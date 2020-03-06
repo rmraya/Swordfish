@@ -1,0 +1,678 @@
+<?xml version="1.0"?>
+
+<!-- TBX core-structure Schema version 0.1 (TBXcsV01) compatible with ISO 12200 amended -->
+<!-- Schema target namespace: "urn:TBXcs" -->
+
+<!-- note: see XCS file for values of type on meta data categories and for values of lang -->
+
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
+           xml:lang="en-US"
+           version="0.1">
+
+<!-- =================================================================================
+SOME USEFUL ENTITIES THAT ARE REFERENCED BELOW 
+================================================================================== -->
+<!-- ENTITY % basicText '(#PCDATA | hi)*' --> 
+  <xs:complexType name="basicText" mixed="true">
+    <xs:choice minOccurs="0" maxOccurs="unbounded">
+      <xs:element ref="hi"/>
+    </xs:choice>
+  </xs:complexType>
+
+<!-- ENTITY % noteText '(#PCDATA | hi | foreign | bpt | ept | it | ph | ut)*' -->
+  <xs:complexType name="noteText" mixed="true">
+    <xs:choice minOccurs="0" maxOccurs="unbounded">
+      <xs:element ref="hi"/>
+      <xs:element ref="foreign"/>
+      <xs:element ref="bpt"/>
+      <xs:element ref="ept"/>
+      <xs:element ref="it"/>
+      <xs:element ref="ph"/>
+      <xs:element ref="ut"/>
+    </xs:choice>
+  </xs:complexType>
+
+<!-- ENTITY % auxInfo '(descrip | descripGrp | admin | adminGrp | transacGrp | note
+                      | ref | xref)*' -->
+  <xs:group name="auxInfo">
+    <xs:choice>
+      <xs:element ref="descrip"/>
+      <xs:element ref="descripGrp"/>
+      <xs:element ref="admin"/>
+      <xs:element ref="adminGrp"/>
+      <xs:element ref="transacGrp"/>
+      <xs:element ref="note"/>
+      <xs:element ref="ref"/>
+      <xs:element ref="xref"/>
+    </xs:choice>
+  </xs:group>
+
+<!-- ENTITY % noteLinkInfo '(admin | adminGrp | transacGrp | note | ref | xref)*' -->
+  <xs:group name="noteLinkInfo">
+    <xs:choice>
+      <xs:element ref="admin"/>
+      <xs:element ref="adminGrp"/>
+      <xs:element ref="transacGrp"/>
+      <xs:element ref="note"/>
+      <xs:element ref="ref"/>
+      <xs:element ref="xref"/>
+    </xs:choice>
+  </xs:group>
+
+<!-- Entities that define common sets of attributes -->
+  <xs:attributeGroup name="XMLNamespaceAttrs">
+    <xs:anyAttribute namespace="http://www.w3.org/XML/1998/namespace" processContents="lax"/>
+  </xs:attributeGroup>
+
+  <xs:attributeGroup name="impIDLang">
+    <xs:attribute name="id" type="xs:ID" use="optional"/>
+    <!--xs:attribute ref="xml:lang" use="optional"/-->
+    <xs:attributeGroup ref="XMLNamespaceAttrs"/> <!-- for xml:lang -->
+  </xs:attributeGroup>
+
+  <xs:attributeGroup name="impIDType">
+    <xs:attribute name="id" type="xs:ID" use="optional"/>
+    <xs:attribute name="type" type="xs:string" use="optional"/>
+  </xs:attributeGroup>
+
+  <xs:attributeGroup name="impIDLangTypTgtDtyp">
+    <xs:attribute name="id" type="xs:ID" use="optional"/>
+    <!--xs:attribute ref="xml:lang" use="optional"/-->
+    <xs:attributeGroup ref="XMLNamespaceAttrs"/> <!-- for xml:lang -->
+    <xs:attribute name="type" type="xs:string" use="required"/>
+    <xs:attribute name="target" type="xs:IDREF" use="optional"/>
+    <xs:attribute name="datatype" type="xs:string" use="optional"/>
+  </xs:attributeGroup>
+
+
+<!-- Some useful types derived by combination of a content model & an attribute group -->
+  <xs:complexType name="noteText_impIDLang">
+    <xs:complexContent mixed="true">
+      <xs:extension base="noteText">
+        <xs:attributeGroup ref="impIDLang"/>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:complexType name="noteText_impIDLangTypTgtDtyp">
+    <xs:complexContent mixed="true">
+      <xs:extension base="noteText">
+        <xs:attributeGroup ref="impIDLangTypTgtDtyp"/>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+
+<!-- ================================================================================
+ELEMENTS USED FOR TEXT MARKUP 
+================================================================================  -->
+  <xs:element name="hi">
+    <xs:complexType>
+      <xs:simpleContent>
+        <xs:extension base="xs:string">
+          <xs:attribute name="type" use="optional">
+            <xs:simpleType>
+              <xs:restriction base="xs:string">
+                <xs:enumeration value="entailedTerm"/>
+                <xs:enumeration value="xlink"/>
+              </xs:restriction>
+            </xs:simpleType>                
+          </xs:attribute>
+          <xs:attribute name="target" type="xs:IDREF" use="optional"/>
+          <!--xs:attribute ref="xml:lang" use="optional"/-->
+          <xs:attributeGroup ref="XMLNamespaceAttrs"/> <!-- for xml:lang -->
+          <xs:attribute name="href" type="xs:string" use="optional"/>
+          <xs:attribute name="show" type="xs:string" use="optional"/>
+          <xs:attribute name="actuate" type="xs:string" use="optional"/>
+          <xs:attribute name="role" type="xs:string" use="optional"/>
+          <xs:attribute name="behavior" type="xs:string" use="optional"/>
+        </xs:extension>
+      </xs:simpleContent>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:element name="foreign" type="noteText_impIDLang"/>
+
+<!-- meta-markup elements borrowed from OSCAR -->
+  <xs:element name="bpt">
+    <xs:complexType>
+      <xs:simpleContent>
+        <xs:extension base="xs:string">
+          <xs:attribute name="i" type="xs:string" use="optional"/>
+          <xs:attribute name="x" type="xs:string" use="optional"/>
+          <xs:attribute name="type" type="xs:string" use="optional"/>
+        </xs:extension>
+      </xs:simpleContent>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:element name="ept">
+    <xs:complexType>
+      <xs:simpleContent>
+        <xs:extension base="xs:string">
+          <xs:attribute name="i" type="xs:string" use="optional"/>
+        </xs:extension>
+      </xs:simpleContent>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:element name="it">
+    <xs:complexType>
+      <xs:simpleContent>
+        <xs:extension base="xs:string">
+          <xs:attribute name="pos" use="required">
+            <xs:simpleType>
+              <xs:restriction base="xs:string">
+                <xs:enumeration value="begin"/>
+                <xs:enumeration value="end"/>
+              </xs:restriction>
+            </xs:simpleType>                
+          </xs:attribute>
+          <xs:attribute name="x" type="xs:string" use="optional"/>
+          <xs:attribute name="type" type="xs:string" use="optional"/>
+        </xs:extension>
+      </xs:simpleContent>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:element name="ph">
+    <xs:complexType>
+      <xs:simpleContent>
+        <xs:extension base="xs:string">
+          <xs:attribute name="assoc" type="xs:string" use="optional"/>
+          <xs:attribute name="x" type="xs:string" use="optional"/>
+          <xs:attribute name="type" type="xs:string" use="optional"/>
+        </xs:extension>
+      </xs:simpleContent>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:element name="ut">
+    <xs:complexType>
+      <xs:simpleContent>
+        <xs:extension base="xs:string">
+          <xs:attribute name="x" type="xs:string" use="optional"/>
+        </xs:extension>
+      </xs:simpleContent>
+    </xs:complexType>
+  </xs:element>
+
+<!-- ================================================================================
+ELEMENTS NEEDED FOR TERMINOLOGICAL ENTRIES (IN ALPHABETICAL ORDER)
+================================================================================ -->
+  <!-- meta: see XCS for values of type -->
+  <xs:element name="admin" type="noteText_impIDLangTypTgtDtyp"/>
+
+  <xs:element name="adminGrp">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="admin"/>
+        <xs:choice minOccurs="0" maxOccurs="unbounded">
+          <xs:element ref="adminNote"/>
+          <xs:element ref="note"/>
+          <xs:element ref="ref"/>
+          <xs:element ref="xref"/>
+        </xs:choice>
+      </xs:sequence>
+      <xs:attribute name="id" type="xs:ID" use="optional"/>
+    </xs:complexType>
+  </xs:element>
+  
+  <!-- meta: see XCS for values of type -->
+  <xs:element name="adminNote" type="noteText_impIDLangTypTgtDtyp"/>
+
+  <xs:element name="date">
+    <xs:complexType>
+      <xs:simpleContent>
+        <xs:extension base="xs:string">
+          <xs:attribute name="id" type="xs:ID" use="optional"/>
+        </xs:extension>
+      </xs:simpleContent>
+    </xs:complexType>
+  </xs:element>
+  
+  <!-- meta: see XCS for values of type -->
+  <xs:element name="descrip" type="noteText_impIDLangTypTgtDtyp"/>
+
+  <xs:element name="descripGrp">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="descrip"/>
+        <xs:choice minOccurs="0" maxOccurs="unbounded">
+          <xs:element ref="descripNote"/>
+          <xs:element ref="admin"/>
+          <xs:element ref="adminGrp"/>
+          <xs:element ref="transacGrp"/>
+          <xs:element ref="note"/>
+          <xs:element ref="ref"/>
+          <xs:element ref="xref"/>
+        </xs:choice>
+      </xs:sequence>
+      <xs:attribute name="id" type="xs:ID" use="optional"/>
+    </xs:complexType>
+  </xs:element>
+  
+  <!-- meta: see XCS for values of type -->
+  <xs:element name="descripNote" type="noteText_impIDLangTypTgtDtyp"/>
+
+  <xs:element name="langSet">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:group ref="auxInfo" minOccurs="0" maxOccurs="unbounded"/>
+        <xs:choice minOccurs="1" maxOccurs="unbounded">
+          <xs:element ref="tig"/>
+          <xs:element ref="ntig"/>
+        </xs:choice>
+      </xs:sequence>
+      <xs:attributeGroup ref="impIDLang"/>
+     <xs:attribute name="lang" type="xs:language" use="optional"/>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:element name="note" type="noteText_impIDLang"/>
+
+  <xs:element name="ntig">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="termGrp"/>
+        <xs:group ref="auxInfo" minOccurs="0" maxOccurs="unbounded"/>
+      </xs:sequence>
+      <xs:attribute name="id" type="xs:ID" use="optional"/>
+    </xs:complexType>
+  </xs:element>
+  
+  <!-- meta: see XCS for values of type -->
+  <xs:element name="ref">
+    <xs:complexType>
+      <xs:simpleContent>
+        <xs:extension base="xs:string">
+          <xs:attributeGroup ref="impIDLangTypTgtDtyp"/>
+        </xs:extension>
+      </xs:simpleContent>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:element name="term">
+    <xs:complexType>
+      <xs:complexContent mixed="true">
+        <xs:extension base="noteText">
+          <xs:attribute name="id" type="xs:ID" use="optional"/>
+        </xs:extension>
+      </xs:complexContent>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:element name="termComp" type="noteText_impIDLang"/>
+
+  <xs:element name="termCompGrp">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="termComp"/>
+        <xs:choice minOccurs="0" maxOccurs="unbounded">
+          <xs:element ref="termNote"/>
+          <xs:element ref="termNoteGrp"/>
+        </xs:choice>
+        <xs:group ref="noteLinkInfo" minOccurs="0" maxOccurs="unbounded"/>
+      </xs:sequence>
+      <xs:attribute name="id" type="xs:ID" use="optional"/>
+    </xs:complexType>
+  </xs:element>
+  
+  <!-- meta: see XCS for values of type -->
+  <xs:element name="termCompList">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:group ref="auxInfo" minOccurs="0" maxOccurs="unbounded"/>
+        <xs:choice minOccurs="1" maxOccurs="unbounded">
+          <xs:element ref="termComp"/>
+          <xs:element ref="termCompGrp"/>
+        </xs:choice>
+      </xs:sequence>
+      <xs:attribute name="id" type="xs:ID" use="optional"/>
+      <xs:attribute name="type" type="xs:string" use="required"/>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:element name="termEntry">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:group ref="auxInfo" minOccurs="0" maxOccurs="unbounded"/>
+        <xs:choice minOccurs="1" maxOccurs="unbounded">
+          <xs:element ref="langSet"/>
+        </xs:choice>
+      </xs:sequence>
+      <xs:attribute name="id" type="xs:ID" use="optional"/>
+    </xs:complexType>
+  </xs:element>
+    
+  <xs:element name="termGrp">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="term"/>
+        <xs:choice minOccurs="0" maxOccurs="unbounded">
+          <xs:element ref="termNote"/>
+          <xs:element ref="termNoteGrp"/>
+        </xs:choice>
+        <xs:choice minOccurs="0" maxOccurs="unbounded">
+          <xs:element ref="termCompList"/>
+        </xs:choice>
+      </xs:sequence>
+      <xs:attribute name="id" type="xs:ID" use="optional"/>
+    </xs:complexType>
+  </xs:element>
+  
+  <!-- meta: see XCS for values of type -->
+  <xs:element name="termNote" type="noteText_impIDLangTypTgtDtyp"/>
+
+  <xs:element name="termNoteGrp">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="termNote"/>
+        <xs:group ref="noteLinkInfo" minOccurs="0" maxOccurs="unbounded"/>
+      </xs:sequence>
+      <xs:attribute name="id" type="xs:ID" use="optional"/>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:element name="tig">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="term"/>
+        <xs:choice minOccurs="0" maxOccurs="unbounded">
+          <xs:element ref="termNote"/>
+        </xs:choice>
+        <xs:group ref="auxInfo" minOccurs="0" maxOccurs="unbounded"/>
+      </xs:sequence>
+      <xs:attribute name="id" type="xs:ID" use="optional"/>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:element name="transac">     <!-- meta: see DCS for values of type -->
+    <xs:complexType>
+      <xs:complexContent mixed="true">
+        <xs:extension base="noteText">
+
+<!--  //type CDATA "transactionType"// :: (Not sure how to translate this; is that the default val?) -->
+          <xs:attribute name="type" type="xs:string" use="required"/>
+
+          <!--xs:attribute ref="xml:lang" use="optional"/-->
+          <xs:attributeGroup ref="XMLNamespaceAttrs"/> <!-- for xml:lang -->
+          <xs:attribute name="target" type="xs:IDREF" use="optional"/>
+          <xs:attribute name="datatype" type="xs:string" use="optional"/>
+        </xs:extension>
+      </xs:complexContent>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:element name="transacGrp">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="transac"/>
+        <xs:choice minOccurs="0" maxOccurs="unbounded">
+          <xs:element ref="transacNote"/>
+          <xs:element ref="date"/>
+          <xs:element ref="note"/>
+          <xs:element ref="ref"/>
+          <xs:element ref="xref"/>
+        </xs:choice>
+      </xs:sequence>
+      <xs:attribute name="id" type="xs:ID" use="optional"/>
+    </xs:complexType>
+  </xs:element>
+  
+  <!-- meta: see XCS for values of type -->
+  <xs:element name="transacNote" type="noteText_impIDLangTypTgtDtyp"/>
+  
+  <!-- meta: see XCS for values of type -->
+  <xs:element name="xref">
+    <xs:complexType>
+      <xs:simpleContent>
+        <xs:extension base="xs:string">
+          <xs:attributeGroup ref="impIDType"/>
+          <xs:attribute name="target" type="xs:string" use="required"/>
+        </xs:extension>
+      </xs:simpleContent>
+    </xs:complexType>
+  </xs:element>
+
+
+<!-- ===================================================================================
+OTHER ELEMENTS (in hierarchical order)
+===================================================================================  -->
+  <xs:element name="martif">    <!-- *** starting element *** -->
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="martifHeader"/>
+        <xs:element ref="text"/>
+      </xs:sequence>
+      <xs:attribute name="type" type="xs:string" use="required"/>
+      <!--xs:attribute ref="xml:lang" use="optional"/-->
+      <xs:attributeGroup ref="XMLNamespaceAttrs"/> <!-- for xml:lang -->
+    </xs:complexType>
+  </xs:element>
+
+  <xs:element name="martifHeader">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="fileDesc"/>
+        <xs:element ref="encodingDesc" minOccurs="0"/>
+        <xs:element ref="revisionDesc" minOccurs="0"/>
+      </xs:sequence>
+      <xs:attribute name="id" type="xs:ID" use="optional"/>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:element name="p">   <!-- p is used in several header elements -->
+    <xs:complexType>
+      <xs:complexContent mixed="true">
+        <xs:extension base="noteText">
+          <xs:attribute name="id" type="xs:ID" use="optional"/>
+          <xs:attribute name="type" use="optional">
+            <xs:simpleType>
+              <xs:restriction base="xs:string">
+                <xs:enumeration value="langDeclaration"/>
+                <xs:enumeration value="DCSName"/>
+              </xs:restriction>
+            </xs:simpleType>
+          </xs:attribute>
+          <!--xs:attribute ref="xml:lang" use="optional"/-->
+          <xs:attributeGroup ref="XMLNamespaceAttrs"/> <!-- for xml:lang -->
+        </xs:extension>
+      </xs:complexContent>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:element name="fileDesc">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="titleStmt" minOccurs="0"/>
+        <xs:element ref="publicationStmt" minOccurs="0"/>
+        <xs:element ref="sourceDesc" minOccurs="1" maxOccurs="unbounded"/>
+      </xs:sequence>
+      <xs:attribute name="id" type="xs:ID" use="optional"/>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:element name="titleStmt">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="title"/>
+        <xs:element ref="note" minOccurs="0" maxOccurs="unbounded"/>
+      </xs:sequence>
+      <xs:attributeGroup ref="impIDLang"/>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:element name="title">
+    <xs:complexType>
+      <xs:simpleContent>
+        <xs:extension base="xs:string">
+          <xs:attributeGroup ref="impIDLang"/>
+        </xs:extension>
+      </xs:simpleContent>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:element name="publicationStmt">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="p" minOccurs="1" maxOccurs="unbounded"/>
+      </xs:sequence>
+      <xs:attribute name="id" type="xs:ID" use="optional"/>
+    </xs:complexType>
+  </xs:element>
+  
+  <xs:element name="sourceDesc">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="p" minOccurs="1" maxOccurs="unbounded"/>
+      </xs:sequence>
+      <xs:attributeGroup ref="impIDLang"/>
+    </xs:complexType>
+  </xs:element>
+  
+  <xs:element name="encodingDesc">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="ude" minOccurs="0" maxOccurs="1"/>
+        <xs:element ref="p" minOccurs="1" maxOccurs="unbounded"/>
+      </xs:sequence>
+      <xs:attribute name="id" type="xs:ID" use="optional"/>
+    </xs:complexType>
+  </xs:element>
+  
+  <xs:element name="ude">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="map" minOccurs="1" maxOccurs="unbounded"/>
+      </xs:sequence>
+      <xs:attribute name="id" type="xs:ID" use="optional"/>
+      <xs:attribute name="name" type="xs:string" use="required"/>
+      <xs:attribute name="base" type="xs:string" use="optional"/>
+    </xs:complexType>
+  </xs:element>
+  
+  <xs:element name="map">
+    <xs:complexType>
+      <xs:attribute name="unicode" type="xs:string" use="required"/>
+      <xs:attribute name="code" type="xs:string" use="required"/>
+      <xs:attribute name="ent" type="xs:string" use="required"/>
+      <xs:attribute name="subst" type="xs:string" use="required"/>
+    </xs:complexType>
+  </xs:element>
+  
+  <xs:element name="revisionDesc">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="change" minOccurs="1" maxOccurs="unbounded"/>
+      </xs:sequence>
+      <xs:attributeGroup ref="impIDLang"/>
+    </xs:complexType>
+  </xs:element>
+  
+  <xs:element name="change">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="p" minOccurs="1" maxOccurs="unbounded"/>
+      </xs:sequence>
+      <xs:attributeGroup ref="impIDLang"/>
+    </xs:complexType>
+  </xs:element>
+  
+  <xs:element name="text">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="front" minOccurs="0" maxOccurs="1"/>
+        <xs:element ref="body"/>
+        <xs:element ref="back" minOccurs="0" maxOccurs="1"/>
+      </xs:sequence>
+      <xs:attribute name="id" type="xs:ID" use="optional"/>
+    </xs:complexType>
+  </xs:element>
+  
+  <xs:element name="front">   <!-- here put Other Resources, each in a namespace -->
+    <xs:complexType>
+      <xs:simpleContent>
+        <xs:extension base="xs:string">
+          <xs:attribute name="id" type="xs:ID" use="optional"/>
+        </xs:extension>
+      </xs:simpleContent>
+    </xs:complexType>
+  </xs:element>
+  
+  <xs:element name="body">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="termEntry" minOccurs="1" maxOccurs="unbounded"/>
+      </xs:sequence>
+      <xs:attribute name="id" type="xs:ID" use="optional"/>
+    </xs:complexType>
+  </xs:element>
+  
+  <xs:element name="back">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="refObjectList" minOccurs="0" maxOccurs="unbounded"/>
+      </xs:sequence>
+      <xs:attribute name="id" type="xs:ID" use="optional"/>
+    </xs:complexType>
+  </xs:element>
+  
+  <xs:element name="refObjectList">   <!-- meta: see DCS for values of type -->
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="refObject" minOccurs="1" maxOccurs="unbounded"/>
+      </xs:sequence>
+      <xs:attribute name="id" type="xs:ID" use="optional"/>
+      <xs:attribute name="type" type="xs:string" use="required"/>
+    </xs:complexType>
+  </xs:element>
+  
+  <xs:element name="refObject">
+    <xs:complexType>
+      <xs:choice minOccurs="1" maxOccurs="unbounded">
+        <xs:element ref="itemSet"/>
+        <xs:element ref="itemGrp"/>
+        <xs:element ref="item"/>
+      </xs:choice>
+      <xs:attribute name="id" type="xs:ID" use="optional"/>
+    </xs:complexType>
+  </xs:element>
+  
+  <xs:element name="item">
+    <xs:complexType>
+      <xs:complexContent mixed="true">
+        <xs:extension base="noteText">
+          <xs:attributeGroup ref="impIDType"/>
+        </xs:extension>
+      </xs:complexContent>
+    </xs:complexType>
+  </xs:element>
+  
+  <xs:element name="itemGrp">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="item"/>
+        <xs:group ref="noteLinkInfo" minOccurs="0" maxOccurs="unbounded"/>
+      </xs:sequence>
+      <xs:attribute name="id" type="xs:ID" use="optional"/>
+    </xs:complexType>
+  </xs:element>
+  
+  <xs:element name="itemSet">
+    <xs:complexType>
+      <xs:choice minOccurs="1" maxOccurs="unbounded">
+        <xs:element ref="item"/>
+        <xs:element ref="itemGrp"/>
+      </xs:choice>
+      <xs:attributeGroup ref="impIDType"/>
+    </xs:complexType>
+  </xs:element>
+
+<!-- =================================================================================
+ELEMENT ATTRIBUTES
+=================================================================================  -->
+
+<!--      ptr: not currently used in DXF -->
+
+</xs:schema>

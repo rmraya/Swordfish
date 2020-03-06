@@ -1,0 +1,20 @@
+<!ELEMENT xliffProject (xliff,srx,files)>
+<!ATTLIST xliffProject 
+  version CDATA #IMPLIED
+>
+
+<!ELEMENT xliff (#PCDATA)>
+<!ATTLIST xliff 
+  srcLanguage CDATA #REQUIRED
+  tgtLanguage CDATA #REQUIRED
+ >
+
+<!ELEMENT srx (#PCDATA)>
+
+<!ELEMENT files (file)+>
+
+<!ELEMENT file (#PCDATA)>
+<!ATTLIST file 
+  type (INX|IDML|DITA|HTML|JS|JAVA|MIF|OFF|OO|TEXT|PHPA|PO|RC|RESX|RTF|SDLXLIFF|TRTF|TS|TTX|TXML|XML|XMLG) #REQUIRED
+  charset CDATA #REQUIRED
+ >

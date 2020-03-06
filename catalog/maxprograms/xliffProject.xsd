@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" elementFormDefault="qualified">
+  <xs:element name="xliffProject">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="xliff"/>
+        <xs:element ref="srx"/>
+        <xs:element ref="files"/>
+      </xs:sequence>
+      <xs:attributeGroup ref="attlist.xliffProject"/>
+    </xs:complexType>
+  </xs:element>
+  <xs:attributeGroup name="attlist.xliffProject">
+    <xs:attribute name="version"/>
+  </xs:attributeGroup>
+  <xs:element name="xliff">
+    <xs:complexType mixed="true">
+      <xs:attributeGroup ref="attlist.xliff"/>
+    </xs:complexType>
+  </xs:element>
+  <xs:attributeGroup name="attlist.xliff">
+    <xs:attribute name="srcLanguage" use="required"/>
+    <xs:attribute name="tgtLanguage" use="required"/>
+  </xs:attributeGroup>
+  <xs:element name="srx" type="xs:string"/>
+  <xs:element name="files">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element maxOccurs="unbounded" ref="file"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="file">
+    <xs:complexType mixed="true">
+      <xs:attributeGroup ref="attlist.file"/>
+    </xs:complexType>
+  </xs:element>
+  <xs:attributeGroup name="attlist.file">
+    <xs:attribute name="type" use="required">
+      <xs:simpleType>
+        <xs:restriction base="xs:token">
+          <xs:enumeration value="INX"/>
+          <xs:enumeration value="IDML"/>
+          <xs:enumeration value="DITA"/>
+          <xs:enumeration value="HTML"/>
+          <xs:enumeration value="JS"/>
+          <xs:enumeration value="JAVA"/>
+          <xs:enumeration value="MIF"/>
+          <xs:enumeration value="OFF"/>
+          <xs:enumeration value="OO"/>
+          <xs:enumeration value="TEXT"/>
+          <xs:enumeration value="PHPA"/>
+          <xs:enumeration value="PO"/>
+          <xs:enumeration value="RC"/>
+          <xs:enumeration value="RESX"/>
+          <xs:enumeration value="RTF"/>
+          <xs:enumeration value="SDLXLIFF"/>
+          <xs:enumeration value="TRTF"/>
+          <xs:enumeration value="TS"/>
+          <xs:enumeration value="TTX"/>
+          <xs:enumeration value="TXML"/>
+          <xs:enumeration value="XML"/>
+          <xs:enumeration value="XMLG"/>
+        </xs:restriction>
+      </xs:simpleType>
+    </xs:attribute>
+    <xs:attribute name="charset" use="required"/>
+  </xs:attributeGroup>
+</xs:schema>

@@ -1,0 +1,500 @@
+<xsd:schema targetNamespace="http://sdl.com/FileTypes/SdlXliff/1.0" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:sdl="http://sdl.com/FileTypes/SdlXliff/1.0" elementFormDefault="qualified" attributeFormDefault="unqualified">
+  <!-- 
+    Schema for SDL extensions to XLIFF 1.2 that can be used to validate the SDL XLIFF file format.
+    
+    SDL XLIFF Version: 1.0
+    Last changed: 27 January 2010
+    
+    Copyright (c) 2009-2010 SDL. All rights reserved.
+  -->
+
+  <!-- SDL XLIFF version, used on <xliff> element -->
+  <xsd:attribute name="version" type="xsd:string" />
+
+  <!-- <xliff> extension elements -->
+  <xsd:element name="doc-info">
+    <xsd:complexType>
+      <xsd:sequence>
+        <xsd:element minOccurs="0" maxOccurs="1" ref="sdl:rep-defs" />
+        <xsd:element minOccurs="0" maxOccurs="1" ref="sdl:cmt-defs" />
+        <xsd:element minOccurs="0" maxOccurs="1" ref="sdl:rev-defs" />
+      </xsd:sequence>
+    </xsd:complexType>
+  </xsd:element>
+  
+  <!-- <doc-info> child nodes-->
+  <xsd:element name="rep-defs">
+    <xsd:complexType>
+      <xsd:sequence>
+        <xsd:element minOccurs="1" maxOccurs="unbounded" ref="sdl:rep-def" />
+      </xsd:sequence>
+    </xsd:complexType>
+    <xsd:unique name="unique_rep_id">
+      <xsd:selector xpath="rep-def"/>
+      <xsd:field xpath="@id"/>
+    </xsd:unique>
+  </xsd:element>
+  
+  <xsd:element name="cmt-defs">
+    <xsd:complexType>
+      <xsd:sequence>
+        <xsd:element minOccurs="1" maxOccurs="unbounded" ref="sdl:cmt-def"/>
+      </xsd:sequence>
+    </xsd:complexType>
+    <xsd:unique name="unique_cmt_id">
+      <xsd:selector xpath="cmt-def"/>
+      <xsd:field xpath="@id"/>
+    </xsd:unique>
+  </xsd:element>
+
+  <xsd:element name="rev-defs">
+    <xsd:complexType>
+      <xsd:sequence>
+        <xsd:element minOccurs="1" maxOccurs="unbounded" ref="sdl:rev-def"/>
+      </xsd:sequence>
+    </xsd:complexType>
+    <xsd:unique name="unique_rev_id">
+      <xsd:selector xpath="rev-def"/>
+      <xsd:field xpath="@id"/>
+    </xsd:unique>
+  </xsd:element>
+
+  <!-- <rev-defs> child node-->
+  <xsd:element name="rev-def">
+    <xsd:complexType>
+      <xsd:attribute name="id" type="xsd:string" use="required" />
+      <xsd:attribute name="type" type="xsd:string" />
+      <xsd:attribute name="author" type="xsd:string" />
+      <xsd:attribute name="date" type="xsd:string" />
+    </xsd:complexType>
+  </xsd:element>
+
+  <!-- <cmt-defs> child node-->
+  <xsd:element name="cmt-def">
+    <xsd:complexType mixed="true">
+      <xsd:sequence>
+        <!-- Comment content corresponds to format used in TTX .comments file and SDLX ITD files. 
+            TODO: define properly to allow full validation against the schema! -->
+        <xsd:any minOccurs="0" maxOccurs="unbounded" processContents="skip" />
+      </xsd:sequence>
+      <xsd:attribute name="id" type="xsd:string" use="required"/>
+    </xsd:complexType>
+  </xsd:element>
+
+  <!-- <rep-defs> child node-->
+  <xsd:element name="rep-def">
+    <xsd:complexType>
+      <xsd:sequence>
+        <xsd:element minOccurs="1" maxOccurs="unbounded" ref="sdl:entry" />
+      </xsd:sequence>
+      <xsd:attribute name="id" type="xsd:string" use="required" />
+    </xsd:complexType>
+  </xsd:element>
+  
+  <!-- <rep-def> child node-->
+  <xsd:element name="entry">
+    <xsd:complexType>
+      <xsd:attribute name="tu" type="xsd:string" use="required" />
+      <xsd:attribute name="seg" type="xsd:string" use="required" />
+    </xsd:complexType>
+  </xsd:element>
+  
+  <!-- XLIFF <header> extension elements -->
+  <xsd:element name="ref-files">
+    <xsd:complexType>
+      <xsd:sequence>
+        <xsd:element minOccurs="0" maxOccurs="unbounded" ref="sdl:ref-file" />
+      </xsd:sequence>
+    </xsd:complexType>
+  </xsd:element>
+
+  <xsd:element name="file-info">
+    <xsd:complexType>
+      <xsd:sequence>
+        <xsd:element minOccurs="0" maxOccurs="unbounded" ref="sdl:value" />
+        <xsd:element minOccurs="0" maxOccurs="1" ref="sdl:sniff-info" />
+      </xsd:sequence>
+    </xsd:complexType>
+  </xsd:element>
+
+  <xsd:element name="filetype-info">
+    <xsd:complexType>
+      <xsd:sequence>
+        <xsd:element ref="sdl:filetype-id" />
+      </xsd:sequence>
+    </xsd:complexType>
+  </xsd:element>
+  
+  <xsd:element name="fmt-defs">
+    <xsd:complexType>
+      <xsd:sequence>
+        <xsd:element minOccurs="0" maxOccurs="unbounded" ref="sdl:fmt-def" />
+      </xsd:sequence>
+    </xsd:complexType>
+    <xsd:unique name="unique_fmt_id">
+      <xsd:selector xpath="fmt-def"/>
+      <xsd:field xpath="@id"/>
+    </xsd:unique>
+  </xsd:element>
+
+  <xsd:element name="cxt-defs">
+    <xsd:complexType>
+      <xsd:sequence>
+        <xsd:element minOccurs="0" maxOccurs="unbounded" ref="sdl:cxt-def" />
+      </xsd:sequence>
+    </xsd:complexType>
+    <xsd:unique name="unique_cxt_id">
+      <xsd:selector xpath="cxt-def"/>
+      <xsd:field xpath="@id"/>
+    </xsd:unique>
+  </xsd:element>
+
+  <xsd:element name="node-defs">
+    <xsd:complexType>
+      <xsd:sequence>
+        <xsd:element minOccurs="0" maxOccurs="unbounded" ref="sdl:node-def" />
+      </xsd:sequence>
+    </xsd:complexType>
+    <xsd:unique name="unique_node_id">
+      <xsd:selector xpath="node-def"/>
+      <xsd:field xpath="@id"/>
+    </xsd:unique>
+  </xsd:element>
+
+  <xsd:element name="tag-defs">
+    <xsd:complexType>
+      <xsd:sequence>
+        <xsd:element maxOccurs="unbounded" ref="sdl:tag" />
+      </xsd:sequence>
+    </xsd:complexType>
+    <xsd:unique name="unique_tag_id">
+      <xsd:selector xpath="tag"/>
+      <xsd:field xpath="@id"/>
+    </xsd:unique>
+  </xsd:element>
+
+  <xsd:element name="cmt">
+    <xsd:complexType>
+      <xsd:attribute name="id" type="xsd:string" use="required" />
+    </xsd:complexType>
+  </xsd:element>
+
+  <!-- <node-defs> child nodes -->
+  <xsd:element name="node-def">
+    <xsd:complexType>
+      <xsd:sequence>
+        <xsd:element minOccurs="1" maxOccurs="1" ref="sdl:cxt" />
+      </xsd:sequence>
+      <xsd:attribute name="id" type="xsd:string" use="required"/>
+      <xsd:attribute name="force-name" type="xsd:string"/>
+      <xsd:attribute name="parent" type="xsd:string"/>
+    </xsd:complexType>
+  </xsd:element>
+
+  <!-- <fmt-defs> child nodes -->
+  <xsd:element name="fmt-def">
+    <xsd:complexType>
+      <xsd:sequence>
+        <xsd:element minOccurs="0" maxOccurs="unbounded" ref="sdl:value" />
+      </xsd:sequence>
+      <xsd:attribute name="id" type="xsd:string" use="required" />
+    </xsd:complexType>
+  </xsd:element>
+  
+  <!-- <filter-info> child nodes -->
+  <xsd:element name="filetype-id" type="xsd:string"/>
+
+  <!-- reference to a <fmt-def>, used in <tag> and <cxt-def> -->
+  <xsd:element name="fmt">
+    <xsd:complexType>
+      <xsd:attribute name="id" type="xsd:string" use="required" />
+    </xsd:complexType>
+    <!--<xsd:keyref name="ref_fmt_id" refer="sdl:unique_fmt_id">
+      <xsd:selector xpath="."/>
+      <xsd:field xpath="@id"/>
+    </xsd:keyref>-->
+  </xsd:element>
+  
+  <!-- <file-info> child nodes -->
+  <xsd:element name="sniff-info">
+    <xsd:complexType>
+      <xsd:sequence>
+        <xsd:element minOccurs="0" maxOccurs="1" ref="sdl:detected-encoding" />
+        <xsd:element minOccurs="0" maxOccurs="1" ref="sdl:detected-source-lang" />
+        <xsd:element minOccurs="0" maxOccurs="1" ref="sdl:detected-target-lang" />
+        <xsd:element minOccurs="0" maxOccurs="1" ref="sdl:suggested-target-encoding" />
+        <xsd:element minOccurs="0" maxOccurs="1" ref="sdl:props" />
+      </xsd:sequence>
+      <xsd:attribute name="is-supported" type="xsd:string" />
+    </xsd:complexType>
+  </xsd:element>
+  
+  <!-- <sniff-info> child nodes -->
+  <xsd:element name="detected-encoding">
+    <xsd:complexType>
+      <xsd:attribute name="detection-level" type="xsd:string" />
+      <xsd:attribute name="encoding" type="xsd:string" />
+    </xsd:complexType>
+  </xsd:element>
+  
+  <xsd:element name="detected-source-lang">
+    <xsd:complexType>
+      <xsd:attribute name="detection-level" type="xsd:string" />
+      <xsd:attribute name="lang" type="xsd:string" />
+    </xsd:complexType>
+  </xsd:element>
+  
+  <xsd:element name="detected-target-lang">
+    <xsd:complexType>
+      <xsd:attribute name="detection-level" type="xsd:string" />
+      <xsd:attribute name="lang" type="xsd:string" />
+    </xsd:complexType>
+  </xsd:element>
+  
+  <xsd:element name="suggested-target-encoding">
+    <xsd:complexType>
+      <xsd:attribute name="category" type="xsd:string" />
+    </xsd:complexType>
+  </xsd:element>
+  
+  <xsd:element name="values">
+    <xsd:complexType>
+      <xsd:sequence>
+        <xsd:element minOccurs="0" maxOccurs="unbounded" ref="sdl:value" />
+      </xsd:sequence>
+    </xsd:complexType>
+    <xsd:unique name="unique_value_key">
+      <xsd:selector xpath="value"/>
+      <xsd:field xpath="@key"/>
+    </xsd:unique>
+  </xsd:element>
+  
+  <!-- used for storing key/value pairs in many different elements -->
+  <xsd:element name="value">
+    <xsd:complexType>
+      <xsd:simpleContent>
+        <xsd:extension base="xsd:string">
+          <xsd:attribute name="key" type="xsd:string" use="required"/>
+        </xsd:extension>
+      </xsd:simpleContent>
+    </xsd:complexType>
+  </xsd:element>
+  
+  <!-- <ref-files> child nodes -->
+  <xsd:element name="ref-file">
+    <xsd:complexType>
+      <xsd:attribute name="uid" type="xsd:string" />
+      <xsd:attribute name="id" type="xsd:string" />
+      <xsd:attribute name="name" type="xsd:string" />
+      <xsd:attribute name="o-path" type="xsd:string" />
+      <xsd:attribute name="date" type="xsd:string" />
+      <xsd:attribute name="rel-path" type="xsd:string" />
+      <xsd:attribute name="descr" type="xsd:string" />
+      <xsd:attribute name="expected-use" type="xsd:string" />
+      <xsd:attribute name="pref-reftype" type="xsd:string" />
+    </xsd:complexType>
+  </xsd:element>
+
+  <!-- <cxt-defs> child nodes -->
+  <xsd:element name="cxt-def">
+    <xsd:complexType>
+      <xsd:sequence>
+        <xsd:element minOccurs="0" maxOccurs="1" ref="sdl:fmt" />
+        <xsd:element minOccurs="0" maxOccurs="1" ref="sdl:props" />
+      </xsd:sequence>
+      <xsd:attribute name="id" type="xsd:string" use="required"/>
+      <xsd:attribute name="type" type="xsd:string" use="required"/>
+      <xsd:attribute name="code" type="xsd:string" />
+      <xsd:attribute name="name" type="xsd:string" />
+      <xsd:attribute name="descr" type="xsd:string" />
+      <xsd:attribute name="color" type="xsd:string" />
+      <xsd:attribute name="purpose" type="xsd:string" />
+    </xsd:complexType>
+  </xsd:element>
+  
+  <!-- XLIFF <group> extension elements -->
+  <xsd:element name="cxts">
+    <xsd:complexType>
+      <xsd:sequence>
+        <xsd:element minOccurs="0" maxOccurs="unbounded" ref="sdl:cxt" />
+        <xsd:element minOccurs="0" maxOccurs="1" ref="sdl:node" />
+      </xsd:sequence>
+    </xsd:complexType>
+  </xsd:element>
+  
+  <!-- <cxts> child nodes -->
+  <xsd:element name="cxt">
+    <xsd:complexType>
+      <xsd:attribute name="id" type="xsd:string" use="required" />
+    </xsd:complexType>
+    <!--<xsd:keyref name="ref_cxt_id" refer="sdl:unique_cxt_id">
+      <xsd:selector xpath="."/>
+      <xsd:field xpath="@id"/>
+    </xsd:keyref>-->
+  </xsd:element>
+
+  <xsd:element name="node">
+    <xsd:complexType>
+      <xsd:attribute name="id" type="xsd:string" use="required" />
+    </xsd:complexType>
+    <!--<xsd:keyref name="ref_node_id" refer="sdl:unique_node_id">
+      <xsd:selector xpath="."/>
+      <xsd:field xpath="@id"/>
+    </xsd:keyref>-->
+  </xsd:element>
+
+  <!-- <tag-defs> child nodes -->
+  <xsd:element name="tag">
+    <xsd:complexType>
+      <xsd:sequence>
+        <xsd:element minOccurs="0" maxOccurs="1" ref="sdl:bpt" />
+        <xsd:element minOccurs="0" maxOccurs="1" ref="sdl:bpt-props" />
+        <xsd:element minOccurs="0" maxOccurs="1" ref="sdl:ept" />
+        <xsd:element minOccurs="0" maxOccurs="1" ref="sdl:ept-props" />
+        <xsd:element minOccurs="0" maxOccurs="1" ref="sdl:st" />
+        <xsd:element minOccurs="0" maxOccurs="1" ref="sdl:ph" />
+        <xsd:element minOccurs="0" maxOccurs="1" ref="sdl:props" />
+        <xsd:element minOccurs="0" maxOccurs="1" ref="sdl:fmt" />
+      </xsd:sequence>
+      <xsd:attribute name="id" type="xsd:string" use="required" />
+    </xsd:complexType>
+  </xsd:element>
+  
+  <!-- <tag> child nodes -->
+  <xsd:element name="bpt-props">
+    <xsd:complexType>
+      <xsd:sequence>
+        <xsd:element minOccurs="0" maxOccurs="unbounded" ref="sdl:value" />
+      </xsd:sequence>
+    </xsd:complexType>
+  </xsd:element>
+  
+  <xsd:element name="ept-props">
+    <xsd:complexType>
+      <xsd:sequence>
+        <xsd:element minOccurs="0" maxOccurs="unbounded" ref="sdl:value" />
+      </xsd:sequence>
+    </xsd:complexType>
+  </xsd:element>
+  
+  <xsd:element name="props">
+    <xsd:complexType>
+      <xsd:sequence>
+        <xsd:element minOccurs="0" maxOccurs="unbounded" ref="sdl:value" />
+      </xsd:sequence>
+    </xsd:complexType>
+  </xsd:element>
+
+  <xsd:attributeGroup name="AttrGrp_CommonTagAttributes">
+    <xsd:attribute name="name" type="xsd:string" />
+    <xsd:attribute name="can-hide" type="xsd:boolean"/>
+    <xsd:attribute name="line-wrap" type="xsd:boolean"/>
+    <xsd:attribute name="word-end" type="xsd:boolean"/>
+  </xsd:attributeGroup>
+
+  <xsd:element name="bpt">
+    <xsd:complexType mixed="true">
+      <xsd:sequence>
+        <xsd:any namespace="http://sdl.com/FileTypes/SdlXliff/1.0" minOccurs="0" maxOccurs="unbounded" processContents="skip" />
+      </xsd:sequence>
+      <xsd:attributeGroup ref="sdl:AttrGrp_CommonTagAttributes"/>
+      <xsd:attribute name="seg-hint" type="xsd:string" />
+    </xsd:complexType>
+  </xsd:element>
+  
+  <xsd:element name="ept">
+    <xsd:complexType mixed="true">
+      <xsd:sequence>
+        <xsd:any namespace="http://sdl.com/FileTypes/SdlXliff/1.0" minOccurs="0" maxOccurs="unbounded" processContents="skip" />
+      </xsd:sequence>
+      <xsd:attributeGroup ref="sdl:AttrGrp_CommonTagAttributes"/>
+    </xsd:complexType>
+  </xsd:element>
+  
+  <xsd:element name="st">
+    <xsd:complexType mixed="true">
+      <xsd:sequence>
+        <xsd:any namespace="http://sdl.com/FileTypes/SdlXliff/1.0" minOccurs="0" maxOccurs="unbounded" processContents="skip" />
+      </xsd:sequence>
+      <xsd:attribute name="name" type="xsd:string" use="optional" />
+    </xsd:complexType>
+  </xsd:element>
+  
+  <xsd:element name="ph">
+    <xsd:complexType mixed="true">
+      <xsd:sequence>
+        <xsd:any namespace="http://sdl.com/FileTypes/SdlXliff/1.0" minOccurs="0" maxOccurs="unbounded" processContents="skip" />
+      </xsd:sequence>
+      <xsd:attributeGroup ref="sdl:AttrGrp_CommonTagAttributes"/>
+      <xsd:attribute name="is-whitespace" type="xsd:boolean"/>
+      <xsd:attribute name="equiv-text" type="xsd:string" />
+      <xsd:attribute name="seg-hint" type="xsd:string" />
+    </xsd:complexType>
+  </xsd:element>
+  
+  <!-- XLIFF <trans-unit> extensions -->
+  <xsd:attribute name="locktype" type="xsd:string" />
+
+  <xsd:element name="seg-defs">
+    <xsd:complexType>
+      <xsd:sequence>
+        <xsd:element minOccurs="1" maxOccurs="unbounded" ref="sdl:seg" />
+      </xsd:sequence>
+    </xsd:complexType>
+  </xsd:element>
+  
+  <!-- <seg-defs> child nodes -->
+  <xsd:complexType name="Type_OriginInformation">
+    <xsd:annotation>
+      <xsd:documentation>Origin information used in seg and prev-origin elements</xsd:documentation>
+    </xsd:annotation>
+    <xsd:sequence>
+      <xsd:element minOccurs="0" maxOccurs="1" ref="sdl:rep" />
+      <xsd:element minOccurs="0" maxOccurs="1" ref="sdl:prev-origin" />
+      <xsd:element minOccurs="0" maxOccurs="unbounded" ref="sdl:value"/>
+    </xsd:sequence>
+    <xsd:attribute name="origin" type="xsd:string"/>
+    <xsd:attribute name="origin-system" type="xsd:string"/>
+    <xsd:attribute name="percent" type="xsd:byte"/>
+    <xsd:attribute name="struct-match" type="xsd:boolean"/>
+    <xsd:attribute name="text-match" type="xsd:string"/>
+  </xsd:complexType>
+
+  <xsd:element name="seg">
+    <xsd:complexType>
+      <xsd:complexContent>
+        <xsd:extension base="sdl:Type_OriginInformation">
+          <xsd:attribute name="id" type="xsd:string" use="required" />
+          <xsd:attribute name="locked" type="xsd:boolean"/>
+          <xsd:attribute name="conf" type="xsd:string"/>
+        </xsd:extension>
+      </xsd:complexContent>
+    </xsd:complexType>
+  </xsd:element>
+  
+  <xsd:element name="prev-origin" type="sdl:Type_OriginInformation"/>
+
+  <!-- reference to a <rep-def>, used in <seg> and <prev-origin> -->
+  <xsd:element name="rep">
+    <xsd:complexType>
+      <xsd:sequence>
+      </xsd:sequence>
+      <xsd:attribute name="id" type="xsd:string" use="required"/>
+    </xsd:complexType>
+    <!--<xsd:keyref name="ref_rep_id" refer="sdl:unique_rep_id">
+      <xsd:selector xpath="."/>
+      <xsd:field xpath="@id"/>
+    </xsd:keyref>-->
+  </xsd:element>
+
+  <!-- XLIFF <mrk> extension attributes -->
+  <xsd:attribute name="cid" type="xsd:string" />
+  <xsd:attribute name="revid" type="xsd:string" />
+
+  <!-- XLIFF <g> extension attributes (indicates ghost status and revision ID for the start and end tags of a tag pair) -->
+  <xsd:attribute name="end" type="xsd:boolean" />
+  <xsd:attribute name="start" type="xsd:boolean" />
+  <xsd:attribute name="start-revid" type="xsd:string" />
+  <xsd:attribute name="end-revid" type="xsd:string" />
+
+</xsd:schema>

@@ -1,0 +1,92 @@
+<!-- SRX
+
+Public Identifier: "-//SRX//DTD SRX//EN"
+
+History of modifications (latest first):
+
+Apr-21-2004 by DRP: Convert to version 1.0.
+Mar-22-2004 by DRP: Eighth draft version.
+                    Ensure the <excludeexception> element is removed
+                    Update version number
+Mar-17-2004 by DRP: Seventh draft version.
+                    Remove <exceptions>, <exception>, <endrules>, <endrule> and <excludeexception> elements
+                    Add <rule> element
+                    Update version number
+Feb-02-2004 by DRP: Sixth draft version.
+                    Update version number
+Oct-27-2003 by DRP: Fifth draft version.
+                    Removed includeformatting attribute from <header> element
+                    Added <formathandle> element to the <header>
+                    Removed priority attribute from <endrule> and <exception> elements
+                    Added name attribute to <exception> element
+                    Added <excludeexception> element to the <endrule> element
+Oct-10-2003 by DRP: Fourth draft version.
+                    Removed <classdefinitions> and <classdefinition> elements
+                    Removed classdefinitionname attribute
+                    Removed <digitcharacters>, <whitespacecharacters> and <wordcharacters>
+                    Added priority attribute to <endrule> and <exception> elements
+                    Added includeformatting attribute to <header> element
+Jul-24-2003 by DRP: Third draft version.
+                    Removed <charsets> and <charset> to be replaced with <classdefinitions> and <classdefinition>
+                    Renamed <digits> to <digitcharacters>
+                    Renamed <whitespace> to <whitespacecharacters>
+                    Renamed <wordchars> to <wordcharacters>
+                    <digitcharacters>, <whitespacecharacters> and <wordcharacters> are now optional
+                    Renamed <langrules> to <languagerules>
+                    Renamed <langrule> to <languagerule>
+                    Renamed <langmap> to <languagemap>
+                    Renamed langrulename to languagerulename
+                    Renamed langpattern to languagepattern
+Jun-19-2003 by DRP: Second draft version.
+                    Removed the <codepage> element.
+                    Added <header> and <body> elements.
+Nov-22-2002 by DRP: First draft version
+
+-->
+
+<!ELEMENT srx                   (header, body) >
+<!ATTLIST srx
+    version                     CDATA       #FIXED "1.0"
+>
+
+<!ELEMENT header                (formathandle*) >
+<!ATTLIST header
+    segmentsubflows             CDATA       #REQUIRED
+>
+
+<!ELEMENT formathandle          EMPTY >
+<!ATTLIST formathandle
+    type                        CDATA       #REQUIRED
+    include                     CDATA       #REQUIRED
+>
+
+<!ELEMENT body                  (languagerules?, maprules?) >
+
+<!ELEMENT languagerules         (languagerule+) >
+
+<!ELEMENT languagerule          (rule+) >
+<!ATTLIST languagerule
+    languagerulename            CDATA       #REQUIRED
+>
+
+<!ELEMENT rule                  (beforebreak?, afterbreak?) >
+<!ATTLIST rule
+    break                       CDATA       #IMPLIED
+>
+
+<!ELEMENT beforebreak           (#PCDATA) >
+
+<!ELEMENT afterbreak            (#PCDATA) >
+
+<!ELEMENT maprules              (maprule+) >
+
+<!ELEMENT maprule               (languagemap+) >
+<!ATTLIST maprule
+    maprulename                 CDATA       #REQUIRED
+>
+
+<!ELEMENT languagemap           EMPTY >
+<!ATTLIST languagemap
+    languagepattern             CDATA       #REQUIRED
+    languagerulename            CDATA       #REQUIRED
+>

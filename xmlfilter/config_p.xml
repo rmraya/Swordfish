@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE ini-file PUBLIC "-//MAXPROGRAMS//Converters 2.0.0//EN" "configuration.dtd" >
+<ini-file>
+	<tag hard-break="segment">a:t</tag>
+	<tag hard-break="ignore">p:sldLayout</tag>
+	<tag hard-break="ignore">p:notesMaster</tag>
+	<tag hard-break="ignore">p:sldMaster</tag>	
+</ini-file>

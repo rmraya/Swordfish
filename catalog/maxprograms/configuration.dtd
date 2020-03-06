@@ -1,0 +1,60 @@
+<!--
+
+  When writing configuration files use the following PUBLIC id:
+
+        "-//MAXPROGRAMS//Converters 2.0.0//EN"
+
+  Name your configuration files using the following schema:
+
+	"config_" + DTD name + ".xml"
+
+  If you don't use a DTD, name the configuration file as:
+
+	"config_" + root element + ".xml"
+
+  dita-based: Set to "yes" if the vocabulary is based on DITA standard and the
+              "translate" attribute needs to be considered. If not present, 
+              "no" is assumed.
+
+-->
+
+<!ELEMENT ini-file (tag|entity)+>
+<!ATTLIST ini-file
+  dita-based (yes|no) #IMPLIED
+>
+
+<!--
+  ELEMENT tag:
+
+  Content:     Element name.
+
+  hard-break:  Set to "segment" if the element starts a new segment.
+               Set to "inline" if the element is an inline element.
+               Set to "ignore" if the element and its children should be ignored.
+
+  ctype:       Description to use for inline elements in <ph> placeholder.
+
+  attributes:  List of attributes that contain translatable text. Write
+               attribute names separataed with ";".
+
+  keep-format: Set to "yes" if you need to preserve white spaces. If not
+               present, "no" is assumed.
+
+-->
+
+<!ELEMENT tag (#PCDATA)>
+<!ATTLIST tag
+   hard-break  (segment|inline|ignore) #REQUIRED
+   ctype       (image|pb|lb|x-bold|x-entry|x-font|x-italic|x-link|x-underlined|x-other) #IMPLIED
+   attributes  CDATA #IMPLIED
+   keep-format (yes|no) #IMPLIED
+>
+
+<!-- HTML converter needs the following element -->
+
+<!ELEMENT entity (#PCDATA)>
+<!ATTLIST entity
+	char_code CDATA  #REQUIRED
+	name      CDATA  #REQUIRED
+>
+

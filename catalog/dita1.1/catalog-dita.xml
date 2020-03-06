@@ -1,0 +1,120 @@
+<?xml version="1.0" ?>
+<!--             (C) Copyright OASIS Open 2005, 2006.              -->
+<!--             (C) Copyright IBM Corporation 2001, 2004.         -->
+<!--             All Rights Reserved.                              -->
+<!--                                                               -->
+<!--  UPDATES:                                                     -->
+<!--    2005.11.15 RDA: Corrected system ID for topicAttr.mod      -->
+<!--    2005.11.15 RDA: Corrected public ID for tblDecl.mod        -->
+<!--    2005.11.15 RDA: Removed @xml:base from <group>             -->
+<!--    2006.06.07 RDA: Added commonElements.mod                   -->
+<!--    2006.06.07 RDA: Added indexing domain                      -->
+<!--    2006.06.20 RDA: Added bookmap and XNAL domain              -->
+<catalog xmlns="urn:oasis:names:tc:entity:xmlns:xml:catalog"
+         prefer="public">
+
+<!-- Catalog for Dita -->
+
+<!-- Dita DTDs -->
+
+<group>
+
+  <public publicId="-//OASIS//DTD DITA Concept//EN"
+          uri="concept.dtd"/>
+  <public publicId="-//OASIS//ELEMENTS DITA Concept//EN"
+          uri="concept.mod"/>
+
+  <public publicId="-//OASIS//DTD DITA Composite//EN"
+          uri="ditabase.dtd"/>
+
+  <public publicId="-//OASIS//DTD DITA Glossary//EN"
+          uri="glossary.dtd"/>
+  <public publicId="-//OASIS//ELEMENTS DITA Glossary//EN"
+          uri="glossary.mod"/>
+
+  <public publicId="-//OASIS//DTD DITA Reference//EN"
+          uri="reference.dtd"/>
+  <public publicId="-//OASIS//ELEMENTS DITA Reference//EN"
+          uri="reference.mod"/>
+
+  <public publicId="-//OASIS//DTD DITA Task//EN"
+          uri="task.dtd"/>
+  <public publicId="-//OASIS//ELEMENTS DITA Task//EN"
+          uri="task.mod"/>
+
+  <public publicId="-//OASIS//DTD DITA Topic//EN"
+          uri="topic.dtd"/>
+  <public publicId="-//OASIS//ELEMENTS DITA Topic//EN"
+          uri="topic.mod"/>
+  <public publicId="-//OASIS//ENTITIES DITA Topic Definitions//EN"
+          uri="topicDefn.ent"/>
+  <!-- topicAttr.mod is no longer used in DITA 1.1; kept for backwards compatibility -->
+  <public publicId="-//OASIS//ENTITIES DITA Topic Class//EN"
+          uri="topicAttr.mod"/>
+
+<!-- Maps -->
+
+  <public publicId="-//OASIS//DTD DITA Map//EN"
+          uri="map.dtd"/>
+  <public publicId="-//OASIS//ELEMENTS DITA Map//EN"
+          uri="map.mod"/>
+  <public publicId="-//OASIS//ENTITIES DITA Map Group Domain//EN"
+          uri="mapGroup.ent"/>
+  <public publicId="-//OASIS//ELEMENTS DITA Map Group Domain//EN"
+          uri="mapGroup.mod"/>
+
+  <public publicId="-//OASIS//DTD DITA BookMap//EN"
+          uri="bookmap.dtd"/>
+  <public publicId="-//OASIS//ELEMENTS DITA BookMap//EN"
+          uri="bookmap.mod"/>
+
+<!-- Domains -->
+
+  <public publicId="-//OASIS//ELEMENTS DITA Highlight Domain//EN"
+          uri="highlightDomain.mod"/>
+  <public publicId="-//OASIS//ENTITIES DITA Highlight Domain//EN"
+          uri="highlightDomain.ent"/>
+
+  <public publicId="-//OASIS//ELEMENTS DITA Indexing Domain//EN"
+          uri="indexingDomain.mod"/>
+  <public publicId="-//OASIS//ENTITIES DITA Indexing Domain//EN"
+          uri="indexingDomain.ent"/>
+
+  <public publicId="-//OASIS//ELEMENTS DITA Programming Domain//EN"
+          uri="programmingDomain.mod"/>
+  <public publicId="-//OASIS//ENTITIES DITA Programming Domain//EN"
+          uri="programmingDomain.ent"/>
+
+  <public publicId="-//OASIS//ELEMENTS DITA Software Domain//EN"
+          uri="softwareDomain.mod"/>
+  <public publicId="-//OASIS//ENTITIES DITA Software Domain//EN"
+          uri="softwareDomain.ent"/>
+
+  <public publicId="-//OASIS//ELEMENTS DITA User Interface Domain//EN"
+          uri="uiDomain.mod"/>
+  <public publicId="-//OASIS//ENTITIES DITA User Interface Domain//EN"
+          uri="uiDomain.ent"/>
+
+  <public publicId="-//OASIS//ELEMENTS DITA Utilities Domain//EN"
+          uri="utilitiesDomain.mod"/>
+  <public publicId="-//OASIS//ENTITIES DITA Utilities Domain//EN"
+          uri="utilitiesDomain.ent"/>
+
+  <public publicId="-//OASIS//ELEMENTS DITA XNAL Domain//EN"
+          uri="xnalDomain.mod"/>
+  <public publicId="-//OASIS//ENTITIES DITA XNAL Domain//EN"
+          uri="xnalDomain.ent"/>
+
+<!-- Common -->
+
+  <public publicId="-//OASIS//ELEMENTS DITA Common Elements//EN"
+          uri="commonElements.mod"/>
+  <public publicId="-//OASIS//ENTITIES DITA Common Elements//EN"
+          uri="commonElements.ent"/>
+  <public publicId="-//OASIS//ELEMENTS DITA Metadata//EN"
+          uri="metaDecl.mod"/>
+  <public publicId="-//OASIS//ELEMENTS DITA Exchange Table Model//EN"
+          uri="tblDecl.mod"/>
+</group>
+
+</catalog>

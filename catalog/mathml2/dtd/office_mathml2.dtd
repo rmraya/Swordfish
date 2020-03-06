@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--Some open document peculiarities-->
+<!ENTITY % MATHML.pfx  "math:">
+<!ENTITY % MATHML.prefix   "math" >
+<!ENTITY % MATHML.prefixed   "INCLUDE" >
+<!-- MathML module ............................... -->
+<!ENTITY % mathml.module "INCLUDE" >
+<![%mathml.module;[
+<!ENTITY % mathml.mod
+     PUBLIC "-//W3C//DTD MathML 2.0//EN"
+            "mathml2.dtd" >
+%mathml.mod;]]>

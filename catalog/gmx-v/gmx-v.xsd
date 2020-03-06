@@ -1,0 +1,211 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Document        : gmx-v.xsd
+  Version         : 1.0
+  Created on      : 28 February 2007 19:45
+  Authors         : azydron@xml-intl.com rmraya@maxprograms.com
+  Description     : This XML Schema defines the structure of the GIM Metrics Volume namespace
+  Note            : Final version approved 26 February 2007
+  
+  Copyright © The Localisation Industry Standards Association [LISA] 2007. 
+  All Rights Reserved.
+  
+-->
+<!--
+    Changes History:
+    
+    May 05, 2008:  (RMR) Added "category" attribute to <count> element.
+    May 05, 2008:  (RMR) used qualified names in element descriptions
+-->
+<xs:schema xmlns:metrics="urn:lisa-metrics-tags"
+    targetNamespace="urn:lisa-metrics-tags" 
+    xmlns:xs="http://www.w3.org/2001/XMLSchema" 
+    xml:lang="en"
+    elementFormDefault="qualified">
+    
+    <xs:import namespace="http://www.w3.org/XML/1998/namespace"
+        schemaLocation="http://www.w3.org/2001/xml.xsd"/>
+    
+<!--
+    ================================================== 
+    Restrictions
+    ================================================== 
+    -->
+<!-- Restriction for state attribute -->
+    <xs:simpleType name="State">
+        <xs:restriction base="xs:token">
+            <xs:enumeration value="final"/>
+            <xs:enumeration value="needs-adaptation"/>
+            <xs:enumeration value="needs-l10n"/>
+            <xs:enumeration value="needs-review-adaptation"/>
+            <xs:enumeration value="needs-review-l10n"/>
+            <xs:enumeration value="needs-review-translation"/>
+            <xs:enumeration value="needs-translation"/>
+            <xs:enumeration value="new"/>
+            <xs:enumeration value="signed-off"/>
+            <xs:enumeration value="translated"/>
+        </xs:restriction>
+    </xs:simpleType>
+<!-- Restriction for type attribute -->
+    <xs:simpleType name="Type">
+        <xs:restriction base="xs:token">
+            <xs:enumeration value="ScreenCount"/>
+            <xs:enumeration value="FileCount"/>
+            <xs:enumeration value="PageCount"/>
+            <xs:enumeration value="TextUnitCount"/>
+            <xs:enumeration value="TotalWordCount"/>
+            <xs:enumeration value="WhiteSpaceCharacterCount"/>
+            <xs:enumeration value="PunctuationCharacterCount"/>
+            <xs:enumeration value="AlphanumericOnlyTextUnitWordCount"/>
+            <xs:enumeration value="MeasurementOnlyTextUnitWordCount"/>
+            <xs:enumeration value="NumericOnlyTextUnitWordCount"/>
+            <xs:enumeration value="ExactMatchedWordCount"/>
+            <xs:enumeration value="LeveragedMatchedWordCount"/>
+            <xs:enumeration value="RepetionMatchedWordCount"/>
+            <xs:enumeration value="ProtectedWordCount"/>
+            <xs:enumeration value="ProjectRepetionMatchedWordCount"/>
+            <xs:enumeration value="FuzzyMatchedWordCount"/>
+            <xs:enumeration value="ProjectFuzzyMatchedWordCount"/>
+            <xs:enumeration value="TotalCharacterCount"/>
+            <xs:enumeration value="AlphanumericOnlyTextUnitCharacterCount"/>
+            <xs:enumeration value="MeasurementOnlyTextUnitCharacterCount"/>
+            <xs:enumeration value="NumericOnlyTextUnitCharacterCount"/>
+            <xs:enumeration value="ExactMatchedCharacterCount"/>
+            <xs:enumeration value="LeveragedMatchedCharacterCount"/>
+            <xs:enumeration value="RepetionMatchedCharacterCount"/>
+            <xs:enumeration value="ProjectRepetionMatchedCharacterCount"/>
+            <xs:enumeration value="FuzzyMatchedCharacterCount"/>
+            <xs:enumeration value="ProjectFuzzyMatchedCharacterCount"/>
+            <xs:enumeration value="ProtectedCharacterCount"/>
+            <xs:enumeration value="SimpleNumericAutoTextWordCount"/>
+            <xs:enumeration value="ComplexNumericAutoTextWordCount"/>
+            <xs:enumeration value="MeasurementAutoTextWordCount"/>
+            <xs:enumeration value="AlphaNumericAutoTextWordCount"/>
+            <xs:enumeration value="DateAutoTextWordCount"/>
+            <xs:enumeration value="TMAutoTextWordCount"/>
+            <xs:enumeration value="SimpleNumericAutoTextCharacterCount"/>
+            <xs:enumeration value="ComplexNumericAutoTextCharacterCount"/>
+            <xs:enumeration value="MeasurementAutoTextCharacterCount"/>
+            <xs:enumeration value="AlphaNumericAutoTextCharacterCount"/>
+            <xs:enumeration value="DateAutoTextCharacterCount"/>
+            <xs:enumeration value="TMAutoTextCharacterCount"/>
+            <xs:enumeration value="TranslatableInlineCount"/>
+            <xs:enumeration value="TranslatableLinkingInlineCount"/>
+        </xs:restriction>
+    </xs:simpleType>
+<!-- Restrictions for user-defined attribute values -->
+    <xs:simpleType name="Custom">
+        <xs:restriction base="xs:string">
+            <xs:pattern value="x-[^\s]+"/>
+        </xs:restriction>
+    </xs:simpleType>        
+<!--
+    ================================================== 
+    Structural Elements     
+    ================================================== 
+    -->
+<!-- The main element -->    
+    <xs:element name="metrics">
+        <xs:complexType>
+            <xs:choice>
+                <xs:element maxOccurs="unbounded" ref="metrics:project"/>
+                <xs:element maxOccurs="unbounded" ref="metrics:stage"/>
+            </xs:choice>
+            <xs:attribute name="version" use="required">
+                <xs:simpleType>
+                    <xs:restriction base="xs:string">
+                        <xs:enumeration value="1.0"/>
+                    </xs:restriction>
+                </xs:simpleType>
+            </xs:attribute>
+            <xs:attribute name="source-language" use="required" type="xs:NMTOKEN"/>
+            <xs:attribute name="target-language" type="xs:NMTOKEN"/>
+            <xs:attribute name="tool-name" use="required" type="xs:NMTOKEN"/>
+            <xs:attribute name="tool-version" use="required" type="xs:NMTOKEN"/>
+            <xs:attribute name="reference"/>
+        </xs:complexType>
+    </xs:element>
+<!-- The project element -->
+    <xs:element name="project">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element minOccurs="1" maxOccurs="unbounded" ref="metrics:resource"/>
+            </xs:sequence>
+            <xs:attribute name="identifier" use="required" type="xs:NMTOKEN"/>
+        </xs:complexType>
+    </xs:element>
+<!-- The resource element -->
+    <xs:element name="resource">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element minOccurs="1" maxOccurs="unbounded" ref="metrics:stage"/>
+            </xs:sequence>
+            <xs:attribute name="identifier" type="xs:NMTOKEN"/>
+        </xs:complexType>
+    </xs:element>
+<!-- The stage element -->
+    <xs:element name="stage">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element minOccurs="0" maxOccurs="unbounded" ref="metrics:notes"/>
+                <xs:element minOccurs="1" maxOccurs="unbounded" ref="metrics:count-group"/>
+            </xs:sequence>
+            <xs:attribute name="date" use="required" type="xs:NMTOKEN"/>
+            <xs:attribute name="phase" use="required" type="xs:NMTOKEN"/>
+            <xs:attribute name="source-language" use="required" type="xs:NMTOKEN"/>
+            <xs:attribute name="target-language" type="xs:NMTOKEN"/>
+        </xs:complexType>
+    </xs:element>
+<!-- The notes element -->
+    <xs:element name="notes">
+        <xs:complexType mixed="true">
+            <xs:attribute name="date" type="xs:NMTOKEN"/>
+            <xs:attribute name="from" type="xs:NMTOKEN"/>
+        </xs:complexType>
+    </xs:element>
+<!-- The count group element -->
+    <xs:element name="count-group">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element minOccurs="1" maxOccurs="unbounded" ref="metrics:count"/>
+            </xs:sequence>
+            <xs:attribute name="name" use="required">
+                <xs:simpleType>
+                    <xs:restriction base="xs:token">
+                        <xs:enumeration value="verifiable"/>
+                        <xs:enumeration value="non-verifiable"/>
+                    </xs:restriction>
+                </xs:simpleType>
+            </xs:attribute>
+            <xs:attribute name="state">
+                <xs:simpleType>
+                    <xs:union memberTypes="metrics:State metrics:Custom"/>
+                </xs:simpleType>
+            </xs:attribute>
+        </xs:complexType>
+    </xs:element>
+<!-- The count element -->
+    <xs:element name="count">
+        <xs:complexType>
+            <xs:attribute name="type" use="required">
+                <xs:simpleType>
+                    <xs:union memberTypes="metrics:Type metrics:Custom"/>
+                </xs:simpleType>
+            </xs:attribute>
+            <xs:attribute name="value">
+                <xs:simpleType>
+                    <xs:restriction base="xs:integer">
+                        <xs:minInclusive value="0"/>
+                    </xs:restriction>
+                </xs:simpleType>
+            </xs:attribute>
+            <xs:attribute name="category">
+                <xs:simpleType>
+                    <xs:restriction base="xs:string">
+                        <xs:pattern value="[0-9][0-9]?-[0-9][0-9]?"/>
+                    </xs:restriction>
+                </xs:simpleType>
+            </xs:attribute>
+        </xs:complexType>
+    </xs:element>
+</xs:schema>

@@ -1,0 +1,113 @@
+<!-- ...................................................................... -->
+<!-- SuSE XML DTD V0.1 .................................................... -->
+<!-- This file contains general entities                                    -->
+
+
+<!-- ============================================================= -->
+<!--                    SUSE                                       -->
+<!-- ============================================================= -->
+
+<!ENTITY suse           "SUSE">
+<!ENTITY suseconfig     "SuSEconfig">
+<!ENTITY suselinux      "SUSE LINUX">
+<!ENTITY unitedlinux    "United Linux">
+
+<!ENTITY sax            "SaX">
+<!ENTITY saxii          "SaX2">
+<!ENTITY yast           "YaST">
+<!ENTITY yasti          "YaST1">
+<!ENTITY yastii         "YaST2">
+
+
+
+<!-- ============================================================= -->
+<!--                    Networking                                 -->
+<!-- ============================================================= -->
+
+<!ENTITY exampleuser        "tux">
+<!ENTITY exampleuserII      "wilber">
+<!ENTITY examplegroup       "users">
+<!ENTITY exampledomain      "example.com">
+<!ENTITY exampledomainip    "192.168.0">
+
+<!ENTITY exampleserver      "sun">
+<!ENTITY exampleserverip    "&exampledomainip;.20">
+<!ENTITY exampleserverfq    "&exampleserver;.&exampledomain;">
+
+<!ENTITY exampleclient      "earth">
+<!ENTITY exampleclientip    "&exampledomainip;.0">
+<!ENTITY exampleclientfq    "&exampleclient;.&exampledomain;">
+
+<!ENTITY exampleclientppp   "ppp&exampleclient;">
+<!ENTITY exampleclientslip  "sl&exampleclient;">
+<!ENTITY exampleclientuucp  "uu&exampleclient;">
+
+<!ENTITY exampleclientII      "venus">
+<!ENTITY exampleclientIIppp   "ppp&exampleclientII;">
+<!ENTITY exampleclientIIslip  "sl&exampleclientII;">
+<!ENTITY exampleclientIIuucp  "uu&exampleclientII;">
+
+
+
+<!-- ============================================================= -->
+<!--                    General Entities                           -->
+<!-- ============================================================= -->
+
+<!ENTITY fwcd           "Firewall on CD">
+<!ENTITY gimp           "GIMP">
+<!ENTITY grub           "GRUB">
+<!ENTITY lcd            "LCD">
+<!ENTITY lilo           "LILO">
+<!ENTITY macos          "MacOS">
+<!ENTITY miboot         "miboot">
+<!ENTITY milo           "MILO">
+<!ENTITY rootuser       '<systemitem class="username">root</systemitem>'>
+<!ENTITY xfree          "X.Org">
+<!ENTITY xfreetm        "<trademark>&xfree;</trademark>">
+<!ENTITY xvendor	"X.Org">
+<!ENTITY xwinsys        "X Window System">
+<!ENTITY yaboot         "yaboot">
+
+
+<!-- ============================================================= -->
+<!--                    Books                                      -->
+<!-- ============================================================= -->
+
+<!ENTITY inst           "<emphasis>Start-up Guide</emphasis>">
+<!ENTITY prep           "<emphasis>Architecture-specific Information</emphasis>">
+<!ENTITY adguide        "<emphasis>Administration Guide</emphasis>"> 
+<!ENTITY userguide	"<emphasis>User Guide</emphasis>">
+
+<!-- ============================================================= -->
+<!--                    Platforms                                  -->
+<!-- ============================================================= -->
+
+<!ENTITY x86           "x86">
+<!ENTITY amd64         "AMD64">
+<!ENTITY s390          "S/390">
+<!ENTITY zseries       "zSeries">
+<!ENTITY ipf           "Itanium Processor Family">
+<!ENTITY ipseries      "POWER">
+<!ENTITY ppc           "POWER">
+<!ENTITY em64t         "Intel EM64T">
+
+
+<!-- ============================================================= -->
+<!--                    Products                                   -->
+<!-- ============================================================= -->
+
+<!ENTITY sls           "SUSE LINUX Enterprise Server">
+<!ENTITY nld           "Novell Linux Desktop">
+<!ENTITY sdk           "SUSE Software Development Kit">
+
+<!-- ============================================================= -->
+<!--                    yast desktop entities                      -->
+<!-- ============================================================= -->
+
+<!ENTITY ycc_runlevel  "System Services (Runlevel)">
+
+<!--
+<!ENTITY % desktop-entities SYSTEM "desktop-entities.ent">
+%desktop-entities; -->
+<!--                             End of file                                -->
+<!-- ...................................................................... -->

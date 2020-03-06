@@ -1,0 +1,468 @@
+--              (C) Copyright OASIS Open 2005, 2010.               --
+--              (C) Copyright IBM Corporation 2001, 2004.          --
+--              All Rights Reserved.                               --
+--                                                                 --
+--  Catalog for Dita XSDs  --
+--  It includes both SYSTEM and URI catalog declerations.  
+       - The SYSTEM declarations are used by the Apache Catalog Resolver.
+       - The URI declarations are the proper declerations as per the OASIS Entity 
+       Resolution Committee.  They are included in case some entity resolves adhere
+       to the spec to resolve the location of the schemas.
+   --
+BASE "base/xsd/" 
+URI "topicMod.xsd" "topicMod.xsd"
+URI "urn:oasis:names:tc:dita:xsd:topicMod.xsd" "topicMod.xsd"
+URI "urn:oasis:names:tc:dita:xsd:topicMod.xsd:1.x" "topicMod.xsd"
+URI "urn:oasis:names:tc:dita:xsd:topicMod.xsd:1.2" "topicMod.xsd"
+
+URI "basetopic.xsd" "basetopic.xsd"
+URI "urn:oasis:names:tc:dita:xsd:basetopic.xsd" "basetopic.xsd"
+URI "urn:oasis:names:tc:dita:xsd:basetopic.xsd:1.x" "basetopic.xsd"
+URI "urn:oasis:names:tc:dita:xsd:basetopic.xsd:1.2" "basetopic.xsd"
+
+URI "topicGrp.xsd" "topicGrp.xsd"
+URI "urn:oasis:names:tc:dita:xsd:topicGrp.xsd" "topicGrp.xsd"
+URI "urn:oasis:names:tc:dita:xsd:topicGrp.xsd:1.x" "topicGrp.xsd"
+URI "urn:oasis:names:tc:dita:xsd:topicGrp.xsd:1.2" "topicGrp.xsd"
+
+URI "tblDeclMod.xsd" "tblDeclMod.xsd"
+URI "urn:oasis:names:tc:dita:xsd:tblDeclMod.xsd" "tblDeclMod.xsd"
+URI "urn:oasis:names:tc:dita:xsd:tblDeclMod.xsd:1.x" "tblDeclMod.xsd"
+URI "urn:oasis:names:tc:dita:xsd:tblDeclMod.xsd:1.2" "tblDeclMod.xsd"
+
+URI "tblDeclGrp.xsd" "tblDeclGrp.xsd"
+URI "urn:oasis:names:tc:dita:xsd:tblDeclGrp.xsd" "tblDeclGrp.xsd"
+URI "urn:oasis:names:tc:dita:xsd:tblDeclGrp.xsd:1.x" "tblDeclGrp.xsd"
+URI "urn:oasis:names:tc:dita:xsd:tblDeclGrp.xsd:1.2" "tblDeclGrp.xsd"
+
+URI "metaDeclMod.xsd" "metaDeclMod.xsd"
+URI "urn:oasis:names:tc:dita:xsd:metaDeclMod.xsd" "metaDeclMod.xsd"
+URI "urn:oasis:names:tc:dita:xsd:metaDeclMod.xsd:1.x" "metaDeclMod.xsd"
+URI "urn:oasis:names:tc:dita:xsd:metaDeclMod.xsd:1.2" "metaDeclMod.xsd"
+
+URI "metaDeclGrp.xsd" "metaDeclGrp.xsd"
+URI "urn:oasis:names:tc:dita:xsd:metaDeclGrp.xsd" "metaDeclGrp.xsd"
+URI "urn:oasis:names:tc:dita:xsd:metaDeclGrp.xsd:1.x" "metaDeclGrp.xsd"
+URI "urn:oasis:names:tc:dita:xsd:metaDeclGrp.xsd:1.2" "metaDeclGrp.xsd"
+
+URI "mapMod.xsd" "mapMod.xsd"
+URI "urn:oasis:names:tc:dita:xsd:mapMod.xsd" "mapMod.xsd"
+URI "urn:oasis:names:tc:dita:xsd:mapMod.xsd:1.x" "mapMod.xsd"
+URI "urn:oasis:names:tc:dita:xsd:mapMod.xsd:1.2" "mapMod.xsd"
+
+URI "basemap.xsd" "basemap.xsd"
+URI "urn:oasis:names:tc:dita:xsd:basemap.xsd" "basemap.xsd"
+URI "urn:oasis:names:tc:dita:xsd:basemap.xsd:1.x" "basemap.xsd"
+URI "urn:oasis:names:tc:dita:xsd:basemap.xsd:1.2" "basemap.xsd"
+
+URI "mapGrp.xsd" "mapGrp.xsd"
+URI "urn:oasis:names:tc:dita:xsd:mapGrp.xsd" "mapGrp.xsd"
+URI "urn:oasis:names:tc:dita:xsd:mapGrp.xsd:1.x" "mapGrp.xsd"
+URI "urn:oasis:names:tc:dita:xsd:mapGrp.xsd:1.2" "mapGrp.xsd"
+
+URI "mapGroupMod.xsd" "mapGroupMod.xsd"
+URI "urn:oasis:names:tc:dita:xsd:mapGroupMod.xsd" "mapGroupMod.xsd"
+URI "urn:oasis:names:tc:dita:xsd:mapGroupMod.xsd:1.x" "mapGroupMod.xsd"
+URI "urn:oasis:names:tc:dita:xsd:mapGroupMod.xsd:1.2" "mapGroupMod.xsd"
+
+URI "highlightDomain.xsd" "highlightDomain.xsd"
+URI "urn:oasis:names:tc:dita:xsd:highlightDomain.xsd" "highlightDomain.xsd"
+URI "urn:oasis:names:tc:dita:xsd:highlightDomain.xsd:1.x" "highlightDomain.xsd"
+URI "urn:oasis:names:tc:dita:xsd:highlightDomain.xsd:1.2" "highlightDomain.xsd"
+
+URI "utilitiesDomain.xsd" "utilitiesDomain.xsd"
+URI "urn:oasis:names:tc:dita:xsd:utilitiesDomain.xsd" "utilitiesDomain.xsd"
+URI "urn:oasis:names:tc:dita:xsd:utilitiesDomain.xsd:1.x" "utilitiesDomain.xsd"
+URI "urn:oasis:names:tc:dita:xsd:utilitiesDomain.xsd:1.2" "utilitiesDomain.xsd"
+
+URI "indexingDomain.xsd" "indexingDomain.xsd"
+URI "urn:oasis:names:tc:dita:xsd:indexingDomain.xsd" "indexingDomain.xsd"
+URI "urn:oasis:names:tc:dita:xsd:indexingDomain.xsd:1.x" "indexingDomain.xsd"
+URI "urn:oasis:names:tc:dita:xsd:indexingDomain.xsd:1.2" "indexingDomain.xsd"
+
+URI "hazardstatementDomain.xsd" "hazardstatementDomain.xsd"
+URI "urn:oasis:names:tc:dita:xsd:hazardstatementDomain.xsd" "hazardstatementDomain.xsd"
+URI "urn:oasis:names:tc:dita:xsd:hazardstatementDomain.xsd:1.x" "hazardstatementDomain.xsd"
+URI "urn:oasis:names:tc:dita:xsd:hazardstatementDomain.xsd:1.2" "hazardstatementDomain.xsd"
+
+URI "delayResolutionDomain.xsd" "delayResolutionDomain.xsd"
+URI "urn:oasis:names:tc:dita:xsd:delayResolutionDomain.xsd" "delayResolutionDomain.xsd"
+URI "urn:oasis:names:tc:dita:xsd:delayResolutionDomain.xsd:1.x" "delayResolutionDomain.xsd"
+URI "urn:oasis:names:tc:dita:xsd:delayResolutionDomain.xsd:1.2" "delayResolutionDomain.xsd"
+
+URI "ditaarch.xsd" "ditaarch.xsd"
+URI "urn:oasis:names:tc:dita:xsd:ditaarch.xsd" "ditaarch.xsd"
+URI "urn:oasis:names:tc:dita:xsd:ditaarch.xsd:1.x" "ditaarch.xsd"
+URI "urn:oasis:names:tc:dita:xsd:ditaarch.xsd:1.2" "ditaarch.xsd"
+
+URI "xml.xsd" "xml.xsd"
+URI "urn:oasis:names:tc:dita:xsd:xml.xsd" "xml.xsd"
+URI "urn:oasis:names:tc:dita:xsd:xml.xsd:1.x" "xml.xsd"
+URI "urn:oasis:names:tc:dita:xsd:xml.xsd:1.2" "xml.xsd"
+
+URI "commonElementMod.xsd" "commonElementMod.xsd"
+URI "urn:oasis:names:tc:dita:xsd:commonElementMod.xsd" "commonElementMod.xsd"
+URI "urn:oasis:names:tc:dita:xsd:commonElementMod.xsd:1.x" "commonElementMod.xsd"
+URI "urn:oasis:names:tc:dita:xsd:commonElementMod.xsd:1.2" "commonElementMod.xsd"
+
+URI "commonElementGrp.xsd" "commonElementGrp.xsd"
+URI "urn:oasis:names:tc:dita:xsd:commonElementGrp.xsd" "commonElementGrp.xsd"
+URI "urn:oasis:names:tc:dita:xsd:commonElementGrp.xsd:1.x" "commonElementGrp.xsd"
+URI "urn:oasis:names:tc:dita:xsd:commonElementGrp.xsd:1.2" "commonElementGrp.xsd"
+
+--  Document types and modules used by the Technical Content package  --
+
+BASE "../../technicalContent/xsd/" 
+URI "topic.xsd" "topic.xsd"
+URI "urn:oasis:names:tc:dita:xsd:topic.xsd" "topic.xsd"
+URI "urn:oasis:names:tc:dita:xsd:topic.xsd:1.x" "topic.xsd"
+URI "urn:oasis:names:tc:dita:xsd:topic.xsd:1.2" "topic.xsd"
+
+URI "map.xsd" "map.xsd"
+URI "urn:oasis:names:tc:dita:xsd:map.xsd" "map.xsd"
+URI "urn:oasis:names:tc:dita:xsd:map.xsd:1.x" "map.xsd"
+URI "urn:oasis:names:tc:dita:xsd:map.xsd:1.2" "map.xsd"
+
+URI "ditabase.xsd" "ditabase.xsd"
+URI "urn:oasis:names:tc:dita:xsd:ditabase.xsd" "ditabase.xsd"
+URI "urn:oasis:names:tc:dita:xsd:ditabase.xsd:1.x" "ditabase.xsd"
+URI "urn:oasis:names:tc:dita:xsd:ditabase.xsd:1.2" "ditabase.xsd"
+
+URI "ditabaseMod.xsd" "ditabaseMod.xsd"
+URI "urn:oasis:names:tc:dita:xsd:ditabaseMod.xsd" "ditabaseMod.xsd"
+URI "urn:oasis:names:tc:dita:xsd:ditabaseMod.xsd:1.x" "ditabaseMod.xsd"
+URI "urn:oasis:names:tc:dita:xsd:ditabaseMod.xsd:1.2" "ditabaseMod.xsd"
+
+URI "concept.xsd" "concept.xsd"
+URI "urn:oasis:names:tc:dita:xsd:concept.xsd" "concept.xsd"
+URI "urn:oasis:names:tc:dita:xsd:concept.xsd:1.x" "concept.xsd"
+URI "urn:oasis:names:tc:dita:xsd:concept.xsd:1.2" "concept.xsd"
+
+URI "conceptMod.xsd" "conceptMod.xsd"
+URI "urn:oasis:names:tc:dita:xsd:conceptMod.xsd" "conceptMod.xsd"
+URI "urn:oasis:names:tc:dita:xsd:conceptMod.xsd:1.x" "conceptMod.xsd"
+URI "urn:oasis:names:tc:dita:xsd:conceptMod.xsd:1.2" "conceptMod.xsd"
+
+URI "conceptGrp.xsd" "conceptGrp.xsd"
+URI "urn:oasis:names:tc:dita:xsd:conceptGrp.xsd" "conceptGrp.xsd"
+URI "urn:oasis:names:tc:dita:xsd:conceptGrp.xsd:1.x" "conceptGrp.xsd"
+URI "urn:oasis:names:tc:dita:xsd:conceptGrp.xsd:1.2" "conceptGrp.xsd"
+
+URI "reference.xsd" "reference.xsd"
+URI "urn:oasis:names:tc:dita:xsd:reference.xsd" "reference.xsd"
+URI "urn:oasis:names:tc:dita:xsd:reference.xsd:1.x" "reference.xsd"
+URI "urn:oasis:names:tc:dita:xsd:reference.xsd:1.2" "reference.xsd"
+
+URI "referenceMod.xsd" "referenceMod.xsd"
+URI "urn:oasis:names:tc:dita:xsd:referenceMod.xsd" "referenceMod.xsd"
+URI "urn:oasis:names:tc:dita:xsd:referenceMod.xsd:1.x" "referenceMod.xsd"
+URI "urn:oasis:names:tc:dita:xsd:referenceMod.xsd:1.2" "referenceMod.xsd"
+
+URI "referenceGrp.xsd" "referenceGrp.xsd"
+URI "urn:oasis:names:tc:dita:xsd:referenceGrp.xsd" "referenceGrp.xsd"
+URI "urn:oasis:names:tc:dita:xsd:referenceGrp.xsd:1.x" "referenceGrp.xsd"
+URI "urn:oasis:names:tc:dita:xsd:referenceGrp.xsd:1.2" "referenceGrp.xsd"
+
+URI "task.xsd" "task.xsd"
+URI "urn:oasis:names:tc:dita:xsd:task.xsd" "task.xsd"
+URI "urn:oasis:names:tc:dita:xsd:task.xsd:1.x" "task.xsd"
+URI "urn:oasis:names:tc:dita:xsd:task.xsd:1.2" "task.xsd"
+
+URI "generalTask.xsd" "generalTask.xsd"
+URI "urn:oasis:names:tc:dita:xsd:generalTask.xsd" "generalTask.xsd"
+URI "urn:oasis:names:tc:dita:xsd:generalTask.xsd:1.x" "generalTask.xsd"
+URI "urn:oasis:names:tc:dita:xsd:generalTask.xsd:1.2" "generalTask.xsd"
+
+URI "taskMod.xsd" "taskMod.xsd"
+URI "urn:oasis:names:tc:dita:xsd:taskMod.xsd" "taskMod.xsd"
+URI "urn:oasis:names:tc:dita:xsd:taskMod.xsd:1.x" "taskMod.xsd"
+URI "urn:oasis:names:tc:dita:xsd:taskMod.xsd:1.2" "taskMod.xsd"
+
+URI "strictTaskbodyConstraintMod.xsd" "strictTaskbodyConstraintMod.xsd"
+URI "urn:oasis:names:tc:dita:xsd:strictTaskbodyConstraintMod.xsd" "strictTaskbodyConstraintMod.xsd"
+URI "urn:oasis:names:tc:dita:xsd:strictTaskbodyConstraintMod.xsd:1.x" "strictTaskbodyConstraintMod.xsd"
+URI "urn:oasis:names:tc:dita:xsd:strictTaskbodyConstraintMod.xsd:1.2" "strictTaskbodyConstraintMod.xsd"
+
+URI "taskGrp.xsd" "taskGrp.xsd"
+URI "urn:oasis:names:tc:dita:xsd:taskGrp.xsd" "taskGrp.xsd"
+URI "urn:oasis:names:tc:dita:xsd:taskGrp.xsd:1.x" "taskGrp.xsd"
+URI "urn:oasis:names:tc:dita:xsd:taskGrp.xsd:1.2" "taskGrp.xsd"
+
+URI "glossary.xsd" "glossary.xsd"
+URI "urn:oasis:names:tc:dita:xsd:glossary.xsd" "glossary.xsd"
+URI "urn:oasis:names:tc:dita:xsd:glossary.xsd:1.x" "glossary.xsd"
+URI "urn:oasis:names:tc:dita:xsd:glossary.xsd:1.2" "glossary.xsd"
+
+URI "glossaryMod.xsd" "glossaryMod.xsd"
+URI "urn:oasis:names:tc:dita:xsd:glossaryMod.xsd" "glossaryMod.xsd"
+URI "urn:oasis:names:tc:dita:xsd:glossaryMod.xsd:1.x" "glossaryMod.xsd"
+URI "urn:oasis:names:tc:dita:xsd:glossaryMod.xsd:1.2" "glossaryMod.xsd"
+
+URI "glossaryGrp.xsd" "glossaryGrp.xsd"
+URI "urn:oasis:names:tc:dita:xsd:glossaryGrp.xsd" "glossaryGrp.xsd"
+URI "urn:oasis:names:tc:dita:xsd:glossaryGrp.xsd:1.x" "glossaryGrp.xsd"
+URI "urn:oasis:names:tc:dita:xsd:glossaryGrp.xsd:1.2" "glossaryGrp.xsd"
+
+URI "glossentry.xsd" "glossentry.xsd"
+URI "urn:oasis:names:tc:dita:xsd:glossentry.xsd" "glossentry.xsd"
+URI "urn:oasis:names:tc:dita:xsd:glossentry.xsd:1.x" "glossentry.xsd"
+URI "urn:oasis:names:tc:dita:xsd:glossentry.xsd:1.2" "glossentry.xsd"
+
+URI "glossentryMod.xsd" "glossentryMod.xsd"
+URI "urn:oasis:names:tc:dita:xsd:glossentryMod.xsd" "glossentryMod.xsd"
+URI "urn:oasis:names:tc:dita:xsd:glossentryMod.xsd:1.x" "glossentryMod.xsd"
+URI "urn:oasis:names:tc:dita:xsd:glossentryMod.xsd:1.2" "glossentryMod.xsd"
+
+URI "glossentryGrp.xsd" "glossentryGrp.xsd"
+URI "urn:oasis:names:tc:dita:xsd:glossentryGrp.xsd" "glossentryGrp.xsd"
+URI "urn:oasis:names:tc:dita:xsd:glossentryGrp.xsd:1.x" "glossentryGrp.xsd"
+URI "urn:oasis:names:tc:dita:xsd:glossentryGrp.xsd:1.2" "glossentryGrp.xsd"
+
+URI "glossarygroup.xsd" "glossgroup.xsd"
+URI "urn:oasis:names:tc:dita:xsd:glossarygroup.xsd" "glossgroup.xsd"
+URI "urn:oasis:names:tc:dita:xsd:glossarygroup.xsd:1.x" "glossgroup.xsd"
+URI "urn:oasis:names:tc:dita:xsd:glossarygroup.xsd:1.2" "glossgroup.xsd"
+
+URI "glossgroupMod.xsd" "glossgroupMod.xsd"
+URI "urn:oasis:names:tc:dita:xsd:glossgroupMod.xsd" "glossgroupMod.xsd"
+URI "urn:oasis:names:tc:dita:xsd:glossgroupMod.xsd:1.x" "glossgroupMod.xsd"
+URI "urn:oasis:names:tc:dita:xsd:glossgroupMod.xsd:1.2" "glossgroupMod.xsd"
+
+URI "glossgroupGrp.xsd" "glossgroupGrp.xsd"
+URI "urn:oasis:names:tc:dita:xsd:glossgroupGrp.xsd" "glossgroupGrp.xsd"
+URI "urn:oasis:names:tc:dita:xsd:glossgroupGrp.xsd:1.x" "glossgroupGrp.xsd"
+URI "urn:oasis:names:tc:dita:xsd:glossgroupGrp.xsd:1.2" "glossgroupGrp.xsd"
+
+URI "softwareDomain.xsd" "softwareDomain.xsd"
+URI "urn:oasis:names:tc:dita:xsd:softwareDomain.xsd" "softwareDomain.xsd"
+URI "urn:oasis:names:tc:dita:xsd:softwareDomain.xsd:1.x" "softwareDomain.xsd"
+URI "urn:oasis:names:tc:dita:xsd:softwareDomain.xsd:1.2" "softwareDomain.xsd"
+
+URI "programmingDomain.xsd" "programmingDomain.xsd"
+URI "urn:oasis:names:tc:dita:xsd:programmingDomain.xsd" "programmingDomain.xsd"
+URI "urn:oasis:names:tc:dita:xsd:programmingDomain.xsd:1.x" "programmingDomain.xsd"
+URI "urn:oasis:names:tc:dita:xsd:programmingDomain.xsd:1.2" "programmingDomain.xsd"
+
+URI "uiDomain.xsd" "uiDomain.xsd"
+URI "urn:oasis:names:tc:dita:xsd:uiDomain.xsd" "uiDomain.xsd"
+URI "urn:oasis:names:tc:dita:xsd:uiDomain.xsd:1.x" "uiDomain.xsd"
+URI "urn:oasis:names:tc:dita:xsd:uiDomain.xsd:1.2" "uiDomain.xsd"
+
+URI "glossrefDomain.xsd" "glossrefDomain.xsd"
+URI "urn:oasis:names:tc:dita:xsd:glossrefDomain.xsd" "glossrefDomain.xsd"
+URI "urn:oasis:names:tc:dita:xsd:glossrefDomain.xsd:1.x" "glossrefDomain.xsd"
+URI "urn:oasis:names:tc:dita:xsd:glossrefDomain.xsd:1.2" "glossrefDomain.xsd"
+
+URI "abbreviateDomain.xsd" "abbreviateDomain.xsd"
+URI "urn:oasis:names:tc:dita:xsd:abbreviateDomain.xsd" "abbreviateDomain.xsd"
+URI "urn:oasis:names:tc:dita:xsd:abbreviateDomain.xsd:1.x" "abbreviateDomain.xsd"
+URI "urn:oasis:names:tc:dita:xsd:abbreviateDomain.xsd:1.2" "abbreviateDomain.xsd"
+
+URI "taskreqDomain.xsd" "taskreqDomain.xsd"
+URI "urn:oasis:names:tc:dita:xsd:taskreqDomain.xsd" "taskreqDomain.xsd"
+URI "urn:oasis:names:tc:dita:xsd:taskreqDomain.xsd:1.x" "taskreqDomain.xsd"
+URI "urn:oasis:names:tc:dita:xsd:taskreqDomain.xsd:1.2" "taskreqDomain.xsd"
+
+--  Bookmap document type and module  --
+
+BASE "../../bookmap/xsd/" 
+URI "bookmap.xsd" "bookmap.xsd"
+URI "urn:oasis:names:tc:dita:xsd:bookmap.xsd" "bookmap.xsd"
+URI "urn:oasis:names:tc:dita:xsd:bookmap.xsd:1.x" "bookmap.xsd"
+URI "urn:oasis:names:tc:dita:xsd:bookmap.xsd:1.2" "bookmap.xsd"
+
+URI "bookmapMod.xsd" "bookmapMod.xsd"
+URI "urn:oasis:names:tc:dita:xsd:bookmapMod.xsd" "bookmapMod.xsd"
+URI "urn:oasis:names:tc:dita:xsd:bookmapMod.xsd:1.x" "bookmapMod.xsd"
+URI "urn:oasis:names:tc:dita:xsd:bookmapMod.xsd:1.2" "bookmapMod.xsd"
+
+URI "bookmapGrp.xsd" "bookmapGrp.xsd"
+URI "urn:oasis:names:tc:dita:xsd:bookmapGrp.xsd" "bookmapGrp.xsd"
+URI "urn:oasis:names:tc:dita:xsd:bookmapGrp.xsd:1.x" "bookmapGrp.xsd"
+URI "urn:oasis:names:tc:dita:xsd:bookmapGrp.xsd:1.2" "bookmapGrp.xsd"
+
+--  Domain for representing XNAL address information  --
+
+BASE "../../xnal/xsd/" 
+URI "xnalDomain.xsd" "xnalDomain.xsd"
+URI "urn:oasis:names:tc:dita:xsd:xnalDomain.xsd" "xnalDomain.xsd"
+URI "urn:oasis:names:tc:dita:xsd:xnalDomain.xsd:1.x" "xnalDomain.xsd"
+URI "urn:oasis:names:tc:dita:xsd:xnalDomain.xsd:1.2" "xnalDomain.xsd"
+
+--  Modules and topic types from the OASIS DITA Learning Subcommittee  --
+
+BASE "../../learning/xsd/" 
+URI "learningDomain.xsd" "learningDomain.xsd"
+URI "urn:oasis:names:tc:dita:spec:learning:xsd:learningDomain.xsd" "learningDomain.xsd"
+URI "urn:oasis:names:tc:dita:spec:learning:xsd:learningDomain.xsd:1.x" "learningDomain.xsd"
+URI "urn:oasis:names:tc:dita:spec:learning:xsd:learningDomain.xsd:1.2" "learningDomain.xsd"
+
+URI "learningInteractionBaseDomain.xsd" "learningInteractionBaseDomain.xsd"
+URI "urn:oasis:names:tc:dita:spec:learning:xsd:learningInteractionBaseDomain.xsd" "learningInteractionBaseDomain.xsd"
+URI "urn:oasis:names:tc:dita:spec:learning:xsd:learningInteractionBaseDomain.xsd:1.x" "learningInteractionBaseDomain.xsd"
+URI "urn:oasis:names:tc:dita:spec:learning:xsd:learningInteractionBaseDomain.xsd:1.2" "learningInteractionBaseDomain.xsd"
+
+URI "learningMapDomain.xsd" "learningMapDomain.xsd"
+URI "urn:oasis:names:tc:dita:spec:learning:xsd:learningMapDomain.xsd" "learningMapDomain.xsd"
+URI "urn:oasis:names:tc:dita:spec:learning:xsd:learningMapDomain.xsd:1.x" "learningMapDomain.xsd"
+URI "urn:oasis:names:tc:dita:spec:learning:xsd:learningMapDomain.xsd:1.2" "learningMapDomain.xsd"
+
+URI "learningMetadataDomain.xsd" "learningMetadataDomain.xsd"
+URI "urn:oasis:names:tc:dita:spec:learning:xsd:learningMetadataDomain.xsd" "learningMetadataDomain.xsd"
+URI "urn:oasis:names:tc:dita:spec:learning:xsd:learningMetadataDomain.xsd:1.x" "learningMetadataDomain.xsd"
+URI "urn:oasis:names:tc:dita:spec:learning:xsd:learningMetadataDomain.xsd:1.2" "learningMetadataDomain.xsd"
+
+URI "learningAssessment.xsd" "learningAssessment.xsd"
+URI "urn:oasis:names:tc:dita:spec:learning:xsd:learningAssessment.xsd" "learningAssessment.xsd"
+URI "urn:oasis:names:tc:dita:spec:learning:xsd:learningAssessment.xsd:1.x" "learningAssessment.xsd"
+URI "urn:oasis:names:tc:dita:spec:learning:xsd:learningAssessment.xsd:1.2" "learningAssessment.xsd"
+
+URI "learningAssessmentGrp.xsd" "learningAssessmentGrp.xsd"
+URI "urn:oasis:names:tc:dita:spec:learning:xsd:learningAssessmentGrp.xsd" "learningAssessmentGrp.xsd"
+URI "urn:oasis:names:tc:dita:spec:learning:xsd:learningAssessmentGrp.xsd:1.x" "learningAssessmentGrp.xsd"
+URI "urn:oasis:names:tc:dita:spec:learning:xsd:learningAssessmentGrp.xsd:1.2" "learningAssessmentGrp.xsd"
+
+URI "learningAssessmentMod.xsd" "learningAssessmentMod.xsd"
+URI "urn:oasis:names:tc:dita:spec:learning:xsd:learningAssessmentMod.xsd" "learningAssessmentMod.xsd"
+URI "urn:oasis:names:tc:dita:spec:learning:xsd:learningAssessmentMod.xsd:1.x" "learningAssessmentMod.xsd"
+URI "urn:oasis:names:tc:dita:spec:learning:xsd:learningAssessmentMod.xsd:1.2" "learningAssessmentMod.xsd"
+
+URI "learningBaseGrp.xsd" "learningBaseGrp.xsd"
+URI "urn:oasis:names:tc:dita:spec:learning:xsd:learningBaseGrp.xsd" "learningBaseGrp.xsd"
+URI "urn:oasis:names:tc:dita:spec:learning:xsd:learningBaseGrp.xsd:1.x" "learningBaseGrp.xsd"
+URI "urn:oasis:names:tc:dita:spec:learning:xsd:learningBaseGrp.xsd:1.2" "learningBaseGrp.xsd"
+
+URI "learningBaseMod.xsd" "learningBaseMod.xsd"
+URI "urn:oasis:names:tc:dita:spec:learning:xsd:learningBaseMod.xsd" "learningBaseMod.xsd"
+URI "urn:oasis:names:tc:dita:spec:learning:xsd:learningBaseMod.xsd:1.x" "learningBaseMod.xsd"
+URI "urn:oasis:names:tc:dita:spec:learning:xsd:learningBaseMod.xsd:1.2" "learningBaseMod.xsd"
+
+URI "learningContent.xsd" "learningContent.xsd"
+URI "urn:oasis:names:tc:dita:spec:learning:xsd:learningContent.xsd" "learningContent.xsd"
+URI "urn:oasis:names:tc:dita:spec:learning:xsd:learningContent.xsd:1.x" "learningContent.xsd"
+URI "urn:oasis:names:tc:dita:spec:learning:xsd:learningContent.xsd:1.2" "learningContent.xsd"
+
+URI "learningContentGrp.xsd" "learningContentGrp.xsd"
+URI "urn:oasis:names:tc:dita:spec:learning:xsd:learningContentGrp.xsd" "learningContentGrp.xsd"
+URI "urn:oasis:names:tc:dita:spec:learning:xsd:learningContentGrp.xsd:1.x" "learningContentGrp.xsd"
+URI "urn:oasis:names:tc:dita:spec:learning:xsd:learningContentGrp.xsd:1.2" "learningContentGrp.xsd"
+
+URI "learningContentMod.xsd" "learningContentMod.xsd"
+URI "urn:oasis:names:tc:dita:spec:learning:xsd:learningContentMod.xsd:" "learningContentMod.xsd"
+URI "urn:oasis:names:tc:dita:spec:learning:xsd:learningContentMod.xsd:1.x" "learningContentMod.xsd"
+URI "urn:oasis:names:tc:dita:spec:learning:xsd:learningContentMod.xsd:1.2" "learningContentMod.xsd"
+
+URI "learningBookmap.xsd" "learningBookmap.xsd"
+URI "urn:oasis:names:tc:dita:spec:learning:xsd:learningBookmap.xsd" "learningBookmap.xsd"
+URI "urn:oasis:names:tc:dita:spec:learning:xsd:learningBookmap.xsd:1.x" "learningBookmap.xsd"
+URI "urn:oasis:names:tc:dita:spec:learning:xsd:learningBookmap.xsd:1.2" "learningBookmap.xsd"
+
+URI "learningMap.xsd" "learningMap.xsd"
+URI "urn:oasis:names:tc:dita:spec:learning:xsd:learningMap.xsd" "learningMap.xsd"
+URI "urn:oasis:names:tc:dita:spec:learning:xsd:learningMap.xsd:1.x" "learningMap.xsd"
+URI "urn:oasis:names:tc:dita:spec:learning:xsd:learningMap.xsd:1.2" "learningMap.xsd"
+
+URI "learningMapGrp.xsd" "learningMapGrp.xsd"
+URI "urn:oasis:names:tc:dita:spec:learning:xsd:learningMapGrp.xsd" "learningMapGrp.xsd"
+URI "urn:oasis:names:tc:dita:spec:learning:xsd:learningMapGrp.xsd:1.x" "learningMapGrp.xsd"
+URI "urn:oasis:names:tc:dita:spec:learning:xsd:learningMapGrp.xsd:1.2" "learningMapGrp.xsd"
+
+URI "learningOverview.xsd" "learningOverview.xsd"
+URI "urn:oasis:names:tc:dita:spec:learning:xsd:learningOverview.xsd" "learningOverview.xsd"
+URI "urn:oasis:names:tc:dita:spec:learning:xsd:learningOverview.xsd:1.x" "learningOverview.xsd"
+URI "urn:oasis:names:tc:dita:spec:learning:xsd:learningOverview.xsd:1.2" "learningOverview.xsd"
+
+URI "learningOverviewGrp.xsd" "learningOverviewGrp.xsd"
+URI "urn:oasis:names:tc:dita:spec:learning:xsd:learningOverviewGrp.xsd" "learningOverviewGrp.xsd"
+URI "urn:oasis:names:tc:dita:spec:learning:xsd:learningOverviewGrp.xsd:1.x" "learningOverviewGrp.xsd"
+URI "urn:oasis:names:tc:dita:spec:learning:xsd:learningOverviewGrp.xsd:1.2" "learningOverviewGrp.xsd"
+
+URI "learningOverviewMod.xsd" "learningOverviewMod.xsd"
+URI "urn:oasis:names:tc:dita:spec:learning:xsd:learningOverviewMod.xsd" "learningOverviewMod.xsd"
+URI "urn:oasis:names:tc:dita:spec:learning:xsd:learningOverviewMod.xsd:1.x" "learningOverviewMod.xsd"
+URI "urn:oasis:names:tc:dita:spec:learning:xsd:learningOverviewMod.xsd:1.2" "learningOverviewMod.xsd"
+
+URI "learningPlan.xsd" "learningPlan.xsd"
+URI "urn:oasis:names:tc:dita:spec:learning:xsd:learningPlan.xsd" "learningPlan.xsd"
+URI "urn:oasis:names:tc:dita:spec:learning:xsd:learningPlan.xsd:1.x" "learningPlan.xsd"
+URI "urn:oasis:names:tc:dita:spec:learning:xsd:learningPlan.xsd:1.2" "learningPlan.xsd"
+
+URI "learningPlanMod.xsd" "learningPlanMod.xsd"
+URI "urn:oasis:names:tc:dita:spec:learning:xsd:learningPlanMod.xsd" "learningPlanMod.xsd"
+URI "urn:oasis:names:tc:dita:spec:learning:xsd:learningPlanMod.xsd:1.x" "learningPlanMod.xsd"
+URI "urn:oasis:names:tc:dita:spec:learning:xsd:learningPlanMod.xsd:1.2" "learningPlanMod.xsd"
+
+URI "learningPlanGrp.xsd" "learningPlanGrp.xsd"
+URI "urn:oasis:names:tc:dita:spec:learning:xsd:learningPlanGrp.xsd" "learningPlanGrp.xsd"
+URI "urn:oasis:names:tc:dita:spec:learning:xsd:learningPlanGrp.xsd:1.x" "learningPlanGrp.xsd"
+URI "urn:oasis:names:tc:dita:spec:learning:xsd:learningPlanGrp.xsd:1.2" "learningPlanGrp.xsd"
+
+URI "learningSummary.xsd" "learningSummary.xsd"
+URI "urn:oasis:names:tc:dita:spec:learning:xsd:learningSummary.xsd" "learningSummary.xsd"
+URI "urn:oasis:names:tc:dita:spec:learning:xsd:learningSummary.xsd:1.x" "learningSummary.xsd"
+URI "urn:oasis:names:tc:dita:spec:learning:xsd:learningSummary.xsd:1.2" "learningSummary.xsd"
+
+URI "learningSummaryGrp.xsd" "learningSummaryGrp.xsd"
+URI "urn:oasis:names:tc:dita:spec:learning:xsd:learningSummaryGrp.xsd" "learningSummaryGrp.xsd"
+URI "urn:oasis:names:tc:dita:spec:learning:xsd:learningSummaryGrp.xsd:1.x" "learningSummaryGrp.xsd"
+URI "urn:oasis:names:tc:dita:spec:learning:xsd:learningSummaryGrp.xsd:1.2" "learningSummaryGrp.xsd"
+
+URI "learningSummaryMod.xsd" "learningSummaryMod.xsd"
+URI "urn:oasis:names:tc:dita:spec:learning:xsd:learningSummaryMod.xsd" "learningSummaryMod.xsd"
+URI "urn:oasis:names:tc:dita:spec:learning:xsd:learningSummaryMod.xsd:1.x" "learningSummaryMod.xsd"
+URI "urn:oasis:names:tc:dita:spec:learning:xsd:learningSummaryMod.xsd:1.2" "learningSummaryMod.xsd"
+
+--  Subject scheme package for controlled vocabularies  --
+
+BASE "../../subjectScheme/xsd/" 
+URI "subjectScheme.xsd" "subjectScheme.xsd"
+URI "urn:oasis:names:tc:dita:spec:classification:xsd:subjectScheme.xsd" "subjectScheme.xsd"
+URI "urn:oasis:names:tc:dita:spec:classification:xsd:subjectScheme.xsd:1.x" "subjectScheme.xsd"
+URI "urn:oasis:names:tc:dita:spec:classification:xsd:subjectScheme.xsd:1.2" "subjectScheme.xsd"
+
+URI "subjectSchemeMod.xsd" "subjectSchemeMod.xsd"
+URI "urn:oasis:names:tc:dita:spec:classification:xsd:subjectSchemeMod.xsd" "subjectSchemeMod.xsd"
+URI "urn:oasis:names:tc:dita:spec:classification:xsd:subjectSchemeMod.xsd:1.x" "subjectSchemeMod.xsd"
+URI "urn:oasis:names:tc:dita:spec:classification:xsd:subjectSchemeMod.xsd:1.2" "subjectSchemeMod.xsd"
+
+URI "subjectSchemeGrp.xsd" "subjectSchemeGrp.xsd"
+URI "urn:oasis:names:tc:dita:spec:classification:xsd:subjectSchemeGrp.xsd" "subjectSchemeGrp.xsd"
+URI "urn:oasis:names:tc:dita:spec:classification:xsd:subjectSchemeGrp.xsd:1.x" "subjectSchemeGrp.xsd"
+URI "urn:oasis:names:tc:dita:spec:classification:xsd:subjectSchemeGrp.xsd:1.2" "subjectSchemeGrp.xsd"
+
+URI "classifyMap.xsd" "classifyMap.xsd"
+URI "urn:oasis:names:tc:dita:spec:classification:xsd:classifyMap.xsd" "classifyMap.xsd"
+URI "urn:oasis:names:tc:dita:spec:classification:xsd:classifyMap.xsd:1.x" "classifyMap.xsd"
+URI "urn:oasis:names:tc:dita:spec:classification:xsd:classifyMap.xsd:1.2" "classifyMap.xsd"
+
+URI "classifyDomain.xsd" "classifyDomain.xsd"
+URI "urn:oasis:names:tc:dita:spec:classification:xsd:classifyDomain.xsd" "classifyDomain.xsd"
+URI "urn:oasis:names:tc:dita:spec:classification:xsd:classifyDomain.xsd:1.x" "classifyDomain.xsd"
+URI "urn:oasis:names:tc:dita:spec:classification:xsd:classifyDomain.xsd:1.2" "classifyDomain.xsd"
+
+--  Modules and document types from the OASIS DITA Machine Industry Subcommittee  --
+
+BASE "../../machineryIndustry/xsd/" 
+URI "machineryTask.xsd" "machineryTask.xsd"
+URI "urn:oasis:names:tc:dita:spec:machinery:xsd:machineryTask.xsd" "machineryTask.xsd"
+URI "urn:oasis:names:tc:dita:spec:machinery:xsd:machineryTask.xsd:1.x" "machineryTask.xsd"
+URI "urn:oasis:names:tc:dita:spec:machinery:xsd:machineryTask.xsd:1.2" "machineryTask.xsd"
+
+URI "machineryTaskbodyConstraintMod.xsd" "machineryTaskbodyConstraintMod.xsd"
+URI "urn:oasis:names:tc:dita:spec:machinery:xsd:machineryTaskbodyConstraintMod.xsd" "machineryTaskbodyConstraintMod.xsd"
+URI "urn:oasis:names:tc:dita:spec:machinery:xsd:machineryTaskbodyConstraintMod.xsd:1.x" "machineryTaskbodyConstraintMod.xsd"
+URI "urn:oasis:names:tc:dita:spec:machinery:xsd:machineryTaskbodyConstraintMod.xsd:1.2" "machineryTaskbodyConstraintMod.xsd"
+
+URI "machineryTaskbodyConstraintIntMod.xsd" "machineryTaskbodyConstraintIntMod.xsd"
+URI "urn:oasis:names:tc:dita:spec:machinery:xsd:machineryTaskbodyConstraintIntMod.xsd" "machineryTaskbodyConstraintIntMod.xsd"
+URI "urn:oasis:names:tc:dita:spec:machinery:xsd:machineryTaskbodyConstraintIntMod.xsd:1.x" "machineryTaskbodyConstraintIntMod.xsd"
+URI "urn:oasis:names:tc:dita:spec:machinery:xsd:machineryTaskbodyConstraintIntMod.xsd:1.2" "machineryTaskbodyConstraintIntMod.xsd"
+
+--  DITAVal package for conditional processing  --
+
+BASE "../../ditaval/xsd/" 
+URI "ditaval.xsd" "ditaval.xsd"
+URI "urn:oasis:names:tc:dita:xsd:ditaval.xsd" "ditaval.xsd"
+URI "urn:oasis:names:tc:dita:xsd:ditaval.xsd:1.x" "ditaval.xsd"
+URI "urn:oasis:names:tc:dita:xsd:ditaval.xsd:1.2" "ditaval.xsd"
+

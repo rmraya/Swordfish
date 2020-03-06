@@ -1,0 +1,91 @@
+<!--
+DTD Generated 2008-02-22T18:04:34.515-05:00
+copied from spec PDF file July 22, 2008
+after redundant entity declarations removed
+-->
+<!-- start classes -->
+<!ENTITY % specAtt.attributes '
+datcatId CDATA #REQUIRED
+name CDATA #REQUIRED'>
+<!-- stop classes -->
+<!-- start elements -->
+<!ELEMENT TBXXCS ((header,languages,datCatSet),(refObjectDefSet?))>
+<!ATTLIST TBXXCS
+lang CDATA #REQUIRED
+name CDATA #REQUIRED
+version CDATA #REQUIRED >
+<!ELEMENT adminNoteSpec (contents)>
+<!ATTLIST adminNoteSpec
+%specAtt.attributes; >
+<!ELEMENT adminSpec (contents)>
+<!ATTLIST adminSpec
+%specAtt.attributes; >
+<!ELEMENT contents (#PCDATA)>
+<!ATTLIST contents
+datatype CDATA #IMPLIED
+forTermComp CDATA #IMPLIED
+targetType CDATA #IMPLIED >
+<!ELEMENT datCatDisplay (#PCDATA)>
+<!ATTLIST datCatDisplay
+xml:lang CDATA #IMPLIED >
+<!ELEMENT datCatDoc (datCatMap)*>
+<!ELEMENT datCatMap (datCatToken,(datCatDisplay)+,(langCode)*,(datCatNote)?)>
+<!ELEMENT datCatNote (#PCDATA)>
+<!ATTLIST datCatNote
+xml:lang CDATA #IMPLIED >
+<!ELEMENT datCatSet (adminNoteSpec |
+adminSpec |
+descripNoteSpec |
+descripSpec |
+hiSpec |
+refSpec |
+termCompListSpec |
+termNoteSpec |
+transacNoteSpec |
+transacSpec |
+xrefSpec)+>
+<!ELEMENT datCatToken (#PCDATA)>
+<!ELEMENT descripNoteSpec (contents)>
+<!ATTLIST descripNoteSpec
+%specAtt.attributes; >
+<!ELEMENT descripSpec (contents,levels)>
+<!ATTLIST descripSpec
+%specAtt.attributes; >
+<!ELEMENT header (title,(datCatDoc)?)>
+<!ELEMENT hiSpec (contents)>
+<!ATTLIST hiSpec
+%specAtt.attributes; >
+<!ELEMENT itemSpec (#PCDATA)>
+<!ATTLIST itemSpec
+type CDATA #REQUIRED >
+<!ELEMENT itemSpecSet (itemSpec)+>
+<!ATTLIST itemSpecSet
+type CDATA #REQUIRED >
+<!ELEMENT langCode (#PCDATA)>
+<!ELEMENT langInfo (langCode,langName)>
+<!ELEMENT langName (#PCDATA)>
+<!ELEMENT languages (langInfo)+>
+<!ELEMENT levels (#PCDATA)>
+<!ELEMENT refObjectDef (refObjectType,itemSpecSet)>
+<!ELEMENT refObjectDefSet (refObjectDef)+>
+<!ELEMENT refObjectType (#PCDATA)>
+<!ELEMENT refSpec (contents)>
+<!ATTLIST refSpec
+%specAtt.attributes; >
+<!ELEMENT termCompListSpec (contents)>
+<!ATTLIST termCompListSpec
+%specAtt.attributes; >
+<!ELEMENT termNoteSpec (contents)>
+<!ATTLIST termNoteSpec
+%specAtt.attributes; >
+<!ELEMENT title (#PCDATA)>
+<!ELEMENT transacNoteSpec (contents)>
+<!ATTLIST transacNoteSpec
+%specAtt.attributes; >
+<!ELEMENT transacSpec (contents)>
+<!ATTLIST transacSpec
+%specAtt.attributes; >
+<!ELEMENT xrefSpec (contents)>
+<!ATTLIST xrefSpec
+%specAtt.attributes; >
+<!-- end elements -->

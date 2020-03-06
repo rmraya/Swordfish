@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+	XLIFF Version 2.0
+	OASIS Standard
+	05 August 2014
+	Copyright (c) OASIS Open 2014. All rights reserved.
+	Source: http://docs.oasis-open.org/xliff/xliff-core/v2.0/os/schemas/
+     -->
+<catalog xmlns="urn:oasis:names:tc:entity:xmlns:xml:catalog">
+    <uri name="urn:oasis:names:tc:xliff:document:2.0" uri="xliff_core_2.0.xsd"/>
+    <uri name="urn:oasis:names:tc:xliff:changetracking:2.0" uri="modules/change_tracking.xsd"/>
+    <uri name="urn:oasis:names:tc:xliff:fs:2.0" uri="modules/fs.xsd"/>
+    <uri name="urn:oasis:names:tc:xliff:glossary:2.0" uri="modules/glossary.xsd"/>
+    <uri name="urn:oasis:names:tc:xliff:matches:2.0" uri="modules/matches.xsd"/>
+    <uri name="urn:oasis:names:tc:xliff:metadata:2.0" uri="modules/metadata.xsd"/>
+    <uri name="urn:oasis:names:tc:xliff:resourcedata:2.0" uri="modules/resource_data.xsd"/>
+    <uri name="urn:oasis:names:tc:xliff:sizerestriction:2.0" uri="modules/size_restriction.xsd"/>
+    <uri name="urn:oasis:names:tc:xliff:validation:2.0" uri="modules/validation.xsd"/>
+</catalog>

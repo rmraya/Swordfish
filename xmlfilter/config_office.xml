@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE ini-file PUBLIC "-//MAXPROGRAMS//Converters 2.0.0//EN" "configuration.dtd" >
+<ini-file><tag hard-break="ignore">text:tracked-changes</tag>
+<tag hard-break="ignore">text:insertion</tag>
+<tag hard-break="ignore">text:deletion</tag>
+<tag hard-break="ignore">dc:creator</tag>
+<tag hard-break="ignore">dc:date</tag>
+<tag hard-break="ignore">meta:print-date</tag>
+<tag hard-break="segment" keep-format="no">table:table</tag>
+<tag hard-break="segment" keep-format="no">table:table-column</tag>
+<tag hard-break="segment" keep-format="no">table:row</tag>
+<tag hard-break="segment" keep-format="no">text:h</tag>
+<tag hard-break="segment" keep-format="no">text:p</tag>
+<tag hard-break="segment">dc:language</tag>
+<tag hard-break="segment">dc:title</tag>
+<tag hard-break="segment">dc:description</tag>
+<tag hard-break="segment">meta:keyword</tag>
+<tag hard-break="segment">dc:subject</tag>
+<tag hard-break="segment" keep-format="no">text:unordered-list</tag>
+<tag hard-break="segment" keep-format="no">text:list-item</tag>
+<tag hard-break="segment">office:annotation</tag>
+<tag ctype="x-other" hard-break="inline" keep-format="yes">text:tab-stop</tag>
+<tag hard-break="segment" keep-format="no">text:line-break</tag>
+<tag ctype="x-font" hard-break="inline">text:span</tag>
+<tag ctype="x-link" hard-break="inline">text:a</tag>
+<tag ctype="x-other" hard-break="inline">text:page-number</tag>
+<tag attributes="name" ctype="x-other" hard-break="inline">text:index</tag>
+</ini-file>

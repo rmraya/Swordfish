@@ -1,0 +1,91 @@
+<?xml version="1.0"?>
+
+<schema xmlns="http://www.w3.org/2001/10/XMLSchema">
+
+  <element name="srx">
+    <complexType>
+      <sequence>
+        <element ref="header" minOccurs="1" maxOccurs="1" />
+        <element ref="body" minOccurs="1" maxOccurs="1" />
+      </sequence>
+      <attribute name="version" type="string" use="required" value="1.0" />
+    </complexType>
+  </element>
+
+  <element name="header">
+    <complexType>
+      <element ref="formathandle" minOccurs="0" maxOccurs="3" />
+      <attribute name="segmentsubflows" type="string" use="required" />
+    </complexType>
+  </element>
+
+  <element name="formathandle>
+    <complexType>
+      <attribute name="type" type="string" use="required" />
+      <attribute name="include" type="string" use="required" />
+    </complexType>
+  </element>
+
+  <element name="body">
+    <complexType>
+      <sequence>
+        <element ref="languagerules" minOccurs="0" maxOccurs="1" />
+        <element ref="maprules" minOccurs="0" maxOccurs="1" />
+      </sequence>
+    </complexType>
+  </element>
+
+  <element name="languagerules">
+    <complexType>
+      <element ref="languagerule" minOccurs="1" maxOccurs="unbounded" />
+    </complexType>
+  </element>
+
+  <element name="languagerule">
+    <complexType>
+      <sequence>
+        <element ref="rule" minOccurs="1" maxOccurs="unbounded" />
+      </sequence>
+      <attribute name="languagerulename" type="string" use="required" />
+    </complexType>
+  </element>
+
+  <element name="rule">
+    <complexType>
+      <sequence>
+        <element ref="beforebreak" minOccurs="0" maxOccurs="1" />
+        <element ref="afterbreak" minOccurs="0" maxOccurs="1" />
+      </sequence>
+      <attribute name="break" type="string" use="optional" />
+    </complexType>
+  </element>
+  
+  <element name="beforebreak">
+    <complexType mixed="true" />
+  </element>
+
+  <element name="afterbreak">
+    <complexType mixed="true" />
+  </element>
+
+  <element name="maprules">
+    <complexType>
+      <element ref="maprule" minOccurs="1" maxOccurs="unbounded" />
+    </complexType>
+  </element>
+
+  <element name="maprule">
+    <complexType>
+      <element ref="languagemap" minOccurs="1" maxOccurs="unbounded" />
+      <attribute name="maprulename" type="string" use="required" />
+    </complexType>
+  </element>
+
+  <element name="languagemap">
+    <complexType>
+      <attribute name="languagepattern" type="string" use="required" />
+      <attribute name="languagerulename" type="string" use="required" />
+    </complexType>
+  </element>
+
+</schema>

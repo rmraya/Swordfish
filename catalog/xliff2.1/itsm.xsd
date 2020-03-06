@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+     XLIFF Version 2.1
+     OASIS Standard
+     13 February 2018
+     Copyright (c) OASIS Open 2018. All Rights Reserved.
+     Source: http://docs.oasis-open.org/xliff/xliff-core/v2.1/os/schemas/
+     Latest version of narrative specification: http://docs.oasis-open.org/xliff/xliff-core/v2.1/xliff-core-v2.1.html
+     TC IPR Statement: https://www.oasis-open.org/committees/xliff/ipr.php
+-->
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" elementFormDefault="qualified"
+  xmlns:itsm="urn:oasis:names:tc:xliff:itsm:2.1" xmlns:xlf="urn:oasis:names:tc:xliff:document:2.0"
+  targetNamespace="urn:oasis:names:tc:xliff:itsm:2.1">
+
+
+  <!-- Import -->
+
+  <xs:import namespace="urn:oasis:names:tc:xliff:document:2.0" schemaLocation="xliff_core_2.0.xsd"/>
+
+
+  
+  <!-- Attributes -->
+
+  <xs:attribute name="domains" type="xs:string"/>
+
+  <xs:attribute name="lang" type="xs:language"/>
+</xs:schema>

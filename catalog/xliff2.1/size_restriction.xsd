@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+     XLIFF Version 2.1
+     OASIS Standard
+     13 February 2018
+     Copyright (c) OASIS Open 2018. All Rights Reserved.
+     Source: http://docs.oasis-open.org/xliff/xliff-core/v2.1/os/schemas/
+     Latest version of narrative specification: http://docs.oasis-open.org/xliff/xliff-core/v2.1/xliff-core-v2.1.html
+     TC IPR Statement: https://www.oasis-open.org/committees/xliff/ipr.php
+-->
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" elementFormDefault="qualified"
+    xmlns:slr="urn:oasis:names:tc:xliff:sizerestriction:2.0"
+    targetNamespace="urn:oasis:names:tc:xliff:sizerestriction:2.0">
+
+
+  <!-- Attribute Types -->
+
+  <xs:simpleType name="normalization_type">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="none"/>
+      <xs:enumeration value="nfc"/>
+      <xs:enumeration value="nfd"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+
+  <!-- Attributes for size and length restriction used on core elements-->
+
+  <xs:attribute name="equivStorage" type="xs:string"/>
+
+  <xs:attribute name="sizeInfo" type="xs:string"/>
+
+  <xs:attribute name="sizeInfoRef" type="xs:NMTOKEN"/>
+
+  <xs:attribute name="sizeRestriction" type="xs:string"/>
+
+  <xs:attribute name="storageRestriction" type="xs:string"/>
+
+
+  <!-- Elements for size and length restriction -->
+
+  <xs:element name="profiles">
+    <xs:complexType mixed="false">
+      <xs:sequence>
+        <xs:element minOccurs="0" maxOccurs="1" ref="slr:normalization" />
+        <xs:any maxOccurs="unbounded" minOccurs="0" namespace="##other" processContents="lax"/>
+      </xs:sequence>
+      <xs:attribute name="generalProfile" use="optional"/>
+      <xs:attribute name="storageProfile" use="optional"/>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:element name="normalization">
+    <xs:complexType mixed="false">
+      <xs:attribute name="general" use="optional" type="slr:normalization_type" default="none"/>
+      <xs:attribute name="storage" use="optional" type="slr:normalization_type" default="none"/>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:element name="data">
+    <xs:complexType mixed="false">
+      <xs:sequence>
+        <xs:any maxOccurs="unbounded" minOccurs="0" namespace="##other" processContents="lax"/>
+      </xs:sequence>
+      <xs:attribute name="profile" use="required"/>
+      <xs:anyAttribute namespace="##other" processContents="lax"/>
+    </xs:complexType>
+  </xs:element>
+
+</xs:schema>

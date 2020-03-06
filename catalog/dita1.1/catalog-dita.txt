@@ -1,0 +1,74 @@
+-- Catalog for Dita --
+--             (C) Copyright OASIS Open 2005, 2006.              --
+--             (C) Copyright IBM Corporation 2001, 2004.         --
+--             All Rights Reserved.                              --
+-- UPDATES:                                                      --
+--     2005.11.15 RDA: Corrected system ID for topicAttr.mod,    --
+--                     topicDefn.ent                             -- 
+--     2005.11.15 RDA: Corrected public ID for tblDecl.mod       --
+--     2006.06.07 RDA: Added commonElements.mod                  --
+--     2006.06.07 RDA: Added indexing domain                     --
+--     2006.06.20 RDA: Added bookmap and XNAL domain             --
+
+-- Dita DTDs --
+
+PUBLIC "-//OASIS//DTD DITA Concept//EN" "concept.dtd"
+PUBLIC "-//OASIS//ELEMENTS DITA Concept//EN" "concept.mod"
+
+PUBLIC "-//OASIS//DTD DITA Composite//EN" "ditabase.dtd"
+
+PUBLIC "-//OASIS//DTD DITA Glossary//EN" "glossary.dtd"
+PUBLIC "-//OASIS//ELEMENTS DITA Glossary//EN" "glossary.mod"
+
+PUBLIC "-//OASIS//DTD DITA Reference//EN" "reference.dtd"
+PUBLIC "-//OASIS//ELEMENTS DITA Reference//EN" "reference.mod"
+
+PUBLIC "-//OASIS//DTD DITA Task//EN" "task.dtd"
+PUBLIC "-//OASIS//ELEMENTS DITA Task//EN" "task.mod"
+
+PUBLIC "-//OASIS//DTD DITA Topic//EN" "topic.dtd"
+PUBLIC "-//OASIS//ELEMENTS DITA Topic//EN" "topic.mod"
+PUBLIC "-//OASIS//ENTITIES DITA Topic Definitions//EN" "topicDefn.ent"
+
+-- topicAttr.mod is no longer used --
+PUBLIC "-//OASIS//ENTITIES DITA Topic Class//EN" "topicAttr.mod"
+
+-- Maps --
+
+PUBLIC "-//OASIS//DTD DITA Map//EN" "map.dtd"
+PUBLIC "-//OASIS//ELEMENTS DITA Map//EN" "map.mod"
+PUBLIC "-//OASIS//ENTITIES DITA Map Group Domain//EN" "mapGroup.ent"
+PUBLIC "-//OASIS//ELEMENTS DITA Map Group Domain//EN" "mapGroup.mod"
+
+PUBLIC "-//OASIS//DTD DITA BookMap//EN" "bookmap.dtd"
+PUBLIC "-//OASIS//ELEMENTS DITA BookMap//EN" "bookmap.mod"
+
+-- Domains --
+
+PUBLIC "-//OASIS//ELEMENTS DITA Highlight Domain//EN" "highlightDomain.mod"
+PUBLIC "-//OASIS//ENTITIES DITA Highlight Domain//EN" "highlightDomain.ent"
+
+PUBLIC "-//OASIS//ELEMENTS DITA Indexing Domain//EN" "indexingDomain.mod"
+PUBLIC "-//OASIS//ENTITIES DITA Indexing Domain//EN" "indexingDomain.ent"
+
+PUBLIC "-//OASIS//ELEMENTS DITA Programming Domain//EN" "programmingDomain.mod"
+PUBLIC "-//OASIS//ENTITIES DITA Programming Domain//EN" "programmingDomain.ent"
+
+PUBLIC "-//OASIS//ELEMENTS DITA Software Domain//EN" "softwareDomain.mod"
+PUBLIC "-//OASIS//ENTITIES DITA Software Domain//EN" "softwareDomain.ent"
+
+PUBLIC "-//OASIS//ELEMENTS DITA User Interface Domain//EN" "uiDomain.mod"
+PUBLIC "-//OASIS//ENTITIES DITA User Interface Domain//EN" "uiDomain.ent"
+
+PUBLIC "-//OASIS//ELEMENTS DITA Utilities Domain//EN" "utilitiesDomain.mod"
+PUBLIC "-//OASIS//ENTITIES DITA Utilities Domain//EN" "utilitiesDomain.ent"
+
+PUBLIC "-//OASIS//ELEMENTS DITA XNAL Domain//EN" "xnalDomain.mod"
+PUBLIC "-//OASIS//ENTITIES DITA XNAL Domain//EN" "xnalDomain.ent"
+
+-- Common --
+
+PUBLIC "-//OASIS//ELEMENTS DITA Common Elements//EN" "commonElements.mod"
+PUBLIC "-//OASIS//ENTITIES DITA Common Elements//EN" "commonElements.ent"
+PUBLIC "-//OASIS//ELEMENTS DITA Metadata//EN" "metaDecl.mod"
+PUBLIC "-//OASIS//ELEMENTS DITA Exchange Table Model//EN" "tblDecl.mod"

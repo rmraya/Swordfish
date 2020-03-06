@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+     XLIFF Version 2.1
+     OASIS Standard
+     13 February 2018
+     Copyright (c) OASIS Open 2018. All Rights Reserved.
+     Source: http://docs.oasis-open.org/xliff/xliff-core/v2.1/os/schemas/
+     Latest version of narrative specification: http://docs.oasis-open.org/xliff/xliff-core/v2.1/xliff-core-v2.1.html
+     TC IPR Statement: https://www.oasis-open.org/committees/xliff/ipr.php
+-->
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" elementFormDefault="qualified"
+    xmlns:mda="urn:oasis:names:tc:xliff:metadata:2.0"
+    targetNamespace="urn:oasis:names:tc:xliff:metadata:2.0">
+
+
+  <!-- Attribute Types -->
+
+  <xs:simpleType name="appliesTo">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="source"/>
+      <xs:enumeration value="target"/>
+      <xs:enumeration value="ignorable"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+
+  <!-- Elements for holding custom metadata -->
+
+  <xs:element name="metadata">
+    <xs:complexType mixed="false">
+      <xs:sequence>
+        <xs:element minOccurs="1" maxOccurs="unbounded" ref="mda:metaGroup" />
+      </xs:sequence>
+      <xs:attribute name="id" use="optional" type="xs:NMTOKEN"/>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:element name="metaGroup">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:choice minOccurs="1" maxOccurs="unbounded">
+          <xs:element ref="mda:metaGroup"/>
+          <xs:element ref="mda:meta"/>
+        </xs:choice>
+      </xs:sequence>
+      <xs:attribute name="id" use="optional" type="xs:NMTOKEN"/>
+      <xs:attribute name="category" use="optional"/>
+      <xs:attribute name="appliesTo" use="optional" type="mda:appliesTo"/>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:element name="meta">
+    <xs:complexType mixed="true">
+      <xs:attribute name="type" use="required" type="xs:string"/>
+    </xs:complexType>
+  </xs:element>
+
+</xs:schema>

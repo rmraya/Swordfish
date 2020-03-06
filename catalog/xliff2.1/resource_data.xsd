@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+     XLIFF Version 2.1
+     OASIS Standard
+     13 February 2018
+     Copyright (c) OASIS Open 2018. All Rights Reserved.
+     Source: http://docs.oasis-open.org/xliff/xliff-core/v2.1/os/schemas/
+     Latest version of narrative specification: http://docs.oasis-open.org/xliff/xliff-core/v2.1/xliff-core-v2.1.html
+     TC IPR Statement: https://www.oasis-open.org/committees/xliff/ipr.php
+-->
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
+    elementFormDefault="qualified"
+    xmlns:res="urn:oasis:names:tc:xliff:resourcedata:2.0"
+    xmlns:xlf="urn:oasis:names:tc:xliff:document:2.0"
+    targetNamespace="urn:oasis:names:tc:xliff:resourcedata:2.0">
+
+  <!-- Import -->
+
+  <xs:import namespace="urn:oasis:names:tc:xliff:document:2.0"
+      schemaLocation="xliff_core_2.0.xsd"/>
+  <xs:import namespace="http://www.w3.org/XML/1998/namespace"
+    schemaLocation="informativeCopiesOf3rdPartySchemas/w3c/xml.xsd"/>
+  
+  <!-- Elements -->
+
+  <xs:element name="resourceData">
+    <xs:complexType mixed="false">
+      <xs:sequence>
+        <xs:element minOccurs="0" maxOccurs="unbounded" ref="res:resourceItemRef"/>
+        <xs:element minOccurs="0" maxOccurs="unbounded" ref="res:resourceItem"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:element name="resourceItemRef">
+    <xs:complexType mixed="false">
+      <xs:attribute name="id" use="optional" type="xs:NMTOKEN"/>
+      <xs:attribute name="ref" use="required" type="xs:NMTOKEN"/>
+      <xs:anyAttribute namespace="##other" processContents="lax"/>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:element name="resourceItem">
+    <xs:complexType mixed="false">
+      <xs:sequence>
+        <xs:element minOccurs="0" maxOccurs="1" ref="res:source"/>
+        <xs:element minOccurs="0" maxOccurs="1" ref="res:target"/>
+        <xs:element minOccurs="0" maxOccurs="unbounded" ref="res:reference"/>
+      </xs:sequence>
+      <xs:attribute name="mimeType" use="optional"/>
+      <xs:attribute name="id" use="optional" type="xs:NMTOKEN"/>
+      <xs:attribute name="context" use="optional" type="xlf:yesNo" default="yes"/>
+      <xs:anyAttribute namespace="##other" processContents="lax"/>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:element name="source">
+    <xs:complexType mixed="false">
+      <xs:sequence>
+        <xs:any minOccurs="0" maxOccurs="unbounded" namespace="##other"
+            processContents="lax"/>
+      </xs:sequence>
+      <xs:attribute name="href" use="optional"/>
+      <xs:attribute ref="xml:lang" use="optional"/>
+      <xs:anyAttribute namespace="##other" processContents="lax"/>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:element name="target">
+    <xs:complexType mixed="false">
+      <xs:sequence>
+        <xs:any minOccurs="0" maxOccurs="unbounded" namespace="##other"
+            processContents="lax"/>
+      </xs:sequence>
+      <xs:attribute name="href" use="optional"/>
+      <xs:attribute ref="xml:lang" use="optional"/>
+      <xs:anyAttribute namespace="##other" processContents="lax"/>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:element name="reference">
+    <xs:complexType mixed="false">
+      <xs:attribute name="href" use="required"/>
+      <xs:attribute ref="xml:lang" use="optional"/>
+      <xs:anyAttribute namespace="##other" processContents="lax"/>
+    </xs:complexType>
+  </xs:element>
+
+</xs:schema>

@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE ini-file PUBLIC "-//MAXPROGRAMS//Converters 2.0.0//EN" "configuration.dtd" >
+<ini-file><tag hard-break="segment">title</tag>
+<tag hard-break="segment">subtitle</tag>
+<tag hard-break="segment">para</tag>
+<tag hard-break="segment" keep-format="yes">code</tag>
+<tag ctype="x-link" hard-break="inline">link</tag>
+<tag hard-break="segment">bridgehead</tag>
+<tag hard-break="segment">pageheader</tag>
+<tag hard-break="inline">leftcontent</tag>
+<tag hard-break="inline">rightcontent</tag>
+<tag hard-break="segment">pagefooter</tag>
+<tag ctype="x-bold" hard-break="inline">emphasis</tag>
+<tag ctype="x-italic" hard-break="inline">remark</tag>
+<tag ctype="x-underlined" hard-break="inline">underline</tag>
+<tag ctype="x-entry" hard-break="inline">entry</tag>
+<tag ctype="x-font" hard-break="inline">font</tag>
+<tag ctype="image" hard-break="inline">glyph</tag>
+<tag hard-break="segment">epigraph</tag>
+<tag hard-break="segment">tocentry</tag>
+<tag hard-break="segment">form</tag>
+<tag hard-break="segment">input</tag>
+<tag hard-break="segment">option</tag>
+<tag hard-break="segment">textarea</tag>
+<tag hard-break="segment">button</tag>
+<tag attributes="doctitle;xml:lang" hard-break="segment" keep-format="no">doctrans</tag>
+<tag attributes="alt" hard-break="segment">image</tag>
+</ini-file>

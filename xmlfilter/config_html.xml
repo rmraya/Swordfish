@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE ini-file PUBLIC "-//MAXPROGRAMS//Converters 2.0.0//EN" "configuration.dtd" >
+<ini-file><tag hard-break="segment">body</tag>
+<tag attributes="title" hard-break="segment">p</tag>
+<tag hard-break="segment">br</tag>
+<tag hard-break="segment">title</tag>
+<tag hard-break="segment">td</tag>
+<tag hard-break="segment">dd</tag>
+<tag attributes="title" hard-break="segment">div</tag>
+<tag hard-break="segment">h1</tag>
+<tag hard-break="segment">h2</tag>
+<tag hard-break="segment">h3</tag>
+<tag hard-break="segment">h4</tag>
+<tag hard-break="segment">h5</tag>
+<tag hard-break="segment">h6</tag>
+<tag hard-break="segment">ol</tag>
+<tag hard-break="segment">ul</tag>
+<tag hard-break="segment">li</tag>
+<tag hard-break="segment" keep-format="yes">code</tag>
+<tag hard-break="segment">param</tag>
+<tag hard-break="segment">option</tag>
+<tag hard-break="segment">input</tag>
+<tag attributes="content" hard-break="segment">meta</tag>
+<tag attributes="title" hard-break="inline" ctype="x-other">a</tag>
+<tag ctype="x-bold" hard-break="inline">b</tag>
+<tag ctype="x-bold" hard-break="inline">strong</tag>
+<tag ctype="x-italic" hard-break="inline">i</tag>
+<tag ctype="x-underlined" hard-break="inline">u</tag>
+<tag ctype="x-other" hard-break="inline">span</tag>
+</ini-file>

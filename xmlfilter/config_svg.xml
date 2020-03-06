@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE ini-file PUBLIC "-//MAXPROGRAMS//Converters 2.0.0//EN" "configuration.dtd" >
+<ini-file><tag hard-break="segment" keep-format="yes">text</tag>
+<tag ctype="x-font" hard-break="inline">tspan</tag>
+<tag ctype="x-other" hard-break="inline">tref</tag>
+<tag ctype="x-other" hard-break="inline">textPath</tag>
+<tag hard-break="segment">title</tag>
+<tag hard-break="segment">desc</tag>
+<tag attributes="xlink:title" ctype="x-link" hard-break="inline">a</tag>
+</ini-file>

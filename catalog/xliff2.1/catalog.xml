@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+     XLIFF Version 2.1
+     OASIS Standard
+     13 February 2018
+     Copyright (c) OASIS Open 2018. All Rights Reserved.
+     Source: http://docs.oasis-open.org/xliff/xliff-core/v2.1/os/schemas/
+     Latest version of narrative specification: http://docs.oasis-open.org/xliff/xliff-core/v2.1/xliff-core-v2.1.html
+     TC IPR Statement: https://www.oasis-open.org/committees/xliff/ipr.php
+-->
+<catalog xmlns="urn:oasis:names:tc:entity:xmlns:xml:catalog">
+	<uri name="http://www.w3.org/XML/1998/namespace" uri="informativeCopiesOf3rdPartySchemas/w3c/xml.xsd"/>
+    <uri name="urn:oasis:names:tc:xliff:document:2.0" uri="xliff_core_2.0.xsd"/>
+    <uri name="urn:oasis:names:tc:xliff:changetracking:2.1" uri="change_tracking.xsd"/>
+    <uri name="urn:oasis:names:tc:xliff:fs:2.0" uri="fs.xsd"/>
+    <uri name="urn:oasis:names:tc:xliff:glossary:2.0" uri="glossary.xsd"/>
+    <uri name="urn:oasis:names:tc:xliff:matches:2.0" uri="matches.xsd"/>
+    <uri name="urn:oasis:names:tc:xliff:metadata:2.0" uri="metadata.xsd"/>
+    <uri name="urn:oasis:names:tc:xliff:resourcedata:2.0" uri="resource_data.xsd"/>
+    <uri name="urn:oasis:names:tc:xliff:sizerestriction:2.0" uri="size_restriction.xsd"/>
+    <uri name="urn:oasis:names:tc:xliff:validation:2.0" uri="validation.xsd"/>
+    <uri name="https://www.w3.org/2005/11/its/" uri="its.xsd"/>
+    <uri name="urn:oasis:names:tc:xliff:itsm:2.1" uri="itsm.xsd"/>
+</catalog>

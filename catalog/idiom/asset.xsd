@@ -1,0 +1,255 @@
+<xsd:schema  targetNamespace="http://www.idiominc.com/ws/asset"
+    xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+    xmlns:iws="http://www.idiominc.com/ws/asset"
+    elementFormDefault="qualified" attributeFormDefault="unqualified">
+
+    <!-- This maps to the meta data file in export kit -->
+    <xsd:complexType name="asset-data">
+        <xsd:sequence>
+            <xsd:element name="ais-src-path" type="xsd:string"/>
+            <xsd:element name="ais-tgt-path" type="xsd:string"/>
+            <xsd:element name="taskid" type="xsd:integer"/>
+            <xsd:element name="display-taskid" type="xsd:integer"/>
+            <xsd:element name="src-fingerprint" type="xsd:integer"/>
+            <xsd:element name="tgt-fingerprint" type="xsd:integer"/>
+            <xsd:element name="seg-asset-id" type="xsd:integer"/>
+            <xsd:element name="step-lock" type="xsd:string"/>
+            <xsd:element name="digest" type="xsd:string"/>
+            <xsd:element name="glossary-format" type="xsd:string" />
+        </xsd:sequence>
+    </xsd:complexType>
+
+    <!-- marks boundary segments (used to SQL mounts) -->
+    <xsd:complexType name="boundary-seg" >
+        <xsd:sequence>
+            <xsd:element name="ais-src-path" type="xsd:string"/>
+            <xsd:element name="ais-tgt-path" type="xsd:string"/>
+        </xsd:sequence>
+    </xsd:complexType>
+
+    <!-- describes markup segments -->
+    <xsd:complexType name="markup-seg" >
+        <xsd:sequence>
+            <xsd:element name="sequence" type="xsd:string"/>
+        </xsd:sequence>
+    </xsd:complexType>
+
+    <!-- describes the format of terminology data: IDD or TBX -->
+    <xsd:complexType name="glossary-format">
+        <xsd:attribute name="format" type="xsd:string" use="required"/>
+    </xsd:complexType>
+
+    <!-- For communicating data about TM weights -->
+    <xsd:complexType name="tm_score_number_weight">
+        <xsd:attribute name="weight" type="xsd:float" use="required"/>
+    </xsd:complexType>
+
+    <xsd:complexType name="tm_score_outer_placeholder_weight">
+        <xsd:attribute name="weight" type="xsd:float" use="required"/>
+    </xsd:complexType>
+
+    <xsd:complexType name="tm_score_inner_placeholder_weight">
+      <xsd:attribute name="weight" type="xsd:float" use="required"/>
+    </xsd:complexType>
+
+    <xsd:complexType name="TM-Weights">
+        <xsd:sequence>
+            <xsd:element ref="tm_score_number_weight"/>
+            <xsd:element ref="tm_score_outer_placeholder_weight"/>
+            <xsd:element ref="tm_score_inner_placeholder_weight"/>
+        </xsd:sequence>
+    </xsd:complexType>
+
+    <!-- For communicating data about TM penalties -->
+    <xsd:complexType name="tm_score_capitalization_penalty">
+        <xsd:attribute name="penalty" type="xsd:float" use="required"/>
+    </xsd:complexType>
+
+    <xsd:complexType name="tm_score_punctuation_penalty">
+        <xsd:attribute name="penalty" type="xsd:float" use="required"/>
+    </xsd:complexType>
+
+    <xsd:complexType name="tm_score_placeholder_sequence_penalty">
+        <xsd:attribute name="penalty" type="xsd:float" use="required"/>
+    </xsd:complexType>
+
+    <xsd:complexType name="TM-Penalties">
+        <xsd:sequence>
+            <xsd:element ref="tm_score_capitalization_penalty"/>
+            <xsd:element ref="tm_score_punctuation_penalty"/>
+            <xsd:element ref="tm_score_placeholder_sequence_penalty"/>
+        </xsd:sequence>
+    </xsd:complexType>
+
+    <!-- For WS attribute metadata -->
+    <xsd:complexType name="attr-option">
+        <xsd:attribute name="name" type="xsd:string" use="required"/>
+    </xsd:complexType>
+
+    <xsd:complexType name="attribute-descr">
+        <xsd:sequence>
+            <xsd:element ref="attr-option" />
+        </xsd:sequence>
+        <xsd:attribute name="name" type="xsd:string" use="required"/>
+        <xsd:attribute name="ui_name" type="xsd:string" use="required"/>
+        <xsd:attribute name="type" type="xsd:integer" use="required"/>
+        <xsd:attribute name="flags" type="xsd:integer" use="required"/>
+    </xsd:complexType>
+
+    <!-- Indicates meta data for TM attributes -->
+    <xsd:complexType name="tm-attribute-metadata">
+        <xsd:sequence>
+            <xsd:element ref="attribute-descr" />
+        </xsd:sequence>
+    </xsd:complexType>
+
+    <!-- Indicates meta data for project attributes -->
+    <xsd:complexType name="project-attribute-metadata">
+        <xsd:sequence>
+            <xsd:element ref="attribute-descr" />
+        </xsd:sequence>
+    </xsd:complexType>
+
+    <!-- Indicates data for project attributes -->
+    <xsd:complexType name="project-attribute">
+        <xsd:sequence>
+            <xsd:element ref="attribute" />
+        </xsd:sequence>
+    </xsd:complexType>
+
+    <!-- For multi-select values -->
+    <xsd:element name="multi-select-value">
+    </xsd:element>
+
+    <!-- Attribute name,value pairs -->
+    <xsd:complexType name="attribute">
+        <xsd:sequence>
+            <xsd:element ref="multi-select-value" />
+        </xsd:sequence>
+        <xsd:attribute name="name" type="xsd:string" use="required"/>
+    </xsd:complexType>
+
+    <!-- segment filter -->
+    <xsd:complexType name="exclude-segment-filter">
+        <xsd:attribute name="filter" type="xsd:string" use="required"/>
+    </xsd:complexType>
+
+    <!-- indicates maximum length allowed for target segment -->
+    <xsd:complexType name="max-segment-length">
+        <xsd:attribute name="characters" type="xsd:string" use="required"/>
+    </xsd:complexType>
+
+    <!-- indicates whether or not split and merge operation are allowed -->
+    <xsd:complexType name="split-merge">
+        <xsd:attribute name="disable" type="xsd:boolean" use="required"/>
+    </xsd:complexType>
+
+    <!-- indicates whether or not background jobs can be created -->
+    <xsd:complexType name="create-background-job">
+        <xsd:attribute name="disable" type="xsd:boolean" use="required"/>
+    </xsd:complexType>
+
+    <!-- indicates setting of the update translation memory by default priv -->
+    <xsd:complexType name="update-translation-memory-setting">
+        <xsd:attribute name="update" type="xsd:boolean" use="required"/>
+    </xsd:complexType>
+
+    <!-- translation type attribute values -->
+    <xsd:simpleType name="translation_type_value">
+        <xsd:restriction base="xsd:string">
+            <xsd:enumeration value="manual_translation"/>
+            <xsd:enumeration value="machine_translation"/>
+        </xsd:restriction>
+    </xsd:simpleType>
+
+    <!-- tranlation memory origin attribute values -->
+    <xsd:simpleType name="tm_origin_value">
+        <xsd:restriction base="xsd:string">
+            <xsd:enumeration value="from_translation_tool_tm"/>
+            <xsd:enumeration value="from_ws_tm"/>
+        </xsd:restriction>
+    </xsd:simpleType>
+
+    <!-- translation memory origin attribute values -->
+    <xsd:simpleType name="lock_status_value">
+        <xsd:restriction base="xsd:string">
+            <xsd:enumeration value="locked"/>
+        </xsd:restriction>
+    </xsd:simpleType>
+
+    <!-- match quality attribute values -->
+    <xsd:simpleType name="match_quality_value">
+        <xsd:restriction base="xsd:string">
+            <xsd:enumeration value="fuzzy"/>
+            <xsd:enumeration value="guaranteed"/>
+            <xsd:enumeration value="repaired"/>
+        </xsd:restriction>
+    </xsd:simpleType>
+
+    <!-- target content attribute values -->
+    <xsd:simpleType name="target_content_value">
+        <xsd:restriction base="xsd:string">
+            <xsd:enumeration value="placeholders_only"/>
+        </xsd:restriction>
+    </xsd:simpleType>
+
+    <!-- source content attribute values -->
+    <xsd:simpleType name="source_content_value">
+        <xsd:restriction base="xsd:string">
+            <xsd:enumeration value="repetition"/>
+            <xsd:enumeration value="repeated"/>
+        </xsd:restriction>
+    </xsd:simpleType>
+
+    <!-- exact match content attribute values -->
+    <xsd:simpleType name="multiple_exact_value">
+        <xsd:restriction base="xsd:string">
+            <xsd:enumeration value="has_multiple_exact"/>
+        </xsd:restriction>
+    </xsd:simpleType>
+
+    <!-- translation attribute values -->
+    <xsd:simpleType name="translation_status_value">
+        <xsd:restriction base="xsd:string">
+            <xsd:enumeration value="pending"/>
+            <xsd:enumeration value="finished"/>
+            <xsd:enumeration value="question"/>
+            <xsd:enumeration value="rejected"/>
+        </xsd:restriction>
+    </xsd:simpleType>
+
+    <!-- describes segment status -->
+    <xsd:complexType name="status">
+        <xsd:attribute name="translation_type" ref="translation_type_value"
+                       use="optional"/>
+        <xsd:attribute name="tm_origin" ref="tm_origin_value"
+                       use="optional"/>
+        <xsd:attribute name="lock_status" ref="lock_status_value"
+                       use="optional"/>
+        <xsd:attribute name="match_quality" ref="match_quality_value"
+                       use="optional"/>
+        <xsd:attribute name="target_content" ref="target_content_value"
+                       use="optional"/>
+        <xsd:attribute name="source_content" ref="source_content_value"
+                       use="optional"/>
+        <xsd:attribute name="multiple_exact" ref="multiple_exact_value"
+                       use="optional"/>
+        <xsd:attribute name="translation_status" ref="translation_status_value"
+                       use="optional"/>
+    </xsd:complexType>
+
+    <!-- indicates setting of the update translation memory by default priv -->
+    <xsd:complexType name="segment-metadata">
+        <xsd:attribute name="tm_score" type="xsd:float" use="required"/>
+        <xsd:attribute name="ws_word_count" type="xsd:integer" use="required"/>
+        <xsd:attribute name="sid" type="xsd:string" use="optional"/>
+        <xsd:attribute name="max_segment_length" type="xsd:string"
+                       use="required"/>
+    </xsd:complexType>
+
+    <!-- communicates the current WS Xliff extension level -->
+    <xsd:complexType name="extension-level">
+        <xsd:attribute name="version" type="xsd:integer" use="required"/>
+    </xsd:complexType>
+
+</xsd:schema>

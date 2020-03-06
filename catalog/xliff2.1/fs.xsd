@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+     XLIFF Version 2.1
+     OASIS Standard
+     13 February 2018
+     Copyright (c) OASIS Open 2018. All Rights Reserved.
+     Source: http://docs.oasis-open.org/xliff/xliff-core/v2.1/os/schemas/
+     Latest version of narrative specification: http://docs.oasis-open.org/xliff/xliff-core/v2.1/xliff-core-v2.1.html
+     TC IPR Statement: https://www.oasis-open.org/committees/xliff/ipr.php
+-->
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" elementFormDefault="qualified"
+    xmlns:fs="urn:oasis:names:tc:xliff:fs:2.0"
+    targetNamespace="urn:oasis:names:tc:xliff:fs:2.0">
+
+
+  <!-- Attribute Types -->
+
+  <xs:simpleType name="fs_type">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="a"/>
+      <xs:enumeration value="b"/>
+      <xs:enumeration value="bdo"/>
+      <xs:enumeration value="big"/>
+      <xs:enumeration value="blockquote"/>
+      <xs:enumeration value="body"/>
+      <xs:enumeration value="br"/>
+      <xs:enumeration value="button"/>
+      <xs:enumeration value="caption"/>
+      <xs:enumeration value="center"/>
+      <xs:enumeration value="cite"/>
+      <xs:enumeration value="code"/>
+      <xs:enumeration value="col"/>
+      <xs:enumeration value="colgroup"/>
+      <xs:enumeration value="dd"/>
+      <xs:enumeration value="del"/>
+      <xs:enumeration value="div"/>
+      <xs:enumeration value="dl"/>
+      <xs:enumeration value="dt"/>
+      <xs:enumeration value="em"/>
+      <xs:enumeration value="h1"/>
+      <xs:enumeration value="h2"/>
+      <xs:enumeration value="h3"/>
+      <xs:enumeration value="h4"/>
+      <xs:enumeration value="h5"/>
+      <xs:enumeration value="h6"/>
+      <xs:enumeration value="head"/>
+      <xs:enumeration value="hr"/>
+      <xs:enumeration value="html"/>
+      <xs:enumeration value="i"/>
+      <xs:enumeration value="img"/>
+      <xs:enumeration value="label"/>
+      <xs:enumeration value="legend"/>
+      <xs:enumeration value="li"/>
+      <xs:enumeration value="ol"/>
+      <xs:enumeration value="p"/>
+      <xs:enumeration value="pre"/>
+      <xs:enumeration value="q"/>
+      <xs:enumeration value="s"/>
+      <xs:enumeration value="samp"/>
+      <xs:enumeration value="select"/>
+      <xs:enumeration value="small"/>
+      <xs:enumeration value="span"/>
+      <xs:enumeration value="strike"/>
+      <xs:enumeration value="strong"/>
+      <xs:enumeration value="sub"/>
+      <xs:enumeration value="sup"/>
+      <xs:enumeration value="table"/>
+      <xs:enumeration value="tbody"/>
+      <xs:enumeration value="td"/>
+      <xs:enumeration value="tfoot"/>
+      <xs:enumeration value="th"/>
+      <xs:enumeration value="thead"/>
+      <xs:enumeration value="title"/>
+      <xs:enumeration value="tr"/>
+      <xs:enumeration value="tt"/>
+      <xs:enumeration value="u"/>
+      <xs:enumeration value="ul"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+
+  <!-- Attributes -->
+
+  <xs:attribute name="fs" type="fs:fs_type"/>
+
+  <xs:attribute name="subFs" type="xs:string"/>
+
+</xs:schema>

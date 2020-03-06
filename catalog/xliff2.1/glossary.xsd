@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+     XLIFF Version 2.1
+     OASIS Standard
+     13 February 2018
+     Copyright (c) OASIS Open 2018. All Rights Reserved.
+     Source: http://docs.oasis-open.org/xliff/xliff-core/v2.1/os/schemas/
+     Latest version of narrative specification: http://docs.oasis-open.org/xliff/xliff-core/v2.1/xliff-core-v2.1.html
+     TC IPR Statement: https://www.oasis-open.org/committees/xliff/ipr.php
+-->
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" elementFormDefault="qualified"
+    xmlns:gls="urn:oasis:names:tc:xliff:glossary:2.0"
+    targetNamespace="urn:oasis:names:tc:xliff:glossary:2.0">
+
+
+  <!-- Elements for holding simple glossary data -->
+
+  <xs:element name="glossary">
+    <xs:complexType mixed="false">
+      <xs:sequence>
+        <xs:element minOccurs="1" maxOccurs="unbounded" ref="gls:glossEntry" />
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:element name="glossEntry">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element minOccurs="1" maxOccurs="1" ref="gls:term"/>
+        <xs:element minOccurs="0" maxOccurs="unbounded" ref="gls:translation" />
+        <xs:element minOccurs="0" maxOccurs="1" ref="gls:definition" />
+        <xs:any maxOccurs="unbounded" minOccurs="0" namespace="##other" processContents="lax"/>
+      </xs:sequence>
+      <xs:attribute name="id" use="optional" type="xs:NMTOKEN"/>
+      <xs:attribute name="ref" use="optional" type="xs:anyURI"/>
+      <xs:anyAttribute namespace="##other" processContents="lax"/>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:element name="term">
+    <xs:complexType mixed="true">
+      <xs:attribute name="source" use="optional"/>
+      <xs:anyAttribute namespace="##other" processContents="lax"/>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:element name="translation">
+    <xs:complexType mixed="true">
+      <xs:attribute name="id" use="optional" type="xs:NMTOKEN"/>
+      <xs:attribute name="ref" use="optional" type="xs:anyURI"/>
+      <xs:attribute name="source" use="optional"/>
+      <xs:anyAttribute namespace="##other" processContents="lax"/>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:element name="definition">
+    <xs:complexType mixed="true">
+      <xs:attribute name="source" use="optional"/>
+      <xs:anyAttribute namespace="##other" processContents="lax"/>
+    </xs:complexType>
+  </xs:element>
+
+</xs:schema>

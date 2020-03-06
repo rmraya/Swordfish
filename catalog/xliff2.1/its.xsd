@@ -1,0 +1,220 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+     XLIFF Version 2.1
+     OASIS Standard
+     13 February 2018
+     Copyright (c) OASIS Open 2018. All Rights Reserved.
+     Source: http://docs.oasis-open.org/xliff/xliff-core/v2.1/os/schemas/
+     Latest version of narrative specification: http://docs.oasis-open.org/xliff/xliff-core/v2.1/xliff-core-v2.1.html
+     TC IPR Statement: https://www.oasis-open.org/committees/xliff/ipr.php
+-->
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" elementFormDefault="qualified"
+  xmlns:its="http://www.w3.org/2005/11/its" xmlns:xlf="urn:oasis:names:tc:xliff:document:2.0"
+  targetNamespace="http://www.w3.org/2005/11/its">
+
+
+  <!-- Import -->
+
+  <xs:import namespace="http://www.w3.org/XML/1998/namespace"
+    schemaLocation="informativeCopiesOf3rdPartySchemas/w3c/xml.xsd"/>
+
+  <!-- Attribute Types -->
+
+  <xs:simpleType name="ITSVersion">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="2.0"/>
+    </xs:restriction>
+  </xs:simpleType>
+  
+  <xs:simpleType name="locFilterType">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="include"/>
+      <xs:enumeration value="exclude"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:simpleType name="issueType">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="terminology"/>
+      <xs:enumeration value="mistranslation"/>
+      <xs:enumeration value="omission"/>
+      <xs:enumeration value="untranslated"/>
+      <xs:enumeration value="addition"/>
+      <xs:enumeration value="duplication"/>
+      <xs:enumeration value="inconsistency"/>
+      <xs:enumeration value="grammar"/>
+      <xs:enumeration value="legal"/>
+      <xs:enumeration value="register"/>
+      <xs:enumeration value="locale-specific-content"/>
+      <xs:enumeration value="locale-violation"/>
+      <xs:enumeration value="style"/>
+      <xs:enumeration value="characters"/>
+      <xs:enumeration value="misspelling"/>
+      <xs:enumeration value="typographical"/>
+      <xs:enumeration value="formatting"/>
+      <xs:enumeration value="inconsistent-entities"/>
+      <xs:enumeration value="numbers"/>
+      <xs:enumeration value="markup"/>
+      <xs:enumeration value="pattern-problem"/>
+      <xs:enumeration value="whitespace"/>
+      <xs:enumeration value="internationalization"/>
+      <xs:enumeration value="length"/>
+      <xs:enumeration value="non-conformance"/>
+      <xs:enumeration value="uncategorized"/>
+      <xs:enumeration value="other"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:simpleType name="score">
+    <xs:restriction base="xs:decimal">
+      <xs:minInclusive value="0.0"/>
+      <xs:maxInclusive value="100.0"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:simpleType name="confidence">
+    <xs:restriction base="xs:double">
+      <xs:minInclusive value="0"/>
+      <xs:maxInclusive value="1"/>
+    </xs:restriction>
+  </xs:simpleType>
+  
+  <xs:simpleType name="yesNo">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="yes"/>
+      <xs:enumeration value="no"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+
+  <!-- Attributes -->
+  
+  <xs:attribute name="version" type="its:ITSVersion"/>
+
+  <xs:attribute name="allowedCharacters" type="xs:string"/>
+
+  <xs:attribute name="annotatorsRef" type="xs:string"/>
+
+  <!-- <xs:attribute name="domains" type="xs:string"/> moved to itsm.xsd as it does not exist in the W3C namespace -->
+  
+  <!-- <xs:attribute name="lang" type="xs:language"/> moved to itsm.xsd as it does not exist in the W3C namespace that reuses xml:lang -->
+  
+  <xs:attribute name="localeFilterList" type="xs:string" default="*"/>
+
+  <xs:attribute name="localeFilterType" type="its:locFilterType" default="include"/>
+
+  <xs:attribute name="locQualityIssueComment" type="xs:string"/>
+
+  <xs:attribute name="locQualityIssueEnabled" type="its:yesNo" default="yes"/>
+
+  <xs:attribute name="locQualityIssueProfileRef" type="xs:anyURI"/>
+
+  <xs:attribute name="locQualityIssuesRef" type="xs:anyURI"/>
+
+  <xs:attribute name="locQualityIssueSeverity" type="its:score"/>
+
+  <xs:attribute name="locQualityIssueType" type="its:issueType"/>
+
+  <xs:attribute name="locQualityRatingProfileRef" type="xs:anyURI"/>
+
+  <xs:attribute name="locQualityRatingScore" type="its:score"/>
+
+  <xs:attribute name="locQualityRatingScoreThreshold" type="its:score"/>
+
+  <xs:attribute name="locQualityRatingVote" type="xs:integer"/>
+
+  <xs:attribute name="locQualityRatingVoteThreshold" type="xs:integer"/>
+
+  <xs:attribute name="mtConfidence" type="its:confidence"/>
+
+  <xs:attribute name="org" type="xs:string"/>
+
+  <xs:attribute name="orgRef" type="xs:anyURI"/>
+
+  <xs:attribute name="person" type="xs:string"/>
+
+  <xs:attribute name="personRef" type="xs:anyURI"/>
+
+  <xs:attribute name="provenanceRecordsRef" type="xs:anyURI"/>
+
+  <xs:attribute name="revOrg" type="xs:string"/>
+
+  <xs:attribute name="revOrgRef" type="xs:anyURI"/>
+
+  <xs:attribute name="revPerson" type="xs:string"/>
+
+  <xs:attribute name="revPersonRef" type="xs:anyURI"/>
+
+  <xs:attribute name="revTool" type="xs:string"/>
+
+  <xs:attribute name="revToolRef" type="xs:anyURI"/>
+
+  <xs:attribute name="taClassRef" type="xs:anyURI"/>
+
+  <xs:attribute name="taConfidence" type="its:confidence"/>
+
+  <xs:attribute name="taIdent" type="xs:string"/>
+
+  <xs:attribute name="taIdentRef" type="xs:anyURI"/>
+
+  <xs:attribute name="taSource" type="xs:string"/>
+
+  <xs:attribute name="termConfidence" type="its:confidence"/>
+
+  <xs:attribute name="tool" type="xs:string"/>
+
+  <xs:attribute name="toolRef" type="xs:anyURI"/>
+
+
+  <!-- Elements -->
+
+  <xs:element name="locQualityIssues">
+    <xs:complexType mixed="false">
+      <xs:sequence>
+        <xs:element minOccurs="1" maxOccurs="unbounded" ref="its:locQualityIssue"/>
+      </xs:sequence>
+      <xs:attribute ref="xml:id" use="required"/>
+      <xs:attribute name="version" use="optional"/>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:element name="locQualityIssue">
+    <xs:complexType mixed="false">
+      <xs:attribute name="version" use="optional"/>
+      <xs:attribute name="locQualityIssueType" use="optional"/>
+      <xs:attribute name="locQualityIssueComment" use="optional"/>
+      <xs:attribute name="locQualityIssueSeverity" use="optional"/>
+      <xs:attribute name="locQualityIssueProfileRef" use="optional"/>
+      <xs:attribute name="locQualityIssueEnabled" use="optional"/>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:element name="provenanceRecords">
+    <xs:complexType mixed="false">
+      <xs:sequence>
+        <xs:element minOccurs="1" maxOccurs="unbounded" ref="its:provenanceRecord"/>
+      </xs:sequence>
+      <xs:attribute ref="xml:id" use="required"/>
+      <xs:attribute name="version" use="optional"/>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:element name="provenanceRecord">
+    <xs:complexType mixed="false">
+      <xs:attribute name="version" use="optional"/>
+      <xs:attribute name="org" use="optional"/>
+      <xs:attribute name="orgRef" use="optional"/>
+      <xs:attribute name="person" use="optional"/>
+      <xs:attribute name="personRef" use="optional"/>
+      <xs:attribute name="revOrg" use="optional"/>
+      <xs:attribute name="revOrgRef" use="optional"/>
+      <xs:attribute name="revPerson" use="optional"/>
+      <xs:attribute name="revPersonRef" use="optional"/>
+      <xs:attribute name="revTool" use="optional"/>
+      <xs:attribute name="revToolRef" use="optional"/>
+      <xs:attribute name="tool" use="optional"/>
+      <xs:attribute name="toolRef" use="optional"/>
+    </xs:complexType>
+  </xs:element>
+
+</xs:schema>

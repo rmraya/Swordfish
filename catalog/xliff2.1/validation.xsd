@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+     XLIFF Version 2.1
+     OASIS Standard
+     13 February 2018
+     Copyright (c) OASIS Open 2018. All Rights Reserved.
+     Source: http://docs.oasis-open.org/xliff/xliff-core/v2.1/os/schemas/
+     Latest version of narrative specification: http://docs.oasis-open.org/xliff/xliff-core/v2.1/xliff-core-v2.1.html
+     TC IPR Statement: https://www.oasis-open.org/committees/xliff/ipr.php
+-->
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
+    elementFormDefault="qualified"
+    xmlns:val="urn:oasis:names:tc:xliff:validation:2.0"
+    xmlns:xlf="urn:oasis:names:tc:xliff:document:2.0"
+    targetNamespace="urn:oasis:names:tc:xliff:validation:2.0">
+
+  <!-- Import -->
+
+  <xs:import namespace="urn:oasis:names:tc:xliff:document:2.0"
+      schemaLocation="xliff_core_2.0.xsd"/>
+
+  <!-- Attribute Types -->
+
+  <xs:simpleType name="normalization_type">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="none"/>
+      <xs:enumeration value="nfc"/>
+      <xs:enumeration value="nfd"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <!-- Elements -->
+
+  <xs:element name="validation">
+    <xs:complexType mixed="false">
+      <xs:sequence>
+        <xs:element minOccurs="1" maxOccurs="unbounded" ref="val:rule"/>
+      </xs:sequence>
+      <xs:anyAttribute namespace="##other" processContents="lax"/>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:element name="rule">
+    <xs:complexType mixed="false">
+      <xs:attribute name="isPresent" use="optional"/>
+      <xs:attribute name="occurs" use="optional" type="xs:positiveInteger"/>
+      <xs:attribute name="isNotPresent" use="optional"/>
+      <xs:attribute name="startsWith" use="optional"/>
+      <xs:attribute name="endsWith" use="optional"/>
+      <xs:attribute name="existsInSource" use="optional" type="xlf:yesNo" default="no"/>
+      <xs:attribute name="caseSensitive" use="optional" type="xlf:yesNo" default="yes"/>
+      <xs:attribute name="normalization" use="optional" type="val:normalization_type" default="nfc"/>
+      <xs:attribute name="disabled" use="optional" type="xlf:yesNo" default="no"/>
+      <xs:anyAttribute namespace="##other" processContents="lax"/>
+    </xs:complexType>
+  </xs:element>
+
+</xs:schema>

@@ -1,0 +1,86 @@
+<!-- ============================================================= -->
+<!--                    HEADER                                     -->
+<!-- ============================================================= -->
+<!-- ============================================================= -->
+<!--  MODULE:    DITA MAP DTD                                      -->
+<!--  VERSION:   1.3                                               -->
+<!--  DATE:      February 2005                                     -->
+<!--                                                               -->
+<!-- ============================================================= -->
+
+<!-- ============================================================= -->
+<!--                    PUBLIC DOCUMENT TYPE DEFINITION            -->
+<!--                        TYPICAL INVOCATION                     -->
+<!--                                                               -->
+<!-- Refer to this file by the following public identfier or an
+     appropriate system identifier:
+PUBLIC "-//OASIS//DTD DITA Map//EN"
+     Delivered as file "map.dtd"                                        -->
+
+<!-- ============================================================= -->
+<!-- SYSTEM:     Darwin Information Typing Architecture (DITA)     -->
+<!--                                                               -->
+<!-- PURPOSE:    DTD to describe DITA maps                         -->
+<!--                                                               -->
+<!-- ORIGINAL CREATION DATE:                                       -->
+<!--             March 2001                                        -->
+<!--                                                               -->
+<!--             (C) Copyright OASIS Open 2005.                    -->
+<!--             (C) Copyright IBM Corporation 2001, 2004.         -->
+<!--             All Rights Reserved.                              -->
+<!--             See license.txt for disclaimers and permissions.  -->
+<!-- ============================================================= -->
+
+
+<!-- ============================================================= -->
+<!--                    ENTITY DECLARATIONS                        -->
+<!-- ============================================================= -->
+
+
+<!ENTITY % mapgroup-d-dec 
+                        PUBLIC 
+"-//OASIS//ENTITIES DITA Map Group Domain//EN" 
+"mapGroup.ent"                                                       >
+%mapgroup-d-dec;
+
+<!--                    One for each extended base element, with
+                        the name of the domain(s) in which the
+                        extension was declared                     -->
+<!ENTITY % topicref     "topicref | (%mapgroup-d-topicref;)"         >
+
+
+<!-- ============================================================= -->
+<!--                    DOMAINS ATTRIBUTE OVERRIDE                 -->
+<!-- ============================================================= -->
+<!--                    Must be declared ahead of the DTDs, which
+                        puts @domains first in order               -->
+
+<!ENTITY included-domains 
+                        "&mapgroup-d-att;"                           >
+
+
+<!-- ============================================================= -->
+<!--                    TOPIC ELEMENT INTEGRATION                  -->
+<!-- ============================================================= -->
+
+
+<!--                    Embed map to get generic elements          -->
+<!ENTITY % map-type     PUBLIC 
+"-//OASIS//Elements DITA Map//EN" 
+"map.mod"                                                            >
+%map-type;
+
+
+<!-- ============================================================= -->
+<!--                    DOMAIN ELEMENT INTEGRATION                 -->
+<!-- ============================================================= -->
+
+
+<!ENTITY % mapgroup-d-def  
+                        PUBLIC 
+"-//OASIS//ELEMENTS DITA Map Group Domain//EN" 
+"mapGroup.mod"                                                       >
+%mapgroup-d-def;
+
+
+<!-- ================== End DITA Map DTD  ======================== -->

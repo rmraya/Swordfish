@@ -1,0 +1,606 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE ini-file PUBLIC "-//Maxprograms//Converters 2.0.0//EN" "configuration.dtd">
+<ini-file>
+<tag hard-break="inline" ctype="x-other">abbreviatedform</tag>
+<tag hard-break="segment" attributes="@navtitle">abbrevlist</tag>
+<tag hard-break="segment">abstract</tag>
+<tag hard-break="segment">addressdetails</tag>
+<tag hard-break="segment">administrativearea</tag>
+<tag hard-break="segment">alt</tag>
+<tag hard-break="segment">alt-text</tag>
+<tag hard-break="segment" attributes="navtitle">amendments</tag>
+<tag hard-break="ignore">anchor</tag>
+<tag hard-break="ignore">anchorid</tag>
+<tag hard-break="ignore">anchorkey</tag>
+<tag hard-break="segment" attributes="navtitle">anchorref</tag>
+<tag hard-break="inline" ctype="x-other">apiname</tag>
+<tag hard-break="segment" attributes="navtitle">appendix</tag>
+<tag hard-break="ignore">approved</tag>
+<tag hard-break="segment">area</tag>
+<tag hard-break="ignore">attributedef</tag>
+<tag hard-break="segment">audience</tag>
+<tag hard-break="segment">author</tag>
+<tag hard-break="segment">authorinformation</tag>
+<tag hard-break="inline" ctype="x-bold">b</tag>
+<tag hard-break="segment">backmatter</tag>
+<tag hard-break="segment" attributes="navtitle">bibliolist</tag>
+<tag hard-break="segment">body</tag>
+<tag hard-break="segment">bodydiv</tag>
+<tag hard-break="segment" attributes="navtitle">bookabstract</tag>
+<tag hard-break="segment">bookchangehistory</tag>
+<tag hard-break="segment">bookevent</tag>
+<tag hard-break="segment" attributes="name">bookeventtype</tag>
+<tag hard-break="ignore">bookid</tag>
+<tag hard-break="inline" ctype="x-other">booklibrary</tag>
+<tag hard-break="segment" attributes="navtitle">booklist</tag>
+<tag hard-break="segment">booklists</tag>
+<tag hard-break="segment">bookmap</tag>
+<tag hard-break="segment">bookmeta</tag>
+<tag hard-break="ignore">booknumber</tag>
+<tag hard-break="ignore">bookowner</tag>
+<tag hard-break="ignore">bookpartno</tag>
+<tag hard-break="ignore">bookrestriction</tag>
+<tag hard-break="ignore">bookrights</tag>
+<tag hard-break="segment">booktitle</tag>
+<tag hard-break="inline" ctype="x-other">booktitlealt</tag>
+<tag hard-break="inline" ctype="x-other">boolean</tag>
+<tag hard-break="segment">brand</tag>
+<tag hard-break="segment">category</tag>
+<tag hard-break="segment" attributes="specentry">cause</tag>
+<tag hard-break="ignore">change-completed</tag>
+<tag hard-break="ignore">change-historylist</tag>
+<tag hard-break="ignore">change-item</tag>
+<tag hard-break="ignore">change-organization</tag>
+<tag hard-break="ignore">change-person</tag>
+<tag hard-break="ignore">change-request-id</tag>
+<tag hard-break="ignore">change-request-reference</tag>
+<tag hard-break="ignore">change-request-system</tag>
+<tag hard-break="ignore">change-revisionid</tag>
+<tag hard-break="ignore">change-started</tag>
+<tag hard-break="ignore">change-summary</tag>
+<tag hard-break="segment" attributes="navtitle">chapter</tag>
+<tag hard-break="segment" attributes="specentry">chdesc</tag>
+<tag hard-break="segment" attributes="specentry">chdeschd</tag>
+<tag hard-break="segment">chhead</tag>
+<tag hard-break="segment">choice</tag>
+<tag hard-break="segment" attributes="spectitle">choicetable</tag>
+<tag hard-break="segment" attributes="specentry">choption</tag>
+<tag hard-break="segment" attributes="specentry">choptionhd</tag>
+<tag hard-break="segment">chrow</tag>
+<tag hard-break="inline" ctype="x-other">cite</tag>
+<tag hard-break="segment">closereqs</tag>
+<tag hard-break="segment">cmd</tag>
+<tag hard-break="inline" ctype="x-other">cmdname</tag>
+<tag hard-break="segment" keep-format="yes">codeblock</tag>
+<tag hard-break="inline" ctype="x-other" keep-format="yes">codeph</tag>
+<tag hard-break="inline" ctype="x-other">coderef</tag>
+<tag hard-break="segment" attributes="navtitle">colophon</tag>
+<tag hard-break="ignore">colspec</tag>
+<tag hard-break="inline" ctype="x-other">completed</tag>
+<tag hard-break="segment">component</tag>
+<tag hard-break="segment">conbody</tag>
+<tag hard-break="segment">conbodydiv</tag>
+<tag hard-break="segment">concept</tag>
+<tag hard-break="segment" attributes="specentry">condition</tag>
+<tag hard-break="segment">consequence</tag>
+<tag hard-break="segment">contactnumber</tag>
+<tag hard-break="segment">contactnumbers</tag>
+<tag hard-break="segment">context</tag>
+<tag hard-break="ignore">coords</tag>
+<tag hard-break="ignore">copyrfirst</tag>
+<tag hard-break="segment">copyrholder</tag>
+<tag hard-break="segment">copyright</tag>
+<tag hard-break="ignore">copyrlast</tag>
+<tag hard-break="segment" attributes="year">copyryear</tag>
+<tag hard-break="segment">country</tag>
+<tag hard-break="segment" attributes="date;golive;expiry">created</tag>
+<tag hard-break="segment">critdates</tag>
+<tag hard-break="ignore">data</tag>
+<tag hard-break="ignore">data-about</tag>
+<tag hard-break="inline" ctype="x-other">day</tag>
+<tag hard-break="segment">dd</tag>
+<tag hard-break="segment">ddhd</tag>
+<tag hard-break="segment" attributes="navtitle">dedication</tag>
+<tag hard-break="segment" attributes="navtitle">defaultSubject</tag>
+<tag hard-break="inline" ctype="x-other">delim</tag>
+<tag hard-break="segment">desc</tag>
+<tag hard-break="segment">ditavalmeta</tag>
+<tag hard-break="segment" attributes="navtitle">ditavalref</tag>
+<tag hard-break="segment">div</tag>
+<tag hard-break="segment" attributes="spectitle">dl</tag>
+<tag hard-break="segment">dlentry</tag>
+<tag hard-break="segment">dlhead</tag>
+<tag hard-break="ignore">draft-comment</tag>
+<tag hard-break="segment" attributes="navtitle">draftintro</tag>
+<tag hard-break="segment">dt</tag>
+<tag hard-break="segment">dthd</tag>
+<tag hard-break="ignore">dvrKeyscopePrefix</tag>
+<tag hard-break="ignore">dvrKeyscopeSuffix</tag>
+<tag hard-break="ignore">dvrResourcePrefix</tag>
+<tag hard-break="ignore">dvrResourceSuffix</tag>
+<tag hard-break="ignore">edited</tag>
+<tag hard-break="ignore">edition</tag>
+<tag hard-break="ignore">elementdef</tag>
+<tag hard-break="segment">emailaddress</tag>
+<tag hard-break="segment">emailaddresses</tag>
+<tag hard-break="segment">entry</tag>
+<tag hard-break="segment">enumerationdef</tag>
+<tag hard-break="segment">equation-block</tag>
+<tag hard-break="segment">equation-figure</tag>
+<tag hard-break="inline" ctype="x-other">equation-inline</tag>
+<tag hard-break="inline" ctype="x-other">equation-number</tag>
+<tag hard-break="segment">esttime</tag>
+<tag hard-break="segment" keep-format="yes">example</tag>
+<tag hard-break="ignore">exportanchors</tag>
+<tag hard-break="segment">featnum</tag>
+<tag hard-break="segment">fig</tag>
+<tag hard-break="segment">figgroup</tag>
+<tag hard-break="segment" attributes="navtitle">figurelist</tag>
+<tag hard-break="inline" ctype="x-other">filepath</tag>
+<tag hard-break="segment">firstname</tag>
+<tag hard-break="segment">fn</tag>
+<tag hard-break="ignore">foreign</tag>
+<tag hard-break="segment">fragment</tag>
+<tag hard-break="inline" ctype="x-link">fragref</tag>
+<tag hard-break="segment" attributes="navtitle">frontmatter</tag>
+<tag hard-break="segment">generationidentifier</tag>
+<tag hard-break="segment">glossAcronym</tag>
+<tag hard-break="segment">glossAlt</tag>
+<tag hard-break="inline" ctype="x-other">glossAlternateFor</tag>
+<tag hard-break="ignore">glossPartOfSpeech</tag>
+<tag hard-break="ignore">glossProperty</tag>
+<tag hard-break="segment">glossScopeNote</tag>
+<tag hard-break="segment">glossShortForm</tag>
+<tag hard-break="ignore">glossStatus</tag>
+<tag hard-break="segment">glossSurfaceForm</tag>
+<tag hard-break="segment">glossSymbol</tag>
+<tag hard-break="segment">glossSynonym</tag>
+<tag hard-break="segment">glossUsage</tag>
+<tag hard-break="segment">glossabbreviation</tag>
+<tag hard-break="segment" attributes="navtitle">glossarylist</tag>
+<tag hard-break="segment">glossbody</tag>
+<tag hard-break="segment">glossdef</tag>
+<tag hard-break="segment">glossentry</tag>
+<tag hard-break="segment">glossgroup</tag>
+<tag hard-break="segment" attributes="navtitle">glossref</tag>
+<tag hard-break="segment">glossterm</tag>
+<tag hard-break="segment">groupchoice</tag>
+<tag hard-break="segment">groupcomp</tag>
+<tag hard-break="segment">groupseq</tag>
+<tag hard-break="segment" attributes="navtitle">hasInstance</tag>
+<tag hard-break="segment" attributes="navtitle">hasKind</tag>
+<tag hard-break="segment" attributes="navtitle">hasNarrower</tag>
+<tag hard-break="segment" attributes="navtitle">hasPart</tag>
+<tag hard-break="segment" attributes="navtitle">hasRelated</tag>
+<tag hard-break="segment" attributes="othertype;spectitle">hazardstatement</tag>
+<tag hard-break="segment">hazardsymbol</tag>
+<tag hard-break="segment">honorific</tag>
+<tag hard-break="segment">howtoavoid</tag>
+<tag hard-break="inline" ctype="x-italic">i</tag>
+<tag hard-break="inline" ctype="x-image" attributes="alt;longdescref">image</tag>
+<tag hard-break="segment" attributes="spectitle">imagemap</tag>
+<tag hard-break="segment">index-base</tag>
+<tag hard-break="segment">index-see</tag>
+<tag hard-break="segment">index-see-also</tag>
+<tag hard-break="segment">index-sort-as</tag>
+<tag hard-break="segment" attributes="navtitle">indexlist</tag>
+<tag hard-break="segment">indexterm</tag>
+<tag hard-break="ignore">indextermref</tag>
+<tag hard-break="segment">info</tag>
+<tag hard-break="ignore">isbn</tag>
+<tag hard-break="inline" ctype="x-other">itemgroup</tag>
+<tag hard-break="segment" attributes="navtitle">keydef</tag>
+<tag hard-break="inline" ctype="x-other">keyword</tag>
+<tag hard-break="segment">keywords</tag>
+<tag hard-break="inline" ctype="x-other">kwd</tag>
+<tag hard-break="segment">lastname</tag>
+<tag hard-break="segment">lcAge</tag>
+<tag hard-break="segment">lcAnswerContent</tag>
+<tag hard-break="segment">lcAnswerContent2</tag>
+<tag hard-break="segment">lcAnswerOption</tag>
+<tag hard-break="segment">lcAnswerOption2</tag>
+<tag hard-break="segment">lcArea</tag>
+<tag hard-break="segment">lcArea2</tag>
+<tag hard-break="inline" ctype="x-other">lcAreaCoords</tag>
+<tag hard-break="inline" ctype="x-other">lcAreaCoords2</tag>
+<tag hard-break="inline" ctype="x-other">lcAreaShape</tag>
+<tag hard-break="inline" ctype="x-other">lcAreaShape2</tag>
+<tag hard-break="segment">lcAssessment</tag>
+<tag hard-break="segment">lcAsset</tag>
+<tag hard-break="segment">lcAsset2</tag>
+<tag hard-break="segment">lcAttitude</tag>
+<tag hard-break="segment" attributes="spectitle">lcAudience</tag>
+<tag hard-break="segment">lcBackground</tag>
+<tag hard-break="segment" attributes="spectitle">lcCIN</tag>
+<tag hard-break="segment" attributes="spectitle">lcChallenge</tag>
+<tag hard-break="segment" attributes="spectitle">lcClassroom</tag>
+<tag hard-break="segment" attributes="spectitle">lcClient</tag>
+<tag hard-break="segment" attributes="spectitle">lcConstraints</tag>
+<tag hard-break="segment">lcCorrectReponse2</tag>
+<tag hard-break="segment">lcCorrectResponse</tag>
+<tag hard-break="segment" attributes="spectitle">lcDelivDate</tag>
+<tag hard-break="segment">lcDelivery</tag>
+<tag hard-break="segment" attributes="spectitle">lcDownloadTime</tag>
+<tag hard-break="segment" attributes="spectitle">lcDuration</tag>
+<tag hard-break="segment">lcEdLevel</tag>
+<tag hard-break="segment">lcFeedback</tag>
+<tag hard-break="segment">lcFeedback2</tag>
+<tag hard-break="segment">lcFeedbackCorrect</tag>
+<tag hard-break="segment">lcFeedbackCorrect2</tag>
+<tag hard-break="segment">lcFeedbackIncorrect</tag>
+<tag hard-break="segment">lcFeedbackIncorrect2</tag>
+<tag hard-break="segment" attributes="spectitle">lcFileSizeLimitations</tag>
+<tag hard-break="segment" attributes="spectitle">lcGapAnalysis</tag>
+<tag hard-break="segment" attributes="spectitle">lcGapItem</tag>
+<tag hard-break="segment">lcGapItemDelta</tag>
+<tag hard-break="segment">lcGeneralDescription</tag>
+<tag hard-break="segment">lcGoals</tag>
+<tag hard-break="segment" attributes="spectitle">lcGraphics</tag>
+<tag hard-break="segment" attributes="spectitle">lcHandouts</tag>
+<tag hard-break="segment">lcHotspot</tag>
+<tag hard-break="segment">lcHotspot2</tag>
+<tag hard-break="segment">lcHotspotMap</tag>
+<tag hard-break="segment" attributes="spectitle">lcHotspotMap2</tag>
+<tag hard-break="segment" attributes="spectitle">lcInstruction</tag>
+<tag hard-break="segment" attributes="spectitle">lcInstructorenote2</tag>
+<tag hard-break="segment" attributes="spectitle">lcInstructornote</tag>
+<tag hard-break="segment" attributes="spectitle">lcInteraction</tag>
+<tag hard-break="segment">lcInteractionBase</tag>
+<tag hard-break="segment">lcInteractionBase2</tag>
+<tag hard-break="segment">lcInteractionLabel2</tag>
+<tag hard-break="segment" attributes="spectitle">lcIntervention</tag>
+<tag hard-break="segment" attributes="spectitle">lcInterventionItem</tag>
+<tag hard-break="segment" attributes="spectitle">lcIntro</tag>
+<tag hard-break="segment">lcItem</tag>
+<tag hard-break="segment">lcItem2</tag>
+<tag hard-break="segment">lcJtaItem</tag>
+<tag hard-break="segment">lcKnowledge</tag>
+<tag hard-break="segment" attributes="spectitle">lcLMS</tag>
+<tag hard-break="segment">lcLearnStrat</tag>
+<tag hard-break="segment">lcLom</tag>
+<tag hard-break="segment">lcMatchTable</tag>
+<tag hard-break="segment">lcMatchTable2</tag>
+<tag hard-break="segment">lcMatching</tag>
+<tag hard-break="segment">lcMatchingHeader</tag>
+<tag hard-break="segment">lcMatchingHeader2</tag>
+<tag hard-break="segment">lcMatchingItem</tag>
+<tag hard-break="segment">lcMatchingItem2</tag>
+<tag hard-break="segment">lcMatchingItemFeedback</tag>
+<tag hard-break="segment">lcMatchingItemFeedback2</tag>
+<tag hard-break="segment">lcMatchingPair</tag>
+<tag hard-break="segment">lcMatchingPair2</tag>
+<tag hard-break="segment" attributes="spectitle">lcModDate</tag>
+<tag hard-break="segment">lcMotivation</tag>
+<tag hard-break="segment">lcMultipleSelect</tag>
+<tag hard-break="segment">lcMultipleSelect2</tag>
+<tag hard-break="segment">lcNeeds</tag>
+<tag hard-break="segment" attributes="spectitle">lcNeedsAnalysis</tag>
+<tag hard-break="segment" attributes="spectitle">lcNextSteps</tag>
+<tag hard-break="segment" attributes="spectitle">lcNoLMS</tag>
+<tag hard-break="segment" attributes="spectitle">lcOJT</tag>
+<tag hard-break="segment">lcObjectiveGroup</tag>
+<tag hard-break="segment" attributes="spectitle">lcObjectives</tag>
+<tag hard-break="inline" ctype="x-other">lcObjectivesStem</tag>
+<tag hard-break="segment">lcOpenAnswer</tag>
+<tag hard-break="segment">lcOpenAnswer2</tag>
+<tag hard-break="segment">lcOpenQuestion</tag>
+<tag hard-break="segment">lcOpenQuestion2</tag>
+<tag hard-break="segment">lcOrgConstraints</tag>
+<tag hard-break="segment" attributes="spectitle">lcOrganizational</tag>
+<tag hard-break="segment" attributes="spectitle">lcPlanAudience</tag>
+<tag hard-break="segment" attributes="spectitle">lcPlanDescrip</tag>
+<tag hard-break="segment">lcPlanObjective</tag>
+<tag hard-break="segment" attributes="spectitle">lcPlanPrereqs</tag>
+<tag hard-break="segment">lcPlanResources</tag>
+<tag hard-break="segment" attributes="spectitle">lcPlanSubject</tag>
+<tag hard-break="segment" attributes="spectitle">lcPlanTitle</tag>
+<tag hard-break="segment">lcPlayers</tag>
+<tag hard-break="segment" attributes="spectitle">lcPrereqs</tag>
+<tag hard-break="segment">lcProcesses</tag>
+<tag hard-break="segment" attributes="spectitle">lcProject</tag>
+<tag hard-break="segment">lcQuestion</tag>
+<tag hard-break="segment">lcQuestion2</tag>
+<tag hard-break="segment">lcQuestionBase</tag>
+<tag hard-break="segment">lcQuestionBase2</tag>
+<tag hard-break="segment">lcResolution</tag>
+<tag hard-break="segment" attributes="spectitle">lcResources</tag>
+<tag hard-break="segment" attributes="spectitle">lcReview</tag>
+<tag hard-break="segment" attributes="spectitle">lcSecurity</tag>
+<tag hard-break="segment">lcSequence</tag>
+<tag hard-break="segment">lcSequence2</tag>
+<tag hard-break="segment">lcSequenceOption</tag>
+<tag hard-break="segment">lcSequenceOption2</tag>
+<tag hard-break="segment">lcSequenceOptionGroup</tag>
+<tag hard-break="segment">lcSequenceOptionGroup2</tag>
+<tag hard-break="segment">lcSequencing</tag>
+<tag hard-break="segment">lcSequencing2</tag>
+<tag hard-break="segment">lcSingleSelect</tag>
+<tag hard-break="segment">lcSingleSelect2</tag>
+<tag hard-break="segment">lcSkills</tag>
+<tag hard-break="segment">lcSpecChars</tag>
+<tag hard-break="segment" attributes="spectitle">lcSummary</tag>
+<tag hard-break="segment" attributes="spectitle">lcTask</tag>
+<tag hard-break="segment">lcTaskItem</tag>
+<tag hard-break="segment" attributes="spectitle">lcTechnical</tag>
+<tag hard-break="inline" ctype="x-other">lcTime</tag>
+<tag hard-break="segment">lcTrueFalse</tag>
+<tag hard-break="segment">lcTrueFalse2</tag>
+<tag hard-break="segment">lcValues</tag>
+<tag hard-break="segment" attributes="spectitle">lcViewers</tag>
+<tag hard-break="segment" attributes="spectitle">lcW3C</tag>
+<tag hard-break="segment">lcWorkDescription</tag>
+<tag hard-break="segment">lcWorkEnv</tag>
+<tag hard-break="segment">learninOverview</tag>
+<tag hard-break="segment">learningAssesment</tag>
+<tag hard-break="segment">learningAssesmentbody</tag>
+<tag hard-break="segment">learningBase</tag>
+<tag hard-break="segment">learningBasebody</tag>
+<tag hard-break="segment">learningContent</tag>
+<tag hard-break="segment" attributes="navtitle">learningContentRef</tag>
+<tag hard-break="segment">learningContentbody</tag>
+<tag hard-break="segment" attributes="navtitle">learningGroup</tag>
+<tag hard-break="segment">learningGroupMap</tag>
+<tag hard-break="segment" attributes="navtitle">learningGroupMapRef</tag>
+<tag hard-break="segment" attributes="navtitle">learningObject</tag>
+<tag hard-break="segment">learningObjectMap</tag>
+<tag hard-break="segment" attributes="navtitle">learningObjectMapRef</tag>
+<tag hard-break="segment" attributes="navtitle">learningOverviewRef</tag>
+<tag hard-break="segment">learningOverviewbody</tag>
+<tag hard-break="segment">learningPlan</tag>
+<tag hard-break="segment" attributes="navtitle">learningPlanRef</tag>
+<tag hard-break="segment">learningPlanbody</tag>
+<tag hard-break="segment" attributes="navtitle">learningPostAssesmentRef</tag>
+<tag hard-break="segment">learningPreAssesmentRef</tag>
+<tag hard-break="segment">learningSummary</tag>
+<tag hard-break="segment">learningSummaryRef</tag>
+<tag hard-break="segment">learningSummarybody</tag>
+<tag hard-break="segment">li</tag>
+<tag hard-break="inline" ctype="x-other">line-through</tag>
+<tag hard-break="segment" keep-format="yes">lines</tag>
+<tag hard-break="segment">link</tag>
+<tag hard-break="segment">linkinfo</tag>
+<tag hard-break="segment">linklist</tag>
+<tag hard-break="segment">linkpool</tag>
+<tag hard-break="segment">linktext</tag>
+<tag hard-break="segment">locality</tag>
+<tag hard-break="segment">localityname</tag>
+<tag hard-break="ignore">lomAggregationLevel</tag>
+<tag hard-break="ignore">lomContext</tag>
+<tag hard-break="ignore">lomCoverage</tag>
+<tag hard-break="ignore">lomDifficulty</tag>
+<tag hard-break="segment">lomInstallationRemarks</tag>
+<tag hard-break="ignore">lomIntendedUserRole</tag>
+<tag hard-break="ignore">lomInteractivityLevel</tag>
+<tag hard-break="ignore">lomInteractivityType</tag>
+<tag hard-break="ignore">lomLearningresourceType</tag>
+<tag hard-break="ignore">lomOtherPlatformRequirements</tag>
+<tag hard-break="ignore">lomSemanticDensity</tag>
+<tag hard-break="ignore">lomStructure</tag>
+<tag hard-break="ignore">lomTechRequirement</tag>
+<tag hard-break="ignore">lomTypicalLearningTime</tag>
+<tag hard-break="ignore">lomTypicalagerange</tag>
+<tag hard-break="segment" attributes="reftitle">lq</tag>
+<tag hard-break="inline" ctype="x-other">mainbooktitle</tag>
+<tag hard-break="ignore">maintainer</tag>
+<tag hard-break="segment" attributes="title">map</tag>
+<tag hard-break="segment" attributes="navtitle">mapref</tag>
+<tag hard-break="inline" ctype="x-other">markupname</tag>
+<tag hard-break="ignore">mathml</tag>
+<tag hard-break="inline" ctype="x-other">mathmlref</tag>
+<tag hard-break="inline" ctype="x-other">menucascade</tag>
+<tag hard-break="segment">messagepanel</tag>
+<tag hard-break="segment">metadata</tag>
+<tag hard-break="segment">middlename</tag>
+<tag hard-break="inline" ctype="x-other">month</tag>
+<tag hard-break="segment" keep-format="yes">msgblock</tag>
+<tag hard-break="inline" ctype="x-other">msgnum</tag>
+<tag hard-break="inline" ctype="x-other">msgph</tag>
+<tag hard-break="segment">namedetails</tag>
+<tag hard-break="ignore">navref</tag>
+<tag hard-break="segment">navtitle</tag>
+<tag hard-break="ignore">no-topic-nesting</tag>
+<tag hard-break="segment">noconds</tag>
+<tag hard-break="segment">nosafety</tag>
+<tag hard-break="ignore">nospares</tag>
+<tag hard-break="ignore">nosupeq</tag>
+<tag hard-break="ignore">nosupply</tag>
+<tag hard-break="segment" attributes="othertype;spectitle">note</tag>
+<tag hard-break="segment" attributes="navtitle">notices</tag>
+<tag hard-break="inline" ctype="x-other">numcharref</tag>
+<tag hard-break="segment" attributes="standby">object</tag>
+<tag hard-break="segment" attributes="spectitle">ol</tag>
+<tag hard-break="inline" ctype="x-other">oper</tag>
+<tag hard-break="inline" ctype="x-other">option</tag>
+<tag hard-break="segment">organization</tag>
+<tag hard-break="segment">organizationinfo</tag>
+<tag hard-break="segment">organizationname</tag>
+<tag hard-break="segment">organizationnamedetails</tag>
+<tag hard-break="segment">otherinfo</tag>
+<tag hard-break="segment" attributes="content">othermeta</tag>
+<tag hard-break="inline" ctype="x-other">overline</tag>
+<tag hard-break="segment">p</tag>
+<tag hard-break="ignore">param</tag>
+<tag hard-break="inline" ctype="x-other">parameterentity</tag>
+<tag hard-break="segment" attributes="spectitle">parml</tag>
+<tag hard-break="inline" ctype="x-other">parmname</tag>
+<tag hard-break="segment" attributes="navtitle">part</tag>
+<tag hard-break="segment">pd</tag>
+<tag hard-break="segment">permissions</tag>
+<tag hard-break="segment">perscat</tag>
+<tag hard-break="segment">perskill</tag>
+<tag hard-break="ignore">person</tag>
+<tag hard-break="segment">personinfo</tag>
+<tag hard-break="segment">personname</tag>
+<tag hard-break="segment">personnel</tag>
+<tag hard-break="inline" ctype="x-other">ph</tag>
+<tag hard-break="segment">platform</tag>
+<tag hard-break="segment">plentry</tag>
+<tag hard-break="segment">postalcode</tag>
+<tag hard-break="segment">postreq</tag>
+<tag hard-break="segment" attributes="spectitle" keep-format="yes">pre</tag>
+<tag hard-break="segment" attributes="navtitle">preface</tag>
+<tag hard-break="segment">prelreqs</tag>
+<tag hard-break="segment">prereq</tag>
+<tag hard-break="segment">printlocation</tag>
+<tag hard-break="segment">prodinfo</tag>
+<tag hard-break="segment">prodname</tag>
+<tag hard-break="segment">prognum</tag>
+<tag hard-break="segment">prolog</tag>
+<tag hard-break="segment" attributes="specentry">propdesc</tag>
+<tag hard-break="segment" attributes="specentry">propdeschd</tag>
+<tag hard-break="segment" attributes="spectitle">properties</tag>
+<tag hard-break="segment">property</tag>
+<tag hard-break="segment">prophead</tag>
+<tag hard-break="segment" attributes="specentry">proptype</tag>
+<tag hard-break="segment" attributes="specentry">proptypehd</tag>
+<tag hard-break="segment" attributes="specentry">propvalue</tag>
+<tag hard-break="segment" attributes="specentry">propvaluehd</tag>
+<tag hard-break="segment">pt</tag>
+<tag hard-break="ignore">published</tag>
+<tag hard-break="segment">publisher</tag>
+<tag hard-break="segment">publisherinformation</tag>
+<tag hard-break="ignore">publishtype</tag>
+<tag hard-break="inline" ctype="x-other">q</tag>
+<tag hard-break="segment">refbody</tag>
+<tag hard-break="segment">refbodydiv</tag>
+<tag hard-break="segment">reference</tag>
+<tag hard-break="segment" attributes="spectitle">refsyn</tag>
+<tag hard-break="segment">related-links</tag>
+<tag hard-break="segment" attributes="navtitle">relatedSubjects</tag>
+<tag hard-break="segment">relcell</tag>
+<tag hard-break="segment">relcolspec</tag>
+<tag hard-break="segment">relheader</tag>
+<tag hard-break="segment">relrow</tag>
+<tag hard-break="segment">reltable</tag>
+<tag hard-break="segment" attributes="specentry">remedy</tag>
+<tag hard-break="inline" ctype="x-other">repsep</tag>
+<tag hard-break="segment">reqcond</tag>
+<tag hard-break="segment">reqconds</tag>
+<tag hard-break="segment">reqcontp</tag>
+<tag hard-break="segment">reqpers</tag>
+<tag hard-break="ignore">required-cleanup</tag>
+<tag hard-break="segment">resourceid</tag>
+<tag hard-break="segment">responsibleParty</tag>
+<tag hard-break="segment">result</tag>
+<tag hard-break="ignore">reviewed</tag>
+<tag hard-break="segment" attributes="modified;golive;expiry">revised</tag>
+<tag hard-break="inline" ctype="x-other">revisionid</tag>
+<tag hard-break="segment">row</tag>
+<tag hard-break="segment">safecond</tag>
+<tag hard-break="segment">safety</tag>
+<tag hard-break="segment" attributes="navtitle">schemeref</tag>
+<tag hard-break="segment" attributes="spectitle" keep-format="yes">screen</tag>
+<tag hard-break="segment">searchtitle</tag>
+<tag hard-break="segment" attributes="spectitle">section</tag>
+<tag hard-break="segment">sectiondiv</tag>
+<tag hard-break="inline" ctype="x-other">sep</tag>
+<tag hard-break="segment">series</tag>
+<tag hard-break="inline" ctype="image">shape</tag>
+<tag hard-break="inline" ctype="x-other">shortcut</tag>
+<tag hard-break="segment">shortdesc</tag>
+<tag hard-break="segment" attributes="spectitle">simpletable</tag>
+<tag hard-break="segment" attributes="spectitle">sl</tag>
+<tag hard-break="segment">sli</tag>
+<tag hard-break="segment">sort-as</tag>
+<tag hard-break="segment">source</tag>
+<tag hard-break="segment">spare</tag>
+<tag hard-break="segment">spares</tag>
+<tag hard-break="segment" attributes="spectitle">sparesli</tag>
+<tag hard-break="inline" ctype="x-other">started</tag>
+<tag hard-break="inline" ctype="x-other">state</tag>
+<tag hard-break="segment">stentry</tag>
+<tag hard-break="segment">step</tag>
+<tag hard-break="segment">stepresult</tag>
+<tag hard-break="segment">steps</tag>
+<tag hard-break="segment">steps-informal</tag>
+<tag hard-break="segment">steps-unordered</tag>
+<tag hard-break="segment">stepsection</tag>
+<tag hard-break="segment">steptroubleshooting</tag>
+<tag hard-break="segment">stepxmp</tag>
+<tag hard-break="segment">sthead</tag>
+<tag hard-break="segment">strow</tag>
+<tag hard-break="inline" ctype="x-other">sub</tag>
+<tag hard-break="segment" attributes="navtitle">subjectHead</tag>
+<tag hard-break="segment">subjectHeadMeta</tag>
+<tag hard-break="segment">subjectRel</tag>
+<tag hard-break="segment">subjectRelHeader</tag>
+<tag hard-break="segment">subjectRelTable</tag>
+<tag hard-break="segment">subjectRole</tag>
+<tag hard-break="segment">subjectScheme</tag>
+<tag hard-break="segment">subjectcell</tag>
+<tag hard-break="segment" attributes="navtitle">subjectdef</tag>
+<tag hard-break="segment">subjectref</tag>
+<tag hard-break="segment">substep</tag>
+<tag hard-break="segment">substeps</tag>
+<tag hard-break="inline" ctype="x-other">summary</tag>
+<tag hard-break="inline" ctype="x-other">sup</tag>
+<tag hard-break="segment">supequip</tag>
+<tag hard-break="segment" attributes="spectitle">superqli</tag>
+<tag hard-break="segment">superqui</tag>
+<tag hard-break="segment">supplies</tag>
+<tag hard-break="segment">supply</tag>
+<tag hard-break="segment">supplyli</tag>
+<tag hard-break="segment">svg-container</tag>
+<tag hard-break="inline" ctype="image">svgref</tag>
+<tag hard-break="segment">synblk</tag>
+<tag hard-break="inline" ctype="x-link">synnoteref</tag>
+<tag hard-break="segment" keep-format="yes">synph</tag>
+<tag hard-break="segment">syntaxdiagram</tag>
+<tag hard-break="inline" ctype="x-other">systemoutput</tag>
+<tag hard-break="segment">table</tag>
+<tag hard-break="segment" attributes="navtitle">tablelist</tag>
+<tag hard-break="segment">task</tag>
+<tag hard-break="segment">taskbody</tag>
+<tag hard-break="segment">tasktroubleshooting</tag>
+<tag hard-break="segment">tbody</tag>
+<tag hard-break="inline" ctype="x-other">term</tag>
+<tag hard-break="ignore">tested</tag>
+<tag hard-break="inline" ctype="x-other">text</tag>
+<tag hard-break="inline" ctype="x-other">textentity</tag>
+<tag hard-break="segment">tgroup</tag>
+<tag hard-break="segment">thead</tag>
+<tag hard-break="segment">thoroughfare</tag>
+<tag hard-break="segment">title</tag>
+<tag hard-break="segment">titlealt</tag>
+<tag hard-break="inline" ctype="x-other">tm</tag>
+<tag hard-break="segment" attributes="navtitle">toc</tag>
+<tag hard-break="segment">topic</tag>
+<tag hard-break="segment">topicCell</tag>
+<tag hard-break="segment">topicSubjectHeader</tag>
+<tag hard-break="segment">topicSubjectRow</tag>
+<tag hard-break="segment">topicSubjectTable</tag>
+<tag hard-break="segment">topicapply</tag>
+<tag hard-break="segment" attributes="navtitle">topicgroup</tag>
+<tag hard-break="segment" attributes="navtitle">topichead</tag>
+<tag hard-break="segment">topicmeta</tag>
+<tag hard-break="segment" attributes="navtitle">topicref</tag>
+<tag hard-break="segment" attributes="navtitle">topicset</tag>
+<tag hard-break="segment" attributes="navtitle">topicsetref</tag>
+<tag hard-break="segment">topicsubject</tag>
+<tag hard-break="segment" attributes="navtitle">trademarklist</tag>
+<tag hard-break="segment">troubleSolution</tag>
+<tag hard-break="segment">troublebody</tag>
+<tag hard-break="inline" ctype="x-other">tt</tag>
+<tag hard-break="segment">tutorialinfo</tag>
+<tag hard-break="segment">typeofhazard</tag>
+<tag hard-break="inline" ctype="x-underlined">u</tag>
+<tag hard-break="inline" ctype="x-other">uicontrol</tag>
+<tag hard-break="segment" attributes="spectitle">ul</tag>
+<tag hard-break="ignore">unknown</tag>
+<tag hard-break="segment">url</tag>
+<tag hard-break="segment">urls</tag>
+<tag hard-break="inline" ctype="x-other">userinput</tag>
+<tag hard-break="ignore">ux-window</tag>
+<tag hard-break="inline" ctype="x-other">var</tag>
+<tag hard-break="inline" ctype="x-other">varname</tag>
+<tag hard-break="ignore">volume</tag>
+<tag hard-break="segment" attributes="version;release;modification">vrm</tag>
+<tag hard-break="segment">vrmlist</tag>
+<tag hard-break="inline" ctype="x-other">wintitle</tag>
+<tag hard-break="inline" ctype="x-other">xmlatt</tag>
+<tag hard-break="inline" ctype="x-other">xmlelement</tag>
+<tag hard-break="inline" ctype="x-other">xmlnsname</tag>
+<tag hard-break="inline" ctype="x-other">xmlpi</tag>
+<tag hard-break="inline" ctype="x-link">xref</tag>
+<tag hard-break="inline" ctype="x-other">year</tag>
+</ini-file>

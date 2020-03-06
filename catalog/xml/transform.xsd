@@ -1,0 +1,10 @@
+<?xml version='1.0'?>
+<!DOCTYPE schema SYSTEM "http://www.w3.org/1999/XMLSchema.dtd">
+<schema xmlns="http://www.w3.org/1999/XMLSchema"
+        targetNamespace="http://www.w3.org/1999/XSL/Transform">
+ <annotation>
+  <documentation>
+   Someday a schema for XSL Transforms will live here
+  </documentation>
+ </annotation>
+</schema>

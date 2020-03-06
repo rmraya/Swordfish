@@ -1,0 +1,567 @@
+<?xml version="1.0" encoding="utf-8"?>
+<xs:schema xmlns="MQXliff" xmlns:mstns="http://tempuri.org/XMLSchema.xsd" xmlns:xs="http://www.w3.org/2001/XMLSchema" targetNamespace="MQXliff" elementFormDefault="qualified" attributeFormDefault="qualified">
+  <!--Type definitions-->
+  <xs:simpleType name="ST_export-path">
+    <xs:restriction base="xs:string"/>
+  </xs:simpleType>
+  <xs:simpleType name="ST_filterinformation">
+    <xs:restriction base="xs:string">
+      <xs:annotation>
+        <xs:documentation>
+          This string holds the base64 encoded value of the filterconfigurations of the documents.
+          The cnfiguration is serilazed binary, then compressed, then encoded as base64 string.
+        </xs:documentation>
+      </xs:annotation>
+    </xs:restriction>
+  </xs:simpleType>
+  <xs:complexType name="CT_oneattribute_empty">
+    <xs:anyAttribute/>
+  </xs:complexType>
+  <xs:complexType name="CT_docinformation">
+    <xs:complexContent>
+      <xs:restriction base="CT_oneattribute_empty">
+        <xs:attribute name="isabstract" use="optional"/>
+      </xs:restriction>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:simpleType name="ST_isabstract">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="isabstract">
+        <xs:annotation>
+          <xs:documentation>
+            If a file honds this attribute, it means,
+            that it was exported from a view or the skeletal data
+            of the translationdocument was not exported.
+          </xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+    </xs:restriction>
+  </xs:simpleType>
+  <xs:simpleType name="ST_status">
+    <xs:annotation>
+      <xs:documentation>
+        This type corresponds to the MemoQ.Common.TranslationState enumeration.
+      </xs:documentation>
+    </xs:annotation>
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="NotStarted"/>
+      <xs:enumeration value="PreTranslated"/>
+      <xs:enumeration value="PartiallyEdited"/>
+      <xs:enumeration value="ManuallyConfirmed"/>
+      <xs:enumeration value="AssembledFromFragments"/>
+      <xs:enumeration value="AutoJoined"/>
+      <xs:enumeration value="AutoSplit"/>
+      <xs:enumeration value="AutoSplitAndEmpty"/>
+      <xs:enumeration value="Ackknowledged"/>
+    </xs:restriction>
+  </xs:simpleType>
+  <xs:simpleType name="ST_fragmentassembledmatch">
+    <xs:annotation>
+      <xs:documentation>
+        If attributes of this type are present, they can have only one value.
+      </xs:documentation>
+    </xs:annotation>
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="fragmentassembledmatch"/>
+    </xs:restriction>
+  </xs:simpleType>
+  <xs:simpleType name="ST_translatorcommitmatchrate">
+    <xs:restriction base="xs:int">
+    </xs:restriction>
+  </xs:simpleType>
+  <xs:simpleType name="ST_rep">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="rep">
+        <xs:annotation>
+          <xs:documentation>
+            This value indicates that the segment corresponding to the current trans-unit is a repetition.
+          </xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+    </xs:restriction>
+  </xs:simpleType>
+  <xs:simpleType name="ST_propagated">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="propagated">
+        <xs:annotation>
+          <xs:documentation>
+            This value indicates that the segment corresponding to the current trans-unit is propagated.
+          </xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+    </xs:restriction>
+  </xs:simpleType>
+  <xs:simpleType name="ST_percent">
+    <xs:annotation>
+      <xs:documentation>
+        This type represents the possible matchrates of segments.
+        If a segments match rate is 0, then it is nor exported to the xliff file.
+        Match rate 101 indicates context match.
+      </xs:documentation>
+    </xs:annotation>
+    <xs:restriction base="xs:integer">
+      <xs:minInclusive value="1"/>
+      <xs:maxInclusive value="101"/>
+    </xs:restriction>
+  </xs:simpleType>
+  <xs:simpleType name="ST_auto-split-join">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="auto-split-join">
+        <xs:annotation>
+          <xs:documentation>
+            This value indicates that the segment corresponding to the
+            current trans-unit is create by automatic split and join operations.
+
+            This type covers a portion of the MemoQ.Common.TranslationState enumeration.
+
+            Namely: AutoJoined, AutoSplit, AutoSplitAndEmpty
+          </xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+    </xs:restriction>
+  </xs:simpleType>
+  <xs:simpleType name="ST_locked">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="locked">
+        <xs:annotation>
+          <xs:documentation>
+            This value indicates that the segment corresponding to the
+            current trans-unit is locked.
+          </xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+    </xs:restriction>
+  </xs:simpleType>
+  <xs:simpleType name="ST_segmentguid">
+    <xs:annotation>
+      <xs:documentation>
+        This type correspond to the string value of a GUID.
+      </xs:documentation>
+    </xs:annotation>
+    <xs:restriction base="xs:string"/>
+  </xs:simpleType>
+  <xs:simpleType name="ST_fileIDGuid">
+    <xs:annotation>
+      <xs:documentation>
+        This type correspond to the string value of a GUID of a file.
+      </xs:documentation>
+    </xs:annotation>
+    <xs:restriction base="xs:string"/>
+  </xs:simpleType>
+  <xs:simpleType name="ST_segmentproofread">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="segmentproofread">
+        <xs:annotation>
+          <xs:documentation>
+            This value indicates that the segment corresponding to the
+            current trans-unit is proofread.
+          </xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+    </xs:restriction>
+  </xs:simpleType>
+  <xs:simpleType name="ST_segpart">
+    <xs:annotation>
+      <xs:documentation>
+        This type correponds to the type of Segment.PartID property.
+      </xs:documentation>
+    </xs:annotation>
+    <xs:restriction base="xs:string"/>
+  </xs:simpleType>
+  <xs:simpleType name="ST_hasfollowingobject">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="hasfollowingobject">
+        <xs:annotation>
+          <xs:documentation>
+            This value indicates that the last segmentpart in the segment corresponding to the
+            current trans-unit ha hasfollowingobject=true.
+          </xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+    </xs:restriction>
+  </xs:simpleType>
+  <xs:complexType name="CT_errorwarninglist">
+    <xs:sequence>
+      <xs:element name="errorwarning" type="CT_errorwarning" minOccurs="0" maxOccurs="unbounded"/>
+    </xs:sequence>
+  </xs:complexType>
+  <xs:complexType name="CT_errorwarninglist40">
+    <xs:annotation>
+      <xs:documentation>
+        The content of Erros and Warnings was changed in version 4.0, so a new element is introduced for these type of
+        errors and warnings.
+        This list contains that type of elements.
+        After 4.0, CT_errorwarninglist elements are ignored.
+      </xs:documentation>
+    </xs:annotation>
+    <xs:sequence>
+      <xs:element name="errorwarning" type="CT_errorwarning40" minOccurs="0" maxOccurs="unbounded"/>
+    </xs:sequence>
+  </xs:complexType>
+  <xs:complexType name="CT_errorwarning">
+    <xs:annotation>
+      <xs:documentation>
+        This tag holds an error/warning. If the tag has text content, then it is the CustomInfo of the error/warning coded as Base64 string.
+      </xs:documentation>
+    </xs:annotation>
+    <xs:attribute name="errorwarning-code" type="ST_errorwarning-code" use="required"/>
+    <xs:attribute name="errorwarning-ignored" type="ST_errorwarning-ignored" use="optional"/>
+    <xs:attribute name="errorwarning-ignorable" type="ST_errorwarning-ignorable" use="optional"/>
+    <xs:attribute name="errorwarning-shorttext" type="ST_errorwarning-shorttext" use="required"/>
+  </xs:complexType>
+  <xs:complexType name="CT_errorwarning40">
+    <xs:annotation>
+      <xs:documentation>
+        This tag holds an error/warning after version 4.0. There can be no text in this element, CustomInfo field is omitted in 4.0.
+      </xs:documentation>
+    </xs:annotation>
+    <xs:attribute name="errorwarning-code" type="ST_errorwarning-code" use="required"/>
+    <xs:attribute name="errorwarning-ignored" type="ST_errorwarning-ignored" use="optional"/>
+    <xs:attribute name="errorwarning-ignorable" type="ST_errorwarning-ignorable" use="optional"/>
+    <xs:attribute name="errorwarning-shorttext" type="ST_errorwarning-shorttext" use="required"/>
+    <xs:attribute name="errorwarning-problemname" type="ST_errorwarning-problemname" use="optional"/>
+    <xs:attribute name="errorwarning-dataspecific" type="ST_errorwarning-dataspecific" use="optional"/>
+    <xs:attribute name="errorwarning-ignorenote" type="ST_errorwarning-ignorenote" use="optional"/>
+    <xs:attribute name="errorwarning-segmenthash" type="ST_errorwarning-segmenthash" use="required"/>
+    <xs:attribute name="errorwarning-combinedposstart" type="ST_errorwarning-combinedposstart" use="required"/>
+    <xs:attribute name="errorwarning-combinedposlength" type="ST_errorwarning-combinedposlength" use="required"/>
+    <xs:attribute name="errorwarning-posinsource" type="ST_errorwarning-posinsource" use="optional"/>
+    <xs:attribute name="errorwarning-correction" type="ST_errorwarning-correction" use="optional"/>
+  </xs:complexType>
+  <xs:simpleType name="ST_errorwarning-code">
+    <xs:annotation>
+      <xs:documentation>
+        This value represents an error/warning code formed from the providerID and the code of the error/warning.
+      </xs:documentation>
+    </xs:annotation>
+    <xs:restriction base="xs:string"/>
+  </xs:simpleType>
+  <xs:simpleType name="ST_errorwarning-ignored">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="errorwarning-ignored">
+        <xs:annotation>
+          <xs:documentation>
+            This value indicates that the corresponding error/warning is ignored.
+          </xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+    </xs:restriction>
+  </xs:simpleType>
+  <xs:simpleType name="ST_errorwarning-ignorable">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="errorwarning-ignorable">
+        <xs:annotation>
+          <xs:documentation>
+            This value indicates that the corresponding error/warning is ignorable.
+          </xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+    </xs:restriction>
+  </xs:simpleType>
+  <xs:simpleType name="ST_errorwarning-shorttext">
+    <xs:annotation>
+      <xs:documentation>
+        This value represents the short text of an error/warning.
+      </xs:documentation>
+    </xs:annotation>
+    <xs:restriction base="xs:string"/>
+  </xs:simpleType>
+  <xs:simpleType name="ST_errorwarning-problemname">
+    <xs:annotation>
+      <xs:documentation>
+        This type correspond to the problemname of an error/warning.
+      </xs:documentation>
+    </xs:annotation>
+    <xs:restriction base="xs:string"/>
+  </xs:simpleType>
+  <xs:simpleType name="ST_errorwarning-dataspecific">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="errorwarning-dataspecific">
+      </xs:enumeration>
+    </xs:restriction>
+  </xs:simpleType>
+  <xs:simpleType name="ST_errorwarning-ignorenote">
+    <xs:annotation>
+      <xs:documentation>
+        This type correspond to the problemname of an error/warning.
+      </xs:documentation>
+    </xs:annotation>
+    <xs:restriction base="xs:string"/>
+  </xs:simpleType>
+  <xs:simpleType name="ST_errorwarning-segmenthash">
+    <xs:annotation>
+      <xs:documentation>
+        Full hash (incl. formatting) of the segment to which the SegmentInfo applies, as the segment was seen
+        when adding the info. Used to detect if segment has been changed in the meantime.
+      </xs:documentation>
+    </xs:annotation>
+    <xs:restriction base="xs:int"/>
+  </xs:simpleType>
+  <xs:simpleType name="ST_errorwarning-combinedposstart">
+    <xs:annotation>
+      <xs:documentation>
+        Start position within the segment if the info applies to a particular range, -1 otherwise.
+        Combined position: tags count as a single character (for ease of display in the editor)
+      </xs:documentation>
+    </xs:annotation>
+    <xs:restriction base="xs:int"/>
+  </xs:simpleType>
+  <xs:simpleType name="ST_errorwarning-combinedposlength">
+    <xs:annotation>
+      <xs:documentation>
+        Length within the segment if the info applies to a particular range, 0 otherwise.
+        Combined position: tags count as a single character (for ease of display in the editor)
+      </xs:documentation>
+    </xs:annotation>
+    <xs:restriction base="xs:int"/>
+  </xs:simpleType>
+  <xs:simpleType name="ST_errorwarning-posinsource">
+    <xs:annotation>
+      <xs:documentation>
+      True of range defined by CombinedPosStart/CombinedPosLength applies to source of segment pair.
+      </xs:documentation>
+    </xs:annotation>
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="errorwarning-posinsource">
+      </xs:enumeration>
+    </xs:restriction>
+  </xs:simpleType>
+  <xs:simpleType name="ST_errorwarning-correction">
+    <xs:annotation>
+      <xs:documentation>
+        Automatically suggested correction, if one is available (or replace text for find/replace); null otherwise.
+      </xs:documentation>
+    </xs:annotation>
+    <xs:restriction base="xs:base64Binary"/>
+  </xs:simpleType>
+  <!--Attribute definitions-->
+  <xs:attribute name="id" type="ST_fileIDGuid">
+    <xs:annotation>
+      <xs:documentation>
+        This is attribute is added to the xliff:file tag, and holds the GUID of the file.
+
+        This attribute is required in every case.
+      </xs:documentation>
+    </xs:annotation>
+  </xs:attribute>
+  <xs:attribute name="status" type="ST_status">
+    <xs:annotation>
+      <xs:documentation>
+        This is attribute is added to the xliff:trans-unit tag, and hold the MemoQ segment status of the corresponding segment.
+
+        This attribute is required in every case.
+      </xs:documentation>
+    </xs:annotation>
+  </xs:attribute>
+  <xs:attribute name="isabstract" type="ST_isabstract">
+    <xs:annotation>
+      <xs:documentation>
+        This is attribute is added to the xliff:trans-unit tag, and indicates if the corresponding segment is a repetiotion.
+
+        This attribute is not added when the segment is not a repetition.
+      </xs:documentation>
+    </xs:annotation>
+  </xs:attribute>
+  <xs:attribute name="rep" type="ST_rep">
+    <xs:annotation>
+      <xs:documentation>
+        This is attribute is added to the xliff:trans-unit tag, and indicates if the corresponding segment is a repetiotion.
+
+        This attribute is not added when the segment is not a repetition.
+      </xs:documentation>
+    </xs:annotation>
+  </xs:attribute>
+  <xs:attribute name="propagated" type="ST_propagated">
+    <xs:annotation>
+      <xs:documentation>
+        This is attribute is added to the xliff:trans-unit tag, and indicates
+        if the corresponding segment is a propagated segment or not.
+
+        This attribute is not added when the segment is not a propagated.
+      </xs:documentation>
+    </xs:annotation>
+  </xs:attribute>
+  <xs:attribute name="percent" type="ST_percent">
+    <xs:annotation>
+      <xs:documentation>
+        This is attribute is added to the xliff:trans-unit tag, and indicates
+        the TM match rate of the corresponding segment.
+
+        This attribute is not added when the match rate is 0.
+      </xs:documentation>
+    </xs:annotation>
+  </xs:attribute>
+  <xs:attribute name="auto-split-join" type="ST_auto-split-join">
+    <xs:annotation>
+      <xs:documentation>
+        This is attribute is added to the xliff:trans-unit tag, and indicates
+        if the corresponding segment is create by automatic split and join operations.
+
+        This attribute is not added when this is not the case.
+      </xs:documentation>
+    </xs:annotation>
+  </xs:attribute>
+  <xs:attribute name="locked" type="ST_locked">
+    <xs:annotation>
+      <xs:documentation>
+        This is attribute is added to the xliff:trans-unit tag, and indicates
+        if the corresponding segment is locked.
+
+        This attribute is not added when this the segment is not locked.
+      </xs:documentation>
+    </xs:annotation>
+  </xs:attribute>
+  <xs:attribute name="segmentguid" type="ST_segmentguid">
+    <xs:annotation>
+      <xs:documentation>
+        This is attribute is added to the xliff:trans-unit tag, and holds the GUID of the segment.
+
+        This attribute is required in every case.
+      </xs:documentation>
+    </xs:annotation>
+  </xs:attribute>
+  <xs:attribute name="segmentproofread" type="ST_segmentproofread">
+    <xs:annotation>
+      <xs:documentation>
+        This is attribute is added to the xliff:trans-unit tag, and indicates
+        if the corresponding segment proofread.
+
+        This attribute is not added when the segment is not proofread.
+      </xs:documentation>
+    </xs:annotation>
+  </xs:attribute>
+  <xs:attribute name="segpart" type="ST_segpart">
+    <xs:annotation>
+      <xs:documentation>
+        This is attribute is added to the xliff:source tag, and holds the last segmentpart of the corresponding segment.
+
+        This attribute is required in every case.
+      </xs:documentation>
+    </xs:annotation>
+  </xs:attribute>
+  <xs:attribute name="hasfollowingobject" type="ST_hasfollowingobject">
+    <xs:annotation>
+      <xs:documentation>
+        This is attribute is added to the xliff:source tag, and indicates
+        wheter the corresponding segments last segmentpart is a hasfollowingobject=true segmentpart or not.
+
+        This attribute is not added when the last segmentpart is hasfollowingobject=false.
+      </xs:documentation>
+    </xs:annotation>
+  </xs:attribute>
+  <xs:attribute name="fragmentassembledmatch" type="ST_fragmentassembledmatch">
+    <xs:annotation>
+      <xs:documentation>
+        This is attribute is added to the xliff:trans-unit tag, and shows if it was a fragment assembled match.
+
+        This attribute is optional.
+      </xs:documentation>
+    </xs:annotation>
+  </xs:attribute>
+  <xs:attribute name="translatorcommitmatchrate" type="ST_translatorcommitmatchrate">
+    <xs:annotation>
+      <xs:documentation>
+        The match rate of the row when the translator committed this segment.
+        Special values:
+         -300: fragment assembled
+         -100 and -200: auto-propagated
+      </xs:documentation>
+    </xs:annotation>
+  </xs:attribute>
+  <xs:attribute name="translatorcommitusername" type="xs:string">
+    <xs:annotation>
+      <xs:documentation>
+        Name of the Translator user that confirmed the row.
+      </xs:documentation>
+    </xs:annotation>
+  </xs:attribute>
+  <xs:attribute name="translatorcommittimestamp" type="xs:dateTime">
+    <xs:annotation>
+      <xs:documentation>
+        Timestamp when the Translator user confirmed the row; MUST BE UTC
+      </xs:documentation>
+    </xs:annotation>
+  </xs:attribute>
+  <xs:attribute name="reviewer1commitusername" type="xs:string">
+    <xs:annotation>
+      <xs:documentation>
+        Name of the Reviewer 1 user that confirmed the row.
+      </xs:documentation>
+    </xs:annotation>
+  </xs:attribute>
+  <xs:attribute name="reviewer1committimestamp" type="xs:dateTime">
+    <xs:annotation>
+      <xs:documentation>
+        Timestamp when the Reviewer 1 user confirmed the row; MUST BE UTC
+      </xs:documentation>
+    </xs:annotation>
+  </xs:attribute>
+  <xs:attribute name="reviewer2commitusername" type="xs:string">
+    <xs:annotation>
+      <xs:documentation>
+        Name of the Reviewer 2 user that confirmed the row.
+      </xs:documentation>
+    </xs:annotation>
+  </xs:attribute>
+  <xs:attribute name="reviewer2committimestamp" type="xs:dateTime">
+    <xs:annotation>
+      <xs:documentation>
+        Timestamp when the Reviewer 2 user confirmed the row; MUST BE UTC
+      </xs:documentation>
+    </xs:annotation>
+  </xs:attribute>
+  <xs:attribute name="lastchangedtimestamp" type="xs:dateTime">
+    <xs:annotation>
+      <xs:documentation>
+        Timestamp when the row was changed; MUST BE UTC
+      </xs:documentation>
+    </xs:annotation>
+  </xs:attribute>
+  <xs:attribute name="errorwarning-code" type="ST_errorwarning-code">
+    <xs:annotation>
+      <xs:documentation>
+        This is an attribute of the errorwarning tag, and holds the proveiderID and the code of the corresponding error/warning.
+      </xs:documentation>
+    </xs:annotation>
+  </xs:attribute>
+  <xs:attribute name="errorwarning-ignored" type="ST_errorwarning-ignored">
+    <xs:annotation>
+      <xs:documentation>
+        This is an attribute of the errorwarning tag, and holds wheter this error/warning is ignored or not.
+
+        This attribute is optional.
+      </xs:documentation>
+    </xs:annotation>
+  </xs:attribute>
+  <xs:attribute name="errorwarning-ignorable" type="ST_errorwarning-ignorable">
+    <xs:annotation>
+      <xs:documentation>
+        This is an attribute of the errorwarning tag, and holds wheter this error/warning is ignorable or not.
+
+        This attribute is optional.
+      </xs:documentation>
+    </xs:annotation>
+  </xs:attribute>
+  <xs:attribute name="errorwarning-shorttext" type="ST_errorwarning-shorttext">
+    <xs:annotation>
+      <xs:documentation>
+        This is an attribute of the errorwarning tag, and holds its short text.
+      </xs:documentation>
+    </xs:annotation>
+  </xs:attribute>
+  <!--Element definitions-->
+  <xs:element name="export-path" type="ST_export-path"/>
+  <xs:element name="docinformation" type="CT_docinformation"/>
+  <xs:element name="filterinformation" type="ST_filterinformation">
+    <xs:annotation>
+      <xs:documentation>
+        This tag apears before the body tag of the xliff file, see content at the type descreption.
+      </xs:documentation>
+    </xs:annotation>
+  </xs:element>
+  <xs:element name="errors" type="CT_errorwarninglist"/>
+  <xs:element name="warnings" type="CT_errorwarninglist"/>
+  <xs:element name="errors40" type="CT_errorwarninglist40"/>
+  <xs:element name="warnings40" type="CT_errorwarninglist40"/>
+  <xs:element name="errorwarning" type="CT_errorwarning"/>
+</xs:schema>

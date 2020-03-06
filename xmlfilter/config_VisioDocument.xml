@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE ini-file PUBLIC "-//Maxprograms//Converters 2.0.0//EN" "configuration.dtd" >
+<ini-file>
+    <tag hard-break="ignore">Masters</tag>    
+    <tag hard-break="segment">Title</tag>
+    <tag hard-break="segment">Subject</tag>
+    <tag hard-break="segment">Desc</tag>
+    <tag hard-break="segment">Description</tag>
+    <tag hard-break="segment">Keywords</tag>
+    <tag hard-break="segment">Company</tag>
+    <tag hard-break="segment" keep-format="yes">Text</tag>
+    <tag hard-break="segment" keep-format="yes">FooterLeft</tag>
+    <tag hard-break="segment" keep-format="yes">FooterCenter</tag>
+    <tag hard-break="segment" keep-format="yes">FooterRight</tag>
+    <tag hard-break="segment" keep-format="yes">HeaderLeft</tag>
+    <tag hard-break="segment" keep-format="yes">HeaderCenter</tag>
+    <tag hard-break="segment" keep-format="yes">HeaderRight</tag>
+    <tag ctype="x-other" hard-break="inline">cp</tag>
+    <tag ctype="x-other" hard-break="inline">pp</tag>
+    <tag ctype="x-other" hard-break="inline">tp</tag>
+    <tag ctype="x-other" hard-break="inline">fld</tag>
+</ini-file>

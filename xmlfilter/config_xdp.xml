@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE ini-file PUBLIC "-//Maxprograms//Converters 2.0.0//EN" "configuration.dtd" >
+<ini-file><tag hard-break="segment">text</tag>
+<tag hard-break="segment">toolTip</tag>
+<tag hard-break="segment">speak</tag>
+<tag hard-break="segment">exData</tag>
+</ini-file>

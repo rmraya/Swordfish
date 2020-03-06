@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- ======================================================= -->
+<!-- Copyright © 2009 Maxprograms                            -->
+<!-- All rights reserved.                                    -->
+<!-- Revision: 7D9-1-F                                       -->
+<!-- ======================================================= -->
+<xs:schema xmlns:gml="http://www.maxprograms.com/gml" 
+    targetNamespace="http://www.maxprograms.com/gml"
+    xmlns:xs="http://www.w3.org/2001/XMLSchema" elementFormDefault="qualified">
+    <xs:import namespace="http://www.w3.org/XML/1998/namespace"
+    schemaLocation="http://www.w3.org/2001/xml.xsd" />
+    <xs:element name="glossary">
+        <xs:complexType mixed="false">
+            <xs:sequence>
+                <xs:element minOccurs="0" maxOccurs="1"  ref="gml:comment" />
+                <xs:element minOccurs="1" maxOccurs="unbounded" ref="gml:glossentry" />
+            </xs:sequence>
+            <xs:attribute name="version" use="required">
+                <xs:simpleType>
+                    <xs:restriction base="xs:string">
+                        <xs:enumeration value="1.0"/>
+                    </xs:restriction>
+                </xs:simpleType>
+            </xs:attribute>
+            <xs:attribute name="srclang" use="required" />
+            <xs:anyAttribute namespace="##any" processContents="lax" />
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="comment">
+        <xs:complexType mixed="true">
+            <xs:attribute name="from"  />
+            <xs:anyAttribute namespace="##any" processContents="lax" />
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="glossentry">
+        <xs:complexType mixed="false">
+            <xs:sequence>
+                <xs:element minOccurs="0" maxOccurs="1"  ref="gml:comment" />
+                <xs:element minOccurs="1" maxOccurs="unbounded" ref="gml:langentry" />
+            </xs:sequence>
+            <xs:anyAttribute namespace="##any" processContents="lax"/>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="langentry">
+        <xs:complexType mixed="false">
+            <xs:sequence>
+                <xs:element minOccurs="1" maxOccurs="1" ref="gml:term" />
+                <xs:element minOccurs="0" maxOccurs="1" ref="gml:definition" />
+            </xs:sequence>
+            <xs:attribute  ref="xml:lang" use="required" />
+            <xs:anyAttribute namespace="##any" processContents="lax" />
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="definition">
+        <xs:complexType mixed="true">
+            <xs:attribute name="source" use="optional" />
+            <xs:anyAttribute namespace="##any" processContents="lax" />
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="term">
+        <xs:complexType mixed="true">
+            <xs:anyAttribute namespace="##any" processContents="lax" />
+        </xs:complexType>
+    </xs:element>
+</xs:schema>

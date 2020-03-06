@@ -1,0 +1,214 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<catalog xmlns="urn:oasis:names:tc:entity:xmlns:xml:catalog">
+	
+	<public publicId="-//OASIS//DTD XML Catalogs V1.1//EN" uri="catalog/catalog.dtd"/>
+	<system systemId="catalog.dtd" uri="catalog/catalog.dtd"/>	
+	<uri name="urn:oasis:names:tc:entity:xmlns:xml:catalog" uri="catalog/catalog.xsd"/>
+	<system systemId="http://www.oasis-open.org/committees/entity/release/1.1/catalog.xsd" uri="catalog/catalog.xsd"/>	
+
+	<system systemId="http://www.w3.org/2001/xml.xsd" uri="xml/xml.xsd"/>
+	<system systemId="http://www.w3.org/XML/1998/namespace" uri="xml/xml.xsd"/>
+	<system systemId="http://www.w3.org/1999/XSL/Transform" uri="xml/transform.xsd"/>
+	<public publicId="-//W3C//DTD XMLSCHEMA 200102//EN" uri="xml/XMLSchema.dtd"/>
+	<public publicId="datatypes" uri="xml/datatypes.dtd"/>
+	
+	<public publicId="-//XLIFF//DTD XLIFF//EN" uri="xliff/xliff.dtd"/>
+	<system systemId="xliff.dtd" uri="xliff/xliff.dtd"/>
+	<system systemId="xliff-core-schema-1.1.xsd" uri="xliff/xliff-core-1.1.xsd"/>
+	<uri name="urn:oasis:names:tc:xliff:document:1.1" uri="xliff/xliff-core-1.1.xsd"/>
+	<uri name="urn:oasis:names:tc:xliff:document:1.2" uri="xliff/xliff-core-1.2-transitional.xsd"/>
+	<system systemId="xliff-core-1.2-strict.xsd" uri="xliff/xliff-core-1.2-strict.xsd"/>
+	<system systemId="xliff-core-1.2-transitional.xsd" uri="xliff/xliff-core-1.2-transitional.xsd"/>
+	<nextCatalog catalog="xliff2.0/catalog.xml"/>
+	<nextCatalog catalog="xliff2.1/catalog.xml"/>
+	
+	<uri name="urn:lisa-metrics-tags" uri="gmx-v/gmx-v.xsd"/>
+	<system systemId="http://www.xml-intl.com/dtd/GMX-V.xsd" uri="gmx-v/gmx-v.xsd"/>	
+	
+	<public publicId="-//MAXPROGRAMS//Converters 2.0.0//EN" uri="maxprograms/configuration.dtd"/>
+	<system systemId="configuration.dtd" uri="maxprograms/configuration.dtd"/>
+	<system systemId="xliffProject.dtd" uri="maxprograms/xliffProject.dtd"/>
+	<system systemId="xliffProject.xsd" uri="maxprograms/xliffProject.xsd"/>
+
+	<uri name="http://www.maxprograms.com/gml" uri="glossml/GlossML.xsd"/>
+	
+	<!--    XLIFF RoundTrip Tool    -->
+	<uri name="urn:xmarker" uri="xmarker/xmarker.xsd"/>
+	
+	<!--    Memoq    -->
+	<uri name="MQXliff" uri="memoq/MQXliffSchema-4-0-21.xsd"/>
+	
+	<!--    Trados Studio 2009    -->
+	<uri name="sdl" uri="sdl/sdl-FilterFramework2-1.0.xsd"/>
+	
+	<!--    gs4tr extensions    -->
+	<uri name="gs4tr" uri="gs4tr/xliff-gs4tr-ext-1.0.xsd"/>	
+	
+	<public publicId="-//LISA OSCAR:1998//DTD for Translation Memory eXchange//EN" uri="tmx/tmx14.dtd"/>
+	<uri name="http://www.lisa.org/tmx14" uri="tmx/tmx14.dtd"/>
+	<system systemId="tmx14.dtd" uri="tmx/tmx14.dtd"/>
+	<system systemId="tmx13.dtd" uri="tmx/tmx13.dtd"/>
+	<system systemId="tmx12.dtd" uri="tmx/tmx12.dtd"/>
+	<system systemId="tmx11.dtd" uri="tmx/tmx11.dtd"/>
+	<uri name="http://www.lisa.org/tmx" uri="tmx/tmx13.dtd"/>
+
+	<public publicId="ISO 12200:1999A//DTD MARTIF core (DXFcdV04)//EN" uri="tbx/TBXcdv04.dtd"/>
+	<system systemId="TBXcdv04.dtd" uri="tbx/TBXcdv04.dtd"/>	
+	<system systemId="TBXcoreStructV02.dtd" uri="tbx/TBXcoreStructV02.dtd"/>	
+	<system systemId="tbxxcsdtd.dtd" uri="tbx/tbxxcsdtd.dtd"/>	
+	<uri name="urn:TBXcs" uri="tbx/TBXcsV02.xsd"/>	
+	<uri name="x-schema:TBXdsV1-0.xml" uri="tbx/TBXdsV1-0.xml"/>
+	
+	<public publicId="-//SRX//DTD SRX//EN" uri="srx/srx.dtd"/>
+	<system systemId="srx.dtd" uri="srx/srx.dtd"/>
+	<uri name="http://www.lisa.org/srx10" uri="srx/srx.xsd"/>
+	<uri name="http://www.lisa.org/srx20" uri="srx/srx20.xsd"/>
+	
+	<public publicId="-//W3C//DTD XHTML 1.0 Strict//EN" uri="xhtml1.0/xhtml1-strict.dtd"/>
+	<system systemId="http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd" uri="xhtml1.0/xhtml1-strict.dtd"/>
+	<public publicId="-//W3C//ENTITIES Latin 1 for XHTML//EN" uri="xhtml1.0/xhtml-lat1.ent"/>
+	<system systemId="http://www.w3.org/TR/xhtml1/DTD/xhtml-lat1.ent" uri="xhtml1.0/xhtml-lat1.ent"/>
+	<public publicId="-//W3C//ENTITIES Symbols for XHTML//EN" uri="xhtml1.0/xhtml-symbol.ent"/>
+	<system systemId="http://www.w3.org/TR/xhtml1/DTD/xhtml-symbol.ent" uri="xhtml1.0/xhtml-symbol.ent"/>
+	<public publicId="-//W3C//ENTITIES Special for XHTML//EN" uri="xhtml1.0/xhtml-special.ent"/>
+	<system systemId="http://www.w3.org/TR/xhtml1/DTD/xhtml-special.ent" uri="xhtml1.0/xhtml-special.ent"/>
+	<public publicId="-//W3C//DTD XHTML 1.0 Frameset//EN" uri="xhtml1.0/xhtml1-frameset.dtd"/>
+	<system systemId="http://www.w3.org/TR/xhtml1/DTD/xhtml1-frameset.dtd" uri="xhtml1.0/xhtml1-frameset.dtd"/>
+	<public publicId="-//W3C//DTD XHTML 1.0 Transitional//EN" uri="xhtml1.0/xhtml1-transitional.dtd"/>
+	<system systemId="http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd" uri="xhtml1.0/xhtml1-transitional.dtd"/>
+	
+	<public publicId="-//W3C//DTD XHTML 1.1//EN" uri="xhtml1.1/xhtml11-flat.dtd"/>
+	<public publicId="-//W3C//ENTITIES XHTML 1.1 Document Model 1.0//EN" uri="xhtml1.1/xhtml11-model-1.mod"/>
+	<public publicId="-//W3C//ENTITIES XHTML Inline Style 1.0//EN" uri="xhtml1.1/xhtml11-model-1.mod"/>
+	<system systemId="http://www.w3.org/TR/xhtml-modularization/DTD/xhtml-inlstyle-1.mod" uri="xhtml1.1/xhtml11-model-1.mod"/>
+	<uri name="http://www.w3.org/1999/xhtml" uri="xhtml1.1/xhtml11-flat.dtd"/>
+	<system systemId="xhtml11.dtd" uri="xhtml1.1/xhtml11-flat.dtd"/>
+
+	<public publicId="-//W3C//DTD SVG 1.0//EN" uri="svg/svg10.dtd"/>
+	<system systemId="http://www.w3.org/TR/2001/REC-SVG-20010904/DTD/svg10.dtd" uri="svg/svg10.dtd"/>
+	<public publicId="-//W3C//DTD SVG 1.1//EN" uri="svg/svg11.dtd"/>
+	<system systemId="http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd" uri="svg/svg11.dtd"/>
+	
+	<public publicId="-//OpenOffice.org//DTD OfficeDocument 1.0//EN" uri="openoffice/office.dtd"/>
+	<system systemId="office.dtd" uri="openoffice/office.dtd"/>	
+	<system systemId="dtypes.mod" uri="openoffice/dtypes.mod"/>
+	<system systemId="nmspace.mod" uri="openoffice/nmspace.mod"/>
+	<system systemId="defs.mod" uri="openoffice/defs.mod"/>
+	<system systemId="office.mod" uri="openoffice/office.mod"/>
+	<system systemId="style.mod" uri="openoffice/style.mod"/>
+	<system systemId="meta.mod" uri="openoffice/meta.mod"/>
+	<system systemId="script.mod" uri="openoffice/script.mod"/>
+	<system systemId="drawing.mod" uri="openoffice/drawing.mod"/>
+	<system systemId="text.mod" uri="openoffice/text.mod"/>
+	<system systemId="table.mod" uri="openoffice/table.mod"/>
+	<system systemId="chart.mod" uri="openoffice/chart.mod"/>
+	<system systemId="datastyl.mod" uri="openoffice/datastyl.mod"/>
+	<system systemId="form.mod" uri="openoffice/form.mod"/>
+	<system systemId="settings.mod" uri="openoffice/settings.mod"/>
+
+	<!--    MathML    -->
+
+	<nextCatalog catalog="mathml2/catalog.xml"/>
+	
+	<!--    DocBook    -->
+
+	<nextCatalog catalog="docbook5.0/catalog.xml"/>
+	<nextCatalog catalog="docbook4.5/catalog.xml"/>
+	<nextCatalog catalog="docbook4.4/catalog.xml"/>
+	<nextCatalog catalog="docbook4.3/catalog.xml"/>
+	<nextCatalog catalog="docbook4.2/catalog.xml"/>
+	<nextCatalog catalog="docbook4.1.2/catalog.xml"/>
+
+	<!--    OASIS DITA    -->	
+
+	<nextCatalog catalog="dita1.3/catalog.xml"/> 	
+	<nextCatalog catalog="dita1.2/catalog-dita.xml"/> 	
+	<nextCatalog catalog="dita1.2/catalog-dita-xsd.xml"/> 	
+	
+	<!-- 
+	<nextCatalog catalog="dita1.1/catalog-dita.xml"/> 	
+	<nextCatalog catalog="dita1.0/catalog-dita.xml"/> 	
+     -->
+
+	<!--    Novell's version of DocBook    -->
+
+	<public publicId="-//Novell//DTD NovDoc XML V1.0//EN" uri="novdoc/novdocx.dtd"/>
+	<system systemId="novdocx.dtd" uri="novdoc/novdocx.dtd"/>
+	<system systemId="entity-decl.ent" uri="novdoc/entity-decl.ent"/>
+
+	<!--    IDIOM WorldServer    -->
+
+	<uri name="http://www.idiominc.com/ws/asset" uri="idiom/asset.xsd"/>
+
+	<!--    Microsoft OpenXML    -->
+
+	<uri name="http://schemas.openxmlformats.org/presentationml/2006/3/main" uri="openxml/pml-slidesyncinfo.xsd"/>
+	<uri name="http://schemas.openxmlformats.org/officeDocument/2006/relationships" uri="openxml/shared-relationships.xsd"/>
+	<uri name="http://schemas.openxmlformats.org/drawingml/2006/3/main" uri="openxml/dml-graphicalobject.xsd"/>
+	<uri name="http://schemas.openxmlformats.org/drawingml/2006/3/main" uri="openxml/dml-shapemisc.xsd"/>
+	<uri name="http://schemas.openxmlformats.org/drawingml/2006/3/main" uri="openxml/dml-graphicalobjectformat.xsd"/>
+	<uri name="http://schemas.openxmlformats.org/drawingml/2006/3/main" uri="openxml/dml-text.xsd"/>
+	<uri name="http://schemas.openxmlformats.org/drawingml/2006/3/picture" uri="openxml/dml-picture.xsd"/>
+	<uri name="http://schemas.openxmlformats.org/drawingml/2006/3/diagram" uri="openxml/dml-diagramcolortransform.xsd"/>
+	<uri name="http://schemas.openxmlformats.org/drawingml/2006/3/main" uri="openxml/dml-basestylesheet.xsd"/>
+	<uri name="http://schemas.openxmlformats.org/drawingml/2006/3/main" uri="openxml/dml-docproperties.xsd"/>
+	<uri name="http://schemas.openxmlformats.org/drawingml/2006/3/main" uri="openxml/dml-basetypes.xsd"/>
+	<uri name="http://schemas.openxmlformats.org/presentationml/2006/3/main" uri="openxml/pml-presentation.xsd"/>
+	<uri name="http://schemas.openxmlformats.org/drawingml/2006/3/diagram" uri="openxml/dml-diagramlayoutvariables.xsd"/>
+	<uri name="http://schemas.openxmlformats.org/drawingml/2006/3/main" uri="openxml/dml-shape3dcamera.xsd"/>
+	<uri name="http://schemas.openxmlformats.org/presentationml/2006/3/main" uri="openxml/pml-slide.xsd"/>
+	<uri name="http://schemas.openxmlformats.org/presentationml/2006/3/main" uri="openxml/pml-presentationproperties.xsd"/>
+	<uri name="http://schemas.openxmlformats.org/drawingml/2006/3/main" uri="openxml/dml-tablestyle.xsd"/>
+	<uri name="http://schemas.openxmlformats.org/drawingml/2006/3/main" uri="openxml/dml-shape3dlight.xsd"/>
+	<uri name="http://schemas.openxmlformats.org/presentationml/2006/3/main" uri="openxml/pml-ptags.xsd"/>
+	<uri name="http://schemas.openxmlformats.org/drawingml/2006/3/main" uri="openxml/dml-shape3dstyles.xsd"/>
+	<uri name="http://schemas.openxmlformats.org/presentationml/2006/3/main" uri="openxml/pml-viewproperties.xsd"/>
+	<uri name="http://schemas.openxmlformats.org/package/2006/content-types" uri="openxml/opc-contenttypes.xsd"/>
+	<uri name="urn:schemas-microsoft-com:office:office" uri="openxml/vml-officedrawing.xsd"/>
+	<uri name="http://schemas.openxmlformats.org/schemaLibrary/2006/2/main" uri="openxml/shared-schemalibrary.xsd"/>
+	<uri name="http://schemas.openxmlformats.org/drawingml/2006/3/lockedCanvas" uri="openxml/dml-lockedcanvas.xsd"/>
+	<uri name="http://schemas.openxmlformats.org/presentationml/2006/3/main" uri="openxml/pml-base.xsd"/>
+	<uri name="http://schemas.openxmlformats.org/drawingml/2006/3/main" uri="openxml/dml-table.xsd"/>
+	<uri name="http://schemas.microsoft.com/office/omml/2004/12/core" uri="openxml/shared-math.xsd"/>
+	<uri name="http://schemas.openxmlformats.org/drawingml/2006/3/main" uri="openxml/dml-shapegeometry.xsd"/>
+	<uri name="http://schemas.openxmlformats.org/officedocument/2006/2/customXml" uri="openxml/shared-customxmlprops.xsd"/>
+	<uri name="http://schemas.openxmlformats.org/drawingml/2006/3/main" uri="openxml/dml-textbullet.xsd"/>
+	<uri name="http://schemas.openxmlformats.org/drawingml/2006/3/diagram" uri="openxml/dml-diagramdefinition.xsd"/>
+	<uri name="http://schemas.openxmlformats.org/package/2006/relationships" uri="openxml/opc-relationships.xsd"/>
+	<uri name="http://schemas.openxmlformats.org/drawingml/2006/3/main" uri="openxml/dml-graphicalobjectanimation.xsd"/>
+	<uri name="http://schemas.openxmlformats.org/drawingml/2006/3/compatibility" uri="openxml/dml-compat.xsd"/>
+	<uri name="http://schemas.openxmlformats.org/officeDocument/2006/custom-properties" uri="openxml/shared-docpropertiescustom.xsd"/>
+	<uri name="http://schemas.openxmlformats.org/drawingml/2006/3/diagram" uri="openxml/dml-diagramstyledefinition.xsd"/>
+	<uri name="http://schemas.openxmlformats.org/drawingml/2006/3/main" uri="openxml/dml-shape3dscene.xsd"/>
+	<uri name="http://schemas.openxmlformats.org/package/2006/metadata/core-properties" uri="openxml/opc-coreproperties.xsd"/>
+	<uri name="http://schemas.openxmlformats.org/drawingml/2006/3/main" uri="openxml/dml-gvml.xsd"/>
+	<uri name="http://schemas.openxmlformats.org/officeDocument/2006/2/activeX" uri="openxml/shared-activex.xsd"/>
+	<uri name="http://schemas.openxmlformats.org/drawingml/2006/3/main" uri="openxml/dml-audiovideo.xsd"/>
+	<uri name="http://schemas.openxmlformats.org/presentationml/2006/3/main" uri="openxml/pml-animationinfo.xsd"/>
+	<uri name="http://schemas.openxmlformats.org/presentationml/2006/3/main" uri="openxml/pml-comments.xsd"/>
+	<uri name="http://schemas.openxmlformats.org/drawingml/2006/3/main" uri="openxml/dml-shape3dsceneplane.xsd"/>
+	<uri name="urn:schemas-microsoft-com:office:word" uri="openxml/vml-wordprocessingdrawing.xsd"/>
+	<uri name="http://schemas.openxmlformats.org/drawingml/2006/3/spreadsheetDrawing" uri="openxml/dml-spreadsheetdrawing.xsd"/>
+	<uri name="http://schemas.openxmlformats.org/drawingml/2006/3/main" uri="openxml/dml-textrun.xsd"/>
+	<uri name="http://schemas.openxmlformats.org/drawingml/2006/3/main" uri="openxml/dml-shapeproperties.xsd"/>
+	<uri name="http://schemas.openxmlformats.org/drawingml/2006/3/main" uri="openxml/dml-textchar.xsd"/>
+	<uri name="urn:schemas-microsoft-com:vml" uri="openxml/vml.xsd"/>
+	<uri name="http://schemas.openxmlformats.org/drawingml/2006/3/main" uri="openxml/dml-styledefaults.xsd"/>
+	<uri name="http://schemas.openxmlformats.org/drawingml/2006/3/chart" uri="openxml/dml-chart.xsd"/>
+	<uri name="http://schemas.openxmlformats.org/drawingml/2006/3/main" uri="openxml/dml-textpara.xsd"/>
+	<uri name="http://schemas.openxmlformats.org/officeDocument/2006/docPropsVTypes" uri="openxml/shared-docpropertiesvectortypes.xsd"/>
+	<uri name="http://schemas.openxmlformats.org/drawingml/2006/3/diagram" uri="openxml/dml-diagramtypes.xsd"/>
+	<uri name="http://schemas.openxmlformats.org/spreadsheetml/2006/5/main" uri="openxml/sml-comments.xsd"/>
+	<uri name="http://schemas.openxmlformats.org/drawingml/2006/3/main" uri="openxml/dml-stylesheet.xsd"/>
+	<uri name="http://schemas.openxmlformats.org/drawingml/2006/3/main" uri="openxml/dml-shapestyle.xsd"/>
+	<uri name="http://schemas.openxmlformats.org/wordprocessingml/2006/3/main" uri="openxml/wml.xsd"/>
+	<uri name="http://schemas.openxmlformats.org/officeDocument/2006/extended-properties" uri="openxml/shared-docpropertiesextended.xsd"/>
+	<uri name="http://schemas.openxmlformats.org/drawingml/2006/3/diagram" uri="openxml/dml-diagramdatamodel.xsd"/>
+	<uri name="http://schemas.openxmlformats.org/presentationml/2006/3/main" uri="openxml/pml-ole.xsd"/>
+	<uri name="http://schemas.openxmlformats.org/drawingml/2006/3/diagram" uri="openxml/dml-diagramelementpropertyset.xsd"/>
+	<uri name="http://schemas.openxmlformats.org/drawingml/2006/3/chartdr" uri="openxml/dml-chartDrawing.xsd"/>
+	<uri name="http://schemas.openxmlformats.org/drawingml/2006/3/main" uri="openxml/dml-shapelineproperties.xsd"/>
+	<uri name="http://schemas.openxmlformats.org/drawingml/2006/3/wordprocessingDrawing" uri="openxml/dml-wordprocessingdrawing.xsd"/>
+	<uri name="http://schemas.openxmlformats.org/drawingml/2006/3/main" uri="openxml/dml-shapeeffects.xsd"/>
+
+</catalog>

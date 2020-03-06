@@ -1,0 +1,242 @@
+<?xml version ="1.0"?>
+<Schema name="TBXdsV1-0"
+     xmlns="urn:schemas-microsoft-com:xml-data"
+     xmlns:dt="urn:schemas-microsoft-com:datatypes">
+
+<!-- DCS Schema for XLT formats -->
+
+<!-- Modifications:
+	Nov 9th 2001 changed element termCompSpec to termCompListSpec
+	Nov 9th 2001 added hiSpec
+	Nov 9th 2001 root node changed from DXLTDCS to TBXXCS
+-->
+<!-- ##### global default attribute defs ##### -->
+
+	<AttributeType name="name" dt:type="string" required="no"/>
+	<AttributeType name="lang" dt:type="string" required="no"/>
+	<AttributeType name="datCatType" dt:type="id" required="no"/>
+	<AttributeType name="datcatId" dt:type="string" required="no"/>
+	<AttributeType name="target" dt:type="idref" required="no"/>
+	<AttributeType name="type" dt:type="string" required="no"/>
+
+
+<!-- #####  high-level structure #### -->
+
+	<ElementType name="TBXXCS" content="eltOnly" order="seq" model="closed">
+	  <AttributeType name="name" required="yes" dt:type="string"/>
+	  <AttributeType name="version" required="yes" dt:type="string"/>
+		<attribute type="name" required="yes"/>
+		<attribute type="version" required="yes"/>
+		<attribute type="lang" required="yes"/>
+		    <element type="header"/>
+		    <element type="languages" minOccurs="0"/>
+		    <element type="countries" minOccurs="0"/>
+		    <element type="datCatSet"/>
+		    <element type="refObjectSet" minOccurs="0"/>
+	</ElementType>
+
+	<ElementType name="header" content="eltOnly" order="seq" model="closed">
+		    <element type="title"/>
+	</ElementType>
+
+	<ElementType name="title" content="textOnly" model="closed">
+	</ElementType>
+
+	<ElementType name="languages" content="eltOnly" order="seq" model="closed">
+		    <element type="langInfo" minOccurs="1" maxOccurs="*"/>
+	</ElementType>
+
+	<ElementType name="langInfo" content="eltOnly" order="seq" model="closed">
+		    <element type="langCode"/>
+		    <element type="langName"/>
+	</ElementType>
+
+	<ElementType name="langCode" content="textOnly" model="closed">
+	</ElementType>
+
+	<ElementType name="langName" content="textOnly" model="closed">
+	</ElementType>
+
+	<ElementType name="countries" content="eltOnly" order="seq" model="closed">
+		    <element type="geoInfo" minOccurs="1" maxOccurs="*"/>
+	</ElementType>
+
+	<ElementType name="geoInfo" content="eltOnly" order="seq" model="closed">
+		    <element type="geoCode"/>
+		    <element type="geoName"/>
+	</ElementType>
+
+	<ElementType name="geoCode" content="textOnly" model="closed">
+	</ElementType>
+
+	<ElementType name="geoName" content="textOnly" model="closed">
+	</ElementType>
+
+
+
+	<ElementType name="datCatSet" content="eltOnly" order="seq" model="closed">
+		  <group order="many" minOccurs="0" maxOccurs="*">
+		    <element type="termNoteSpec"/>
+		    <element type="termCompListSpec"/>
+		    <element type="adminSpec"/>
+		    <element type="adminNoteSpec"/>
+		    <element type="transacSpec"/>
+		    <element type="transacNoteSpec"/>
+		    <element type="descripSpec"/>
+		    <element type="descripNoteSpec"/>
+		    <element type="refSpec"/>
+		    <element type="xrefSpec"/>
+		    <element type="hiSpec"/>
+		  </group>
+	</ElementType>
+
+	<ElementType name="refObjectSet" content="eltOnly" order="seq" model="closed">
+		    <element type="refObjectDef"  minOccurs="0" maxOccurs="*"/>
+	</ElementType>
+
+
+
+<!-- #### meta data-category elements #### -->
+
+
+
+	<!-- re-useable elements -->
+
+	<ElementType name="contents" content="textOnly">
+	  <AttributeType name="datatype" required="yes" dt:type="enumeration"
+		dt:values = "geoList picklist plainText basicText noteText elements"/>
+	  <AttributeType name="targetType" required="no" dt:type="enumeration"
+		dt:values="none entry term element bibl
+                 respPerson respOrg binaryData
+                 classSysDescrip conceptSysDescrip thesaurusDescrip
+                 colSeqDescrip external"/>
+	  <AttributeType name="forTermComp" required="no" dt:type="enumeration"
+		dt:values = "yes no"/>
+		<attribute type="datatype"/>
+		<attribute type="targetType"/>
+		<attribute type="forTermComp"/>
+	</ElementType>
+
+	<ElementType name="levels" content="textOnly">
+	  <!-- when schemas allow it, automate restriction to:
+	       termEntry langSet term
+          -->
+	</ElementType>
+
+	<ElementType name="comment" content="textOnly">
+	</ElementType>
+
+
+
+	<!-- meta data-category specification elements -->
+
+
+	<ElementType name="termNoteSpec" content="eltOnly" model="closed">
+		<attribute type="name" required="yes"/>
+		<attribute type="datcatId"/>
+                    <element type="contents"/>
+		    <element type="comment" minOccurs="0"/>
+	</ElementType>
+
+	<ElementType name="termCompListSpec" content="eltOnly" model="closed">
+		<attribute type="name" required="yes"/>
+		<attribute type="datcatId"/>
+                    <element type="contents"/>
+		    <element type="comment" minOccurs="0"/>
+	</ElementType>
+	<ElementType name="hiSpec" content="eltOnly" model="closed">
+		<attribute type="name" required="yes"/>
+		<attribute type="datcatId"/>
+                    <element type="contents"/>
+		    <element type="comment" minOccurs="0"/>
+	</ElementType>
+
+	<ElementType name="adminSpec" content="eltOnly" order="seq" model="closed">
+		<attribute type="name" required="yes"/>
+		<attribute type="datcatId"/>
+                    <element type="contents"/>
+		    <element type="comment" minOccurs="0"/>
+	</ElementType>
+
+	<ElementType name="adminNoteSpec" content="eltOnly" order="seq" model="closed">
+		<attribute type="name" required="yes"/>
+		<attribute type="datcatId"/>
+                    <element type="contents"/>
+		    <element type="comment" minOccurs="0"/>
+	</ElementType>
+
+	<ElementType name="transacSpec" content="eltOnly" model="closed">
+		<attribute type="name" required="yes"/>
+		<attribute type="datcatId"/>
+                    <element type="contents"/>
+		    <element type="comment" minOccurs="0"/>
+	</ElementType>
+
+	<ElementType name="transacNoteSpec" content="eltOnly" order="seq" model="closed">
+		<attribute type="name" required="yes"/>
+		<attribute type="datcatId"/>
+                    <element type="contents"/>
+		    <element type="comment" minOccurs="0"/>
+	</ElementType>
+
+
+	<ElementType name="descripSpec" content="eltOnly" order="seq" model="closed">
+		<attribute type="name" required="yes"/>
+		<attribute type="datcatId"/>
+                	<element type="contents"/>
+			<element type="levels"/>
+			<element type="comment" minOccurs="0"/>		    
+	</ElementType>
+
+	<ElementType name="descripNoteSpec" content="eltOnly" model="closed">
+		<attribute type="name" required="yes"/>
+		<attribute type="datcatId"/>
+                    <element type="contents"/>
+		    <element type="comment" minOccurs="0"/>
+	</ElementType>
+
+	<ElementType name="refSpec" content="eltOnly" order="seq" model="closed">
+		<attribute type="name" required="yes"/>
+		<attribute type="datcatId"/>
+                    <element type="contents"/>
+		    <element type="comment" minOccurs="0"/>
+	</ElementType>
+
+	<ElementType name="xrefSpec" content="eltOnly" order="seq" model="closed">
+		<attribute type="name" required="yes"/>
+		<attribute type="datcatId"/>
+                    <element type="contents"/>
+		    <element type="comment" minOccurs="0"/>
+	</ElementType>
+
+
+<!--  ##### refObject type definition elements #### -->
+
+
+	<ElementType name="refObjectDef" content="eltOnly" model="closed">
+		    <element type="refObjectType"/>
+		    <group order="one" minOccurs="1" maxOccurs="*">
+		      <element type="itemSet"/>
+		      <element type="itemGrp"/>
+		      <element type="item"/>
+		    </group>
+	</ElementType>
+
+	<ElementType name="refObjectType" content="textOnly" model="closed"/>
+
+	<ElementType name="item" content="textOnly" model="closed">
+		<attribute type="type"/>
+	</ElementType>
+
+	<ElementType name="itemGrp" content="eltOnly" order="seq" model="closed">
+		    <element type="item"/>
+	</ElementType>
+
+	<ElementType name="itemSet" content="eltOnly" order="many" model="closed">
+		<attribute type="type"/>
+		    <element type="item" minOccurs="1" maxOccurs="*"/>
+		    <element type="itemGrp" minOccurs="1" maxOccurs="*"/>
+	</ElementType>
+
+
+</Schema>

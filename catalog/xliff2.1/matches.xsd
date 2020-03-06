@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+     XLIFF Version 2.1
+     OASIS Standard
+     13 February 2018
+     Copyright (c) OASIS Open 2018. All Rights Reserved.
+     Source: http://docs.oasis-open.org/xliff/xliff-core/v2.1/os/schemas/
+     Latest version of narrative specification: http://docs.oasis-open.org/xliff/xliff-core/v2.1/xliff-core-v2.1.html
+     TC IPR Statement: https://www.oasis-open.org/committees/xliff/ipr.php
+-->
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
+    elementFormDefault="qualified"
+    xmlns:mtc="urn:oasis:names:tc:xliff:matches:2.0"
+    xmlns:xlf="urn:oasis:names:tc:xliff:document:2.0"
+    xmlns:mda="urn:oasis:names:tc:xliff:metadata:2.0"
+    targetNamespace="urn:oasis:names:tc:xliff:matches:2.0">
+
+  <!-- Import -->
+
+  <xs:import namespace="urn:oasis:names:tc:xliff:document:2.0"
+      schemaLocation="xliff_core_2.0.xsd"/>
+  <xs:import namespace="urn:oasis:names:tc:xliff:metadata:2.0"
+      schemaLocation="metadata.xsd"/>
+
+  <!-- Attribute Types -->
+
+  <xs:simpleType name="similarity">
+    <xs:restriction base="xs:decimal">
+      <xs:minInclusive value="0.0"/>
+      <xs:maxInclusive value="100.0"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:simpleType name="typeValues">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="am"/>
+      <xs:enumeration value="mt"/>
+      <xs:enumeration value="icm"/>
+      <xs:enumeration value="idm"/>
+      <xs:enumeration value="tb"/>
+      <xs:enumeration value="tm"/>
+      <xs:enumeration value="other"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <!-- Elements -->
+
+  <xs:element name="matches">
+    <xs:complexType mixed="false">
+      <xs:sequence>
+        <xs:element minOccurs="1" maxOccurs="unbounded" ref="mtc:match"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:element name="match">
+    <xs:complexType mixed="false">
+      <xs:sequence>
+        <xs:element minOccurs="0" maxOccurs="1" ref="mda:metadata"/>
+        <xs:element minOccurs="0" maxOccurs="1" ref="xlf:originalData"/>
+        <xs:element minOccurs="1" maxOccurs="1" ref="xlf:source"/>
+        <xs:element minOccurs="1" maxOccurs="1" ref="xlf:target"/>
+        <xs:any minOccurs="0" maxOccurs="unbounded" namespace="##other"
+            processContents="lax"/>
+      </xs:sequence>
+      <xs:attribute name="id" use="optional" type="xs:NMTOKEN"/>
+      <xs:attribute name="matchQuality" use="optional" type="mtc:similarity"/>
+      <xs:attribute name="matchSuitability" use="optional" type="mtc:similarity"/>
+      <xs:attribute name="origin" use="optional"/>
+      <xs:attribute name="ref" use="required" type="xs:anyURI"/>
+      <xs:attribute name="reference" use="optional" type="xlf:yesNo" default="no"/>
+      <xs:attribute name="similarity" use="optional" type="mtc:similarity"/>
+      <xs:attribute name="subType" use="optional" type="xlf:userDefinedValue"/>
+      <xs:attribute name="type" use="optional" type="mtc:typeValues"/>
+      <xs:anyAttribute namespace="##other" processContents="lax"/>
+    </xs:complexType>
+  </xs:element>
+
+</xs:schema>

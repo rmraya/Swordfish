@@ -1,0 +1,14 @@
+<catalog xmlns="urn:oasis:names:tc:entity:xmlns:xml:catalog" prefer="public">
+    <public publicId="-//OpenOffice.org//DTD Modified W3C MathML 1.01//EN" uri="dtd/office_mathml2.dtd"/>
+    <public publicId="-//W3C//DTD MathML 2.0//EN" uri="dtd/mathml2.dtd"/>        
+    <system systemId="mathml2.dtd" uri="dtd/mathml2.dtd"/>
+    <system systemId="math.dtd" uri="dtd/office_mathml2.dtd"/>
+    <system systemId="mathml2-qname-1.mod" uri="dtd/mathml2-qname-1.mod"/>
+    <system systemId="mmlalias.ent" uri="dtd/mathml/mmlalias.ent"/>
+    <system systemId="mmlextra.ent" uri="dtd/mathml/mmlextra.ent"/>
+    <system systemId="isomfrk.ent" uri="dtd/iso9573-13/isomfrk.ent"/>
+    <system systemId="isomopf.ent" uri="dtd/iso9573-13/isomopf.ent"/>
+    <system systemId="isomscr.ent" uri="dtd/iso9573-13/isomscr.ent"/>
+    <system systemId="isotech.ent" uri="dtd/iso9573-13/isotech.ent"/>
+    <system systemId="http://www.w3.org/2002/04/xhtml-math-svg/xhtml-math-svg.dtd" uri="dtd/xhtml-math-svg.dtd"/>    
+</catalog>

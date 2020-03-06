@@ -1,0 +1,749 @@
+<?xml version="1.0" ?>
+<!--             (C) Copyright OASIS Open 2005, 2009.              -->
+<!--             (C) Copyright IBM Corporation 2001, 2004.         -->
+<!--             All Rights Reserved.                              -->
+<!--                                                               -->
+<!--  UPDATES:                                                     -->
+<!--    2005.11.15 RDA: Corrected system ID for topicAttr.mod      -->
+<!--    2005.11.15 RDA: Corrected public ID for tblDecl.mod        -->
+<!--    2005.11.15 RDA: Removed @xml:base from <group>             -->
+<!--    2006.06.07 RDA: Added commonElements.mod                   -->
+<!--    2006.06.07 RDA: Added indexing domain                      -->
+<!--    2006.06.20 RDA: Added bookmap and XNAL domain              -->
+<!--    2006.11.30 RDA: Added version specific public IDs          -->
+<!--    2008.01.25 RDA: Added DITA 1.2 version specific IDs        -->
+<!--    2008.02.01 RDA: *.ent files for topic types                -->
+<!--    2008.02.12 RDA: Add hazard statement domain                -->
+<!--    2008.02.13 RDA: Added DITA 1.x PUBLIC IDs                  -->
+<!--    2008.04.11 RDA: Added Learning specializations             -->
+<!--    2008.04.15 RDA: Added Machine Industry specializations     -->
+<!--    2008.04.15 RDA: Reorganized DTDs into subdirectories       -->
+<!--    2008.06.03 RDA: Added glossary group, glossary domains     -->
+<!--    2008.11.24 RDA: Added ditaval                              -->
+<!--    2009.01.05 RDA: Rename machineIndustry dir to machinery    -->
+<!--    2009.11.10 RDA: Add entries for glossentry.*               -->
+<!--    2009.12.03 RDA: Add entry for learningInteractionBaseDomain -->
+<!--    2010.04.08 RDA: Add basemap.dtd and basetopic.dtd          -->
+
+<catalog xmlns="urn:oasis:names:tc:entity:xmlns:xml:catalog"
+         prefer="public">
+
+<!-- Catalog for Dita DTDs -->
+
+  <group xml:base="base/dtd/">
+    <!-- Topics -->
+    <public publicId="-//OASIS//ELEMENTS DITA Topic//EN"
+            uri="topic.mod"/>
+    <public publicId="-//OASIS//ELEMENTS DITA 1.x Topic//EN"
+            uri="topic.mod"/>
+    <public publicId="-//OASIS//ELEMENTS DITA 1.2 Topic//EN"
+            uri="topic.mod"/>
+    <public publicId="-//OASIS//ENTITIES DITA Topic Definitions//EN"
+            uri="topicDefn.ent"/>
+    <public publicId="-//OASIS//ENTITIES DITA 1.x Topic Definitions//EN"
+            uri="topicDefn.ent"/>
+    <public publicId="-//OASIS//ENTITIES DITA 1.2 Topic Definitions//EN"
+            uri="topicDefn.ent"/>
+    <!-- topicAttr.mod is only used in DITA 1.0; kept for backwards compatibility -->
+    <public publicId="-//OASIS//ENTITIES DITA Topic Class//EN"
+            uri="topicAttr.mod"/>
+
+    <!-- Maps -->
+    <public publicId="-//OASIS//ELEMENTS DITA Map//EN"
+            uri="map.mod"/>
+    <public publicId="-//OASIS//ELEMENTS DITA 1.x Map//EN"
+            uri="map.mod"/>
+    <public publicId="-//OASIS//ELEMENTS DITA 1.2 Map//EN"
+            uri="map.mod"/>
+
+    <!-- Base topic DTD (no tech-comm domains -->
+    <public publicId="-//OASIS//DTD DITA Base Topic//EN"
+            uri="basetopic.dtd"/>
+    <public publicId="-//OASIS//DTD DITA 1.x Base Topic//EN"
+            uri="basetopic.dtd"/>
+    <public publicId="-//OASIS//DTD DITA 1.2 Base Topic//EN"
+            uri="basetopic.dtd"/>
+
+    <!-- Base map DTD (no tech-comm domains -->
+    <public publicId="-//OASIS//DTD DITA Base Map//EN"
+            uri="basemap.dtd"/>
+    <public publicId="-//OASIS//DTD DITA 1.x Base Map//EN"
+            uri="basemap.dtd"/>
+    <public publicId="-//OASIS//DTD DITA 1.2 Base Map//EN"
+            uri="basemap.dtd"/>
+
+    <!-- Common files for topics and maps -->
+    <public publicId="-//OASIS//ELEMENTS DITA Common Elements//EN"
+            uri="commonElements.mod"/>
+    <public publicId="-//OASIS//ENTITIES DITA Common Elements//EN"
+            uri="commonElements.ent"/>
+    <public publicId="-//OASIS//ELEMENTS DITA 1.x Common Elements//EN"
+            uri="commonElements.mod"/>
+    <public publicId="-//OASIS//ENTITIES DITA 1.x Common Elements//EN"
+            uri="commonElements.ent"/>
+    <public publicId="-//OASIS//ELEMENTS DITA 1.2 Common Elements//EN"
+            uri="commonElements.mod"/>
+    <public publicId="-//OASIS//ENTITIES DITA 1.2 Common Elements//EN"
+            uri="commonElements.ent"/>
+    <public publicId="-//OASIS//ELEMENTS DITA Metadata//EN"
+            uri="metaDecl.mod"/>
+    <public publicId="-//OASIS//ELEMENTS DITA 1.x Metadata//EN"
+            uri="metaDecl.mod"/>
+    <public publicId="-//OASIS//ELEMENTS DITA 1.2 Metadata//EN"
+            uri="metaDecl.mod"/>
+    <public publicId="-//OASIS//ELEMENTS DITA Exchange Table Model//EN"
+            uri="tblDecl.mod"/>
+    <public publicId="-//OASIS//ELEMENTS DITA 1.x Exchange Table Model//EN"
+            uri="tblDecl.mod"/>
+    <public publicId="-//OASIS//ELEMENTS DITA 1.2 Exchange Table Model//EN"
+            uri="tblDecl.mod"/>
+
+    <!-- base domains -->
+    <public publicId="-//OASIS//ELEMENTS DITA Delayed Resolution Domain//EN"
+            uri="delayResolutionDomain.mod"/>
+    <public publicId="-//OASIS//ENTITIES DITA Delayed Resolution Domain//EN"
+            uri="delayResolutionDomain.ent"/>
+    <public publicId="-//OASIS//ELEMENTS DITA 1.x Delayed Resolution Domain//EN"
+            uri="delayResolutionDomain.mod"/>
+    <public publicId="-//OASIS//ENTITIES DITA 1.x Delayed Resolution Domain//EN"
+            uri="delayResolutionDomain.ent"/>
+    <public publicId="-//OASIS//ELEMENTS DITA 1.2 Delayed Resolution Domain//EN"
+            uri="delayResolutionDomain.mod"/>
+    <public publicId="-//OASIS//ENTITIES DITA 1.2 Delayed Resolution Domain//EN"
+            uri="delayResolutionDomain.ent"/>
+
+    <public publicId="-//OASIS//ELEMENTS DITA Highlight Domain//EN"
+            uri="highlightDomain.mod"/>
+    <public publicId="-//OASIS//ENTITIES DITA Highlight Domain//EN"
+            uri="highlightDomain.ent"/>
+    <public publicId="-//OASIS//ELEMENTS DITA 1.x Highlight Domain//EN"
+            uri="highlightDomain.mod"/>
+    <public publicId="-//OASIS//ENTITIES DITA 1.x Highlight Domain//EN"
+            uri="highlightDomain.ent"/>
+    <public publicId="-//OASIS//ELEMENTS DITA 1.2 Highlight Domain//EN"
+            uri="highlightDomain.mod"/>
+    <public publicId="-//OASIS//ENTITIES DITA 1.2 Highlight Domain//EN"
+            uri="highlightDomain.ent"/>
+
+    <public publicId="-//OASIS//ELEMENTS DITA Indexing Domain//EN"
+            uri="indexingDomain.mod"/>
+    <public publicId="-//OASIS//ENTITIES DITA Indexing Domain//EN"
+            uri="indexingDomain.ent"/>
+    <public publicId="-//OASIS//ELEMENTS DITA 1.x Indexing Domain//EN"
+            uri="indexingDomain.mod"/>
+    <public publicId="-//OASIS//ENTITIES DITA 1.x Indexing Domain//EN"
+            uri="indexingDomain.ent"/>
+    <public publicId="-//OASIS//ELEMENTS DITA 1.2 Indexing Domain//EN"
+            uri="indexingDomain.mod"/>
+    <public publicId="-//OASIS//ENTITIES DITA 1.2 Indexing Domain//EN"
+            uri="indexingDomain.ent"/>
+
+    <public publicId="-//OASIS//ENTITIES DITA Map Group Domain//EN"
+            uri="mapGroup.ent"/>
+    <public publicId="-//OASIS//ENTITIES DITA 1.x Map Group Domain//EN"
+            uri="mapGroup.ent"/>
+    <public publicId="-//OASIS//ENTITIES DITA 1.2 Map Group Domain//EN"
+            uri="mapGroup.ent"/>
+    <public publicId="-//OASIS//ELEMENTS DITA Map Group Domain//EN"
+            uri="mapGroup.mod"/>
+    <public publicId="-//OASIS//ELEMENTS DITA 1.x Map Group Domain//EN"
+            uri="mapGroup.mod"/>
+    <public publicId="-//OASIS//ELEMENTS DITA 1.2 Map Group Domain//EN"
+            uri="mapGroup.mod"/>
+
+    <public publicId="-//OASIS//ELEMENTS DITA Utilities Domain//EN"
+            uri="utilitiesDomain.mod"/>
+    <public publicId="-//OASIS//ENTITIES DITA Utilities Domain//EN"
+            uri="utilitiesDomain.ent"/>
+    <public publicId="-//OASIS//ELEMENTS DITA 1.x Utilities Domain//EN"
+            uri="utilitiesDomain.mod"/>
+    <public publicId="-//OASIS//ENTITIES DITA 1.x Utilities Domain//EN"
+            uri="utilitiesDomain.ent"/>
+    <public publicId="-//OASIS//ELEMENTS DITA 1.2 Utilities Domain//EN"
+            uri="utilitiesDomain.mod"/>
+    <public publicId="-//OASIS//ENTITIES DITA 1.2 Utilities Domain//EN"
+            uri="utilitiesDomain.ent"/>
+
+    <public publicId="-//OASIS//ENTITIES DITA Hazard Statement Domain//EN"
+            uri="hazardstatementDomain.ent"/>
+    <public publicId="-//OASIS//ELEMENTS DITA Hazard Statement Domain//EN"
+            uri="hazardstatementDomain.mod"/>
+    <public publicId="-//OASIS//ENTITIES DITA 1.x Hazard Statement Domain//EN"
+            uri="hazardstatementDomain.ent"/>
+    <public publicId="-//OASIS//ELEMENTS DITA 1.x Hazard Statement Domain//EN"
+            uri="hazardstatementDomain.mod"/>
+    <public publicId="-//OASIS//ENTITIES DITA 1.2 Hazard Statement Domain//EN"
+            uri="hazardstatementDomain.ent"/>
+    <public publicId="-//OASIS//ELEMENTS DITA 1.2 Hazard Statement Domain//EN"
+            uri="hazardstatementDomain.mod"/>
+  </group>
+
+  <group xml:base="ditaval/dtd/">
+    <public publicId="-//OASIS//DTD DITA DITAVAL//EN"
+            uri="ditaval.dtd"/>
+    <public publicId="-//OASIS//DTD DITA 1.x DITAVAL//EN"
+            uri="ditaval.dtd"/>
+    <public publicId="-//OASIS//DTD DITA 1.2 DITAVAL//EN"
+            uri="ditaval.dtd"/>
+  </group>
+
+  <group xml:base="technicalContent/dtd/">
+    <!-- Document types and modules used by the Technical Content package -->
+    <public publicId="-//OASIS//DTD DITA Concept//EN"
+            uri="concept.dtd"/>
+    <public publicId="-//OASIS//DTD DITA 1.x Concept//EN"
+            uri="concept.dtd"/>
+    <public publicId="-//OASIS//DTD DITA 1.2 Concept//EN"
+            uri="concept.dtd"/>
+    <public publicId="-//OASIS//ELEMENTS DITA Concept//EN"
+            uri="concept.mod"/>
+    <public publicId="-//OASIS//ELEMENTS DITA 1.x Concept//EN"
+            uri="concept.mod"/>
+    <public publicId="-//OASIS//ELEMENTS DITA 1.2 Concept//EN"
+            uri="concept.mod"/>
+    <public publicId="-//OASIS//ENTITIES DITA Concept//EN"
+            uri="concept.ent"/>
+    <public publicId="-//OASIS//ENTITIES DITA 1.x Concept//EN"
+            uri="concept.ent"/>
+    <public publicId="-//OASIS//ENTITIES DITA 1.2 Concept//EN"
+            uri="concept.ent"/>
+
+    <public publicId="-//OASIS//DTD DITA Composite//EN"
+            uri="ditabase.dtd"/>
+    <public publicId="-//OASIS//DTD DITA 1.x Composite//EN"
+            uri="ditabase.dtd"/>
+    <public publicId="-//OASIS//DTD DITA 1.2 Composite//EN"
+            uri="ditabase.dtd"/>
+
+    <public publicId="-//OASIS//DTD DITA Glossary Entry//EN"
+            uri="glossentry.dtd"/>
+    <public publicId="-//OASIS//DTD DITA 1.x Glossary Entry//EN"
+            uri="glossentry.dtd"/>
+    <public publicId="-//OASIS//DTD DITA 1.2 Glossary Entry//EN"
+            uri="glossentry.dtd"/>
+    <public publicId="-//OASIS//ELEMENTS DITA Glossary Entry//EN"
+            uri="glossentry.mod"/>
+    <public publicId="-//OASIS//ELEMENTS DITA 1.x Glossary Entry//EN"
+            uri="glossentry.mod"/>
+    <public publicId="-//OASIS//ELEMENTS DITA 1.2 Glossary Entry//EN"
+            uri="glossentry.mod"/>
+    <public publicId="-//OASIS//ENTITIES DITA Glossary Entry//EN"
+            uri="glossentry.ent"/>
+    <public publicId="-//OASIS//ENTITIES DITA 1.x Glossary Entry//EN"
+            uri="glossentry.ent"/>
+    <public publicId="-//OASIS//ENTITIES DITA 1.2 Glossary Entry//EN"
+            uri="glossentry.ent"/>
+
+    <public publicId="-//OASIS//DTD DITA Glossary//EN"
+            uri="glossary.dtd"/>
+    <public publicId="-//OASIS//DTD DITA 1.x Glossary//EN"
+            uri="glossary.dtd"/>
+    <public publicId="-//OASIS//DTD DITA 1.2 Glossary//EN"
+            uri="glossary.dtd"/>
+    <public publicId="-//OASIS//ELEMENTS DITA Glossary//EN"
+            uri="glossary.mod"/>
+    <public publicId="-//OASIS//ELEMENTS DITA 1.x Glossary//EN"
+            uri="glossary.mod"/>
+    <public publicId="-//OASIS//ELEMENTS DITA 1.2 Glossary//EN"
+            uri="glossary.mod"/>
+    <public publicId="-//OASIS//ENTITIES DITA Glossary//EN"
+            uri="glossary.ent"/>
+    <public publicId="-//OASIS//ENTITIES DITA 1.x Glossary//EN"
+            uri="glossary.ent"/>
+    <public publicId="-//OASIS//ENTITIES DITA 1.2 Glossary//EN"
+            uri="glossary.ent"/>
+
+    <public publicId="-//OASIS//DTD DITA Glossary Group//EN"
+            uri="glossgroup.dtd"/>
+    <public publicId="-//OASIS//DTD DITA 1.x Glossary Group//EN"
+            uri="glossgroup.dtd"/>
+    <public publicId="-//OASIS//DTD DITA 1.2 Glossary Group//EN"
+            uri="glossgroup.dtd"/>
+    <public publicId="-//OASIS//ELEMENTS DITA Glossary Group//EN"
+            uri="glossgroup.mod"/>
+    <public publicId="-//OASIS//ELEMENTS DITA 1.x Glossary Group//EN"
+            uri="glossgroup.mod"/>
+    <public publicId="-//OASIS//ELEMENTS DITA 1.2 Glossary Group//EN"
+            uri="glossgroup.mod"/>
+    <public publicId="-//OASIS//ENTITIES DITA Glossary Group//EN"
+            uri="glossgroup.ent"/>
+    <public publicId="-//OASIS//ENTITIES DITA 1.x Glossary Group//EN"
+            uri="glossgroup.ent"/>
+    <public publicId="-//OASIS//ENTITIES DITA 1.2 Glossary Group//EN"
+            uri="glossgroup.ent"/>
+
+    <public publicId="-//OASIS//DTD DITA Reference//EN"
+            uri="reference.dtd"/>
+    <public publicId="-//OASIS//DTD DITA 1.x Reference//EN"
+            uri="reference.dtd"/>
+    <public publicId="-//OASIS//DTD DITA 1.2 Reference//EN"
+            uri="reference.dtd"/>
+    <public publicId="-//OASIS//ELEMENTS DITA Reference//EN"
+            uri="reference.mod"/>
+    <public publicId="-//OASIS//ELEMENTS DITA 1.x Reference//EN"
+            uri="reference.mod"/>
+    <public publicId="-//OASIS//ELEMENTS DITA 1.2 Reference//EN"
+            uri="reference.mod"/>
+    <public publicId="-//OASIS//ENTITIES DITA Reference//EN"
+            uri="reference.ent"/>
+    <public publicId="-//OASIS//ENTITIES DITA 1.x Reference//EN"
+            uri="reference.ent"/>
+    <public publicId="-//OASIS//ENTITIES DITA 1.2 Reference//EN"
+            uri="reference.ent"/>
+
+    <public publicId="-//OASIS//DTD DITA Task//EN"
+            uri="task.dtd"/>
+    <public publicId="-//OASIS//DTD DITA 1.x Task//EN"
+            uri="task.dtd"/>
+    <public publicId="-//OASIS//DTD DITA 1.2 Task//EN"
+            uri="task.dtd"/>
+    <public publicId="-//OASIS//DTD DITA General Task//EN"
+            uri="generalTask.dtd"/>
+    <public publicId="-//OASIS//DTD DITA 1.x General Task//EN"
+            uri="generalTask.dtd"/>
+    <public publicId="-//OASIS//DTD DITA 1.2 General Task//EN"
+            uri="generalTask.dtd"/>
+    <public publicId="-//OASIS//ELEMENTS DITA Task//EN"
+            uri="task.mod"/>
+    <public publicId="-//OASIS//ELEMENTS DITA 1.x Task//EN"
+            uri="task.mod"/>
+    <public publicId="-//OASIS//ELEMENTS DITA 1.2 Task//EN"
+            uri="task.mod"/>
+    <public publicId="-//OASIS//ENTITIES DITA Task//EN"
+            uri="task.ent"/>
+    <public publicId="-//OASIS//ENTITIES DITA 1.x Task//EN"
+            uri="task.ent"/>
+    <public publicId="-//OASIS//ENTITIES DITA 1.2 Task//EN"
+            uri="task.ent"/>
+
+    <!-- Topic for use in the technical content package -->
+    <public publicId="-//OASIS//DTD DITA Topic//EN"
+            uri="topic.dtd"/>
+    <public publicId="-//OASIS//DTD DITA 1.x Topic//EN"
+            uri="topic.dtd"/>
+    <public publicId="-//OASIS//DTD DITA 1.2 Topic//EN"
+            uri="topic.dtd"/>
+
+    <!-- Map for use in the technical content package -->
+    <public publicId="-//OASIS//DTD DITA Map//EN"
+            uri="map.dtd"/>
+    <public publicId="-//OASIS//DTD DITA 1.x Map//EN"
+            uri="map.dtd"/>
+    <public publicId="-//OASIS//DTD DITA 1.2 Map//EN"
+            uri="map.dtd"/>
+
+    <!-- Domains for the technical content package -->
+    <public publicId="-//OASIS//ENTITIES DITA Abbreviated Form Domain//EN"
+            uri="abbreviateDomain.ent"/>
+    <public publicId="-//OASIS//ELEMENTS DITA Abbreviated Form Domain//EN"
+            uri="abbreviateDomain.mod"/>
+    <public publicId="-//OASIS//ENTITIES DITA 1.x Abbreviated Form Domain//EN"
+            uri="abbreviateDomain.ent"/>
+    <public publicId="-//OASIS//ELEMENTS DITA 1.x Abbreviated Form Domain//EN"
+            uri="abbreviateDomain.mod"/>
+    <public publicId="-//OASIS//ENTITIES DITA 1.2 Abbreviated Form Domain//EN"
+            uri="abbreviateDomain.ent"/>
+    <public publicId="-//OASIS//ELEMENTS DITA 1.2 Abbreviated Form Domain//EN"
+            uri="abbreviateDomain.mod"/>
+
+    <public publicId="-//OASIS//ELEMENTS DITA Programming Domain//EN"
+            uri="programmingDomain.mod"/>
+    <public publicId="-//OASIS//ENTITIES DITA Programming Domain//EN"
+            uri="programmingDomain.ent"/>
+    <public publicId="-//OASIS//ELEMENTS DITA 1.x Programming Domain//EN"
+            uri="programmingDomain.mod"/>
+    <public publicId="-//OASIS//ENTITIES DITA 1.x Programming Domain//EN"
+            uri="programmingDomain.ent"/>
+    <public publicId="-//OASIS//ELEMENTS DITA 1.2 Programming Domain//EN"
+            uri="programmingDomain.mod"/>
+    <public publicId="-//OASIS//ENTITIES DITA 1.2 Programming Domain//EN"
+            uri="programmingDomain.ent"/>
+
+    <public publicId="-//OASIS//ELEMENTS DITA Software Domain//EN"
+            uri="softwareDomain.mod"/>
+    <public publicId="-//OASIS//ENTITIES DITA Software Domain//EN"
+            uri="softwareDomain.ent"/>
+    <public publicId="-//OASIS//ELEMENTS DITA 1.x Software Domain//EN"
+            uri="softwareDomain.mod"/>
+    <public publicId="-//OASIS//ENTITIES DITA 1.x Software Domain//EN"
+            uri="softwareDomain.ent"/>
+    <public publicId="-//OASIS//ELEMENTS DITA 1.2 Software Domain//EN"
+            uri="softwareDomain.mod"/>
+    <public publicId="-//OASIS//ENTITIES DITA 1.2 Software Domain//EN"
+            uri="softwareDomain.ent"/>
+
+    <public publicId="-//OASIS//ENTITIES DITA Task Requirements Domain//EN"
+            uri="taskreqDomain.ent"/>
+    <public publicId="-//OASIS//ELEMENTS DITA Task Requirements Domain//EN"
+            uri="taskreqDomain.mod"/>
+    <public publicId="-//OASIS//ENTITIES DITA 1.x Task Requirements Domain//EN"
+            uri="taskreqDomain.ent"/>
+    <public publicId="-//OASIS//ELEMENTS DITA 1.x Task Requirements Domain//EN"
+            uri="taskreqDomain.mod"/>
+    <public publicId="-//OASIS//ENTITIES DITA 1.2 Task Requirements Domain//EN"
+            uri="taskreqDomain.ent"/>
+    <public publicId="-//OASIS//ELEMENTS DITA 1.2 Task Requirements Domain//EN"
+            uri="taskreqDomain.mod"/>
+
+    <public publicId="-//OASIS//ELEMENTS DITA User Interface Domain//EN"
+            uri="uiDomain.mod"/>
+    <public publicId="-//OASIS//ENTITIES DITA User Interface Domain//EN"
+            uri="uiDomain.ent"/>
+    <public publicId="-//OASIS//ELEMENTS DITA 1.x User Interface Domain//EN"
+            uri="uiDomain.mod"/>
+    <public publicId="-//OASIS//ENTITIES DITA 1.x User Interface Domain//EN"
+            uri="uiDomain.ent"/>
+    <public publicId="-//OASIS//ELEMENTS DITA 1.2 User Interface Domain//EN"
+            uri="uiDomain.mod"/>
+    <public publicId="-//OASIS//ENTITIES DITA 1.2 User Interface Domain//EN"
+            uri="uiDomain.ent"/>
+
+    <public publicId="-//OASIS//ELEMENTS DITA Glossary Reference Domain//EN"
+            uri="glossrefDomain.mod"/>
+    <public publicId="-//OASIS//ENTITIES DITA Glossary Reference Domain//EN"
+            uri="glossrefDomain.ent"/>
+    <public publicId="-//OASIS//ELEMENTS DITA 1.x Glossary Reference Domain//EN"
+            uri="glossrefDomain.mod"/>
+    <public publicId="-//OASIS//ENTITIES DITA 1.x Glossary Reference Domain//EN"
+            uri="glossrefDomain.ent"/>
+    <public publicId="-//OASIS//ELEMENTS DITA 1.2 Glossary Reference Domain//EN"
+            uri="glossrefDomain.mod"/>
+    <public publicId="-//OASIS//ENTITIES DITA 1.2 Glossary Reference Domain//EN"
+            uri="glossrefDomain.ent"/>
+
+    <!-- Constraints in the technical content package -->
+    <public publicId="-//OASIS//ELEMENTS DITA Strict Taskbody Constraint//EN" 
+            uri="strictTaskbodyConstraint.mod"/>
+    <public publicId="-//OASIS//ELEMENTS DITA 1.x Strict Taskbody Constraint//EN" 
+            uri="strictTaskbodyConstraint.mod"/>
+    <public publicId="-//OASIS//ELEMENTS DITA 1.2 Strict Taskbody Constraint//EN" 
+            uri="strictTaskbodyConstraint.mod"/>
+  </group>
+
+  <!-- Bookmap document type and module -->
+  <group xml:base="bookmap/dtd/">
+    <public publicId="-//OASIS//DTD DITA BookMap//EN"
+            uri="bookmap.dtd"/>
+    <public publicId="-//OASIS//DTD DITA 1.x BookMap//EN"
+            uri="bookmap.dtd"/>
+    <public publicId="-//OASIS//DTD DITA 1.2 BookMap//EN"
+            uri="bookmap.dtd"/>
+    <public publicId="-//OASIS//ELEMENTS DITA BookMap//EN"
+            uri="bookmap.mod"/>
+    <public publicId="-//OASIS//ELEMENTS DITA 1.x BookMap//EN"
+            uri="bookmap.mod"/>
+    <public publicId="-//OASIS//ELEMENTS DITA 1.2 BookMap//EN"
+            uri="bookmap.mod"/>
+    <public publicId="-//OASIS//ENTITIES DITA BookMap//EN"
+            uri="bookmap.ent"/>
+    <public publicId="-//OASIS//ENTITIES DITA 1.x BookMap//EN"
+            uri="bookmap.ent"/>
+    <public publicId="-//OASIS//ENTITIES DITA 1.2 BookMap//EN"
+            uri="bookmap.ent"/>
+  </group>
+
+  <!-- Subject scheme package for controlled vocabularies -->
+  <group xml:base="subjectScheme/dtd/">
+    <public publicId="-//OASIS//DTD DITA Subject Scheme Map//EN"
+            uri="subjectScheme.dtd"/>
+    <public publicId="-//OASIS//DTD DITA 1.x Subject Scheme Map//EN"
+            uri="subjectScheme.dtd"/>
+    <public publicId="-//OASIS//DTD DITA 1.2 Subject Scheme Map//EN"
+            uri="subjectScheme.dtd"/>
+    <public publicId="-//OASIS//ELEMENTS DITA Subject Scheme Map//EN"
+            uri="subjectScheme.mod"/>
+    <public publicId="-//OASIS//ELEMENTS DITA 1.x Subject Scheme Map//EN"
+            uri="subjectScheme.mod"/>
+    <public publicId="-//OASIS//ELEMENTS DITA 1.2 Subject Scheme Map//EN"
+            uri="subjectScheme.mod"/>
+    <public publicId="-//OASIS//ENTITIES DITA Subject Scheme Map//EN"
+            uri="subjectScheme.ent"/>
+    <public publicId="-//OASIS//ENTITIES DITA 1.x Subject Scheme Map//EN"
+            uri="subjectScheme.ent"/>
+    <public publicId="-//OASIS//ENTITIES DITA 1.2 Subject Scheme Map//EN"
+            uri="subjectScheme.ent"/>
+
+    <public publicId="-//OASIS//DTD DITA Classification Map//EN"
+            uri="classifyMap.dtd"/>
+    <public publicId="-//OASIS//DTD DITA 1.x Classification Map//EN"
+            uri="classifyMap.dtd"/>
+    <public publicId="-//OASIS//DTD DITA 1.2 Classification Map//EN"
+            uri="classifyMap.dtd"/>
+
+    <public publicId="-//OASIS//ENTITIES DITA Map Subject Classification Domain//EN"
+            uri="classifyDomain.ent"/>
+    <public publicId="-//OASIS//ELEMENTS DITA Map Subject Classification Domain//EN"
+            uri="classifyDomain.mod"/>
+    <public publicId="-//OASIS//ENTITIES DITA 1.x Map Subject Classification Domain//EN"
+            uri="classifyDomain.ent"/>
+    <public publicId="-//OASIS//ELEMENTS DITA 1.x Map Subject Classification Domain//EN"
+            uri="classifyDomain.mod"/>
+    <public publicId="-//OASIS//ENTITIES DITA 1.2 Map Subject Classification Domain//EN"
+            uri="classifyDomain.ent"/>
+    <public publicId="-//OASIS//ELEMENTS DITA 1.2 Map Subject Classification Domain//EN"
+            uri="classifyDomain.mod"/>
+  </group>
+
+  <!-- Domain for representing XNAL address information -->
+  <group xml:base="xnal/dtd/">
+    <public publicId="-//OASIS//ELEMENTS DITA XNAL Domain//EN"
+            uri="xnalDomain.mod"/>
+    <public publicId="-//OASIS//ENTITIES DITA XNAL Domain//EN"
+            uri="xnalDomain.ent"/>
+    <public publicId="-//OASIS//ELEMENTS DITA 1.x XNAL Domain//EN"
+            uri="xnalDomain.mod"/>
+    <public publicId="-//OASIS//ENTITIES DITA 1.x XNAL Domain//EN"
+            uri="xnalDomain.ent"/>
+    <public publicId="-//OASIS//ELEMENTS DITA 1.2 XNAL Domain//EN"
+            uri="xnalDomain.mod"/>
+    <public publicId="-//OASIS//ENTITIES DITA 1.2 XNAL Domain//EN"
+            uri="xnalDomain.ent"/>
+  </group>
+
+  <!-- Modules and document types from the OASIS DITA Learning Subcommittee -->
+  <group xml:base="learning/dtd/">
+    <public publicId="-//OASIS//DTD DITA Learning Assessment//EN"
+            uri="learningAssessment.dtd"/> 
+    <public publicId="-//OASIS//DTD DITA Learning BookMap//EN"
+            uri="learningBookmap.dtd"/>
+    <public publicId="-//OASIS//DTD DITA Learning Content//EN"
+            uri="learningContent.dtd"/>
+    <public publicId="-//OASIS//DTD DITA Learning Map//EN"
+            uri="learningMap.dtd"/>
+    <public publicId="-//OASIS//DTD DITA Learning Overview//EN"
+            uri="learningOverview.dtd"/>
+    <public publicId="-//OASIS//DTD DITA Learning Plan//EN"
+            uri="learningPlan.dtd"/>
+    <public publicId="-//OASIS//DTD DITA Learning Summary//EN"
+            uri="learningSummary.dtd"/>
+
+    <public publicId="-//OASIS//DTD DITA 1.x Learning Assessment//EN"
+            uri="learningAssessment.dtd"/>
+    <public publicId="-//OASIS//DTD DITA 1.x Learning BookMap//EN"
+            uri="learningBookmap.dtd"/>
+    <public publicId="-//OASIS//DTD DITA 1.x Learning Content//EN"
+            uri="learningContent.dtd"/>
+    <public publicId="-//OASIS//DTD DITA 1.x Learning Map//EN"
+            uri="learningMap.dtd"/>
+    <public publicId="-//OASIS//DTD DITA 1.x Learning Overview//EN"
+            uri="learningOverview.dtd"/>
+    <public publicId="-//OASIS//DTD DITA 1.x Learning Plan//EN"
+            uri="learningPlan.dtd"/>
+    <public publicId="-//OASIS//DTD DITA 1.x Learning Summary//EN"
+            uri="learningSummary.dtd"/>
+
+    <public publicId="-//OASIS//DTD DITA 1.2 Learning Assessment//EN"
+            uri="learningAssessment.dtd"/>
+    <public publicId="-//OASIS//DTD DITA 1.2 Learning BookMap//EN"
+            uri="learningBookmap.dtd"/>
+    <public publicId="-//OASIS//DTD DITA 1.2 Learning Content//EN"
+            uri="learningContent.dtd"/>
+    <public publicId="-//OASIS//DTD DITA 1.2 Learning Map//EN"
+            uri="learningMap.dtd"/>
+    <public publicId="-//OASIS//DTD DITA 1.2 Learning Overview//EN"
+            uri="learningOverview.dtd"/>
+    <public publicId="-//OASIS//DTD DITA 1.2 Learning Plan//EN"
+            uri="learningPlan.dtd"/>
+    <public publicId="-//OASIS//DTD DITA 1.2 Learning Summary//EN"
+            uri="learningSummary.dtd"/>
+
+    <public publicId="-//OASIS//ENTITIES DITA Learning Assessment//EN"
+            uri="learningAssessment.ent"/>
+    <public publicId="-//OASIS//ELEMENTS DITA Learning Assessment//EN"
+            uri="learningAssessment.mod"/>
+    <public publicId="-//OASIS//ENTITIES DITA Learning Base//EN"
+            uri="learningBase.ent"/>
+    <public publicId="-//OASIS//ELEMENTS DITA Learning Base//EN"
+            uri="learningBase.mod"/>
+    <public publicId="-//OASIS//ENTITIES DITA Learning Content//EN"
+            uri="learningContent.ent"/>
+    <public publicId="-//OASIS//ELEMENTS DITA Learning Content//EN"
+            uri="learningContent.mod"/>
+    <public publicId="-//OASIS//ENTITIES DITA Learning Overview//EN"
+            uri="learningOverview.ent"/>
+    <public publicId="-//OASIS//ELEMENTS DITA Learning Overview//EN"
+            uri="learningOverview.mod"/>
+    <public publicId="-//OASIS//ENTITIES DITA Learning Plan//EN"
+            uri="learningPlan.ent"/>
+    <public publicId="-//OASIS//ELEMENTS DITA Learning Plan//EN"
+            uri="learningPlan.mod"/>
+    <public publicId="-//OASIS//ENTITIES DITA Learning Summary//EN"
+            uri="learningSummary.ent"/>
+    <public publicId="-//OASIS//ELEMENTS DITA Learning Summary//EN"
+            uri="learningSummary.mod"/>
+
+    <public publicId="-//OASIS//ENTITIES DITA 1.x Learning Assessment//EN"
+            uri="learningAssessment.ent"/>
+    <public publicId="-//OASIS//ELEMENTS DITA 1.x Learning Assessment//EN"
+            uri="learningAssessment.mod"/>
+    <public publicId="-//OASIS//ENTITIES DITA 1.x Learning Base//EN"
+            uri="learningBase.ent"/>
+    <public publicId="-//OASIS//ELEMENTS DITA 1.x Learning Base//EN"
+            uri="learningBase.mod"/>
+    <public publicId="-//OASIS//ENTITIES DITA 1.x Learning Content//EN"
+            uri="learningContent.ent"/>
+    <public publicId="-//OASIS//ELEMENTS DITA 1.x Learning Content//EN"
+            uri="learningContent.mod"/>
+    <public publicId="-//OASIS//ENTITIES DITA 1.x Learning Overview//EN"
+            uri="learningOverview.ent"/>
+    <public publicId="-//OASIS//ELEMENTS DITA 1.x Learning Overview//EN"
+            uri="learningOverview.mod"/>
+    <public publicId="-//OASIS//ENTITIES DITA 1.x Learning Plan//EN"
+            uri="learningPlan.ent"/>
+    <public publicId="-//OASIS//ELEMENTS DITA 1.x Learning Plan//EN"
+            uri="learningPlan.mod"/>
+    <public publicId="-//OASIS//ENTITIES DITA 1.x Learning Summary//EN"
+            uri="learningSummary.ent"/>
+    <public publicId="-//OASIS//ELEMENTS DITA 1.x Learning Summary//EN"
+            uri="learningSummary.mod"/>
+
+    <public publicId="-//OASIS//ENTITIES DITA 1.2 Learning Assessment//EN"
+            uri="learningAssessment.ent"/>
+    <public publicId="-//OASIS//ELEMENTS DITA 1.2 Learning Assessment//EN"
+            uri="learningAssessment.mod"/>
+    <public publicId="-//OASIS//ENTITIES DITA 1.2 Learning Base//EN"
+            uri="learningBase.ent"/>
+    <public publicId="-//OASIS//ELEMENTS DITA 1.2 Learning Base//EN"
+            uri="learningBase.mod"/>
+    <public publicId="-//OASIS//ENTITIES DITA 1.2 Learning Content//EN"
+            uri="learningContent.ent"/>
+    <public publicId="-//OASIS//ELEMENTS DITA 1.2 Learning Content//EN"
+            uri="learningContent.mod"/>
+    <public publicId="-//OASIS//ENTITIES DITA 1.2 Learning Overview//EN"
+            uri="learningOverview.ent"/>
+    <public publicId="-//OASIS//ELEMENTS DITA 1.2 Learning Overview//EN"
+            uri="learningOverview.mod"/>
+    <public publicId="-//OASIS//ENTITIES DITA 1.2 Learning Plan//EN"
+            uri="learningPlan.ent"/>
+    <public publicId="-//OASIS//ELEMENTS DITA 1.2 Learning Plan//EN"
+            uri="learningPlan.mod"/>
+    <public publicId="-//OASIS//ENTITIES DITA 1.2 Learning Summary//EN"
+            uri="learningSummary.ent"/>
+    <public publicId="-//OASIS//ELEMENTS DITA 1.2 Learning Summary//EN"
+            uri="learningSummary.mod"/>
+
+    <public publicId="-//OASIS//ENTITIES DITA Learning Interaction Base Domain//EN"
+            uri="learningInteractionBaseDomain.ent"/>
+    <public publicId="-//OASIS//ELEMENTS DITA Learning Interaction Base Domain//EN"
+            uri="learningInteractionBaseDomain.mod"/>
+    <public publicId="-//OASIS//ENTITIES DITA Learning Domain//EN"
+            uri="learningDomain.ent"/>
+    <public publicId="-//OASIS//ELEMENTS DITA Learning Domain//EN"
+            uri="learningDomain.mod"/>
+    <public publicId="-//OASIS//ENTITIES DITA Learning Metadata Domain//EN"
+            uri="learningMetadataDomain.ent"/>
+    <public publicId="-//OASIS//ELEMENTS DITA Learning Metadata Domain//EN"
+            uri="learningMetadataDomain.mod"/>
+    <public publicId="-//OASIS//ENTITIES DITA Learning Map Domain//EN"
+            uri="learningMapDomain.ent"/>
+    <public publicId="-//OASIS//ELEMENTS DITA Learning Map Domain//EN"
+            uri="learningMapDomain.mod"/>
+
+    <public publicId="-//OASIS//ENTITIES DITA 1.x Learning Interaction Base Domain//EN"
+            uri="learningInteractionBaseDomain.ent"/>
+    <public publicId="-//OASIS//ELEMENTS DITA 1.x Learning Interaction Base Domain//EN"
+            uri="learningInteractionBaseDomain.mod"/>
+    <public publicId="-//OASIS//ENTITIES DITA 1.x Learning Domain//EN"
+            uri="learningDomain.ent"/>
+    <public publicId="-//OASIS//ELEMENTS DITA 1.x Learning Domain//EN"
+            uri="learningDomain.mod"/>
+    <public publicId="-//OASIS//ENTITIES DITA 1.x Learning Metadata Domain//EN"
+            uri="learningMetadataDomain.ent"/>
+    <public publicId="-//OASIS//ELEMENTS DITA 1.x Learning Metadata Domain//EN"
+            uri="learningMetadataDomain.mod"/>
+    <public publicId="-//OASIS//ENTITIES DITA 1.x Learning Map Domain//EN"
+            uri="learningMapDomain.ent"/>
+    <public publicId="-//OASIS//ELEMENTS DITA 1.x Learning Map Domain//EN"
+            uri="learningMapDomain.mod"/>
+
+    <public publicId="-//OASIS//ENTITIES DITA 1.2 Learning Interaction Base Domain//EN"
+            uri="learningInteractionBaseDomain.ent"/>
+    <public publicId="-//OASIS//ELEMENTS DITA 1.2 Learning Interaction Base Domain//EN"
+            uri="learningInteractionBaseDomain.mod"/>
+    <public publicId="-//OASIS//ENTITIES DITA 1.2 Learning Domain//EN"
+            uri="learningDomain.ent"/>
+    <public publicId="-//OASIS//ELEMENTS DITA 1.2 Learning Domain//EN"
+            uri="learningDomain.mod"/>
+    <public publicId="-//OASIS//ENTITIES DITA 1.2 Learning Metadata Domain//EN"
+            uri="learningMetadataDomain.ent"/>
+    <public publicId="-//OASIS//ELEMENTS DITA 1.2 Learning Metadata Domain//EN"
+            uri="learningMetadataDomain.mod"/>
+    <public publicId="-//OASIS//ENTITIES DITA 1.2 Learning Map Domain//EN"
+            uri="learningMapDomain.ent"/>
+    <public publicId="-//OASIS//ELEMENTS DITA 1.2 Learning Map Domain//EN"
+            uri="learningMapDomain.mod"/>
+  </group>
+
+  <!-- Modules and document types from the OASIS DITA Machine Industry Subcommittee -->
+  <group uri="machineryIndustry/dtd/">
+    <public publicId="-//OASIS//DTD DITA Machinery Task//EN"
+            uri="machineryTask.dtd"/>
+    <public publicId="-//OASIS//DTD DITA 1.x Machinery Task//EN"
+            uri="machineryTask.dtd"/>
+    <public publicId="-//OASIS//DTD DITA 1.2 Machinery Task//EN"
+            uri="machineryTask.dtd"/>
+
+    <public publicId="-//OASIS//ELEMENTS DITA Machinery Taskbody Constraint//EN" 
+            uri="machineryTaskbodyConstraint.mod"/>
+    <public publicId="-//OASIS//ELEMENTS DITA 1.x Machinery Taskbody Constraint//EN" 
+            uri="machineryTaskbodyConstraint.mod"/>
+    <public publicId="-//OASIS//ELEMENTS DITA 1.2 Machinery Taskbody Constraint//EN" 
+            uri="machineryTaskbodyConstraint.mod"/>
+  </group>
+
+<!-- The following identifiers may be used to refer to DITA 1.1 DTDs.
+     Those DTDs are not shipped with this package, so the IDs are
+     commented out. -->
+<!--
+<group>
+  <public publicId="-//OASIS//DTD DITA 1.1 Concept//EN" uri="concept.dtd"/>
+  <public publicId="-//OASIS//ELEMENTS DITA 1.1 Concept//EN" uri="concept.mod"/>
+  <public publicId="-//OASIS//DTD DITA 1.1 Composite//EN" uri="ditabase.dtd"/>
+  <public publicId="-//OASIS//DTD DITA 1.1 Glossary//EN" uri="glossary.dtd"/>
+  <public publicId="-//OASIS//ELEMENTS DITA 1.1 Glossary//EN" uri="glossary.mod"/>
+  <public publicId="-//OASIS//DTD DITA 1.1 Reference//EN" uri="reference.dtd"/>
+  <public publicId="-//OASIS//ELEMENTS DITA 1.1 Reference//EN" uri="reference.mod"/>
+  <public publicId="-//OASIS//DTD DITA 1.1 Task//EN" uri="task.dtd"/>
+  <public publicId="-//OASIS//ELEMENTS DITA 1.1 Task//EN" uri="task.mod"/>
+  <public publicId="-//OASIS//DTD DITA 1.1 Topic//EN" uri="topic.dtd"/>
+  <public publicId="-//OASIS//ELEMENTS DITA 1.1 Topic//EN" uri="topic.mod"/>
+  <public publicId="-//OASIS//ENTITIES DITA 1.1 Topic Definitions//EN" uri="topicDefn.ent"/>
+  <public publicId="-//OASIS//DTD DITA 1.1 Map//EN" uri="map.dtd"/>
+  <public publicId="-//OASIS//ELEMENTS DITA 1.1 Map//EN" uri="map.mod"/>
+  <public publicId="-//OASIS//ENTITIES DITA 1.1 Map Group Domain//EN" uri="mapGroup.ent"/>
+  <public publicId="-//OASIS//ELEMENTS DITA 1.1 Map Group Domain//EN" uri="mapGroup.mod"/>
+  <public publicId="-//OASIS//DTD DITA 1.1 BookMap//EN" uri="bookmap.dtd"/>
+  <public publicId="-//OASIS//ELEMENTS DITA 1.1 BookMap//EN" uri="bookmap.mod"/>
+  <public publicId="-//OASIS//ELEMENTS DITA 1.1 Highlight Domain//EN" uri="highlightDomain.mod"/>
+  <public publicId="-//OASIS//ENTITIES DITA 1.1 Highlight Domain//EN" uri="highlightDomain.ent"/>
+  <public publicId="-//OASIS//ELEMENTS DITA 1.1 Indexing Domain//EN" uri="indexingDomain.mod"/>
+  <public publicId="-//OASIS//ENTITIES DITA 1.1 Indexing Domain//EN" uri="indexingDomain.ent"/>
+  <public publicId="-//OASIS//ELEMENTS DITA 1.1 Programming Domain//EN" uri="programmingDomain.mod"/>
+  <public publicId="-//OASIS//ENTITIES DITA 1.1 Programming Domain//EN" uri="programmingDomain.ent"/>
+  <public publicId="-//OASIS//ELEMENTS DITA 1.1 Software Domain//EN" uri="softwareDomain.mod"/>
+  <public publicId="-//OASIS//ENTITIES DITA 1.1 Software Domain//EN" uri="softwareDomain.ent"/>
+  <public publicId="-//OASIS//ELEMENTS DITA 1.1 User Interface Domain//EN" uri="uiDomain.mod"/>
+  <public publicId="-//OASIS//ENTITIES DITA 1.1 User Interface Domain//EN" uri="uiDomain.ent"/>
+  <public publicId="-//OASIS//ELEMENTS DITA 1.1 Utilities Domain//EN" uri="utilitiesDomain.mod"/>
+  <public publicId="-//OASIS//ENTITIES DITA 1.1 Utilities Domain//EN" uri="utilitiesDomain.ent"/>
+  <public publicId="-//OASIS//ELEMENTS DITA 1.1 XNAL Domain//EN" uri="xnalDomain.mod"/>
+  <public publicId="-//OASIS//ENTITIES DITA 1.1 XNAL Domain//EN" uri="xnalDomain.ent"/>
+  <public publicId="-//OASIS//ELEMENTS DITA 1.1 Common Elements//EN" uri="commonElements.mod"/>
+  <public publicId="-//OASIS//ENTITIES DITA 1.1 Common Elements//EN" uri="commonElements.ent"/>
+  <public publicId="-//OASIS//ELEMENTS DITA 1.1 Metadata//EN" uri="metaDecl.mod"/>
+  <public publicId="-//OASIS//ELEMENTS DITA 1.1 Exchange Table Model//EN" uri="tblDecl.mod"/>
+</group>
+-->
+<!-- The following identifiers may be used to refer to DITA 1.0 DTDs.
+     Those DTDs are not shipped with this package, so the IDs are
+     commented out. -->
+<!--<group>
+  <public publicId="-//OASIS//DTD DITA 1.0 Concept//EN" uri="concept.dtd"/>
+  <public publicId="-//OASIS//DTD DITA 1.0 Composite//EN" uri="ditabase.dtd"/>
+  <public publicId="-//OASIS//DTD DITA 1.0 Reference//EN" uri="reference.dtd"/>
+  <public publicId="-//OASIS//DTD DITA 1.0 Task//EN" uri="task.dtd"/>
+  <public publicId="-//OASIS//DTD DITA 1.0 Topic//EN" uri="topic.dtd"/>
+  <public publicId="-//OASIS//DTD DITA 1.0 Map//EN" uri="map.dtd"/>
+</group>-->
+
+</catalog>

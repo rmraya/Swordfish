@@ -1,0 +1,1015 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+	xmlns:gs4tr="http://www.gs4tr.org/schema/xliff-ext" elementFormDefault="qualified"
+	targetNamespace="http://www.gs4tr.org/schema/xliff-ext" xml:lang="en">
+	<!-- Import for xml:lang and xml:space (make sure to use local copy) -->
+	<xsd:import namespace="http://www.w3.org/XML/1998/namespace"
+		schemaLocation="http://www.w3.org/2001/xml.xsd" />
+
+	<!-- START definitions copied from xliff-core-1.2-strict.xsd -->
+
+	<xsd:group name="ElemGroup_TextContent">
+		<xsd:choice>
+			<xsd:element ref="gs4tr:g" />
+			<xsd:element ref="gs4tr:bpt" />
+			<xsd:element ref="gs4tr:ept" />
+			<xsd:element ref="gs4tr:ph" />
+			<xsd:element ref="gs4tr:it" />
+			<xsd:element ref="gs4tr:mrk" />
+			<xsd:element ref="gs4tr:x" />
+			<xsd:element ref="gs4tr:bx" />
+			<xsd:element ref="gs4tr:ex" />
+		</xsd:choice>
+	</xsd:group>
+
+	<xsd:simpleType name="XTend">
+		<xsd:restriction base="xsd:string">
+			<xsd:pattern value="x-[^\s]+" />
+		</xsd:restriction>
+	</xsd:simpleType>
+
+	<xsd:simpleType name="mtypeValueList">
+		<xsd:annotation>
+			<xsd:documentation>Values for the attribute 'mtype'.
+			</xsd:documentation>
+		</xsd:annotation>
+		<xsd:restriction base="xsd:NMTOKEN">
+			<xsd:enumeration value="abbrev">
+				<xsd:annotation>
+					<xsd:documentation>Indicates the marked text is an abbreviation.
+					</xsd:documentation>
+				</xsd:annotation>
+			</xsd:enumeration>
+			<xsd:enumeration value="abbreviated-form">
+				<xsd:annotation>
+					<xsd:documentation>ISO-12620 2.1.8: A term resulting from the
+						omission of any part of the full term while designating the same
+						concept.</xsd:documentation>
+				</xsd:annotation>
+			</xsd:enumeration>
+			<xsd:enumeration value="abbreviation">
+				<xsd:annotation>
+					<xsd:documentation>ISO-12620 2.1.8.1: An abbreviated form of a
+						simple term resulting from the omission of some of its letters
+						(e.g. 'adj.' for 'adjective').</xsd:documentation>
+				</xsd:annotation>
+			</xsd:enumeration>
+			<xsd:enumeration value="acronym">
+				<xsd:annotation>
+					<xsd:documentation>ISO-12620 2.1.8.4: An abbreviated form of a term
+						made up of letters from the full form of a multiword term strung
+						together into a sequence pronounced only syllabically (e.g.
+						'radar' for 'radio detecting and ranging').</xsd:documentation>
+				</xsd:annotation>
+			</xsd:enumeration>
+			<xsd:enumeration value="appellation">
+				<xsd:annotation>
+					<xsd:documentation>ISO-12620: A proper-name term, such as the name
+						of an agency or other proper entity.</xsd:documentation>
+				</xsd:annotation>
+			</xsd:enumeration>
+			<xsd:enumeration value="collocation">
+				<xsd:annotation>
+					<xsd:documentation>ISO-12620 2.1.18.1: A recurrent word combination
+						characterized by cohesion in that the components of the
+						collocation must co-occur within an utterance or series of
+						utterances, even though they do not necessarily have to maintain
+						immediate proximity to one another.</xsd:documentation>
+				</xsd:annotation>
+			</xsd:enumeration>
+			<xsd:enumeration value="common-name">
+				<xsd:annotation>
+					<xsd:documentation>ISO-12620 2.1.5: A synonym for an international
+						scientific term that is used in general discourse in a given
+						language.</xsd:documentation>
+				</xsd:annotation>
+			</xsd:enumeration>
+			<xsd:enumeration value="datetime">
+				<xsd:annotation>
+					<xsd:documentation>Indicates the marked text is a date and/or time.
+					</xsd:documentation>
+				</xsd:annotation>
+			</xsd:enumeration>
+			<xsd:enumeration value="equation">
+				<xsd:annotation>
+					<xsd:documentation>ISO-12620 2.1.15: An expression used to
+						represent a concept based on a statement that two mathematical
+						expressions are, for instance, equal as identified by the equal
+						sign (=), or assigned to one another by a similar sign.
+					</xsd:documentation>
+				</xsd:annotation>
+			</xsd:enumeration>
+			<xsd:enumeration value="expanded-form">
+				<xsd:annotation>
+					<xsd:documentation>ISO-12620 2.1.7: The complete representation of
+						a term for which there is an abbreviated form.</xsd:documentation>
+				</xsd:annotation>
+			</xsd:enumeration>
+			<xsd:enumeration value="formula">
+				<xsd:annotation>
+					<xsd:documentation>ISO-12620 2.1.14: Figures, symbols or the like
+						used to express a concept briefly, such as a mathematical or
+						chemical formula.</xsd:documentation>
+				</xsd:annotation>
+			</xsd:enumeration>
+			<xsd:enumeration value="head-term">
+				<xsd:annotation>
+					<xsd:documentation>ISO-12620 2.1.1: The concept designation that
+						has been chosen to head a terminological record.
+					</xsd:documentation>
+				</xsd:annotation>
+			</xsd:enumeration>
+			<xsd:enumeration value="initialism">
+				<xsd:annotation>
+					<xsd:documentation>ISO-12620 2.1.8.3: An abbreviated form of a term
+						consisting of some of the initial letters of the words making up a
+						multiword term or the term elements making up a compound term when
+						these letters are pronounced individually (e.g. 'BSE' for 'bovine
+						spongiform encephalopathy').</xsd:documentation>
+				</xsd:annotation>
+			</xsd:enumeration>
+			<xsd:enumeration value="international-scientific-term">
+				<xsd:annotation>
+					<xsd:documentation>ISO-12620 2.1.4: A term that is part of an
+						international scientific nomenclature as adopted by an appropriate
+						scientific body.</xsd:documentation>
+				</xsd:annotation>
+			</xsd:enumeration>
+			<xsd:enumeration value="internationalism">
+				<xsd:annotation>
+					<xsd:documentation>ISO-12620 2.1.6: A term that has the same or
+						nearly identical orthographic or phonemic form in many languages.
+					</xsd:documentation>
+				</xsd:annotation>
+			</xsd:enumeration>
+			<xsd:enumeration value="logical-expression">
+				<xsd:annotation>
+					<xsd:documentation>ISO-12620 2.1.16: An expression used to
+						represent a concept based on mathematical or logical relations,
+						such as statements of inequality, set relationships, Boolean
+						operations, and the like.</xsd:documentation>
+				</xsd:annotation>
+			</xsd:enumeration>
+			<xsd:enumeration value="materials-management-unit">
+				<xsd:annotation>
+					<xsd:documentation>ISO-12620 2.1.17: A unit to track object.
+					</xsd:documentation>
+				</xsd:annotation>
+			</xsd:enumeration>
+			<xsd:enumeration value="name">
+				<xsd:annotation>
+					<xsd:documentation>Indicates the marked text is a name.
+					</xsd:documentation>
+				</xsd:annotation>
+			</xsd:enumeration>
+			<xsd:enumeration value="near-synonym">
+				<xsd:annotation>
+					<xsd:documentation>ISO-12620 2.1.3: A term that represents the same
+						or a very similar concept as another term in the same language,
+						but for which interchangeability is limited to some contexts and
+						inapplicable in others.</xsd:documentation>
+				</xsd:annotation>
+			</xsd:enumeration>
+			<xsd:enumeration value="part-number">
+				<xsd:annotation>
+					<xsd:documentation>ISO-12620 2.1.17.2: A unique alphanumeric
+						designation assigned to an object in a manufacturing system.
+					</xsd:documentation>
+				</xsd:annotation>
+			</xsd:enumeration>
+			<xsd:enumeration value="phrase">
+				<xsd:annotation>
+					<xsd:documentation>Indicates the marked text is a phrase.
+					</xsd:documentation>
+				</xsd:annotation>
+			</xsd:enumeration>
+			<xsd:enumeration value="phraseological-unit">
+				<xsd:annotation>
+					<xsd:documentation>ISO-12620 2.1.18: Any group of two or more words
+						that form a unit, the meaning of which frequently cannot be
+						deduced based on the combined sense of the words making up the
+						phrase.</xsd:documentation>
+				</xsd:annotation>
+			</xsd:enumeration>
+			<xsd:enumeration value="protected">
+				<xsd:annotation>
+					<xsd:documentation>Indicates the marked text should not be
+						translated.</xsd:documentation>
+				</xsd:annotation>
+			</xsd:enumeration>
+			<xsd:enumeration value="romanized-form">
+				<xsd:annotation>
+					<xsd:documentation>ISO-12620 2.1.12: A form of a term resulting
+						from an operation whereby non-Latin writing systems are converted
+						to the Latin alphabet.</xsd:documentation>
+				</xsd:annotation>
+			</xsd:enumeration>
+			<xsd:enumeration value="seg">
+				<xsd:annotation>
+					<xsd:documentation>Indicates that the marked text represents a
+						segment.</xsd:documentation>
+				</xsd:annotation>
+			</xsd:enumeration>
+			<xsd:enumeration value="set-phrase">
+				<xsd:annotation>
+					<xsd:documentation>ISO-12620 2.1.18.2: A fixed, lexicalized phrase.
+					</xsd:documentation>
+				</xsd:annotation>
+			</xsd:enumeration>
+			<xsd:enumeration value="short-form">
+				<xsd:annotation>
+					<xsd:documentation>ISO-12620 2.1.8.2: A variant of a multiword term
+						that includes fewer words than the full form of the term (e.g.
+						'Group of Twenty-four' for 'Intergovernmental Group of Twenty-four
+						on International Monetary Affairs').</xsd:documentation>
+				</xsd:annotation>
+			</xsd:enumeration>
+			<xsd:enumeration value="sku">
+				<xsd:annotation>
+					<xsd:documentation>ISO-12620 2.1.17.1: Stock keeping unit, an
+						inventory item identified by a unique alphanumeric designation
+						assigned to an object in an inventory control system.
+					</xsd:documentation>
+				</xsd:annotation>
+			</xsd:enumeration>
+			<xsd:enumeration value="standard-text">
+				<xsd:annotation>
+					<xsd:documentation>ISO-12620 2.1.19: A fixed chunk of recurring
+						text.</xsd:documentation>
+				</xsd:annotation>
+			</xsd:enumeration>
+			<xsd:enumeration value="symbol">
+				<xsd:annotation>
+					<xsd:documentation>ISO-12620 2.1.13: A designation of a concept by
+						letters, numerals, pictograms or any combination thereof.
+					</xsd:documentation>
+				</xsd:annotation>
+			</xsd:enumeration>
+			<xsd:enumeration value="synonym">
+				<xsd:annotation>
+					<xsd:documentation>ISO-12620 2.1.2: Any term that represents the
+						same or a very similar concept as the main entry term in a term
+						entry.</xsd:documentation>
+				</xsd:annotation>
+			</xsd:enumeration>
+			<xsd:enumeration value="synonymous-phrase">
+				<xsd:annotation>
+					<xsd:documentation>ISO-12620 2.1.18.3: Phraseological unit in a
+						language that expresses the same semantic content as another
+						phrase in that same language.</xsd:documentation>
+				</xsd:annotation>
+			</xsd:enumeration>
+			<xsd:enumeration value="term">
+				<xsd:annotation>
+					<xsd:documentation>Indicates the marked text is a term.
+					</xsd:documentation>
+				</xsd:annotation>
+			</xsd:enumeration>
+			<xsd:enumeration value="transcribed-form">
+				<xsd:annotation>
+					<xsd:documentation>ISO-12620 2.1.11: A form of a term resulting
+						from an operation whereby the characters of one writing system are
+						represented by characters from another writing system, taking into
+						account the pronunciation of the characters converted.
+					</xsd:documentation>
+				</xsd:annotation>
+			</xsd:enumeration>
+			<xsd:enumeration value="transliterated-form">
+				<xsd:annotation>
+					<xsd:documentation>ISO-12620 2.1.10: A form of a term resulting
+						from an operation whereby the characters of an alphabetic writing
+						system are represented by characters from another alphabetic
+						writing system.</xsd:documentation>
+				</xsd:annotation>
+			</xsd:enumeration>
+			<xsd:enumeration value="truncated-term">
+				<xsd:annotation>
+					<xsd:documentation>ISO-12620 2.1.8.5: An abbreviated form of a term
+						resulting from the omission of one or more term elements or
+						syllables (e.g. 'flu' for 'influenza').</xsd:documentation>
+				</xsd:annotation>
+			</xsd:enumeration>
+			<xsd:enumeration value="variant">
+				<xsd:annotation>
+					<xsd:documentation>ISO-12620 2.1.9: One of the alternate forms of a
+						term.</xsd:documentation>
+				</xsd:annotation>
+			</xsd:enumeration>
+		</xsd:restriction>
+	</xsd:simpleType>
+
+	<xsd:simpleType name="AttrType_assoc">
+		<xsd:restriction base="xsd:NMTOKEN">
+			<xsd:enumeration value="preceding" />
+			<xsd:enumeration value="following" />
+			<xsd:enumeration value="both" />
+		</xsd:restriction>
+	</xsd:simpleType>
+
+	<xsd:simpleType name="AttrType_Position">
+		<xsd:restriction base="xsd:NMTOKEN">
+			<xsd:enumeration value="open" />
+			<xsd:enumeration value="close" />
+		</xsd:restriction>
+	</xsd:simpleType>
+
+	<xsd:simpleType name="AttrType_mtype">
+		<xsd:union memberTypes="gs4tr:mtypeValueList gs4tr:XTend" />
+	</xsd:simpleType>
+
+	<xsd:simpleType name="datatypeValueList">
+		<xsd:annotation>
+			<xsd:documentation>Values for the attribute 'datatype'.
+			</xsd:documentation>
+		</xsd:annotation>
+		<xsd:restriction base="xsd:NMTOKEN">
+			<xsd:enumeration value="asp">
+				<xsd:annotation>
+					<xsd:documentation>Indicates Active Server Page data.
+					</xsd:documentation>
+				</xsd:annotation>
+			</xsd:enumeration>
+			<xsd:enumeration value="c">
+				<xsd:annotation>
+					<xsd:documentation>Indicates C source file data.
+					</xsd:documentation>
+				</xsd:annotation>
+			</xsd:enumeration>
+			<xsd:enumeration value="cdf">
+				<xsd:annotation>
+					<xsd:documentation>Indicates Channel Definition Format (CDF) data.
+					</xsd:documentation>
+				</xsd:annotation>
+			</xsd:enumeration>
+			<xsd:enumeration value="cfm">
+				<xsd:annotation>
+					<xsd:documentation>Indicates ColdFusion data.</xsd:documentation>
+				</xsd:annotation>
+			</xsd:enumeration>
+			<xsd:enumeration value="cpp">
+				<xsd:annotation>
+					<xsd:documentation>Indicates C++ source file data.
+					</xsd:documentation>
+				</xsd:annotation>
+			</xsd:enumeration>
+			<xsd:enumeration value="csharp">
+				<xsd:annotation>
+					<xsd:documentation>Indicates C-Sharp data.</xsd:documentation>
+				</xsd:annotation>
+			</xsd:enumeration>
+			<xsd:enumeration value="cstring">
+				<xsd:annotation>
+					<xsd:documentation>Indicates strings from C, ASM, and driver files
+						data.</xsd:documentation>
+				</xsd:annotation>
+			</xsd:enumeration>
+			<xsd:enumeration value="csv">
+				<xsd:annotation>
+					<xsd:documentation>Indicates comma-separated values data.
+					</xsd:documentation>
+				</xsd:annotation>
+			</xsd:enumeration>
+			<xsd:enumeration value="database">
+				<xsd:annotation>
+					<xsd:documentation>Indicates database data.</xsd:documentation>
+				</xsd:annotation>
+			</xsd:enumeration>
+			<xsd:enumeration value="documentfooter">
+				<xsd:annotation>
+					<xsd:documentation>Indicates portions of document that follows data
+						and contains metadata.</xsd:documentation>
+				</xsd:annotation>
+			</xsd:enumeration>
+			<xsd:enumeration value="documentheader">
+				<xsd:annotation>
+					<xsd:documentation>Indicates portions of document that precedes
+						data and contains metadata.</xsd:documentation>
+				</xsd:annotation>
+			</xsd:enumeration>
+			<xsd:enumeration value="filedialog">
+				<xsd:annotation>
+					<xsd:documentation>Indicates data from standard UI file operations
+						dialogs (e.g., Open, Save, Save As, Export, Import).
+					</xsd:documentation>
+				</xsd:annotation>
+			</xsd:enumeration>
+			<xsd:enumeration value="form">
+				<xsd:annotation>
+					<xsd:documentation>Indicates standard user input screen data.
+					</xsd:documentation>
+				</xsd:annotation>
+			</xsd:enumeration>
+			<xsd:enumeration value="html">
+				<xsd:annotation>
+					<xsd:documentation>Indicates HyperText Markup Language (HTML) data
+						- document instance.</xsd:documentation>
+				</xsd:annotation>
+			</xsd:enumeration>
+			<xsd:enumeration value="htmlbody">
+				<xsd:annotation>
+					<xsd:documentation>Indicates content within an HTML document's
+						&lt;body&gt; element.</xsd:documentation>
+				</xsd:annotation>
+			</xsd:enumeration>
+			<xsd:enumeration value="ini">
+				<xsd:annotation>
+					<xsd:documentation>Indicates Windows INI file data.
+					</xsd:documentation>
+				</xsd:annotation>
+			</xsd:enumeration>
+			<xsd:enumeration value="interleaf">
+				<xsd:annotation>
+					<xsd:documentation>Indicates Interleaf data.</xsd:documentation>
+				</xsd:annotation>
+			</xsd:enumeration>
+			<xsd:enumeration value="javaclass">
+				<xsd:annotation>
+					<xsd:documentation>Indicates Java source file data (extension
+						'.java').</xsd:documentation>
+				</xsd:annotation>
+			</xsd:enumeration>
+			<xsd:enumeration value="javapropertyresourcebundle">
+				<xsd:annotation>
+					<xsd:documentation>Indicates Java property resource bundle data.
+					</xsd:documentation>
+				</xsd:annotation>
+			</xsd:enumeration>
+			<xsd:enumeration value="javalistresourcebundle">
+				<xsd:annotation>
+					<xsd:documentation>Indicates Java list resource bundle data.
+					</xsd:documentation>
+				</xsd:annotation>
+			</xsd:enumeration>
+			<xsd:enumeration value="javascript">
+				<xsd:annotation>
+					<xsd:documentation>Indicates JavaScript source file data.
+					</xsd:documentation>
+				</xsd:annotation>
+			</xsd:enumeration>
+			<xsd:enumeration value="jscript">
+				<xsd:annotation>
+					<xsd:documentation>Indicates JScript source file data.
+					</xsd:documentation>
+				</xsd:annotation>
+			</xsd:enumeration>
+			<xsd:enumeration value="layout">
+				<xsd:annotation>
+					<xsd:documentation>Indicates information relating to formatting.
+					</xsd:documentation>
+				</xsd:annotation>
+			</xsd:enumeration>
+			<xsd:enumeration value="lisp">
+				<xsd:annotation>
+					<xsd:documentation>Indicates LISP source file data.
+					</xsd:documentation>
+				</xsd:annotation>
+			</xsd:enumeration>
+			<xsd:enumeration value="margin">
+				<xsd:annotation>
+					<xsd:documentation>Indicates information relating to margin
+						formats.</xsd:documentation>
+				</xsd:annotation>
+			</xsd:enumeration>
+			<xsd:enumeration value="menufile">
+				<xsd:annotation>
+					<xsd:documentation>Indicates a file containing menu.
+					</xsd:documentation>
+				</xsd:annotation>
+			</xsd:enumeration>
+			<xsd:enumeration value="messagefile">
+				<xsd:annotation>
+					<xsd:documentation>Indicates numerically identified string table.
+					</xsd:documentation>
+				</xsd:annotation>
+			</xsd:enumeration>
+			<xsd:enumeration value="mif">
+				<xsd:annotation>
+					<xsd:documentation>Indicates Maker Interchange Format (MIF) data.
+					</xsd:documentation>
+				</xsd:annotation>
+			</xsd:enumeration>
+			<xsd:enumeration value="mimetype">
+				<xsd:annotation>
+					<xsd:documentation>Indicates that the datatype attribute value is a
+						MIME Type value and is defined in the mime-type attribute.
+					</xsd:documentation>
+				</xsd:annotation>
+			</xsd:enumeration>
+			<xsd:enumeration value="mo">
+				<xsd:annotation>
+					<xsd:documentation>Indicates GNU Machine Object data.
+					</xsd:documentation>
+				</xsd:annotation>
+			</xsd:enumeration>
+			<xsd:enumeration value="msglib">
+				<xsd:annotation>
+					<xsd:documentation>Indicates Message Librarian strings created by
+						Novell's Message Librarian Tool.</xsd:documentation>
+				</xsd:annotation>
+			</xsd:enumeration>
+			<xsd:enumeration value="pagefooter">
+				<xsd:annotation>
+					<xsd:documentation>Indicates information to be displayed at the
+						bottom of each page of a document.</xsd:documentation>
+				</xsd:annotation>
+			</xsd:enumeration>
+			<xsd:enumeration value="pageheader">
+				<xsd:annotation>
+					<xsd:documentation>Indicates information to be displayed at the top
+						of each page of a document.</xsd:documentation>
+				</xsd:annotation>
+			</xsd:enumeration>
+			<xsd:enumeration value="parameters">
+				<xsd:annotation>
+					<xsd:documentation>Indicates a list of property values (e.g.,
+						settings within INI files or preferences dialog).
+					</xsd:documentation>
+				</xsd:annotation>
+			</xsd:enumeration>
+			<xsd:enumeration value="pascal">
+				<xsd:annotation>
+					<xsd:documentation>Indicates Pascal source file data.
+					</xsd:documentation>
+				</xsd:annotation>
+			</xsd:enumeration>
+			<xsd:enumeration value="php">
+				<xsd:annotation>
+					<xsd:documentation>Indicates Hypertext Preprocessor data.
+					</xsd:documentation>
+				</xsd:annotation>
+			</xsd:enumeration>
+			<xsd:enumeration value="plaintext">
+				<xsd:annotation>
+					<xsd:documentation>Indicates plain text file (no formatting other
+						than, possibly, wrapping).</xsd:documentation>
+				</xsd:annotation>
+			</xsd:enumeration>
+			<xsd:enumeration value="po">
+				<xsd:annotation>
+					<xsd:documentation>Indicates GNU Portable Object file.
+					</xsd:documentation>
+				</xsd:annotation>
+			</xsd:enumeration>
+			<xsd:enumeration value="report">
+				<xsd:annotation>
+					<xsd:documentation>Indicates dynamically generated user defined
+						document. e.g. Oracle Report, Crystal Report, etc.
+					</xsd:documentation>
+				</xsd:annotation>
+			</xsd:enumeration>
+			<xsd:enumeration value="resources">
+				<xsd:annotation>
+					<xsd:documentation>Indicates Windows .NET binary resources.
+					</xsd:documentation>
+				</xsd:annotation>
+			</xsd:enumeration>
+			<xsd:enumeration value="resx">
+				<xsd:annotation>
+					<xsd:documentation>Indicates Windows .NET Resources.
+					</xsd:documentation>
+				</xsd:annotation>
+			</xsd:enumeration>
+			<xsd:enumeration value="rtf">
+				<xsd:annotation>
+					<xsd:documentation>Indicates Rich Text Format (RTF) data.
+					</xsd:documentation>
+				</xsd:annotation>
+			</xsd:enumeration>
+			<xsd:enumeration value="sgml">
+				<xsd:annotation>
+					<xsd:documentation>Indicates Standard Generalized Markup Language
+						(SGML) data - document instance.</xsd:documentation>
+				</xsd:annotation>
+			</xsd:enumeration>
+			<xsd:enumeration value="sgmldtd">
+				<xsd:annotation>
+					<xsd:documentation>Indicates Standard Generalized Markup Language
+						(SGML) data - Document Type Definition (DTD).</xsd:documentation>
+				</xsd:annotation>
+			</xsd:enumeration>
+			<xsd:enumeration value="svg">
+				<xsd:annotation>
+					<xsd:documentation>Indicates Scalable Vector Graphic (SVG) data.
+					</xsd:documentation>
+				</xsd:annotation>
+			</xsd:enumeration>
+			<xsd:enumeration value="vbscript">
+				<xsd:annotation>
+					<xsd:documentation>Indicates VisualBasic Script source file.
+					</xsd:documentation>
+				</xsd:annotation>
+			</xsd:enumeration>
+			<xsd:enumeration value="warning">
+				<xsd:annotation>
+					<xsd:documentation>Indicates warning message.</xsd:documentation>
+				</xsd:annotation>
+			</xsd:enumeration>
+			<xsd:enumeration value="winres">
+				<xsd:annotation>
+					<xsd:documentation>Indicates Windows (Win32) resources (i.e.
+						resources extracted from an RC script, a message file, or a
+						compiled file).</xsd:documentation>
+				</xsd:annotation>
+			</xsd:enumeration>
+			<xsd:enumeration value="xhtml">
+				<xsd:annotation>
+					<xsd:documentation>Indicates Extensible HyperText Markup Language
+						(XHTML) data - document instance.</xsd:documentation>
+				</xsd:annotation>
+			</xsd:enumeration>
+			<xsd:enumeration value="xml">
+				<xsd:annotation>
+					<xsd:documentation>Indicates Extensible Markup Language (XML) data
+						- document instance.</xsd:documentation>
+				</xsd:annotation>
+			</xsd:enumeration>
+			<xsd:enumeration value="xmldtd">
+				<xsd:annotation>
+					<xsd:documentation>Indicates Extensible Markup Language (XML) data
+						- Document Type Definition (DTD).</xsd:documentation>
+				</xsd:annotation>
+			</xsd:enumeration>
+			<xsd:enumeration value="xsl">
+				<xsd:annotation>
+					<xsd:documentation>Indicates Extensible Stylesheet Language (XSL)
+						data.</xsd:documentation>
+				</xsd:annotation>
+			</xsd:enumeration>
+			<xsd:enumeration value="xul">
+				<xsd:annotation>
+					<xsd:documentation>Indicates XUL elements.</xsd:documentation>
+				</xsd:annotation>
+			</xsd:enumeration>
+		</xsd:restriction>
+	</xsd:simpleType>
+
+	<xsd:simpleType name="AttrType_datatype">
+		<xsd:union memberTypes="gs4tr:datatypeValueList gs4tr:XTend" />
+	</xsd:simpleType>
+
+	<xsd:simpleType name="context-typeValueList">
+		<xsd:annotation>
+			<xsd:documentation>Values for the attribute 'context-type'.
+			</xsd:documentation>
+		</xsd:annotation>
+		<xsd:restriction base="xsd:string">
+			<xsd:enumeration value="database">
+				<xsd:annotation>
+					<xsd:documentation>Indicates a database content.
+					</xsd:documentation>
+				</xsd:annotation>
+			</xsd:enumeration>
+			<xsd:enumeration value="element">
+				<xsd:annotation>
+					<xsd:documentation>Indicates the content of an element within an
+						XML document.</xsd:documentation>
+				</xsd:annotation>
+			</xsd:enumeration>
+			<xsd:enumeration value="elementtitle">
+				<xsd:annotation>
+					<xsd:documentation>Indicates the name of an element within an XML
+						document.</xsd:documentation>
+				</xsd:annotation>
+			</xsd:enumeration>
+			<xsd:enumeration value="linenumber">
+				<xsd:annotation>
+					<xsd:documentation>Indicates the line number from the sourcefile
+						(see context-type="sourcefile") where the &lt;source&gt; is found.
+					</xsd:documentation>
+				</xsd:annotation>
+			</xsd:enumeration>
+			<xsd:enumeration value="numparams">
+				<xsd:annotation>
+					<xsd:documentation>Indicates a the number of parameters contained
+						within the &lt;source&gt;.</xsd:documentation>
+				</xsd:annotation>
+			</xsd:enumeration>
+			<xsd:enumeration value="paramnotes">
+				<xsd:annotation>
+					<xsd:documentation>Indicates notes pertaining to the parameters in
+						the &lt;source&gt;.</xsd:documentation>
+				</xsd:annotation>
+			</xsd:enumeration>
+			<xsd:enumeration value="record">
+				<xsd:annotation>
+					<xsd:documentation>Indicates the content of a record within a
+						database.</xsd:documentation>
+				</xsd:annotation>
+			</xsd:enumeration>
+			<xsd:enumeration value="recordtitle">
+				<xsd:annotation>
+					<xsd:documentation>Indicates the name of a record within a
+						database.</xsd:documentation>
+				</xsd:annotation>
+			</xsd:enumeration>
+			<xsd:enumeration value="sourcefile">
+				<xsd:annotation>
+					<xsd:documentation>Indicates the original source file in the case
+						that multiple files are merged to form the original file from
+						which the XLIFF file is created. This differs from the original
+						&lt;file&gt; attribute in that this sourcefile is one of many that
+						make up that file.</xsd:documentation>
+				</xsd:annotation>
+			</xsd:enumeration>
+		</xsd:restriction>
+	</xsd:simpleType>
+
+	<xsd:simpleType name="InlineDelimitersValueList">
+		<xsd:annotation>
+			<xsd:documentation>Values for the attribute 'ctype' when used other
+				elements than &lt;ph&gt; or &lt;x&gt;.</xsd:documentation>
+		</xsd:annotation>
+		<xsd:restriction base="xsd:NMTOKEN">
+			<xsd:enumeration value="bold">
+				<xsd:annotation>
+					<xsd:documentation>Indicates a run of bolded text.
+					</xsd:documentation>
+				</xsd:annotation>
+			</xsd:enumeration>
+			<xsd:enumeration value="italic">
+				<xsd:annotation>
+					<xsd:documentation>Indicates a run of text in italics.
+					</xsd:documentation>
+				</xsd:annotation>
+			</xsd:enumeration>
+			<xsd:enumeration value="underlined">
+				<xsd:annotation>
+					<xsd:documentation>Indicates a run of underlined text.
+					</xsd:documentation>
+				</xsd:annotation>
+			</xsd:enumeration>
+			<xsd:enumeration value="link">
+				<xsd:annotation>
+					<xsd:documentation>Indicates a run of hyper-text.
+					</xsd:documentation>
+				</xsd:annotation>
+			</xsd:enumeration>
+		</xsd:restriction>
+	</xsd:simpleType>
+
+	<xsd:simpleType name="InlinePlaceholdersValueList">
+		<xsd:annotation>
+			<xsd:documentation>Values for the attribute 'ctype' when used with
+				&lt;ph&gt; or &lt;x&gt;.</xsd:documentation>
+		</xsd:annotation>
+		<xsd:restriction base="xsd:NMTOKEN">
+			<xsd:enumeration value="image">
+				<xsd:annotation>
+					<xsd:documentation>Indicates a inline image.</xsd:documentation>
+				</xsd:annotation>
+			</xsd:enumeration>
+			<xsd:enumeration value="pb">
+				<xsd:annotation>
+					<xsd:documentation>Indicates a page break.</xsd:documentation>
+				</xsd:annotation>
+			</xsd:enumeration>
+			<xsd:enumeration value="lb">
+				<xsd:annotation>
+					<xsd:documentation>Indicates a line break.</xsd:documentation>
+				</xsd:annotation>
+			</xsd:enumeration>
+		</xsd:restriction>
+	</xsd:simpleType>
+
+	<xsd:simpleType name="AttrType_InlineDelimiters">
+		<xsd:union memberTypes="gs4tr:InlineDelimitersValueList gs4tr:XTend" />
+	</xsd:simpleType>
+	<xsd:simpleType name="AttrType_InlinePlaceholders">
+		<xsd:union memberTypes="gs4tr:InlinePlaceholdersValueList gs4tr:XTend" />
+	</xsd:simpleType>
+
+	<xsd:simpleType name="AttrType_YesNo">
+		<xsd:restriction base="xsd:NMTOKEN">
+			<xsd:enumeration value="yes" />
+			<xsd:enumeration value="no" />
+		</xsd:restriction>
+	</xsd:simpleType>
+
+	<xsd:attributeGroup name="AttrGroup_TextContent">
+		<xsd:attribute name="id" type="xsd:string" use="required" />
+		<xsd:attribute name="xid" type="xsd:string" use="optional" />
+		<xsd:attribute name="equiv-text" type="xsd:string" use="optional" />
+		<xsd:anyAttribute namespace="##other"
+			processContents="strict" />
+	</xsd:attributeGroup>
+
+	<xsd:element name="g">
+		<xsd:complexType mixed="true">
+			<xsd:group maxOccurs="unbounded" minOccurs="0"
+				ref="gs4tr:ElemGroup_TextContent" />
+			<xsd:attribute name="ctype" type="gs4tr:AttrType_InlineDelimiters"
+				use="optional" />
+			<xsd:attribute default="yes" name="clone"
+				type="gs4tr:AttrType_YesNo" use="optional" />
+			<xsd:attributeGroup ref="gs4tr:AttrGroup_TextContent" />
+		</xsd:complexType>
+	</xsd:element>
+	<xsd:element name="x">
+		<xsd:complexType>
+			<xsd:attribute name="ctype" type="gs4tr:AttrType_InlinePlaceholders"
+				use="optional" />
+			<xsd:attribute default="yes" name="clone"
+				type="gs4tr:AttrType_YesNo" use="optional" />
+			<xsd:attributeGroup ref="gs4tr:AttrGroup_TextContent" />
+		</xsd:complexType>
+	</xsd:element>
+	<xsd:element name="bx">
+		<xsd:complexType>
+			<xsd:attribute name="rid" type="xsd:NMTOKEN" use="optional" />
+			<xsd:attribute name="ctype" type="gs4tr:AttrType_InlineDelimiters"
+				use="optional" />
+			<xsd:attribute default="yes" name="clone"
+				type="gs4tr:AttrType_YesNo" use="optional" />
+			<xsd:attributeGroup ref="gs4tr:AttrGroup_TextContent" />
+		</xsd:complexType>
+	</xsd:element>
+	<xsd:element name="ex">
+		<xsd:complexType>
+			<xsd:attribute name="rid" type="xsd:NMTOKEN" use="optional" />
+			<xsd:attributeGroup ref="gs4tr:AttrGroup_TextContent" />
+		</xsd:complexType>
+	</xsd:element>
+	<xsd:element name="ph">
+		<xsd:complexType mixed="true">
+			<xsd:sequence maxOccurs="unbounded" minOccurs="0">
+				<xsd:element ref="gs4tr:sub" />
+			</xsd:sequence>
+			<xsd:attribute name="ctype" type="gs4tr:AttrType_InlinePlaceholders"
+				use="optional" />
+			<xsd:attribute name="crc" type="xsd:string" use="optional" />
+			<xsd:attribute name="assoc" type="gs4tr:AttrType_assoc"
+				use="optional" />
+			<xsd:attributeGroup ref="gs4tr:AttrGroup_TextContent" />
+		</xsd:complexType>
+	</xsd:element>
+	<xsd:element name="bpt">
+		<xsd:complexType mixed="true">
+			<xsd:sequence maxOccurs="unbounded" minOccurs="0">
+				<xsd:element ref="gs4tr:sub" />
+			</xsd:sequence>
+			<xsd:attribute name="rid" type="xsd:NMTOKEN" use="optional" />
+			<xsd:attribute name="ctype" type="gs4tr:AttrType_InlineDelimiters"
+				use="optional" />
+			<xsd:attribute name="crc" type="xsd:string" use="optional" />
+			<xsd:attributeGroup ref="gs4tr:AttrGroup_TextContent" />
+		</xsd:complexType>
+	</xsd:element>
+	<xsd:element name="ept">
+		<xsd:complexType mixed="true">
+			<xsd:sequence maxOccurs="unbounded" minOccurs="0">
+				<xsd:element ref="gs4tr:sub" />
+			</xsd:sequence>
+			<xsd:attribute name="rid" type="xsd:NMTOKEN" use="optional" />
+			<xsd:attribute name="crc" type="xsd:string" use="optional" />
+			<xsd:attributeGroup ref="gs4tr:AttrGroup_TextContent" />
+		</xsd:complexType>
+	</xsd:element>
+	<xsd:element name="it">
+		<xsd:complexType mixed="true">
+			<xsd:sequence maxOccurs="unbounded" minOccurs="0">
+				<xsd:element ref="gs4tr:sub" />
+			</xsd:sequence>
+			<xsd:attribute name="pos" type="gs4tr:AttrType_Position"
+				use="required" />
+			<xsd:attribute name="rid" type="xsd:NMTOKEN" use="optional" />
+			<xsd:attribute name="ctype" type="gs4tr:AttrType_InlineDelimiters"
+				use="optional" />
+			<xsd:attribute name="crc" type="xsd:string" use="optional" />
+			<xsd:attributeGroup ref="gs4tr:AttrGroup_TextContent" />
+		</xsd:complexType>
+	</xsd:element>
+	<xsd:element name="sub">
+		<xsd:complexType mixed="true">
+			<xsd:group maxOccurs="unbounded" minOccurs="0"
+				ref="gs4tr:ElemGroup_TextContent" />
+			<xsd:attribute name="datatype" type="gs4tr:AttrType_datatype"
+				use="optional" />
+			<xsd:attribute name="ctype" type="gs4tr:AttrType_InlineDelimiters"
+				use="optional" />
+			<xsd:attribute name="xid" type="xsd:string" use="optional" />
+		</xsd:complexType>
+	</xsd:element>
+	<xsd:element name="mrk">
+		<xsd:complexType mixed="true">
+			<xsd:group maxOccurs="unbounded" minOccurs="0"
+				ref="gs4tr:ElemGroup_TextContent" />
+			<xsd:attribute name="mtype" type="gs4tr:AttrType_mtype"
+				use="required" />
+			<xsd:attribute name="mid" type="xsd:NMTOKEN" use="optional" />
+			<xsd:attribute name="comment" type="xsd:string" use="optional" />
+			<xsd:anyAttribute namespace="##other"
+				processContents="strict" />
+		</xsd:complexType>
+	</xsd:element>
+
+	<!-- END definitions copied from xliff-core-1.2-strict.xsd -->
+
+	<xsd:element name="ws">
+		<xsd:complexType mixed="true">
+			<xsd:group maxOccurs="unbounded" minOccurs="0"
+				ref="gs4tr:ElemGroup_TextContent" />
+			<xsd:attribute name="pos" use="required">
+				<xsd:simpleType>
+					<xsd:restriction base="xsd:string">
+						<xsd:enumeration value="before" />
+						<xsd:enumeration value="after" />
+					</xsd:restriction>
+				</xsd:simpleType>
+			</xsd:attribute>
+		</xsd:complexType>
+	</xsd:element>
+
+	<xsd:element name="note">
+		<xsd:complexType>
+			<xsd:simpleContent>
+				<xsd:extension base="xsd:string">
+					<xsd:attribute name="from" type="xsd:string" use="required" />
+					<xsd:attribute name="timestamp" type="xsd:dateTime"
+						use="required" />
+					<xsd:attribute name="annotates" use="required">
+						<xsd:simpleType>
+							<xsd:restriction base="xsd:string">
+								<xsd:enumeration value="source" />
+								<xsd:enumeration value="target" />
+							</xsd:restriction>
+						</xsd:simpleType>
+					</xsd:attribute>
+					<xsd:attribute name="snid" type="xsd:string" use="required" />
+				</xsd:extension>
+			</xsd:simpleContent>
+		</xsd:complexType>
+	</xsd:element>
+
+	<xsd:element name="revision">
+		<xsd:complexType mixed="true">
+			<xsd:group maxOccurs="unbounded" minOccurs="0"
+				ref="gs4tr:ElemGroup_TextContent" />
+			<xsd:attribute name="from" type="xsd:string" use="required" />
+			<xsd:attribute name="timestamp" type="xsd:string" use="required" />
+			<xsd:attribute name="annotates" use="required">
+				<xsd:simpleType>
+					<xsd:restriction base="xsd:string">
+						<xsd:enumeration value="source" />
+						<xsd:enumeration value="target" />
+					</xsd:restriction>
+				</xsd:simpleType>
+			</xsd:attribute>
+			<!-- <xsd:attribute name="segmentid" type="xsd:string" use="required" 
+				/> -->
+		</xsd:complexType>
+	</xsd:element>
+
+	<xsd:attribute name="required" type="xsd:boolean" />
+	<xsd:attribute name="fake" type="xsd:boolean" />
+	<xsd:attribute name="fileLevelInfo" type="xsd:NMTOKEN" />
+	<xsd:attribute name="wordcount" type="xsd:NMTOKEN" />
+	<!-- <xsd:attribute name="approved" type="xsd:boolean" /> -->
+	<xsd:attribute name="score" type="xsd:int" />
+	<!-- <xsd:attribute name="state" type="xsd:NMTOKEN" /> -->
+	<xsd:attribute name="maxlen" type="xsd:int" />
+	<xsd:attribute name="creationDate" type="xsd:date" />
+	<xsd:attribute name="creationUser" type="xsd:string" />
+	<xsd:attribute name="segtype" type="xsd:NMTOKEN" />
+	<xsd:attribute name="segmented" type="xsd:NMTOKEN" />
+	<xsd:attribute name="total-segment-count" type="xsd:int" />
+	<xsd:attribute name="translated-segment-count" type="xsd:int" />
+	<xsd:attribute name="locked" type="xsd:boolean" />
+
+	<xsd:attribute name="filter-configuration" type="xsd:string" />
+
+	<xsd:attribute name="offline-tm" type="xsd:boolean" />
+
+	<!-- split/merge support for TXLF files -->
+	<xsd:attribute name="split-file" type="xsd:string" />
+	<xsd:attribute name="split-file-sequence" type="xsd:string" />
+
+	<!-- for pd checksum for XliffDoument -->
+	<xsd:attribute name="md5checksum" type="xsd:string" />
+
+	<!-- Table formating -->
+	<xsd:attribute name="height" type="xsd:double" />
+	<xsd:attribute name="width" type="xsd:double" />
+	<xsd:attribute name="x" type="xsd:double" />
+	<xsd:attribute name="y" type="xsd:double" />
+
+	<xsd:simpleType name="MergeType">
+		<xsd:restriction base="xsd:integer">
+			<xsd:enumeration value="0" />
+			<xsd:enumeration value="1" />
+			<xsd:enumeration value="2" />
+		</xsd:restriction>
+	</xsd:simpleType>
+
+	<xsd:attribute name="horizontalMerge" type="gs4tr:MergeType" />
+	<xsd:attribute name="verticalMerge" type="gs4tr:MergeType" />
+	<xsd:attribute name="cellOrdinalNumber" type="xsd:integer" />
+
+	<!-- MIF filter extensions -->
+	<xsd:attribute name="txlfVar" type="xsd:string" />
+	<xsd:attribute name="mifVar" type="xsd:string" />
+	<xsd:attribute name="FEncoding" type="xsd:string" />
+	<xsd:attribute name="ParaID" type="xsd:string" />
+	<xsd:attribute name="TextLineID" type="xsd:string" />
+
+</xsd:schema>

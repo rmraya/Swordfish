@@ -1,0 +1,613 @@
+<!-- ...................................................................... -->
+<!-- novdoc DTD V1.0 ...................................................... -->
+<!-- File novdoc.dtd ...................................................... -->
+<!--
+     novdocx.dtd is a subset of docbook and all instances should be valid
+     docbook files, however, the docbookx.dtd is not directly referenced.
+
+     Please use the following formal public identifier:
+
+     "-//Novell//DTD NovDoc XML V1.0//EN" "novdocx.dtd"
+
+     The following is copyright information required for the docbook dtd:
+
+     Copyright 1992-2002 HaL Computer Systems, Inc.,
+     O'Reilly & Associates, Inc., ArborText, Inc., Fujitsu Software
+     Corporation, Norman Walsh, Sun Microsystems, Inc., and the
+     Organization for the Advancement of Structured Information
+     Standards (OASIS).
+
+     $Id: novdocx.dtd,v 1.1 2011-03-28 16:14:20 maxprograms-cvs Exp $
+
+     Permission to use, copy, modify and distribute the DocBook XML DTD
+     and its accompanying documentation for any purpose and without fee
+     is hereby granted in perpetuity, provided that the above copyright
+     notice and this paragraph appear in all copies.  The copyright
+     holders make no representation about the suitability of the DTD for
+     any purpose.  It is provided "as is" without expressed or implied
+     warranty.
+-->
+
+<!ENTITY % admonitions "important | note | tip | warning">
+<!ENTITY % lists   "itemizedlist | orderedlist | simplelist | variablelist | calloutlist">
+<!ENTITY % tables  "table | informaltable">
+<!ENTITY % figures "figure | informalfigure">
+<!ENTITY % common	 "example | screen | remark | para | formalpara | indexterm">
+<!ENTITY % all     "%admonitions; | %lists; | %figures; | %tables; | %common;">
+
+<!ENTITY % xrefinlines	"xref | link | ulink">
+
+
+<!ENTITY % basicinlines   "command | envar | productname | literal | emphasis |
+    option | replaceable | remark | filename | indexterm | citetitle | quote |
+    phrase | systemitem | guimenu | subscript | superscript | trademark">
+
+<!ENTITY % guiinlines	"keycombo | keycap | menuchoice">
+<!ENTITY % allinlines	"%xrefinlines; | %basicinlines; | %guiinlines; | inlinemediaobject">
+
+
+<!-- Profiling information (attributes) -->
+<!ENTITY % profiling.attributes
+   "os        CDATA     #IMPLIED
+    arch      CDATA     #IMPLIED">
+<!ENTITY % xmlbase
+   "xml:base  CDATA     #IMPLIED">
+
+
+<!ELEMENT book      (bookinfo , preface? , (part | chapter)+ , appendix* , glossary*, index?) >
+<!ELEMENT bookinfo  (productname , productnumber? , invpartnumber? , titleabbrev? , legalnotice+, authorgroup+) >
+<!ELEMENT preface   (title , (((%all; | procedure)+ , sect1*) | sect1+)) >
+<!ELEMENT part      (title , partintro? , ((chapter+ , appendix*) | appendix+) ) >
+<!ELEMENT appendix  (title , (%all; | procedure)+ , (sect1* | refentry*) ) >
+<!ELEMENT chapter   (title , (abstract | %all; | procedure)+ , (sect1* | refentry*) ) >
+<!ELEMENT abstract  (para+) >
+<!ELEMENT index     EMPTY>
+
+<!-- sections -->
+<!ELEMENT sect1      (title , (%all; | procedure)+ , (sect2* | refentry*)) >
+<!ELEMENT sect2      (title , (%all; | procedure)+ , (sect3*)) >
+<!ELEMENT sect3      (title , (%all; | procedure)+ , (sect4*)) >
+<!ELEMENT sect4      (title , (%all; | procedure)+) >
+
+<!ELEMENT partintro  ((%all;)+ , sect1*) >
+
+<!-- inlines -->
+<!ELEMENT application     (#PCDATA) >
+<!ELEMENT command         (#PCDATA | option | replaceable)* >
+<!ELEMENT envar           (#PCDATA) >
+<!ELEMENT literal         (#PCDATA | replaceable)* >
+<!ELEMENT emphasis        (#PCDATA | %xrefinlines; | %basicinlines; | %guiinlines;)* >
+
+<!ELEMENT citetitle       (#PCDATA | %xrefinlines;)* >
+
+<!ELEMENT option          (#PCDATA | replaceable)* >
+<!ELEMENT replaceable     (#PCDATA) >
+<!ELEMENT filename        (#PCDATA) >
+<!ELEMENT quote           (#PCDATA) >
+<!ELEMENT phrase          (#PCDATA | %allinlines;)* >
+<!ELEMENT productname     (#PCDATA) >
+<!ELEMENT productnumber   (#PCDATA) >
+<!ELEMENT systemitem      (#PCDATA) >
+
+<!-- Curtis, do we need that according to legal issues? -->
+<!ELEMENT trademark       (#PCDATA)>
+
+<!ELEMENT co              EMPTY  >
+<!ELEMENT xref            EMPTY  >
+<!ELEMENT link            (#PCDATA | %basicinlines;)* >
+<!--
+     novdoc had xrefext and xrefexttext which handled cross-book links
+     attributes on ulink will be used for the same purpose
+-->
+<!ELEMENT ulink           (#PCDATA | %basicinlines;)* >
+
+<!ELEMENT keycombo        (keycap)+ >
+<!ELEMENT keycap          (#PCDATA) >
+<!ELEMENT menuchoice      (shortcut?, guimenu+) ><!-- toms -->
+<!ELEMENT shortcut        (keycombo | keycap+) >
+<!ELEMENT guimenu         (#PCDATA) >
+
+<!ELEMENT subscript       (#PCDATA) >
+<!ELEMENT superscript     (#PCDATA) >
+
+<!-- common -->
+<!ELEMENT title       (#PCDATA | %basicinlines;)* >
+<!ELEMENT titleabbrev (#PCDATA | %basicinlines;)* >
+<!ELEMENT example     (title , (%lists; | formalpara | para | screen | indexterm)+ ) >
+<!ELEMENT para        (#PCDATA | %allinlines;)* >
+
+<!ELEMENT formalpara  (title , para) >
+
+<!ELEMENT screen      (#PCDATA | co)* >
+<!ELEMENT remark      (#PCDATA) >  <!-- also inline -->
+
+<!-- admonitions -->
+<!ENTITY % admonition.module
+  "(title? , (para | remark | screen |
+    simplelist | itemizedlist | variablelist | orderedlist )+)" >
+<!ELEMENT tip         (%admonition.module;)>
+<!ELEMENT important   (%admonition.module;)>
+<!ELEMENT note        (%admonition.module;)>
+<!ELEMENT warning     (%admonition.module;)>
+
+<!-- lists -->
+<!ELEMENT itemizedlist  (title?, listitem+) >
+<!ELEMENT orderedlist   (title?, listitem+) >
+<!ELEMENT simplelist    (member+) >
+<!ELEMENT variablelist  (title?, varlistentry+) >
+<!--
+     calloutlist is used with co tag to callout sections within screen
+     we should review the use of calloutlist, callout and co
+-->
+<!ELEMENT calloutlist   (callout+) >
+<!ELEMENT callout       (para+) >
+
+<!ELEMENT listitem      ((%all;)+) >
+<!ELEMENT member        (#PCDATA | %allinlines;)* >
+<!ELEMENT varlistentry  (term+ , listitem) >
+<!ELEMENT term          (#PCDATA | %allinlines;)* >
+
+
+<!-- procedure -->
+<!ELEMENT procedure   (title? , (%all;)* , step+) >
+<!ELEMENT step        ((para | formalpara) , (%all;)*, substeps*) >
+<!ELEMENT substeps    (step+) >
+
+
+<!-- tables -->
+<!ELEMENT informaltable   (tgroup) >
+<!ELEMENT table           (title , tgroup) >
+<!ELEMENT tgroup          (colspec* , spanspec* , thead? , tfoot?, tbody) >
+<!ELEMENT colspec         EMPTY >
+<!ELEMENT spanspec        EMPTY >
+<!ELEMENT thead           (colspec* , row+) >
+<!ELEMENT tfoot           (colspec* , row+) >
+<!ELEMENT tbody           (row+) >
+<!ELEMENT row             (entry+) >
+<!--
+       novdoc entry included tblhead and tsubhead for which no docbook
+       counterpart exists. May need to find alternatives?
+-->
+<!ELEMENT entry           ((%admonitions; | %figures; | para | screen |
+    formalpara | itemizedlist | orderedlist | simplelist)*) >
+
+<!-- figures -->
+<!ELEMENT figure             (title, mediaobject) >
+<!ELEMENT informalfigure     (mediaobject) >
+
+
+<!--
+       provo doc has required a text description for all graphics where suse
+       has not. textobject is optional but we might discuss this further
+-->
+<!ELEMENT inlinemediaobject  (imageobject+, textobject?) >
+<!ELEMENT mediaobject        (imageobject+, textobject?) >
+<!ELEMENT imageobject        (imagedata) >
+<!ELEMENT imagedata          EMPTY >
+<!ELEMENT textobject         (phrase) >
+
+<!-- glossary -->
+<!ELEMENT glossary    (title , (para | formalpara | remark)* ,
+    (glossentry+ | glossdiv+)) >
+
+<!ELEMENT glossdiv    (glossentry+) >
+<!ELEMENT glossentry  (glossterm , glossdef+) >
+<!ELEMENT glossterm   (#PCDATA | %basicinlines;)*>
+<!ELEMENT glossdef    (para+) >
+
+<!-- indexterm -->
+<!ELEMENT indexterm  (primary?, ((secondary, ((tertiary, (see | seealso+)?) |
+    see | seealso+)?) | see | seealso+)?) >
+
+<!-- content for these???? -->
+<!ELEMENT primary         (#PCDATA) >
+<!ELEMENT secondary       (#PCDATA) >
+<!ELEMENT tertiary        (#PCDATA) >
+<!ELEMENT see             (#PCDATA) >
+<!ELEMENT seealso         (#PCDATA) >
+
+
+<!-- authorgroup -->
+<!ELEMENT authorgroup     (author+) >
+<!ELEMENT author          (firstname, surname) >
+<!ELEMENT firstname       (#PCDATA) >
+<!ELEMENT surname         (#PCDATA) >
+
+<!-- msgset -->
+<!--
+       use of msgset needs more definition based on the use of previous
+       msgset, codeset and tshootset usage by Provo doc group
+-->
+<!ELEMENT msgset     (title , msgentry+) >
+<!ELEMENT msgentry   (msg+ , msginfo? , msgexplan* ) >
+<!ELEMENT msg        (msgmain) >
+<!ELEMENT msginfo    (msgorig? , msglevel?) >
+<!ELEMENT msgmain    (msgtext) >
+<!ELEMENT msgtext    (para) >
+<!ELEMENT msgexplan  ((para | %admonitions; | informaltable)*) >
+
+<!-- misc -->
+<!ELEMENT legalnotice  (title?, (simplelist | para | formalpara | remark)+) >
+<!ELEMENT invpartnumber  (#PCDATA) >
+
+<!-- refentry -->
+<!ELEMENT refentry        (refmeta, (%xrefinlines;)* , refnamediv , refsect1+) >
+<!ELEMENT refmeta         (refentrytitle) >
+<!ELEMENT refentrytitle   (refentrytitle) >
+<!ELEMENT refnamediv      (refname+,refpurpose,refclass*,(%xrefinlines;)*) >
+
+<!ELEMENT refname         (#PCDATA | command | envar | literal | emphasis |
+    option | replaceable | filename | %guiinlines;)* >
+
+<!ELEMENT refpurpose      (#PCDATA | %xrefinlines; | %basicinlines; | %guiinlines;)* >
+
+<!ELEMENT refclass        (#PCDATA | application)* >
+
+<!ELEMENT refsect1        (title , (%all; | procedure)* , (refsect2*)) >
+<!ELEMENT refsect2        (title , (%all; | procedure)* , (refsect3*)) >
+<!ELEMENT refsect3        (title , (%all; | procedure)*) >
+
+
+<!ATTLIST book
+               revision       CDATA     #IMPLIED
+               role           CDATA     #IMPLIED
+               lang           CDATA     #IMPLIED
+               id             ID        #IMPLIED  >
+
+<!ATTLIST appendix
+               id             ID        #IMPLIED
+               %profiling.attributes;
+               %xmlbase; >
+
+
+<!ATTLIST bookinfo
+               id             ID        #IMPLIED
+               %xmlbase;  >
+
+<!ATTLIST chapter
+               id             ID        #IMPLIED
+               %profiling.attributes;
+               %xmlbase;  >
+
+<!ATTLIST preface
+               id             ID        #IMPLIED
+               %xmlbase; >
+
+<!ATTLIST part
+               id             ID        #IMPLIED
+               %profiling.attributes;
+               %xmlbase;  >
+
+<!ATTLIST sect1
+               role           CDATA     #IMPLIED
+               id             ID        #IMPLIED
+               %profiling.attributes;
+               %xmlbase;  >
+
+<!ATTLIST sect2
+               role           CDATA     #IMPLIED
+               id             ID        #IMPLIED
+               %profiling.attributes;
+               %xmlbase;  >
+
+<!ATTLIST sect3
+               role           CDATA     #IMPLIED
+               id             ID        #IMPLIED
+               %profiling.attributes;
+               %xmlbase;  >
+
+<!ATTLIST sect4
+               role           CDATA     #IMPLIED
+               id             ID        #IMPLIED
+               %profiling.attributes;
+               %xmlbase;  >
+
+<!ATTLIST authorgroup
+               %xmlbase;>
+
+<!ATTLIST legalnotice
+                id            ID        #IMPLIED
+                %xmlbase;>
+
+<!ATTLIST systemitem
+               class (constant | daemon | domainname | etheraddress |
+                     event | eventhandler | filesystem | fqdomainname |
+                     groupname | ipaddress | library | macro |
+                     netmask | newsgroup | osname | process | resource |
+                     server | service | systemname | username) #IMPLIED >
+
+<!ATTLIST trademark
+               class (service | trade | registered | copyright) #IMPLIED >
+
+<!ATTLIST co
+                id            ID        #IMPLIED >
+
+
+<!--
+   This parameter entity "deactivates" all IDREF(S).
+
+   So somebody can validate a separate file even if some
+   xref/link elements points outside this file.
+
+-->
+<!ENTITY % NOVDOC.DEACTIVATE.IDREF "IGNORE">
+
+<![%NOVDOC.DEACTIVATE.IDREF;[
+  <!ENTITY % __HIDE__ "IGNORE">
+<!--
+   docbook has linkends as IDREFS but we'll just use IDREF
+-->
+
+<!ATTLIST callout
+               arearefs       CDATA     #REQUIRED >
+
+<!ATTLIST xref
+               linkend        CDATA     #REQUIRED
+               xrefstyle      (headingonpage | refnopage)     #IMPLIED  >
+
+<!ATTLIST link
+               linkend        CDATA     #REQUIRED >
+
+<!ATTLIST indexterm
+               %profiling.attributes;
+               startref       CDATA     #IMPLIED
+               class          (endofrange|singular|startofrange)    #IMPLIED
+               id             ID        #IMPLIED  >
+<!-- End of NOVDOC.DEACTIVATE.IDREF -->]]>
+
+<!--
+   The NOVDOC.DEACTIVATE.IDREF p.e. is mutually exclusive
+   to the following declaration.
+   This p.e. should be never touched.
+-->
+<!ENTITY % __HIDE__ "INCLUDE">
+<![%__HIDE__;[
+
+<!ATTLIST callout
+               arearefs       IDREF     #REQUIRED >
+
+<!ATTLIST xref
+               linkend        IDREF     #REQUIRED
+               xrefstyle      (headingonpage | refnopage)     #IMPLIED  >
+
+<!ATTLIST link
+               linkend        IDREF     #REQUIRED >
+
+<!ATTLIST indexterm
+               %profiling.attributes;
+               startref       IDREF     #IMPLIED
+               class          CDATA     #IMPLIED
+               id             ID        #IMPLIED  >
+<!-- End of %__HIDE__ -->]]>
+
+
+<!ATTLIST primary
+               sortas         CDATA     #IMPLIED>
+
+<!ATTLIST secondary
+               sortas         CDATA     #IMPLIED>
+
+<!ATTLIST tertiary
+               sortas         CDATA     #IMPLIED>
+
+
+<!--
+     novdoc had xrefext and xrefexttext which handled cross-book links
+     hopefully ulink can be used for the same purpose
+-->
+<!ATTLIST ulink
+               url            CDATA     #REQUIRED >
+
+<!ATTLIST keycombo
+               action     (press | seq) #IMPLIED >
+
+<!ATTLIST keycap
+               function (alt|
+                        backspace|
+                        command|
+                        control|
+                        delete|
+                        down|
+                        end|
+                        enter|
+                        escape|
+                        home|
+                        insert|
+                        left|
+                        meta|
+                        option|
+                        other|
+                        pagedown|
+                        pageup|
+                        right|
+                        shift|
+                        space|
+                        tab|
+                        up) #IMPLIED >
+
+<!ATTLIST example
+               id             ID        #IMPLIED
+               %profiling.attributes;  >
+
+<!ATTLIST para
+               %profiling.attributes;  >
+
+<!ATTLIST phrase
+               role           CDATA     #IMPLIED
+               %profiling.attributes;  >
+
+<!ATTLIST emphasis
+               role           CDATA     #IMPLIED  >
+
+
+<!--
+     provo doc group links to formalpara but may want to consider
+     variablelists instead - otherwise we'll need an id here
+     suse doesn't use formalpara
+-->
+
+<!ATTLIST formalpara
+               %profiling.attributes; >
+
+<!ATTLIST screen
+               %profiling.attributes;
+               linenumbering   (numbered | unnumbered)    #IMPLIED  >
+
+
+<!ATTLIST remark
+               role           CDATA     #IMPLIED  >
+
+
+<!ATTLIST tip
+               %profiling.attributes;  >
+
+<!ATTLIST important
+               %profiling.attributes;  >
+
+<!ATTLIST note
+               %profiling.attributes;  >
+
+<!ATTLIST warning
+               %profiling.attributes;  >
+
+<!ATTLIST itemizedlist
+               mark           CDATA     #IMPLIED >
+
+<!ATTLIST variablelist
+               %profiling.attributes; >
+
+<!ATTLIST varlistentry
+               id             ID        #IMPLIED
+               %profiling.attributes;  >
+
+<!ATTLIST term
+               %profiling.attributes;  >
+
+
+<!ATTLIST procedure
+               id             ID        #IMPLIED
+               %profiling.attributes;  >
+
+<!ATTLIST step
+               id             ID        #IMPLIED
+               performance    (optional|required) "required"
+               %profiling.attributes; >
+
+<!ATTLIST substeps
+               id             ID        #IMPLIED
+               performance    (optional|required) "required"
+               %profiling.attributes; >
+
+<!ATTLIST table
+               id             ID        #IMPLIED
+               %profiling.attributes;  >
+
+<!ATTLIST informaltable
+               %profiling.attributes;  >
+
+
+<!ATTLIST tgroup
+               cols           CDATA     #REQUIRED
+               align (center | char | justify | left | right) #IMPLIED>
+
+
+<!--
+     provo doc group uses 2 col tables for command descriptions
+     where suse might use variablelist instead. that's why we have an id here
+     another style issue to discuss?
+-->
+<!ATTLIST row
+               id             ID        #IMPLIED  >
+
+<!-- pgwide used to set image at left edge or current indent -->
+<!ATTLIST figure
+               pgwide         CDATA     #IMPLIED
+               id             ID        #IMPLIED
+               %profiling.attributes; >
+
+
+<!ATTLIST informalfigure
+               pgwide         CDATA     #IMPLIED
+               %profiling.attributes;  >
+
+
+<!ATTLIST imageobject
+               role           CDATA     #IMPLIED >
+
+<!-- can Framemaker handle using % in the width attribute? -->
+<!ATTLIST imagedata
+               fileref        CDATA     #IMPLIED
+               width          CDATA     #IMPLIED
+               format         CDATA     #IMPLIED >
+
+<!ATTLIST glossary
+               id             ID        #IMPLIED
+               %profiling.attributes;
+               %xmlbase;  >
+
+<!ATTLIST glossentry
+               id             ID        #IMPLIED  >
+
+<!ATTLIST authorgroup
+               role           CDATA     #IMPLIED  >
+
+<!ATTLIST msgset
+               id             ID        #IMPLIED  >
+
+
+<!ATTLIST msgentry
+               id             ID        #IMPLIED  >
+
+<!--
+     will need to add attributes to refentry sdk tags after further discussion
+-->
+
+<!-- Entities which are used by SUSE
+
+     If someone doesn´t need that, it can be switched off with the proper
+     parameter entity declaration, e.g.:
+     <!ENTITY % ISOlat1.module "IGNORE">
+-->
+<!ENTITY % ISOlat1.module "INCLUDE">
+<![ %ISOlat1.module; [
+ <!ENTITY % ISOlat1 PUBLIC
+  "ISO 8879:1986//ENTITIES Added Latin 1//EN//XML"
+  "http://www.oasis-open.org/docbook/xml/4.3/ent/iso-lat1.ent">
+<!--end of ISOlat1.module-->]]>
+
+<!ENTITY % ISOlat2.module "INCLUDE">
+<![ %ISOlat2.module; [
+ <!ENTITY % ISOlat2 PUBLIC
+  "ISO 8879:1986//ENTITIES Added Latin 2//EN//XML"
+  "http://www.oasis-open.org/docbook/xml/4.3/ent/iso-lat2.ent">
+<!--end of ISOlat2.module-->]]>
+
+<!ENTITY % ISOnum.module "INCLUDE">
+<![ %ISOnum.module; [
+ <!ENTITY % ISOnum PUBLIC
+  "ISO 8879:1986//ENTITIES Numeric and Special Graphic//EN//XML"
+  "http://www.oasis-open.org/docbook/xml/4.3/ent/iso-num.ent">
+<!--end of ISOnum.module-->]]>
+
+<!ENTITY % ISOpub.module "INCLUDE">
+<![ %ISOpub.module; [
+ <!ENTITY % ISOpub PUBLIC
+  "ISO 8879:1986//ENTITIES Publishing//EN//XML"
+  "http://www.oasis-open.org/docbook/xml/4.3/ent/iso-pub.ent">
+<!--end of ISOpub.module-->]]>
+
+<![ %ISOlat1.module; [
+%ISOlat1;
+]]>
+
+<![ %ISOlat2.module; [
+%ISOlat2;
+]]>
+
+<![ %ISOnum.module; [
+%ISOnum;
+]]>
+
+<![ %ISOpub.module; [
+%ISOpub;
+]]>

@@ -1,0 +1,6 @@
+The schemas for XLIFF 1.2 included in this catalog are not the original 
+ones published by OASIS.
+
+The original schemas include the "merged-trans" attribute in <trans-unit> 
+element. According to the specification document, this attribute is only 
+allowed in the <group> element. 
