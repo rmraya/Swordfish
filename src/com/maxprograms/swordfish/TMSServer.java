@@ -20,6 +20,7 @@ package com.maxprograms.swordfish;
 
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -28,6 +29,7 @@ import java.lang.System.Logger;
 import java.lang.System.Logger.Level;
 import java.net.InetSocketAddress;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
@@ -38,18 +40,19 @@ import com.sun.net.httpserver.HttpServer;
 
 import org.json.JSONObject;
 
-public class TMSServer implements HttpHandler {
+public class TmsServer implements HttpHandler {
 
-	private static Logger logger = System.getLogger(TMSServer.class.getName());
+	private static Logger logger = System.getLogger(TmsServer.class.getName());
 	private HttpServer server;
-	private TMSService service;
+	private TmsService service;
 	private boolean debug;
+	private static File workDir;
 
-	public TMSServer(Integer port) throws IOException {
+	public TmsServer(Integer port) throws IOException {
 		server = HttpServer.create(new InetSocketAddress(port), 0);
 		server.createContext("/TMSServer", this);
 		server.setExecutor(new ThreadPoolExecutor(3, 10, 20, TimeUnit.SECONDS, new ArrayBlockingQueue<Runnable>(100)));
-		service = new TMSService();
+		service = new TmsService();
 	}
 
 	public static void main(String[] args) {
@@ -69,7 +72,7 @@ public class TMSServer implements HttpHandler {
 			}
 		}
 		try {
-			TMSServer instance = new TMSServer(Integer.valueOf(port));
+			TmsServer instance = new TmsServer(Integer.valueOf(port));
 			instance.setDebug(shouldDebug);
 			instance.run();
 		} catch (Exception e) {
@@ -110,7 +113,7 @@ public class TMSServer implements HttpHandler {
 					obj.put("build", Constants.BUILD);
 					response = obj.toString();
 					break;
-				
+
 				default:
 					JSONObject unknown = new JSONObject();
 					unknown.put(Constants.STATUS, Constants.ERROR);
@@ -147,7 +150,7 @@ public class TMSServer implements HttpHandler {
 		}
 	}
 
-	private static String readRequestBody(InputStream is) throws IOException {
+	protected static String readRequestBody(InputStream is) throws IOException {
 		StringBuilder request = new StringBuilder();
 		try (BufferedReader rd = new BufferedReader(new InputStreamReader(is, StandardCharsets.UTF_8))) {
 			String line;
@@ -157,4 +160,33 @@ public class TMSServer implements HttpHandler {
 		}
 		return request.toString();
 	}
+
+	public static File getWorkFolder() throws IOException {
+		if (workDir == null) {
+			String os = System.getProperty("os.name").toLowerCase();
+			if (os.startsWith("mac")) {
+				workDir = new File(System.getProperty("user.home") + "/Library/Application Support/Swordfish/");
+			} else if (os.startsWith("windows")) {
+				workDir = new File(System.getenv("AppData") + "\\Swordfish\\" );
+			} else {
+				workDir = new File(System.getProperty("user.home") + "/.swordfish/" );
+			}
+			if (!workDir.exists()) {
+				Files.createDirectories(workDir.toPath());
+			}
+		}
+		return workDir;
+	}
+
+	public static void deleteFolder(String folder) throws IOException {
+		File f = new File(folder);
+		if (f.isDirectory()) {
+			String[] list = f.list();
+			for (int i = 0; i < list.length; i++) {
+				deleteFolder(new File(f, list[i]).getAbsolutePath());
+			}
+		}
+		Files.delete(f.toPath());
+	}
 }
+

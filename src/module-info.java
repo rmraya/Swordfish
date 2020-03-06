@@ -21,6 +21,9 @@ module swordfish {
 	exports com.maxprograms.swordfish;
 	exports com.maxprograms.swordfish.models;
 	
+	opens com.maxprograms.swordfish to mapdb;
+	opens com.maxprograms.swordfish.models to mapdb;
+
 	requires java.base;
 	requires java.xml;
 	requires java.sql;
@@ -28,4 +31,5 @@ module swordfish {
 	requires transitive jdk.httpserver;
 	requires transitive json;
 	requires java.logging;
+	requires tmengine;
 }

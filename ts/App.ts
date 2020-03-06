@@ -55,14 +55,14 @@ if (!app.requestSingleInstanceLock()) {
 if (process.platform == 'win32') {
     javapath = app.getAppPath() + '\\bin\\java.exe';
     classpath = 'lib\h2-1.4.200.jar;lib\mariadb-java-client-2.4.3.jar';
-    appHome = app.getPath('appData') + '\\tmxeditor\\';
+    appHome = app.getPath('appData') + '\\swordfish\\';
 }
 
 if (!existsSync(appHome)) {
     mkdirSync(appHome, { recursive: true });
 }
 
-const ls = spawn(javapath, ['-cp', classpath, '--module-path', 'lib', '-m', 'swordfish/com.maxprograms.swordfish.TMSServer', '-port', '8070'], { cwd: app.getAppPath() });
+const ls = spawn(javapath, ['-cp', classpath, '--module-path', 'lib', '-m', 'swordfish/com.maxprograms.swordfish.TmsServer', '-port', '8070'], { cwd: app.getAppPath() });
 
 ls.stdout.on('data', (data) => {
     console.log(`stdout: ${data}`);

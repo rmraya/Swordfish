@@ -18,6 +18,6 @@ SOFTWARE.
 *****************************************************************************/
 package com.maxprograms.swordfish;
 
-public class TMSService {
+public class TmsService {
 
 }
