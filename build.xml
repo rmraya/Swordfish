@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<project basedir="." default="dist" name="Swordfish">
+    <property name="target" value="11"/>
+    <property name="source" value="11"/>
+    <property name="build.compiler" value="javac10+"/>
+    <path id="Swordfish.classpath">
+        <pathelement location="jars/dtd.jar"/>
+        <pathelement location="jars/json.jar"/>
+        <pathelement location="jars/jsoup-1.11.3.jar"/>
+        <pathelement location="jars/mapdb.jar"/>
+        <pathelement location="jars/openxliff.jar"/>
+        <pathelement location="jars/tmengine.jar"/>
+        <pathelement location="jars/h2-1.4.200.jar"/>
+        <pathelement location="jars/mariadb-java-client-2.4.3.jar"/>
+    </path>
+    <condition property="isWindows"> 
+        <os family="windows"/>
+    </condition>
+    <target name="init">
+        <mkdir dir="out"/>
+        <copy includeemptydirs="false" todir="out">
+            <fileset dir="src">
+                <exclude name="**/*.java"/>
+            </fileset>
+        </copy>
+    </target>
+    <target name="clean">
+        <delete dir="out" failonerror="false"/>
+    </target>
+    <target name="distclean">
+        <delete dir="dist" failonerror="false"/>
+        <delete dir="bin" failonerror="false"/>
+        <delete dir="conf" failonerror="false"/>
+        <delete dir="include" failonerror="false"/>
+        <delete dir="legal" failonerror="false"/>
+        <delete dir="lib" failonerror="false"/>
+        <delete file="release"/>
+    </target>
+    <target name="compile" depends="clean,init">
+        <description>Build jar file</description>
+        <delete file="jars/swordfish.jar"/>
+        <javac srcdir="src" destdir="out" classpathref="Swordfish.classpath" modulepathref="Swordfish.classpath" includeAntRuntime="false"/>
+        <jar destfile="jars/swordfish.jar" basedir="out"/>
+    </target>
+    <target name="link" depends="distclean,compile">
+        <description>Build Java binaries</description>
+        <link destDir="dist" modulepath="jars:${java.home}/jmods">
+            <module name="swordfish"/>
+        </link>
+        <delete file="dist/lib/jrt-fs.jar"/>
+    </target>
+    <target name="copyWindows" if="isWindows">
+        <description>Move java binaries to work folder</description>
+        <move todir=".\bin">
+            <fileset dir="dist\bin"/>
+        </move>
+         <move todir=".\conf">
+            <fileset dir="dist\conf"/>
+        </move>
+         <move todir=".\include">
+            <fileset dir="dist\include"/>
+        </move>
+         <move todir=".\legal">
+            <fileset dir="dist\legal"/>
+        </move>
+         <move todir=".\lib">
+            <fileset dir="dist\lib"/>
+        </move>
+        <move file="dist\release" todir="."/>
+        <delete dir="dist" failonerror="false"/>
+        <delete file=".\jars\swordfish.jar" />
+    </target>
+    <target name="copyUnix" unless="isWindows">
+        <description>Move java binaries to work folder</description>
+        <move todir="./bin">
+            <fileset dir="dist/bin"/>
+        </move>
+         <move todir="./conf">
+            <fileset dir="dist/conf"/>
+        </move>
+         <move todir="./include">
+            <fileset dir="dist/include"/>
+        </move>
+         <move todir="./legal">
+            <fileset dir="dist/legal"/>
+        </move>
+         <move todir="./lib">
+            <fileset dir="dist/lib"/>
+        </move>
+        <move file="dist/release" todir="."/>
+        <delete dir="dist" failonerror="false"/>
+        <delete file="jars/swordfish.jar" />
+        <copy file="jars/h2-1.4.200.jar" todir="dist/lib"/>
+        <copy file="jars/mariadb-java-client-2.4.3.jar" todir="dist/lib"/>
+    </target>
+    <target name="dist" depends="link,copyWindows,copyUnix">
+        <description>Prepare distribution</description>
+        <copy file="jars/h2-1.4.200.jar" todir="lib"/>
+        <copy file="jars/mariadb-java-client-2.4.3.jar" todir="lib"/>
+    </target>
+</project>

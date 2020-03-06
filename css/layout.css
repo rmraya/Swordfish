@@ -1,0 +1,39 @@
+body {
+    height: 100vh;
+    width: 100%;
+    margin: 0px;
+    padding: 0px;
+}
+
+header {
+    position: absolute;
+    left: 0px;
+    top: 0px;
+    right: 0px;
+    height: 29px;
+    width: 100%;
+}
+
+footer {
+    position: absolute;
+    height: 29px;
+    left: 0px;
+    bottom: 0px;
+    right: 0px;
+    vertical-align: bottom;
+}
+
+.divContainer {
+    width: 100vh;
+    height: 100%;
+}
+
+.divContentArea {
+    position: absolute;
+    left: 0px;
+    top: 31px;
+    right: 0px;
+    bottom: 29px;
+    width: 100%;
+    overflow-y: scroll;
+}

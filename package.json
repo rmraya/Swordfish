@@ -1,0 +1,26 @@
+{
+    "name": "swordfish",
+    "productName": "Swordfish",
+    "version": "4.0.0",
+    "description": "Swordfish Translation Editor",
+    "main": "js/app.js",
+    "scripts": {
+        "build": "tsc",
+        "start": "npm run build && electron ."
+    },
+    "author": {
+        "name": "Rodolfo M. Raya",
+        "email": "rmraya@maxprograms.com",
+        "url": "https://www.maxprograms.com"
+    },
+    "license": "SEE LICENSE IN LICENSE",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/rmraya/Swordfish.git"
+    },
+    "dependencies": {},
+    "devDependencies": {
+        "electron": "8.0.3",
+        "typescript": "^3.8.3"
+    }
+}

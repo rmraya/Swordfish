@@ -1,0 +1,64 @@
+@font-face {
+    font-family: "Noto Sans";
+    src: url('../fonts/NotoSans-Regular.ttf');
+}
+
+* {
+    font-family: "Noto Sans";
+}
+
+@font-face {
+    font-family: "Noto CJK";
+    src: url('../fonts/NotoSansCJKjp-Regular.otf');
+}
+
+td[lang^="ja"] {
+    font-family: "Noto CJK";
+}
+
+td[lang^="zh"] {
+    font-family: "Noto CJK";
+}
+
+td[lang^="ko"] {
+    font-family: "Noto CJK";
+}
+
+@font-face {
+    font-family: "Noto Arabic";
+    src: url('../fonts/NotoSansArabicUI-Regular.ttf');
+}
+
+td[lang^="ar"] {
+    font-family: "Noto Arabic";
+}
+
+td[lang^="ur"] {
+    font-family: "Noto Arabic";
+}
+
+td[lang^="fa"] {
+    font-family: "Noto Arabic";
+}
+
+@font-face {
+    font-family: "Noto Thai";
+    src: url('../fonts/NotoSansThai-Regular.ttf');
+}
+
+td[lang^="th"] {
+    font-family: "Noto Thai";
+}
+
+td[lang^="vi"] {
+    font-family: "Noto Thai";
+}
+
+@font-face {
+    font-family: "Noto Hebrew";
+    src: url('../fonts/NotoSansHebrew-Regular.ttf');
+}
+
+td[lang^="he"] {
+    font-family: "Noto Hebrew";
+}
