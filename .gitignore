@@ -1,5 +1,12 @@
 .DS_Store
 package-lock.json
 /out/
+/bin/
+/conf/
+/dist/
+/include/
+/legal/
+/lib/
 /js/
+/release
 /node_modules/

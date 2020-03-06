@@ -53,7 +53,7 @@ public class TMSServer implements HttpHandler {
 	}
 
 	public static void main(String[] args) {
-		String port = "8050";
+		String port = "8070";
 		boolean shouldDebug = false;
 		for (int i = 0; i < args.length; i++) {
 			String arg = args[i];
