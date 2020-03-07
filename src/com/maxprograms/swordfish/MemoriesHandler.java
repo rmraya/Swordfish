@@ -25,7 +25,6 @@ import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.lang.System.Logger;
 import java.lang.System.Logger.Level;
@@ -57,7 +56,8 @@ import com.sun.net.httpserver.HttpHandler;
 
 public class MemoriesHandler implements HttpHandler {
 
-	private static final Logger LOGGER = System.getLogger(MemoriesHandler.class.getName());
+	private static Logger logger = System.getLogger(MemoriesHandler.class.getName());
+
 	private static ConcurrentHashMap<String, Memory> memories;
 	private static ConcurrentHashMap<String, ITmEngine> openEngines;
 	private static ConcurrentHashMap<String, String[]> openTasks;
@@ -72,23 +72,20 @@ public class MemoriesHandler implements HttpHandler {
 				request = TmsServer.readRequestBody(is);
 			}
 			JSONObject response = processRequest(uri.toString(), request);
-
-			exchange.getResponseHeaders().add("content-type", "application/json");
-			exchange.sendResponseHeaders(200, response.toString(2).length() + 1l);
-			try (ByteArrayInputStream stream = new ByteArrayInputStream((response.toString(2) + '\n').getBytes())) {
-				try (InputStreamReader input = new InputStreamReader(stream)) {
-					try (BufferedReader reader = new BufferedReader(input)) {
-						try (OutputStream os = exchange.getResponseBody()) {
-							String line;
-							while ((line = reader.readLine()) != null) {
-								os.write((line + '\n').getBytes());
-							}
-						}
+			byte[] bytes = response.toString().getBytes(StandardCharsets.UTF_8);
+			exchange.sendResponseHeaders(200, bytes.length);
+			exchange.getResponseHeaders().add("content-type", "application/json; charset=utf-8");
+			try (ByteArrayInputStream stream = new ByteArrayInputStream(bytes)) {
+				try (OutputStream os = exchange.getResponseBody()) {
+					byte[] array = new byte[2048];
+					int read;
+					while ((read = stream.read(array)) != -1) {
+						os.write(array, 0, read);
 					}
 				}
 			}
 		} catch (IOException e) {
-			LOGGER.log(Level.ERROR, "Error processing memory " + exchange.getRequestURI().toString(), e);
+			logger.log(Level.ERROR, "Error processing memory " + exchange.getRequestURI().toString(), e);
 		}
 	}
 
@@ -120,14 +117,15 @@ public class MemoriesHandler implements HttpHandler {
 			} else {
 				response.put(Constants.REASON, "Unknown request");
 			}
+
 			if (!response.has(Constants.REASON)) {
-				response.put(Constants.STATUS, "OK");
+				response.put(Constants.STATUS, Constants.SUCCESS);
 			} else {
-				response.put(Constants.STATUS, "failed");
+				response.put(Constants.STATUS, Constants.ERROR);
 			}
 		} catch (Exception j) {
-			LOGGER.log(Level.ERROR, j.getMessage(), j);
-			response.put(Constants.STATUS, "failed");
+			logger.log(Level.ERROR, j.getMessage(), j);
+			response.put(Constants.STATUS, Constants.ERROR);
 			response.put(Constants.REASON, j.getMessage());
 		}
 		return response;
@@ -169,7 +167,7 @@ public class MemoriesHandler implements HttpHandler {
 				obj.put("languages", array);
 				openTasks.put(process, new String[] { Constants.COMPLETED, obj.toString() });
 			} catch (IOException | SQLException e) {
-				LOGGER.log(Level.ERROR, e.getMessage(), e);
+				logger.log(Level.ERROR, e.getMessage(), e);
 				openTasks.put(process, new String[] { Constants.ERROR, e.getMessage() });
 			}
 		}).start();
@@ -268,13 +266,13 @@ public class MemoriesHandler implements HttpHandler {
 					openTasks.put(process, new String[] { Constants.COMPLETED });
 				} catch (Exception e) {
 					openTasks.put(process, new String[] { Constants.ERROR, e.getMessage() });
-					LOGGER.log(Level.ERROR, e.getMessage(), e);
+					logger.log(Level.ERROR, e.getMessage(), e);
 				}
 				if (!wasOpen) {
 					closeMemory(id);
 				}
 			} catch (IOException | SQLException e) {
-				LOGGER.log(Level.ERROR, e.getMessage(), e);
+				logger.log(Level.ERROR, e.getMessage(), e);
 				openTasks.put(process, new String[] { Constants.ERROR, e.getMessage() });
 			}
 		}).start();
@@ -340,7 +338,7 @@ public class MemoriesHandler implements HttpHandler {
 				}
 				openTasks.put(process, new String[] { Constants.COMPLETED });
 			} catch (IOException | JSONException | SAXException | ParserConfigurationException | SQLException e) {
-				LOGGER.log(Level.ERROR, e.getMessage(), e);
+				logger.log(Level.ERROR, e.getMessage(), e);
 				openTasks.put(process, new String[] { Constants.ERROR, e.getMessage() });
 			}
 
@@ -374,14 +372,14 @@ public class MemoriesHandler implements HttpHandler {
 							File wfolder = new File(getWorkFolder(), mem.getId());
 							TmsServer.deleteFolder(wfolder.getAbsolutePath());
 						} catch (IOException ioe) {
-							LOGGER.log(Level.WARNING, "Folder '" + mem.getId() + "' will be deleted on next start");
+							logger.log(Level.WARNING, "Folder '" + mem.getId() + "' will be deleted on next start");
 						}
 						memories.remove(mem.getId());
 					}
 					saveMemoriesList();
 					openTasks.put(process, new String[] { Constants.COMPLETED });
 				} catch (IOException | SQLException e) {
-					LOGGER.log(Level.ERROR, e.getMessage(), e);
+					logger.log(Level.ERROR, e.getMessage(), e);
 					openTasks.put(process, new String[] { Constants.ERROR, e.getMessage() });
 				}
 			}).start();
@@ -465,7 +463,7 @@ public class MemoriesHandler implements HttpHandler {
 						}
 					}
 				} catch (IOException e) {
-					LOGGER.log(Level.WARNING, "Error deleting folder", e);
+					logger.log(Level.WARNING, "Error deleting folder", e);
 				}
 			}).start();
 		}
@@ -512,7 +510,7 @@ public class MemoriesHandler implements HttpHandler {
 	private static void closeMemory(String id) throws IOException, SQLException {
 		if (openEngines == null) {
 			openEngines = new ConcurrentHashMap<>();
-			LOGGER.log(Level.WARNING, "Closing memory when 'openEngine' is null");
+			logger.log(Level.WARNING, "Closing memory when 'openEngine' is null");
 		}
 		if (!openEngines.contains(id)) {
 			return;

@@ -44,15 +44,11 @@ public class TmsServer implements HttpHandler {
 
 	private static Logger logger = System.getLogger(TmsServer.class.getName());
 	private HttpServer server;
-	private TmsService service;
 	private boolean debug;
 	private static File workDir;
 
 	public TmsServer(Integer port) throws IOException {
 		server = HttpServer.create(new InetSocketAddress(port), 0);
-		server.createContext("/TMSServer", this);
-		server.setExecutor(new ThreadPoolExecutor(3, 10, 20, TimeUnit.SECONDS, new ArrayBlockingQueue<Runnable>(100)));
-		service = new TmsService();
 	}
 
 	public static void main(String[] args) {
@@ -85,8 +81,13 @@ public class TmsServer implements HttpHandler {
 	}
 
 	private void run() {
+		server.createContext("/projects", new ProjectsHandler());
+		server.createContext("/memories", new MemoriesHandler());
+		server.createContext("/glossaries", new GlossariesHandler());
+		server.createContext("/services", new ServicesHandler());
+		server.setExecutor(new ThreadPoolExecutor(4, 8, 30, TimeUnit.SECONDS, new ArrayBlockingQueue<Runnable>(100)));
 		server.start();
-		logger.log(Level.INFO, "TMSServer started");
+		logger.log(Level.INFO, "TMS server started");
 	}
 
 	@Override
@@ -167,9 +168,9 @@ public class TmsServer implements HttpHandler {
 			if (os.startsWith("mac")) {
 				workDir = new File(System.getProperty("user.home") + "/Library/Application Support/Swordfish/");
 			} else if (os.startsWith("windows")) {
-				workDir = new File(System.getenv("AppData") + "\\Swordfish\\" );
+				workDir = new File(System.getenv("AppData") + "\\Swordfish\\");
 			} else {
-				workDir = new File(System.getProperty("user.home") + "/.swordfish/" );
+				workDir = new File(System.getProperty("user.home") + "/.swordfish/");
 			}
 			if (!workDir.exists()) {
 				Files.createDirectories(workDir.toPath());
@@ -189,4 +190,3 @@ public class TmsServer implements HttpHandler {
 		Files.delete(f.toPath());
 	}
 }
-
