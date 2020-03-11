@@ -19,26 +19,25 @@ SOFTWARE.
 
 import { Buffer } from "buffer";
 import { execFileSync, spawn } from "child_process";
-import { app, BrowserWindow, dialog, ipcMain, Menu, MenuItem, shell, webContents, nativeTheme } from "electron";
+import { app, BrowserWindow, dialog, ipcMain, Menu, MenuItem, shell, webContents, nativeTheme, Rectangle } from "electron";
 import { existsSync, mkdirSync, readFile, readFileSync, writeFile, writeFileSync } from "fs";
 import { ClientRequest, request, IncomingMessage } from "http";
-const https = require('https');
+import https = require('https');
 
 app.allowRendererProcessReuse = true;
 
 var mainWindow: BrowserWindow;
 var contents: webContents;
 var javapath: string = app.getAppPath() + '/bin/java';
-var classpath = 'lib/h2-1.4.200.jar:lib/mariadb-java-client-2.4.3.jar';
+var classpath: string = 'lib/h2-1.4.200.jar:lib/mariadb-java-client-2.4.3.jar';
 var appHome: string = app.getPath('appData') + '/swordfish/';
 
-var currentDefaults: any;
+var currentDefaults: Rectangle;
+var currentPreferences: any;
+var currentTheme: string;
 
 var saved: boolean = true;
 var stopping: boolean = false;
-
-var currentTheme: string;
-
 
 if (!app.requestSingleInstanceLock()) {
     app.quit();
@@ -54,8 +53,8 @@ if (!app.requestSingleInstanceLock()) {
 
 if (process.platform == 'win32') {
     javapath = app.getAppPath() + '\\bin\\java.exe';
-    classpath = 'lib\h2-1.4.200.jar;lib\mariadb-java-client-2.4.3.jar';
-    appHome = app.getPath('appData') + '\\swordfish\\';
+    classpath = 'lib\\h2-1.4.200.jar;lib\\mariadb-java-client-2.4.3.jar';
+    appHome = app.getPath('appData') + '\\Swordfish\\';
 }
 
 if (!existsSync(appHome)) {
@@ -135,7 +134,7 @@ function createWindow(): void {
     contents = mainWindow.webContents;
 }
 
-function stopServer() {
+function stopServer(): void {
     if (!stopping) {
         stopping = true;
         if (!saved) {
@@ -160,30 +159,59 @@ function loadDefaults(): void {
     }
 }
 
-
 function saveDefaults(): void {
-    var defaults = mainWindow.getBounds();
+    var defaults: Rectangle = mainWindow.getBounds();
     if (!currentDefaults) {
         return;
     }
-    if (defaults.width === currentDefaults.width && defaults.height === currentDefaults.height && defaults.x === currentDefaults.x) {
-        return;
-    }
-    if (defaults.width === 800 && defaults.height === 600) {
+    if (defaults.width === currentDefaults.width
+        && defaults.height === currentDefaults.height
+        && defaults.x === currentDefaults.x
+        && defaults.y === currentDefaults.y) {
         return;
     }
     writeFileSync(appHome + 'defaults.json', JSON.stringify(defaults));
 }
 
 function loadPreferences(): void {
+    currentPreferences = { theme: 'system' };
+    if (existsSync(appHome + 'preferences.json')) {
+        try {
+            var data: Buffer = readFileSync(appHome + 'preferences.json');
+            currentPreferences = JSON.parse(data.toString());
+        } catch (err) {
+            console.log(err);
+        }
+    }
+    if (currentPreferences.theme === 'system') {
+        if (nativeTheme.shouldUseDarkColors) {
+            currentTheme = app.getAppPath() + '/css/dark.css';
+            nativeTheme.themeSource = 'dark';
+        } else {
+            currentTheme = app.getAppPath() + '/css/light.css';
+            nativeTheme.themeSource = 'light';
+        }
+    }
+    if (currentPreferences.theme === 'dark') {
+        currentTheme = app.getAppPath() + '/css/dark.css';
+        nativeTheme.themeSource = 'dark';
+    }
+    if (currentPreferences.theme === 'light') {
+        currentTheme = app.getAppPath() + '/css/light.css';
+        nativeTheme.themeSource = 'light';
+    }
+}
+
+function savePreferences(): void {
+    writeFileSync(appHome + 'preferences.json', JSON.stringify(currentPreferences));
+    nativeTheme.themeSource = currentPreferences.theme;
+}
+
+function openFile(file: string): void {
     // TODO
 }
 
-function openFile(file: string) {
-    // TODO
-}
-
-function saveFile() {
+function saveFile(): void {
     // TODO
 }
 
@@ -194,6 +222,10 @@ function setTheme(): void {
 nativeTheme.on('updated', () => {
     loadPreferences();
     setTheme();
+});
+
+ipcMain.on('get-theme', (event, arg) => {
+    event.sender.send('set-theme', currentTheme);
 });
 
 function checkUpdates(silent: boolean): void {

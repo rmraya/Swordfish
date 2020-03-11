@@ -17,4 +17,20 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 *****************************************************************************/
 
-const { ipcRenderer } = require('electron');
+import { ipcRenderer } from "electron";
+
+function getTheme(): void {
+    ipcRenderer.send('get-theme');
+}
+
+ipcRenderer.on('set-theme', (event, arg) => {
+    (document.getElementById('theme') as HTMLLinkElement).href = arg;
+});
+
+function setSizes(): void {
+
+}
+
+function resizePanels(): void {
+
+}
