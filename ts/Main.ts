@@ -17,20 +17,78 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 *****************************************************************************/
 
-import { ipcRenderer } from "electron";
+const { ipcRenderer } = require('electron');
 
-function getTheme(): void {
-    ipcRenderer.send('get-theme');
+class Main {
+
+    tabs: Map<string, string>;
+
+    constructor() {
+        this.tabs = new Map<string, string>();
+
+        document.getElementById('projects').addEventListener('click', () => { this.selectTab('projects') });
+        document.getElementById('memories').addEventListener('click', () => { this.selectTab('memories') });
+        document.getElementById('glossaries').addEventListener('click', () => { this.selectTab('glossaries') });
+
+        this.tabs.set('projects', this.buildProjectsTab());
+        this.tabs.set('memories', 'memories tab');
+        this.tabs.set('glossaries', 'glossaries tab');
+
+        this.selectTab('projects');
+
+        ipcRenderer.send('get-theme');
+        ipcRenderer.on('set-theme', (event, arg) => {
+            (document.getElementById('theme') as HTMLLinkElement).href = arg;
+        });
+        window.addEventListener('resize', () => {
+            this.resizePanels();
+        });
+    }
+
+    selectTab(tab: string): void {
+        let list: HTMLCollectionOf<Element> = document.getElementsByClassName('tab');
+        let length = list.length;
+        for (let i = 0; i < length; i++) {
+            if (list[i].classList.contains('selectedTab')) {
+                list[i].classList.remove('selectedTab');
+                this.tabs.set(list[i].getAttribute('id'), document.getElementById('main').innerHTML);
+            }
+        }
+        document.getElementById('main').innerHTML = this.tabs.get(tab);
+        document.getElementById(tab).classList.add('selectedTab');
+        document.getElementById(tab).blur();
+    }
+
+    buildProjectsTab(): string {
+        let container: HTMLDivElement = document.createElement('div');
+        let topBar: HTMLDivElement = document.createElement('div');
+        topBar.style.display = 'flex';
+        topBar.style.padding = '0px';
+        topBar.style.borderBottom = '1px solid navy';
+        container.appendChild(topBar);
+
+        let addButton = document.createElement('a');
+        addButton.innerHTML = '<img src="images/file-add.svg"><span class="tooltiptext bottomTooltip">Add Project</span>';
+        addButton.className = 'tooltip';
+        addButton.addEventListener('click', () => { this.addProject() });
+        topBar.appendChild(addButton);
+
+        let project = new Projects('hello');
+
+        let hello = document.createElement('p');
+        hello.innerHTML = project.getName();
+        container.appendChild(hello);
+
+        return container.innerHTML;
+    }
+
+    resizePanels(): void {
+        // TODO
+    }
+
+    addProject() {
+        // TODO
+    }
 }
 
-ipcRenderer.on('set-theme', (event, arg) => {
-    (document.getElementById('theme') as HTMLLinkElement).href = arg;
-});
-
-function setSizes(): void {
-
-}
-
-function resizePanels(): void {
-
-}
+new Main();

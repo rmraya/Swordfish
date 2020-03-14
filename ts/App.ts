@@ -96,7 +96,7 @@ app.on('ready', function () {
         saveDefaults();
     });
     mainWindow.show();
-    // contents.openDevTools();
+    contents.openDevTools();
     setTheme();
     checkUpdates(true);
 });
