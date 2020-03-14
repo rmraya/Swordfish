@@ -17,7 +17,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 *****************************************************************************/
 
-class ProjectsView {
+class MemoriesView {
 
     container: HTMLDivElement;
 
@@ -28,9 +28,9 @@ class ProjectsView {
         this.container.appendChild(topBar);
 
         let addButton = document.createElement('a');
-        addButton.innerHTML = '<img src="images/file-add.svg"><span class="tooltiptext bottomTooltip">Add Project</span>';
+        addButton.innerHTML = '<img src="images/file-add.svg"><span class="tooltiptext bottomTooltip">Add Memory</span>';
         addButton.className = 'tooltip';
-        addButton.addEventListener('click', () => { this.addProject() });
+        addButton.addEventListener('click', () => { this.addMemory() });
         topBar.appendChild(addButton);
 
     }
@@ -39,7 +39,7 @@ class ProjectsView {
         return this.container.innerHTML;
     }
 
-    addProject() {
+    addMemory() {
         // TODO
     }
 }

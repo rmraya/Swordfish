@@ -23,6 +23,10 @@ class Main {
 
     tabs: Map<string, string>;
 
+    projectsView: ProjectsView;
+    memoriesView: MemoriesView;
+    glossariesView: GlossariesView;
+
     constructor() {
         this.tabs = new Map<string, string>();
 
@@ -31,8 +35,8 @@ class Main {
         document.getElementById('glossaries').addEventListener('click', () => { this.selectTab('glossaries') });
 
         this.tabs.set('projects', this.buildProjectsTab());
-        this.tabs.set('memories', 'memories tab');
-        this.tabs.set('glossaries', 'glossaries tab');
+        this.tabs.set('memories', this.buildMemoriesTab());
+        this.tabs.set('glossaries', this.buildGlossariesTab());
 
         this.selectTab('projects');
 
@@ -60,35 +64,25 @@ class Main {
     }
 
     buildProjectsTab(): string {
-        let container: HTMLDivElement = document.createElement('div');
-        let topBar: HTMLDivElement = document.createElement('div');
-        topBar.style.display = 'flex';
-        topBar.style.padding = '0px';
-        topBar.style.borderBottom = '1px solid navy';
-        container.appendChild(topBar);
-
-        let addButton = document.createElement('a');
-        addButton.innerHTML = '<img src="images/file-add.svg"><span class="tooltiptext bottomTooltip">Add Project</span>';
-        addButton.className = 'tooltip';
-        addButton.addEventListener('click', () => { this.addProject() });
-        topBar.appendChild(addButton);
-
-        let project = new Projects('hello');
-
-        let hello = document.createElement('p');
-        hello.innerHTML = project.getName();
-        container.appendChild(hello);
-
-        return container.innerHTML;
+        this.projectsView = new ProjectsView();
+        return this.projectsView.getHtml();
     }
 
+    buildMemoriesTab(): string {
+        this.memoriesView = new MemoriesView();
+        return this.memoriesView.getHtml();
+    }
+
+    buildGlossariesTab(): string {
+        this.glossariesView = new GlossariesView();
+        return this.glossariesView.getHtml();
+    }
+    
     resizePanels(): void {
         // TODO
     }
 
-    addProject() {
-        // TODO
-    }
+    
 }
 
 new Main();
