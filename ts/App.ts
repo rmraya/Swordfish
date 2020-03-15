@@ -97,7 +97,7 @@ app.on('ready', function () {
         saveDefaults();
     });
     mainWindow.show();
-    contents.openDevTools();
+    // contents.openDevTools();
     setTheme();
     checkUpdates(true);
 });
@@ -149,9 +149,9 @@ function createWindow(): void {
         { label: 'Replace Text...', accelerator: 'CmdOrCtrl+F', click: function () { replaceText(); } }
     ]);
     var viewMenu: Menu = Menu.buildFromTemplate([
-        { label: 'Projects', click: function () { viewProjects(); } },
-        { label: 'Memories', click: function () { viewMemories(); } },
-        { label: 'Glossaries', click: function () { viewGlossaries(); } },
+        { label: 'Projects', accelerator:'CmdOrCtrl+Alt+1', click: function () { viewProjects(); } },
+        { label: 'Memories', accelerator:'CmdOrCtrl+Alt+2', click: function () { viewMemories(); } },
+        { label: 'Glossaries', accelerator:'CmdOrCtrl+Alt+3', click: function () { viewGlossaries(); } },
         new MenuItem({ type: 'separator' }),
         new MenuItem({ label: 'Toggle Full Screen', role: 'togglefullscreen' }),
         new MenuItem({ label: 'Toggle Development Tools', accelerator: 'F12', role: 'toggleDevTools' }),
@@ -207,14 +207,14 @@ function createWindow(): void {
     if (process.platform == 'win32') {
         template[0].submenu.append(new MenuItem({ type: 'separator' }));
         template[0].submenu.append(new MenuItem({ label: 'Exit', accelerator: 'Alt+F4', role: 'quit', click: function () { app.quit(); } }));
-        template[6].submenu.append(new MenuItem({ type: 'separator' }));
-        template[6].submenu.append(new MenuItem({ label: 'About...', click: function () { showAbout(); } }));
+        template[7].submenu.append(new MenuItem({ type: 'separator' }));
+        template[7].submenu.append(new MenuItem({ label: 'About...', click: function () { showAbout(); } }));
     }
     if (process.platform === 'linux') {
         template[0].submenu.append(new MenuItem({ type: 'separator' }));
         template[0].submenu.append(new MenuItem({ label: 'Quit', accelerator: 'Ctrl+Q', role: 'quit', click: function () { app.quit(); } }));
-        template[6].submenu.append(new MenuItem({ type: 'separator' }));
-        template[6].submenu.append(new MenuItem({ label: 'About...', click: function () { showAbout(); } }));
+        template[7].submenu.append(new MenuItem({ type: 'separator' }));
+        template[7].submenu.append(new MenuItem({ label: 'About...', click: function () { showAbout(); } }));
     }
     Menu.setApplicationMenu(Menu.buildFromTemplate(template));   
 }
