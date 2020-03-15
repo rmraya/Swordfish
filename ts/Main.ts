@@ -47,6 +47,15 @@ class Main {
         window.addEventListener('resize', () => {
             this.resizePanels();
         });
+        ipcRenderer.on('view-projects', () => {
+            this.selectTab('projects');
+        });
+        ipcRenderer.on('view-memories', () => {
+            this.selectTab('memories');
+        });
+        ipcRenderer.on('view-glossaries', () => {
+            this.selectTab('glossaries');
+        });
     }
 
     selectTab(tab: string): void {
@@ -80,9 +89,7 @@ class Main {
     
     resizePanels(): void {
         // TODO
-    }
-
-    
+    }    
 }
 
 new Main();

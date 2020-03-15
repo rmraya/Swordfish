@@ -27,6 +27,11 @@ Ready to use installers and technical support for Swordfish III are available at
 
 Subscription version includes unlimited email support at tech@maxprograms.com
 
+## Related Projects
+
+- [OpenXLIFF Filters](https://github.com/rmraya/OpenXLIFF)
+- [TMEngine](https://github.com/rmraya/TMEngine)
+
 ## Requirements
 
 - JDK 11 or newer is required for compiling and building. Get it from [AdoptOpenJDK](https://adoptopenjdk.net/).

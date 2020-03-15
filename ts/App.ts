@@ -27,6 +27,7 @@ import https = require('https');
 app.allowRendererProcessReuse = true;
 
 var mainWindow: BrowserWindow;
+var settingsWindow: BrowserWindow;
 var contents: webContents;
 var javapath: string = app.getAppPath() + '/bin/java';
 var classpath: string = 'lib/h2-1.4.200.jar:lib/mariadb-java-client-2.4.3.jar';
@@ -132,6 +133,90 @@ function createWindow(): void {
         icon: 'icons/icon.png'
     });
     contents = mainWindow.webContents;
+    var fileMenu: Menu = Menu.buildFromTemplate([
+    ]);
+    var editMenu: Menu = Menu.buildFromTemplate([
+        { label: 'Undo', accelerator: 'CmdOrCtrl+Z', click: function () { contents.undo(); } },
+        new MenuItem({ type: 'separator' }),
+        { label: 'Cut', accelerator: 'CmdOrCtrl+X', click: function () { contents.cut(); } },
+        { label: 'Copy', accelerator: 'CmdOrCtrl+C', click: function () { contents.copy(); } },
+        { label: 'Paste', accelerator: 'CmdOrCtrl+V', click: function () { contents.paste(); } },
+        { label: 'Select All', accelerator: 'CmdOrCtrl+A', click: function () { contents.selectAll(); } },
+        new MenuItem({ type: 'separator' }),
+        { label: 'Confirm Edit', accelerator: 'Alt+Enter', click: function () { saveEdits(); } },
+        { label: 'Cancel Edit', accelerator: 'Esc', click: function () { cancelEdit(); } },
+        new MenuItem({ type: 'separator' }),
+        { label: 'Replace Text...', accelerator: 'CmdOrCtrl+F', click: function () { replaceText(); } }
+    ]);
+    var viewMenu: Menu = Menu.buildFromTemplate([
+        { label: 'Projects', click: function () { viewProjects(); } },
+        { label: 'Memories', click: function () { viewMemories(); } },
+        { label: 'Glossaries', click: function () { viewGlossaries(); } },
+        new MenuItem({ type: 'separator' }),
+        new MenuItem({ label: 'Toggle Full Screen', role: 'togglefullscreen' }),
+        new MenuItem({ label: 'Toggle Development Tools', accelerator: 'F12', role: 'toggleDevTools' }),
+    ]);
+    var projectsMenu: Menu = Menu.buildFromTemplate([]);
+    var memoriesMenu: Menu = Menu.buildFromTemplate([]);
+    var memoriesMenu: Menu = Menu.buildFromTemplate([]);
+    var helpMenu: Menu = Menu.buildFromTemplate([
+        { label: 'Swordfish User Guide', accelerator: 'F1', click: function () { showHelp(); } },
+        new MenuItem({ type: 'separator' }),
+        { label: 'Check for Updates...', click: function () { checkUpdates(false); } },
+        { label: 'View Licenses', click: function () { showLicenses(); } },
+        new MenuItem({ type: 'separator' }),
+        { label: 'Release History', click: function () { showReleaseHistory(); } },
+        { label: 'Support Group', click: function () { showSupportGroup(); } }
+    ]);
+    var template: MenuItem[] = [
+        new MenuItem({ label: '&File', role: 'fileMenu', submenu: fileMenu }),
+        new MenuItem({ label: '&Edit', role: 'editMenu', submenu: editMenu }),
+        new MenuItem({ label: '&View', role: 'viewMenu', submenu: viewMenu }),
+        new MenuItem({ label: '&Projects', submenu: projectsMenu }),
+        new MenuItem({ label: '&Memories', submenu: memoriesMenu }),
+        new MenuItem({ label: '&Glossaries', submenu: memoriesMenu }),
+        new MenuItem({ label: '&Help', role: 'help', submenu: helpMenu })
+    ];
+    if (process.platform === 'darwin') {
+        var appleMenu: Menu = Menu.buildFromTemplate([
+            new MenuItem({ label: 'About...', click: function () { showAbout(); } }),
+            new MenuItem({
+                label: 'Preferences...', submenu: [
+                    { label: 'Settings', accelerator: 'Cmd+,', click: function () { showSettings(); } }
+                ]
+            }),
+            new MenuItem({ type: 'separator' }),
+            new MenuItem({
+                label: 'Services', role: 'services', submenu: [
+                    { label: 'No Services Apply', enabled: false }
+                ]
+            }),
+            new MenuItem({ type: 'separator' }),
+            new MenuItem({ label: 'Quit Swordfish', accelerator: 'Cmd+Q', role: 'quit', click: function () { app.quit(); } })
+        ]);
+        template.unshift(new MenuItem({ label: 'Swordfish', role: 'appMenu', submenu: appleMenu }));
+    } else {
+        var help: MenuItem = template.pop();
+        template.push(new MenuItem({
+            label: '&Settings', submenu: [
+                { label: 'Preferences', click: function () { showSettings(); } }
+            ]
+        }));
+        template.push(help);
+    }
+    if (process.platform == 'win32') {
+        template[0].submenu.append(new MenuItem({ type: 'separator' }));
+        template[0].submenu.append(new MenuItem({ label: 'Exit', accelerator: 'Alt+F4', role: 'quit', click: function () { app.quit(); } }));
+        template[6].submenu.append(new MenuItem({ type: 'separator' }));
+        template[6].submenu.append(new MenuItem({ label: 'About...', click: function () { showAbout(); } }));
+    }
+    if (process.platform === 'linux') {
+        template[0].submenu.append(new MenuItem({ type: 'separator' }));
+        template[0].submenu.append(new MenuItem({ label: 'Quit', accelerator: 'Ctrl+Q', role: 'quit', click: function () { app.quit(); } }));
+        template[6].submenu.append(new MenuItem({ type: 'separator' }));
+        template[6].submenu.append(new MenuItem({ label: 'About...', click: function () { showAbout(); } }));
+    }
+    Menu.setApplicationMenu(Menu.buildFromTemplate(template));   
 }
 
 function stopServer(): void {
@@ -215,6 +300,107 @@ function saveFile(): void {
     // TODO
 }
 
+function saveEdits(): void {
+    // TODO
+}
+
+function cancelEdit(): void {
+    // TODO
+}
+
+function replaceText(): void {
+    // TODO
+}
+
+function viewProjects(): void {
+    contents.send('view-projects');
+}
+
+function viewMemories(): void {
+    contents.send('view-memories');
+}
+
+function viewGlossaries(): void {
+    contents.send('view-glossaries');
+}
+
+function showHelp() {
+    shell.openExternal('file://' + app.getAppPath() + '/swordfish.pdf',
+        { activate: true, workingDirectory: app.getAppPath() }
+    ).catch((error: Error) => {
+        dialog.showErrorBox('Error', error.message);
+    });
+}
+
+function showAbout() {
+    var aboutWindow = new BrowserWindow({
+        parent: mainWindow,
+        width: getWidth('aboutWindow'),
+        height: getHeihght('aboutWindow'),
+        minimizable: false,
+        maximizable: false,
+        resizable: false,
+        useContentSize: true,
+        show: false,
+        icon: './icons/tmxeditor.png',
+        webPreferences: {
+            nodeIntegration: true
+        }
+    });
+    aboutWindow.setMenu(null);
+    aboutWindow.loadURL('file://' + app.getAppPath() + '/html/about.html');
+    aboutWindow.show();
+}
+
+function showSettings(): void {
+    settingsWindow = new BrowserWindow({
+        parent: mainWindow,
+        width: getWidth('settingsWindow'),
+        height: getHeihght('settingsWindow'),
+        useContentSize: true,
+        minimizable: false,
+        maximizable: false,
+        resizable: false,
+        show: false,
+        icon: './icons/tmxeditor.png',
+        webPreferences: {
+            nodeIntegration: true
+        }
+    });
+    settingsWindow.setMenu(null);
+    settingsWindow.loadURL('file://' + app.getAppPath() + '/html/preferences.html');
+    // settingsWindow.webContents.openDevTools()
+    settingsWindow.show();
+}
+
+function showLicenses() {
+    var licensesWindow = new BrowserWindow({
+        parent: mainWindow,
+        width: getWidth('licensesWindow'),
+        height: getHeihght('licensesWindow'),
+        useContentSize: true,
+        minimizable: false,
+        maximizable: false,
+        resizable: false,
+        show: false,
+        icon: './icons/tmxeditor.png',
+        webPreferences: {
+            nodeIntegration: true
+        }
+    });
+    licensesWindow.setMenu(null);
+    licensesWindow.loadURL('file://' + app.getAppPath() + '/html/licenses.html');
+    licensesWindow.show();
+}
+
+function showReleaseHistory(): void {
+    shell.openExternal('https://www.maxprograms.com/products/swfishlog.html');
+}
+
+function showSupportGroup(): void {
+    shell.openExternal('https://groups.io/g/maxprograms/');
+}
+
 function setTheme(): void {
     contents.send('set-theme', currentTheme);
 }
@@ -266,4 +452,50 @@ function checkUpdates(silent: boolean): void {
             dialog.showErrorBox('Error', e.message);
         }
     });
+}
+
+function getHeihght(window: string): number {
+    switch (process.platform) {
+        case 'win32': {
+            switch (window) {
+                case 'licensesWindow': { return 350; }
+            }
+            break;
+        }
+        case 'darwin': {
+            switch (window) {
+                case 'licensesWindow': { return 350; }
+            }
+            break;
+        }
+        case 'linux': {
+            switch (window) {
+                case 'licensesWindow': { return 350; }
+            }
+            break;
+        }
+    }
+}
+
+function getWidth(window: string): number {
+    switch (process.platform) {
+        case 'win32': {
+            switch (window) {
+                case 'licensesWindow': { return 350; }
+            }
+            break;
+        }
+        case 'darwin': {
+            switch (window) {
+                case 'licensesWindow': { return 350; }
+            }
+            break;
+        }
+        case 'linux': {
+            switch (window) {
+                case 'licensesWindow': { return 350; }
+            }
+            break;
+        }
+    }
 }

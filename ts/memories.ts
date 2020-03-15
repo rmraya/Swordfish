@@ -28,18 +28,37 @@ class MemoriesView {
         this.container.appendChild(topBar);
 
         let addButton = document.createElement('a');
-        addButton.innerHTML = '<img src="images/file-add.svg"><span class="tooltiptext bottomTooltip">Add Memory</span>';
+        addButton.innerHTML = '<img src="images/add.svg"><span class="tooltiptext bottomTooltip">Add Memory</span>';
         addButton.className = 'tooltip';
         addButton.addEventListener('click', () => { this.addMemory() });
         topBar.appendChild(addButton);
 
+        let removeButton = document.createElement('a');
+        removeButton.innerHTML = '<img src="images/minus.svg"><span class="tooltiptext bottomTooltip">Remove Memory</span>';
+        removeButton.className = 'tooltip';
+        removeButton.addEventListener('click', () => { this.removeMemory() });
+        topBar.appendChild(removeButton);
+
+        let modifyButton = document.createElement('a');
+        modifyButton.innerHTML = '<img src="images/edit.svg"><span class="tooltiptext bottomTooltip">Modify Memory</span>';
+        modifyButton.className = 'tooltip';
+        modifyButton.addEventListener('click', () => { this.modifyMemory() });
+        topBar.appendChild(modifyButton);
     }
 
     getHtml(): string {
         return this.container.innerHTML;
     }
 
-    addMemory() {
+    addMemory(): void {
+        // TODO
+    }
+
+    removeMemory(): void {
+        // TODO
+    }
+
+    modifyMemory(): void {
         // TODO
     }
 }

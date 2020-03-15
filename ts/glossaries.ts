@@ -28,18 +28,37 @@ class GlossariesView {
         this.container.appendChild(topBar);
 
         let addButton = document.createElement('a');
-        addButton.innerHTML = '<img src="images/file-add.svg"><span class="tooltiptext bottomTooltip">Add Glossary</span>';
+        addButton.innerHTML = '<img src="images/add.svg"><span class="tooltiptext bottomTooltip">Add Glossary</span>';
         addButton.className = 'tooltip';
         addButton.addEventListener('click', () => { this.addGlossary() });
         topBar.appendChild(addButton);
 
+        let removeButton = document.createElement('a');
+        removeButton.innerHTML = '<img src="images/minus.svg"><span class="tooltiptext bottomTooltip">Remove Glossary</span>';
+        removeButton.className = 'tooltip';
+        removeButton.addEventListener('click', () => { this.removeGlossary() });
+        topBar.appendChild(removeButton);
+
+        let modifyButton = document.createElement('a');
+        modifyButton.innerHTML = '<img src="images/edit.svg"><span class="tooltiptext bottomTooltip">Modify Glossary</span>';
+        modifyButton.className = 'tooltip';
+        modifyButton.addEventListener('click', () => { this.modifyGlossary() });
+        topBar.appendChild(modifyButton);
     }
 
     getHtml(): string {
         return this.container.innerHTML;
     }
 
-    addGlossary() {
+    addGlossary(): void {
+        // TODO
+    }
+
+    removeGlossary(): void {
+        // TODO
+    }
+
+    modifyGlossary(): void {
         // TODO
     }
 }

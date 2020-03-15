@@ -28,18 +28,47 @@ class ProjectsView {
         this.container.appendChild(topBar);
 
         let addButton = document.createElement('a');
-        addButton.innerHTML = '<img src="images/file-add.svg"><span class="tooltiptext bottomTooltip">Add Project</span>';
+        addButton.innerHTML = '<img src="images/add.svg"><span class="tooltiptext bottomTooltip">Add Project</span>';
         addButton.className = 'tooltip';
         addButton.addEventListener('click', () => { this.addProject() });
         topBar.appendChild(addButton);
 
+        let removeButton = document.createElement('a');
+        removeButton.innerHTML = '<img src="images/minus.svg"><span class="tooltiptext bottomTooltip">Remove Project</span>';
+        removeButton.className = 'tooltip';
+        removeButton.addEventListener('click', () => { this.removeProject() });
+        topBar.appendChild(removeButton);
+
+        let modifyButton = document.createElement('a');
+        modifyButton.innerHTML = '<img src="images/edit.svg"><span class="tooltiptext bottomTooltip">Modify Project</span>';
+        modifyButton.className = 'tooltip';
+        modifyButton.addEventListener('click', () => { this.modifyProject() });
+        topBar.appendChild(modifyButton);
+
+        let checkButton = document.createElement('a');
+        checkButton.innerHTML = '<img src="images/check.svg"><span class="tooltiptext bottomTooltip">Complete Project</span>';
+        checkButton.className = 'tooltip';
+        checkButton.addEventListener('click', () => { this.completeProject() });
+        topBar.appendChild(checkButton);
     }
 
     getHtml(): string {
         return this.container.innerHTML;
     }
 
-    addProject() {
+    addProject(): void {
+        // TODO
+    }
+
+    removeProject(): void {
+        // TODO
+    }
+
+    modifyProject(): void {
+        // TODO
+    }
+
+    completeProject(): void {
         // TODO
     }
 }
