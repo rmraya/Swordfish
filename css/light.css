@@ -308,7 +308,7 @@ label {
 	background: var(--toolbar-background);
 	color: var(--dark-color);
 	padding-bottom: 0px;
-	padding-top: 4px;
+	padding-top: 0px;
 	padding-left: 4px;
 	padding-right: 4px;
 	justify-content: flex-start;
@@ -327,7 +327,11 @@ label {
 }
 
 .toolbar button img {
-	padding: 5px;
+	padding: 4px;
+}
+
+.toolbar a img {
+	padding-top: 4px;
 }
 
 button.toolbar:hover {
