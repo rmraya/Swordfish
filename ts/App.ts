@@ -97,7 +97,6 @@ app.on('ready', function () {
         saveDefaults();
     });
     mainWindow.show();
-    // contents.openDevTools();
     setTheme();
     checkUpdates(true);
 });
@@ -332,6 +331,10 @@ function showHelp() {
     });
 }
 
+ipcMain.on('get-version', (event, arg) => {
+    event.sender.send('set-version', app.name + ' ' + app.getVersion());
+});
+
 function showAbout() {
     var aboutWindow = new BrowserWindow({
         parent: mainWindow,
@@ -369,7 +372,6 @@ function showSettings(): void {
     });
     settingsWindow.setMenu(null);
     settingsWindow.loadURL('file://' + app.getAppPath() + '/html/preferences.html');
-    // settingsWindow.webContents.openDevTools()
     settingsWindow.show();
 }
 
