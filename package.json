@@ -3,7 +3,7 @@
     "productName": "Swordfish",
     "version": "4.0.0",
     "description": "Swordfish Translation Editor",
-    "main": "js/app.js",
+    "main": "js/App.js",
     "scripts": {
         "build": "tsc",
         "start": "npm run build && electron ."
