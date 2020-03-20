@@ -149,9 +149,9 @@ function createWindow(): void {
         { label: 'Replace Text...', accelerator: 'CmdOrCtrl+F', click: function () { replaceText(); } }
     ]);
     var viewMenu: Menu = Menu.buildFromTemplate([
-        { label: 'Projects', accelerator:'CmdOrCtrl+Alt+1', click: function () { viewProjects(); } },
-        { label: 'Memories', accelerator:'CmdOrCtrl+Alt+2', click: function () { viewMemories(); } },
-        { label: 'Glossaries', accelerator:'CmdOrCtrl+Alt+3', click: function () { viewGlossaries(); } },
+        { label: 'Projects', accelerator: 'CmdOrCtrl+Alt+1', click: function () { viewProjects(); } },
+        { label: 'Memories', accelerator: 'CmdOrCtrl+Alt+2', click: function () { viewMemories(); } },
+        { label: 'Glossaries', accelerator: 'CmdOrCtrl+Alt+3', click: function () { viewGlossaries(); } },
         new MenuItem({ type: 'separator' }),
         new MenuItem({ label: 'Toggle Full Screen', role: 'togglefullscreen' }),
         new MenuItem({ label: 'Toggle Development Tools', accelerator: 'F12', role: 'toggleDevTools' }),
@@ -216,7 +216,7 @@ function createWindow(): void {
         template[7].submenu.append(new MenuItem({ type: 'separator' }));
         template[7].submenu.append(new MenuItem({ label: 'About...', click: function () { showAbout(); } }));
     }
-    Menu.setApplicationMenu(Menu.buildFromTemplate(template));   
+    Menu.setApplicationMenu(Menu.buildFromTemplate(template));
 }
 
 function stopServer(): void {
@@ -373,6 +373,65 @@ function showSettings(): void {
     settingsWindow.show();
 }
 
+
+ipcMain.on('open-license', function (event, arg: any) {
+    var licenseFile = '';
+    var title = '';
+    switch (arg.type) {
+        case 'Swordfish':
+            licenseFile = 'file://' + app.getAppPath() + '/html/licenses/license.txt'
+            title = 'TMXEditor License';
+            break;
+        case "electron":
+            licenseFile = 'file://' + app.getAppPath() + '/html/licenses/electron.txt'
+            title = 'MIT License';
+            break;
+        case "TypeScript":
+        case "MapDB":
+            licenseFile = 'file://' + app.getAppPath() + '/html/licenses/Apache2.0.html'
+            title = 'Apache 2.0';
+            break;
+        case "Java":
+            licenseFile = 'file://' + app.getAppPath() + '/html/licenses/java.html'
+            title = 'GPL2 with Classpath Exception';
+            break;
+        case "OpenXLIFF":
+        case "TMEngine":
+            licenseFile = 'file://' + app.getAppPath() + '/html/licenses/EclipsePublicLicense1.0.html';
+            title = 'Eclipse Public License 1.0';
+            break;
+        case "JSON":
+            licenseFile = 'file://' + app.getAppPath() + '/html/licenses/json.txt'
+            title = 'JSON.org License';
+            break;
+        case "jsoup":
+            licenseFile = 'file://' + app.getAppPath() + '/html/licenses/jsoup.txt'
+            title = 'MIT License';
+            break;
+        case "DTDParser":
+            licenseFile = 'file://' + app.getAppPath() + '/html/licenses/LGPL2.1.txt'
+            title = 'LGPL 2.1';
+            break;
+        default:
+            dialog.showErrorBox('Error', 'Unknow license');
+            return;
+    }
+    var licenseWindow = new BrowserWindow({
+        parent: mainWindow,
+        width: 680,
+        height: 400,
+        show: false,
+        title: title,
+        icon: './icons/tmxeditor.png',
+        webPreferences: {
+            nodeIntegration: true
+        }
+    });
+    licenseWindow.setMenu(null);
+    licenseWindow.loadURL(licenseFile);
+    licenseWindow.show();
+});
+
 function showLicenses() {
     var licensesWindow = new BrowserWindow({
         parent: mainWindow,
@@ -392,6 +451,10 @@ function showLicenses() {
     licensesWindow.loadURL('file://' + app.getAppPath() + '/html/licenses.html');
     licensesWindow.show();
 }
+
+ipcMain.on('licenses-clicked', () => {
+    showLicenses();
+});
 
 function showReleaseHistory(): void {
     shell.openExternal('https://www.maxprograms.com/products/swfishlog.html');
@@ -458,18 +521,21 @@ function getHeihght(window: string): number {
     switch (process.platform) {
         case 'win32': {
             switch (window) {
+                case 'aboutWindow': { return 380; }
                 case 'licensesWindow': { return 350; }
             }
             break;
         }
         case 'darwin': {
             switch (window) {
+                case 'aboutWindow': { return 370; }
                 case 'licensesWindow': { return 350; }
             }
             break;
         }
         case 'linux': {
             switch (window) {
+                case 'aboutWindow': { return 370; }
                 case 'licensesWindow': { return 350; }
             }
             break;
@@ -481,19 +547,22 @@ function getWidth(window: string): number {
     switch (process.platform) {
         case 'win32': {
             switch (window) {
-                case 'licensesWindow': { return 350; }
+                case 'aboutWindow': { return 490; }
+                case 'licensesWindow': { return 400; }
             }
             break;
         }
         case 'darwin': {
             switch (window) {
-                case 'licensesWindow': { return 350; }
+                case 'aboutWindow': { return 490; }
+                case 'licensesWindow': { return 400; }
             }
             break;
         }
         case 'linux': {
             switch (window) {
-                case 'licensesWindow': { return 350; }
+                case 'aboutWindow': { return 490; }
+                case 'licensesWindow': { return 400; }
             }
             break;
         }
