@@ -56,6 +56,23 @@ class Main {
         ipcRenderer.on('view-glossaries', () => {
             this.selectTab('glossaries');
         });
+        ipcRenderer.on('start-waiting', () => {
+            document.getElementById('body').classList.add("wait");
+        });
+        
+        ipcRenderer.on('end-waiting', () => {
+            document.getElementById('body').classList.remove("wait");
+        });
+        
+        ipcRenderer.on('set-status', (event, arg) => {
+            var status: HTMLDivElement = document.getElementById('status') as HTMLDivElement;
+            status.innerHTML = arg;
+            if (arg.length > 0) {
+                status.style.display = 'block';
+            } else {
+                status.style.display = 'none';
+            }
+        });
     }
 
     selectTab(tab: string): void {

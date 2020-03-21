@@ -40,6 +40,13 @@ var currentTheme: string;
 var saved: boolean = true;
 var stopping: boolean = false;
 
+const SUCCESS: string = 'Success';
+const LOADING: string = 'Loading';
+const COMPLETED: string = 'Completed';
+const ERROR: string = 'Error';
+const SAVING: string = 'Saving';
+const PROCESSING: string = 'Processing';
+
 if (!app.requestSingleInstanceLock()) {
     app.quit();
 } else {
@@ -64,7 +71,7 @@ if (!existsSync(appHome)) {
     mkdirSync(appHome, { recursive: true });
 }
 
-const ls = spawn(javapath, ['-cp', classpath, '--module-path', 'lib', '-m', 'swordfish/com.maxprograms.swordfish.TmsServer', '-port', '8070'], { cwd: app.getAppPath() });
+const ls = spawn(javapath, ['-cp', classpath, '--module-path', 'lib', '-m', 'swordfish/com.maxprograms.swordfish.TmsServer', '-port', '8070', '-debug'], { cwd: app.getAppPath() });
 
 ls.stdout.on('data', (data) => {
     console.log(`stdout: ${data}`);
@@ -323,12 +330,68 @@ function viewProjects(): void {
     contents.send('view-projects');
 }
 
+ipcMain.on('get-projects', (event, arg) => {
+    contents.send('start-waiting');
+    contents.send('set-status', 'Loading projects');
+    sendRequest('/projects/list', {},
+        function success(json: any) {
+            contents.send('set-status', '');
+            contents.send('end-waiting');
+            if (json.status === SUCCESS) {
+                event.sender.send('set-projects', json.projects);
+            } else {
+                dialog.showMessageBox({ type: 'error', message: json.reason });
+            }
+        },
+        function error(data: string) {
+            contents.send('set-status', '');
+            dialog.showMessageBox({ type: 'error', message: data });
+        }
+    );
+});
+
 function viewMemories(): void {
     contents.send('view-memories');
 }
 
 function viewGlossaries(): void {
     contents.send('view-glossaries');
+}
+
+function sendRequest(url: string, json: any, success: any, error: any) {
+    var postData: string = JSON.stringify(json);
+    var options = {
+        hostname: '127.0.0.1',
+        port: 8070,
+        path: url,
+        headers: {
+            'Content-Type': 'application/json',
+            'Content-Length': Buffer.byteLength(postData)
+        }
+    };
+    // Make a request
+    var req: ClientRequest = request(options);
+    req.on('response',
+        function (res: any) {
+            res.setEncoding('utf-8');
+            if (res.statusCode != 200) {
+                error('sendRequest() error: ' + res.statusMessage);
+            }
+            var rawData: string = '';
+            res.on('data', function (chunk: string) {
+                rawData += chunk;
+            });
+            res.on('end', function () {
+                try {
+                    success(JSON.parse(rawData));
+                } catch (e) {
+                    error(e.message);
+                }
+            });
+        }
+    );
+    req.write(postData);
+    req.end();
 }
 
 function showHelp() {
@@ -393,7 +456,7 @@ ipcMain.on('open-license', function (event, arg: any) {
     switch (arg.type) {
         case 'Swordfish':
             licenseFile = 'file://' + app.getAppPath() + '/html/licenses/license.txt'
-            title = 'TMXEditor License';
+            title = 'Swordfish License';
             break;
         case "electron":
             licenseFile = 'file://' + app.getAppPath() + '/html/licenses/electron.txt'

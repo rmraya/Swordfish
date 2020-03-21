@@ -18,22 +18,30 @@ SOFTWARE.
 *****************************************************************************/
 package com.maxprograms.swordfish.models;
 
+import java.io.IOException;
 import java.io.Serializable;
+import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
+
+import com.maxprograms.languages.Language;
+import com.maxprograms.languages.LanguageUtils;
+
+import org.json.JSONObject;
 
 public class Project implements Serializable, Comparable<Project> {
 
 	private static final long serialVersionUID = -7301458245016833998L;
 
 	public static final int NEW = 0;
-	public static final int INPROGRESS = 2;
-	public static final int COMPLETED = 3;
-	public static final int CANCELLED = 4;
-	
+	public static final int INPROGRESS = 1;
+	public static final int COMPLETED = 2;
+
 	private String id;
 	private String description;
 	private int status;
+	private String client;
+	private String subject;
 	private Language sourceLang;
 	private Language targetLang;
 	private String instructions;
@@ -43,18 +51,52 @@ public class Project implements Serializable, Comparable<Project> {
 	private List<SourceFile> files;
 	private List<Memory> memories;
 	private List<Glossary> glossaries;
-	
-	public Project(String id, String description, int status, Language sourceLang, Language targetLang, 
-			String instructions, Date creationDate, Date dueDate, Date finishDate) {
+
+	public Project(String id, String description, int status, Language sourceLang, Language targetLang,
+			String client, String subject, String instructions, Date creationDate, Date dueDate, Date finishDate) {
 		this.id = id;
 		this.description = description;
 		this.status = status;
 		this.sourceLang = sourceLang;
 		this.targetLang = targetLang;
+		this.client = client;
+		this.subject = subject;
 		this.instructions = instructions;
 		this.creationDate = creationDate;
 		this.dueDate = dueDate;
 		this.finishDate = finishDate;
+	}
+
+	public Project(String json) throws IOException {
+		JSONObject object = new JSONObject(json);
+		this.id = object.getString("id");
+		this.description = object.getString("description");
+		if (object.has("sourceLang")) {
+			this.sourceLang = LanguageUtils.getLanguage(object.getString("sourceLang"));
+		}
+		if (object.has("targetLang")) {
+			this.targetLang = LanguageUtils.getLanguage(object.getString("targetLang"));
+		}
+		this.instructions = object.has("instructions") ? object.getString("instructions") : "";
+		this.client = object.has("client") ? object.getString("client") : "";
+		this.subject = object.has("subject") ? object.getString("subject") : "";
+		this.creationDate = new Date(object.getLong("creationDate"));
+		this.dueDate = new Date(object.getLong("dueDate"));
+	}
+	
+	public String toJSON() {
+		SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+		JSONObject json = new JSONObject();
+		json.put("id", id);
+		json.put("description", description);
+		json.put("sourceLang", sourceLang);
+		json.put("targetLang", targetLang);
+		json.put("client", client);
+		json.put("subject", subject);
+		json.put("instructions", instructions);
+		json.put("creationDate", creationDate.getTime());
+		json.put("creationString", df.format(creationDate));
+		return json.toString(2);
 	}
 
 	public String getId() {

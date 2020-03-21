@@ -20,6 +20,8 @@ SOFTWARE.
 class ProjectsView {
 
     container: HTMLDivElement;
+    tableContainer: HTMLDivElement;
+    projectsTable: HTMLTableElement;
 
     constructor() {
         this.container = document.createElement('div');
@@ -50,6 +52,35 @@ class ProjectsView {
         checkButton.className = 'tooltip';
         checkButton.addEventListener('click', () => { this.completeProject() });
         topBar.appendChild(checkButton);
+
+        this.tableContainer = document.createElement('div');
+        this.tableContainer.classList.add('scrollPanel');
+        this.container.appendChild(this.tableContainer);
+
+        this.projectsTable = document.createElement('table');
+        this.projectsTable.classList.add('fill_width');
+        this.projectsTable.classList.add('stripes');
+        this.tableContainer.appendChild(this.projectsTable);
+
+        this.projectsTable.innerHTML = '<thead><tr>' +
+            '<th class="fixed"><input type="checkbox"></th>' +
+            '<th>Description</th><th>Status</th>' +
+            '<th>Src.Lang.</th><th>Tgt.Lang.</th>' +
+            '<th>Created</th><th>Completed</th>' +
+            '</tr></thead>' +
+            '<tbody id="projectsBody"></tbody>';
+
+        window.addEventListener('resize', () => { this.setSizes() });
+        this.setSizes();
+
+        this.loadProjects()
+
+        ipcRenderer.on('set-projects', (event, arg) => { this.displayProjects(arg); })
+    }
+
+    setSizes() {
+        this.tableContainer.style.height = (this.container.clientHeight - 30) + 'px';
+        this.tableContainer.style.width = (this.container.clientWidth - 2) + 'px';
     }
 
     getHtml(): string {
@@ -70,5 +101,30 @@ class ProjectsView {
 
     completeProject(): void {
         // TODO
+    }
+
+    loadProjects(): void {
+        ipcRenderer.send('get-projects');
+    }
+
+    displayProjects(projects: any[]) {
+        document.getElementById('projectsBody').innerHTML = '';
+        let length = projects.length;
+        for (let i=0 ; i<length ; i++) {
+            let p = projects[i];
+            let tr = document.createElement('tr');
+            tr.className = 'discover';
+
+            let td = document.createElement('td');
+            td.id = p.id;
+            td.innerHTML = '<input type="checkbox" data="' + p.id + '" class="fixed">'
+            tr.appendChild(td);
+
+            td = document.createElement('td');
+            td.innerText = p.description;
+            tr.append(td);
+
+            document.getElementById('projectsBody').appendChild(tr);
+        }
     }
 }

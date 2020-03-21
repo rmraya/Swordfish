@@ -44,7 +44,7 @@ public class TmsServer implements HttpHandler {
 
 	private static Logger logger = System.getLogger(TmsServer.class.getName());
 	private HttpServer server;
-	private boolean debug;
+	private static boolean debug;
 	private static File workDir;
 
 	public TmsServer(Integer port) throws IOException {
@@ -53,7 +53,6 @@ public class TmsServer implements HttpHandler {
 
 	public static void main(String[] args) {
 		String port = "8070";
-		boolean shouldDebug = false;
 		for (int i = 0; i < args.length; i++) {
 			String arg = args[i];
 			if (arg.equals("-version")) {
@@ -64,20 +63,15 @@ public class TmsServer implements HttpHandler {
 				port = args[i + 1];
 			}
 			if (arg.equals("-debug")) {
-				shouldDebug = true;
+				debug = true;
 			}
 		}
 		try {
 			TmsServer instance = new TmsServer(Integer.valueOf(port));
-			instance.setDebug(shouldDebug);
 			instance.run();
 		} catch (Exception e) {
 			logger.log(Level.ERROR, "Server error", e);
 		}
-	}
-
-	private void setDebug(boolean value) {
-		debug = value;
 	}
 
 	private void run() {
@@ -188,5 +182,9 @@ public class TmsServer implements HttpHandler {
 			}
 		}
 		Files.delete(f.toPath());
+	}
+
+	public static boolean isDebug() {
+		return debug;
 	}
 }
