@@ -295,7 +295,7 @@ function savePreferences(): void {
 
 ipcMain.on('save-preferences', (event, arg) => {
     settingsWindow.close();
-    currentPreferences = arg;
+    currentPreferences.theme = arg.theme;
     savePreferences();
 });
 
@@ -383,6 +383,9 @@ function showSettings(): void {
     settingsWindow.show();
 }
 
+ipcMain.on('get-preferences', (event, arg) => {
+    event.sender.send('set-preferences', currentPreferences);
+});
 
 ipcMain.on('open-license', function (event, arg: any) {
     var licenseFile = '';
