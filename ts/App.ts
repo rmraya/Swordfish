@@ -52,6 +52,8 @@ if (!app.requestSingleInstanceLock()) {
     }
 }
 
+// TODO remove H@ and MariaDB driver or add their licenses 
+
 if (process.platform == 'win32') {
     javapath = app.getAppPath() + '\\bin\\java.exe';
     classpath = 'lib\\h2-1.4.200.jar;lib\\mariadb-java-client-2.4.3.jar';
@@ -79,7 +81,7 @@ ls.on('close', (code) => {
 var ck: Buffer = execFileSync('bin/java', ['--module-path', 'lib', '-m', 'openxliff/com.maxprograms.server.CheckURL', 'http://localhost:8070/TMSServer'], { cwd: app.getAppPath() });
 console.log(ck.toString());
 
-app.on('open-file', function (event, filePath) {
+app.on('open-file', (event, filePath) => {
     event.preventDefault();
     openFile(filePath);
 });
@@ -87,13 +89,13 @@ app.on('open-file', function (event, filePath) {
 loadDefaults();
 loadPreferences();
 
-app.on('ready', function () {
+app.on('ready', () => {
     createWindow();
     mainWindow.loadURL('file://' + app.getAppPath() + '/index.html');
-    mainWindow.on('resize', function () {
+    mainWindow.on('resize', () => {
         saveDefaults();
     });
-    mainWindow.on('move', function () {
+    mainWindow.on('move', () => {
         saveDefaults();
     });
     mainWindow.show();
@@ -101,17 +103,17 @@ app.on('ready', function () {
     checkUpdates(true);
 });
 
-app.on('quit', function () {
+app.on('quit', () => {
     stopServer();
 });
 
-app.on('window-all-closed', function () {
+app.on('window-all-closed', () => {
     stopServer();
     app.quit();
 });
 
 if (process.platform === 'darwin') {
-    app.on('open-file', function (event, path) {
+    app.on('open-file', (event, path) => {
         event.preventDefault();
         openFile(path);
     });
@@ -119,7 +121,7 @@ if (process.platform === 'darwin') {
 
 function createWindow(): void {
     mainWindow = new BrowserWindow({
-        title: 'Swordfish',
+        title: app.name,
         width: currentDefaults.width,
         height: currentDefaults.height,
         x: currentDefaults.x,
@@ -290,6 +292,12 @@ function savePreferences(): void {
     writeFileSync(appHome + 'preferences.json', JSON.stringify(currentPreferences));
     nativeTheme.themeSource = currentPreferences.theme;
 }
+
+ipcMain.on('save-preferences', (event, arg) => {
+    settingsWindow.close();
+    currentPreferences = arg;
+    savePreferences();
+});
 
 function openFile(file: string): void {
     // TODO
@@ -523,22 +531,25 @@ function getHeihght(window: string): number {
     switch (process.platform) {
         case 'win32': {
             switch (window) {
-                case 'aboutWindow': { return 380; }
+                case 'aboutWindow': { return 390; }
                 case 'licensesWindow': { return 350; }
+                case 'settingsWindow': { return 150; }
             }
             break;
         }
         case 'darwin': {
             switch (window) {
-                case 'aboutWindow': { return 370; }
+                case 'aboutWindow': { return 380; }
                 case 'licensesWindow': { return 350; }
+                case 'settingsWindow': { return 150; }
             }
             break;
         }
         case 'linux': {
             switch (window) {
-                case 'aboutWindow': { return 370; }
+                case 'aboutWindow': { return 380; }
                 case 'licensesWindow': { return 350; }
+                case 'settingsWindow': { return 150; }
             }
             break;
         }
@@ -551,6 +562,7 @@ function getWidth(window: string): number {
             switch (window) {
                 case 'aboutWindow': { return 490; }
                 case 'licensesWindow': { return 400; }
+                case 'settingsWindow': { return 400; }
             }
             break;
         }
@@ -558,6 +570,7 @@ function getWidth(window: string): number {
             switch (window) {
                 case 'aboutWindow': { return 490; }
                 case 'licensesWindow': { return 400; }
+                case 'settingsWindow': { return 400; }
             }
             break;
         }
@@ -565,6 +578,7 @@ function getWidth(window: string): number {
             switch (window) {
                 case 'aboutWindow': { return 490; }
                 case 'licensesWindow': { return 400; }
+                case 'settingsWindow': { return 400; }
             }
             break;
         }

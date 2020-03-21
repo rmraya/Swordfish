@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Preferences</title>
+    <link id="theme" rel="stylesheet" type="text/css" href="../css/light.css">
+    <link rel="stylesheet" type="text/css" href="../css/fonts.css">
+</head>
+
+<body>
+
+    <div style="padding:4px;" class="fill_width">
+        <table class="fill_width">
+            <tr>
+                <td> <label for="themeColor">Theme</label></td>
+                <td class="fill_width">
+                    <select id="themeColor" class="fill_width">
+                        <option value="system">System Default</option>
+                        <option value="dark">Dark</option>
+                        <option value="light">Light</option>
+                    </select>
+                </td>
+            </tr>
+        </table>
+    </div>
+
+    <div class="buttonArea">
+        <button id="save">Save Preferences</button>
+    </div>
+
+    <script src="../js/preferences.js"></script>
+</body>
+
+</html>
