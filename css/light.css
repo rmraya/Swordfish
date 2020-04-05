@@ -2,7 +2,7 @@
 	--normal-background: #c1c1c1;
 	--normal-color: #000000;
 	
-	--medium-background: #3b3b3b;
+	--medium-background: #1565c0;
 	--medium-color: #fefefe;
 
 	--accent-color: #3465aa;
@@ -10,7 +10,7 @@
 	--accent-contrast: #ffffff;
 
 	--toolbar-background: #e1e1e1;
-	--toolbar-color: #323255;
+	--toolbar-color: #0d47a1;
 
 	--tooltip-background: #3465aa;
 	--tooltip-color: #fefefe;
@@ -68,6 +68,15 @@ footer {
 	background: var(--medium-background);
 	color: var(--medium-color);
 	border-top: 2px solid var(--accent-color);
+}
+
+a {
+	color: var( --accent-color);
+	cursor: pointer;
+}
+
+a:hover {
+	text-decoration: underline;
 }
 
 .status {

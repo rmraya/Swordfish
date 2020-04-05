@@ -70,6 +70,15 @@ footer {
 	border-top: 2px solid var(--accent-color);
 }
 
+a {
+	color: var( --accent-color);
+	cursor: pointer;
+}
+
+a:hover {
+	text-decoration: underline;
+}
+
 .status {
 	position: absolute;
 	top: 200px;
