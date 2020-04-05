@@ -98,4 +98,17 @@
         <copy file="jars/h2-1.4.200.jar" todir="lib"/>
         <copy file="jars/mariadb-java-client-2.4.3.jar" todir="lib"/>
     </target>
+    <target name="server" depends="dist">
+        <exec executable="bin/java">
+            <arg value="-cp"/>
+            <arg value="lib/h2-1.4.200.jar:lib/mariadb-java-client-2.4.3.jar"/>
+            <arg value="--module-path"/>
+            <arg value="lib"/>
+            <arg value="-m"/>
+            <arg value="swordfish/com.maxprograms.swordfish.TmsServer"/>
+            <arg value="-port"/>
+            <arg value="8070"/>
+            <arg value="-debug"/>
+        </exec>
+    </target>
 </project>

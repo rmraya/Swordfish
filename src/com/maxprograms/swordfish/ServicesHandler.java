@@ -19,16 +19,24 @@ SOFTWARE.
 package com.maxprograms.swordfish;
 
 import java.io.IOException;
+import java.lang.System.Logger;
+import java.lang.System.Logger.Level;
+import java.net.URI;
 
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 
 public class ServicesHandler implements HttpHandler {
 
+    private static Logger logger = System.getLogger(ServicesHandler.class.getName());
+
     @Override
     public void handle(HttpExchange exchange) throws IOException {
         // TODO Auto-generated method stub
-
+        URI uri = exchange.getRequestURI();
+        if (TmsServer.isDebug()) {
+            logger.log(Level.INFO, uri.toURL().toString());
+        }
     }
 
 }

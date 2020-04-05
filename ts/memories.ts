@@ -28,19 +28,22 @@ class MemoriesView {
         this.container.appendChild(topBar);
 
         let addButton = document.createElement('a');
-        addButton.innerHTML = '<img src="images/add.svg"><span class="tooltiptext bottomTooltip">Add Memory</span>';
+        addButton.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path d="M12 2c5.514 0 10 4.486 10 10s-4.486 10-10 10-10-4.486-10-10 4.486-10 10-10zm0-2c-6.627 0-12 5.373-12 12s5.373 12 12 12 12-5.373 12-12-5.373-12-12-12zm6 13h-5v5h-2v-5h-5v-2h5v-5h2v5h5v2z"/></svg>'+
+        '<span class="tooltiptext bottomTooltip">Add Memory</span>';
         addButton.className = 'tooltip';
         addButton.addEventListener('click', () => { this.addMemory() });
         topBar.appendChild(addButton);
 
         let removeButton = document.createElement('a');
-        removeButton.innerHTML = '<img src="images/minus.svg"><span class="tooltiptext bottomTooltip">Remove Memory</span>';
+        removeButton.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path d="M12 2c5.514 0 10 4.486 10 10s-4.486 10-10 10-10-4.486-10-10 4.486-10 10-10zm0-2c-6.627 0-12 5.373-12 12s5.373 12 12 12 12-5.373 12-12-5.373-12-12-12zm6 13h-12v-2h12v2z"/></svg>'+
+        '<span class="tooltiptext bottomTooltip">Remove Memory</span>';
         removeButton.className = 'tooltip';
         removeButton.addEventListener('click', () => { this.removeMemory() });
         topBar.appendChild(removeButton);
 
         let modifyButton = document.createElement('a');
-        modifyButton.innerHTML = '<img src="images/edit.svg"><span class="tooltiptext bottomTooltip">Modify Memory</span>';
+        modifyButton.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path d="M12 2c5.514 0 10 4.486 10 10s-4.486 10-10 10-10-4.486-10-10 4.486-10 10-10zm0-2c-6.627 0-12 5.373-12 12s5.373 12 12 12 12-5.373 12-12-5.373-12-12-12zm-3.994 12.964l3.106 3.105-4.112.931 1.006-4.036zm9.994-3.764l-5.84 5.921-3.202-3.202 5.841-5.919 3.201 3.2z"/></svg>'+
+        '<span class="tooltiptext bottomTooltip">Modify Memory</span>';
         modifyButton.className = 'tooltip';
         modifyButton.addEventListener('click', () => { this.modifyMemory() });
         topBar.appendChild(modifyButton);
