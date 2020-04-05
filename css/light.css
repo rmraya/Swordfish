@@ -1,33 +1,43 @@
 :root {
-	--darker-background: #002050;
-	--dark-background: #124078;
-	--dark-color: #fefefe;
-	--light-background: #3c65a4;
-	--lighter-background: #7da3c6;
-	--soft-background: #666666;
-	--normal-background: #efefef;
-	--normal-color: #111111;
-	--even-row-background: #efefef;
-	--odd-row-background: #fefefe;
-	--highlight-color: #ecf01b;
-	--shadow-color: #eeeeee;
-	--input-background: #ffffff;
+	--normal-background: #c1c1c1;
+	--normal-color: #000000;
+	
+	--medium-background: #3b3b3b;
+	--medium-color: #fefefe;
 
-	--toolbar-background: #dddddd;
+	--accent-color: #3465aa;
+	--accent-alternative: #0551bb;
+	--accent-contrast: #ffffff;
+
+	--toolbar-background: #e1e1e1;
+	--toolbar-color: #323255;
+
+	--tooltip-background: #3465aa;
+	--tooltip-color: #fefefe;
+
+	--tabHolder-background: #9a9a9a;
+	--tab-background: #dedede;
+	--tab-color: #101010;
+	--tab-highlight: #3966d6;
+	--tab-hover: #cdcdcd;
+
+	--input-background: #fefefe;
+	--input-color: #2e2e2e;
+
+	--even-row-background: #2a2a2a;
+	--odd-row-background: #313131;
+
+	--highlight-color: #ecf01b;
 }
 
 body {
 	background: var(--normal-background);
-	color: var(--normal-color)
-}
-
-.dark_background {
-	background: var(--dark-background);
-	color: var(--dark-color);
+	color: var(--normal-color);
+	fill: var(--normal-color);
 }
 
 .hdivider {
-	background: var(--darker-background);
+	background: var(--accent-color);
 	width: 2px;
 	height: 100%;
 	position: relative;
@@ -36,7 +46,7 @@ body {
 }
 
 .vdivider {
-	background: var(--darker-background);
+	background: var(--accent-color);
 	width: 100%;
 	height: 2px;
 	position: relative;
@@ -49,15 +59,15 @@ body {
 }
 
 header {
-	background: var(--dark-color);
-	color: var(--dark-color);
-	border-bottom: solid 2px var(--darker-background);
+	background: var(--medium-background);
+	color: var(--medium-color);
+	border-bottom: solid 2px var(--accent-color);
 }
 
 footer {
-	background: var(--soft-background);
-	color: var(--dark-color);
-	border-top: 2px solid var(--darker-background);
+	background: var(--medium-background);
+	color: var(--medium-color);
+	border-top: 2px solid var(--accent-color);
 }
 
 .status {
@@ -66,32 +76,28 @@ footer {
 	left: calc(40% - 100px);
 	width: 200px;
 	margin: auto;
-	background-color: var(--dark-background);
-	color: var(--dark-color);
+	background-color: var(--accent-color);
+	color: var(--normal-color);
 	padding: 20px;
-	border: 1px solid var(--dark-color);
+	border: 1px solid var(--normal-color);
 }
+
+/* tables */
 
 table {
 	width: 100%;
 	border-collapse: collapse;
 }
 
-a {
-	color: var(--light-background);
-}
-
-a img {
-	padding-right: 4px;
-	padding-left: 4px;
-}
-
-a:hover {
-	background: #cccccc;
-}
-
 thead {
 	height: 24px;
+	background-color: var(--medium-background);
+	color: var(--medium-color);
+}
+
+thead tr {
+	background: inherit !important;
+	color: inherit !important;
 }
 
 tbody {
@@ -108,31 +114,26 @@ td {
 td.fixed {
 	text-align: center;
 	vertical-align: middle;
-	background: var(--lighter-background);
+	background: var(--medium-background);
 	color: var(--normal-color);
 	cursor: default !important;
 }
 
-table th {
+th {
 	position: sticky;
 	top: 0;
 	z-index: 5;
 	font-weight: lighter;
+	background-color: var(--medium-background);
+	color: var(--medium-color);
 }
 
-table.stripes tr:nth-child(odd) {
+.stripes tr:nth-child(odd) {
 	background-color: var(--odd-row-background) !important;
 }
 
-table.stripes tr:nth-child(even) {
+.stripes tr:nth-child(even) {
 	background-color: var(--even-row-background) !important;
-}
-
-textarea {
-	padding: 0px;
-	font-size: medium;
-	background-color: var(--normal-background);
-	color: var(--normal-color);
 }
 
 .fixed {
@@ -142,7 +143,7 @@ textarea {
 
 .highlighted {
 	color: var(--highlight-color);
-	background: var(--soft-background);
+	background: var(--medium-background);
 }
 
 .right {
@@ -157,16 +158,25 @@ textarea {
 	text-align: center;
 }
 
+/* inputs */
+
+input {
+	background-color: var(--input-background);
+	color: var(--input-color);
+	border: 1px solid var(--input-color);
+}
+
 input[type=text] {
 	margin-top: 3px;
 	height: 1.4rem;
 	font-size: 1rem;
-	border: 1px solid var(--dark-background);
-	background-color: var(--input-background);
-	color: var(--normal-color);
 }
 
 input[type=text]:focus {
+	border: 1px solid transparent;
+}
+
+input[type=number]:focus {
 	border: 1px solid transparent;
 }
 
@@ -174,26 +184,17 @@ input[type=password] {
 	margin-top: 3px;
 	height: 1.4rem;
 	font-size: 1rem;
-	border: 1px solid var(--dark-background);
-	background-color: var(--input-background);
-	color: var(--normal-color);
 }
 
 input[type=number] {
 	font-size: 0.8em;
 	width: 40px;
-	height: 18px;
+	height: 1.4rem;
 	margin: 0px;
 	padding: 0px;
 	padding-left: 2px;
-	background-color: var(--input-background);
-	border: 1px solid var(--dark-background);
-	color: var(--normal-color);
 }
 
-input[type=number]:focus {
-	border: 1px solid transparent;
-}
 
 input[type=checkbox] {
 	position: relative;
@@ -207,8 +208,6 @@ input[type=checkbox]:before {
 	height: 12px;
 	top: -2px;
 	left: 0;
-	border: 1px solid var(--dark-background);
-	background-color: var(--input-background);
 }
 
 input[type=checkbox]:checked:after {
@@ -216,7 +215,6 @@ input[type=checkbox]:checked:after {
 	display: block;
 	width: 4px;
 	height: 8px;
-	border: solid var(--normal-color);
 	border-width: 0 1px 1px 0;
 	transform: rotate(45deg);
 	position: absolute;
@@ -224,23 +222,47 @@ input[type=checkbox]:checked:after {
 	left: 5px;
 }
 
+select {
+	background-color: var(--input-background);
+	color: var(--input-color);
+	border: 1px solid var(--input-color);
+	font-size: 1em;
+	height: 1.6em;
+	border-radius: 0px;
+}
+
+option {
+	font-size: 1em;
+	background-color: var(--input-background) !important;
+	color: var(--input-color);
+}
+
+
+textarea {
+	padding: 0px;
+	font-size: medium;
+	background-color: var(--input-background);
+	color: var(--input-color);
+	border: 1px solid var(--input-color);
+	
+}
+
 button {
-	color: var(--dark-color);
-	background: var(--dark-background);
-	border: 1px solid var(--dark-background);
+	color: var(--accent-contrast);
+	background: var(--accent-color);
+	border: 1px solid var(--accent-color);
 	border-radius: 2px;
 	font-size: 1em;
 	text-align: center;
 	margin: 3px;
 	padding-left: 4px;
 	padding-right: 4px;
-	box-shadow: 2px 2px 1px 2px var(--shadow-color);
 	white-space: nowrap;
 }
 
 button:hover {
-	background: var(--darker-background);
-	border: 1px solid var(--darker-background);
+	background: var(--accent-alternative);
+	border: 1px solid var(--accent-alternative);
 }
 
 .row {
@@ -251,19 +273,6 @@ button:hover {
 	padding-bottom: 0px;
 }
 
-select {
-	font-size: 1em;
-	height: 1.6em;
-	border-radius: 0px;
-	background-color: var(--input-background) !important;
-	color: var(--normal-color);
-}
-
-option {
-	font-size: 1em;
-	background-color: var(--normal-background) !important;
-	color: var(--normal-color);
-}
 
 label {
 	padding-left: 4px;
@@ -302,16 +311,20 @@ label {
 	justify-content: flex-end;
 }
 
+/* toolbars */
+
 .toolbar {
 	display: flex;
 	flex-direction: row;
 	background: var(--toolbar-background);
-	color: var(--dark-color);
+	color: var(--toolbar-color);
+	fill: var(--toolbar-color);
 	padding-bottom: 0px;
 	padding-top: 0px;
 	padding-left: 4px;
 	padding-right: 4px;
 	justify-content: flex-start;
+	border-top: 1px solid var(--normal-background);
 }
 
 .toolbar button {
@@ -320,6 +333,7 @@ label {
 	border: none;
 	outline: none;
 	color: inherit;
+	fill: inherit;
 	text-align: left;
 	font-size: 0.8em;
 	vertical-align: middle;
@@ -330,66 +344,67 @@ label {
 	padding: 4px;
 }
 
+.toolbar a {
+	color: inherit;
+	fill: inherit;
+	margin-left: 2px;
+	margin-right: 2px;
+}
+
 .toolbar a img {
 	padding-top: 4px;
 }
 
-button.toolbar:hover {
-	background: #455a64;
+.toolbar a svg {
+	padding-top: 4px;
 }
+
+/* tabs */
 
 .tabHolder {
 	display: flex;
 	flex-flow: row;
 	color: var(--normal-color);
-	background: var(--normal-background);
+	background: var(--tabHolder-background);
 	padding: 2px 0px 0px 8px;
-	border-bottom: 1px solid var(--light-background);
 }
 
 .tab {
 	overflow: hidden;
-	background: var(--lighter-background);
+	background: var(--tab-background);
+	color: var(--tab-color);
+	fill: var(--tab-color);
 	padding-top: 4px;
 	padding-left: 6px;
 	padding-right: 6px;
-	border-radius: 4px 4px 0px 0px;
 	margin: 0px;
 	margin-right: 1px !important;
-	border-color: var(--lighter-background);
 	box-shadow: none !important;
+	border-bottom: 3px solid var(--tab-background);
 }
 
 .selectedTab {
-	background: var(--dark-background);
-	border-color: var(--dark-background);
-	color: var(--dark-color);
+	border-bottom: 3px solid var(--tab-highlight);
 }
 
 .tab:hover {
-	background: var(--darker-background);
-	border-color: var(--darker-background);
-	color: var(--dark-color);
+	background: var(--tab-hover);
+	border-bottom: 3px solid var(--tab-hover);
+}
+
+.selectedTab:hover {
+	border-bottom: 3px solid var(--tab-highlight) !important;
 }
 
 .tab a {
-	color: var(--dark-color);
+	color: inherit;
+	fill: inherit;
 	text-decoration: none;
 	cursor: pointer;
 }
 
 .tab a:hover {
-	background: var(--darker-background);
-	color: var(--dark-color);
-}
-
-.selected {
-	background: var(--light-background);
-	color: var(--dark-color);
-}
-
-.selected a {
-	color: var(--dark-color) !important;
+	background: var(--tab-hover);
 }
 
 .tabContent {
@@ -410,13 +425,13 @@ button.toolbar:hover {
 	padding-top: 0px;
 	display: flex;
 	width: 100%;
-	background: var(--dark-background);
-	color: var(--dark-color);
+	background: var(--accent-color);
+	color: var(--normal-color);
 	white-space: nowrap;
 }
 
 .titlepanel a:hover {
-	background: var(--darker-background);
+	background: var(--accent-alternative);
 }
 
 .panelcontent {
@@ -431,15 +446,16 @@ button.toolbar:hover {
 	z-index: -30;
 }
 
+/* tooltips */
+
 .tooltip {
 	position: relative;
 	display: inline-block;
 }
 
 .tooltip .tooltiptext {
-	background-color: var(--light-background);
-	border-color: var(--lighter-background);
-	color: var(--dark-color);
+	background-color: var(--tooltip-background);
+	color: var(--tooltip-color);
 
 	visibility: hidden;
 	padding: 4px;
