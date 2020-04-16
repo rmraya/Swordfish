@@ -358,6 +358,10 @@ function viewMemories(): void {
     contents.send('view-memories');
 }
 
+ipcMain.on('show-add-memory', () => {
+    addMemory();
+});
+
 function addMemory() {
     addMemoryWindow = new BrowserWindow({
         parent: mainWindow,
@@ -368,7 +372,7 @@ function addMemory() {
         resizable: false,
         useContentSize: true,
         show: false,
-        icon: './icons/tmxeditor.png',
+        icon: './icons/icon.png',
         webPreferences: {
             nodeIntegration: true
         }
@@ -440,7 +444,7 @@ function showAbout() {
         resizable: false,
         useContentSize: true,
         show: false,
-        icon: './icons/tmxeditor.png',
+        icon: './icons/icon.png',
         webPreferences: {
             nodeIntegration: true
         }
@@ -460,7 +464,7 @@ function showSettings(): void {
         maximizable: false,
         resizable: false,
         show: false,
-        icon: './icons/tmxeditor.png',
+        icon: './icons/icon.png',
         webPreferences: {
             nodeIntegration: true
         }
@@ -522,7 +526,7 @@ ipcMain.on('open-license', function (event, arg: any) {
         height: 400,
         show: false,
         title: title,
-        icon: './icons/tmxeditor.png',
+        icon: './icons/icon.png',
         webPreferences: {
             nodeIntegration: true
         }
@@ -542,7 +546,7 @@ function showLicenses() {
         maximizable: false,
         resizable: false,
         show: false,
-        icon: './icons/tmxeditor.png',
+        icon: './icons/icon.png',
         webPreferences: {
             nodeIntegration: true
         }

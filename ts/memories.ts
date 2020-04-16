@@ -51,6 +51,7 @@ class MemoriesView {
 
     addMemory(): void {
         // TODO
+        ipcRenderer.send('show-add-memory');
     }
 
     removeMemory(): void {

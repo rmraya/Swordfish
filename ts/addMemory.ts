@@ -31,7 +31,39 @@ class AddMemory {
                 window.close();
             }
         });
+        document.getElementById('addMemoryButton').addEventListener('click', () => {
+            this.addMemory();
+        });
+        document.getElementById('addSubject').addEventListener('click', () => {
+            this.addSubject();
+        });
+        document.getElementById('addClient').addEventListener('click', () => {
+            this.addClient();
+        });
 
+    }
+
+    addMemory(): void {
+        let name: string = (document.getElementById('nameInput') as HTMLInputElement).value;
+        if (name === '') {
+            window.alert('Enter name');
+            return;
+        }
+        let project: string = (document.getElementById('projectSelect') as HTMLSelectElement).value;
+        let subject: string = (document.getElementById('subjectSelect') as HTMLSelectElement).value;
+        let client: string = (document.getElementById('clientSelect') as HTMLSelectElement).value;
+
+        // TODO
+    }
+
+    addSubject(): void {
+        // TODO
+        window.alert('add subject');
+    }
+
+    addClient(): void {
+        // TODO
+        window.alert('add client');
     }
 }
 

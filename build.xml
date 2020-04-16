@@ -90,8 +90,8 @@
         <move file="dist/release" todir="."/>
         <delete dir="dist" failonerror="false"/>
         <delete file="jars/swordfish.jar" />
-        <copy file="jars/h2-1.4.200.jar" todir="dist/lib"/>
-        <copy file="jars/mariadb-java-client-2.4.3.jar" todir="dist/lib"/>
+        <copy file="jars/h2-1.4.200.jar" todir="lib"/>
+        <copy file="jars/mariadb-java-client-2.4.3.jar" todir="lib"/>
     </target>
     <target name="dist" depends="link,copyWindows,copyUnix">
         <description>Prepare distribution</description>
