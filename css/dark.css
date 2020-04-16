@@ -167,6 +167,10 @@ th {
 	text-align: center;
 }
 
+.middle {
+	vertical-align: middle;
+}
+
 /* inputs */
 
 input {
@@ -282,7 +286,6 @@ button:hover {
 	padding-bottom: 0px;
 }
 
-
 label {
 	padding-left: 4px;
 	padding-right: 4px;
@@ -320,6 +323,11 @@ label {
 	justify-content: flex-end;
 }
 
+.inputArea {
+	display: flex;
+	flex-direction: row;
+	vertical-align: middle;
+}
 /* toolbars */
 
 .toolbar {

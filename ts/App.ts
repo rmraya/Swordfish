@@ -28,6 +28,8 @@ app.allowRendererProcessReuse = true;
 
 var mainWindow: BrowserWindow;
 var settingsWindow: BrowserWindow;
+var addMemoryWindow: BrowserWindow;
+
 var contents: webContents;
 var javapath: string = app.getAppPath() + '/bin/java';
 var classpath: string = 'lib/h2-1.4.200.jar:lib/mariadb-java-client-2.4.3.jar';
@@ -165,8 +167,10 @@ function createWindow(): void {
         new MenuItem({ label: 'Toggle Development Tools', accelerator: 'F12', role: 'toggleDevTools' }),
     ]);
     var projectsMenu: Menu = Menu.buildFromTemplate([]);
-    var memoriesMenu: Menu = Menu.buildFromTemplate([]);
-    var memoriesMenu: Menu = Menu.buildFromTemplate([]);
+    var memoriesMenu: Menu = Menu.buildFromTemplate([
+        { label: 'Add Memory', click: function () { addMemory(); } }
+    ]);
+    var glossariesMenu: Menu = Menu.buildFromTemplate([]);
     var helpMenu: Menu = Menu.buildFromTemplate([
         { label: 'Swordfish User Guide', accelerator: 'F1', click: function () { showHelp(); } },
         new MenuItem({ type: 'separator' }),
@@ -182,7 +186,7 @@ function createWindow(): void {
         new MenuItem({ label: '&View', role: 'viewMenu', submenu: viewMenu }),
         new MenuItem({ label: '&Projects', submenu: projectsMenu }),
         new MenuItem({ label: '&Memories', submenu: memoriesMenu }),
-        new MenuItem({ label: '&Glossaries', submenu: memoriesMenu }),
+        new MenuItem({ label: '&Glossaries', submenu: glossariesMenu }),
         new MenuItem({ label: '&Help', role: 'help', submenu: helpMenu })
     ];
     if (process.platform === 'darwin') {
@@ -354,6 +358,26 @@ function viewMemories(): void {
     contents.send('view-memories');
 }
 
+function addMemory() {
+    addMemoryWindow = new BrowserWindow({
+        parent: mainWindow,
+        width: getWidth('addMemoryWindow'),
+        height: getHeight('addMemoryWindow'),
+        minimizable: false,
+        maximizable: false,
+        resizable: false,
+        useContentSize: true,
+        show: false,
+        icon: './icons/tmxeditor.png',
+        webPreferences: {
+            nodeIntegration: true
+        }
+    });
+    addMemoryWindow.setMenu(null);
+    addMemoryWindow.loadURL('file://' + app.getAppPath() + '/html/addMemory.html');
+    addMemoryWindow.show();
+}
+
 function viewGlossaries(): void {
     contents.send('view-glossaries');
 }
@@ -410,7 +434,7 @@ function showAbout() {
     var aboutWindow = new BrowserWindow({
         parent: mainWindow,
         width: getWidth('aboutWindow'),
-        height: getHeihght('aboutWindow'),
+        height: getHeight('aboutWindow'),
         minimizable: false,
         maximizable: false,
         resizable: false,
@@ -430,7 +454,7 @@ function showSettings(): void {
     settingsWindow = new BrowserWindow({
         parent: mainWindow,
         width: getWidth('settingsWindow'),
-        height: getHeihght('settingsWindow'),
+        height: getHeight('settingsWindow'),
         useContentSize: true,
         minimizable: false,
         maximizable: false,
@@ -512,7 +536,7 @@ function showLicenses() {
     var licensesWindow = new BrowserWindow({
         parent: mainWindow,
         width: getWidth('licensesWindow'),
-        height: getHeihght('licensesWindow'),
+        height: getHeight('licensesWindow'),
         useContentSize: true,
         minimizable: false,
         maximizable: false,
@@ -593,13 +617,14 @@ function checkUpdates(silent: boolean): void {
     });
 }
 
-function getHeihght(window: string): number {
+function getHeight(window: string): number {
     switch (process.platform) {
         case 'win32': {
             switch (window) {
                 case 'aboutWindow': { return 390; }
                 case 'licensesWindow': { return 350; }
                 case 'settingsWindow': { return 150; }
+                case 'addMemoryWindow': { return 360; }
             }
             break;
         }
@@ -608,6 +633,7 @@ function getHeihght(window: string): number {
                 case 'aboutWindow': { return 380; }
                 case 'licensesWindow': { return 350; }
                 case 'settingsWindow': { return 150; }
+                case 'addMemoryWindow': { return 350; }
             }
             break;
         }
@@ -616,6 +642,7 @@ function getHeihght(window: string): number {
                 case 'aboutWindow': { return 380; }
                 case 'licensesWindow': { return 350; }
                 case 'settingsWindow': { return 150; }
+                case 'addMemoryWindow': { return 350; }
             }
             break;
         }
@@ -629,6 +656,7 @@ function getWidth(window: string): number {
                 case 'aboutWindow': { return 490; }
                 case 'licensesWindow': { return 400; }
                 case 'settingsWindow': { return 400; }
+                case 'addMemoryWindow': { return 450; }
             }
             break;
         }
@@ -637,6 +665,7 @@ function getWidth(window: string): number {
                 case 'aboutWindow': { return 490; }
                 case 'licensesWindow': { return 400; }
                 case 'settingsWindow': { return 400; }
+                case 'addMemoryWindow': { return 450; }
             }
             break;
         }
@@ -645,6 +674,7 @@ function getWidth(window: string): number {
                 case 'aboutWindow': { return 490; }
                 case 'licensesWindow': { return 400; }
                 case 'settingsWindow': { return 400; }
+                case 'addMemoryWindow': { return 450; }
             }
             break;
         }

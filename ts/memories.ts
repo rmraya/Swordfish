@@ -21,8 +21,8 @@ class MemoriesView {
 
     container: HTMLDivElement;
 
-    constructor() {
-        this.container = document.createElement('div');
+    constructor(div: HTMLDivElement) {
+        this.container = div;
         let topBar: HTMLDivElement = document.createElement('div');
         topBar.className = 'toolbar';
         this.container.appendChild(topBar);
@@ -47,10 +47,6 @@ class MemoriesView {
         modifyButton.className = 'tooltip';
         modifyButton.addEventListener('click', () => { this.modifyMemory() });
         topBar.appendChild(modifyButton);
-    }
-
-    getHtml(): string {
-        return this.container.innerHTML;
     }
 
     addMemory(): void {

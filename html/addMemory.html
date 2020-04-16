@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <title>Add Memory</title>
+    <link id="theme" rel="stylesheet" type="text/css" href="../css/light.css">
+    <link rel="stylesheet" type="text/css" href="../css/fonts.css">
+</head>
+
+<body id="body">
+    <table class="fill_width">
+        <tr>
+            <td class="middle">
+                <label for="nameInput">Name</label>
+            </td>
+            <td class="fill_width middle">
+                <input type="text" id="nameInput" class="fill_width">
+            </td>
+        </tr>
+        <tr>
+            <td class="middle">
+                <label for="projectSelect">Project</label>
+            </td>
+            <td class="fill_width middle">
+                <select id="projectSelect" class="fill_width">
+                    <option></option>
+                </select>
+            </td>
+        </tr>
+        <tr>
+            <td class="middle">
+                <label for="subjectSelect">Subject</label>
+            </td>
+            <td class="inputArea">
+                <select id="subjectSelect" class="fill_width">
+                    <option></option>
+                </select>&nbsp;
+                <a>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
+                        <path
+                            d="M12 2c5.514 0 10 4.486 10 10s-4.486 10-10 10-10-4.486-10-10 4.486-10 10-10zm0-2c-6.627 0-12 5.373-12 12s5.373 12 12 12 12-5.373 12-12-5.373-12-12-12zm6 13h-5v5h-2v-5h-5v-2h5v-5h2v5h5v2z" />
+                    </svg>
+                </a>
+            </td>
+        </tr>
+        <tr>
+            <td class="middle">
+                <label for="clientSelect">Client</label>
+            </td>
+            <td class="inputArea">
+                <select id="clientSelect" class="fill_width">
+                    <option></option>
+                </select>&nbsp;
+                <a>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
+                        <path
+                            d="M12 2c5.514 0 10 4.486 10 10s-4.486 10-10 10-10-4.486-10-10 4.486-10 10-10zm0-2c-6.627 0-12 5.373-12 12s5.373 12 12 12 12-5.373 12-12-5.373-12-12-12zm6 13h-5v5h-2v-5h-5v-2h5v-5h2v5h5v2z" />
+                    </svg>
+                </a>
+            </td>
+        </tr>
+
+        <tr>
+            <td class="middle">
+                <label for="typeSelect">Type</label>
+            </td>
+            <td class="middle">
+                <select id="typeSelect">
+                    <option>Internal</option>
+                    <option>Remote</option>
+                </select>
+            </td>
+        </tr>
+        <tr>
+            <td class="middle">
+                <label for="nameInput">URL</label>
+            </td>
+            <td class="fill_width middle">
+                <input type="text" id="urlInput" class="fill_width" disabled>
+            </td>
+        </tr>
+    </table>
+    <div class="buttonArea">
+        <button id="addMemoryButton">Add Memory</button>
+    </div>
+
+    <script src="../js/addMemory.js"></script>
+</body>
+
+</html>

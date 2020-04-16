@@ -21,8 +21,8 @@ class GlossariesView {
 
     container: HTMLDivElement;
 
-    constructor() {
-        this.container = document.createElement('div');
+    constructor(div: HTMLDivElement) {
+        this.container = div;
         let topBar: HTMLDivElement = document.createElement('div');
         topBar.className = 'toolbar';
         this.container.appendChild(topBar);
@@ -53,10 +53,6 @@ class GlossariesView {
             this.modifyGlossary()
         });
         topBar.appendChild(modifyButton);
-    }
-
-    getHtml(): string {
-        return this.container.innerHTML;
     }
 
     addGlossary(): void {

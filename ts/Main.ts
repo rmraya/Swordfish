@@ -21,22 +21,61 @@ const { ipcRenderer } = require('electron');
 
 class Main {
 
-    tabs: Map<string, string>;
+    labels: Map<String, HTMLAnchorElement>;
+    tabs: Map<string, HTMLDivElement>;
 
     projectsView: ProjectsView;
     memoriesView: MemoriesView;
     glossariesView: GlossariesView;
 
     constructor() {
-        this.tabs = new Map<string, string>();
+        this.labels = new Map<String, HTMLAnchorElement>();
+        this.tabs = new Map<string, HTMLDivElement>();
 
-        document.getElementById('projects').addEventListener('click', () => { this.selectTab('projects') });
-        document.getElementById('memories').addEventListener('click', () => { this.selectTab('memories') });
-        document.getElementById('glossaries').addEventListener('click', () => { this.selectTab('glossaries') });
+        let tabHolder = document.getElementById('tabs');
+        let main = document.getElementById('main');
 
-        this.tabs.set('projects', this.buildProjectsTab());
-        this.tabs.set('memories', this.buildMemoriesTab());
-        this.tabs.set('glossaries', this.buildGlossariesTab());
+        let projLabel = document.createElement('a');
+        projLabel.innerText = 'Projects';
+        projLabel.classList.add('tab');
+        projLabel.id = 'projects';
+        projLabel.addEventListener('click', () => {
+            this.selectTab('projects');
+        });
+        tabHolder.appendChild(projLabel);
+        this.labels.set('projects', projLabel);
+
+        let proj = this.buildProjectsTab();
+        main.appendChild(proj);
+        this.tabs.set('projects', proj);
+
+        let memLabel = document.createElement('a');
+        memLabel.innerHTML = 'Memories';
+        memLabel.classList.add('tab');
+        memLabel.id = 'memories';
+        memLabel.addEventListener('click', () => {
+            this.selectTab('memories');
+        });
+        tabHolder.appendChild(memLabel);
+        this.labels.set('memories', memLabel);
+
+        let mem = this.buildMemoriesTab();
+        main.appendChild(mem);
+        this.tabs.set('memories', mem);
+
+        let glossLabel = document.createElement('a');
+        glossLabel.innerText = 'Glossaries';
+        glossLabel.classList.add('tab');
+        glossLabel.id = 'glossaries';
+        glossLabel.addEventListener('click', () => {
+            this.selectTab('glossaries');
+        });
+        tabHolder.appendChild(glossLabel);
+        this.labels.set('glossaries', glossLabel);
+
+        let gloss = this.buildGlossariesTab();
+        main.appendChild(gloss);
+        this.tabs.set('glossaries', gloss);
 
         this.selectTab('projects');
 
@@ -59,11 +98,11 @@ class Main {
         ipcRenderer.on('start-waiting', () => {
             document.getElementById('body').classList.add("wait");
         });
-        
+
         ipcRenderer.on('end-waiting', () => {
             document.getElementById('body').classList.remove("wait");
         });
-        
+
         ipcRenderer.on('set-status', (event, arg) => {
             var status: HTMLDivElement = document.getElementById('status') as HTMLDivElement;
             status.innerHTML = arg;
@@ -76,37 +115,46 @@ class Main {
     }
 
     selectTab(tab: string): void {
-        let list: HTMLCollectionOf<Element> = document.getElementsByClassName('tab');
-        let length = list.length;
-        for (let i = 0; i < length; i++) {
-            if (list[i].classList.contains('selectedTab')) {
-                list[i].classList.remove('selectedTab');
-                this.tabs.set(list[i].getAttribute('id'), document.getElementById('main').innerHTML);
+        this.labels.forEach(function (value, key) {
+            if (value.classList.contains('selectedTab')) {
+                value.classList.remove('selectedTab');
             }
-        }
-        document.getElementById('main').innerHTML = this.tabs.get(tab);
-        document.getElementById(tab).classList.add('selectedTab');
-        document.getElementById(tab).blur();
+        });
+        this.labels.get(tab).classList.add('selectedTab');
+        this.labels.get(tab).blur();
+
+        this.tabs.forEach(function (value, key) {
+            if (!value.classList.contains('hidden')) {
+                value.classList.add('hidden');
+            }
+        });
+        this.tabs.get(tab).classList.remove('hidden');
     }
 
-    buildProjectsTab(): string {
-        this.projectsView = new ProjectsView();
-        return this.projectsView.getHtml();
+    buildProjectsTab(): HTMLDivElement {
+        let div: HTMLDivElement = document.createElement('div');
+        div.classList.add('hidden');
+        this.projectsView = new ProjectsView(div);
+        return div;
     }
 
-    buildMemoriesTab(): string {
-        this.memoriesView = new MemoriesView();
-        return this.memoriesView.getHtml();
+    buildMemoriesTab(): HTMLDivElement {
+        let div: HTMLDivElement = document.createElement('div');
+        div.classList.add('hidden');
+        this.memoriesView = new MemoriesView(div);
+        return div;
     }
 
-    buildGlossariesTab(): string {
-        this.glossariesView = new GlossariesView();
-        return this.glossariesView.getHtml();
+    buildGlossariesTab(): HTMLDivElement {
+        let div: HTMLDivElement = document.createElement('div');
+        div.classList.add('hidden');
+        this.glossariesView = new GlossariesView(div);
+        return div;
     }
-    
+
     resizePanels(): void {
         // TODO
-    }    
+    }
 }
 
 new Main();

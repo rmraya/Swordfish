@@ -23,8 +23,8 @@ class ProjectsView {
     tableContainer: HTMLDivElement;
     projectsTable: HTMLTableElement;
 
-    constructor() {
-        this.container = document.createElement('div');
+    constructor(div: HTMLDivElement) {
+        this.container = div;
         let topBar: HTMLDivElement = document.createElement('div');
         topBar.className = 'toolbar';
         this.container.appendChild(topBar);
@@ -74,37 +74,39 @@ class ProjectsView {
         this.projectsTable.classList.add('stripes');
         this.tableContainer.appendChild(this.projectsTable);
 
-        this.projectsTable.innerHTML = '<thead><tr>' +
-            '<th class="fixed"><input type="checkbox"></th>' +
-            '<th>Description</th><th>Status</th>' +
-            '<th>Src.Lang.</th><th>Tgt.Lang.</th>' +
-            '<th>Created</th><th>Completed</th>' +
-            '</tr></thead>' +
-            '<tbody id="projectsBody"></tbody>';
+        /*
+                this.projectsTable.innerHTML = '<thead><tr>' +
+                    '<th class="fixed"><input type="checkbox"></th>' +
+                    '<th>Description</th><th>Status</th>' +
+                    '<th>Src.Lang.</th><th>Tgt.Lang.</th>' +
+                    '<th>Created</th><th>Completed</th>' +
+                    '</tr></thead>' +
+                    '<tbody id="projectsBody"></tbody>';
+        */
+
+        let tbody = document.createElement('tbody');
+        tbody.id = 'projectsBody';
+        this.projectsTable.appendChild(tbody);
 
         // event listeners
 
-        window.addEventListener('resize', () => { 
-            this.setSizes() 
+        window.addEventListener('resize', () => {
+            this.setSizes()
         });
 
-        ipcRenderer.on('set-projects', (event, arg) => { 
-            this.displayProjects(arg); 
+        ipcRenderer.on('set-projects', (event, arg) => {
+            this.displayProjects(arg);
         })
 
         // finish setup
 
         this.setSizes();
-        this.loadProjects();
+        // this.loadProjects();
     }
 
     setSizes() {
         this.tableContainer.style.height = (this.container.clientHeight - 30) + 'px';
         this.tableContainer.style.width = (this.container.clientWidth - 2) + 'px';
-    }
-
-    getHtml(): string {
-        return this.container.innerHTML;
     }
 
     addProject(): void {
