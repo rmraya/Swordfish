@@ -23,6 +23,7 @@
 
 	--input-background: #fefefe;
 	--input-color: #2e2e2e;
+	--disabled-input: #999999;
 
 	--even-row-background: #2a2a2a;
 	--odd-row-background: #313131;
@@ -179,6 +180,10 @@ input {
 	border: 1px solid var(--input-color);
 }
 
+input:disabled {
+	background-color: var(--disabled-input);
+}
+
 input[type=text] {
 	margin-top: 3px;
 	height: 1.4rem;
@@ -207,7 +212,6 @@ input[type=number] {
 	padding: 0px;
 	padding-left: 2px;
 }
-
 
 input[type=checkbox] {
 	position: relative;

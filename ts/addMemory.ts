@@ -26,6 +26,14 @@ class AddMemory {
         _am.ipcRenderer.on('set-theme', (event, arg) => {
             (document.getElementById('theme') as HTMLLinkElement).href = arg;
         });
+        _am.ipcRenderer.send('get-clients');
+        _am.ipcRenderer.on('set-clients', (event, arg) => {
+            this.setClients(arg);
+        });
+        _am.ipcRenderer.send('get-subjects');
+        _am.ipcRenderer.on('set-subjects', (event, arg) => {
+            this.setSubjects(arg);
+        });
         document.addEventListener('keydown', (event) => {
             if (event.key === 'Escape') {
                 window.close();
@@ -40,7 +48,9 @@ class AddMemory {
         document.getElementById('addClient').addEventListener('click', () => {
             this.addClient();
         });
-
+        document.getElementById('typeSelect').addEventListener("change", () => {
+            this.typeChanged();
+        });
     }
 
     addMemory(): void {
@@ -52,7 +62,7 @@ class AddMemory {
         let project: string = (document.getElementById('projectSelect') as HTMLSelectElement).value;
         let subject: string = (document.getElementById('subjectSelect') as HTMLSelectElement).value;
         let client: string = (document.getElementById('clientSelect') as HTMLSelectElement).value;
-
+        let type: string = (document.getElementById('typeSelect') as HTMLSelectElement).value;
         // TODO
     }
 
@@ -64,6 +74,19 @@ class AddMemory {
     addClient(): void {
         // TODO
         window.alert('add client');
+    }
+
+    setClients(arg: any): void {
+        // TODO
+    }
+
+    setSubjects(arg: any): void {
+        // TODO
+    }
+
+    typeChanged(): void {
+        let type: string = (document.getElementById('typeSelect') as HTMLSelectElement).value;
+        (document.getElementById('urlInput') as HTMLInputElement).disabled = type === 'Internal';
     }
 }
 

@@ -382,6 +382,14 @@ function addMemory() {
     addMemoryWindow.show();
 }
 
+ipcMain.on('get-clients', (event, arg) => {
+    // TODO
+});
+
+ipcMain.on('get-subjects', (event, arg) => {
+    // TODO
+});
+
 function viewGlossaries(): void {
     contents.send('view-glossaries');
 }
