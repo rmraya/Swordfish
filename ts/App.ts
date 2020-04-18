@@ -28,7 +28,10 @@ app.allowRendererProcessReuse = true;
 
 var mainWindow: BrowserWindow;
 var settingsWindow: BrowserWindow;
+var aboutWindow: BrowserWindow;
+var licensesWindow: BrowserWindow;
 var addMemoryWindow: BrowserWindow;
+var addProjectWindow: BrowserWindow;
 
 var contents: webContents;
 var javapath: string = app.getAppPath() + '/bin/java';
@@ -166,7 +169,9 @@ function createWindow(): void {
         new MenuItem({ label: 'Toggle Full Screen', role: 'togglefullscreen' }),
         new MenuItem({ label: 'Toggle Development Tools', accelerator: 'F12', role: 'toggleDevTools' }),
     ]);
-    var projectsMenu: Menu = Menu.buildFromTemplate([]);
+    var projectsMenu: Menu = Menu.buildFromTemplate([
+        { label: 'Add Project', click: function () { addProject(); } }
+    ]);
     var memoriesMenu: Menu = Menu.buildFromTemplate([
         { label: 'Add Memory', click: function () { addMemory(); } }
     ]);
@@ -354,6 +359,34 @@ ipcMain.on('get-projects', (event, arg) => {
     );
 });
 
+ipcMain.on('show-add-project', () => {
+    addProject();
+});
+
+function addProject() {
+    addProjectWindow = new BrowserWindow({
+        parent: mainWindow,
+        width: getWidth('addProjectWindow'),
+        // height: getHeight('addProjectWindow'),
+        minimizable: false,
+        maximizable: false,
+        resizable: false,
+        useContentSize: true,
+        show: false,
+        icon: './icons/icon.png',
+        webPreferences: {
+            nodeIntegration: true
+        }
+    });
+    addProjectWindow.setMenu(null);
+    addProjectWindow.loadURL('file://' + app.getAppPath() + '/html/addProject.html');
+    addProjectWindow.show();
+}
+
+ipcMain.on('add-project-height', (event, arg) => {
+    addProjectWindow.setSize(arg.width, arg.height + 30);
+});
+
 function viewMemories(): void {
     contents.send('view-memories');
 }
@@ -366,7 +399,7 @@ function addMemory() {
     addMemoryWindow = new BrowserWindow({
         parent: mainWindow,
         width: getWidth('addMemoryWindow'),
-        height: getHeight('addMemoryWindow'),
+        // height: getHeight('addMemoryWindow'),
         minimizable: false,
         maximizable: false,
         resizable: false,
@@ -381,6 +414,10 @@ function addMemory() {
     addMemoryWindow.loadURL('file://' + app.getAppPath() + '/html/addMemory.html');
     addMemoryWindow.show();
 }
+
+ipcMain.on('add-memory-height', (event, arg) => {
+    addMemoryWindow.setSize(arg.width, arg.height + 30);
+});
 
 ipcMain.on('get-clients', (event, arg) => {
     // TODO
@@ -443,10 +480,9 @@ ipcMain.on('get-version', (event, arg) => {
 });
 
 function showAbout() {
-    var aboutWindow = new BrowserWindow({
+    aboutWindow = new BrowserWindow({
         parent: mainWindow,
         width: getWidth('aboutWindow'),
-        height: getHeight('aboutWindow'),
         minimizable: false,
         maximizable: false,
         resizable: false,
@@ -462,11 +498,14 @@ function showAbout() {
     aboutWindow.show();
 }
 
+ipcMain.on('about-height', (event, arg) => {
+    aboutWindow.setSize(arg.width, arg.height + 30);
+});
+
 function showSettings(): void {
     settingsWindow = new BrowserWindow({
         parent: mainWindow,
         width: getWidth('settingsWindow'),
-        height: getHeight('settingsWindow'),
         useContentSize: true,
         minimizable: false,
         maximizable: false,
@@ -481,6 +520,10 @@ function showSettings(): void {
     settingsWindow.loadURL('file://' + app.getAppPath() + '/html/preferences.html');
     settingsWindow.show();
 }
+
+ipcMain.on('settings-height', (event, arg) => {
+    settingsWindow.setSize(arg.width, arg.height + 30);
+});
 
 ipcMain.on('get-preferences', (event, arg) => {
     event.sender.send('set-preferences', currentPreferences);
@@ -545,10 +588,9 @@ ipcMain.on('open-license', function (event, arg: any) {
 });
 
 function showLicenses() {
-    var licensesWindow = new BrowserWindow({
+    licensesWindow = new BrowserWindow({
         parent: mainWindow,
         width: getWidth('licensesWindow'),
-        height: getHeight('licensesWindow'),
         useContentSize: true,
         minimizable: false,
         maximizable: false,
@@ -563,6 +605,10 @@ function showLicenses() {
     licensesWindow.loadURL('file://' + app.getAppPath() + '/html/licenses.html');
     licensesWindow.show();
 }
+
+ipcMain.on('licenses-height', (event, arg) => {
+    licensesWindow.setSize(arg.width, arg.height + 30);
+});
 
 ipcMain.on('licenses-clicked', () => {
     showLicenses();
@@ -629,64 +675,35 @@ function checkUpdates(silent: boolean): void {
     });
 }
 
-function getHeight(window: string): number {
-    switch (process.platform) {
-        case 'win32': {
-            switch (window) {
-                case 'aboutWindow': { return 390; }
-                case 'licensesWindow': { return 350; }
-                case 'settingsWindow': { return 150; }
-                case 'addMemoryWindow': { return 360; }
-            }
-            break;
-        }
-        case 'darwin': {
-            switch (window) {
-                case 'aboutWindow': { return 380; }
-                case 'licensesWindow': { return 350; }
-                case 'settingsWindow': { return 150; }
-                case 'addMemoryWindow': { return 350; }
-            }
-            break;
-        }
-        case 'linux': {
-            switch (window) {
-                case 'aboutWindow': { return 380; }
-                case 'licensesWindow': { return 350; }
-                case 'settingsWindow': { return 150; }
-                case 'addMemoryWindow': { return 350; }
-            }
-            break;
-        }
-    }
-}
-
 function getWidth(window: string): number {
     switch (process.platform) {
         case 'win32': {
             switch (window) {
-                case 'aboutWindow': { return 490; }
+                case 'aboutWindow': { return 500; }
                 case 'licensesWindow': { return 400; }
                 case 'settingsWindow': { return 400; }
                 case 'addMemoryWindow': { return 450; }
+                case 'addProjectWindow': { return 750; }
             }
             break;
         }
         case 'darwin': {
             switch (window) {
-                case 'aboutWindow': { return 490; }
+                case 'aboutWindow': { return 500; }
                 case 'licensesWindow': { return 400; }
                 case 'settingsWindow': { return 400; }
                 case 'addMemoryWindow': { return 450; }
+                case 'addProjectWindow': { return 750; }
             }
             break;
         }
         case 'linux': {
             switch (window) {
-                case 'aboutWindow': { return 490; }
+                case 'aboutWindow': { return 500; }
                 case 'licensesWindow': { return 400; }
                 case 'settingsWindow': { return 400; }
                 case 'addMemoryWindow': { return 450; }
+                case 'addProjectWindow': { return 750; }
             }
             break;
         }

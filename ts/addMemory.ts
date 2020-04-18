@@ -39,18 +39,11 @@ class AddMemory {
                 window.close();
             }
         });
-        document.getElementById('addMemoryButton').addEventListener('click', () => {
-            this.addMemory();
-        });
-        document.getElementById('addSubject').addEventListener('click', () => {
-            this.addSubject();
-        });
-        document.getElementById('addClient').addEventListener('click', () => {
-            this.addClient();
-        });
         document.getElementById('typeSelect').addEventListener("change", () => {
             this.typeChanged();
         });
+        let body: HTMLBodyElement = document.getElementById('body') as HTMLBodyElement;
+        _am.ipcRenderer.send('add-memory-height', { width: body.clientWidth, height: body.clientHeight });
     }
 
     addMemory(): void {
@@ -59,21 +52,11 @@ class AddMemory {
             window.alert('Enter name');
             return;
         }
-        let project: string = (document.getElementById('projectSelect') as HTMLSelectElement).value;
-        let subject: string = (document.getElementById('subjectSelect') as HTMLSelectElement).value;
-        let client: string = (document.getElementById('clientSelect') as HTMLSelectElement).value;
+        let project: string = (document.getElementById('projectInput') as HTMLSelectElement).value;
+        let subject: string = (document.getElementById('subjectInput') as HTMLSelectElement).value;
+        let client: string = (document.getElementById('clientInput') as HTMLSelectElement).value;
         let type: string = (document.getElementById('typeSelect') as HTMLSelectElement).value;
         // TODO
-    }
-
-    addSubject(): void {
-        // TODO
-        window.alert('add subject');
-    }
-
-    addClient(): void {
-        // TODO
-        window.alert('add client');
     }
 
     setClients(arg: any): void {
@@ -86,7 +69,7 @@ class AddMemory {
 
     typeChanged(): void {
         let type: string = (document.getElementById('typeSelect') as HTMLSelectElement).value;
-        (document.getElementById('urlInput') as HTMLInputElement).disabled = type === 'Internal';
+        (document.getElementById('urlInput') as HTMLInputElement).disabled = (type === 'Local');
     }
 }
 

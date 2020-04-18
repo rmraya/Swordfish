@@ -22,41 +22,32 @@
                 <label for="projectSelect">Project</label>
             </td>
             <td class="fill_width middle">
-                <select id="projectSelect" class="fill_width">
-                    <option></option>
-                </select>
+                <input list="projects" name="projectInput" class="fill_width middle">
+                <datalist id="projects">
+                    
+                </datalist>
             </td>
         </tr>
         <tr>
             <td class="middle">
                 <label for="subjectSelect">Subject</label>
             </td>
-            <td class="inputArea">
-                <select id="subjectSelect" class="fill_width">
-                    <option></option>
-                </select>&nbsp;
-                <a id="addSubject" title="Add Subject">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
-                        <path
-                            d="M12 2c5.514 0 10 4.486 10 10s-4.486 10-10 10-10-4.486-10-10 4.486-10 10-10zm0-2c-6.627 0-12 5.373-12 12s5.373 12 12 12 12-5.373 12-12-5.373-12-12-12zm6 13h-5v5h-2v-5h-5v-2h5v-5h2v5h5v2z" />
-                    </svg>
-                </a>
+            <td class="fill_width middle">
+                <input list="subjects" name="subjectInput" class="fill_width middle">
+                <datalist id="subjects">
+                    
+                </datalist>
             </td>
         </tr>
         <tr>
             <td class="middle">
                 <label for="clientSelect">Client</label>
             </td>
-            <td class="inputArea">
-                <select id="clientSelect" class="fill_width">
-                    <option></option>
-                </select>&nbsp;
-                <a id="addClient" title="Add Client">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
-                        <path
-                            d="M12 2c5.514 0 10 4.486 10 10s-4.486 10-10 10-10-4.486-10-10 4.486-10 10-10zm0-2c-6.627 0-12 5.373-12 12s5.373 12 12 12 12-5.373 12-12-5.373-12-12-12zm6 13h-5v5h-2v-5h-5v-2h5v-5h2v5h5v2z" />
-                    </svg>
-                </a>
+            <td class="fill_width middle">
+                <input list="clients" name="clientInput" class="fill_width middle">
+                <datalist id="clients">
+                    
+                </datalist>
             </td>
         </tr>
 
@@ -66,7 +57,7 @@
             </td>
             <td class="middle">
                 <select id="typeSelect">
-                    <option value="Internal">Internal</option>
+                    <option value="Local">Local</option>
                     <option value="Remote">Remote</option>
                 </select>
             </td>

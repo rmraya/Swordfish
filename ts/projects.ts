@@ -111,6 +111,7 @@ class ProjectsView {
 
     addProject(): void {
         // TODO
+        ipcRenderer.send('show-add-project');
     }
 
     removeProject(): void {

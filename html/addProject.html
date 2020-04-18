@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <title>Add Project</title>
+    <link id="theme" rel="stylesheet" type="text/css" href="../css/light.css">
+    <link rel="stylesheet" type="text/css" href="../css/fonts.css">
+</head>
+
+<body id="body">
+    <table class="fill_width">
+        <tr>
+            <td class="middle">
+                <label for="nameInput">Name</label>
+            </td>
+            <td class="fill_width middle">
+                <input type="text" id="nameInput" class="fill_width">
+            </td>
+        </tr>
+    </table>
+    <div class="row">
+        <table class="fill_width">
+            <tr>
+                <td class="middle noWrap">
+                    <label for="srcLangSelect">Source Language</label>
+                </td>
+                <td class="fill_width middle">
+                    <select id="srcLangSelect" class="fill_width">
+
+                    </select>
+                </td>
+            </tr>
+            <tr>
+                <td class="middle noWrap">
+                    <label for="tgtLangSelect">Target Language</label>
+                </td>
+                <td class="fill_width middle">
+                    <select id="tgtLangSelect" class="fill_width">
+
+                    </select>
+                </td>
+            </tr>
+        </table>
+        <table>
+            <tr>
+                <td class="middle">
+                    <label for="subjectSelect">Subject</label>
+                </td>
+                <td class="fill_width middle">
+                    <input list="subjects" name="subjectInput" class="fill_width middle">
+                    <datalist id="subjects">
+
+                    </datalist>
+                </td>
+            </tr>
+            <tr>
+                <td class="middle">
+                    <label for="clientSelect">Client</label>
+                </td>
+                <td class="fill_width middle">
+                    <input list="clients" name="clientInput" class="fill_width middle">
+                    <datalist id="clients">
+
+                    </datalist>
+                </td>
+            </tr>
+        </table>
+    </div>
+    <div class="bordered">
+        <table class="fill_width" style="height: 240px">
+            <thead>
+                <tr class="noWrap">
+                    <th><input type="checkbox" id="selectAll"></th>
+                    <th class="fill_width" style="text-align: left;">File Name</th>
+                    <th>File Type</th>
+                    <th>Character Set</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr></tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div class="buttonArea">
+        <button>Add Files</button>
+        <button>Add Folder</button>
+        <button>Delete Selected Files</button>
+        <span class="fill_width">&nbsp;</span>
+        <button id="addProjectButton">Add Project</button>
+    </div>
+
+    <script src="../js/addProject.js"></script>
+</body>
+
+</html>

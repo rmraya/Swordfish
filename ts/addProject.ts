@@ -17,32 +17,53 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 *****************************************************************************/
 
+var _ap = require('electron');
 
-var _b = require('electron');
-
-class About {
+class AddProject {
 
     constructor() {
-        _b.ipcRenderer.send('get-theme');
-        _b.ipcRenderer.send('get-version');
-        _b.ipcRenderer.on('set-theme', (event, arg) => {
+        _ap.ipcRenderer.send('get-theme');
+        _ap.ipcRenderer.on('set-theme', (event, arg) => {
             (document.getElementById('theme') as HTMLLinkElement).href = arg;
         });
-        _b.ipcRenderer.on('set-version', (event, arg) => {
-            document.getElementById('version').innerHTML = arg;
+        _ap.ipcRenderer.send('get-clients');
+        _ap.ipcRenderer.on('set-clients', (event, arg) => {
+            this.setClients(arg);
         });
-        document.getElementById('licensesButton').addEventListener('click', () => { 
-            _b.ipcRenderer.send('licenses-clicked'); 
+        _ap.ipcRenderer.send('get-subjects');
+        _ap.ipcRenderer.on('set-subjects', (event, arg) => {
+            this.setSubjects(arg);
         });
         document.addEventListener('keydown', (event) => {
             if (event.key === 'Escape') {
                 window.close();
             }
         });
+        document.getElementById('addProjectButton').addEventListener('click', () => {
+            this.addProject();
+        });
         let body: HTMLBodyElement = document.getElementById('body') as HTMLBodyElement;
-        _b.ipcRenderer.send('about-height', { width: body.clientWidth, height: body.clientHeight });
+        _ap.ipcRenderer.send('add-project-height', { width: body.clientWidth, height: body.clientHeight });
     }
 
+    addProject(): void {
+        let name: string = (document.getElementById('nameInput') as HTMLInputElement).value;
+        if (name === '') {
+            window.alert('Enter name');
+            return;
+        }
+        let subject: string = (document.getElementById('subjectInput') as HTMLSelectElement).value;
+        let client: string = (document.getElementById('clientInput') as HTMLSelectElement).value;
+        // TODO
+    }
+
+    setClients(arg: any): void {
+        // TODO
+    }
+
+    setSubjects(arg: any): void {
+        // TODO
+    }
 }
 
-new About();
+new AddProject();
