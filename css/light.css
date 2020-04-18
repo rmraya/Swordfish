@@ -178,16 +178,13 @@ input {
 	background-color: var(--input-background);
 	color: var(--input-color);
 	border: 1px solid var(--input-color);
+	margin-top: 3px;
+	height: 1.4rem;
+	font-size: 1rem;
 }
 
 input:disabled {
 	background-color: var(--disabled-input);
-}
-
-input[type=text] {
-	margin-top: 3px;
-	height: 1.4rem;
-	font-size: 1rem;
 }
 
 input[type=text]:focus {
@@ -198,16 +195,9 @@ input[type=number]:focus {
 	border: 1px solid transparent;
 }
 
-input[type=password] {
-	margin-top: 3px;
-	height: 1.4rem;
-	font-size: 1rem;
-}
-
 input[type=number] {
 	font-size: 0.8em;
 	width: 40px;
-	height: 1.4rem;
 	margin: 0px;
 	padding: 0px;
 	padding-left: 2px;
