@@ -37,7 +37,7 @@ var contents: webContents;
 var javapath: string = app.getAppPath() + '/bin/java';
 var classpath: string = 'lib/h2-1.4.200.jar:lib/mariadb-java-client-2.4.3.jar';
 var appHome: string = app.getPath('appData') + '/swordfish/';
-var verticalPadding: number = 30;
+var verticalPadding: number = 40;
 
 var currentDefaults: Rectangle;
 var currentPreferences: any;
@@ -71,7 +71,7 @@ if (process.platform == 'win32') {
     javapath = app.getAppPath() + '\\bin\\java.exe';
     classpath = 'lib\\h2-1.4.200.jar;lib\\mariadb-java-client-2.4.3.jar';
     appHome = app.getPath('appData') + '\\Swordfish\\';
-    verticalPadding = 45;
+    verticalPadding = 50;
 }
 
 if (!existsSync(appHome)) {
@@ -640,7 +640,7 @@ function showLicenses() {
 
 ipcMain.on('licenses-height', (event, arg) => {
     let rect: Rectangle = licensesWindow.getBounds();
-    rect.height = arg.height + verticalPadding + 30; 
+    rect.height = arg.height + verticalPadding; 
     licensesWindow.setBounds(rect);
 });
 
