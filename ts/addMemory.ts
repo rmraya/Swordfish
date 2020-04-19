@@ -42,8 +42,10 @@ class AddMemory {
         document.getElementById('typeSelect').addEventListener("change", () => {
             this.typeChanged();
         });
-        let body: HTMLBodyElement = document.getElementById('body') as HTMLBodyElement;
-        _am.ipcRenderer.send('add-memory-height', { width: body.clientWidth, height: body.clientHeight });
+        _am.ipcRenderer.on('get-height', () => {
+            let body: HTMLBodyElement = document.getElementById('body') as HTMLBodyElement;
+            _am.ipcRenderer.send('add-memory-height', { width: body.clientWidth, height: body.clientHeight });
+        });
     }
 
     addMemory(): void {

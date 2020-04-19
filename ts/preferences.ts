@@ -41,8 +41,10 @@ class Preferences {
         document.getElementById('save').addEventListener('click', () => {
             this.savePreferences();
         });
-        let body: HTMLBodyElement = document.getElementById('body') as HTMLBodyElement;
-        _p.ipcRenderer.send('settings-height', { width: body.clientWidth, height: body.clientHeight });
+        _p.ipcRenderer.on('get-height', () => {
+            let body: HTMLBodyElement = document.getElementById('body') as HTMLBodyElement;
+            _p.ipcRenderer.send('settings-height', { width: body.clientWidth, height: body.clientHeight });
+        });
     }
 
     savePreferences() {

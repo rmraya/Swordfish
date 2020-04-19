@@ -42,8 +42,10 @@ class AddProject {
         document.getElementById('addProjectButton').addEventListener('click', () => {
             this.addProject();
         });
-        let body: HTMLBodyElement = document.getElementById('body') as HTMLBodyElement;
-        _ap.ipcRenderer.send('add-project-height', { width: body.clientWidth, height: body.clientHeight });
+        _ap.ipcRenderer.on('get-height', () => {
+            let body: HTMLBodyElement = document.getElementById('body') as HTMLBodyElement;
+            _ap.ipcRenderer.send('add-project-height', { width: body.clientWidth, height: body.clientHeight });
+        });
     }
 
     addProject(): void {

@@ -39,8 +39,10 @@ class About {
                 window.close();
             }
         });
-        let body: HTMLBodyElement = document.getElementById('body') as HTMLBodyElement;
-        _b.ipcRenderer.send('about-height', { width: body.clientWidth, height: body.clientHeight });
+        _b.ipcRenderer.on('get-height', () => {
+            let body: HTMLBodyElement = document.getElementById('body') as HTMLBodyElement;
+            _b.ipcRenderer.send('about-height', { width: body.clientWidth, height: body.clientHeight });
+        });
     }
 
 }
