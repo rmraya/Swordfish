@@ -12,3 +12,4 @@ package-lock.json
 /node_modules/
 /xcf/
 /Swordfish-darwin-x64/
+/Swordfish-win32-x64/
