@@ -21,23 +21,30 @@ package com.maxprograms.swordfish;
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.lang.System.Logger;
+import java.lang.System.Logger.Level;
+import java.net.URI;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Date;
+import java.util.Enumeration;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
-import java.lang.System.Logger;
-import java.lang.System.Logger.Level;
-import java.net.URI;
+import java.util.concurrent.ConcurrentHashMap.KeySetView;
 
+import com.maxprograms.languages.Language;
+import com.maxprograms.languages.LanguageUtils;
 import com.maxprograms.swordfish.models.Project;
+import com.maxprograms.swordfish.models.SourceFile;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 
@@ -49,6 +56,9 @@ public class ProjectsHandler implements HttpHandler {
 	private static Logger logger = System.getLogger(ProjectsHandler.class.getName());
 	private static ConcurrentHashMap<String, Project> projects;
 	private static boolean firstRun = true;
+
+	protected boolean converting;
+	protected String conversionError = "";
 
 	@Override
 	public void handle(HttpExchange exchange) throws IOException {
@@ -149,7 +159,9 @@ public class ProjectsHandler implements HttpHandler {
 		File home = new File(getWorkFolder());
 		File list = new File(home, "projects.json");
 		if (!list.exists()) {
-			return;
+			try (FileOutputStream out = new FileOutputStream(list)) {
+				out.write("{\"projects\":[]}".getBytes(StandardCharsets.UTF_8));
+			}
 		}
 		StringBuffer buffer = new StringBuffer();
 		try (FileReader input = new FileReader(list)) {
@@ -161,12 +173,10 @@ public class ProjectsHandler implements HttpHandler {
 			}
 		}
 		JSONObject json = new JSONObject(buffer.toString());
-		Set<String> keys = json.keySet();
-		Iterator<String> it = keys.iterator();
-		while (it.hasNext()) {
-			String key = it.next();
-			JSONObject obj = json.getJSONObject(key);
-			projects.put(key, new Project(obj.toString()));
+		JSONArray array = json.getJSONArray("projects");
+		for (int i = 0; i < array.length(); i++) {
+			JSONObject project = array.getJSONObject(i);
+			projects.put(project.getString("id"), new Project(project.toString()));
 		}
 		if (firstRun) {
 			firstRun = false;
@@ -185,12 +195,97 @@ public class ProjectsHandler implements HttpHandler {
 		}
 	}
 
+	private synchronized void saveProjectsList() throws IOException {
+		File home = new File(getWorkFolder());
+		File list = new File(home, "projects.json");
+		try (FileOutputStream out = new FileOutputStream(list)) {
+			out.write("{\"projects\":[".getBytes(StandardCharsets.UTF_8));
+			Enumeration<String> keys = projects.keys();
+			boolean first = true;
+			while (keys.hasMoreElements()) {
+				if (!first) {
+					out.write(",\n".getBytes(StandardCharsets.UTF_8));
+				}
+				String key = keys.nextElement();
+				out.write(projects.get(key).toJSON().toString().getBytes(StandardCharsets.UTF_8));
+				first = false;
+			}
+			out.write("]}".getBytes(StandardCharsets.UTF_8));
+		}
+	}
+
 	private JSONObject updateProject(String request) {
 		return null;
 	}
 
 	private JSONObject createProject(String request) {
-		return null;
+		JSONObject result = new JSONObject();
+		if (projects == null) {
+			try {
+				loadProjectsList();
+			} catch (IOException e) {
+				logger.log(Level.ERROR, "Error loading project list", e);
+				result.put(Constants.REASON, e.getMessage());
+				return result;
+			}
+		}
+
+		JSONObject json = new JSONObject(request);
+		JSONArray files = json.getJSONArray("files");
+		conversionError = "";
+		converting = true;
+
+		String id = "" + System.currentTimeMillis();
+		try {
+			Language sourceLang = LanguageUtils.getLanguage(json.getString("srcLang"));
+			Language targetLang = LanguageUtils.getLanguage(json.getString("tgtLang"));
+
+			Date dueDate = new Date();
+
+			Project p = new Project(id, json.getString("description"), Project.NEW, sourceLang, targetLang,
+					json.getString("client"), json.getString("subject"), new Date(), dueDate, null);
+			List<SourceFile> sourceFiles = new ArrayList<>();
+			Thread thread = new Thread() {
+				@Override
+				public void run() {
+					try {
+						for (int i = 0; i < files.length(); i++) {
+							JSONObject file = files.getJSONObject(i);
+							SourceFile sf = new SourceFile(file.getString("file"), file.getString("type"),
+									file.getString("encoding"));
+							sourceFiles.add(sf);
+							/*
+							 * if (!FileFormats.XLIFF.equals(file.getString("type"))) { File source = new
+							 * File(file.getString("file")); Map<String, String> params = new HashMap<>();
+							 * params.put("source", source.getAbsolutePath()); params.put("xliff", xliff);
+							 * params.put("skeleton", skl); params.put("format", file.getString("type"));
+							 * params.put("catalog", catalog); params.put("srcEncoding",
+							 * file.getString("encoding")); params.put("paragraph", "no");
+							 * params.put("srxFile", srx); params.put("srcLang", json.getString("srcLang"));
+							 * params.put("tgtLang", json.getString("tgtLang")); List<String> res =
+							 * Convert.run(params);
+							 * 
+							 * }
+							 */
+						}
+						p.setFiles(sourceFiles);
+						projects.put(id, p);
+						saveProjectsList();
+					} catch (IOException e) {
+						logger.log(Level.ERROR, e.getMessage(), e);
+						conversionError = e.getMessage();
+					}
+					converting = false;
+				}
+			};
+			thread.start();
+			result.put(Constants.STATUS, Constants.SUCCESS);
+		} catch (IOException e) {
+			logger.log(Level.ERROR, e);
+			result.put(Constants.STATUS, Constants.ERROR);
+			result.put(Constants.REASON, e.getMessage());
+		}
+		return result;
 	}
 
 	private static String getWorkFolder() throws IOException {

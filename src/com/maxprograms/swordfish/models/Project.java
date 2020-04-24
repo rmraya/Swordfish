@@ -22,11 +22,13 @@ import java.io.IOException;
 import java.io.Serializable;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.Iterator;
 import java.util.List;
 
 import com.maxprograms.languages.Language;
 import com.maxprograms.languages.LanguageUtils;
 
+import org.json.JSONArray;
 import org.json.JSONObject;
 
 public class Project implements Serializable, Comparable<Project> {
@@ -44,7 +46,6 @@ public class Project implements Serializable, Comparable<Project> {
 	private String subject;
 	private Language sourceLang;
 	private Language targetLang;
-	private String instructions;
 	private Date creationDate;
 	private Date dueDate;
 	private Date finishDate;
@@ -52,8 +53,8 @@ public class Project implements Serializable, Comparable<Project> {
 	private List<Memory> memories;
 	private List<Glossary> glossaries;
 
-	public Project(String id, String description, int status, Language sourceLang, Language targetLang,
-			String client, String subject, String instructions, Date creationDate, Date dueDate, Date finishDate) {
+	public Project(String id, String description, int status, Language sourceLang, Language targetLang, String client,
+			String subject, Date creationDate, Date dueDate, Date finishDate) {
 		this.id = id;
 		this.description = description;
 		this.status = status;
@@ -61,7 +62,6 @@ public class Project implements Serializable, Comparable<Project> {
 		this.targetLang = targetLang;
 		this.client = client;
 		this.subject = subject;
-		this.instructions = instructions;
 		this.creationDate = creationDate;
 		this.dueDate = dueDate;
 		this.finishDate = finishDate;
@@ -71,31 +71,40 @@ public class Project implements Serializable, Comparable<Project> {
 		JSONObject object = new JSONObject(json);
 		this.id = object.getString("id");
 		this.description = object.getString("description");
-		if (object.has("sourceLang")) {
-			this.sourceLang = LanguageUtils.getLanguage(object.getString("sourceLang"));
-		}
-		if (object.has("targetLang")) {
-			this.targetLang = LanguageUtils.getLanguage(object.getString("targetLang"));
-		}
-		this.instructions = object.has("instructions") ? object.getString("instructions") : "";
+		this.sourceLang = LanguageUtils.getLanguage(object.getString("sourceLang"));
+		this.targetLang = LanguageUtils.getLanguage(object.getString("targetLang"));
 		this.client = object.has("client") ? object.getString("client") : "";
 		this.subject = object.has("subject") ? object.getString("subject") : "";
 		this.creationDate = new Date(object.getLong("creationDate"));
 		this.dueDate = new Date(object.getLong("dueDate"));
+		if (object.has("finishDate")) {
+			this.finishDate = new Date(object.getLong("finishDate"));
+		}
 	}
-	
+
 	public String toJSON() {
 		SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 		JSONObject json = new JSONObject();
 		json.put("id", id);
 		json.put("description", description);
-		json.put("sourceLang", sourceLang);
-		json.put("targetLang", targetLang);
+		json.put("sourceLang", sourceLang.getCode());
+		json.put("targetLang", targetLang.getCode());
 		json.put("client", client);
 		json.put("subject", subject);
-		json.put("instructions", instructions);
 		json.put("creationDate", creationDate.getTime());
 		json.put("creationString", df.format(creationDate));
+		json.put("dueDate", dueDate.getTime());
+		json.put("dueDateString", df.format(dueDate));
+		if (finishDate != null) {
+			json.put("finishDate", finishDate.getTime());
+			json.put("finishDateString", df.format(finishDate));
+		}
+		JSONArray filesArray = new JSONArray();
+		Iterator<SourceFile> it = files.iterator();
+		while (it.hasNext()) {
+			filesArray.put(it.next().toJSON());
+		}
+		json.put("files", filesArray);
 		return json.toString(2);
 	}
 
@@ -137,14 +146,6 @@ public class Project implements Serializable, Comparable<Project> {
 
 	public void setTargetLang(Language targetLang) {
 		this.targetLang = targetLang;
-	}
-
-	public String getInstructions() {
-		return instructions;
-	}
-
-	public void setInstructions(String instructions) {
-		this.instructions = instructions;
 	}
 
 	public Date getCreationDate() {
@@ -199,7 +200,7 @@ public class Project implements Serializable, Comparable<Project> {
 	public int compareTo(Project o) {
 		return creationDate.compareTo(o.getCreationDate());
 	}
-	
+
 	@Override
 	public boolean equals(Object obj) {
 		if (!(obj instanceof Project)) {

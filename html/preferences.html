@@ -9,9 +9,17 @@
 
 <body id="body">
     <div style="padding:4px;" class="fill_width">
-        <table class="fill_width">
+        <table class="panel">
             <tr>
-                <td> <label for="themeColor">Theme</label></td>
+                <td class="noWrap"><label for="srcLangSelect">Default Source Language</label></td>
+                <td class="fill_width"><select id="srcLangSelect" class="fill_width"></select></td>
+            </tr>
+            <tr>
+                <td class="noWrap"><label for="tgtLangSelect">Default Target Language</label></td>
+                <td class="fill_width"><select id="tgtLangSelect" class="fill_width"></select></td>
+            </tr>
+            <tr>
+                <td class="noWrap"><label for="themeColor">Theme</label></td>
                 <td class="fill_width">
                     <select id="themeColor" class="fill_width">
                         <option value="system">System Default</option>

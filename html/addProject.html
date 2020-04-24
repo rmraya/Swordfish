@@ -16,8 +16,15 @@
             <td class="fill_width middle">
                 <input type="text" id="nameInput" class="fill_width">
             </td>
+            <td class="middle">
+                <label for="dueDate" class="noWrap">Due Date</label>
+            </td>
+            <td class="middle">
+                <input type="date" id="dueDate">
+            </td>
         </tr>
     </table>
+
     <div class="row">
         <table class="fill_width">
             <tr>
@@ -44,30 +51,30 @@
         <table>
             <tr>
                 <td class="middle">
-                    <label for="subjectSelect">Subject</label>
+                    <label for="subjectInput">Subject</label>
                 </td>
                 <td class="fill_width middle">
-                    <input list="subjects" name="subjectInput" class="fill_width middle">
+                    <input list="subjects" id="subjectInput" class="fill_width middle" >
                     <datalist id="subjects">
-
+                        <option value="none">
                     </datalist>
                 </td>
             </tr>
             <tr>
                 <td class="middle">
-                    <label for="clientSelect">Client</label>
+                    <label for="clientInput">Client</label>
                 </td>
                 <td class="fill_width middle">
-                    <input list="clients" name="clientInput" class="fill_width middle">
+                    <input list="clients" id="clientInput" class="fill_width middle" >
                     <datalist id="clients">
-
+                        <option value="none">
                     </datalist>
                 </td>
             </tr>
         </table>
     </div>
-    <div class="bordered">
-        <table class="fill_width" style="height: 240px">
+    <div class="bordered fill_width scrollPanel" style="height: 260px" id="tablePanel">
+        <table class="stripes">
             <thead>
                 <tr class="noWrap">
                     <th><input type="checkbox" id="selectAll"></th>
@@ -76,16 +83,16 @@
                     <th>Character Set</th>
                 </tr>
             </thead>
-            <tbody>
+            <tbody id="tableBody">
                 <tr></tr>
             </tbody>
         </table>
     </div>
 
     <div class="buttonArea">
-        <button>Add Files</button>
-        <button>Add Folder</button>
-        <button>Delete Selected Files</button>
+        <button id="addFilesButton">Add Files</button>
+        <button id="addFolderButton">Add Folder</button>
+        <button id="deleteFilesButton">Delete Selected Files</button>
         <span class="fill_width">&nbsp;</span>
         <button id="addProjectButton">Add Project</button>
     </div>

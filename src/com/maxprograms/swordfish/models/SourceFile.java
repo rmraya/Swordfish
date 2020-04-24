@@ -20,13 +20,15 @@ package com.maxprograms.swordfish.models;
 
 import java.io.Serializable;
 
+import org.json.JSONObject;
+
 public class SourceFile implements Serializable, Comparable<SourceFile> {
 
 	private static final long serialVersionUID = -3726822493975520037L;
 	private String file;
 	private String type;
 	private String encoding;
-	
+
 	public SourceFile(String file, String type, String encoding) {
 		this.file = file;
 		this.type = type;
@@ -54,14 +56,22 @@ public class SourceFile implements Serializable, Comparable<SourceFile> {
 	}
 
 	public void setEncoding(String encoding) {
-		this.encoding = encoding;	
+		this.encoding = encoding;
+	}
+
+	public JSONObject toJSON() {
+		JSONObject result = new JSONObject();
+		result.put("file", file);
+		result.put("type", type);
+		result.put("encoding", encoding);
+		return result;
 	}
 
 	@Override
 	public int compareTo(SourceFile o) {
 		return file.compareTo(o.getFile());
-	}	
-	
+	}
+
 	@Override
 	public boolean equals(Object obj) {
 		if (!(obj instanceof SourceFile)) {

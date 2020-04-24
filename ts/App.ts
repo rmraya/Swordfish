@@ -42,6 +42,10 @@ var verticalPadding: number = 40;
 var currentDefaults: Rectangle;
 var currentPreferences: any;
 var currentTheme: string;
+var currentStatus: any;
+
+let defaultSrcLang: string;
+let defaultTgtLang: string;
 
 var saved: boolean = true;
 var stopping: boolean = false;
@@ -117,7 +121,7 @@ app.on('ready', () => {
         if (currentDefaults) {
             mainWindow.setBounds(currentDefaults);
         }
-        mainWindow.show();    
+        mainWindow.show();
     });
     checkUpdates(true);
 });
@@ -283,7 +287,9 @@ function saveDefaults(): void {
 }
 
 function loadPreferences(): void {
-    currentPreferences = { theme: 'system' };
+    currentPreferences = { theme: 'system', srcLang: 'none', tgtLang: 'none' };
+    defaultSrcLang = 'none';
+    defaultTgtLang = 'none';
     if (existsSync(appHome + 'preferences.json')) {
         try {
             var data: Buffer = readFileSync(appHome + 'preferences.json');
@@ -309,6 +315,12 @@ function loadPreferences(): void {
         currentTheme = app.getAppPath() + '/css/light.css';
         nativeTheme.themeSource = 'light';
     }
+    if (currentPreferences.srcLang) {
+        defaultSrcLang = currentPreferences.srcLang;
+    }
+    if (currentPreferences.tgtLang) {
+        defaultTgtLang = currentPreferences.tgtLang;
+    }
 }
 
 function savePreferences(): void {
@@ -318,7 +330,13 @@ function savePreferences(): void {
 
 ipcMain.on('save-preferences', (event, arg) => {
     settingsWindow.close();
-    currentPreferences.theme = arg.theme;
+    currentPreferences = arg;
+    if (currentPreferences.srcLang) {
+        defaultSrcLang = currentPreferences.srcLang;
+    }
+    if (currentPreferences.tgtLang) {
+        defaultTgtLang = currentPreferences.tgtLang;
+    }
     savePreferences();
 });
 
@@ -374,10 +392,9 @@ function addProject() {
     addProjectWindow = new BrowserWindow({
         parent: mainWindow,
         width: getWidth('addProjectWindow'),
-        // height: getHeight('addProjectWindow'),
         minimizable: false,
         maximizable: false,
-        resizable: false,
+        // resizable: false,
         useContentSize: true,
         show: false,
         icon: './icons/icon.png',
@@ -390,8 +407,9 @@ function addProject() {
     addProjectWindow.once('ready-to-show', (event: IpcMainEvent) => {
         event.sender.send('get-height');
         addProjectWindow.show();
+        addProjectWindow.webContents.openDevTools();
     });
- 
+
 }
 
 ipcMain.on('add-project-height', (event, arg) => {
@@ -399,6 +417,134 @@ ipcMain.on('add-project-height', (event, arg) => {
     rect.height = arg.height + verticalPadding;
     addProjectWindow.setBounds(rect);
 });
+
+ipcMain.on('get-languages', (event) => {
+    getLanguages(event);
+});
+
+ipcMain.on('select-source-files', (event) => {
+    selectSourceFiles(event);
+})
+
+function selectSourceFiles(event: IpcMainEvent): void {
+    dialog.showOpenDialog({
+        properties: ['openFile', 'multiSelections'],
+        filters: [
+            { name: 'Any File', extensions: ['*'] },
+            { name: 'Adobe InDesign Interchange', extensions: ['inx'] },
+            { name: 'Adobe InDesign IDML', extensions: ['idml'] },
+            { name: 'DITA Map', extensions: ['ditamap', 'dita', 'xml'] },
+            { name: 'HTML Page', extensions: ['html', 'htm'] },
+            { name: 'JavaScript', extensions: ['js'] },
+            { name: 'Java Properties', extensions: ['properties'] },
+            { name: 'MIF (Maker Interchange Format)', extensions: ['mif'] },
+            { name: 'Microsoft Office 2007 Document', extensions: ['docx', 'xlsx', 'pptx'] },
+            { name: 'OpenOffice 1.x Document', extensions: ['sxw', 'sxc', 'sxi', 'sxd'] },
+            { name: 'OpenOffice 2.x Document', extensions: ['odt', 'ods', 'odp', 'odg'] },
+            { name: 'Plain Text', extensions: ['txt'] },
+            { name: 'PO (Portable Objects)', extensions: ['po', 'pot'] },
+            { name: 'RC (Windows C/C++ Resources)', extensions: ['rc'] },
+            { name: 'ResX (Windows .NET Resources)', extensions: ['resx'] },
+            { name: 'SDLXLIFF Document', extensions: ['sdlxliff'] },
+            { name: 'SVG (Scalable Vector Graphics)', extensions: ['svg'] },
+            { name: 'Trados Studio Package', extensions: ['sdlppx'] },
+            { name: 'TS (Qt Linguist translation source)', extensions: ['ts'] },
+            { name: 'TXML Document', extensions: ['txml'] },
+            { name: 'Visio XML Drawing', extensions: ['vsdx'] },
+            { name: 'WPML XLIFF', extensions: ['xliff'] },
+            { name: 'XML Document', extensions: ['xml'] }
+        ]
+    }).then((value) => {
+        if (!value.canceled) {
+            getFileType(event, value.filePaths);
+        }
+    }).catch((error) => {
+        console.log(error);
+    });
+}
+
+function getFileType(event: IpcMainEvent, files: string[]): void {
+    sendRequest('/services/getFileTypes', { files: files },
+        function success(data: any) {
+            event.sender.send('add-source-files', data);
+        },
+        function error(reason: string) {
+            dialog.showErrorBox('Error', reason);
+        }
+    );
+}
+
+function getLanguages(event: IpcMainEvent): void {
+    sendRequest('/services/getLanguages', {},
+        function success(data: any) {
+            data.srcLang = defaultSrcLang;
+            data.tgtLang = defaultTgtLang;
+            event.sender.send('set-languages', data);
+        },
+        function error(reason: string) {
+            dialog.showErrorBox('Error', reason);
+        }
+    );
+}
+
+ipcMain.on('create-project', (event, arg) => {
+    console.log(JSON.stringify(arg));
+    addProjectWindow.close();
+    contents.send('start-waiting');
+    contents.send('set-status', 'Creating project');
+    sendRequest('/projects/create', arg,
+        function success(data: any) {
+            if (data.status !== SUCCESS) {
+                dialog.showErrorBox('Error', data.reason);
+            }
+            currentStatus = data;
+            contents.send('end-waiting');
+            contents.send('set-status', '');
+            /*
+            let processId: string = data.process;
+            var intervalObject = setInterval(function () {
+                if (currentStatus.status === COMPLETED) {
+                    contents.send('end-waiting');
+                    clearInterval(intervalObject);
+                    // TODO
+                    return;
+                } else if (currentStatus.status === PROCESSING) {
+                    // it's OK, keep waiting
+                } else if (currentStatus.status === ERROR) {
+                    contents.send('end-waiting');
+                    contents.send('set-status', '');
+                    clearInterval(intervalObject);
+                    dialog.showErrorBox('Error', currentStatus.reason);
+                    return;
+                } else if (currentStatus.status === SUCCESS) {
+                    // ignore status from 'openFile'
+                } else {
+                    contents.send('end-waiting');
+                    clearInterval(intervalObject);
+                    dialog.showErrorBox('Error', 'Unknown error processing files');
+                    return;
+                }
+                getCreationProgress(processId);
+            }, 500);
+            */
+        },
+        function error(reason: string) {
+            dialog.showErrorBox('Error', reason);
+        }
+    );
+});
+
+function getCreationProgress(processId: string): void {
+    sendRequest('/projects/status', { process: processId },
+        function success(data: any) {
+            currentStatus = data;
+        },
+        function error(reason: string) {
+            currentStatus = ERROR;
+            dialog.showErrorBox('Error', reason);
+        }
+    );
+}
 
 function viewMemories(): void {
     contents.send('view-memories');
@@ -428,7 +574,7 @@ function addMemory() {
     addMemoryWindow.once('ready-to-show', (event: IpcMainEvent) => {
         event.sender.send('get-height');
         addMemoryWindow.show();
-    });    
+    });
 }
 
 ipcMain.on('add-memory-height', (event, arg) => {
@@ -517,7 +663,7 @@ function showAbout() {
         event.sender.send('get-height');
         aboutWindow.show();
     });
-    
+
 }
 
 ipcMain.on('about-height', (event, arg) => {
@@ -635,12 +781,12 @@ function showLicenses() {
     licensesWindow.once('ready-to-show', (event: IpcMainEvent) => {
         event.sender.send('get-height');
         licensesWindow.show();
-    });    
+    });
 }
 
 ipcMain.on('licenses-height', (event, arg) => {
     let rect: Rectangle = licensesWindow.getBounds();
-    rect.height = arg.height + verticalPadding; 
+    rect.height = arg.height + verticalPadding;
     licensesWindow.setBounds(rect);
 });
 
@@ -715,9 +861,9 @@ function getWidth(window: string): number {
             switch (window) {
                 case 'aboutWindow': { return 495; }
                 case 'licensesWindow': { return 430; }
-                case 'settingsWindow': { return 400; }
+                case 'settingsWindow': { return 600; }
                 case 'addMemoryWindow': { return 450; }
-                case 'addProjectWindow': { return 750; }
+                case 'addProjectWindow': { return 800; }
             }
             break;
         }
@@ -725,9 +871,9 @@ function getWidth(window: string): number {
             switch (window) {
                 case 'aboutWindow': { return 495; }
                 case 'licensesWindow': { return 430; }
-                case 'settingsWindow': { return 400; }
+                case 'settingsWindow': { return 600; }
                 case 'addMemoryWindow': { return 450; }
-                case 'addProjectWindow': { return 750; }
+                case 'addProjectWindow': { return 800; }
             }
             break;
         }
@@ -735,9 +881,9 @@ function getWidth(window: string): number {
             switch (window) {
                 case 'aboutWindow': { return 495; }
                 case 'licensesWindow': { return 430; }
-                case 'settingsWindow': { return 400; }
+                case 'settingsWindow': { return 600; }
                 case 'addMemoryWindow': { return 450; }
-                case 'addProjectWindow': { return 750; }
+                case 'addProjectWindow': { return 800; }
             }
             break;
         }
