@@ -17,21 +17,21 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 *****************************************************************************/
 
-var _am = require('electron');
-
 class AddMemory {
 
+    electron = require('electron');
+
     constructor() {
-        _am.ipcRenderer.send('get-theme');
-        _am.ipcRenderer.on('set-theme', (event, arg) => {
+        this.electron.ipcRenderer.send('get-theme');
+        this.electron.ipcRenderer.on('set-theme', (event, arg) => {
             (document.getElementById('theme') as HTMLLinkElement).href = arg;
         });
-        _am.ipcRenderer.send('get-clients');
-        _am.ipcRenderer.on('set-clients', (event, arg) => {
+        this.electron.ipcRenderer.send('get-clients');
+        this.electron.ipcRenderer.on('set-clients', (event, arg) => {
             this.setClients(arg);
         });
-        _am.ipcRenderer.send('get-subjects');
-        _am.ipcRenderer.on('set-subjects', (event, arg) => {
+        this.electron.ipcRenderer.send('get-subjects');
+        this.electron.ipcRenderer.on('set-subjects', (event, arg) => {
             this.setSubjects(arg);
         });
         document.addEventListener('keydown', (event) => {
@@ -42,9 +42,9 @@ class AddMemory {
         document.getElementById('typeSelect').addEventListener("change", () => {
             this.typeChanged();
         });
-        _am.ipcRenderer.on('get-height', () => {
+        this.electron.ipcRenderer.on('get-height', () => {
             let body: HTMLBodyElement = document.getElementById('body') as HTMLBodyElement;
-            _am.ipcRenderer.send('add-memory-height', { width: body.clientWidth, height: body.clientHeight });
+            this.electron.ipcRenderer.send('add-memory-height', { width: body.clientWidth, height: body.clientHeight });
         });
     }
 

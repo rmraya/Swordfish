@@ -16,13 +16,14 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 *****************************************************************************/
-var _l = require('electron');
 
 class Licenses {
 
+    electron = require('electron');
+
     constructor() {
-        _l.ipcRenderer.send('get-theme');
-        _l.ipcRenderer.on('set-theme', (event, arg) => {
+        this.electron.ipcRenderer.send('get-theme');
+        this.electron.ipcRenderer.on('set-theme', (event, arg) => {
             (document.getElementById('theme') as HTMLLinkElement).href = arg;
         });
         document.addEventListener('keydown', (event) => {
@@ -60,14 +61,14 @@ class Licenses {
         document.getElementById('DTDParser').addEventListener('click', () => {
             this.openLicense('DTDParser');
         });
-        _l.ipcRenderer.on('get-height', () => {
+        this.electron.ipcRenderer.on('get-height', () => {
             let body: HTMLBodyElement = document.getElementById('body') as HTMLBodyElement;
-            _l.ipcRenderer.send('licenses-height', { width: body.clientWidth, height: body.clientHeight });
+            this.electron.ipcRenderer.send('licenses-height', { width: body.clientWidth, height: body.clientHeight });
         });
     }
 
     openLicense(type: string) {
-        _l.ipcRenderer.send('open-license', { type: type });
+        this.electron.ipcRenderer.send('open-license', { type: type });
     }
 }
 

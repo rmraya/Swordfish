@@ -18,30 +18,30 @@ SOFTWARE.
 *****************************************************************************/
 
 
-var _b = require('electron');
-
 class About {
 
+    electron = require('electron');
+
     constructor() {
-        _b.ipcRenderer.send('get-theme');
-        _b.ipcRenderer.send('get-version');
-        _b.ipcRenderer.on('set-theme', (event, arg) => {
+        this.electron.ipcRenderer.send('get-theme');
+        this.electron.ipcRenderer.send('get-version');
+        this.electron.ipcRenderer.on('set-theme', (event, arg) => {
             (document.getElementById('theme') as HTMLLinkElement).href = arg;
         });
-        _b.ipcRenderer.on('set-version', (event, arg) => {
+        this.electron.ipcRenderer.on('set-version', (event, arg) => {
             document.getElementById('version').innerHTML = arg;
         });
         document.getElementById('licensesButton').addEventListener('click', () => { 
-            _b.ipcRenderer.send('licenses-clicked'); 
+            this.electron.ipcRenderer.send('licenses-clicked'); 
         });
         document.addEventListener('keydown', (event) => {
             if (event.key === 'Escape') {
                 window.close();
             }
         });
-        _b.ipcRenderer.on('get-height', () => {
+        this.electron.ipcRenderer.on('get-height', () => {
             let body: HTMLBodyElement = document.getElementById('body') as HTMLBodyElement;
-            _b.ipcRenderer.send('about-height', { width: body.clientWidth, height: body.clientHeight });
+            this.electron.ipcRenderer.send('about-height', { width: body.clientWidth, height: body.clientHeight });
         });
     }
 

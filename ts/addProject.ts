@@ -17,37 +17,36 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 *****************************************************************************/
 
-var _ap = require('electron');
-
 class AddProject {
 
+    electron = require('electron');
     addedFiles: Map<number, any>;
 
     constructor() {
         this.addedFiles = new Map<number, any>();
-        _ap.ipcRenderer.send('get-theme');
-        _ap.ipcRenderer.on('set-theme', (event, arg) => {
+        this.electron.ipcRenderer.send('get-theme');
+        this.electron.ipcRenderer.on('set-theme', (event, arg) => {
             (document.getElementById('theme') as HTMLLinkElement).href = arg;
         });
-        _ap.ipcRenderer.send('get-clients');
-        _ap.ipcRenderer.on('set-clients', (event, arg) => {
+        this.electron.ipcRenderer.send('get-clients');
+        this.electron.ipcRenderer.on('set-clients', (event, arg) => {
             this.setClients(arg);
         });
-        _ap.ipcRenderer.send('get-subjects');
-        _ap.ipcRenderer.on('set-subjects', (event, arg) => {
+        this.electron.ipcRenderer.send('get-subjects');
+        this.electron.ipcRenderer.on('set-subjects', (event, arg) => {
             this.setSubjects(arg);
         });
-        _ap.ipcRenderer.send('get-languages');
-        _ap.ipcRenderer.on('set-languages', (event, arg) => {
+        this.electron.ipcRenderer.send('get-languages');
+        this.electron.ipcRenderer.on('set-languages', (event, arg) => {
             this.setLanguages(arg);
         });
-        _ap.ipcRenderer.on('add-source-files', (event, arg) => {
+        this.electron.ipcRenderer.on('add-source-files', (event, arg) => {
             this.addFiles(arg);
         });
-        _ap.ipcRenderer.on('get-height', () => {
+        this.electron.ipcRenderer.on('get-height', () => {
             let body: HTMLBodyElement = document.getElementById('body') as HTMLBodyElement;
             document.getElementById('tablePanel').style.width = body.clientWidth + 'px';
-            _ap.ipcRenderer.send('add-project-height', { width: body.clientWidth, height: body.clientHeight });
+            this.electron.ipcRenderer.send('add-project-height', { width: body.clientWidth, height: body.clientHeight });
         });
         document.addEventListener('keydown', (event) => {
             if (event.key === 'Escape') {
@@ -55,7 +54,7 @@ class AddProject {
             }
         });
         document.getElementById('addFilesButton').addEventListener('click', () => {
-            _ap.ipcRenderer.send('select-source-files');
+            this.electron.ipcRenderer.send('select-source-files');
             document.getElementById('addFilesButton').blur();
         });
         document.getElementById('addFolderButton').addEventListener('click', () => {
@@ -113,7 +112,7 @@ class AddProject {
             tgtLang: tgtLang,
             dueDate: dueDate
         }
-        _ap.ipcRenderer.send('create-project', params);
+        this.electron.ipcRenderer.send('create-project', params);
     }
 
     setClients(arg: any): void {

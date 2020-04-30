@@ -17,20 +17,20 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 *****************************************************************************/
 
-const _p = require("electron");
-
 class Preferences {
 
+    electron = require('electron');
+
     constructor() {
-        _p.ipcRenderer.send('get-theme');
-        _p.ipcRenderer.send('get-languages');
-        _p.ipcRenderer.on('set-languages', (event, arg) => {
+        this.electron.ipcRenderer.send('get-theme');
+        this.electron.ipcRenderer.send('get-languages');
+        this.electron.ipcRenderer.on('set-languages', (event, arg) => {
             this.setLanguages(arg);
         });
-        _p.ipcRenderer.on('set-theme', (event, arg) => {
+        this.electron.ipcRenderer.on('set-theme', (event, arg) => {
             (document.getElementById('theme') as HTMLLinkElement).href = arg;
         });
-        _p.ipcRenderer.on('set-preferences', (event, arg) => {
+        this.electron.ipcRenderer.on('set-preferences', (event, arg) => {
             (document.getElementById('themeColor') as HTMLSelectElement).value = arg.theme;
             (document.getElementById('srcLangSelect') as HTMLSelectElement).value = arg.srcLang;
             (document.getElementById('tgtLangSelect') as HTMLSelectElement).value = arg.tgtLang;
@@ -46,9 +46,9 @@ class Preferences {
         document.getElementById('save').addEventListener('click', () => {
             this.savePreferences();
         });
-        _p.ipcRenderer.on('get-height', () => {
+        this.electron.ipcRenderer.on('get-height', () => {
             let body: HTMLBodyElement = document.getElementById('body') as HTMLBodyElement;
-            _p.ipcRenderer.send('settings-height', { width: body.clientWidth, height: body.clientHeight });
+            this.electron.ipcRenderer.send('settings-height', { width: body.clientWidth, height: body.clientHeight });
         });
     }
 
@@ -61,7 +61,7 @@ class Preferences {
         }
         document.getElementById('srcLangSelect').innerHTML = languageOptions;
         document.getElementById('tgtLangSelect').innerHTML = languageOptions;
-        _p.ipcRenderer.send('get-preferences');
+        this.electron.ipcRenderer.send('get-preferences');
     }
 
     savePreferences() {
@@ -70,7 +70,7 @@ class Preferences {
             tgtLang: (document.getElementById('tgtLangSelect') as HTMLSelectElement).value,
             theme: (document.getElementById('themeColor') as HTMLSelectElement).value
         }
-        _p.ipcRenderer.send('save-preferences', prefs);
+        this.electron.ipcRenderer.send('save-preferences', prefs);
     }
 }
 
