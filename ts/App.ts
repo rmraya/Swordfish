@@ -37,9 +37,12 @@ class Swordfish {
 
     static contents: webContents;
     javapath: string = Swordfish.path.join(app.getAppPath(), 'bin', 'java');
-    classpath: string = Swordfish.path.join('lib', 'h2-1.4.200.jar') + Swordfish.path.separator + Swordfish.path.join('lib', 'mariadb-java-client-2.4.3.jar');
+    classpath: string = Swordfish.path.join('lib', 'h2-1.4.200.jar')
+        + Swordfish.path.separator
+        + Swordfish.path.join('lib', 'mariadb-java-client-2.4.3.jar');
     appHome: string = Swordfish.path.join(app.getPath('appData'), app.name);
-    verticalPadding: number = 40;
+    static iconPath: string = Swordfish.path.join(app.getAppPath(), 'icons', 'icon.png');
+    verticalPadding: number = 46;
 
     static currentDefaults: Rectangle;
     currentPreferences: any;
@@ -80,11 +83,10 @@ class Swordfish {
             }
         }
 
-        // TODO remove H@ and MariaDB driver or add their licenses 
+        // TODO remove H2 and MariaDB driver or add their licenses 
 
         if (process.platform == 'win32') {
             this.javapath = Swordfish.path.join(app.getAppPath(), 'bin', 'java.exe');
-            this.verticalPadding = 50;
         }
 
         if (!existsSync(this.appHome)) {
@@ -155,29 +157,12 @@ class Swordfish {
         });
 
         ipcMain.on('get-projects', (event, arg) => {
-            Swordfish.contents.send('start-waiting');
-            Swordfish.contents.send('set-status', 'Loading projects');
-            this.sendRequest('/projects/list', {},
-                function success(json: any) {
-                    Swordfish.contents.send('set-status', '');
-                    Swordfish.contents.send('end-waiting');
-                    if (json.status === this.SUCCESS) {
-                        event.sender.send('set-projects', json.projects);
-                    } else {
-                        dialog.showMessageBox({ type: 'error', message: json.reason });
-                    }
-                },
-                function error(data: string) {
-                    Swordfish.contents.send('set-status', '');
-                    dialog.showMessageBox({ type: 'error', message: data });
-                }
-            );
+            this.getProjects(event);
         });
 
         ipcMain.on('show-add-project', () => {
             Swordfish.addProject();
         });
-
 
         ipcMain.on('get-theme', (event, arg) => {
             event.sender.send('set-theme', this.currentTheme);
@@ -226,50 +211,7 @@ class Swordfish {
         });
 
         ipcMain.on('create-project', (event, arg) => {
-            console.log(JSON.stringify(arg));
-            Swordfish.addProjectWindow.close();
-            Swordfish.contents.send('start-waiting');
-            Swordfish.contents.send('set-status', 'Creating project');
-            this.sendRequest('/projects/create', arg,
-                function success(data: any) {
-                    if (data.status !== this.SUCCESS) {
-                        dialog.showErrorBox('Error', data.reason);
-                    }
-                    this.currentStatus = data;
-                    Swordfish.contents.send('end-waiting');
-                    Swordfish.contents.send('set-status', '');
-                    /*
-                    let processId: string = data.process;
-                    var intervalObject = setInterval(() => {
-                        if (currentStatus.status === COMPLETED) {
-                            contents.send('end-waiting');
-                            clearInterval(intervalObject);
-                            // TODO
-                            return;
-                        } else if (currentStatus.status === PROCESSING) {
-                            // it's OK, keep waiting
-                        } else if (currentStatus.status === ERROR) {
-                            contents.send('end-waiting');
-                            contents.send('set-status', '');
-                            clearInterval(intervalObject);
-                            dialog.showErrorBox('Error', currentStatus.reason);
-                            return;
-                        } else if (currentStatus.status === SUCCESS) {
-                            // ignore status from 'openFile'
-                        } else {
-                            contents.send('end-waiting');
-                            clearInterval(intervalObject);
-                            dialog.showErrorBox('Error', 'Unknown error processing files');
-                            return;
-                        }
-                        getCreationProgress(processId);
-                    }, 500);
-                    */
-                },
-                function error(reason: string) {
-                    dialog.showErrorBox('Error', reason);
-                }
-            );
+            this.createProject(arg);
         });
 
         ipcMain.on('show-add-memory', () => {
@@ -305,72 +247,18 @@ class Swordfish {
         });
 
         ipcMain.on('open-license', function (event, arg: any) {
-            var licenseFile = '';
-            var title = '';
-            switch (arg.type) {
-                case 'Swordfish':
-                    licenseFile = 'file://' + app.getAppPath() + '/html/licenses/license.txt'
-                    title = 'Swordfish License';
-                    break;
-                case "electron":
-                    licenseFile = 'file://' + app.getAppPath() + '/html/licenses/electron.txt'
-                    title = 'MIT License';
-                    break;
-                case "TypeScript":
-                case "MapDB":
-                    licenseFile = 'file://' + app.getAppPath() + '/html/licenses/Apache2.0.html'
-                    title = 'Apache 2.0';
-                    break;
-                case "Java":
-                    licenseFile = 'file://' + app.getAppPath() + '/html/licenses/java.html'
-                    title = 'GPL2 with Classpath Exception';
-                    break;
-                case "OpenXLIFF":
-                case "TMEngine":
-                    licenseFile = 'file://' + app.getAppPath() + '/html/licenses/EclipsePublicLicense1.0.html';
-                    title = 'Eclipse Public License 1.0';
-                    break;
-                case "JSON":
-                    licenseFile = 'file://' + app.getAppPath() + '/html/licenses/json.txt'
-                    title = 'JSON.org License';
-                    break;
-                case "jsoup":
-                    licenseFile = 'file://' + app.getAppPath() + '/html/licenses/jsoup.txt'
-                    title = 'MIT License';
-                    break;
-                case "DTDParser":
-                    licenseFile = 'file://' + app.getAppPath() + '/html/licenses/LGPL2.1.txt'
-                    title = 'LGPL 2.1';
-                    break;
-                default:
-                    dialog.showErrorBox('Error', 'Unknow license');
-                    return;
-            }
-            var licenseWindow = new BrowserWindow({
-                parent: Swordfish.mainWindow,
-                width: 680,
-                height: 400,
-                show: false,
-                title: title,
-                icon: './icons/icon.png',
-                webPreferences: {
-                    nodeIntegration: true
-                }
-            });
-            licenseWindow.setMenu(null);
-            licenseWindow.loadURL(licenseFile);
-            licenseWindow.show();
+            this.openLicense(arg.type);
         });
 
     }
 
     static createWindow(): void {
-        Swordfish.mainWindow = new BrowserWindow({
+        this.mainWindow = new BrowserWindow({
             title: app.name,
-            width: Swordfish.currentDefaults.width,
-            height: Swordfish.currentDefaults.height,
-            x: Swordfish.currentDefaults.x,
-            y: Swordfish.currentDefaults.y,
+            width: this.currentDefaults.width,
+            height: this.currentDefaults.height,
+            x: this.currentDefaults.x,
+            y: this.currentDefaults.y,
             useContentSize: true,
             webPreferences: {
                 nodeIntegration: true
@@ -378,45 +266,45 @@ class Swordfish {
             show: false,
             icon: 'icons/icon.png'
         });
-        Swordfish.contents = Swordfish.mainWindow.webContents;
+        this.contents = this.mainWindow.webContents;
         var fileMenu: Menu = Menu.buildFromTemplate([
         ]);
         var editMenu: Menu = Menu.buildFromTemplate([
-            { label: 'Undo', accelerator: 'CmdOrCtrl+Z', click: () => { Swordfish.contents.undo(); } },
+            { label: 'Undo', accelerator: 'CmdOrCtrl+Z', click: () => { this.contents.undo(); } },
             new MenuItem({ type: 'separator' }),
-            { label: 'Cut', accelerator: 'CmdOrCtrl+X', click: () => { Swordfish.contents.cut(); } },
-            { label: 'Copy', accelerator: 'CmdOrCtrl+C', click: () => { Swordfish.contents.copy(); } },
-            { label: 'Paste', accelerator: 'CmdOrCtrl+V', click: () => { Swordfish.contents.paste(); } },
-            { label: 'Select All', accelerator: 'CmdOrCtrl+A', click: () => { Swordfish.contents.selectAll(); } },
+            { label: 'Cut', accelerator: 'CmdOrCtrl+X', click: () => { this.contents.cut(); } },
+            { label: 'Copy', accelerator: 'CmdOrCtrl+C', click: () => { this.contents.copy(); } },
+            { label: 'Paste', accelerator: 'CmdOrCtrl+V', click: () => { this.contents.paste(); } },
+            { label: 'Select All', accelerator: 'CmdOrCtrl+A', click: () => { this.contents.selectAll(); } },
             new MenuItem({ type: 'separator' }),
-            { label: 'Confirm Edit', accelerator: 'Alt+Enter', click: () => { Swordfish.saveEdits(); } },
-            { label: 'Cancel Edit', accelerator: 'Esc', click: () => { Swordfish.cancelEdit(); } },
+            { label: 'Confirm Edit', accelerator: 'Alt+Enter', click: () => { this.saveEdits(); } },
+            { label: 'Cancel Edit', accelerator: 'Esc', click: () => { this.cancelEdit(); } },
             new MenuItem({ type: 'separator' }),
-            { label: 'Replace Text...', accelerator: 'CmdOrCtrl+F', click: () => { Swordfish.replaceText(); } }
+            { label: 'Replace Text...', accelerator: 'CmdOrCtrl+F', click: () => { this.replaceText(); } }
         ]);
         var viewMenu: Menu = Menu.buildFromTemplate([
-            { label: 'Projects', accelerator: 'CmdOrCtrl+Alt+1', click: () => { Swordfish.viewProjects(); } },
-            { label: 'Memories', accelerator: 'CmdOrCtrl+Alt+2', click: () => { Swordfish.viewMemories(); } },
-            { label: 'Glossaries', accelerator: 'CmdOrCtrl+Alt+3', click: () => { Swordfish.viewGlossaries(); } },
+            { label: 'Projects', accelerator: 'CmdOrCtrl+Alt+1', click: () => { this.viewProjects(); } },
+            { label: 'Memories', accelerator: 'CmdOrCtrl+Alt+2', click: () => { this.viewMemories(); } },
+            { label: 'Glossaries', accelerator: 'CmdOrCtrl+Alt+3', click: () => { this.viewGlossaries(); } },
             new MenuItem({ type: 'separator' }),
             new MenuItem({ label: 'Toggle Full Screen', role: 'togglefullscreen' }),
             new MenuItem({ label: 'Toggle Development Tools', accelerator: 'F12', role: 'toggleDevTools' }),
         ]);
         var projectsMenu: Menu = Menu.buildFromTemplate([
-            { label: 'Add Project', click: () => { Swordfish.addProject(); } }
+            { label: 'Add Project', click: () => { this.addProject(); } }
         ]);
         var memoriesMenu: Menu = Menu.buildFromTemplate([
-            { label: 'Add Memory', click: () => { Swordfish.addMemory(); } }
+            { label: 'Add Memory', click: () => { this.addMemory(); } }
         ]);
         var glossariesMenu: Menu = Menu.buildFromTemplate([]);
         var helpMenu: Menu = Menu.buildFromTemplate([
-            { label: 'Swordfish User Guide', accelerator: 'F1', click: () => { Swordfish.showHelp(); } },
+            { label: 'Swordfish User Guide', accelerator: 'F1', click: () => { this.showHelp(); } },
             new MenuItem({ type: 'separator' }),
-            { label: 'Check for Updates...', click: () => { Swordfish.checkUpdates(false); } },
-            { label: 'View Licenses', click: () => { Swordfish.showLicenses(); } },
+            { label: 'Check for Updates...', click: () => { this.checkUpdates(false); } },
+            { label: 'View Licenses', click: () => { this.showLicenses(); } },
             new MenuItem({ type: 'separator' }),
-            { label: 'Release History', click: () => { Swordfish.showReleaseHistory(); } },
-            { label: 'Support Group', click: () => { Swordfish.showSupportGroup(); } }
+            { label: 'Release History', click: () => { this.showReleaseHistory(); } },
+            { label: 'Support Group', click: () => { this.showSupportGroup(); } }
         ]);
         var template: MenuItem[] = [
             new MenuItem({ label: '&File', role: 'fileMenu', submenu: fileMenu }),
@@ -429,10 +317,10 @@ class Swordfish {
         ];
         if (process.platform === 'darwin') {
             var appleMenu: Menu = Menu.buildFromTemplate([
-                new MenuItem({ label: 'About...', click: () => { Swordfish.showAbout(); } }),
+                new MenuItem({ label: 'About...', click: () => { this.showAbout(); } }),
                 new MenuItem({
                     label: 'Preferences...', submenu: [
-                        { label: 'Settings', accelerator: 'Cmd+,', click: () => { Swordfish.showSettings(); } }
+                        { label: 'Settings', accelerator: 'Cmd+,', click: () => { this.showSettings(); } }
                     ]
                 }),
                 new MenuItem({ type: 'separator' }),
@@ -449,7 +337,7 @@ class Swordfish {
             var help: MenuItem = template.pop();
             template.push(new MenuItem({
                 label: '&Settings', submenu: [
-                    { label: 'Preferences', click: () => { Swordfish.showSettings(); } }
+                    { label: 'Preferences', click: () => { this.showSettings(); } }
                 ]
             }));
             template.push(help);
@@ -458,13 +346,13 @@ class Swordfish {
             template[0].submenu.append(new MenuItem({ type: 'separator' }));
             template[0].submenu.append(new MenuItem({ label: 'Exit', accelerator: 'Alt+F4', role: 'quit', click: () => { app.quit(); } }));
             template[7].submenu.append(new MenuItem({ type: 'separator' }));
-            template[7].submenu.append(new MenuItem({ label: 'About...', click: () => { Swordfish.showAbout(); } }));
+            template[7].submenu.append(new MenuItem({ label: 'About...', click: () => { this.showAbout(); } }));
         }
         if (process.platform === 'linux') {
             template[0].submenu.append(new MenuItem({ type: 'separator' }));
             template[0].submenu.append(new MenuItem({ label: 'Quit', accelerator: 'Ctrl+Q', role: 'quit', click: () => { app.quit(); } }));
             template[7].submenu.append(new MenuItem({ type: 'separator' }));
-            template[7].submenu.append(new MenuItem({ label: 'About...', click: () => { Swordfish.showAbout(); } }));
+            template[7].submenu.append(new MenuItem({ label: 'About...', click: () => { this.showAbout(); } }));
         }
         Menu.setApplicationMenu(Menu.buildFromTemplate(template));
     }
@@ -567,27 +455,93 @@ class Swordfish {
     }
 
     static addProject() {
-        Swordfish.addProjectWindow = new BrowserWindow({
-            parent: Swordfish.mainWindow,
+        this.addProjectWindow = new BrowserWindow({
+            parent: this.mainWindow,
             width: this.getWidth('addProjectWindow'),
             minimizable: false,
             maximizable: false,
-            // resizable: false,
+            resizable: false,
             useContentSize: true,
             show: false,
-            icon: './icons/icon.png',
+            icon: this.iconPath,
             webPreferences: {
                 nodeIntegration: true
             }
         });
-        Swordfish.addProjectWindow.setMenu(null);
-        Swordfish.addProjectWindow.loadURL('file://' + app.getAppPath() + '/html/addProject.html');
-        Swordfish.addProjectWindow.once('ready-to-show', (event: IpcMainEvent) => {
+        this.addProjectWindow.setMenu(null);
+        this.addProjectWindow.loadURL('file://' + app.getAppPath() + '/html/addProject.html');
+        this.addProjectWindow.once('ready-to-show', (event: IpcMainEvent) => {
             event.sender.send('get-height');
-            Swordfish.addProjectWindow.show();
-            Swordfish.addProjectWindow.webContents.openDevTools();
+            this.addProjectWindow.show();
+            // this.addProjectWindow.webContents.openDevTools();
         });
+    }
 
+    createProject(arg: any): void {
+        console.log(JSON.stringify(arg));
+        Swordfish.addProjectWindow.close();
+        Swordfish.contents.send('start-waiting');
+        Swordfish.contents.send('set-status', 'Creating project');
+        this.sendRequest('/projects/create', arg,
+            function success(data: any) {
+                if (data.status !== this.SUCCESS) {
+                    dialog.showErrorBox('Error', data.reason);
+                }
+                this.currentStatus = data;
+                Swordfish.contents.send('end-waiting');
+                Swordfish.contents.send('set-status', '');
+                /*
+                let processId: string = data.process;
+                var intervalObject = setInterval(() => {
+                    if (currentStatus.status === COMPLETED) {
+                        contents.send('end-waiting');
+                        clearInterval(intervalObject);
+                        // TODO
+                        return;
+                    } else if (currentStatus.status === PROCESSING) {
+                        // it's OK, keep waiting
+                    } else if (currentStatus.status === ERROR) {
+                        contents.send('end-waiting');
+                        contents.send('set-status', '');
+                        clearInterval(intervalObject);
+                        dialog.showErrorBox('Error', currentStatus.reason);
+                        return;
+                    } else if (currentStatus.status === SUCCESS) {
+                        // ignore status from 'openFile'
+                    } else {
+                        contents.send('end-waiting');
+                        clearInterval(intervalObject);
+                        dialog.showErrorBox('Error', 'Unknown error processing files');
+                        return;
+                    }
+                    getCreationProgress(processId);
+                }, 500);
+                */
+            },
+            function error(reason: string) {
+                dialog.showErrorBox('Error', reason);
+            }
+        );
+    }
+
+    getProjects(event: IpcMainEvent): void {
+        Swordfish.contents.send('start-waiting');
+        Swordfish.contents.send('set-status', 'Loading projects');
+        this.sendRequest('/projects/list', {},
+            function success(json: any) {
+                Swordfish.contents.send('set-status', '');
+                Swordfish.contents.send('end-waiting');
+                if (json.status === this.SUCCESS) {
+                    event.sender.send('set-projects', json.projects);
+                } else {
+                    dialog.showMessageBox({ type: 'error', message: json.reason });
+                }
+            },
+            function error(data: string) {
+                Swordfish.contents.send('set-status', '');
+                dialog.showMessageBox({ type: 'error', message: data });
+            }
+        );
     }
 
     selectSourceFiles(event: IpcMainEvent): void {
@@ -664,34 +618,34 @@ class Swordfish {
     }
 
     static viewMemories(): void {
-        Swordfish.contents.send('view-memories');
+        this.contents.send('view-memories');
     }
 
     static addMemory() {
-        Swordfish.addMemoryWindow = new BrowserWindow({
-            parent: Swordfish.mainWindow,
-            width: Swordfish.getWidth('addMemoryWindow'),
+        this.addMemoryWindow = new BrowserWindow({
+            parent: this.mainWindow,
+            width: this.getWidth('addMemoryWindow'),
             // height: getHeight('addMemoryWindow'),
             minimizable: false,
             maximizable: false,
             resizable: false,
             useContentSize: true,
             show: false,
-            icon: './icons/icon.png',
+            icon: this.iconPath,
             webPreferences: {
                 nodeIntegration: true
             }
         });
-        Swordfish.addMemoryWindow.setMenu(null);
-        Swordfish.addMemoryWindow.loadURL('file://' + app.getAppPath() + '/html/addMemory.html');
-        Swordfish.addMemoryWindow.once('ready-to-show', (event: IpcMainEvent) => {
+        this.addMemoryWindow.setMenu(null);
+        this.addMemoryWindow.loadURL('file://' + app.getAppPath() + '/html/addMemory.html');
+        this.addMemoryWindow.once('ready-to-show', (event: IpcMainEvent) => {
             event.sender.send('get-height');
-            Swordfish.addMemoryWindow.show();
+            this.addMemoryWindow.show();
         });
     }
 
     static viewGlossaries(): void {
-        Swordfish.contents.send('view-glossaries');
+        this.contents.send('view-glossaries');
     }
 
     sendRequest(url: string, json: any, success: any, error: any) {
@@ -739,7 +693,7 @@ class Swordfish {
     }
 
     static showAbout(): void {
-        Swordfish.aboutWindow = new BrowserWindow({
+        this.aboutWindow = new BrowserWindow({
             parent: Swordfish.mainWindow,
             width: Swordfish.getWidth('aboutWindow'),
             minimizable: false,
@@ -747,64 +701,120 @@ class Swordfish {
             resizable: false,
             useContentSize: true,
             show: false,
-            icon: './icons/icon.png',
+            icon: this.iconPath,
             webPreferences: {
                 nodeIntegration: true
             }
         });
-        Swordfish.aboutWindow.setMenu(null);
-        Swordfish.aboutWindow.loadURL('file://' + app.getAppPath() + '/html/about.html');
-        Swordfish.aboutWindow.once('ready-to-show', (event: IpcMainEvent) => {
+        this.aboutWindow.setMenu(null);
+        this.aboutWindow.loadURL('file://' + app.getAppPath() + '/html/about.html');
+        this.aboutWindow.once('ready-to-show', (event: IpcMainEvent) => {
             event.sender.send('get-height');
-            Swordfish.aboutWindow.show();
+            this.aboutWindow.show();
         });
     }
 
+    static openLicense(type: string) {
+        var licenseFile = '';
+        var title = '';
+        switch (type) {
+            case 'Swordfish':
+                licenseFile = 'file://' + app.getAppPath() + '/html/licenses/license.txt'
+                title = 'Swordfish License';
+                break;
+            case "electron":
+                licenseFile = 'file://' + app.getAppPath() + '/html/licenses/electron.txt'
+                title = 'MIT License';
+                break;
+            case "TypeScript":
+            case "MapDB":
+                licenseFile = 'file://' + app.getAppPath() + '/html/licenses/Apache2.0.html'
+                title = 'Apache 2.0';
+                break;
+            case "Java":
+                licenseFile = 'file://' + app.getAppPath() + '/html/licenses/java.html'
+                title = 'GPL2 with Classpath Exception';
+                break;
+            case "OpenXLIFF":
+            case "TMEngine":
+                licenseFile = 'file://' + app.getAppPath() + '/html/licenses/EclipsePublicLicense1.0.html';
+                title = 'Eclipse Public License 1.0';
+                break;
+            case "JSON":
+                licenseFile = 'file://' + app.getAppPath() + '/html/licenses/json.txt'
+                title = 'JSON.org License';
+                break;
+            case "jsoup":
+                licenseFile = 'file://' + app.getAppPath() + '/html/licenses/jsoup.txt'
+                title = 'MIT License';
+                break;
+            case "DTDParser":
+                licenseFile = 'file://' + app.getAppPath() + '/html/licenses/LGPL2.1.txt'
+                title = 'LGPL 2.1';
+                break;
+            default:
+                dialog.showErrorBox('Error', 'Unknow license');
+                return;
+        }
+        var licenseWindow = new BrowserWindow({
+            parent: this.mainWindow,
+            width: 680,
+            height: 400,
+            show: false,
+            title: title,
+            icon: this.iconPath,
+            webPreferences: {
+                nodeIntegration: true
+            }
+        });
+        licenseWindow.setMenu(null);
+        licenseWindow.loadURL(licenseFile);
+        licenseWindow.show();
+    }
+
     static showSettings(): void {
-        Swordfish.settingsWindow = new BrowserWindow({
-            parent: Swordfish.mainWindow,
-            width: Swordfish.getWidth('settingsWindow'),
+        this.settingsWindow = new BrowserWindow({
+            parent: this.mainWindow,
+            width: this.getWidth('settingsWindow'),
             useContentSize: true,
             minimizable: false,
             maximizable: false,
             resizable: false,
             show: false,
-            icon: './icons/icon.png',
+            icon: this.iconPath,
             webPreferences: {
                 nodeIntegration: true
             }
         });
-        Swordfish.settingsWindow.setMenu(null);
-        Swordfish.settingsWindow.loadURL('file://' + app.getAppPath() + '/html/preferences.html');
-        Swordfish.settingsWindow.once('ready-to-show', (event: IpcMainEvent) => {
+        this.settingsWindow.setMenu(null);
+        this.settingsWindow.loadURL('file://' + app.getAppPath() + '/html/preferences.html');
+        this.settingsWindow.once('ready-to-show', (event: IpcMainEvent) => {
             event.sender.send('get-height');
-            Swordfish.settingsWindow.show();
+            this.settingsWindow.show();
         });
     }
 
     static showLicenses(): void {
-        Swordfish.licensesWindow = new BrowserWindow({
-            parent: Swordfish.mainWindow,
-            width: Swordfish.getWidth('licensesWindow'),
+        this.licensesWindow = new BrowserWindow({
+            parent: this.mainWindow,
+            width: this.getWidth('licensesWindow'),
             useContentSize: true,
             minimizable: false,
             maximizable: false,
             resizable: false,
             show: false,
-            icon: './icons/icon.png',
+            icon: this.iconPath,
             webPreferences: {
                 nodeIntegration: true
             }
         });
-        Swordfish.licensesWindow.setMenu(null);
-        Swordfish.licensesWindow.loadURL('file://' + app.getAppPath() + '/html/licenses.html');
-        Swordfish.licensesWindow.once('ready-to-show', (event: IpcMainEvent) => {
+        this.licensesWindow.setMenu(null);
+        this.licensesWindow.loadURL('file://' + app.getAppPath() + '/html/licenses.html');
+        this.licensesWindow.once('ready-to-show', (event: IpcMainEvent) => {
             event.sender.send('get-height');
-            Swordfish.licensesWindow.show();
+            this.licensesWindow.show();
         });
     }
-
-
 
     static showReleaseHistory(): void {
         shell.openExternal('https://www.maxprograms.com/products/swfishlog.html');
@@ -818,10 +828,8 @@ class Swordfish {
         Swordfish.contents.send('set-theme', this.currentTheme);
     }
 
-
-
     static checkUpdates(silent: boolean): void {
-        Swordfish.https.get('https://raw.githubusercontent.com/rmraya/Swordfish/master/package.json', (res: IncomingMessage) => {
+        this.https.get('https://raw.githubusercontent.com/rmraya/Swordfish/master/package.json', (res: IncomingMessage) => {
             if (res.statusCode === 200) {
                 let rawData = '';
                 res.on('data', (chunk: string) => {
@@ -831,14 +839,14 @@ class Swordfish {
                     try {
                         const parsedData = JSON.parse(rawData);
                         if (app.getVersion() !== parsedData.version) {
-                            dialog.showMessageBox(Swordfish.mainWindow, {
+                            dialog.showMessageBox(this.mainWindow, {
                                 type: 'info',
                                 title: 'Updates Available',
                                 message: 'Version ' + parsedData.version + ' is available'
                             });
                         } else {
                             if (!silent) {
-                                dialog.showMessageBox(Swordfish.mainWindow, {
+                                dialog.showMessageBox(this.mainWindow, {
                                     type: 'info',
                                     message: 'There are currently no updates available'
                                 });
