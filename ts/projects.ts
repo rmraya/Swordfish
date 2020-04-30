@@ -19,6 +19,8 @@ SOFTWARE.
 
 class ProjectsView {
 
+    electron = require('electron');
+
     container: HTMLDivElement;
     tableContainer: HTMLDivElement;
     projectsTable: HTMLTableElement;
@@ -94,7 +96,7 @@ class ProjectsView {
             this.setSizes()
         });
 
-        ipcRenderer.on('set-projects', (event, arg) => {
+        this.electron.ipcRenderer.on('set-projects', (event, arg) => {
             this.displayProjects(arg);
         })
 
@@ -111,7 +113,7 @@ class ProjectsView {
 
     addProject(): void {
         // TODO
-        ipcRenderer.send('show-add-project');
+        this.electron.ipcRenderer.send('show-add-project');
     }
 
     removeProject(): void {
@@ -127,7 +129,7 @@ class ProjectsView {
     }
 
     loadProjects(): void {
-        ipcRenderer.send('get-projects');
+        this.electron.ipcRenderer.send('get-projects');
     }
 
     displayProjects(projects: any[]) {

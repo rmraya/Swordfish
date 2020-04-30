@@ -19,6 +19,8 @@ SOFTWARE.
 
 class MemoriesView {
 
+    electron = require('electron');
+    
     container: HTMLDivElement;
 
     constructor(div: HTMLDivElement) {
@@ -57,7 +59,7 @@ class MemoriesView {
 
     addMemory(): void {
         // TODO
-        ipcRenderer.send('show-add-memory');
+        this.electron.ipcRenderer.send('show-add-memory');
     }
 
     removeMemory(): void {

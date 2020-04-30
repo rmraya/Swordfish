@@ -17,9 +17,11 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 *****************************************************************************/
 
-const { ipcRenderer } = require('electron');
+
 
 class Main {
+
+    electron = require('electron');
 
     labels: Map<String, HTMLAnchorElement>;
     tabs: Map<string, HTMLDivElement>;
@@ -79,31 +81,31 @@ class Main {
 
         this.selectTab('projects');
 
-        ipcRenderer.send('get-theme');
-        ipcRenderer.on('set-theme', (event, arg) => {
+        this.electron.ipcRenderer.send('get-theme');
+        this.electron.ipcRenderer.on('set-theme', (event, arg) => {
             (document.getElementById('theme') as HTMLLinkElement).href = arg;
         });
         window.addEventListener('resize', () => {
             this.resizePanels();
         });
-        ipcRenderer.on('view-projects', () => {
+        this.electron.ipcRenderer.on('view-projects', () => {
             this.selectTab('projects');
         });
-        ipcRenderer.on('view-memories', () => {
+        this.electron.ipcRenderer.on('view-memories', () => {
             this.selectTab('memories');
         });
-        ipcRenderer.on('view-glossaries', () => {
+        this.electron.ipcRenderer.on('view-glossaries', () => {
             this.selectTab('glossaries');
         });
-        ipcRenderer.on('start-waiting', () => {
+        this.electron.ipcRenderer.on('start-waiting', () => {
             document.getElementById('body').classList.add("wait");
         });
 
-        ipcRenderer.on('end-waiting', () => {
+        this.electron.ipcRenderer.on('end-waiting', () => {
             document.getElementById('body').classList.remove("wait");
         });
 
-        ipcRenderer.on('set-status', (event, arg) => {
+        this.electron.ipcRenderer.on('set-status', (event, arg) => {
             var status: HTMLDivElement = document.getElementById('status') as HTMLDivElement;
             status.innerHTML = arg;
             if (arg.length > 0) {
