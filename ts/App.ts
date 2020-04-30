@@ -247,7 +247,7 @@ class Swordfish {
         });
 
         ipcMain.on('open-license', function (event, arg: any) {
-            this.openLicense(arg.type);
+            Swordfish.openLicense(arg.type);
         });
 
     }
