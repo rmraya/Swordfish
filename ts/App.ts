@@ -40,17 +40,14 @@ class Swordfish {
     classpath: string = Swordfish.path.join('lib', 'h2-1.4.200.jar')
         + Swordfish.path.separator
         + Swordfish.path.join('lib', 'mariadb-java-client-2.4.3.jar');
-    appHome: string = Swordfish.path.join(app.getPath('appData'), app.name);
+    static appHome: string = Swordfish.path.join(app.getPath('appData'), app.name);
     static iconPath: string = Swordfish.path.join(app.getAppPath(), 'icons', 'icon.png');
     verticalPadding: number = 46;
 
     static currentDefaults: Rectangle;
-    currentPreferences: any;
-    currentTheme: string;
+    static currentPreferences: any = { theme: 'system', srcLang: 'none', tgtLang: 'none' }
+    static currentTheme: string = 'system';
     currentStatus: any;
-
-    defaultSrcLang: string;
-    defaultTgtLang: string;
 
     saved: boolean = true;
     stopping: boolean = false;
@@ -68,7 +65,7 @@ class Swordfish {
 
         console.log('javapath:  ' + this.javapath);
         console.log('classpath: ' + this.classpath);
-        console.log('appHome:   ' + this.appHome);
+        console.log('appHome:   ' + Swordfish.appHome);
 
         app.allowRendererProcessReuse = true;
         if (!app.requestSingleInstanceLock()) {
@@ -89,8 +86,8 @@ class Swordfish {
             this.javapath = Swordfish.path.join(app.getAppPath(), 'bin', 'java.exe');
         }
 
-        if (!existsSync(this.appHome)) {
-            mkdirSync(this.appHome, { recursive: true });
+        if (!existsSync(Swordfish.appHome)) {
+            mkdirSync(Swordfish.appHome, { recursive: true });
         }
 
         this.ls = spawn(this.javapath, ['-cp', this.classpath, '--module-path', 'lib', '-m', 'swordfish/com.maxprograms.swordfish.TmsServer', '-port', '8070', '-debug'], { cwd: app.getAppPath() });
@@ -116,7 +113,7 @@ class Swordfish {
         });
 
         this.loadDefaults();
-        this.loadPreferences();
+        Swordfish.loadPreferences();
 
         app.on('ready', () => {
             Swordfish.createWindow();
@@ -152,7 +149,7 @@ class Swordfish {
         }
 
         nativeTheme.on('updated', () => {
-            this.loadPreferences();
+            Swordfish.loadPreferences();
             this.setTheme();
         });
 
@@ -165,7 +162,7 @@ class Swordfish {
         });
 
         ipcMain.on('get-theme', (event, arg) => {
-            event.sender.send('set-theme', this.currentTheme);
+            event.sender.send('set-theme', Swordfish.currentTheme);
         });
 
         ipcMain.on('licenses-height', (event, arg) => {
@@ -176,14 +173,8 @@ class Swordfish {
 
         ipcMain.on('save-preferences', (event, arg) => {
             Swordfish.settingsWindow.close();
-            this.currentPreferences = arg;
-            if (this.currentPreferences.srcLang) {
-                this.defaultSrcLang = this.currentPreferences.srcLang;
-            }
-            if (this.currentPreferences.tgtLang) {
-                this.defaultTgtLang = this.currentPreferences.tgtLang;
-            }
-            this.savePreferences();
+            Swordfish.currentPreferences = arg;
+            Swordfish.savePreferences();
         });
 
         ipcMain.on('add-project-height', (event, arg) => {
@@ -243,7 +234,7 @@ class Swordfish {
         });
 
         ipcMain.on('get-preferences', (event, arg) => {
-            event.sender.send('set-preferences', this.currentPreferences);
+            event.sender.send('set-preferences', Swordfish.currentPreferences);
         });
 
         ipcMain.on('open-license', function (event, arg: any) {
@@ -388,13 +379,11 @@ class Swordfish {
         writeFileSync(defaultsFile, JSON.stringify(Swordfish.mainWindow.getBounds()));
     }
 
-    loadPreferences(): void {
-        this.currentPreferences = { theme: 'system', srcLang: 'none', tgtLang: 'none' };
-        this.defaultSrcLang = 'none';
-        this.defaultTgtLang = 'none';
-        if (existsSync(this.appHome + 'preferences.json')) {
+    static loadPreferences(): void {
+        let preferencesFile = this.path.join(this.appHome, 'preferences.json');
+        if (existsSync(preferencesFile)) {
             try {
-                var data: Buffer = readFileSync(this.appHome + 'preferences.json');
+                var data: Buffer = readFileSync(preferencesFile);
                 this.currentPreferences = JSON.parse(data.toString());
             } catch (err) {
                 console.log(err);
@@ -402,31 +391,26 @@ class Swordfish {
         }
         if (this.currentPreferences.theme === 'system') {
             if (nativeTheme.shouldUseDarkColors) {
-                this.currentTheme = app.getAppPath() + '/css/dark.css';
+                this.currentTheme = this.path.join(app.getAppPath(), 'css', 'dark.css');
                 nativeTheme.themeSource = 'dark';
             } else {
-                this.currentTheme = app.getAppPath() + '/css/light.css';
+                this.currentTheme = this.path.join(app.getAppPath(), 'css', 'light.css');
                 nativeTheme.themeSource = 'light';
             }
         }
         if (this.currentPreferences.theme === 'dark') {
-            this.currentTheme = app.getAppPath() + '/css/dark.css';
+            this.currentTheme = this.path.join(app.getAppPath(), 'css', 'dark.css');
             nativeTheme.themeSource = 'dark';
         }
         if (this.currentPreferences.theme === 'light') {
-            this.currentTheme = app.getAppPath() + '/css/light.css';
+            this.currentTheme = this.path.join(app.getAppPath(), 'css', 'light.css');
             nativeTheme.themeSource = 'light';
-        }
-        if (this.currentPreferences.srcLang) {
-            this.defaultSrcLang = this.currentPreferences.srcLang;
-        }
-        if (this.currentPreferences.tgtLang) {
-            this.defaultTgtLang = this.currentPreferences.tgtLang;
         }
     }
 
-    savePreferences(): void {
-        writeFileSync(this.appHome + 'preferences.json', JSON.stringify(this.currentPreferences));
+    static savePreferences(): void {
+        let preferencesFile = this.path.join(this.appHome, 'preferences.json');
+        writeFileSync(preferencesFile, JSON.stringify(this.currentPreferences));
         nativeTheme.themeSource = this.currentPreferences.theme;
     }
 
@@ -469,11 +453,10 @@ class Swordfish {
             }
         });
         this.addProjectWindow.setMenu(null);
-        this.addProjectWindow.loadURL('file://' + app.getAppPath() + '/html/addProject.html');
+        this.addProjectWindow.loadURL(this.path.join('file://', app.getAppPath(), 'html', 'addProject.html'));
         this.addProjectWindow.once('ready-to-show', (event: IpcMainEvent) => {
             event.sender.send('get-height');
             this.addProjectWindow.show();
-            // this.addProjectWindow.webContents.openDevTools();
         });
     }
 
@@ -595,8 +578,8 @@ class Swordfish {
     getLanguages(event: IpcMainEvent): void {
         this.sendRequest('/services/getLanguages', {},
             function success(data: any) {
-                data.srcLang = this.defaultSrcLang;
-                data.tgtLang = this.defaultTgtLang;
+                data.srcLang = Swordfish.currentPreferences.srcLang;
+                data.tgtLang = Swordfish.currentPreferences.tgtLang;
                 event.sender.send('set-languages', data);
             },
             function error(reason: string) {
@@ -625,7 +608,6 @@ class Swordfish {
         this.addMemoryWindow = new BrowserWindow({
             parent: this.mainWindow,
             width: this.getWidth('addMemoryWindow'),
-            // height: getHeight('addMemoryWindow'),
             minimizable: false,
             maximizable: false,
             resizable: false,
@@ -637,7 +619,7 @@ class Swordfish {
             }
         });
         this.addMemoryWindow.setMenu(null);
-        this.addMemoryWindow.loadURL('file://' + app.getAppPath() + '/html/addMemory.html');
+        this.addMemoryWindow.loadURL(this.path.join('file://', app.getAppPath(), 'html', 'addMemory.html'));
         this.addMemoryWindow.once('ready-to-show', (event: IpcMainEvent) => {
             event.sender.send('get-height');
             this.addMemoryWindow.show();
@@ -685,11 +667,7 @@ class Swordfish {
     }
 
     static showHelp(): void {
-        shell.openExternal('file://' + app.getAppPath() + '/swordfish.pdf',
-            { activate: true, workingDirectory: app.getAppPath() }
-        ).catch((error: Error) => {
-            dialog.showErrorBox('Error', error.message);
-        });
+        shell.openExternal(this.path.join('file://', app.getAppPath(), 'swordfish.pdf'));
     }
 
     static showAbout(): void {
@@ -707,7 +685,7 @@ class Swordfish {
             }
         });
         this.aboutWindow.setMenu(null);
-        this.aboutWindow.loadURL('file://' + app.getAppPath() + '/html/about.html');
+        this.aboutWindow.loadURL(this.path.join('file://', app.getAppPath(), 'html', 'about.html'));
         this.aboutWindow.once('ready-to-show', (event: IpcMainEvent) => {
             event.sender.send('get-height');
             this.aboutWindow.show();
@@ -719,37 +697,37 @@ class Swordfish {
         var title = '';
         switch (type) {
             case 'Swordfish':
-                licenseFile = 'file://' + app.getAppPath() + '/html/licenses/license.txt'
+                licenseFile = this.path.join('file://', app.getAppPath(), 'html', 'licenses', 'license.txt');
                 title = 'Swordfish License';
                 break;
             case "electron":
-                licenseFile = 'file://' + app.getAppPath() + '/html/licenses/electron.txt'
+                licenseFile = this.path.join('file://', app.getAppPath(), 'html', 'licenses', 'electron.txt');
                 title = 'MIT License';
                 break;
             case "TypeScript":
             case "MapDB":
-                licenseFile = 'file://' + app.getAppPath() + '/html/licenses/Apache2.0.html'
+                licenseFile = this.path.join('file://', app.getAppPath(), 'html', 'licenses', 'Apache2.0.html');
                 title = 'Apache 2.0';
                 break;
             case "Java":
-                licenseFile = 'file://' + app.getAppPath() + '/html/licenses/java.html'
+                licenseFile = this.path.join('file://', app.getAppPath(), 'html', 'licenses', 'java.html');
                 title = 'GPL2 with Classpath Exception';
                 break;
             case "OpenXLIFF":
             case "TMEngine":
-                licenseFile = 'file://' + app.getAppPath() + '/html/licenses/EclipsePublicLicense1.0.html';
+                licenseFile = this.path.join('file://', app.getAppPath(), 'html', 'licenses', 'EclipsePublicLicense1.0.html');
                 title = 'Eclipse Public License 1.0';
                 break;
             case "JSON":
-                licenseFile = 'file://' + app.getAppPath() + '/html/licenses/json.txt'
+                licenseFile = this.path.join('file://', app.getAppPath(), 'html', 'licenses', 'json.txt');
                 title = 'JSON.org License';
                 break;
             case "jsoup":
-                licenseFile = 'file://' + app.getAppPath() + '/html/licenses/jsoup.txt'
+                licenseFile = this.path.join('file://', app.getAppPath(), 'html', 'licenses', 'jsoup.txt');
                 title = 'MIT License';
                 break;
             case "DTDParser":
-                licenseFile = 'file://' + app.getAppPath() + '/html/licenses/LGPL2.1.txt'
+                licenseFile = this.path.join('file://', app.getAppPath(), 'html', 'licenses', 'LGPL2.1.txt');
                 title = 'LGPL 2.1';
                 break;
             default:
@@ -769,7 +747,10 @@ class Swordfish {
         });
         licenseWindow.setMenu(null);
         licenseWindow.loadURL(licenseFile);
-        licenseWindow.show();
+        licenseWindow.on('ready-to-show', () => {
+            licenseWindow.show();
+        });
+        
     }
 
     static showSettings(): void {
@@ -787,7 +768,7 @@ class Swordfish {
             }
         });
         this.settingsWindow.setMenu(null);
-        this.settingsWindow.loadURL('file://' + app.getAppPath() + '/html/preferences.html');
+        this.settingsWindow.loadURL(this.path.join('file://', app.getAppPath(), 'html', 'preferences.html'));
         this.settingsWindow.once('ready-to-show', (event: IpcMainEvent) => {
             event.sender.send('get-height');
             this.settingsWindow.show();
@@ -809,7 +790,7 @@ class Swordfish {
             }
         });
         this.licensesWindow.setMenu(null);
-        this.licensesWindow.loadURL('file://' + app.getAppPath() + '/html/licenses.html');
+        this.licensesWindow.loadURL(this.path.join('file://', app.getAppPath(), 'html', 'licenses.html'));
         this.licensesWindow.once('ready-to-show', (event: IpcMainEvent) => {
             event.sender.send('get-height');
             this.licensesWindow.show();
@@ -825,7 +806,7 @@ class Swordfish {
     }
 
     setTheme(): void {
-        Swordfish.contents.send('set-theme', this.currentTheme);
+        Swordfish.contents.send('set-theme', Swordfish.currentTheme);
     }
 
     static checkUpdates(silent: boolean): void {
