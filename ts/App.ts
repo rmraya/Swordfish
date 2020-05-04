@@ -853,7 +853,7 @@ class Swordfish {
         switch (process.platform) {
             case 'win32': {
                 switch (window) {
-                    case 'aboutWindow': { return 495; }
+                    case 'aboutWindow': { return 360; }
                     case 'licensesWindow': { return 430; }
                     case 'settingsWindow': { return 600; }
                     case 'addMemoryWindow': { return 450; }
@@ -863,7 +863,7 @@ class Swordfish {
             }
             case 'darwin': {
                 switch (window) {
-                    case 'aboutWindow': { return 495; }
+                    case 'aboutWindow': { return 360; }
                     case 'licensesWindow': { return 430; }
                     case 'settingsWindow': { return 600; }
                     case 'addMemoryWindow': { return 450; }
@@ -873,7 +873,7 @@ class Swordfish {
             }
             case 'linux': {
                 switch (window) {
-                    case 'aboutWindow': { return 495; }
+                    case 'aboutWindow': { return 360; }
                     case 'licensesWindow': { return 430; }
                     case 'settingsWindow': { return 600; }
                     case 'addMemoryWindow': { return 450; }
