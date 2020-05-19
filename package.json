@@ -20,7 +20,7 @@
     },
     "dependencies": {},
     "devDependencies": {
-        "electron": "^8.2.5",
-        "typescript": "^3.8.3"
+        "electron": "^9.0.0",
+        "typescript": "^3.9.2"
     }
 }
