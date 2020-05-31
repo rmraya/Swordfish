@@ -35,10 +35,14 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.Enumeration;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+import com.maxprograms.converters.Convert;
+import com.maxprograms.converters.FileFormats;
 import com.maxprograms.languages.Language;
 import com.maxprograms.languages.LanguageUtils;
 import com.maxprograms.swordfish.models.Project;
@@ -154,7 +158,7 @@ public class ProjectsHandler implements HttpHandler {
 
 	private void loadProjectsList() throws IOException {
 		projects = new ConcurrentHashMap<>();
-		File home = new File(getWorkFolder());
+		File home = getWorkFolder();
 		File list = new File(home, "projects.json");
 		if (!list.exists()) {
 			try (FileOutputStream out = new FileOutputStream(list)) {
@@ -194,7 +198,7 @@ public class ProjectsHandler implements HttpHandler {
 	}
 
 	private synchronized void saveProjectsList() throws IOException {
-		File home = new File(getWorkFolder());
+		File home = getWorkFolder();
 		File list = new File(home, "projects.json");
 		try (FileOutputStream out = new FileOutputStream(list)) {
 			out.write("{\"projects\":[".getBytes(StandardCharsets.UTF_8));
@@ -242,6 +246,9 @@ public class ProjectsHandler implements HttpHandler {
 
 			Project p = new Project(id, json.getString("description"), Project.NEW, sourceLang, targetLang,
 					json.getString("client"), json.getString("subject"), new Date(), dueDate, null);
+
+			File projectFolder = new File(getWorkFolder(), id);
+
 			List<SourceFile> sourceFiles = new ArrayList<>();
 			Thread thread = new Thread() {
 				@Override
@@ -252,19 +259,28 @@ public class ProjectsHandler implements HttpHandler {
 							SourceFile sf = new SourceFile(file.getString("file"), file.getString("type"),
 									file.getString("encoding"));
 							sourceFiles.add(sf);
-							/*
-							 * if (!FileFormats.XLIFF.equals(file.getString("type"))) { File source = new
-							 * File(file.getString("file")); Map<String, String> params = new HashMap<>();
-							 * params.put("source", source.getAbsolutePath()); params.put("xliff", xliff);
-							 * params.put("skeleton", skl); params.put("format", file.getString("type"));
-							 * params.put("catalog", catalog); params.put("srcEncoding",
-							 * file.getString("encoding")); params.put("paragraph", "no");
-							 * params.put("srxFile", srx); params.put("srcLang", json.getString("srcLang"));
-							 * params.put("tgtLang", json.getString("tgtLang")); List<String> res =
-							 * Convert.run(params);
-							 * 
-							 * }
-							 */
+
+							if (!FileFormats.XLIFF.equals(file.getString("type"))) {
+								File source = new File(file.getString("file"));
+								File xliff = new File(projectFolder, source.getName() + ".xlf");
+								File skl = new File(projectFolder, source.getName() + ".skl");
+								Map<String, String> params = new HashMap<>();
+								params.put("source", source.getAbsolutePath());
+								params.put("xliff", xliff.getAbsolutePath());
+								params.put("skeleton", skl.getAbsolutePath());
+								params.put("format", file.getString("type"));
+								// TODO params.put("catalog", catalog);
+								params.put("srcEncoding", file.getString("encoding"));
+								params.put("paragraph", "no");
+								// TODO params.put("srxFile", srx);
+								params.put("srcLang", json.getString("srcLang"));
+								params.put("tgtLang", json.getString("tgtLang"));
+								List<String> res = Convert.run(params);
+								if (!"0".equals(res.get(0))) {
+									throw new IOException(res.get(1));
+								}
+							}
+
 						}
 						p.setFiles(sourceFiles);
 						projects.put(id, p);
@@ -286,12 +302,12 @@ public class ProjectsHandler implements HttpHandler {
 		return result;
 	}
 
-	private static String getWorkFolder() throws IOException {
+	private static File getWorkFolder() throws IOException {
 		File home = TmsServer.getWorkFolder();
 		File workFolder = new File(home, "projects");
 		if (!workFolder.exists()) {
 			Files.createDirectories(workFolder.toPath());
 		}
-		return workFolder.getAbsolutePath();
+		return workFolder;
 	}
 }
