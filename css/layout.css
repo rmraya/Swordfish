@@ -23,23 +23,3 @@ footer {
     vertical-align: bottom;
 }
 
-.divContainer {
-    width: 100vh;
-    height: 100%;
-}
-
-.scrollPanel {
-    width: 100%;
-    height: 100%;
-    overflow: auto;
-}
-
-.divContentArea {
-    position: absolute;
-    left: 0px;
-    top: 31px;
-    right: 0px;
-    bottom: 29px;
-    width: 100%;
-    overflow-y: scroll;
-}

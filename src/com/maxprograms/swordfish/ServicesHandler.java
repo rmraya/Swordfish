@@ -27,7 +27,10 @@ import java.lang.System.Logger.Level;
 import java.net.URI;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
+import java.util.TreeMap;
 
 import javax.xml.parsers.ParserConfigurationException;
 
@@ -73,13 +76,20 @@ public class ServicesHandler implements HttpHandler {
     }
 
     private JSONObject processRequest(String url, String request) {
-        JSONObject result = new JSONObject();
+        JSONObject result = null;
         try {
             if ("/services/getLanguages".equals(url)) {
                 result = getLanguages();
             } else if ("/services/getFileTypes".equals(url)) {
-                result = getFileTypes(request);
+                result = getFileFormats();
+            } else if ("/services/getCharsets".equals(url)) {
+                result = getCharsets();
+            } else if ("/services/getFileType".equals(url)) {
+                result = getFileType(request);
             } else {
+                result = new JSONObject();
+                result.put("url", url);
+                result.put("request", request);
                 result.put(Constants.REASON, "Unknown request");
             }
 
@@ -96,7 +106,39 @@ public class ServicesHandler implements HttpHandler {
         return result;
     }
 
-    private JSONObject getFileTypes(String request) {
+    private JSONObject getFileFormats() {
+        JSONObject result = new JSONObject();
+        JSONArray array = new JSONArray();
+        String[] formats = FileFormats.getFormats();
+        for (int i=0 ; i<formats.length ; i++) {
+            String format = formats[i];
+            JSONObject json = new JSONObject();
+            json.put("code", FileFormats.getShortName(format));
+            json.put("description", format);
+            array.put(json);
+        }
+        result.put("formats", array);
+        return result;
+    }
+
+    private JSONObject getCharsets() {
+        JSONObject result = new JSONObject();
+        JSONArray array = new JSONArray();
+        TreeMap<String, Charset> charsets = new TreeMap<>(Charset.availableCharsets());
+        Set<String> keys = charsets.keySet();
+        Iterator<String> it = keys.iterator();
+        while (it.hasNext()) {
+            String charset = it.next();
+            JSONObject json = new JSONObject();
+            json.put("code", charset);
+            json.put("description", charsets.get(charset).displayName());
+            array.put(json);
+        }
+        result.put("charsets", array);
+        return result;
+    }
+
+    private JSONObject getFileType(String request) {
         JSONObject result = new JSONObject();
         JSONObject json = new JSONObject(request);
         JSONArray files = json.getJSONArray("files");

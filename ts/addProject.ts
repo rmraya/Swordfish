@@ -22,33 +22,42 @@ class AddProject {
     electron = require('electron');
     addedFiles: Map<number, any>;
 
+    charsetOptions: string;
+    typesOption: string;
+
     constructor() {
         this.addedFiles = new Map<number, any>();
         this.electron.ipcRenderer.send('get-theme');
-        this.electron.ipcRenderer.on('set-theme', (event, arg) => {
+        this.electron.ipcRenderer.on('set-theme', (event: Electron.IpcRendererEvent, arg: any) => {
             (document.getElementById('theme') as HTMLLinkElement).href = arg;
         });
         this.electron.ipcRenderer.send('get-clients');
-        this.electron.ipcRenderer.on('set-clients', (event, arg) => {
+        this.electron.ipcRenderer.on('set-clients', (event: Electron.IpcRendererEvent, arg: any) => {
             this.setClients(arg);
         });
         this.electron.ipcRenderer.send('get-subjects');
-        this.electron.ipcRenderer.on('set-subjects', (event, arg) => {
+        this.electron.ipcRenderer.on('set-subjects', (event: Electron.IpcRendererEvent, arg: any) => {
             this.setSubjects(arg);
         });
         this.electron.ipcRenderer.send('get-languages');
-        this.electron.ipcRenderer.on('set-languages', (event, arg) => {
+        this.electron.ipcRenderer.on('set-languages', (event: Electron.IpcRendererEvent, arg: any) => {
             this.setLanguages(arg);
         });
-        this.electron.ipcRenderer.on('add-source-files', (event, arg) => {
+        this.electron.ipcRenderer.on('add-source-files', (event: Electron.IpcRendererEvent, arg: any) => {
             this.addFiles(arg);
         });
         this.electron.ipcRenderer.on('get-height', () => {
             let body: HTMLBodyElement = document.getElementById('body') as HTMLBodyElement;
-            document.getElementById('tablePanel').style.width = body.clientWidth + 'px';
             this.electron.ipcRenderer.send('add-project-height', { width: body.clientWidth, height: body.clientHeight });
         });
-        document.addEventListener('keydown', (event) => {
+        this.electron.ipcRenderer.send('get-types');
+        this.electron.ipcRenderer.on('set-types', (event: Electron.IpcRendererEvent, arg: any) => {
+            this.setTypes(arg);
+        }); this.electron.ipcRenderer.send('get-charsets');
+        this.electron.ipcRenderer.on('set-charsets', (event: Electron.IpcRendererEvent, arg: any) => {
+            this.setCharsets(arg);
+        });
+        document.addEventListener('keydown', (event: KeyboardEvent) => {
             if (event.key === 'Escape') {
                 window.close();
             }
@@ -145,6 +154,7 @@ class AddProject {
         }
         for (let i = 0; i < length; i++) {
             let file: any = files[i];
+            console.log(JSON.stringify(file));
             let hash = this.hashCode(file.file);
             if (!this.addedFiles.has(hash)) {
                 this.addedFiles.set(hash, file);
@@ -160,15 +170,30 @@ class AddProject {
 
                 td = document.createElement('td');
                 td.className = 'noWrap';
+                td.style.overflowX = 'hidden';
                 td.innerText = file.file;
                 tr.appendChild(td);
 
                 td = document.createElement('td');
-                td.innerText = file.type;
+                let typeSelect: HTMLSelectElement = document.createElement('select');
+                typeSelect.innerHTML = this.typesOption;
+                if (file.type !== 'Unknown') {
+                    typeSelect.value = file.type;
+                } else {
+                    typeSelect.value = 'none';
+                }
+                td.appendChild(typeSelect);
                 tr.appendChild(td);
 
                 td = document.createElement('td');
-                td.innerText = file.encoding;
+                let charsetSelect: HTMLSelectElement = document.createElement('select');
+                charsetSelect.innerHTML = this.charsetOptions;
+                if (file.encoding !== 'Unknown') {
+                    charsetSelect.value = file.encoding;
+                } else {
+                    charsetSelect.value = 'none';
+                }
+                td.appendChild(charsetSelect);
                 tr.appendChild(td);
 
                 tableBody.appendChild(tr);
@@ -204,6 +229,22 @@ class AddProject {
             return '0' + value;
         }
         return '' + value;
+    }
+
+    setTypes(arg: any): void {
+        this.typesOption = '<option value="none" class="error">Select Type</option>';
+        let length: number = arg.formats.length;
+        for (let i = 0; i < length; i++) {
+            this.typesOption = this.typesOption + '<option value="' + arg.formats[i].code + '">' + arg.formats[i].description + '</option>';
+        }
+    }
+
+    setCharsets(arg: any): void {
+        this.charsetOptions = '<option value="none" class="error">Select Charset</option>';
+        let length: number = arg.charsets.length;
+        for (let i = 0; i < length; i++) {
+            this.charsetOptions = this.charsetOptions + '<option value="' + arg.charsets[i].code + '">' + arg.charsets[i].description + '</option>';
+        }
     }
 }
 

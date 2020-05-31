@@ -29,6 +29,7 @@
 	--odd-row-background: #313131;
 
 	--highlight-color: #ecf01b;
+	--error-color: #960303;
 }
 
 body {
@@ -243,7 +244,6 @@ option {
 	background-color: var(--input-background) !important;
 	color: var(--input-color);
 }
-
 
 textarea {
 	padding: 0px;
@@ -511,4 +511,14 @@ label {
 
 .bordered {
 	border: 1px solid var(--normal-color) !important;
+}
+
+.error {
+	color: var(--error-color) !important;
+}
+
+.divContainer {  /* Any container that needs to scroll content */
+    width: 100%;
+    height: 100%;
+    overflow: auto;
 }

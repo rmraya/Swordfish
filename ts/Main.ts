@@ -82,8 +82,11 @@ class Main {
         this.selectTab('projects');
 
         this.electron.ipcRenderer.send('get-theme');
-        this.electron.ipcRenderer.on('set-theme', (event, arg) => {
+        this.electron.ipcRenderer.on('set-theme', (event: Electron.IpcRendererEvent, arg: any) => {
             (document.getElementById('theme') as HTMLLinkElement).href = arg;
+        });
+        this.electron.ipcRenderer.on('request-theme', (event: Electron.IpcRendererEvent, arg: any) => {
+            this.electron.ipcRenderer.send('get-theme');
         });
         window.addEventListener('resize', () => {
             this.resizePanels();
@@ -105,17 +108,21 @@ class Main {
             document.getElementById('body').classList.remove("wait");
         });
 
-        this.electron.ipcRenderer.on('set-status', (event, arg) => {
-            var status: HTMLDivElement = document.getElementById('status') as HTMLDivElement;
-            status.innerHTML = arg;
-            if (arg.length > 0) {
-                status.style.display = 'block';
-            } else {
-                status.style.display = 'none';
-            }
+        this.electron.ipcRenderer.on('set-status', (event: Electron.IpcRendererEvent, arg: any) => {
+           this.setStatus(arg);
         });
     }
 
+    setStatus(arg: any): void {
+        var status: HTMLDivElement = document.getElementById('status') as HTMLDivElement;
+        status.innerHTML = arg;
+        if (arg.length > 0) {
+            status.style.display = 'block';
+        } else {
+            status.style.display = 'none';
+        }
+    }
+    
     selectTab(tab: string): void {
         this.labels.forEach(function (value, key) {
             if (value.classList.contains('selectedTab')) {

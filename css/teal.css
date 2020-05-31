@@ -1,29 +1,29 @@
 :root {
-	--normal-background: #c1c1c1;
+	--normal-background: #f5f5f5;
 	--normal-color: #000000;
 	
-	--medium-background: #1565c0;
+	--medium-background: #00796b;
 	--medium-color: #fefefe;
 
-	--accent-color: #3465aa;
-	--accent-alternative: #0551bb;
+	--accent-color: #004d40;
+	--accent-alternative: #006064;
 	--accent-contrast: #ffffff;
 
-	--toolbar-background: #e1e1e1;
-	--toolbar-color: #0d47a1;
+	--toolbar-background: #004d40;
+	--toolbar-color: #e1e1e1;
 
-	--tooltip-background: #3465aa;
+	--tooltip-background: #00695c;
 	--tooltip-color: #fefefe;
 
 	--tabHolder-background: #9a9a9a;
 	--tab-background: #dedede;
 	--tab-color: #101010;
-	--tab-highlight: #3966d6;
+	--tab-highlight: #004d40;
 	--tab-hover: #cdcdcd;
 
 	--input-background: #fefefe;
 	--input-color: #2e2e2e;
-	--disabled-input: #999999;
+	--disabled-input: #bdbdbd;
 
 	--even-row-background: #cdcdcd;
 	--odd-row-background: #bcbcbc;

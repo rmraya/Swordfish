@@ -40,24 +40,24 @@ class Swordfish {
     classpath: string = Swordfish.path.join('lib', 'h2-1.4.200.jar')
         + Swordfish.path.separator
         + Swordfish.path.join('lib', 'mariadb-java-client-2.4.3.jar');
-    static appHome: string = Swordfish.path.join(app.getPath('appData'), app.name);
+    static appHome: string = Swordfish.path.join(app.getPath('appData'), app.getName());
     static iconPath: string = Swordfish.path.join(app.getAppPath(), 'icons', 'icon.png');
     verticalPadding: number = 46;
 
     static currentDefaults: Rectangle;
     static currentPreferences: any = { theme: 'system', srcLang: 'none', tgtLang: 'none' }
-    static currentTheme: string = 'system';
+    static currentCss: string;
     currentStatus: any;
 
     saved: boolean = true;
     stopping: boolean = false;
 
-    SUCCESS: string = 'Success';
-    LOADING: string = 'Loading';
-    COMPLETED: string = 'Completed';
-    ERROR: string = 'Error';
-    SAVING: string = 'Saving';
-    PROCESSING: string = 'Processing';
+    static SUCCESS: string = 'Success';
+    static LOADING: string = 'Loading';
+    static COMPLETED: string = 'Completed';
+    static ERROR: string = 'Error';
+    static SAVING: string = 'Saving';
+    static PROCESSING: string = 'Processing';
 
     ls: ChildProcessWithoutNullStreams;
 
@@ -90,7 +90,7 @@ class Swordfish {
             mkdirSync(Swordfish.appHome, { recursive: true });
         }
 
-        this.ls = spawn(this.javapath, ['-cp', this.classpath, '--module-path', 'lib', '-m', 'swordfish/com.maxprograms.swordfish.TmsServer', '-port', '8070', '-debug'], { cwd: app.getAppPath() });
+        this.ls = spawn(this.javapath, ['-cp', this.classpath, '--module-path', 'lib', '-m', 'swordfish/com.maxprograms.swordfish.TmsServer', '-port', '8070'], { cwd: app.getAppPath() });
 
         this.ls.stdout.on('data', (data) => {
             console.log(`stdout: ${data}`);
@@ -100,8 +100,24 @@ class Swordfish {
             console.error(`stderr: ${data}`);
         });
 
-        this.ls.on('close', (code) => {
-            console.log(`child process exited with code ${code}`);
+        this.ls.on('close', (code: number) => {
+            if (code === 0) {
+                let data: string = JSON.stringify({ command: 'stop' });
+                var options = {
+                    hostname: '127.0.0.1',
+                    port: 8070,
+                    path: '/',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Content-Length': Buffer.byteLength(data)
+                    }
+                };
+                var req: ClientRequest = request(options);
+                req.write(data);
+                req.end();
+                console.log('Restarting server');
+                this.ls = spawn(this.javapath, ['-cp', this.classpath, '--module-path', 'lib', '-m', 'swordfish/com.maxprograms.swordfish.TmsServer', '-port', '8070'], { cwd: app.getAppPath() });
+            }
         });
 
         var ck: Buffer = execFileSync(this.javapath, ['--module-path', 'lib', '-m', 'openxliff/com.maxprograms.server.CheckURL', 'http://localhost:8070/TMSServer'], { cwd: app.getAppPath() });
@@ -125,7 +141,6 @@ class Swordfish {
                 this.saveDefaults();
             });
             Swordfish.mainWindow.once('ready-to-show', () => {
-                this.setTheme();
                 Swordfish.mainWindow.setBounds(Swordfish.currentDefaults);
                 Swordfish.mainWindow.show();
             });
@@ -148,104 +163,90 @@ class Swordfish {
             });
         }
 
-        nativeTheme.on('updated', () => {
-            Swordfish.loadPreferences();
-            this.setTheme();
-        });
-
-        ipcMain.on('get-projects', (event, arg) => {
+        if (process.platform === 'win32') {
+            nativeTheme.on('updated', () => {
+                Swordfish.setTheme();
+            });
+        }
+        ipcMain.on('get-projects', (event: IpcMainEvent, arg: any) => {
             this.getProjects(event);
         });
-
         ipcMain.on('show-add-project', () => {
             Swordfish.addProject();
         });
-
-        ipcMain.on('get-theme', (event, arg) => {
-            event.sender.send('set-theme', Swordfish.currentTheme);
+        ipcMain.on('get-theme', (event: IpcMainEvent, arg: any) => {
+            event.sender.send('set-theme', Swordfish.currentCss);
         });
-
-        ipcMain.on('licenses-height', (event, arg) => {
+        ipcMain.on('licenses-height', (event: IpcMainEvent, arg: any) => {
             let rect: Rectangle = Swordfish.licensesWindow.getBounds();
             rect.height = arg.height + this.verticalPadding;
             Swordfish.licensesWindow.setBounds(rect);
         });
-
-        ipcMain.on('save-preferences', (event, arg) => {
-            Swordfish.settingsWindow.close();
-            Swordfish.currentPreferences = arg;
-            Swordfish.savePreferences();
+        ipcMain.on('save-preferences', (event: IpcMainEvent, arg: any) => {
+            Swordfish.savePreferences(arg);
         });
-
-        ipcMain.on('add-project-height', (event, arg) => {
+        ipcMain.on('add-project-height', (event: IpcMainEvent, arg: any) => {
             let rect: Rectangle = Swordfish.addProjectWindow.getBounds();
             rect.height = arg.height + this.verticalPadding;
             Swordfish.addProjectWindow.setBounds(rect);
         });
-
         ipcMain.on('get-languages', (event) => {
             this.getLanguages(event);
         });
-
         ipcMain.on('select-source-files', (event) => {
             this.selectSourceFiles(event);
         });
-
-        ipcMain.on('about-height', (event, arg) => {
+        ipcMain.on('about-height', (event: IpcMainEvent, arg: any) => {
             let rect: Rectangle = Swordfish.aboutWindow.getBounds();
             rect.height = arg.height + this.verticalPadding;
             Swordfish.aboutWindow.setBounds(rect);
         });
-
         ipcMain.on('licenses-clicked', () => {
             Swordfish.showLicenses();
         });
-
-        ipcMain.on('create-project', (event, arg) => {
+        ipcMain.on('create-project', (event: IpcMainEvent, arg: any) => {
             this.createProject(arg);
         });
-
         ipcMain.on('show-add-memory', () => {
             Swordfish.addMemory();
         });
-
-        ipcMain.on('add-memory-height', (event, arg) => {
+        ipcMain.on('add-memory-height', (event: IpcMainEvent, arg: any) => {
             let rect: Rectangle = Swordfish.addMemoryWindow.getBounds();
             rect.height = arg.height + this.verticalPadding;
             Swordfish.addMemoryWindow.setBounds(rect);
         });
-
-        ipcMain.on('get-clients', (event, arg) => {
+        ipcMain.on('get-clients', (event: IpcMainEvent, arg: any) => {
             // TODO
         });
-
-        ipcMain.on('get-subjects', (event, arg) => {
+        ipcMain.on('get-subjects', (event: IpcMainEvent, arg: any) => {
             // TODO
         });
-
-        ipcMain.on('get-version', (event, arg) => {
-            event.sender.send('set-version', app.name + ' ' + app.getVersion());
+        ipcMain.on('get-types', (event: IpcMainEvent, arg: any) => {
+            this.getTypes(event);
         });
-
-        ipcMain.on('settings-height', (event, arg) => {
+        ipcMain.on('get-charsets', (event: IpcMainEvent, arg: any) => {
+            this.getCharset(event);
+        });
+        ipcMain.on('get-version', (event: IpcMainEvent, arg: any) => {
+            event.sender.send('set-version', app.getName() + ' ' + app.getVersion());
+        });
+        ipcMain.on('settings-height', (event: IpcMainEvent, arg: any) => {
             let rect: Rectangle = Swordfish.settingsWindow.getBounds();
             rect.height = arg.height + this.verticalPadding;
             Swordfish.settingsWindow.setBounds(rect);
         });
-
-        ipcMain.on('get-preferences', (event, arg) => {
+        ipcMain.on('get-preferences', (event: IpcMainEvent, arg: any) => {
             event.sender.send('set-preferences', Swordfish.currentPreferences);
         });
-
-        ipcMain.on('open-license', function (event, arg: any) {
+        ipcMain.on('open-license', (event: IpcMainEvent, arg: any) => {
             Swordfish.openLicense(arg.type);
         });
 
-    }
+    } // end constructor
 
     static createWindow(): void {
         this.mainWindow = new BrowserWindow({
-            title: app.name,
+            title: app.getName(),
             width: this.currentDefaults.width,
             height: this.currentDefaults.height,
             x: this.currentDefaults.x,
@@ -362,7 +363,7 @@ class Swordfish {
     }
 
     loadDefaults(): void {
-        let defaultsFile: string = Swordfish.path.join(app.getPath('appData'), app.name, 'defaults.json');
+        let defaultsFile: string = Swordfish.path.join(app.getPath('appData'), app.getName(), 'defaults.json');
         Swordfish.currentDefaults = { width: 900, height: 700, x: 0, y: 0 };
         if (existsSync(defaultsFile)) {
             try {
@@ -375,43 +376,52 @@ class Swordfish {
     }
 
     saveDefaults(): void {
-        let defaultsFile: string = Swordfish.path.join(app.getPath('appData'), app.name, 'defaults.json');
+        let defaultsFile: string = Swordfish.path.join(app.getPath('appData'), app.getName(), 'defaults.json');
         writeFileSync(defaultsFile, JSON.stringify(Swordfish.mainWindow.getBounds()));
     }
 
     static loadPreferences(): void {
-        let preferencesFile = this.path.join(this.appHome, 'preferences.json');
+        Swordfish.currentPreferences = { theme: 'system' };
+        let dark: string = 'file://' + Swordfish.path.join(app.getAppPath(), 'css', 'dark.css');
+        let light: string = 'file://' + Swordfish.path.join(app.getAppPath(), 'css', 'light.css');
+        let teal: string = 'file://' + Swordfish.path.join(app.getAppPath(), 'css', 'teal.css');
+        let preferencesFile = Swordfish.path.join(app.getPath('appData'), app.getName(), 'preferences.json');
         if (existsSync(preferencesFile)) {
             try {
                 var data: Buffer = readFileSync(preferencesFile);
-                this.currentPreferences = JSON.parse(data.toString());
+                Swordfish.currentPreferences = JSON.parse(data.toString());
             } catch (err) {
                 console.log(err);
             }
         }
-        if (this.currentPreferences.theme === 'system') {
+        if (Swordfish.currentPreferences.theme === 'system') {
             if (nativeTheme.shouldUseDarkColors) {
-                this.currentTheme = this.path.join(app.getAppPath(), 'css', 'dark.css');
+                Swordfish.currentCss = dark;
                 nativeTheme.themeSource = 'dark';
             } else {
-                this.currentTheme = this.path.join(app.getAppPath(), 'css', 'light.css');
+                Swordfish.currentCss = light;
                 nativeTheme.themeSource = 'light';
             }
         }
-        if (this.currentPreferences.theme === 'dark') {
-            this.currentTheme = this.path.join(app.getAppPath(), 'css', 'dark.css');
+        if (Swordfish.currentPreferences.theme === 'dark') {
+            Swordfish.currentCss = dark;
             nativeTheme.themeSource = 'dark';
         }
-        if (this.currentPreferences.theme === 'light') {
-            this.currentTheme = this.path.join(app.getAppPath(), 'css', 'light.css');
+        if (Swordfish.currentPreferences.theme === 'light') {
+            Swordfish.currentCss = light;
             nativeTheme.themeSource = 'light';
+        }
+        if (Swordfish.currentPreferences.theme === 'teal') {
+            Swordfish.currentCss = teal;
+            nativeTheme.themeSource = 'dark';
         }
     }
 
-    static savePreferences(): void {
-        let preferencesFile = this.path.join(this.appHome, 'preferences.json');
-        writeFileSync(preferencesFile, JSON.stringify(this.currentPreferences));
-        nativeTheme.themeSource = this.currentPreferences.theme;
+    static savePreferences(arg: any): void {
+        Swordfish.settingsWindow.close();
+        writeFileSync(Swordfish.path.join(app.getPath('appData'), app.getName(), 'preferences.json'), JSON.stringify(arg));
+        Swordfish.loadPreferences();
+        Swordfish.setTheme();
     }
 
     openFile(file: string): void {
@@ -565,7 +575,7 @@ class Swordfish {
     }
 
     getFileType(event: IpcMainEvent, files: string[]): void {
-        this.sendRequest('/services/getFileTypes', { files: files },
+        this.sendRequest('/services/getFileType', { files: files },
             function success(data: any) {
                 event.sender.send('add-source-files', data);
             },
@@ -750,7 +760,7 @@ class Swordfish {
         licenseWindow.on('ready-to-show', () => {
             licenseWindow.show();
         });
-        
+
     }
 
     static showSettings(): void {
@@ -805,8 +815,8 @@ class Swordfish {
         shell.openExternal('https://groups.io/g/maxprograms/');
     }
 
-    setTheme(): void {
-        Swordfish.contents.send('set-theme', Swordfish.currentTheme);
+    static setTheme(): void {
+        Swordfish.contents.send('request-theme');
     }
 
     static checkUpdates(silent: boolean): void {
@@ -849,6 +859,36 @@ class Swordfish {
         });
     }
 
+    getTypes(event: IpcMainEvent): void {
+        this.sendRequest('/services/getFileTypes', {},
+            function success(data: any) {
+                if (data.status === Swordfish.SUCCESS) {
+                    event.sender.send('set-types', data);
+                } else {
+                    dialog.showErrorBox('Error', data.reason);
+                }
+            },
+            function error(reason: string) {
+                dialog.showErrorBox('Error', reason);
+            }
+        );
+    }
+
+    getCharset(event: IpcMainEvent): void {
+        this.sendRequest('/services/getCharsets', {},
+            function success(data: any) {
+                if (data.status === Swordfish.SUCCESS) {
+                    event.sender.send('set-charsets', data);
+                } else {
+                    dialog.showErrorBox('Error', data.reason);
+                }
+            },
+            function error(reason: string) {
+                dialog.showErrorBox('Error', reason);
+            }
+        );
+    }
+
     static getWidth(window: string): number {
         switch (process.platform) {
             case 'win32': {
@@ -857,7 +897,7 @@ class Swordfish {
                     case 'licensesWindow': { return 430; }
                     case 'settingsWindow': { return 600; }
                     case 'addMemoryWindow': { return 450; }
-                    case 'addProjectWindow': { return 800; }
+                    case 'addProjectWindow': { return 900; }
                 }
                 break;
             }
@@ -867,7 +907,7 @@ class Swordfish {
                     case 'licensesWindow': { return 430; }
                     case 'settingsWindow': { return 600; }
                     case 'addMemoryWindow': { return 450; }
-                    case 'addProjectWindow': { return 800; }
+                    case 'addProjectWindow': { return 900; }
                 }
                 break;
             }
@@ -877,7 +917,7 @@ class Swordfish {
                     case 'licensesWindow': { return 430; }
                     case 'settingsWindow': { return 600; }
                     case 'addMemoryWindow': { return 450; }
-                    case 'addProjectWindow': { return 800; }
+                    case 'addProjectWindow': { return 900; }
                 }
                 break;
             }
