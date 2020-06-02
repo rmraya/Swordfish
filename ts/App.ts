@@ -45,7 +45,13 @@ class Swordfish {
     verticalPadding: number = 46;
 
     static currentDefaults: Rectangle;
-    static currentPreferences: any = { theme: 'system', srcLang: 'none', tgtLang: 'none' }
+    static currentPreferences = {
+        theme: 'system',
+        srcLang: 'none',
+        tgtLang: 'none',
+        catalog: Swordfish.path.join(app.getAppPath(), 'catalog', 'catalog.xml'),
+        srx: Swordfish.path.join(app.getAppPath(), 'srx', 'default.srx')
+    }
     static currentCss: string;
     currentStatus: any;
 
@@ -238,6 +244,12 @@ class Swordfish {
         ipcMain.on('get-preferences', (event: IpcMainEvent, arg: any) => {
             event.sender.send('set-preferences', Swordfish.currentPreferences);
         });
+        ipcMain.on('browse-srx', (event, arg) => {
+            this.browseSRX(event);
+        });
+        ipcMain.on('browse-catalog', (event, arg) => {
+            this.browseCatalog(event);
+        });
         ipcMain.on('open-license', (event: IpcMainEvent, arg: any) => {
             Swordfish.openLicense(arg.type);
         });
@@ -381,7 +393,6 @@ class Swordfish {
     }
 
     static loadPreferences(): void {
-        Swordfish.currentPreferences = { theme: 'system' };
         let dark: string = 'file://' + Swordfish.path.join(app.getAppPath(), 'css', 'dark.css');
         let light: string = 'file://' + Swordfish.path.join(app.getAppPath(), 'css', 'light.css');
         let teal: string = 'file://' + Swordfish.path.join(app.getAppPath(), 'css', 'teal.css');
@@ -471,7 +482,6 @@ class Swordfish {
     }
 
     createProject(arg: any): void {
-        console.log(JSON.stringify(arg));
         Swordfish.addProjectWindow.close();
         Swordfish.contents.send('start-waiting');
         Swordfish.contents.send('set-status', 'Creating project');
@@ -887,6 +897,42 @@ class Swordfish {
                 dialog.showErrorBox('Error', reason);
             }
         );
+    }
+
+    browseSRX(event: IpcMainEvent): void {
+        dialog.showOpenDialog({
+            title: 'Default SRX File',
+            defaultPath: Swordfish.currentPreferences.srx,
+            properties: ['openFile'],
+            filters: [
+                { name: 'SRX File', extensions: ['srx'] },
+                { name: 'Any File', extensions: ['*'] }
+            ]
+        }).then((value) => {
+            if (!value.canceled) {
+                event.sender.send('set-srx', value.filePaths[0]);
+            }
+        }).catch((error) => {
+            console.log(error);
+        });
+    }
+
+    browseCatalog(event: IpcMainEvent): void {
+        dialog.showOpenDialog({
+            title: 'Default Catalog',
+            defaultPath: Swordfish.currentPreferences.catalog,
+            properties: ['openFile'],
+            filters: [
+                { name: 'XML File', extensions: ['xml'] },
+                { name: 'Any File', extensions: ['*'] }
+            ]
+        }).then((value) => {
+            if (!value.canceled) {
+                event.sender.send('set-catalog', value.filePaths[0]);
+            }
+        }).catch((error) => {
+            console.log(error);
+        });
     }
 
     static getWidth(window: string): number {

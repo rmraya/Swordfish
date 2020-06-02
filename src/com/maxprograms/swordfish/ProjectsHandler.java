@@ -61,7 +61,8 @@ public class ProjectsHandler implements HttpHandler {
 
 	protected boolean converting;
 	protected String conversionError = "";
-
+	private String srxFile;
+	private String catalogFile;
 	@Override
 	public void handle(HttpExchange exchange) throws IOException {
 		try {
@@ -231,7 +232,6 @@ public class ProjectsHandler implements HttpHandler {
 				return result;
 			}
 		}
-
 		JSONObject json = new JSONObject(request);
 		JSONArray files = json.getJSONArray("files");
 		conversionError = "";
@@ -239,6 +239,7 @@ public class ProjectsHandler implements HttpHandler {
 
 		String id = "" + System.currentTimeMillis();
 		try {
+			loadPreferences();
 			Language sourceLang = LanguageUtils.getLanguage(json.getString("srcLang"));
 			Language targetLang = LanguageUtils.getLanguage(json.getString("tgtLang"));
 
@@ -248,7 +249,7 @@ public class ProjectsHandler implements HttpHandler {
 					json.getString("client"), json.getString("subject"), new Date(), dueDate, null);
 
 			File projectFolder = new File(getWorkFolder(), id);
-
+			Files.createDirectories(projectFolder.toPath());
 			List<SourceFile> sourceFiles = new ArrayList<>();
 			Thread thread = new Thread() {
 				@Override
@@ -256,7 +257,7 @@ public class ProjectsHandler implements HttpHandler {
 					try {
 						for (int i = 0; i < files.length(); i++) {
 							JSONObject file = files.getJSONObject(i);
-							SourceFile sf = new SourceFile(file.getString("file"), file.getString("type"),
+							SourceFile sf = new SourceFile(file.getString("file"), FileFormats.getFullName(file.getString("type")),
 									file.getString("encoding"));
 							sourceFiles.add(sf);
 
@@ -268,15 +269,16 @@ public class ProjectsHandler implements HttpHandler {
 								params.put("source", source.getAbsolutePath());
 								params.put("xliff", xliff.getAbsolutePath());
 								params.put("skeleton", skl.getAbsolutePath());
-								params.put("format", file.getString("type"));
-								// TODO params.put("catalog", catalog);
-								params.put("srcEncoding", file.getString("encoding"));
+								params.put("format", sf.getType());
+								params.put("catalog", catalogFile);
+								params.put("srcEncoding", sf.getEncoding());
 								params.put("paragraph", "no");
-								// TODO params.put("srxFile", srx);
+								params.put("srxFile", srxFile);
 								params.put("srcLang", json.getString("srcLang"));
 								params.put("tgtLang", json.getString("tgtLang"));
 								List<String> res = Convert.run(params);
 								if (!"0".equals(res.get(0))) {
+									logger.log(Level.INFO, file.toString(2));
 									throw new IOException(res.get(1));
 								}
 							}
@@ -300,6 +302,22 @@ public class ProjectsHandler implements HttpHandler {
 			result.put(Constants.REASON, e.getMessage());
 		}
 		return result;
+	}
+
+	private void loadPreferences() throws IOException {
+		File preferences = new File(TmsServer.getWorkFolder(), "preferences.json");
+		StringBuilder builder = new StringBuilder();
+		try (FileReader reader = new FileReader(preferences)) {
+			try (BufferedReader buffer = new BufferedReader(reader)) {
+				String line = "";
+				while((line = buffer.readLine()) != null) {
+					builder.append(line);
+				}
+			}
+		}
+		JSONObject json = new JSONObject(builder.toString());
+		srxFile = json.getString("srx");
+		catalogFile = json.getString("catalog");
 	}
 
 	private static File getWorkFolder() throws IOException {

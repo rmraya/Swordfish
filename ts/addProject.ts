@@ -182,6 +182,9 @@ class AddProject {
                 } else {
                     typeSelect.value = 'none';
                 }
+                typeSelect.addEventListener('change', (event: InputEvent) => {
+                    this.addedFiles.get(hash).type = (event.currentTarget as HTMLSelectElement).value;
+                });
                 td.appendChild(typeSelect);
                 tr.appendChild(td);
 
@@ -193,6 +196,9 @@ class AddProject {
                 } else {
                     charsetSelect.value = 'none';
                 }
+                charsetSelect.addEventListener('change', (event: InputEvent) => {
+                    this.addedFiles.get(hash).encoding = (event.currentTarget as HTMLSelectElement).value;
+                });
                 td.appendChild(charsetSelect);
                 tr.appendChild(td);
 
