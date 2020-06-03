@@ -53,7 +53,7 @@ class Swordfish {
         srx: Swordfish.path.join(app.getAppPath(), 'srx', 'default.srx')
     }
     static currentCss: string;
-    currentStatus: any;
+    static currentStatus: any;
 
     saved: boolean = true;
     stopping: boolean = false;
@@ -485,41 +485,52 @@ class Swordfish {
         Swordfish.addProjectWindow.close();
         Swordfish.contents.send('start-waiting');
         Swordfish.contents.send('set-status', 'Creating project');
-        this.sendRequest('/projects/create', arg,
+        Swordfish.sendRequest('/projects/create', arg,
             function success(data: any) {
-                if (data.status !== this.SUCCESS) {
+                if (data.status !== Swordfish.SUCCESS) {
                     dialog.showErrorBox('Error', data.reason);
                 }
-                this.currentStatus = data;
+                Swordfish.currentStatus = data;
                 Swordfish.contents.send('end-waiting');
                 Swordfish.contents.send('set-status', '');
-                /*
+
                 let processId: string = data.process;
                 var intervalObject = setInterval(() => {
-                    if (currentStatus.status === COMPLETED) {
-                        contents.send('end-waiting');
+                    if (Swordfish.currentStatus.status === Swordfish.COMPLETED) {
+                        Swordfish.contents.send('end-waiting');
                         clearInterval(intervalObject);
                         // TODO
                         return;
-                    } else if (currentStatus.status === PROCESSING) {
+                    } else if (Swordfish.currentStatus.status === Swordfish.PROCESSING) {
                         // it's OK, keep waiting
-                    } else if (currentStatus.status === ERROR) {
-                        contents.send('end-waiting');
-                        contents.send('set-status', '');
+                    } else if (Swordfish.currentStatus.status === Swordfish.ERROR) {
+                        Swordfish.contents.send('end-waiting');
+                        Swordfish.contents.send('set-status', '');
                         clearInterval(intervalObject);
-                        dialog.showErrorBox('Error', currentStatus.reason);
+                        dialog.showErrorBox('Error', Swordfish.currentStatus.reason);
                         return;
-                    } else if (currentStatus.status === SUCCESS) {
+                    } else if (Swordfish.currentStatus.status === Swordfish.SUCCESS) {
                         // ignore status from 'openFile'
                     } else {
-                        contents.send('end-waiting');
+                        Swordfish.contents.send('end-waiting');
                         clearInterval(intervalObject);
                         dialog.showErrorBox('Error', 'Unknown error processing files');
                         return;
                     }
-                    getCreationProgress(processId);
+                    Swordfish.getCreationProgress(processId);
                 }, 500);
-                */
+
+            },
+            function error(reason: string) {
+                dialog.showErrorBox('Error', reason);
+            }
+        );
+    }
+
+    static getCreationProgress(process: string): void {
+        this.sendRequest('/projects/status', { process: process },
+            function success(data: any) {
+                Swordfish.currentStatus = data;
             },
             function error(reason: string) {
                 dialog.showErrorBox('Error', reason);
@@ -530,7 +541,7 @@ class Swordfish {
     getProjects(event: IpcMainEvent): void {
         Swordfish.contents.send('start-waiting');
         Swordfish.contents.send('set-status', 'Loading projects');
-        this.sendRequest('/projects/list', {},
+        Swordfish.sendRequest('/projects/list', {},
             function success(json: any) {
                 Swordfish.contents.send('set-status', '');
                 Swordfish.contents.send('end-waiting');
@@ -585,7 +596,7 @@ class Swordfish {
     }
 
     getFileType(event: IpcMainEvent, files: string[]): void {
-        this.sendRequest('/services/getFileType', { files: files },
+        Swordfish.sendRequest('/services/getFileType', { files: files },
             function success(data: any) {
                 event.sender.send('add-source-files', data);
             },
@@ -596,7 +607,7 @@ class Swordfish {
     }
 
     getLanguages(event: IpcMainEvent): void {
-        this.sendRequest('/services/getLanguages', {},
+        Swordfish.sendRequest('/services/getLanguages', {},
             function success(data: any) {
                 data.srcLang = Swordfish.currentPreferences.srcLang;
                 data.tgtLang = Swordfish.currentPreferences.tgtLang;
@@ -609,7 +620,7 @@ class Swordfish {
     }
 
     getCreationProgress(processId: string): void {
-        this.sendRequest('/projects/status', { process: processId },
+        Swordfish.sendRequest('/projects/status', { process: processId },
             function success(data: any) {
                 this.currentStatus = data;
             },
@@ -650,7 +661,7 @@ class Swordfish {
         this.contents.send('view-glossaries');
     }
 
-    sendRequest(url: string, json: any, success: any, error: any) {
+    static sendRequest(url: string, json: any, success: any, error: any) {
         var postData: string = JSON.stringify(json);
         var options = {
             hostname: '127.0.0.1',
@@ -870,7 +881,7 @@ class Swordfish {
     }
 
     getTypes(event: IpcMainEvent): void {
-        this.sendRequest('/services/getFileTypes', {},
+        Swordfish.sendRequest('/services/getFileTypes', {},
             function success(data: any) {
                 if (data.status === Swordfish.SUCCESS) {
                     event.sender.send('set-types', data);
@@ -885,7 +896,7 @@ class Swordfish {
     }
 
     getCharset(event: IpcMainEvent): void {
-        this.sendRequest('/services/getCharsets', {},
+        Swordfish.sendRequest('/services/getCharsets', {},
             function success(data: any) {
                 if (data.status === Swordfish.SUCCESS) {
                     event.sender.send('set-charsets', data);

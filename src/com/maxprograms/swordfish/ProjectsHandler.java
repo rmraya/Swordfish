@@ -36,6 +36,7 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.Enumeration;
 import java.util.HashMap;
+import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -59,6 +60,7 @@ public class ProjectsHandler implements HttpHandler {
 
 	private static Logger logger = System.getLogger(ProjectsHandler.class.getName());
 	private static ConcurrentHashMap<String, Project> projects;
+	private static Map<String,String> processes;
 	private static boolean firstRun = true;
 
 	protected boolean converting;
@@ -125,7 +127,24 @@ public class ProjectsHandler implements HttpHandler {
 	}
 
 	private JSONObject getProcessStatus(String request) {
-		return null;
+		JSONObject json = new JSONObject(request);
+		JSONObject result = new JSONObject();
+		if (processes == null) {
+			processes = new Hashtable<>();
+		}
+		String status = processes.get(json.getString("process"));
+		if (status == null) {
+			result.put(Constants.STATUS, Constants.ERROR);
+			result.put(Constants.REASON, "Null process");
+		} else if (Constants.COMPLETED.equals(status)) {
+			result.put(Constants.STATUS, Constants.COMPLETED);
+		} else if (Constants.PROCESSING.equals(status)) {
+			result.put(Constants.STATUS, Constants.PROCESSING);
+		} else {
+			result.put(Constants.STATUS, Constants.ERROR);
+			result.put(Constants.REASON, status);
+		}
+		return result;
 	}
 
 	private JSONObject exportProject(String request) {
@@ -241,6 +260,11 @@ public class ProjectsHandler implements HttpHandler {
 		converting = true;
 
 		String id = "" + System.currentTimeMillis();
+		result.put("process", id);
+		if (processes == null) {
+			processes = new Hashtable<>();
+		}
+		processes.put(id, Constants.PROCESSING);
 		try {
 			loadPreferences();
 			Language sourceLang = LanguageUtils.getLanguage(json.getString("srcLang"));
@@ -306,9 +330,11 @@ public class ProjectsHandler implements HttpHandler {
 						p.setFiles(sourceFiles);
 						projects.put(id, p);
 						saveProjectsList();
+						processes.put(id, Constants.COMPLETED);
 					} catch (IOException e) {
 						logger.log(Level.ERROR, e.getMessage(), e);
 						conversionError = e.getMessage();
+						processes.put(id, conversionError);
 					}
 					converting = false;
 				}
