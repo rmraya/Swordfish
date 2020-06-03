@@ -47,6 +47,8 @@ import com.maxprograms.languages.Language;
 import com.maxprograms.languages.LanguageUtils;
 import com.maxprograms.swordfish.models.Project;
 import com.maxprograms.swordfish.models.SourceFile;
+import com.maxprograms.xliff2.Resegmenter;
+import com.maxprograms.xliff2.ToXliff2;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 
@@ -63,6 +65,7 @@ public class ProjectsHandler implements HttpHandler {
 	protected String conversionError = "";
 	private String srxFile;
 	private String catalogFile;
+
 	@Override
 	public void handle(HttpExchange exchange) throws IOException {
 		try {
@@ -257,11 +260,19 @@ public class ProjectsHandler implements HttpHandler {
 					try {
 						for (int i = 0; i < files.length(); i++) {
 							JSONObject file = files.getJSONObject(i);
-							SourceFile sf = new SourceFile(file.getString("file"), FileFormats.getFullName(file.getString("type")),
-									file.getString("encoding"));
+							SourceFile sf = new SourceFile(file.getString("file"),
+									FileFormats.getFullName(file.getString("type")), file.getString("encoding"));
 							sourceFiles.add(sf);
 
-							if (!FileFormats.XLIFF.equals(file.getString("type"))) {
+							if (!FileFormats.XLIFF.equals(sf.getType())) {
+
+								boolean paragraph = false;
+								boolean mustResegment = false;
+								if (!FileFormats.isBilingual(sf.getType())) {
+									mustResegment = true;
+									paragraph = true;
+								}
+
 								File source = new File(file.getString("file"));
 								File xliff = new File(projectFolder, source.getName() + ".xlf");
 								File skl = new File(projectFolder, source.getName() + ".skl");
@@ -272,11 +283,19 @@ public class ProjectsHandler implements HttpHandler {
 								params.put("format", sf.getType());
 								params.put("catalog", catalogFile);
 								params.put("srcEncoding", sf.getEncoding());
-								params.put("paragraph", "no");
+								params.put("paragraph", paragraph ? "yes" : "no");
 								params.put("srxFile", srxFile);
 								params.put("srcLang", json.getString("srcLang"));
 								params.put("tgtLang", json.getString("tgtLang"));
 								List<String> res = Convert.run(params);
+
+								if ("0".equals(res.get(0))) {
+									res = ToXliff2.run(xliff, catalogFile);
+									if (mustResegment && "0".equals(res.get(0))) {
+										res = Resegmenter.run(xliff.getAbsolutePath(), srxFile,
+												json.getString("srcLang"), catalogFile);
+									}
+								}
 								if (!"0".equals(res.get(0))) {
 									logger.log(Level.INFO, file.toString(2));
 									throw new IOException(res.get(1));
@@ -310,7 +329,7 @@ public class ProjectsHandler implements HttpHandler {
 		try (FileReader reader = new FileReader(preferences)) {
 			try (BufferedReader buffer = new BufferedReader(reader)) {
 				String line = "";
-				while((line = buffer.readLine()) != null) {
+				while ((line = buffer.readLine()) != null) {
 					builder.append(line);
 				}
 			}
