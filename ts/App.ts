@@ -432,6 +432,7 @@ class Swordfish {
 
     static savePreferences(arg: any): void {
         Swordfish.settingsWindow.close();
+        Swordfish.mainWindow.focus();
         writeFileSync(Swordfish.path.join(app.getPath('appData'), app.getName(), 'preferences.json'), JSON.stringify(arg));
         Swordfish.loadPreferences();
         Swordfish.setTheme();
@@ -485,6 +486,7 @@ class Swordfish {
 
     createProject(arg: any): void {
         Swordfish.addProjectWindow.close();
+        Swordfish.mainWindow.focus();
         Swordfish.contents.send('start-waiting');
         Swordfish.contents.send('set-status', 'Creating project');
         Swordfish.sendRequest('/projects/create', arg,

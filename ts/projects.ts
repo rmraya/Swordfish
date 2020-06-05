@@ -131,6 +131,7 @@ class ProjectsView {
     }
 
     displayProjects(projects: any[]) {
+        this.tbody.innerHTML = '';
         let length = projects.length;
         for (let i = 0; i < length; i++) {
             let p = projects[i];
