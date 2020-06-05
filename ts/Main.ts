@@ -91,8 +91,15 @@ class Main {
         window.addEventListener('resize', () => {
             this.resizePanels();
         });
+        window.addEventListener('load', () => {
+            console.log('loaded');
+            this.resizePanels();
+        })
         this.electron.ipcRenderer.on('view-projects', () => {
             this.selectTab('projects');
+        });
+        this.electron.ipcRenderer.on('request-projects', () => {
+            this.projectsView.loadProjects();
         });
         this.electron.ipcRenderer.on('view-memories', () => {
             this.selectTab('memories');
@@ -162,7 +169,10 @@ class Main {
     }
 
     resizePanels(): void {
-        // TODO
+        let body = document.getElementById('body');
+        let main = document.getElementById('main');
+        main.style.width = body.clientWidth + 'px';
+        main.style.height = (body.clientHeight - 31) + 'px';
     }
 }
 

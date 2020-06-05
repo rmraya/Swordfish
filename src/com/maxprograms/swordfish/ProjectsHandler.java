@@ -32,12 +32,9 @@ import java.net.URI;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Date;
-import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Hashtable;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -60,8 +57,10 @@ public class ProjectsHandler implements HttpHandler {
 
 	private static Logger logger = System.getLogger(ProjectsHandler.class.getName());
 	private static ConcurrentHashMap<String, Project> projects;
-	private static Map<String,String> processes;
+	private static Map<String, String> processes;
 	private static boolean firstRun = true;
+	
+	protected JSONObject projectsList;
 
 	protected boolean converting;
 	protected String conversionError = "";
@@ -134,14 +133,14 @@ public class ProjectsHandler implements HttpHandler {
 		}
 		String status = processes.get(json.getString("process"));
 		if (status == null) {
-			result.put(Constants.STATUS, Constants.ERROR);
+			result.put("progress", Constants.ERROR);
 			result.put(Constants.REASON, "Null process");
 		} else if (Constants.COMPLETED.equals(status)) {
-			result.put(Constants.STATUS, Constants.COMPLETED);
+			result.put("progress", Constants.COMPLETED);
 		} else if (Constants.PROCESSING.equals(status)) {
-			result.put(Constants.STATUS, Constants.PROCESSING);
+			result.put("progress", Constants.PROCESSING);
 		} else {
-			result.put(Constants.STATUS, Constants.ERROR);
+			result.put("progress", Constants.ERROR);
 			result.put(Constants.REASON, status);
 		}
 		return result;
@@ -170,15 +169,7 @@ public class ProjectsHandler implements HttpHandler {
 				return result;
 			}
 		}
-		List<Project> list = new ArrayList<>();
-		list.addAll(projects.values());
-		Collections.sort(list);
-		Iterator<Project> it = list.iterator();
-		while (it.hasNext()) {
-			Project p = it.next();
-			array.put(new JSONObject(p.toJSON()));
-		}
-		return result;
+		return projectsList;
 	}
 
 	private void loadProjectsList() throws IOException {
@@ -186,8 +177,10 @@ public class ProjectsHandler implements HttpHandler {
 		File home = getWorkFolder();
 		File list = new File(home, "projects.json");
 		if (!list.exists()) {
+			JSONObject json = new JSONObject();
+			json.put("projects", new JSONArray());
 			try (FileOutputStream out = new FileOutputStream(list)) {
-				out.write("{\"projects\":[]}".getBytes(StandardCharsets.UTF_8));
+				out.write(json.toString(2).getBytes(StandardCharsets.UTF_8));
 			}
 		}
 		StringBuffer buffer = new StringBuffer();
@@ -199,11 +192,11 @@ public class ProjectsHandler implements HttpHandler {
 				}
 			}
 		}
-		JSONObject json = new JSONObject(buffer.toString());
-		JSONArray array = json.getJSONArray("projects");
+		projectsList = new JSONObject(buffer.toString());
+		JSONArray array = projectsList.getJSONArray("projects");
 		for (int i = 0; i < array.length(); i++) {
 			JSONObject project = array.getJSONObject(i);
-			projects.put(project.getString("id"), new Project(project.toString()));
+			projects.put(project.getString("id"), new Project(project));
 		}
 		if (firstRun) {
 			firstRun = false;
@@ -225,19 +218,9 @@ public class ProjectsHandler implements HttpHandler {
 	private synchronized void saveProjectsList() throws IOException {
 		File home = getWorkFolder();
 		File list = new File(home, "projects.json");
+		byte[] bytes = projectsList.toString(2).getBytes(StandardCharsets.UTF_8);
 		try (FileOutputStream out = new FileOutputStream(list)) {
-			out.write("{\"projects\":[".getBytes(StandardCharsets.UTF_8));
-			Enumeration<String> keys = projects.keys();
-			boolean first = true;
-			while (keys.hasMoreElements()) {
-				if (!first) {
-					out.write(",\n".getBytes(StandardCharsets.UTF_8));
-				}
-				String key = keys.nextElement();
-				out.write(projects.get(key).toJSON().toString().getBytes(StandardCharsets.UTF_8));
-				first = false;
-			}
-			out.write("]}".getBytes(StandardCharsets.UTF_8));
+			out.write(bytes);
 		}
 	}
 
@@ -332,6 +315,7 @@ public class ProjectsHandler implements HttpHandler {
 						}
 						p.setFiles(sourceFiles);
 						projects.put(id, p);
+						projectsList.getJSONArray("projects").put(p.toJSON());
 						saveProjectsList();
 						processes.put(id, Constants.COMPLETED);
 					} catch (IOException e) {

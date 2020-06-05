@@ -175,7 +175,7 @@ class Swordfish {
             });
         }
         ipcMain.on('get-projects', (event: IpcMainEvent, arg: any) => {
-            this.getProjects(event);
+            Swordfish.getProjects(event);
         });
         ipcMain.on('show-add-project', () => {
             Swordfish.addProject();
@@ -488,34 +488,34 @@ class Swordfish {
         Swordfish.sendRequest('/projects/create', arg,
             function success(data: any) {
                 if (data.status !== Swordfish.SUCCESS) {
+                    Swordfish.contents.send('end-waiting');
+                    Swordfish.contents.send('set-status', '');
                     dialog.showErrorBox('Error', data.reason);
                 }
                 Swordfish.currentStatus = data;
-                Swordfish.contents.send('end-waiting');
-                Swordfish.contents.send('set-status', '');
-
                 let processId: string = data.process;
                 var intervalObject = setInterval(() => {
-                    if (Swordfish.currentStatus.status === Swordfish.COMPLETED) {
-                        Swordfish.contents.send('end-waiting');
-                        clearInterval(intervalObject);
-                        // TODO
-                        return;
-                    } else if (Swordfish.currentStatus.status === Swordfish.PROCESSING) {
-                        // it's OK, keep waiting
-                    } else if (Swordfish.currentStatus.status === Swordfish.ERROR) {
-                        Swordfish.contents.send('end-waiting');
-                        Swordfish.contents.send('set-status', '');
-                        clearInterval(intervalObject);
-                        dialog.showErrorBox('Error', Swordfish.currentStatus.reason);
-                        return;
-                    } else if (Swordfish.currentStatus.status === Swordfish.SUCCESS) {
-                        // ignore status from 'openFile'
-                    } else {
-                        Swordfish.contents.send('end-waiting');
-                        clearInterval(intervalObject);
-                        dialog.showErrorBox('Error', 'Unknown error processing files');
-                        return;
+                    if (Swordfish.currentStatus.progress) {
+                        if (Swordfish.currentStatus.progress === Swordfish.COMPLETED) {
+                            Swordfish.contents.send('end-waiting');
+                            clearInterval(intervalObject);
+                            Swordfish.contents.send('request-projects');
+                            return;
+                        } else if (Swordfish.currentStatus.progress === Swordfish.PROCESSING) {
+                            // it's OK, keep waiting
+                        } else if (Swordfish.currentStatus.progress === Swordfish.ERROR) {
+                            Swordfish.contents.send('end-waiting');
+                            Swordfish.contents.send('set-status', '');
+                            clearInterval(intervalObject);
+                            dialog.showErrorBox('Error', Swordfish.currentStatus.reason);
+                            return;
+                        } else {
+                            Swordfish.contents.send('end-waiting');
+                            Swordfish.contents.send('set-status', '');
+                            clearInterval(intervalObject);
+                            dialog.showErrorBox('Error', 'Unknown error processing files');
+                            return;
+                        }
                     }
                     Swordfish.getCreationProgress(processId);
                 }, 500);
@@ -538,22 +538,22 @@ class Swordfish {
         );
     }
 
-    getProjects(event: IpcMainEvent): void {
+    static getProjects(event: IpcMainEvent): void {
         Swordfish.contents.send('start-waiting');
         Swordfish.contents.send('set-status', 'Loading projects');
         Swordfish.sendRequest('/projects/list', {},
-            function success(json: any) {
+            function success(data: any) {
                 Swordfish.contents.send('set-status', '');
                 Swordfish.contents.send('end-waiting');
-                if (json.status === this.SUCCESS) {
-                    event.sender.send('set-projects', json.projects);
+                if (data.status === Swordfish.SUCCESS) {
+                    event.sender.send('set-projects', data.projects);
                 } else {
-                    dialog.showMessageBox({ type: 'error', message: json.reason });
+                    dialog.showMessageBox({ type: 'error', message: data.reason });
                 }
             },
-            function error(data: string) {
+            function error(reason: string) {
                 Swordfish.contents.send('set-status', '');
-                dialog.showMessageBox({ type: 'error', message: data });
+                dialog.showMessageBox({ type: 'error', message: reason });
             }
         );
     }

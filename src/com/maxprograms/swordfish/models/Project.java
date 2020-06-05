@@ -67,26 +67,27 @@ public class Project implements Serializable, Comparable<Project> {
 		this.finishDate = finishDate;
 	}
 
-	public Project(String json) throws IOException {
-		JSONObject object = new JSONObject(json);
-		this.id = object.getString("id");
-		this.description = object.getString("description");
-		this.sourceLang = LanguageUtils.getLanguage(object.getString("sourceLang"));
-		this.targetLang = LanguageUtils.getLanguage(object.getString("targetLang"));
-		this.client = object.has("client") ? object.getString("client") : "";
-		this.subject = object.has("subject") ? object.getString("subject") : "";
-		this.creationDate = new Date(object.getLong("creationDate"));
-		this.dueDate = new Date(object.getLong("dueDate"));
-		if (object.has("finishDate")) {
-			this.finishDate = new Date(object.getLong("finishDate"));
+	public Project(JSONObject json) throws IOException {
+		this.id = json.getString("id");
+		this.description = json.getString("description");
+		this.status = json.getInt("status");
+		this.sourceLang = LanguageUtils.getLanguage(json.getString("sourceLang"));
+		this.targetLang = LanguageUtils.getLanguage(json.getString("targetLang"));
+		this.client = json.has("client") ? json.getString("client") : "";
+		this.subject = json.has("subject") ? json.getString("subject") : "";
+		this.creationDate = new Date(json.getLong("creationDate"));
+		this.dueDate = new Date(json.getLong("dueDate"));
+		if (json.has("finishDate")) {
+			this.finishDate = new Date(json.getLong("finishDate"));
 		}
 	}
 
-	public String toJSON() {
+	public JSONObject toJSON() {
 		SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 		JSONObject json = new JSONObject();
 		json.put("id", id);
 		json.put("description", description);
+		json.put("status", status);
 		json.put("sourceLang", sourceLang.getCode());
 		json.put("targetLang", targetLang.getCode());
 		json.put("client", client);
@@ -105,7 +106,7 @@ public class Project implements Serializable, Comparable<Project> {
 			filesArray.put(it.next().toJSON());
 		}
 		json.put("files", filesArray);
-		return json.toString(2);
+		return json;
 	}
 
 	public String getId() {

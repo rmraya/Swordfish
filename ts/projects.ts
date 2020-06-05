@@ -23,7 +23,7 @@ class ProjectsView {
 
     container: HTMLDivElement;
     tableContainer: HTMLDivElement;
-    projectsTable: HTMLTableElement;
+    tbody: HTMLTableSectionElement;
 
     constructor(div: HTMLDivElement) {
         this.container = div;
@@ -68,51 +68,49 @@ class ProjectsView {
         topBar.appendChild(checkButton);
 
         this.tableContainer = document.createElement('div');
-        this.tableContainer.classList.add('scrollPanel');
+        this.tableContainer.classList.add('divContainer');
         this.container.appendChild(this.tableContainer);
 
-        this.projectsTable = document.createElement('table');
-        this.projectsTable.classList.add('fill_width');
-        this.projectsTable.classList.add('stripes');
-        this.tableContainer.appendChild(this.projectsTable);
+        let projectsTable = document.createElement('table');
+        projectsTable.classList.add('fill_width');
+        projectsTable.classList.add('stripes');
+        this.tableContainer.appendChild(projectsTable);
 
-        /*
-                this.projectsTable.innerHTML = '<thead><tr>' +
-                    '<th class="fixed"><input type="checkbox"></th>' +
-                    '<th>Description</th><th>Status</th>' +
-                    '<th>Src.Lang.</th><th>Tgt.Lang.</th>' +
-                    '<th>Created</th><th>Completed</th>' +
-                    '</tr></thead>' +
-                    '<tbody id="projectsBody"></tbody>';
-        */
+        projectsTable.innerHTML =
+            '<thead><tr>' +
+            '<th><input type="checkbox"></th>' +
+            '<th>Description</th><th>Status</th>' +
+            '<th style="padding-left:5px;padding-right:5px;">Src.Lang.</th>' +
+            '<th style="padding-left:5px;padding-right:5px;">Tgt.Lang.</th>' +
+            '<th style="padding-left:5px;padding-right:5px;">Created</th>'+
+            '<th style="padding-left:5px;padding-right:5px;">Completed</th>' +
+            '</tr></thead>';
 
-        let tbody = document.createElement('tbody');
-        tbody.id = 'projectsBody';
-        this.projectsTable.appendChild(tbody);
+        this.tbody = document.createElement('tbody');
+        projectsTable.appendChild(this.tbody);
 
         // event listeners
 
         window.addEventListener('resize', () => {
             this.setSizes()
         });
-
-        this.electron.ipcRenderer.on('set-projects', (event, arg) => {
+        this.electron.ipcRenderer.on('set-projects', (event: Electron.IpcRendererEvent, arg: any) => {
             this.displayProjects(arg);
-        })
+        });
 
         // finish setup
 
         this.setSizes();
-        // this.loadProjects();
+        this.loadProjects();
     }
 
-    setSizes() {
-        this.tableContainer.style.height = (this.container.clientHeight - 30) + 'px';
-        this.tableContainer.style.width = (this.container.clientWidth - 2) + 'px';
+    setSizes(): void {
+        let body = document.getElementById('body');
+        this.tableContainer.style.height = (body.clientHeight - 65) + 'px';
+        this.tableContainer.style.width = this.container.clientWidth + 'px';
     }
 
     addProject(): void {
-        // TODO
         this.electron.ipcRenderer.send('show-add-project');
     }
 
@@ -133,7 +131,6 @@ class ProjectsView {
     }
 
     displayProjects(projects: any[]) {
-        document.getElementById('projectsBody').innerHTML = '';
         let length = projects.length;
         for (let i = 0; i < length; i++) {
             let p = projects[i];
@@ -141,15 +138,57 @@ class ProjectsView {
             tr.className = 'discover';
 
             let td = document.createElement('td');
+            td.classList.add('fixed');
             td.id = p.id;
-            td.innerHTML = '<input type="checkbox" data="' + p.id + '" class="fixed">'
+            let check: HTMLInputElement = document.createElement('input');
+            check.type = 'checkbox';
+            check.setAttribute('data', p.id);
+            td.appendChild(check);
             tr.appendChild(td);
 
             td = document.createElement('td');
+            td.classList.add('noWrap');
             td.innerText = p.description;
             tr.append(td);
 
-            document.getElementById('projectsBody').appendChild(tr);
+            td = document.createElement('td');
+            td.classList.add('center');
+            if (p.status === 0) {
+                td.innerText = 'New';
+            } else if (p.status === 1) {
+                td.innerText = 'In Progress';
+            } else {
+                td.innerText = 'Completed'
+            }
+            tr.append(td);
+
+            td = document.createElement('td');
+            td.innerText = p.sourceLang;
+            td.classList.add('center');
+            tr.append(td);
+
+            td = document.createElement('td');
+            td.innerText = p.targetLang;
+            td.classList.add('center');
+            tr.append(td);
+
+            td = document.createElement('td');
+            td.classList.add('noWrap');
+            td.classList.add('center');
+            td.style.minWidth = '170px';
+            td.innerText = p.creationString;
+            tr.append(td);
+
+            td = document.createElement('td');
+            td.classList.add('noWrap');
+            td.classList.add('center');
+            td.style.minWidth = '170px';
+            if (p.finishDateString) {
+                td.innerText = p.finishDateString;
+            }
+            tr.append(td);
+
+            this.tbody.appendChild(tr);
         }
     }
 }

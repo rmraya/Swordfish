@@ -45,7 +45,7 @@ public class Memory implements Serializable, Comparable<Memory> {
 		this.creationDate = object.has("creationDate") ? new Date(object.getLong("creationDate")) : new Date();
 	}
 
-	public String toJSON() {
+	public JSONObject toJSON() {
 		SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 		JSONObject json = new JSONObject();
 		json.put("id", id);
@@ -55,7 +55,7 @@ public class Memory implements Serializable, Comparable<Memory> {
 		json.put("client", client);
 		json.put("creationDate", creationDate.getTime());
 		json.put("creationString", df.format(creationDate));
-		return json.toString(2);
+		return json;
 	}
 
 	public Memory(String id, String name, String project, String subject, String client, Date creationDate) {
