@@ -404,6 +404,8 @@ class Swordfish {
             } catch (err) {
                 console.log(err);
             }
+        } else {
+            writeFileSync(Swordfish.path.join(app.getPath('appData'), app.getName(), 'preferences.json'), JSON.stringify(Swordfish.currentPreferences));
         }
         if (Swordfish.currentPreferences.theme === 'system') {
             if (nativeTheme.shouldUseDarkColors) {
