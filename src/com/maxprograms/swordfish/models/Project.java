@@ -20,8 +20,7 @@ package com.maxprograms.swordfish.models;
 
 import java.io.IOException;
 import java.io.Serializable;
-import java.text.SimpleDateFormat;
-import java.util.Date;
+import java.time.LocalDate;
 import java.util.Iterator;
 import java.util.List;
 
@@ -46,15 +45,15 @@ public class Project implements Serializable, Comparable<Project> {
 	private String subject;
 	private Language sourceLang;
 	private Language targetLang;
-	private Date creationDate;
-	private Date dueDate;
-	private Date finishDate;
+	private LocalDate creationDate;
+	private LocalDate dueDate;
+	private LocalDate finishDate;
 	private List<SourceFile> files;
 	private List<Memory> memories;
 	private List<Glossary> glossaries;
 
 	public Project(String id, String description, int status, Language sourceLang, Language targetLang, String client,
-			String subject, Date creationDate, Date dueDate, Date finishDate) {
+			String subject, LocalDate creationDate, LocalDate dueDate, LocalDate finishDate) {
 		this.id = id;
 		this.description = description;
 		this.status = status;
@@ -75,15 +74,14 @@ public class Project implements Serializable, Comparable<Project> {
 		this.targetLang = LanguageUtils.getLanguage(json.getString("targetLang"));
 		this.client = json.has("client") ? json.getString("client") : "";
 		this.subject = json.has("subject") ? json.getString("subject") : "";
-		this.creationDate = new Date(json.getLong("creationDate"));
-		this.dueDate = new Date(json.getLong("dueDate"));
+		this.creationDate = LocalDate.parse(json.getString("creationDate"));
+		this.dueDate = LocalDate.parse(json.getString("dueDate"));
 		if (json.has("finishDate")) {
-			this.finishDate = new Date(json.getLong("finishDate"));
+			this.finishDate = LocalDate.parse(json.getString("finishDate"));
 		}
 	}
 
 	public JSONObject toJSON() {
-		SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 		JSONObject json = new JSONObject();
 		json.put("id", id);
 		json.put("description", description);
@@ -92,13 +90,10 @@ public class Project implements Serializable, Comparable<Project> {
 		json.put("targetLang", targetLang.getCode());
 		json.put("client", client);
 		json.put("subject", subject);
-		json.put("creationDate", creationDate.getTime());
-		json.put("creationString", df.format(creationDate));
-		json.put("dueDate", dueDate.getTime());
-		json.put("dueDateString", df.format(dueDate));
+		json.put("creationDate", creationDate.toString());
+		json.put("dueDate", dueDate.toString());
 		if (finishDate != null) {
-			json.put("finishDate", finishDate.getTime());
-			json.put("finishDateString", df.format(finishDate));
+			json.put("finishDate", finishDate.toString());
 		}
 		JSONArray filesArray = new JSONArray();
 		Iterator<SourceFile> it = files.iterator();
@@ -149,27 +144,27 @@ public class Project implements Serializable, Comparable<Project> {
 		this.targetLang = targetLang;
 	}
 
-	public Date getCreationDate() {
+	public LocalDate getCreationDate() {
 		return creationDate;
 	}
 
-	public void setCreationDate(Date creationDate) {
+	public void setCreationDate(LocalDate creationDate) {
 		this.creationDate = creationDate;
 	}
 
-	public Date getDueDate() {
+	public LocalDate getDueDate() {
 		return dueDate;
 	}
 
-	public void setDueDate(Date dueDate) {
+	public void setDueDate(LocalDate dueDate) {
 		this.dueDate = dueDate;
 	}
 
-	public Date getFinishDate() {
+	public LocalDate getFinishDate() {
 		return finishDate;
 	}
 
-	public void setFinishDate(Date finishDate) {
+	public void setFinishDate(LocalDate finishDate) {
 		this.finishDate = finishDate;
 	}
 

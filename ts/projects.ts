@@ -82,7 +82,8 @@ class ProjectsView {
             '<th>Description</th><th>Status</th>' +
             '<th style="padding-left:5px;padding-right:5px;">Src.Lang.</th>' +
             '<th style="padding-left:5px;padding-right:5px;">Tgt.Lang.</th>' +
-            '<th style="padding-left:5px;padding-right:5px;">Created</th>'+
+            '<th style="padding-left:5px;padding-right:5px;">Created</th>' +
+            '<th style="padding-left:5px;padding-right:5px;">Due Date</th>' +
             '<th style="padding-left:5px;padding-right:5px;">Completed</th>' +
             '</tr></thead>';
 
@@ -177,7 +178,17 @@ class ProjectsView {
             td.classList.add('noWrap');
             td.classList.add('center');
             td.style.minWidth = '170px';
-            td.innerText = p.creationString;
+            td.innerText = p.creationDate;
+            tr.append(td);
+
+            td = document.createElement('td');
+            td.classList.add('noWrap');
+            td.classList.add('center');
+            if (Date.now() > Date.parse(p.dueDate) && p.status !== 2 ) {
+                td.classList.add('error');
+            }
+            td.style.minWidth = '170px';
+            td.innerText = p.dueDate;
             tr.append(td);
 
             td = document.createElement('td');
@@ -185,10 +196,9 @@ class ProjectsView {
             td.classList.add('center');
             td.style.minWidth = '170px';
             if (p.finishDateString) {
-                td.innerText = p.finishDateString;
+                td.innerText = p.finishDate;
             }
             tr.append(td);
-
             this.tbody.appendChild(tr);
         }
     }

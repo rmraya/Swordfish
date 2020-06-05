@@ -91,6 +91,19 @@ class AddProject {
             window.alert('Add files');
             return;
         }
+        let error = '';
+        this.addedFiles.forEach((a) => {
+            if (a.type === 'none' || a.type === 'Unknown') {
+                error = 'Select file types';
+            }
+            if (a.encoding === 'none' || a.encoding === 'Unknown') {
+                error = 'Select character sets';
+            }
+        });
+        if (error !== '') {
+            window.alert(error);
+            return;
+        }
         let subject: string = (document.getElementById('subjectInput') as HTMLInputElement).value;
         let client: string = (document.getElementById('clientInput') as HTMLInputElement).value;
         let srcLang = (document.getElementById('srcLangSelect') as HTMLSelectElement).value;
@@ -110,7 +123,9 @@ class AddProject {
         }
 
         let array: any[] = [];
-        this.addedFiles.forEach((a) => { array.push(a) });
+        this.addedFiles.forEach((a) => {
+            array.push(a)
+        });
 
         let params: any = {
             description: name,

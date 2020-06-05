@@ -31,8 +31,8 @@ import java.lang.System.Logger.Level;
 import java.net.URI;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.time.LocalDate;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.List;
@@ -256,10 +256,13 @@ public class ProjectsHandler implements HttpHandler {
 			Language sourceLang = LanguageUtils.getLanguage(json.getString("srcLang"));
 			Language targetLang = LanguageUtils.getLanguage(json.getString("tgtLang"));
 
-			Date dueDate = new Date();
+			String due = json.getString("dueDate");
+			String[] parts = due.split("-");
+
+			LocalDate dueDate = LocalDate.of(Integer.parseInt(parts[0]), Integer.parseInt(parts[1]), Integer.parseInt(parts[2]));
 
 			Project p = new Project(id, json.getString("description"), Project.NEW, sourceLang, targetLang,
-					json.getString("client"), json.getString("subject"), new Date(), dueDate, null);
+					json.getString("client"), json.getString("subject"), LocalDate.now(), dueDate, null);
 
 			File projectFolder = new File(getWorkFolder(), id);
 			Files.createDirectories(projectFolder.toPath());

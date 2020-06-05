@@ -92,7 +92,6 @@ class Main {
             this.resizePanels();
         });
         window.addEventListener('load', () => {
-            console.log('loaded');
             this.resizePanels();
         })
         this.electron.ipcRenderer.on('view-projects', () => {
