@@ -32,13 +32,33 @@ class ProjectsView {
         this.container.appendChild(topBar);
 
         let addButton = document.createElement('a');
-        addButton.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path d="M12 2c5.514 0 10 4.486 10 10s-4.486 10-10 10-10-4.486-10-10 4.486-10 10-10zm0-2c-6.627 0-12 5.373-12 12s5.373 12 12 12 12-5.373 12-12-5.373-12-12-12zm6 13h-5v5h-2v-5h-5v-2h5v-5h2v5h5v2z"/></svg>' +
+        addButton.innerHTML = '<svg version="1.1" viewBox="0 0 24 24" height="24" width="24">' +
+            '<path style="stroke-width:0.825723" ' +
+            'd="m 21,16.166667 h -2.454545 v -2.5 h -1.636364 v 2.5 h -2.454546 v 1.666666 h 2.454546 v 2.5 h 1.636364 v -2.5 H 21 Z m -5.727273,4.166666 V 22 H 3 V 2 h 8.336455 c 2.587909,0 8.027181,6.0191667 8.027181,8.011667 V 12 h -1.636363 v -1.285833 c 0,-3.4225003 -4.909091,-2.0475003 -4.909091,-2.0475003 0,0 1.242,-5 -2.158364,-5 H 4.6363636 V 20.333333 Z" />' +
+            '</svg>' +
             '<span class="tooltiptext bottomTooltip">Add Project</span>';
         addButton.className = 'tooltip';
         addButton.addEventListener('click', () => {
             this.addProject()
         });
         topBar.appendChild(addButton);
+
+        let openButton = document.createElement('a');
+        openButton.innerHTML = '<svg version="1.1" viewBox="0 0 24 24" height="24" width="24">' +
+            '<path style="stroke-width:0.816497" id="path299" ' +
+            'd="m 20.0575,11.2 -1.154167,7.2 H 5.0966667 L 3.9425,11.2 Z M 8.6433333,4 h -5.81 l 0.595,4 H 5.1125 L 4.755,5.6 H 7.8333333 C 8.76,6.7104 9.46,7.2 11.3975,7.2 h 7.735833 L 18.966667,8 h 1.7 l 0.5,-2.4 H 11.3975 C 9.7491667,5.6 9.6966667,5.2664 8.6433333,4 Z M 22,9.6 H 2 L 3.6666667,20 H 20.333333 Z" />' +
+            '</svg>' +
+            '<span class="tooltiptext bottomTooltip">Open Project</span>';
+        openButton.className = 'tooltip';
+        openButton.addEventListener('click', () => {
+            this.openProject()
+        });
+        topBar.appendChild(openButton);
+
+        let span1 = document.createElement('span');
+        span1.style.width = '30px';
+        span1.innerHTML = '&nbsp;';
+        topBar.appendChild(span1);
 
         let removeButton = document.createElement('a');
         removeButton.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path d="M12 2c5.514 0 10 4.486 10 10s-4.486 10-10 10-10-4.486-10-10 4.486-10 10-10zm0-2c-6.627 0-12 5.373-12 12s5.373 12 12 12 12-5.373 12-12-5.373-12-12-12zm6 13h-12v-2h12v2z"/></svg>' +
@@ -115,6 +135,31 @@ class ProjectsView {
         this.electron.ipcRenderer.send('show-add-project');
     }
 
+    openProject(): void {
+        let selected: string[] = [];
+        let list: HTMLCollectionOf<Element> = document.getElementsByClassName('projectCheck');
+        let length = list.length;
+        for (let i = 0; i < length; i++) {
+            let check: HTMLInputElement = list[i] as HTMLInputElement;
+            if (check.checked) {
+                selected.push(check.getAttribute('data'));
+                console.log(check.getAttribute('data'));
+            }
+        }
+        if (selected.length === 0) {
+            this.electron.ipcRenderer.send('show-message', { type: 'warning', message: 'Select project' });
+            return;
+        }
+        length = selected.length;
+        for (let i = 0; i < length; i++) {
+            // TODO
+           //  let tab: Tab = new Tab(selected[i], 'proj ' + selected[i]);
+           // Main.addTab(tab);
+           let description = 'proj ' + selected[i];
+           this.electron.ipcRenderer.send('add-tab', {id: selected[i], description: description});
+        }
+    }
+
     removeProject(): void {
         // TODO
     }
@@ -144,6 +189,7 @@ class ProjectsView {
             td.id = p.id;
             let check: HTMLInputElement = document.createElement('input');
             check.type = 'checkbox';
+            check.classList.add('projectCheck');
             check.setAttribute('data', p.id);
             td.appendChild(check);
             tr.appendChild(td);
@@ -184,7 +230,7 @@ class ProjectsView {
             td = document.createElement('td');
             td.classList.add('noWrap');
             td.classList.add('center');
-            if (Date.now() > Date.parse(p.dueDate) && p.status !== 2 ) {
+            if (Date.now() > Date.parse(p.dueDate) && p.status !== 2) {
                 td.classList.add('error');
             }
             td.style.minWidth = '170px';

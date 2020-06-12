@@ -17,22 +17,57 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 *****************************************************************************/
 
+class Tab {
 
+    id: string;
+    label: HTMLAnchorElement;
+    container: HTMLDivElement;
+
+    constructor(tabId: string, description: string) {
+        this.id = tabId;
+
+        this.label = document.createElement('a');
+        this.label.id = this.id;
+        this.label.classList.add('tab');
+        this.label.innerText = description;
+        this.label.addEventListener('click', () => {
+            Main.selectTab(this.id);
+        })
+        this.container = document.createElement('div');
+        this.container.classList.add('hidden');
+    }
+
+    getId(): string {
+        return this.id;
+    }
+
+    getLabel(): HTMLAnchorElement {
+        return this.label;
+    }
+
+    getContainer(): HTMLDivElement {
+        return this.container;
+    }
+
+    setContainer(div: HTMLDivElement) : void {
+        this.container = div;
+    }
+}
 
 class Main {
 
     electron = require('electron');
 
-    labels: Map<String, HTMLAnchorElement>;
-    tabs: Map<string, HTMLDivElement>;
+    static labels: Map<String, HTMLAnchorElement>;
+    static tabs: Map<string, HTMLDivElement>;
 
     projectsView: ProjectsView;
     memoriesView: MemoriesView;
     glossariesView: GlossariesView;
 
     constructor() {
-        this.labels = new Map<String, HTMLAnchorElement>();
-        this.tabs = new Map<string, HTMLDivElement>();
+        Main.labels = new Map<String, HTMLAnchorElement>();
+        Main.tabs = new Map<string, HTMLDivElement>();
 
         let tabHolder = document.getElementById('tabs');
         let main = document.getElementById('main');
@@ -42,44 +77,44 @@ class Main {
         projLabel.classList.add('tab');
         projLabel.id = 'projects';
         projLabel.addEventListener('click', () => {
-            this.selectTab('projects');
+            Main.selectTab('projects');
         });
         tabHolder.appendChild(projLabel);
-        this.labels.set('projects', projLabel);
+        Main.labels.set('projects', projLabel);
 
         let proj = this.buildProjectsTab();
         main.appendChild(proj);
-        this.tabs.set('projects', proj);
+        Main.tabs.set('projects', proj);
 
         let memLabel = document.createElement('a');
         memLabel.innerHTML = 'Memories';
         memLabel.classList.add('tab');
         memLabel.id = 'memories';
         memLabel.addEventListener('click', () => {
-            this.selectTab('memories');
+            Main.selectTab('memories');
         });
         tabHolder.appendChild(memLabel);
-        this.labels.set('memories', memLabel);
+        Main.labels.set('memories', memLabel);
 
         let mem = this.buildMemoriesTab();
         main.appendChild(mem);
-        this.tabs.set('memories', mem);
+        Main.tabs.set('memories', mem);
 
         let glossLabel = document.createElement('a');
         glossLabel.innerText = 'Glossaries';
         glossLabel.classList.add('tab');
         glossLabel.id = 'glossaries';
         glossLabel.addEventListener('click', () => {
-            this.selectTab('glossaries');
+            Main.selectTab('glossaries');
         });
         tabHolder.appendChild(glossLabel);
-        this.labels.set('glossaries', glossLabel);
+        Main.labels.set('glossaries', glossLabel);
 
         let gloss = this.buildGlossariesTab();
         main.appendChild(gloss);
-        this.tabs.set('glossaries', gloss);
+        Main.tabs.set('glossaries', gloss);
 
-        this.selectTab('projects');
+        Main.selectTab('projects');
 
         this.electron.ipcRenderer.send('get-theme');
         this.electron.ipcRenderer.on('set-theme', (event: Electron.IpcRendererEvent, arg: any) => {
@@ -95,28 +130,29 @@ class Main {
             this.resizePanels();
         })
         this.electron.ipcRenderer.on('view-projects', () => {
-            this.selectTab('projects');
+            Main.selectTab('projects');
         });
         this.electron.ipcRenderer.on('request-projects', () => {
             this.projectsView.loadProjects();
         });
         this.electron.ipcRenderer.on('view-memories', () => {
-            this.selectTab('memories');
+            Main.selectTab('memories');
         });
         this.electron.ipcRenderer.on('view-glossaries', () => {
-            this.selectTab('glossaries');
+            Main.selectTab('glossaries');
         });
         this.electron.ipcRenderer.on('start-waiting', () => {
             document.getElementById('body').classList.add("wait");
         });
-
         this.electron.ipcRenderer.on('end-waiting', () => {
             document.getElementById('body').classList.remove("wait");
         });
-
         this.electron.ipcRenderer.on('set-status', (event: Electron.IpcRendererEvent, arg: any) => {
-           this.setStatus(arg);
+            this.setStatus(arg);
         });
+        this.electron.ipcRenderer.on('add-tab', (event: Electron.IpcRendererEvent, arg: any) => {
+            this.addTab(arg);
+        })
     }
 
     setStatus(arg: any): void {
@@ -128,22 +164,34 @@ class Main {
             status.style.display = 'none';
         }
     }
-    
-    selectTab(tab: string): void {
-        this.labels.forEach(function (value, key) {
+
+    static selectTab(tab: string): void {
+        Main.labels.forEach(function (value, key) {
             if (value.classList.contains('selectedTab')) {
                 value.classList.remove('selectedTab');
             }
         });
-        this.labels.get(tab).classList.add('selectedTab');
-        this.labels.get(tab).blur();
+        Main.labels.get(tab).classList.add('selectedTab');
+        Main.labels.get(tab).blur();
 
-        this.tabs.forEach(function (value, key) {
+        Main.tabs.forEach(function (value, key) {
             if (!value.classList.contains('hidden')) {
                 value.classList.add('hidden');
             }
         });
-        this.tabs.get(tab).classList.remove('hidden');
+        Main.tabs.get(tab).classList.remove('hidden');
+    }
+
+    addTab(arg: any) {
+        let tab = new Tab(arg.id, arg.description);
+
+        let tabHolder = document.getElementById('tabs');
+        Main.labels.set(tab.getId(), tab.getLabel());
+        tabHolder.appendChild(tab.getLabel());
+
+        let main = document.getElementById('main');
+        Main.tabs.set(tab.getId(), tab.getContainer());
+        main.appendChild(tab.getContainer());
     }
 
     buildProjectsTab(): HTMLDivElement {
