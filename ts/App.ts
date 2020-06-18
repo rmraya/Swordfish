@@ -415,23 +415,18 @@ class Swordfish {
         if (Swordfish.currentPreferences.theme === 'system') {
             if (nativeTheme.shouldUseDarkColors) {
                 Swordfish.currentCss = dark;
-                nativeTheme.themeSource = 'dark';
             } else {
                 Swordfish.currentCss = light;
-                nativeTheme.themeSource = 'light';
             }
         }
         if (Swordfish.currentPreferences.theme === 'dark') {
             Swordfish.currentCss = dark;
-            nativeTheme.themeSource = 'dark';
         }
         if (Swordfish.currentPreferences.theme === 'light') {
             Swordfish.currentCss = light;
-            nativeTheme.themeSource = 'light';
         }
         if (Swordfish.currentPreferences.theme === 'teal') {
             Swordfish.currentCss = teal;
-            nativeTheme.themeSource = 'dark';
         }
     }
 

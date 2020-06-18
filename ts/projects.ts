@@ -25,8 +25,11 @@ class ProjectsView {
     tableContainer: HTMLDivElement;
     tbody: HTMLTableSectionElement;
 
+    descriptions: Map<string, string>;
+
     constructor(div: HTMLDivElement) {
         this.container = div;
+
         let topBar: HTMLDivElement = document.createElement('div');
         topBar.className = 'toolbar';
         this.container.appendChild(topBar);
@@ -87,6 +90,29 @@ class ProjectsView {
         });
         topBar.appendChild(checkButton);
 
+        let span2 = document.createElement('span');
+        span2.style.width = '30px';
+        span2.innerHTML = '&nbsp;';
+        topBar.appendChild(span2);
+
+        let importButton = document.createElement('a');
+        importButton.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path d="M8 9v-4l8 7-8 7v-4h-8v-6h8zm2-7v2h12v16h-12v2h14v-20h-14z"/></svg>' +
+            '<span class="tooltiptext bottomTooltip">Import Project</span>';
+        importButton.className = 'tooltip';
+        importButton.addEventListener('click', () => {
+            this.importProject();
+        });
+        topBar.appendChild(importButton);
+
+        let exportButton = document.createElement('a');
+        exportButton.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path d="M16 9v-4l8 7-8 7v-4h-8v-6h8zm-16-7v20h14v-2h-12v-16h12v-2h-14z"/></svg>' +
+            '<span class="tooltiptext bottomTooltip">Export Project</span>';
+        exportButton.className = 'tooltip';
+        exportButton.addEventListener('click', () => {
+            this.exportProject();
+        });
+        topBar.appendChild(exportButton);
+
         this.tableContainer = document.createElement('div');
         this.tableContainer.classList.add('divContainer');
         this.container.appendChild(this.tableContainer);
@@ -143,7 +169,6 @@ class ProjectsView {
             let check: HTMLInputElement = list[i] as HTMLInputElement;
             if (check.checked) {
                 selected.push(check.getAttribute('data'));
-                console.log(check.getAttribute('data'));
             }
         }
         if (selected.length === 0) {
@@ -152,11 +177,9 @@ class ProjectsView {
         }
         length = selected.length;
         for (let i = 0; i < length; i++) {
-            // TODO
-           //  let tab: Tab = new Tab(selected[i], 'proj ' + selected[i]);
-           // Main.addTab(tab);
-           let description = 'proj ' + selected[i];
-           this.electron.ipcRenderer.send('add-tab', {id: selected[i], description: description});
+            let description = this.descriptions.get(selected[i]);
+            console.log(selected[i] + ' - ' + description);
+            this.electron.ipcRenderer.send('add-tab', { id: selected[i], description: description });
         }
     }
 
@@ -176,7 +199,16 @@ class ProjectsView {
         this.electron.ipcRenderer.send('get-projects');
     }
 
+    importProject(): void {
+        // TODO
+    }
+
+    exportProject(): void {
+        // TODO
+    }
+
     displayProjects(projects: any[]) {
+        this.descriptions = new Map<string, string>();
         this.tbody.innerHTML = '';
         let length = projects.length;
         for (let i = 0; i < length; i++) {
@@ -198,6 +230,7 @@ class ProjectsView {
             td.classList.add('noWrap');
             td.innerText = p.description;
             tr.append(td);
+            this.descriptions.set(p.id, p.description);
 
             td = document.createElement('td');
             td.classList.add('center');

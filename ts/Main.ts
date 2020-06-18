@@ -21,18 +21,30 @@ class Tab {
 
     id: string;
     label: HTMLAnchorElement;
+    labelDiv: HTMLDivElement;
     container: HTMLDivElement;
 
-    constructor(tabId: string, description: string) {
+    constructor(tabId: string, description: string, closeable: boolean) {
         this.id = tabId;
+        this.labelDiv = document.createElement('div');
+        this.labelDiv.classList.add('tab');
 
         this.label = document.createElement('a');
         this.label.id = this.id;
-        this.label.classList.add('tab');
         this.label.innerText = description;
         this.label.addEventListener('click', () => {
             Main.selectTab(this.id);
-        })
+        });
+        this.labelDiv.appendChild(this.label);
+        if (closeable) {
+            let closeAnchor: HTMLAnchorElement = document.createElement('a');
+            closeAnchor.innerText = '[x]';
+            closeAnchor.style.marginLeft = '10px';
+            closeAnchor.addEventListener('click', () => {
+                Main.closeTab(this.id);
+            });
+            this.labelDiv.appendChild(closeAnchor);
+        }
         this.container = document.createElement('div');
         this.container.classList.add('hidden');
     }
@@ -41,15 +53,15 @@ class Tab {
         return this.id;
     }
 
-    getLabel(): HTMLAnchorElement {
-        return this.label;
+    getLabel(): HTMLDivElement {
+        return this.labelDiv;
     }
 
     getContainer(): HTMLDivElement {
         return this.container;
     }
 
-    setContainer(div: HTMLDivElement) : void {
+    setContainer(div: HTMLDivElement): void {
         this.container = div;
     }
 }
@@ -58,61 +70,42 @@ class Main {
 
     electron = require('electron');
 
-    static labels: Map<String, HTMLAnchorElement>;
+    static labels: Map<String, HTMLDivElement>;
     static tabs: Map<string, HTMLDivElement>;
+    static tabHolder: HTMLDivElement;
+    static main: HTMLDivElement;
 
     projectsView: ProjectsView;
     memoriesView: MemoriesView;
     glossariesView: GlossariesView;
 
     constructor() {
-        Main.labels = new Map<String, HTMLAnchorElement>();
+        Main.labels = new Map<String, HTMLDivElement>();
         Main.tabs = new Map<string, HTMLDivElement>();
 
-        let tabHolder = document.getElementById('tabs');
-        let main = document.getElementById('main');
+        Main.tabHolder = document.getElementById('tabs') as HTMLDivElement;
+        Main.main = document.getElementById('main') as HTMLDivElement;
 
-        let projLabel = document.createElement('a');
-        projLabel.innerText = 'Projects';
-        projLabel.classList.add('tab');
-        projLabel.id = 'projects';
-        projLabel.addEventListener('click', () => {
-            Main.selectTab('projects');
-        });
-        tabHolder.appendChild(projLabel);
-        Main.labels.set('projects', projLabel);
+        let projectsTab = new Tab('projects', 'Projects', false);
+        projectsTab.setContainer(this.buildProjectsTab());
+        Main.tabHolder.appendChild(projectsTab.getLabel());
+        Main.labels.set(projectsTab.getId(), projectsTab.getLabel());
+        Main.main.appendChild(projectsTab.getContainer());
+        Main.tabs.set(projectsTab.getId(), projectsTab.getContainer());
 
-        let proj = this.buildProjectsTab();
-        main.appendChild(proj);
-        Main.tabs.set('projects', proj);
+        let memoriesTab = new Tab('memories', 'Memories', false);
+        memoriesTab.setContainer(this.buildMemoriesTab());
+        Main.tabHolder.appendChild(memoriesTab.getLabel());
+        Main.labels.set(memoriesTab.getId(), memoriesTab.getLabel());
+        Main.main.appendChild(memoriesTab.getContainer());
+        Main.tabs.set(memoriesTab.getId(), memoriesTab.getContainer());
 
-        let memLabel = document.createElement('a');
-        memLabel.innerHTML = 'Memories';
-        memLabel.classList.add('tab');
-        memLabel.id = 'memories';
-        memLabel.addEventListener('click', () => {
-            Main.selectTab('memories');
-        });
-        tabHolder.appendChild(memLabel);
-        Main.labels.set('memories', memLabel);
-
-        let mem = this.buildMemoriesTab();
-        main.appendChild(mem);
-        Main.tabs.set('memories', mem);
-
-        let glossLabel = document.createElement('a');
-        glossLabel.innerText = 'Glossaries';
-        glossLabel.classList.add('tab');
-        glossLabel.id = 'glossaries';
-        glossLabel.addEventListener('click', () => {
-            Main.selectTab('glossaries');
-        });
-        tabHolder.appendChild(glossLabel);
-        Main.labels.set('glossaries', glossLabel);
-
-        let gloss = this.buildGlossariesTab();
-        main.appendChild(gloss);
-        Main.tabs.set('glossaries', gloss);
+        let glossariesTab = new Tab('glossaries', 'Glossaries', false);
+        glossariesTab.setContainer(this.buildGlossariesTab())
+        Main.tabHolder.appendChild(glossariesTab.getLabel());
+        Main.labels.set(glossariesTab.getId(), glossariesTab.getLabel());
+        Main.main.appendChild(glossariesTab.getContainer());
+        Main.tabs.set(glossariesTab.getId(), glossariesTab.getContainer());
 
         Main.selectTab('projects');
 
@@ -182,16 +175,28 @@ class Main {
         Main.tabs.get(tab).classList.remove('hidden');
     }
 
+    static closeTab(tab: string): void {
+        Main.tabHolder.removeChild(Main.labels.get(tab));
+        Main.labels.delete(tab);
+        Main.main.removeChild(Main.tabs.get(tab));
+        Main.tabs.delete(tab);
+
+        Main.selectTab('projects');
+    }
+
     addTab(arg: any) {
-        let tab = new Tab(arg.id, arg.description);
+        if (Main.tabs.has(arg.id)) {
+            Main.selectTab(arg.id);
+            return;
+        }
+        let tab = new Tab(arg.id, arg.description, true);
 
-        let tabHolder = document.getElementById('tabs');
         Main.labels.set(tab.getId(), tab.getLabel());
-        tabHolder.appendChild(tab.getLabel());
+        Main.tabHolder.appendChild(tab.getLabel());
 
-        let main = document.getElementById('main');
         Main.tabs.set(tab.getId(), tab.getContainer());
-        main.appendChild(tab.getContainer());
+        Main.main.appendChild(tab.getContainer());
+        Main.selectTab(arg.id);
     }
 
     buildProjectsTab(): HTMLDivElement {
