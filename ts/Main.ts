@@ -17,6 +17,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 *****************************************************************************/
 
+
 class Tab {
 
     id: string;
@@ -38,7 +39,9 @@ class Tab {
         this.labelDiv.appendChild(this.label);
         if (closeable) {
             let closeAnchor: HTMLAnchorElement = document.createElement('a');
-            closeAnchor.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16"><path style="stroke-width: 1.4;" d="M4 4 L12 12 M4 12 L12 4"/></svg>';
+            closeAnchor.className = 'tooltip';
+            closeAnchor.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16"><path style="stroke-width: 1.4;" d="M4 4 L12 12 M4 12 L12 4"/></svg>' +
+            '<span  class="tooltiptext bottomTooltip">Close</span>';
             closeAnchor.style.marginLeft = '10px';
             closeAnchor.addEventListener('click', () => {
                 Main.closeTab(this.id);
@@ -87,21 +90,21 @@ class Main {
         Main.main = document.getElementById('main') as HTMLDivElement;
 
         let projectsTab = new Tab('projects', 'Projects', false);
-        projectsTab.setContainer(this.buildProjectsTab());
+        this.buildProjectsTab(projectsTab.getContainer());
         Main.tabHolder.appendChild(projectsTab.getLabel());
         Main.labels.set(projectsTab.getId(), projectsTab.getLabel());
         Main.main.appendChild(projectsTab.getContainer());
         Main.tabs.set(projectsTab.getId(), projectsTab.getContainer());
 
         let memoriesTab = new Tab('memories', 'Memories', false);
-        memoriesTab.setContainer(this.buildMemoriesTab());
+        this.buildMemoriesTab(memoriesTab.getContainer());
         Main.tabHolder.appendChild(memoriesTab.getLabel());
         Main.labels.set(memoriesTab.getId(), memoriesTab.getLabel());
         Main.main.appendChild(memoriesTab.getContainer());
         Main.tabs.set(memoriesTab.getId(), memoriesTab.getContainer());
 
         let glossariesTab = new Tab('glossaries', 'Glossaries', false);
-        glossariesTab.setContainer(this.buildGlossariesTab())
+        this.buildGlossariesTab(glossariesTab.getContainer());
         Main.tabHolder.appendChild(glossariesTab.getLabel());
         Main.labels.set(glossariesTab.getId(), glossariesTab.getLabel());
         Main.main.appendChild(glossariesTab.getContainer());
@@ -113,7 +116,7 @@ class Main {
         this.electron.ipcRenderer.on('set-theme', (event: Electron.IpcRendererEvent, arg: any) => {
             (document.getElementById('theme') as HTMLLinkElement).href = arg;
         });
-        this.electron.ipcRenderer.on('request-theme', (event: Electron.IpcRendererEvent, arg: any) => {
+        this.electron.ipcRenderer.on('request-theme', () => {
             this.electron.ipcRenderer.send('get-theme');
         });
         window.addEventListener('resize', () => {
@@ -145,6 +148,9 @@ class Main {
         });
         this.electron.ipcRenderer.on('add-tab', (event: Electron.IpcRendererEvent, arg: any) => {
             this.addTab(arg);
+        });
+        this.electron.ipcRenderer.on('open-projects', () => {
+            this.projectsView.openProjects();
         })
     }
 
@@ -196,28 +202,25 @@ class Main {
 
         Main.tabs.set(tab.getId(), tab.getContainer());
         Main.main.appendChild(tab.getContainer());
+
+        new TranslationView(tab.getContainer(), arg.id);
+
         Main.selectTab(arg.id);
     }
 
-    buildProjectsTab(): HTMLDivElement {
-        let div: HTMLDivElement = document.createElement('div');
+    buildProjectsTab(div: HTMLDivElement): void {
         div.classList.add('hidden');
         this.projectsView = new ProjectsView(div);
-        return div;
     }
 
-    buildMemoriesTab(): HTMLDivElement {
-        let div: HTMLDivElement = document.createElement('div');
+    buildMemoriesTab(div: HTMLDivElement): void {
         div.classList.add('hidden');
         this.memoriesView = new MemoriesView(div);
-        return div;
     }
 
-    buildGlossariesTab(): HTMLDivElement {
-        let div: HTMLDivElement = document.createElement('div');
+    buildGlossariesTab(div: HTMLDivElement): void {
         div.classList.add('hidden');
         this.glossariesView = new GlossariesView(div);
-        return div;
     }
 
     resizePanels(): void {

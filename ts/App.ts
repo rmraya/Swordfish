@@ -256,7 +256,7 @@ class Swordfish {
         ipcMain.on('show-message', (event: IpcMainEvent, arg: any) => {
             dialog.showMessageBox(arg);
         });
-        ipcMain.on('add-tab', (event:IpcMainEvent, arg: any) => {
+        ipcMain.on('add-tab', (event: IpcMainEvent, arg: any) => {
             Swordfish.contents.send('add-tab', arg);
         });
     } // end constructor
@@ -300,7 +300,8 @@ class Swordfish {
             new MenuItem({ label: 'Toggle Development Tools', accelerator: 'F12', role: 'toggleDevTools' }),
         ]);
         var projectsMenu: Menu = Menu.buildFromTemplate([
-            { label: 'Add Project', click: () => { this.addProject(); } }
+            { label: 'Add Project', click: () => { Swordfish.addProject(); } },
+            { label: 'Open Project', accelerator: 'CmdOrCtrl+O', click: () => { Swordfish.openProjects(); } }
         ]);
         var memoriesMenu: Menu = Menu.buildFromTemplate([
             { label: 'Add Memory', click: () => { this.addMemory(); } }
@@ -482,6 +483,10 @@ class Swordfish {
             event.sender.send('get-height');
             this.addProjectWindow.show();
         });
+    }
+
+    static openProjects(): void {
+        Swordfish.contents.send('open-projects');
     }
 
     createProject(arg: any): void {

@@ -126,7 +126,6 @@ td {
 td.fixed {
 	text-align: center;
 	vertical-align: middle;
-	background: var(--medium-background);
 	color: var(--normal-color);
 	cursor: default !important;
 }

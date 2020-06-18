@@ -54,7 +54,7 @@ class ProjectsView {
             '<span class="tooltiptext bottomTooltip">Open Project</span>';
         openButton.className = 'tooltip';
         openButton.addEventListener('click', () => {
-            this.openProject()
+            this.openProjects()
         });
         topBar.appendChild(openButton);
 
@@ -161,7 +161,7 @@ class ProjectsView {
         this.electron.ipcRenderer.send('show-add-project');
     }
 
-    openProject(): void {
+    openProjects(): void {
         let selected: string[] = [];
         let list: HTMLCollectionOf<Element> = document.getElementsByClassName('projectCheck');
         let length = list.length;
@@ -218,6 +218,7 @@ class ProjectsView {
 
             let td = document.createElement('td');
             td.classList.add('fixed');
+            td.classList.add('middle');
             td.id = p.id;
             let check: HTMLInputElement = document.createElement('input');
             check.type = 'checkbox';
@@ -228,12 +229,14 @@ class ProjectsView {
 
             td = document.createElement('td');
             td.classList.add('noWrap');
+            td.classList.add('middle');
             td.innerText = p.description;
             tr.append(td);
             this.descriptions.set(p.id, p.description);
 
             td = document.createElement('td');
             td.classList.add('center');
+            td.classList.add('middle');
             if (p.status === 0) {
                 td.innerText = 'New';
             } else if (p.status === 1) {
@@ -246,15 +249,18 @@ class ProjectsView {
             td = document.createElement('td');
             td.innerText = p.sourceLang;
             td.classList.add('center');
+            td.classList.add('middle');
             tr.append(td);
 
             td = document.createElement('td');
             td.innerText = p.targetLang;
             td.classList.add('center');
+            td.classList.add('middle');
             tr.append(td);
 
             td = document.createElement('td');
             td.classList.add('noWrap');
+            td.classList.add('middle');
             td.classList.add('center');
             td.style.minWidth = '170px';
             td.innerText = p.creationDate;
@@ -262,6 +268,7 @@ class ProjectsView {
 
             td = document.createElement('td');
             td.classList.add('noWrap');
+            td.classList.add('middle');
             td.classList.add('center');
             if (Date.now() > Date.parse(p.dueDate) && p.status !== 2) {
                 td.classList.add('error');
@@ -272,6 +279,7 @@ class ProjectsView {
 
             td = document.createElement('td');
             td.classList.add('noWrap');
+            td.classList.add('middle');
             td.classList.add('center');
             td.style.minWidth = '170px';
             if (p.finishDateString) {

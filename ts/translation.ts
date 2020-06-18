@@ -26,6 +26,10 @@ class TranslationView {
     mainArea: HTMLDivElement;
     filesArea: HTMLDivElement;
     translationArea: HTMLDivElement;
+    segmentsArea: HTMLDivElement;
+    memoryArea: HTMLDivElement;
+    termsArea: HTMLDivElement;
+
 
     projectId: string;
     tableContainer: HTMLDivElement;
@@ -40,7 +44,15 @@ class TranslationView {
         let topBar: HTMLDivElement = document.createElement('div');
         topBar.className = 'toolbar';
         div.appendChild(topBar);
-        topBar.innerText = 'top bar'
+        
+        let statisticsButton = document.createElement('a');
+        statisticsButton.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 0 24 24" width="24"><path d="M0 0h24v24H0z" fill="none"/><path d="M9 17H7v-7h2v7zm4 0h-2V7h2v10zm4 0h-2v-4h2v4zm2.5 2.1h-15V5h15v14.1zm0-16.1h-15c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h15c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2z"/></svg>' +
+            '<span class="tooltiptext bottomTooltip">Project Statistics</span>';
+        statisticsButton.className = 'tooltip';
+        statisticsButton.addEventListener('click', () => {
+            this.generateStatistics()
+        });
+        topBar.appendChild(statisticsButton);
 
         this.mainArea = document.createElement('div');
         this.mainArea.id = 'main' + projectId;
@@ -58,7 +70,8 @@ class TranslationView {
 
         this.translationArea = document.createElement('div');
         this.translationArea.id = 'right' + projectId;
-        this.translationArea.style.width = '80%';
+        this.translationArea.classList.add('fill_width');
+        this.translationArea.style.display = 'flex';
         this.mainArea.appendChild(this.translationArea);
 
         this.buildFilesArea();
@@ -66,10 +79,11 @@ class TranslationView {
 
         this.watchSizes(projectId);
 
-        window.addEventListener('load', () => {
+
+        setTimeout(() => {
             this.mainArea.style.width = this.container.clientWidth + 'px';
-            this.mainArea.style.height = (document.getElementById('main').clientHeight - 65) + 'px';
-        });
+            this.mainArea.style.height = (document.getElementById('main').clientHeight - 34) + 'px';
+        }, 200);
     }
 
     getContainer(): HTMLDivElement {
@@ -83,8 +97,7 @@ class TranslationView {
         let observer = new MutationObserver((mutationsList) => {
             for (let mutation of mutationsList) {
                 if (mutation.type === 'attributes') {
-                    console.log('The ' + mutation.attributeName + ' attribute was modified.');
-                    area.style.height = (targetNode.clientHeight - 65) + 'px';
+                    area.style.height = (targetNode.clientHeight - 34) + 'px';
                     area.style.width = this.container.clientWidth + 'px';
                 }
             }
@@ -97,6 +110,35 @@ class TranslationView {
     }
 
     buildTranslationArea(): void {
-        this.translationArea.innerText = 'translation area'
+        this.segmentsArea = document.createElement('div');
+        this.segmentsArea.innerText = 'segments';
+        this.segmentsArea.classList.add('divContainer');
+        this.translationArea.appendChild(this.segmentsArea);
+
+        let rightDivider: HTMLDivElement = document.createElement('div');
+        rightDivider.classList.add('hdivider');
+        this.translationArea.appendChild(rightDivider);
+
+        let rightPanel: HTMLDivElement = document.createElement('div');
+        rightPanel.style.width = '30%';
+        this.translationArea.appendChild(rightPanel);
+
+        this.memoryArea = document.createElement('div');
+        this.memoryArea.style.height = '50%';
+        this.memoryArea.innerText = 'memory';
+        rightPanel.appendChild(this.memoryArea);
+
+        let topDivider: HTMLDivElement = document.createElement('div');;
+        topDivider.classList.add('vdivider');
+        rightPanel.appendChild(topDivider);
+
+        this.termsArea = document.createElement('div');
+        this.termsArea.innerText = 'terms'
+        rightPanel.appendChild(this.termsArea);
+
+    }
+
+    generateStatistics() : void {
+        // TODO
     }
 }
