@@ -38,7 +38,7 @@ class Tab {
         this.labelDiv.appendChild(this.label);
         if (closeable) {
             let closeAnchor: HTMLAnchorElement = document.createElement('a');
-            closeAnchor.innerText = '[x]';
+            closeAnchor.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16"><path style="stroke-width: 1.4;" d="M4 4 L12 12 M4 12 L12 4"/></svg>';
             closeAnchor.style.marginLeft = '10px';
             closeAnchor.addEventListener('click', () => {
                 Main.closeTab(this.id);

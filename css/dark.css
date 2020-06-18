@@ -36,6 +36,7 @@ body {
 	background: var(--normal-background);
 	color: var(--normal-color);
 	fill: var(--normal-color);
+	stroke: var(--normal-color);
 }
 
 .hdivider {
@@ -329,6 +330,7 @@ label {
 	background: var(--toolbar-background);
 	color: var(--toolbar-color);
 	fill: var(--toolbar-color);
+	stroke: var(--toolbar-color);
 	padding-bottom: 0px;
 	padding-top: 0px;
 	padding-left: 4px;
@@ -344,6 +346,7 @@ label {
 	outline: none;
 	color: inherit;
 	fill: inherit;
+	stroke: inherit;
 	text-align: left;
 	font-size: 0.8em;
 	vertical-align: middle;
@@ -357,6 +360,7 @@ label {
 .toolbar a {
 	color: inherit;
 	fill: inherit;
+	stroke: inherit;
 	margin-left: 2px;
 	margin-right: 2px;
 }
@@ -371,6 +375,13 @@ label {
 
 .toolbar a svg {
 	padding-top: 4px;
+	fill: var(--toolbar-color);
+	stroke: var(--toolbar-color);
+}
+
+svg {
+	fill: var(--normal-color);
+	stroke: var(--normal-color);
 }
 
 /* tabs */
@@ -387,7 +398,8 @@ label {
 	overflow: hidden;
 	background: var(--tab-background);
 	color: var(--tab-color);
-	fill: var(--tab-color);
+	fill: var(--tab-highlight);
+	stroke: var(--tab-highlight);
 	padding-top: 4px;
 	padding-left: 6px;
 	padding-right: 6px;
@@ -413,7 +425,6 @@ label {
 
 .tab a {
 	color: inherit;
-	fill: inherit;
 	text-decoration: none;
 	cursor: pointer;
 }
