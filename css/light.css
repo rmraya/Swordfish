@@ -1,5 +1,5 @@
 :root {
-	--normal-background: #c1c1c1;
+	--normal-background: #d1d1d1;
 	--normal-color: #000000;
 	
 	--medium-background: #1565c0;
@@ -26,7 +26,7 @@
 	--disabled-input: #999999;
 
 	--even-row-background: #cdcdcd;
-	--odd-row-background: #bcbcbc;
+	--odd-row-background: #dcdcdc;
 
 	--highlight-color: #ecf01b;
 	--error-color: #960303;
@@ -40,8 +40,9 @@ body {
 }
 
 .hdivider {
-	background: var(--accent-color);
-	width: 2px;
+	width: 3px;
+	border-left: 1px solid var(--accent-color);
+	border-right: 1px solid var(--accent-color);
 	height: 100%;
 	position: relative;
 	cursor: col-resize;
@@ -49,9 +50,10 @@ body {
 }
 
 .vdivider {
-	background: var(--accent-color);
 	width: 100%;
-	height: 2px;
+	height: 3px;
+	border-top: 1px solid var(--accent-color);
+	border-bottom: 1px solid var(--accent-color);
 	position: relative;
 	cursor: row-resize;
 	display: block;

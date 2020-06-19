@@ -126,7 +126,7 @@ class Main {
 
     resizePanels(): void {
         let body = document.getElementById('body');
-        let main = document.getElementById('main');
+        let main = document.getElementById('mainContainer');
         main.style.width = body.clientWidth + 'px';
         main.style.height = (body.clientHeight - 31) + 'px';
     }

@@ -17,57 +17,119 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 *****************************************************************************/
 
-var currentSum: number;
+class VerticalSplit {
 
-function hDragStart(ev: DragEvent, leftId: string, rightId: string) {
-    var leftPanel: HTMLElement = document.getElementById(leftId);
-    var rightPanel: HTMLElement = document.getElementById(rightId);
+    left: HTMLDivElement;
+    divider: HTMLDivElement;
+    right: HTMLDivElement
 
-    currentSum = leftPanel.clientWidth + rightPanel.clientWidth;
+    currentSum: number;
+
+    constructor(parent: HTMLDivElement, leftPercentage: number) {
+
+        parent.style.display = 'flex';
+        parent.style.flexDirection = 'row';
+
+        this.left = document.createElement('div');
+        this.left.style.width = leftPercentage + '%';
+        parent.appendChild(this.left);
+
+        this.divider = document.createElement('div');
+        this.divider.classList.add('hdivider');
+        this.divider.draggable = true;
+        this.divider.addEventListener('dragstart', (event: DragEvent) => {
+            this.dragStart(event);
+        });
+        this.divider.addEventListener('dragend', (event) => {
+            this.dragEnd(event);
+        });
+        parent.appendChild(this.divider);
+
+        this.right = document.createElement('div');
+        this.right.style.width = (100 - leftPercentage) + '%';
+        parent.appendChild(this.right);
+    }
+
+    leftPanel(): HTMLDivElement {
+        return this.left;
+    }
+
+    rightPanel(): HTMLDivElement {
+        return this.right;
+    }
+
+    dragStart(ev: DragEvent) {
+        this.currentSum = this.left.clientWidth + this.divider.clientWidth + this.right.clientWidth;
+    }
+
+    dragEnd(ev: DragEvent) {
+        var leftWidth: number = this.left.clientWidth + ev.offsetX;
+        if (leftWidth < 20) {
+            leftWidth = 20;
+        }
+        leftWidth = Math.round(leftWidth * 100 / this.currentSum);
+
+        var rightWidth: number = 100 - leftWidth;
+        this.left.style.width = leftWidth + 'vw';
+        this.right.style.width = rightWidth + 'vw';
+    }
 }
 
-function hDragEnd(ev: DragEvent, leftId: string, rightId: string) {
-    var leftPanel: HTMLElement = document.getElementById(leftId);
-    var rightPanel: HTMLElement = document.getElementById(rightId);
+class HorizontalSplit {
 
-    var left: number = leftPanel.clientWidth + ev.offsetX;
-    if (left < 20) {
-        left = 20;
+    currentSum: number;
+
+    top: HTMLDivElement;
+    divider: HTMLDivElement;
+    bottom: HTMLDivElement;
+
+    constructor(parent: HTMLDivElement, topPercentage: number) {
+
+        parent.style.display = 'flex';
+        parent.style.flexDirection = 'column';
+
+        this.top = document.createElement('div');
+        this.top.style.height = topPercentage + '%';
+        parent.appendChild(this.top);
+
+        this.divider = document.createElement('div');
+        this.divider.classList.add('vdivider');
+        this.divider.draggable = true;
+        this.divider.addEventListener('dragstart', (event: DragEvent) => {
+            this.dragStart(event);
+        });
+        this.divider.addEventListener('dragend', (event: DragEvent) => {
+            this.dragEnd(event);
+        });
+        parent.appendChild(this.divider);
+
+        this.bottom = document.createElement('div');
+        this.bottom.style.width = (100 - topPercentage) + '%';
+        parent.appendChild(this.bottom);
     }
-    left = Math.round(left * 100 / currentSum);
 
-    var right: number = 100 - left;
-    leftPanel.style.width = left + 'vw';
-    rightPanel.style.width = right + 'vw';
-}
-
-function vDragStart(ev: DragEvent, dividerId: string, topId: string, bottomId: string) {
-    var topPanel: HTMLElement = document.getElementById(topId);
-    var divider: HTMLElement = document.getElementById(dividerId);
-    var bottomPanel: HTMLElement = document.getElementById(bottomId);
-
-    currentSum = topPanel.clientHeight + divider.clientHeight + bottomPanel.clientHeight;
-}
-
-function vDragEnd(ev: DragEvent, dividerId: string, topId: string, bottomId: string, topContainer: string, bottomContainer: string) {
-    var topPanel: HTMLElement = document.getElementById(topId);
-    var divider: HTMLElement = document.getElementById(dividerId);
-    var bottomPanel: HTMLElement = document.getElementById(bottomId);
-
-    var top: number = topPanel.clientHeight + ev.offsetY;
-    if (top < 24) {
-        top = 24;
+    topPanel(): HTMLDivElement {
+        return this.top;
     }
-    if (top > currentSum - 26) {
-        top = currentSum - 26;
+
+    bottomPanel(): HTMLDivElement {
+        return this.bottom;
     }
-    var bottom: number = currentSum - top - divider.clientHeight;
-    topPanel.style.height = top + 'px';
-    bottomPanel.style.height = bottom + 'px';
 
-    var tc = document.getElementById(topContainer);
-    tc.style.height = (top - 25) + 'px';
+    dragStart(ev: DragEvent) {
+        this.currentSum = this.top.clientHeight + this.divider.clientHeight + this.bottom.clientHeight;
+    }
 
-    var bc = document.getElementById(bottomContainer);
-    bc.style.height = (bottom - 25) + 'px';
+    dragEnd(ev: DragEvent) {
+        var topHeight: number = this.top.clientHeight + ev.offsetY;
+        if (topHeight < 24) {
+            topHeight = 24;
+        }
+        topHeight = Math.round(topHeight * 100 / this.currentSum);
+
+        var bottomHeight: number = 100 - topHeight;
+
+        this.top.style.height = topHeight + 'vh';
+        this.bottom.style.height = bottomHeight + 'vh';
+    }
 }
