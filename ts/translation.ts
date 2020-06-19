@@ -26,13 +26,13 @@ class TranslationView {
     mainArea: HTMLDivElement;
     filesArea: HTMLDivElement;
     translationArea: HTMLDivElement;
+    rightPanel: HTMLDivElement;
     segmentsArea: HTMLDivElement;
     memoryArea: HTMLDivElement;
+    machineArea: HTMLDivElement;
     termsArea: HTMLDivElement;
 
-
     projectId: string;
-    tableContainer: HTMLDivElement;
     tbody: HTMLTableSectionElement;
 
     constructor(div: HTMLDivElement, projectId: string) {
@@ -59,24 +59,23 @@ class TranslationView {
         this.mainArea.style.display = 'flex';
         div.appendChild(this.mainArea);
 
-        let splitVertical: VerticalSplit = new VerticalSplit(this.mainArea, 25);
+        let verticalPanels: ThreeVerticalPanels = new ThreeVerticalPanels(this.mainArea);
+        verticalPanels.setWeights([25,50,25])
+        this.filesArea =verticalPanels.leftPanel();
 
-        this.filesArea =splitVertical.leftPanel();
-        this.filesArea.id = 'left' + projectId;
+        this.translationArea = verticalPanels.centerPanel();
+        this.translationArea.style.height = '100%';
 
-        this.translationArea = splitVertical.rightPanel();
-        this.translationArea.id = 'right' + projectId;
-        this.translationArea.classList.add('fill_width');
+        this.rightPanel = verticalPanels.rightPanel();
 
         this.buildFilesArea();
         this.buildTranslationArea();
-
-        this.watchSizes(projectId);
-
+        this.buildRightSide();
 
         setTimeout(() => {
             this.mainArea.style.width = this.container.clientWidth + 'px';
             this.mainArea.style.height = (document.getElementById('mainContainer').clientHeight - 34) + 'px';
+            this.watchSizes(projectId);
         }, 200);
     }
 
@@ -100,27 +99,64 @@ class TranslationView {
     }
 
     buildFilesArea(): void {
-        this.filesArea.innerText = 'files section'
+        let title: HTMLDivElement = document.createElement('div');
+        title.classList.add('titlepanel');
+        title.innerText = 'Files';
+        this.filesArea.appendChild(title);
     }
 
-    buildTranslationArea(): void {
+    buildTranslationArea() : void {
+        let table: HTMLTableElement = document.createElement('table');
+        table.classList.add('fill_width');
+        table.classList.add('stripes');
+        this.translationArea.appendChild(table);
 
-        let verticalSplit : VerticalSplit = new VerticalSplit(this.translationArea, 70);
+        let thead: HTMLTableSectionElement = document.createElement('thead');
+        table.appendChild(thead);
 
-        this.segmentsArea = verticalSplit.leftPanel()
-        this.segmentsArea.innerText = 'segments';
-        this.segmentsArea.classList.add('divContainer');
+        let tr: HTMLTableRowElement = document.createElement('tr');
+        thead.appendChild(tr);
 
-        let rightPanel: HTMLDivElement = verticalSplit.rightPanel();
+        let th = document.createElement('th');
+        th.classList.add('fixed');
+        tr.appendChild(th);
 
-        let horizontalSplit: HorizontalSplit = new HorizontalSplit(rightPanel, 50);
+        let selectAll: HTMLInputElement = document.createElement('input');
+        selectAll.type = 'checkbox';
+        th.appendChild(selectAll);
+
+        th = document.createElement('th');
+        th.innerText = 'Source'
+        tr.appendChild(th);
+
+        th = document.createElement('th');
+        th.innerText = 'Target'
+        tr.appendChild(th);
+
+        this.tbody = document.createElement('tbody');
+        table.appendChild(this.tbody);
+    }
+
+    buildRightSide(): void {
+        let horizontalSplit: ThreeHorizontalPanels = new ThreeHorizontalPanels(this.rightPanel);
 
         this.memoryArea = horizontalSplit.topPanel();
-        this.memoryArea.innerText = 'memory';
+        let memoryTitle: HTMLDivElement = document.createElement('div');
+        memoryTitle.classList.add('titlepanel');
+        memoryTitle.innerText = 'Translation Memory';
+        this.memoryArea.appendChild(memoryTitle);
+
+        this.machineArea = horizontalSplit.centerPanel();
+        let machineTitle: HTMLDivElement = document.createElement('div');
+        machineTitle.classList.add('titlepanel');
+        machineTitle.innerText = 'Machine Translation';
+        this.machineArea.appendChild(machineTitle);
 
         this.termsArea = horizontalSplit.bottomPanel();
-        this.termsArea.innerText = 'terms'
-
+        let termsTitle: HTMLDivElement = document.createElement('div');
+        termsTitle.classList.add('titlepanel');
+        termsTitle.innerText = 'Terms';
+        this.termsArea.appendChild(termsTitle);
     }
 
     generateStatistics() : void {
