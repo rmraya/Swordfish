@@ -1,24 +1,16 @@
 :root {
 	--normal-background: #232323;
-	--normal-color: #ffffff;
-	
-	--medium-background: #3b3b3b;
-	--medium-color: #fefefe;
+	--normal-color: #fefefe;
 
 	--accent-color: #3465aa;
 	--accent-alternative: #0551bb;
 	--accent-contrast: #ffffff;
 
-	--toolbar-background: #454545;
-	--toolbar-color: #fefefe;
-
-	--tooltip-background: #3465aa;
+	--tooltip-background: #0d47a1;
 	--tooltip-color: #fefefe;
 
 	--tabHolder-background: #141414;
 	--tab-background: #454545;
-	--tab-color: #d1d5d4;
-	--tab-highlight: #3966d6;
 	--tab-hover: #2f363d;
 
 	--input-background: #313131;
@@ -63,14 +55,14 @@ body {
 }
 
 header {
-	background: var(--medium-background);
-	color: var(--medium-color);
+	background: var(--accent-color);
+	color: var(--accent-contrast);
 	border-bottom: solid 2px var(--accent-color);
 }
 
 footer {
-	background: var(--medium-background);
-	color: var(--medium-color);
+	background: var(--accent-color);
+	color: var(--accent-contrast);
 	border-top: 2px solid var(--accent-color);
 }
 
@@ -104,8 +96,8 @@ table {
 
 thead {
 	height: 24px;
-	background-color: var(--medium-background);
-	color: var(--medium-color);
+	background: var(--accent-color);
+	color: var(--accent-contrast);
 }
 
 thead tr {
@@ -137,8 +129,8 @@ th {
 	top: 0;
 	z-index: 5;
 	font-weight: lighter;
-	background-color: var(--medium-background);
-	color: var(--medium-color);
+	background: var(--accent-color);
+	color: var(--accent-contrast);
 }
 
 .stripes tr:nth-child(odd) {
@@ -156,7 +148,7 @@ th {
 
 .highlighted {
 	color: var(--highlight-color);
-	background: var(--medium-background);
+	background: var(--accent-color);
 }
 
 .right {
@@ -186,12 +178,13 @@ input {
 	font-size: 1rem;
 }
 
-input:disabled {
-	background-color: var(--disabled-input);
+input:focus {
+	outline: none !important;
+	border: 1px solid var(--accent-color);
 }
 
-input[type=text]:focus {
-	border: 1px solid transparent;
+input:disabled {
+	background-color: var(--disabled-input);
 }
 
 input[type=number]:focus {
@@ -206,32 +199,6 @@ input[type=number] {
 	padding-left: 2px;
 }
 
-input[type=checkbox] {
-	position: relative;
-}
-
-input[type=checkbox]:before {
-	content: "";
-	display: block;
-	position: absolute;
-	width: 12px;
-	height: 12px;
-	top: -2px;
-	left: 0;
-}
-
-input[type=checkbox]:checked:after {
-	content: "";
-	display: block;
-	width: 4px;
-	height: 8px;
-	border-width: 0 1px 1px 0;
-	transform: rotate(45deg);
-	position: absolute;
-	top: 0px;
-	left: 5px;
-}
-
 select {
 	background-color: var(--input-background);
 	color: var(--input-color);
@@ -239,6 +206,11 @@ select {
 	font-size: 1em;
 	height: 1.6em;
 	border-radius: 0px;
+}
+
+select:focus {
+	outline: none !important;
+	border: 1px solid var(--accent-color);
 }
 
 option {
@@ -253,7 +225,12 @@ textarea {
 	background-color: var(--input-background);
 	color: var(--input-color);
 	border: 1px solid var(--input-color);
-	
+	outline: none;
+}
+
+textarea:focus {
+	outline: none !important;
+	border: 1px solid var(--accent-color);
 }
 
 button {
@@ -328,10 +305,10 @@ label {
 .toolbar {
 	display: flex;
 	flex-direction: row;
-	background: var(--toolbar-background);
-	color: var(--toolbar-color);
-	fill: var(--toolbar-color);
-	stroke: var(--toolbar-color);
+	background: var(--tab-background);
+	color: var(--normal-color);
+	fill: var(--accent-color);
+	stroke: var(--accent-color);
 	padding-bottom: 0px;
 	padding-top: 0px;
 	padding-left: 4px;
@@ -376,8 +353,9 @@ label {
 
 .toolbar a svg {
 	padding-top: 4px;
-	fill: var(--toolbar-color);
-	stroke: var(--toolbar-color);
+	color: var(--normal-color);
+	fill: var(--normal-color);
+	stroke: var(--normal-color);
 }
 
 svg {
@@ -398,9 +376,9 @@ svg {
 .tab {
 	overflow: hidden;
 	background: var(--tab-background);
-	color: var(--tab-color);
-	fill: var(--tab-highlight);
-	stroke: var(--tab-highlight);
+	color: var(--normal-color);
+	fill: var(--accent-color);
+	stroke: var(--accent-color);
 	padding-top: 4px;
 	padding-left: 6px;
 	padding-right: 6px;
@@ -412,7 +390,7 @@ svg {
 }
 
 .selectedTab {
-	border-bottom: 3px solid var(--tab-highlight);
+	border-bottom: 3px solid var(--accent-color);
 }
 
 .tab:hover {
@@ -421,7 +399,7 @@ svg {
 }
 
 .selectedTab:hover {
-	border-bottom: 3px solid var(--tab-highlight) !important;
+	border-bottom: 3px solid var(--accent-color) !important;
 }
 
 .tab a {
@@ -449,11 +427,12 @@ svg {
 }
 
 .titlepanel {
+	margin: 0px;
 	padding-top: 0px;
 	padding-left: 4px;
-	width: 100%;
 	background: var(--accent-color);
 	color: var(--accent-contrast);
+	border-bottom: 1px solid var(--normal-background);
 	white-space: nowrap;
 	overflow-x: hidden;
 }

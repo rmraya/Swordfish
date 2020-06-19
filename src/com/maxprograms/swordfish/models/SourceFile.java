@@ -35,6 +35,12 @@ public class SourceFile implements Serializable, Comparable<SourceFile> {
 		this.encoding = encoding;
 	}
 
+	public SourceFile(JSONObject json) {
+		this.file = json.getString("file");
+		this.type = json.getString("type");
+		this.encoding = json.getString("encoding");
+	}
+
 	public String getFile() {
 		return file;
 	}

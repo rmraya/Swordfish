@@ -34,6 +34,7 @@ class TranslationView {
 
     projectId: string;
     tbody: HTMLTableSectionElement;
+    filesTableBody: HTMLTableSectionElement;
 
     constructor(div: HTMLDivElement, projectId: string) {
         this.container = div;
@@ -44,7 +45,7 @@ class TranslationView {
         let topBar: HTMLDivElement = document.createElement('div');
         topBar.className = 'toolbar';
         div.appendChild(topBar);
-        
+
         let statisticsButton = document.createElement('a');
         statisticsButton.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 0 24 24" width="24"><path d="M9 17H7v-7h2v7zm4 0h-2V7h2v10zm4 0h-2v-4h2v4zm2.5 2.1h-15V5h15v14.1zm0-16.1h-15c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h15c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2z"/></svg>' +
             '<span class="tooltiptext bottomTooltip">Project Statistics</span>';
@@ -60,8 +61,8 @@ class TranslationView {
         div.appendChild(this.mainArea);
 
         let verticalPanels: ThreeVerticalPanels = new ThreeVerticalPanels(this.mainArea);
-        verticalPanels.setWeights([25,50,25])
-        this.filesArea =verticalPanels.leftPanel();
+        verticalPanels.setWeights([25, 50, 25])
+        this.filesArea = verticalPanels.leftPanel();
 
         this.translationArea = verticalPanels.centerPanel();
         this.translationArea.style.height = '100%';
@@ -71,6 +72,10 @@ class TranslationView {
         this.buildFilesArea();
         this.buildTranslationArea();
         this.buildRightSide();
+
+        this.electron.ipcRenderer.on('set-files', (event: Electron.IpcRendererEvent, arg: any) => {
+            this.setFiles(arg);
+        });
 
         setTimeout(() => {
             this.mainArea.style.width = this.container.clientWidth + 'px';
@@ -99,13 +104,56 @@ class TranslationView {
     }
 
     buildFilesArea(): void {
+        this.filesArea.classList.add('divContainer');
         let title: HTMLDivElement = document.createElement('div');
         title.classList.add('titlepanel');
-        title.innerText = 'Files';
+        title.innerText = 'Project Files';
         this.filesArea.appendChild(title);
+
+        let table: HTMLTableElement = document.createElement('table');
+        table.classList.add('fill_width');
+        table.classList.add('stripes');
+        this.filesArea.appendChild(table);
+
+        this.filesTableBody = document.createElement('tbody');
+        table.appendChild(this.filesTableBody);
+
+        this.electron.ipcRenderer.send('get-files', { project: this.projectId });
     }
 
-    buildTranslationArea() : void {
+    setFiles(arg: any): void {
+        if (this.projectId !== arg.project) {
+            return;
+        }
+        var files: string[] = arg.files;
+        let length = files.length;
+        for (let i = 0; i < length; i++) {
+            let tr: HTMLTableRowElement = document.createElement('tr');
+            let td: HTMLTableCellElement = document.createElement('td');
+            td.innerText = files[i];
+            tr.appendChild(td);
+            tr.addEventListener('click', () => {
+                this.openFile(files[i])
+            });
+            this.filesTableBody.appendChild(tr);
+        }
+        if (length === 1) {
+            this.openFile(files[0]);
+        }
+    }
+
+    openFile(file: string): void {
+        // TODO 
+        document.getElementById('fileTitle' + this.projectId).innerText = file;
+    }
+
+    buildTranslationArea(): void {
+        let title: HTMLDivElement = document.createElement('div');
+        title.classList.add('titlepanel');
+        title.innerText = 'Select File';
+        title.id = 'fileTitle' + this.projectId;
+        this.translationArea.appendChild(title);
+
         let table: HTMLTableElement = document.createElement('table');
         table.classList.add('fill_width');
         table.classList.add('stripes');
@@ -159,7 +207,7 @@ class TranslationView {
         this.termsArea.appendChild(termsTitle);
     }
 
-    generateStatistics() : void {
+    generateStatistics(): void {
         // TODO
     }
 }

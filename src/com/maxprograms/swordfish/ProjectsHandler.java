@@ -35,12 +35,16 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Hashtable;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.SortedSet;
+import java.util.TreeSet;
 import java.util.concurrent.ConcurrentHashMap;
 
 import com.maxprograms.converters.Convert;
 import com.maxprograms.converters.FileFormats;
+import com.maxprograms.converters.Join;
 import com.maxprograms.languages.Language;
 import com.maxprograms.languages.LanguageUtils;
 import com.maxprograms.swordfish.models.Project;
@@ -59,7 +63,7 @@ public class ProjectsHandler implements HttpHandler {
 	private static ConcurrentHashMap<String, Project> projects;
 	private static Map<String, String> processes;
 	private static boolean firstRun = true;
-	
+
 	protected JSONObject projectsList;
 
 	protected boolean converting;
@@ -108,6 +112,8 @@ public class ProjectsHandler implements HttpHandler {
 				response = exportProject(request);
 			} else if ("/projects/status".equals(url)) {
 				response = getProcessStatus(request);
+			} else if ("/projects/files".equals(url)) {
+				response = getProjectFiles(request);
 			} else {
 				response.put(Constants.REASON, "Unknown request");
 			}
@@ -123,6 +129,24 @@ public class ProjectsHandler implements HttpHandler {
 			response.put(Constants.REASON, j.getMessage());
 		}
 		return response;
+	}
+
+	private JSONObject getProjectFiles(String request) {
+		JSONObject result = new JSONObject();
+		JSONObject json = new JSONObject(request);
+		if (!projects.containsKey(json.getString("project"))) {
+			result.put(Constants.REASON, "Project does not exist");
+			return result;
+		}
+		Project project = projects.get(json.getString("project"));
+		JSONArray filesArray = new JSONArray();
+		List<SourceFile> files = project.getFiles();
+		Iterator<SourceFile> it = files.iterator();
+		while (it.hasNext()) {
+			filesArray.put(it.next().getFile());
+		}
+		result.put("files", filesArray);
+		return result;
 	}
 
 	private JSONObject getProcessStatus(String request) {
@@ -242,6 +266,13 @@ public class ProjectsHandler implements HttpHandler {
 		}
 		JSONObject json = new JSONObject(request);
 		JSONArray files = json.getJSONArray("files");
+
+		SortedSet<String> filesList = new TreeSet<>();
+		for (int i = 0; i < files.length(); i++) {
+			filesList.add(files.getJSONObject(i).getString("file"));
+		}
+		String filesRoot = Join.findTreeRoot(filesList);
+
 		conversionError = "";
 		converting = true;
 
@@ -259,7 +290,8 @@ public class ProjectsHandler implements HttpHandler {
 			String due = json.getString("dueDate");
 			String[] parts = due.split("-");
 
-			LocalDate dueDate = LocalDate.of(Integer.parseInt(parts[0]), Integer.parseInt(parts[1]), Integer.parseInt(parts[2]));
+			LocalDate dueDate = LocalDate.of(Integer.parseInt(parts[0]), Integer.parseInt(parts[1]),
+					Integer.parseInt(parts[2]));
 
 			Project p = new Project(id, json.getString("description"), Project.NEW, sourceLang, targetLang,
 					json.getString("client"), json.getString("subject"), LocalDate.now(), dueDate, null);
@@ -273,10 +305,14 @@ public class ProjectsHandler implements HttpHandler {
 					try {
 						for (int i = 0; i < files.length(); i++) {
 							JSONObject file = files.getJSONObject(i);
-							SourceFile sf = new SourceFile(file.getString("file"),
-									FileFormats.getFullName(file.getString("type")), file.getString("encoding"));
+							String fullName = file.getString("file");
+							String shortName = fullName.substring(filesRoot.length());
+							if (shortName.startsWith(File.pathSeparator)) {
+								shortName = shortName.substring(File.pathSeparator.length());
+							}
+							SourceFile sf = new SourceFile(shortName, FileFormats.getFullName(file.getString("type")),
+									file.getString("encoding"));
 							sourceFiles.add(sf);
-
 							if (!FileFormats.XLIFF.equals(sf.getType())) {
 
 								boolean paragraph = false;
@@ -286,9 +322,13 @@ public class ProjectsHandler implements HttpHandler {
 									paragraph = true;
 								}
 
-								File source = new File(file.getString("file"));
-								File xliff = new File(projectFolder, source.getName() + ".xlf");
-								File skl = new File(projectFolder, source.getName() + ".skl");
+								File source = new File(fullName);
+								File xliff = new File(projectFolder, shortName + ".xlf");
+								if (!xliff.getParentFile().exists()) {
+									Files.createDirectories(xliff.getParentFile().toPath());
+								}
+								File skl = new File(projectFolder, shortName + ".skl");
+
 								Map<String, String> params = new HashMap<>();
 								params.put("source", source.getAbsolutePath());
 								params.put("xliff", xliff.getAbsolutePath());
@@ -310,7 +350,8 @@ public class ProjectsHandler implements HttpHandler {
 									}
 								}
 								if (!"0".equals(res.get(0))) {
-									logger.log(Level.INFO, file.toString(2));
+									logger.log(Level.INFO,"Conversion failed for: " + file.toString(2));
+									// TODO remove failed project folder
 									throw new IOException(res.get(1));
 								}
 							}

@@ -21,6 +21,7 @@ package com.maxprograms.swordfish.models;
 import java.io.IOException;
 import java.io.Serializable;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
@@ -49,8 +50,6 @@ public class Project implements Serializable, Comparable<Project> {
 	private LocalDate dueDate;
 	private LocalDate finishDate;
 	private List<SourceFile> files;
-	private List<Memory> memories;
-	private List<Glossary> glossaries;
 
 	public Project(String id, String description, int status, Language sourceLang, Language targetLang, String client,
 			String subject, LocalDate creationDate, LocalDate dueDate, LocalDate finishDate) {
@@ -78,6 +77,11 @@ public class Project implements Serializable, Comparable<Project> {
 		this.dueDate = LocalDate.parse(json.getString("dueDate"));
 		if (json.has("finishDate")) {
 			this.finishDate = LocalDate.parse(json.getString("finishDate"));
+		}
+		files = new ArrayList<>();
+		JSONArray filesArray = json.getJSONArray("files");
+		for (int i=0 ; i<filesArray.length() ; i++) {
+			files.add(new SourceFile(filesArray.getJSONObject(i)));
 		}
 	}
 
@@ -174,22 +178,6 @@ public class Project implements Serializable, Comparable<Project> {
 
 	public void setFiles(List<SourceFile> files) {
 		this.files = files;
-	}
-
-	public List<Memory> getMemories() {
-		return memories;
-	}
-
-	public void setMemories(List<Memory> memories) {
-		this.memories = memories;
-	}
-
-	public List<Glossary> getGlossaries() {
-		return glossaries;
-	}
-
-	public void setGlossaries(List<Glossary> glossaries) {
-		this.glossaries = glossaries;
 	}
 
 	@Override
