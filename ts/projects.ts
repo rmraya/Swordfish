@@ -34,32 +34,40 @@ class ProjectsView {
         topBar.className = 'toolbar';
         this.container.appendChild(topBar);
 
-        let addButton = document.createElement('a');
-        addButton.innerHTML = '<svg version="1.1" viewBox="0 0 24 24" height="24" width="24">' +
-            '<path style="stroke-width:0.825723" ' +
-            'd="m 21,16.166667 h -2.454545 v -2.5 h -1.636364 v 2.5 h -2.454546 v 1.666666 h 2.454546 v 2.5 h 1.636364 v -2.5 H 21 Z m -5.727273,4.166666 V 22 H 3 V 2 h 8.336455 c 2.587909,0 8.027181,6.0191667 8.027181,8.011667 V 12 h -1.636363 v -1.285833 c 0,-3.4225003 -4.909091,-2.0475003 -4.909091,-2.0475003 0,0 1.242,-5 -2.158364,-5 H 4.6363636 V 20.333333 Z" />' +
-            '</svg>' +
-            '<span class="tooltiptext bottomTooltip">Add Project</span>';
-        addButton.className = 'tooltip';
-        addButton.addEventListener('click', () => {
-            this.addProject()
+        let addFileButton = document.createElement('a');
+        addFileButton.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path d="m 21,16.166667 h -2.454545 v -2.5 h -1.636364 v 2.5 h -2.454546 v 1.666666 h 2.454546 v 2.5 h 1.636364 v -2.5 H 21 Z m -5.727273,4.166666 V 22 H 3 V 2 h 8.336455 c 2.587909,0 8.027181,6.0191667 8.027181,8.011667 V 12 h -1.636363 v -1.285833 c 0,-3.4225003 -4.909091,-2.0475003 -4.909091,-2.0475003 0,0 1.242,-5 -2.158364,-5 H 4.6363636 V 20.333333 Z" /></svg>' +
+            '<span class="tooltiptext bottomTooltip">Translate Single File</span>';
+            addFileButton.className = 'tooltip';
+            addFileButton.addEventListener('click', () => {
+            this.addFile();
         });
-        topBar.appendChild(addButton);
+        topBar.appendChild(addFileButton);
+
+        let addProjectButton = document.createElement('a');
+        addProjectButton.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 0 24 24" width="24"><path d="M20 6h-8l-2-2H4c-1.11 0-1.99.89-1.99 2L2 18c0 1.11.89 2 2 2h16c1.11 0 2-.89 2-2V8c0-1.11-.89-2-2-2zm0 12H4V6h5.17l2 2H20v10zm-8-4h2v2h2v-2h2v-2h-2v-2h-2v2h-2z"/></svg>' +
+            '<span class="tooltiptext bottomTooltip">Add Project</span>';
+        addProjectButton.className = 'tooltip';
+        addProjectButton.addEventListener('click', () => {
+            this.addProject();
+        });
+        topBar.appendChild(addProjectButton);
+
+        let span0 = document.createElement('span');
+        span0.style.width = '30px';
+        span0.innerHTML = '&nbsp;';
+        topBar.appendChild(span0);
 
         let openButton = document.createElement('a');
-        openButton.innerHTML = '<svg version="1.1" viewBox="0 0 24 24" height="24" width="24">' +
-            '<path style="stroke-width:0.816497" id="path299" ' +
-            'd="m 20.0575,11.2 -1.154167,7.2 H 5.0966667 L 3.9425,11.2 Z M 8.6433333,4 h -5.81 l 0.595,4 H 5.1125 L 4.755,5.6 H 7.8333333 C 8.76,6.7104 9.46,7.2 11.3975,7.2 h 7.735833 L 18.966667,8 h 1.7 l 0.5,-2.4 H 11.3975 C 9.7491667,5.6 9.6966667,5.2664 8.6433333,4 Z M 22,9.6 H 2 L 3.6666667,20 H 20.333333 Z" />' +
-            '</svg>' +
+        openButton.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 0 24 24" width="24"><path d="M20 6h-8l-2-2H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2zm0 12H4V8h16v10z"/></svg>' +
             '<span class="tooltiptext bottomTooltip">Open Project</span>';
         openButton.className = 'tooltip';
         openButton.addEventListener('click', () => {
-            this.openProjects()
+            this.openProjects();
         });
         topBar.appendChild(openButton);
 
         let span1 = document.createElement('span');
-        span1.style.width = '30px';
+        span1.style.width = '10px';
         span1.innerHTML = '&nbsp;';
         topBar.appendChild(span1);
 
@@ -68,27 +76,9 @@ class ProjectsView {
             '<span class="tooltiptext bottomTooltip">Remove Project</span>';
         removeButton.className = 'tooltip';
         removeButton.addEventListener('click', () => {
-            this.removeProject()
+            this.removeProject();
         });
         topBar.appendChild(removeButton);
-
-        let modifyButton = document.createElement('a');
-        modifyButton.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path d="M12 2c5.514 0 10 4.486 10 10s-4.486 10-10 10-10-4.486-10-10 4.486-10 10-10zm0-2c-6.627 0-12 5.373-12 12s5.373 12 12 12 12-5.373 12-12-5.373-12-12-12zm-3.994 12.964l3.106 3.105-4.112.931 1.006-4.036zm9.994-3.764l-5.84 5.921-3.202-3.202 5.841-5.919 3.201 3.2z"/></svg>' +
-            '<span class="tooltiptext bottomTooltip">Modify Project</span>';
-        modifyButton.className = 'tooltip';
-        modifyButton.addEventListener('click', () => {
-            this.modifyProject()
-        });
-        topBar.appendChild(modifyButton);
-
-        let checkButton = document.createElement('a');
-        checkButton.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path d="M12 2c5.514 0 10 4.486 10 10s-4.486 10-10 10-10-4.486-10-10 4.486-10 10-10zm0-2c-6.627 0-12 5.373-12 12s5.373 12 12 12 12-5.373 12-12-5.373-12-12-12zm4.393 7.5l-5.643 5.784-2.644-2.506-1.856 1.858 4.5 4.364 7.5-7.643-1.857-1.857z"/></svg>' +
-            '<span class="tooltiptext bottomTooltip">Complete Project</span>';
-        checkButton.className = 'tooltip';
-        checkButton.addEventListener('click', () => {
-            this.completeProject()
-        });
-        topBar.appendChild(checkButton);
 
         let span2 = document.createElement('span');
         span2.style.width = '30px';
@@ -129,8 +119,8 @@ class ProjectsView {
             '<th style="padding-left:5px;padding-right:5px;">Src.Lang.</th>' +
             '<th style="padding-left:5px;padding-right:5px;">Tgt.Lang.</th>' +
             '<th style="padding-left:5px;padding-right:5px;">Created</th>' +
-            '<th style="padding-left:5px;padding-right:5px;">Due Date</th>' +
-            '<th style="padding-left:5px;padding-right:5px;">Completed</th>' +
+            '<th style="padding-left:5px;padding-right:5px;">Client</th>' +
+            '<th style="padding-left:5px;padding-right:5px;">Subject</th>' +
             '</tr></thead>';
 
         this.tbody = document.createElement('tbody');
@@ -157,6 +147,10 @@ class ProjectsView {
         this.tableContainer.style.width = this.container.clientWidth + 'px';
     }
 
+    addFile(): void {
+        this.electron.ipcRenderer.send('show-add-file');
+    }
+
     addProject(): void {
         this.electron.ipcRenderer.send('show-add-project');
     }
@@ -178,20 +172,11 @@ class ProjectsView {
         length = selected.length;
         for (let i = 0; i < length; i++) {
             let description = this.descriptions.get(selected[i]);
-            console.log(selected[i] + ' - ' + description);
             this.electron.ipcRenderer.send('add-tab', { id: selected[i], description: description });
         }
     }
 
     removeProject(): void {
-        // TODO
-    }
-
-    modifyProject(): void {
-        // TODO
-    }
-
-    completeProject(): void {
         // TODO
     }
 
@@ -270,11 +255,8 @@ class ProjectsView {
             td.classList.add('noWrap');
             td.classList.add('middle');
             td.classList.add('center');
-            if (Date.now() > Date.parse(p.dueDate) && p.status !== 2) {
-                td.classList.add('error');
-            }
             td.style.minWidth = '170px';
-            td.innerText = p.dueDate;
+            td.innerText = p.client;
             tr.append(td);
 
             td = document.createElement('td');
@@ -282,9 +264,7 @@ class ProjectsView {
             td.classList.add('middle');
             td.classList.add('center');
             td.style.minWidth = '170px';
-            if (p.finishDateString) {
-                td.innerText = p.finishDate;
-            }
+                td.innerText = p.subject;
             tr.append(td);
             this.tbody.appendChild(tr);
         }

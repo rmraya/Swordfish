@@ -58,28 +58,31 @@ class VerticalSplit {
     }
 
     dragStart(ev: DragEvent) {
-        this.currentSum = this.left.clientWidth + this.divider.clientWidth + this.right.clientWidth;
+        this.currentSum = this.left.clientWidth + this.right.clientWidth;
     }
 
     dragEnd(ev: DragEvent) {
         var leftWidth: number = this.left.clientWidth + ev.offsetX;
-        if (leftWidth < 20) {
-            leftWidth = 20;
+        if (leftWidth < 5) {
+            leftWidth = 5;
         }
-        var rightWidth: number = this.currentSum - leftWidth - this.divider.clientWidth;
+        var rightWidth: number = this.currentSum - leftWidth;
         this.left.style.width = leftWidth + 'px';
         this.right.style.width = rightWidth + 'px';
     }
 }
 
 class ThreeVerticalPanels {
+
     left: HTMLDivElement;
     leftDivider: HTMLDivElement;
     center: HTMLDivElement;
     rightDivider: HTMLDivElement;
     right: HTMLDivElement;
 
-    currentSum: number;
+    leftWidth: number;
+    centerWidth: number;
+    rightWidth: number;
 
     constructor(parent: HTMLDivElement) {
         parent.style.display = 'flex';
@@ -93,7 +96,7 @@ class ThreeVerticalPanels {
         this.leftDivider.classList.add('hdivider');
         this.leftDivider.draggable = true;
         this.leftDivider.addEventListener('dragstart', () => {
-            this.leftDragStart();
+            this.dragStart();
         });
         this.leftDivider.addEventListener('dragend', (event) => {
             this.leftDragEnd(event);
@@ -108,7 +111,7 @@ class ThreeVerticalPanels {
         this.rightDivider.classList.add('hdivider');
         this.rightDivider.draggable = true;
         this.rightDivider.addEventListener('dragstart', () => {
-            this.rightDragStart();
+            this.dragStart();
         });
         this.rightDivider.addEventListener('dragend', (event) => {
             this.rightDragEnd(event);
@@ -120,7 +123,7 @@ class ThreeVerticalPanels {
         parent.appendChild(this.right);
     }
 
-    setWeights(weights: number[]) : void {
+    setWeights(weights: number[]): void {
         this.left.style.width = weights[0] + '%';
         this.center.style.width = weights[1] + '%';
         this.right.style.width = weights[2] + '%';
@@ -138,32 +141,32 @@ class ThreeVerticalPanels {
         return this.right;
     }
 
-    leftDragStart() {
-        this.currentSum = this.left.clientWidth + this.leftDivider.clientWidth + this.right.clientWidth;
+    dragStart() {
+        this.leftWidth = this.left.clientWidth;
+        this.centerWidth = this.center.clientWidth;
+        this.rightWidth = this.right.clientWidth;
     }
 
     leftDragEnd(ev: DragEvent) {
-        var leftWidth: number = this.left.clientWidth + ev.offsetX;
-        if (leftWidth < 20) {
-            leftWidth = 20;
+        let sum = this.leftWidth + this.centerWidth + this.rightWidth;
+        this.leftWidth = this.leftWidth + ev.offsetX;
+        if (this.leftWidth < 5) {
+            this.leftWidth = 5;
         }
-        var centerWidth: number = this.currentSum - this.leftDivider.clientWidth;
-        this.left.style.width = leftWidth + 'px';
-        this.center.style.width = centerWidth + 'px';
-    }
-
-    rightDragStart() {
-        this.currentSum = this.center.clientWidth + this.rightDivider.clientWidth + this.right.clientWidth;
+        this.centerWidth = sum - this.leftWidth - this.rightWidth;
+        this.left.style.width = this.leftWidth + 'px';
+        this.center.style.width = this.centerWidth + 'px';
     }
 
     rightDragEnd(ev: DragEvent) {
-        var centerWidth: number = this.center.clientWidth + ev.offsetX;
-        if (centerWidth < 20) {
-            centerWidth = 20;
+        let sum = this.leftWidth + this.centerWidth + this.rightWidth;
+        this.centerWidth = this.centerWidth + ev.offsetX;
+        if (this.centerWidth < 5) {
+            this.centerWidth = 5;
         }
-        var rightWidth: number = this.currentSum - centerWidth - this.rightDivider.clientWidth;
-        this.center.style.width = centerWidth + 'px';
-        this.right.style.width = rightWidth + 'px';
+        this.rightWidth = sum - this.leftWidth - this.centerWidth;
+        this.center.style.width = this.centerWidth + 'px';
+        this.right.style.width = this.rightWidth + 'px';
     }
 }
 
@@ -208,28 +211,31 @@ class HorizontalSplit {
     }
 
     dragStart(ev: DragEvent) {
-        this.currentSum = this.top.clientHeight + this.divider.clientHeight + this.bottom.clientHeight;
+        this.currentSum = this.top.clientHeight + this.bottom.clientHeight;
     }
 
     dragEnd(ev: DragEvent) {
         var topHeight: number = this.top.clientHeight + ev.offsetY;
-        if (topHeight < 24) {
-            topHeight = 24;
+        if (topHeight < 5) {
+            topHeight = 5;
         }
-        var bottomHeight: number = this.currentSum - this.divider.clientHeight - topHeight ;
+        var bottomHeight: number = this.currentSum - topHeight;
         this.top.style.height = topHeight + 'px';
         this.bottom.style.height = bottomHeight + 'px';
     }
 }
 
 class ThreeHorizontalPanels {
-    currentSum: number;
 
     top: HTMLDivElement;
     topDivider: HTMLDivElement;
     center: HTMLDivElement;
     bottomDivider: HTMLDivElement;
     bottom: HTMLDivElement;
+
+    topHeight: number;
+    centerHeight: number;
+    bottomHeight: number;
 
     constructor(parent: HTMLDivElement) {
         parent.style.display = 'flex';
@@ -243,7 +249,7 @@ class ThreeHorizontalPanels {
         this.topDivider.classList.add('vdivider');
         this.topDivider.draggable = true;
         this.topDivider.addEventListener('dragstart', () => {
-            this.topDragStart();
+            this.dragStart();
         });
         this.topDivider.addEventListener('dragend', (event: DragEvent) => {
             this.topDragEnd(event);
@@ -258,7 +264,7 @@ class ThreeHorizontalPanels {
         this.bottomDivider.classList.add('vdivider');
         this.bottomDivider.draggable = true;
         this.bottomDivider.addEventListener('dragstart', () => {
-            this.bottomDragStart();
+            this.dragStart();
         });
         this.bottomDivider.addEventListener('dragend', (event: DragEvent) => {
             this.bottomDragEnd(event);
@@ -270,7 +276,7 @@ class ThreeHorizontalPanels {
         parent.appendChild(this.bottom);
     }
 
-    setWeights(weights: number[]) : void {
+    setWeights(weights: number[]): void {
         this.top.style.height = weights[0] + '%';
         this.center.style.height = weights[1] + '%';
         this.bottom.style.height = weights[2] + '%';
@@ -288,31 +294,32 @@ class ThreeHorizontalPanels {
         return this.bottom;
     }
 
-    topDragStart() {
-        this.currentSum = this.top.clientHeight + this.topDivider.clientHeight + this.center.clientHeight;
+    dragStart() {
+        this.topHeight = this.top.clientHeight;
+        this.centerHeight = this.center.clientHeight;
+        this.bottomHeight = this.bottom.clientHeight;
     }
 
     topDragEnd(event: DragEvent) {
-        var topHeight: number = this.top.clientHeight + event.offsetY;
-        if (topHeight < 24) {
-            topHeight = 24;
+        let sum = this.topHeight + this.centerHeight + this.bottomHeight;
+        this.topHeight = this.topHeight + event.offsetY;
+        if (this.topHeight < 5) {
+            this.topHeight = 5;
         }
-        var centerHeight: number = this.currentSum - this.topDivider.clientHeight - topHeight ;
-        this.top.style.height = topHeight + 'px';
-        this.center.style.height = centerHeight + 'px';
+        this.centerHeight = sum - this.topHeight - this.bottomHeight;
+        this.top.style.height = this.topHeight + 'px';
+        this.center.style.height = this.centerHeight + 'px';
     }
 
-    bottomDragStart() {
-        this.currentSum = this.center.clientHeight + this.bottomDivider.clientHeight + this.bottom.clientHeight;
-    }
 
     bottomDragEnd(event: DragEvent) {
-        var centerHeight: number = this.center.clientHeight + event.offsetY;
-        if (centerHeight < 24) {
-            centerHeight = 24;
+        let sum = this.topHeight + this.centerHeight + this.bottomHeight;
+        this.centerHeight = this.centerHeight + event.offsetY;
+        if (this.centerHeight < 5) {
+            this.centerHeight = 5;
         }
-        var bottomHeight: number = this.currentSum - this.bottomDivider.clientHeight - centerHeight ;
-        this.center.style.height = centerHeight + 'px';
-        this.bottom.style.height = bottomHeight + 'px';
+        this.bottomHeight = sum - this.topHeight - this.centerHeight;
+        this.center.style.height = this.centerHeight + 'px';
+        this.bottom.style.height = this.bottomHeight + 'px';
     }
 }

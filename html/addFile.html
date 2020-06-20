@@ -2,7 +2,7 @@
 <html lang="en">
 
 <head>
-    <title>New Project</title>
+    <title>Translate Single File</title>
     <link id="theme" rel="stylesheet" type="text/css" href="../css/light.css">
     <link rel="stylesheet" type="text/css" href="../css/fonts.css">
 </head>
@@ -11,16 +11,29 @@
     <table class="fill_width">
         <tr>
             <td class="middle">
-                <label for="nameInput">Name</label>
+                <label for="nameInput">File</label>
             </td>
             <td class="fill_width middle">
                 <input type="text" id="nameInput" class="fill_width">
+            </td>
+            <td>
+                <button id="addFilesButton">Browse...</button>
             </td>
         </tr>
     </table>
 
     <div class="row">
         <table class="fill_width">
+            <tr>
+                <td class="middle noWrap">
+                    <label for="typeSelect">File Type</label>
+                </td>
+                <td class="fill_width middle">
+                    <select id="typeSelect" class="fill_width">
+
+                    </select>
+                </td>
+            </tr>
             <tr>
                 <td class="middle noWrap">
                     <label for="srcLangSelect">Source Language</label>
@@ -43,6 +56,16 @@
             </tr>
         </table>
         <table>
+            <tr>
+                <td class="middle noWrap">
+                    <label for="charsetSelect">Character Set</label>
+                </td>
+                <td class="fill_width middle">
+                    <select id="charsetSelect" class="fill_width">
+
+                    </select>
+                </td>
+            </tr>
             <tr>
                 <td class="middle">
                     <label for="subjectInput">Subject</label>
@@ -67,31 +90,13 @@
             </tr>
         </table>
     </div>
-    <div class="bordered divContainer" style="height: 260px; width:880px" id="tablePanel">
-        <table class="stripes">
-            <thead>
-                <tr class="noWrap">
-                    <th><input type="checkbox" id="selectAll"></th>
-                    <th class="fill_width" style="text-align: left;">File Name</th>
-                    <th style="min-width: 200px;">File Type</th>
-                    <th style="min-width: 150px;">Character Set</th>
-                </tr>
-            </thead>
-            <tbody id="tableBody">
-                <tr></tr>
-            </tbody>
-        </table>
-    </div>
+  
 
     <div class="buttonArea">
-        <button id="addFilesButton">Add Files</button>
-        <button id="addFolderButton">Add Folder</button>
-        <button id="deleteFilesButton">Delete Selected Files</button>
-        <span class="fill_width">&nbsp;</span>
-        <button id="addProjectButton">Create Project</button>
+        <button id="addProjectButton">Prepare File</button>
     </div>
 
-    <script src="../js/addProject.js"></script>
+    <script src="../js/addFile.js"></script>
 </body>
 
 </html>

@@ -47,12 +47,10 @@ public class Project implements Serializable, Comparable<Project> {
 	private Language sourceLang;
 	private Language targetLang;
 	private LocalDate creationDate;
-	private LocalDate dueDate;
-	private LocalDate finishDate;
 	private List<SourceFile> files;
 
 	public Project(String id, String description, int status, Language sourceLang, Language targetLang, String client,
-			String subject, LocalDate creationDate, LocalDate dueDate, LocalDate finishDate) {
+			String subject, LocalDate creationDate) {
 		this.id = id;
 		this.description = description;
 		this.status = status;
@@ -61,8 +59,6 @@ public class Project implements Serializable, Comparable<Project> {
 		this.client = client;
 		this.subject = subject;
 		this.creationDate = creationDate;
-		this.dueDate = dueDate;
-		this.finishDate = finishDate;
 	}
 
 	public Project(JSONObject json) throws IOException {
@@ -74,10 +70,6 @@ public class Project implements Serializable, Comparable<Project> {
 		this.client = json.has("client") ? json.getString("client") : "";
 		this.subject = json.has("subject") ? json.getString("subject") : "";
 		this.creationDate = LocalDate.parse(json.getString("creationDate"));
-		this.dueDate = LocalDate.parse(json.getString("dueDate"));
-		if (json.has("finishDate")) {
-			this.finishDate = LocalDate.parse(json.getString("finishDate"));
-		}
 		files = new ArrayList<>();
 		JSONArray filesArray = json.getJSONArray("files");
 		for (int i=0 ; i<filesArray.length() ; i++) {
@@ -95,10 +87,6 @@ public class Project implements Serializable, Comparable<Project> {
 		json.put("client", client);
 		json.put("subject", subject);
 		json.put("creationDate", creationDate.toString());
-		json.put("dueDate", dueDate.toString());
-		if (finishDate != null) {
-			json.put("finishDate", finishDate.toString());
-		}
 		JSONArray filesArray = new JSONArray();
 		Iterator<SourceFile> it = files.iterator();
 		while (it.hasNext()) {
@@ -154,22 +142,6 @@ public class Project implements Serializable, Comparable<Project> {
 
 	public void setCreationDate(LocalDate creationDate) {
 		this.creationDate = creationDate;
-	}
-
-	public LocalDate getDueDate() {
-		return dueDate;
-	}
-
-	public void setDueDate(LocalDate dueDate) {
-		this.dueDate = dueDate;
-	}
-
-	public LocalDate getFinishDate() {
-		return finishDate;
-	}
-
-	public void setFinishDate(LocalDate finishDate) {
-		this.finishDate = finishDate;
 	}
 
 	public List<SourceFile> getFiles() {

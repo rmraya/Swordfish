@@ -61,7 +61,7 @@ class TranslationView {
         div.appendChild(this.mainArea);
 
         let verticalPanels: ThreeVerticalPanels = new ThreeVerticalPanels(this.mainArea);
-        verticalPanels.setWeights([25, 50, 25])
+        verticalPanels.setWeights([20, 55, 25])
         this.filesArea = verticalPanels.leftPanel();
 
         this.translationArea = verticalPanels.centerPanel();

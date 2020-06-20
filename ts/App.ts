@@ -34,6 +34,7 @@ class Swordfish {
     static licensesWindow: BrowserWindow;
     static addMemoryWindow: BrowserWindow;
     static addProjectWindow: BrowserWindow;
+    static addFileWindow: BrowserWindow;
 
     static contents: webContents;
     javapath: string = Swordfish.path.join(app.getAppPath(), 'bin', 'java');
@@ -139,7 +140,7 @@ class Swordfish {
 
         app.on('ready', () => {
             Swordfish.createWindow();
-            Swordfish.mainWindow.loadURL(Swordfish.path.join('file://', app.getAppPath(), 'html', 'index.html'));
+            Swordfish.mainWindow.loadURL('file://' + Swordfish.path.join(app.getAppPath(), 'html', 'index.html'));
             Swordfish.mainWindow.on('resize', () => {
                 this.saveDefaults();
             });
@@ -177,6 +178,9 @@ class Swordfish {
         ipcMain.on('get-projects', (event: IpcMainEvent, arg: any) => {
             Swordfish.getProjects(event);
         });
+        ipcMain.on('show-add-file', () => {
+            Swordfish.addFile();
+        });
         ipcMain.on('show-add-project', () => {
             Swordfish.addProject();
         });
@@ -195,6 +199,12 @@ class Swordfish {
             let rect: Rectangle = Swordfish.addProjectWindow.getBounds();
             rect.height = arg.height + this.verticalPadding;
             Swordfish.addProjectWindow.setBounds(rect);
+        });
+        ipcMain.on('add-file-height', (event: IpcMainEvent, arg: any) => {
+            let rect: Rectangle = Swordfish.addFileWindow.getBounds();
+            rect.height = arg.height + this.verticalPadding;
+            Swordfish.addFileWindow.setBounds(rect);
+            console.log('height set')
         });
         ipcMain.on('get-languages', (event: IpcMainEvent) => {
             this.getLanguages(event);
@@ -280,6 +290,7 @@ class Swordfish {
         });
         this.contents = this.mainWindow.webContents;
         var fileMenu: Menu = Menu.buildFromTemplate([
+            { label: 'Translate Single File', click: () => { Swordfish.addFile(); } }
         ]);
         var editMenu: Menu = Menu.buildFromTemplate([
             { label: 'Undo', accelerator: 'CmdOrCtrl+Z', click: () => { this.contents.undo(); } },
@@ -481,10 +492,32 @@ class Swordfish {
             }
         });
         this.addProjectWindow.setMenu(null);
-        this.addProjectWindow.loadURL(this.path.join('file://', app.getAppPath(), 'html', 'addProject.html'));
+        this.addProjectWindow.loadURL('file://' + this.path.join(app.getAppPath(), 'html', 'addProject.html'));
         this.addProjectWindow.once('ready-to-show', (event: IpcMainEvent) => {
             event.sender.send('get-height');
             this.addProjectWindow.show();
+        });
+    }
+
+    static addFile() {
+        this.addFileWindow = new BrowserWindow({
+            parent: this.mainWindow,
+            width: this.getWidth('addFileWindow'),
+            minimizable: false,
+            maximizable: false,
+            resizable: false,
+            useContentSize: true,
+            show: false,
+            icon: this.iconPath,
+            webPreferences: {
+                nodeIntegration: true
+            }
+        });
+        this.addFileWindow.setMenu(null);
+        this.addFileWindow.loadURL('file://' + this.path.join(app.getAppPath(), 'html', 'addFile.html'));
+        this.addFileWindow.once('ready-to-show', (event: IpcMainEvent) => {
+            event.sender.send('get-height');
+            this.addFileWindow.show();
         });
     }
 
@@ -493,7 +526,12 @@ class Swordfish {
     }
 
     createProject(arg: any): void {
-        Swordfish.addProjectWindow.close();
+        if (Swordfish.addProjectWindow) {
+            Swordfish.addProjectWindow.close();
+        }
+        if (Swordfish.addFileWindow) {
+            Swordfish.addFileWindow.close();
+        }
         Swordfish.mainWindow.focus();
         Swordfish.contents.send('start-waiting');
         Swordfish.contents.send('set-status', 'Creating project');
@@ -662,7 +700,7 @@ class Swordfish {
             }
         });
         this.addMemoryWindow.setMenu(null);
-        this.addMemoryWindow.loadURL(this.path.join('file://', app.getAppPath(), 'html', 'addMemory.html'));
+        this.addMemoryWindow.loadURL('file://' + this.path.join(app.getAppPath(), 'html', 'addMemory.html'));
         this.addMemoryWindow.once('ready-to-show', (event: IpcMainEvent) => {
             event.sender.send('get-height');
             this.addMemoryWindow.show();
@@ -710,7 +748,7 @@ class Swordfish {
     }
 
     static showHelp(): void {
-        shell.openExternal(this.path.join('file://', app.getAppPath(), 'swordfish.pdf'));
+        shell.openExternal('file://' + this.path.join(app.getAppPath(), 'swordfish.pdf'));
     }
 
     static showAbout(): void {
@@ -728,7 +766,7 @@ class Swordfish {
             }
         });
         this.aboutWindow.setMenu(null);
-        this.aboutWindow.loadURL(this.path.join('file://', app.getAppPath(), 'html', 'about.html'));
+        this.aboutWindow.loadURL('file://' + this.path.join(app.getAppPath(), 'html', 'about.html'));
         this.aboutWindow.once('ready-to-show', (event: IpcMainEvent) => {
             event.sender.send('get-height');
             this.aboutWindow.show();
@@ -740,37 +778,37 @@ class Swordfish {
         var title = '';
         switch (type) {
             case 'Swordfish':
-                licenseFile = this.path.join('file://', app.getAppPath(), 'html', 'licenses', 'license.txt');
+                licenseFile = 'file://' + this.path.join(app.getAppPath(), 'html', 'licenses', 'license.txt');
                 title = 'Swordfish License';
                 break;
             case "electron":
-                licenseFile = this.path.join('file://', app.getAppPath(), 'html', 'licenses', 'electron.txt');
+                licenseFile = 'file://' + this.path.join(app.getAppPath(), 'html', 'licenses', 'electron.txt');
                 title = 'MIT License';
                 break;
             case "TypeScript":
             case "MapDB":
-                licenseFile = this.path.join('file://', app.getAppPath(), 'html', 'licenses', 'Apache2.0.html');
+                licenseFile = 'file://' + this.path.join(app.getAppPath(), 'html', 'licenses', 'Apache2.0.html');
                 title = 'Apache 2.0';
                 break;
             case "Java":
-                licenseFile = this.path.join('file://', app.getAppPath(), 'html', 'licenses', 'java.html');
+                licenseFile = 'file://' + this.path.join(app.getAppPath(), 'html', 'licenses', 'java.html');
                 title = 'GPL2 with Classpath Exception';
                 break;
             case "OpenXLIFF":
             case "TMEngine":
-                licenseFile = this.path.join('file://', app.getAppPath(), 'html', 'licenses', 'EclipsePublicLicense1.0.html');
+                licenseFile = 'file://' + this.path.join(app.getAppPath(), 'html', 'licenses', 'EclipsePublicLicense1.0.html');
                 title = 'Eclipse Public License 1.0';
                 break;
             case "JSON":
-                licenseFile = this.path.join('file://', app.getAppPath(), 'html', 'licenses', 'json.txt');
+                licenseFile = 'file://' + this.path.join(app.getAppPath(), 'html', 'licenses', 'json.txt');
                 title = 'JSON.org License';
                 break;
             case "jsoup":
-                licenseFile = this.path.join('file://', app.getAppPath(), 'html', 'licenses', 'jsoup.txt');
+                licenseFile = 'file://' + this.path.join(app.getAppPath(), 'html', 'licenses', 'jsoup.txt');
                 title = 'MIT License';
                 break;
             case "DTDParser":
-                licenseFile = this.path.join('file://', app.getAppPath(), 'html', 'licenses', 'LGPL2.1.txt');
+                licenseFile = 'file://' + this.path.join(app.getAppPath(), 'html', 'licenses', 'LGPL2.1.txt');
                 title = 'LGPL 2.1';
                 break;
             default:
@@ -811,7 +849,7 @@ class Swordfish {
             }
         });
         this.settingsWindow.setMenu(null);
-        this.settingsWindow.loadURL(this.path.join('file://', app.getAppPath(), 'html', 'preferences.html'));
+        this.settingsWindow.loadURL('file://' + this.path.join(app.getAppPath(), 'html', 'preferences.html'));
         this.settingsWindow.once('ready-to-show', (event: IpcMainEvent) => {
             event.sender.send('get-height');
             this.settingsWindow.show();
@@ -833,7 +871,7 @@ class Swordfish {
             }
         });
         this.licensesWindow.setMenu(null);
-        this.licensesWindow.loadURL(this.path.join('file://', app.getAppPath(), 'html', 'licenses.html'));
+        this.licensesWindow.loadURL('file://' + this.path.join(app.getAppPath(), 'html', 'licenses.html'));
         this.licensesWindow.once('ready-to-show', (event: IpcMainEvent) => {
             event.sender.send('get-height');
             this.licensesWindow.show();
@@ -962,8 +1000,7 @@ class Swordfish {
         Swordfish.sendRequest('/projects/files', arg,
             (data: any) => {
                 if (data.status === Swordfish.SUCCESS) {
-                    console.log(JSON.stringify(data));
-                    event.sender.send('set-files', {files: data.files, project: arg.project});
+                    event.sender.send('set-files', { files: data.files, project: arg.project });
                 } else {
                     dialog.showErrorBox('Error', data.reason);
                 }
@@ -983,6 +1020,7 @@ class Swordfish {
                     case 'settingsWindow': { return 600; }
                     case 'addMemoryWindow': { return 450; }
                     case 'addProjectWindow': { return 900; }
+                    case 'addFileWindow': { return 900; }
                 }
                 break;
             }
@@ -993,6 +1031,7 @@ class Swordfish {
                     case 'settingsWindow': { return 600; }
                     case 'addMemoryWindow': { return 450; }
                     case 'addProjectWindow': { return 900; }
+                    case 'addFileWindow': { return 900; }
                 }
                 break;
             }
@@ -1003,6 +1042,7 @@ class Swordfish {
                     case 'settingsWindow': { return 600; }
                     case 'addMemoryWindow': { return 450; }
                     case 'addProjectWindow': { return 900; }
+                    case 'addFileWindow': { return 900; }
                 }
                 break;
             }

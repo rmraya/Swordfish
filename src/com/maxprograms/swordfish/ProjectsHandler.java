@@ -284,17 +284,16 @@ public class ProjectsHandler implements HttpHandler {
 		processes.put(id, Constants.PROCESSING);
 		try {
 			loadPreferences();
+			String description = json.getString("description");
+			String userHome = System.getProperty("user.home");
+			if (description.startsWith(userHome)) {
+				description = description.substring(userHome.length() + 1);
+			}
 			Language sourceLang = LanguageUtils.getLanguage(json.getString("srcLang"));
 			Language targetLang = LanguageUtils.getLanguage(json.getString("tgtLang"));
 
-			String due = json.getString("dueDate");
-			String[] parts = due.split("-");
-
-			LocalDate dueDate = LocalDate.of(Integer.parseInt(parts[0]), Integer.parseInt(parts[1]),
-					Integer.parseInt(parts[2]));
-
-			Project p = new Project(id, json.getString("description"), Project.NEW, sourceLang, targetLang,
-					json.getString("client"), json.getString("subject"), LocalDate.now(), dueDate, null);
+			Project p = new Project(id, description, Project.NEW, sourceLang, targetLang, json.getString("client"),
+					json.getString("subject"), LocalDate.now());
 
 			File projectFolder = new File(getWorkFolder(), id);
 			Files.createDirectories(projectFolder.toPath());
@@ -307,8 +306,8 @@ public class ProjectsHandler implements HttpHandler {
 							JSONObject file = files.getJSONObject(i);
 							String fullName = file.getString("file");
 							String shortName = fullName.substring(filesRoot.length());
-							if (shortName.startsWith(File.pathSeparator)) {
-								shortName = shortName.substring(File.pathSeparator.length());
+							if (shortName.startsWith("/") || shortName.startsWith("\\")) {
+								shortName = shortName.substring(1);
 							}
 							SourceFile sf = new SourceFile(shortName, FileFormats.getFullName(file.getString("type")),
 									file.getString("encoding"));
@@ -350,7 +349,7 @@ public class ProjectsHandler implements HttpHandler {
 									}
 								}
 								if (!"0".equals(res.get(0))) {
-									logger.log(Level.INFO,"Conversion failed for: " + file.toString(2));
+									logger.log(Level.INFO, "Conversion failed for: " + file.toString(2));
 									// TODO remove failed project folder
 									throw new IOException(res.get(1));
 								}

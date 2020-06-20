@@ -75,9 +75,6 @@ class AddProject {
         document.getElementById('addProjectButton').addEventListener('click', () => {
             this.addProject();
         });
-        let today: Date = new Date();
-        let min: string = today.getFullYear() + '-' + this.pad((today.getMonth() + 1)) + '-' + this.pad(today.getDate());
-        (document.getElementById('dueDate') as HTMLInputElement).setAttribute("min", min);
     }
 
     addProject(): void {
@@ -116,11 +113,6 @@ class AddProject {
             window.alert('Select target language');
             return;
         }
-        let dueDate: string = (document.getElementById('dueDate') as HTMLInputElement).value;
-        if (dueDate === '') {
-            window.alert('Select due date');
-            return;
-        }
 
         let array: any[] = [];
         this.addedFiles.forEach((a) => {
@@ -133,8 +125,7 @@ class AddProject {
             subject: subject,
             client: client,
             srcLang: srcLang,
-            tgtLang: tgtLang,
-            dueDate: dueDate
+            tgtLang: tgtLang
         }
         this.electron.ipcRenderer.send('create-project', params);
     }
@@ -169,7 +160,6 @@ class AddProject {
         }
         for (let i = 0; i < length; i++) {
             let file: any = files[i];
-            console.log(JSON.stringify(file));
             let hash = this.hashCode(file.file);
             if (!this.addedFiles.has(hash)) {
                 this.addedFiles.set(hash, file);

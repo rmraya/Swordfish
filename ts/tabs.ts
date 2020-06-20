@@ -32,7 +32,12 @@ class Tab {
 
         this.label = document.createElement('a');
         this.label.id = this.id;
-        this.label.innerText = description;
+        if (description.length > 40) {
+            this.label.title = description;
+            this.label.innerText = description.substr(0, 37) + '...';
+        } else {
+            this.label.innerText = description;
+        }
         this.label.addEventListener('click', () => {
             this.parent.selectTab(this.id);
         });
