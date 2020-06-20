@@ -86,6 +86,9 @@ class TabHolder {
     tabsHolder: HTMLDivElement;
     contentHolder: HTMLDivElement;
 
+    tabsList: string[] = [];
+    selectedTab: string;
+
     constructor(parent: HTMLDivElement, id: string) {
         this.labels = new Map<String, HTMLDivElement>();
         this.tabs = new Map<string, HTMLDivElement>();
@@ -106,6 +109,7 @@ class TabHolder {
         this.labels.set(tab.getId(), tab.getLabel());
         this.contentHolder.appendChild(tab.getContainer());
         this.tabs.set(tab.getId(), tab.getContainer());
+        this.tabsList.push(tab.getId());
     }
 
     selectTab(tab: string): void {
@@ -123,6 +127,7 @@ class TabHolder {
             }
         });
         this.tabs.get(tab).classList.remove('hidden');
+        this.selectedTab = tab;
     }
 
     closeTab(tab: string): void {
@@ -130,6 +135,10 @@ class TabHolder {
         this.labels.delete(tab);
         this.contentHolder.removeChild(this.tabs.get(tab));
         this.tabs.delete(tab);
+        this.tabsList.splice(this.tabsList.indexOf("tab"), 1);
+        if (tab === this.selectedTab && this.tabsList.length > 1) {
+            this.selectTab(this.tabsList[this.tabsList.length - 1]);
+        }
     }
 
     has(tab: string): boolean {

@@ -204,7 +204,6 @@ class Swordfish {
             let rect: Rectangle = Swordfish.addFileWindow.getBounds();
             rect.height = arg.height + this.verticalPadding;
             Swordfish.addFileWindow.setBounds(rect);
-            console.log('height set')
         });
         ipcMain.on('get-languages', (event: IpcMainEvent) => {
             this.getLanguages(event);
@@ -609,10 +608,15 @@ class Swordfish {
     }
 
     selectSourceFiles(event: IpcMainEvent): void {
+        let any: string[] = [];
+        if (process.platform === 'linux') {
+            any = ['*'];
+        }
         dialog.showOpenDialog({
             properties: ['openFile', 'multiSelections'],
+
             filters: [
-                { name: 'Any File', extensions: ['*'] },
+                { name: 'Any File', extensions: any },
                 { name: 'Adobe InDesign Interchange', extensions: ['inx'] },
                 { name: 'Adobe InDesign IDML', extensions: ['idml'] },
                 { name: 'DITA Map', extensions: ['ditamap', 'dita', 'xml'] },
