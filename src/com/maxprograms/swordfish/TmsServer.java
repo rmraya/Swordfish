@@ -169,7 +169,7 @@ public class TmsServer implements HttpHandler {
 			} else if (os.startsWith("windows")) {
 				workDir = new File(System.getenv("AppData") + "\\Swordfish\\");
 			} else {
-				workDir = new File(System.getProperty("user.home") + "/.swordfish/");
+				workDir = new File(System.getProperty("user.home") + "/.config/Swordfish/");
 			}
 			if (!workDir.exists()) {
 				Files.createDirectories(workDir.toPath());
