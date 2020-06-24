@@ -48,6 +48,7 @@ public class Project implements Serializable, Comparable<Project> {
 	private Language targetLang;
 	private LocalDate creationDate;
 	private List<SourceFile> files;
+	private String xliff;
 
 	public Project(String id, String description, int status, Language sourceLang, Language targetLang, String client,
 			String subject, LocalDate creationDate) {
@@ -59,6 +60,14 @@ public class Project implements Serializable, Comparable<Project> {
 		this.client = client;
 		this.subject = subject;
 		this.creationDate = creationDate;
+	}
+
+	public String getXliff() {
+		return xliff;
+	}
+
+	public void setXliff(String xliff) {
+		this.xliff = xliff;
 	}
 
 	public Project(JSONObject json) throws IOException {
@@ -75,6 +84,7 @@ public class Project implements Serializable, Comparable<Project> {
 		for (int i=0 ; i<filesArray.length() ; i++) {
 			files.add(new SourceFile(filesArray.getJSONObject(i)));
 		}
+		this.xliff = json.getString("xliff");
 	}
 
 	public JSONObject toJSON() {
@@ -93,6 +103,7 @@ public class Project implements Serializable, Comparable<Project> {
 			filesArray.put(it.next().toJSON());
 		}
 		json.put("files", filesArray);
+		json.put("xliff", this.xliff);
 		return json;
 	}
 

@@ -42,6 +42,8 @@ import java.util.SortedSet;
 import java.util.TreeSet;
 import java.util.concurrent.ConcurrentHashMap;
 
+import javax.xml.parsers.ParserConfigurationException;
+
 import com.maxprograms.converters.Convert;
 import com.maxprograms.converters.FileFormats;
 import com.maxprograms.converters.Join;
@@ -56,6 +58,7 @@ import com.sun.net.httpserver.HttpHandler;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
+import org.xml.sax.SAXException;
 
 public class ProjectsHandler implements HttpHandler {
 
@@ -172,12 +175,12 @@ public class ProjectsHandler implements HttpHandler {
 
 	private JSONObject exportProject(String request) {
 		// TODO
-		return null;
+		return new JSONObject();
 	}
 
 	private JSONObject deleteProject(String request) {
 		// TODO
-		return null;
+		return new JSONObject();
 	}
 
 	private JSONObject listProjects(String request) {
@@ -250,7 +253,7 @@ public class ProjectsHandler implements HttpHandler {
 
 	private JSONObject updateProject(String request) {
 		// TODO
-		return null;
+		return new JSONObject();
 	}
 
 	private JSONObject createProject(String request) {
@@ -302,6 +305,7 @@ public class ProjectsHandler implements HttpHandler {
 				@Override
 				public void run() {
 					try {
+						List<String> xliffs = new ArrayList<>();
 						for (int i = 0; i < files.length(); i++) {
 							JSONObject file = files.getJSONObject(i);
 							String fullName = file.getString("file");
@@ -350,18 +354,35 @@ public class ProjectsHandler implements HttpHandler {
 								}
 								if (!"0".equals(res.get(0))) {
 									logger.log(Level.INFO, "Conversion failed for: " + file.toString(2));
-									// TODO remove failed project folder
+									try {
+										TmsServer.deleteFolder(projectFolder.getAbsolutePath());
+									} catch (IOException e) {
+										logger.log(Level.ERROR, e);
+									}
 									throw new IOException(res.get(1));
 								}
+								xliffs.add(xliff.getAbsolutePath());
 							}
 
 						}
+						if (xliffs.size() > 1) {
+							File main = new File(projectFolder, p.getId() + ".xlf");
+							Join.join(xliffs, main.getAbsolutePath());
+							for (int i=0 ; i<xliffs.size() ; i++) {
+								File x = new File(xliffs.get(i));
+								Files.delete(x.toPath());
+							}
+							p.setXliff(main.getAbsolutePath());
+						} else {
+							p.setXliff(xliffs.get(0));
+						}
+						
 						p.setFiles(sourceFiles);
 						projects.put(id, p);
 						projectsList.getJSONArray("projects").put(p.toJSON());
 						saveProjectsList();
 						processes.put(id, Constants.COMPLETED);
-					} catch (IOException e) {
+					} catch (IOException | SAXException | ParserConfigurationException e) {
 						logger.log(Level.ERROR, e.getMessage(), e);
 						conversionError = e.getMessage();
 						processes.put(id, conversionError);
