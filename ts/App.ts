@@ -19,7 +19,7 @@ SOFTWARE.
 
 import { Buffer } from "buffer";
 import { execFileSync, spawn, ChildProcessWithoutNullStreams } from "child_process";
-import { app, BrowserWindow, dialog, ipcMain, Menu, MenuItem, shell, webContents, nativeTheme, Rectangle, IpcMainEvent } from "electron";
+import { app, BrowserWindow, dialog, ipcMain, Menu, MenuItem, shell, webContents, nativeTheme, Rectangle, IpcMainEvent, screen, Size } from "electron";
 import { existsSync, mkdirSync, readFile, readFileSync, writeFile, writeFileSync } from "fs";
 import { ClientRequest, request, IncomingMessage } from "http";
 
@@ -35,6 +35,7 @@ class Swordfish {
     static addMemoryWindow: BrowserWindow;
     static addProjectWindow: BrowserWindow;
     static addFileWindow: BrowserWindow;
+    static defaultLangsWindow: BrowserWindow;
 
     static contents: webContents;
     javapath: string = Swordfish.path.join(app.getAppPath(), 'bin', 'java');
@@ -150,6 +151,9 @@ class Swordfish {
             Swordfish.mainWindow.once('ready-to-show', () => {
                 Swordfish.mainWindow.setBounds(Swordfish.currentDefaults);
                 Swordfish.mainWindow.show();
+                if (Swordfish.currentPreferences.srcLang === 'none') {
+                    Swordfish.getDefaultLanguages();
+                }
             });
             Swordfish.checkUpdates(true);
         });
@@ -194,6 +198,9 @@ class Swordfish {
         });
         ipcMain.on('save-preferences', (event: IpcMainEvent, arg: any) => {
             Swordfish.savePreferences(arg);
+        });
+        ipcMain.on('save-languages', (event: IpcMainEvent, arg: any) => {
+            Swordfish.savelanguages(arg);
         });
         ipcMain.on('add-project-height', (event: IpcMainEvent, arg: any) => {
             let rect: Rectangle = Swordfish.addProjectWindow.getBounds();
@@ -250,6 +257,11 @@ class Swordfish {
             rect.height = arg.height + this.verticalPadding;
             Swordfish.settingsWindow.setBounds(rect);
         });
+        ipcMain.on('languages-height', (event: IpcMainEvent, arg: any) => {
+            let rect: Rectangle = Swordfish.defaultLangsWindow.getBounds();
+            rect.height = arg.height + this.verticalPadding;
+            Swordfish.defaultLangsWindow.setBounds(rect);
+        });
         ipcMain.on('get-preferences', (event: IpcMainEvent, arg: any) => {
             event.sender.send('set-preferences', Swordfish.currentPreferences);
         });
@@ -274,6 +286,12 @@ class Swordfish {
     } // end constructor
 
     static createWindow(): void {
+
+        if (Swordfish.currentDefaults === undefined) {
+            let size: Size = screen.getPrimaryDisplay().workAreaSize;
+            Swordfish.currentDefaults = { width: size.width * 0.9, height: size.height * 0.9, x: 0, y: 0 };
+        }
+
         this.mainWindow = new BrowserWindow({
             title: app.name,
             width: this.currentDefaults.width,
@@ -395,7 +413,6 @@ class Swordfish {
 
     loadDefaults(): void {
         let defaultsFile: string = Swordfish.path.join(app.getPath('appData'), app.name, 'defaults.json');
-        Swordfish.currentDefaults = { width: 900, height: 700, x: 0, y: 0 };
         if (existsSync(defaultsFile)) {
             try {
                 var data: Buffer = readFileSync(defaultsFile);
@@ -479,7 +496,7 @@ class Swordfish {
     static addProject() {
         this.addProjectWindow = new BrowserWindow({
             parent: this.mainWindow,
-            width: this.getWidth('addProjectWindow'),
+            width: 900,
             minimizable: false,
             maximizable: false,
             resizable: false,
@@ -501,7 +518,7 @@ class Swordfish {
     static addFile() {
         this.addFileWindow = new BrowserWindow({
             parent: this.mainWindow,
-            width: this.getWidth('addFileWindow'),
+            width: 900,
             minimizable: false,
             maximizable: false,
             resizable: false,
@@ -692,7 +709,7 @@ class Swordfish {
     static addMemory() {
         this.addMemoryWindow = new BrowserWindow({
             parent: this.mainWindow,
-            width: this.getWidth('addMemoryWindow'),
+            width: 450,
             minimizable: false,
             maximizable: false,
             resizable: false,
@@ -758,7 +775,7 @@ class Swordfish {
     static showAbout(): void {
         this.aboutWindow = new BrowserWindow({
             parent: Swordfish.mainWindow,
-            width: Swordfish.getWidth('aboutWindow'),
+            width: 360,
             minimizable: false,
             maximizable: false,
             resizable: false,
@@ -841,7 +858,7 @@ class Swordfish {
     static showSettings(): void {
         this.settingsWindow = new BrowserWindow({
             parent: this.mainWindow,
-            width: this.getWidth('settingsWindow'),
+            width: 600,
             useContentSize: true,
             minimizable: false,
             maximizable: false,
@@ -863,7 +880,7 @@ class Swordfish {
     static showLicenses(): void {
         this.licensesWindow = new BrowserWindow({
             parent: this.mainWindow,
-            width: this.getWidth('licensesWindow'),
+            width: 430,
             useContentSize: true,
             minimizable: false,
             maximizable: false,
@@ -1015,42 +1032,33 @@ class Swordfish {
         );
     }
 
-    static getWidth(window: string): number {
-        switch (process.platform) {
-            case 'win32': {
-                switch (window) {
-                    case 'aboutWindow': { return 360; }
-                    case 'licensesWindow': { return 430; }
-                    case 'settingsWindow': { return 600; }
-                    case 'addMemoryWindow': { return 450; }
-                    case 'addProjectWindow': { return 900; }
-                    case 'addFileWindow': { return 900; }
-                }
-                break;
+    static getDefaultLanguages() {
+        this.defaultLangsWindow = new BrowserWindow({
+            parent: this.mainWindow,
+            width: 600,
+            useContentSize: true,
+            minimizable: false,
+            maximizable: false,
+            resizable: false,
+            show: false,
+            icon: this.iconPath,
+            webPreferences: {
+                nodeIntegration: true
             }
-            case 'darwin': {
-                switch (window) {
-                    case 'aboutWindow': { return 360; }
-                    case 'licensesWindow': { return 430; }
-                    case 'settingsWindow': { return 600; }
-                    case 'addMemoryWindow': { return 450; }
-                    case 'addProjectWindow': { return 900; }
-                    case 'addFileWindow': { return 900; }
-                }
-                break;
-            }
-            case 'linux': {
-                switch (window) {
-                    case 'aboutWindow': { return 360; }
-                    case 'licensesWindow': { return 430; }
-                    case 'settingsWindow': { return 600; }
-                    case 'addMemoryWindow': { return 450; }
-                    case 'addProjectWindow': { return 900; }
-                    case 'addFileWindow': { return 900; }
-                }
-                break;
-            }
-        }
+        });
+        this.defaultLangsWindow.setMenu(null);
+        this.defaultLangsWindow.loadURL('file://' + this.path.join(app.getAppPath(), 'html', 'defaultLangs.html'));
+        this.defaultLangsWindow.once('ready-to-show', (event: IpcMainEvent) => {
+            event.sender.send('get-height');
+            this.defaultLangsWindow.show();
+        });
+    }
+
+    static savelanguages(arg: any) {
+        this.defaultLangsWindow.close();
+        this.currentPreferences.srcLang = arg.srcLang;
+        this.currentPreferences.tgtLang = arg.tgtLang;
+        writeFileSync(Swordfish.path.join(app.getPath('appData'), app.name, 'preferences.json'), JSON.stringify(this.currentPreferences));
     }
 }
 
