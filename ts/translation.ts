@@ -76,7 +76,9 @@ class TranslationView {
         this.electron.ipcRenderer.on('set-files', (event: Electron.IpcRendererEvent, arg: any) => {
             this.setFiles(arg);
         });
-
+        this.electron.ipcRenderer.on('set-segments', (event: Electron.IpcRendererEvent, arg: any) => {
+            this.setSegments(arg);
+        })
         setTimeout(() => {
             this.mainArea.style.width = this.container.clientWidth + 'px';
             this.mainArea.style.height = (document.getElementById('mainContainer').clientHeight - 34) + 'px';
@@ -128,31 +130,37 @@ class TranslationView {
         var files: string[] = arg.files;
         let length = files.length;
         for (let i = 0; i < length; i++) {
-            let tr: HTMLTableRowElement = document.createElement('tr');
+            let tr: HTMLTableRowElement = document.createElement('tr');            
+            this.filesTableBody.appendChild(tr);
+
             let td: HTMLTableCellElement = document.createElement('td');
+            td.classList.add('middle');
+            let check : HTMLInputElement = document.createElement('input');
+            check.type = 'checkbox';
+            check.checked = true;
+            td.appendChild(check);
+            tr.appendChild(td);
+
+            td = document.createElement('td');
+            td.classList.add('middle');
+            // td.classList.add('noWrap');
             td.innerText = files[i];
             tr.appendChild(td);
-            tr.addEventListener('click', () => {
-                this.openFile(files[i])
-            });
-            this.filesTableBody.appendChild(tr);
         }
-        if (length === 1) {
-            this.openFile(files[0]);
-        }
+        this.getSegments();
     }
 
-    openFile(file: string): void {
-        // TODO 
-        document.getElementById('fileTitle' + this.projectId).innerText = file;
+    getSegments(): void {
+        let params: any = {
+            project: this.projectId, files: [], start: 0, count: 10000, filterText: '',
+            filterLanguage: '', caseSensitiveFilter: false, filterUntranslated: false, regExp: false
+        };
+
+        this.electron.ipcRenderer.send('get-segments', params);
     }
 
     buildTranslationArea(): void {
-        let title: HTMLDivElement = document.createElement('div');
-        title.classList.add('titlepanel');
-        title.innerText = 'Select File';
-        title.id = 'fileTitle' + this.projectId;
-        this.translationArea.appendChild(title);
+        this.translationArea.classList.add('divContainer');
 
         let table: HTMLTableElement = document.createElement('table');
         table.classList.add('fill_width');
@@ -172,6 +180,10 @@ class TranslationView {
         let selectAll: HTMLInputElement = document.createElement('input');
         selectAll.type = 'checkbox';
         th.appendChild(selectAll);
+
+        th = document.createElement('th');
+        th.innerText = '#'
+        tr.appendChild(th);
 
         th = document.createElement('th');
         th.innerText = 'Source'
@@ -209,5 +221,14 @@ class TranslationView {
 
     generateStatistics(): void {
         // TODO
+    }
+
+    setSegments(arg: any): void {
+        this.tbody.innerHTML = '';
+        let length = arg.length;
+        
+        for (let i = 0; i < length; i++) {
+            this.tbody.insertAdjacentHTML('beforeend', arg[i]);
+        }
     }
 }

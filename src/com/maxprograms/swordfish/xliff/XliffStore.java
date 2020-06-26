@@ -21,6 +21,8 @@ package com.maxprograms.swordfish.xliff;
 
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.lang.System.Logger;
+import java.lang.System.Logger.Level;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Hashtable;
@@ -43,12 +45,14 @@ import org.xml.sax.SAXException;
 
 public class XliffStore {
 
+    Logger logger = System.getLogger(XliffStore.class.getName());
+
     private String xliffFile;
     private Document document;
 
     private Map<String, Element> files;
     private List<Segment> segments;
-    
+
     private String currentFile;
     private String currentUnit;
     private String srcLang;
@@ -61,6 +65,7 @@ public class XliffStore {
         builder.setEntityResolver(new Catalog("catalog/catalog.xml")); // TODO make configurable
         document = builder.build(xliffFile);
         parseDocument();
+        logger.log(Level.INFO, "loadded " + segments.size() + " segments");
     }
 
     private void parseDocument() {
@@ -82,7 +87,7 @@ public class XliffStore {
             currentUnit = e.getAttributeValue("id");
         }
         if ("segment".equals(e.getName())) {
-            segments.add(new Segment(currentFile, currentUnit, e,  srcLang,  tgtLang));
+            segments.add(new Segment(currentFile, currentUnit, e, srcLang, tgtLang));
         }
         List<Element> children = e.getChildren();
         Iterator<Element> it = children.iterator();
@@ -104,12 +109,13 @@ public class XliffStore {
             boolean caseSensitiveFilter, boolean filterUntranslated, boolean regExp) {
         List<Segment> result = new ArrayList<>();
         if (filterText.isEmpty()) {
-            for (int i=start ; i<start+count  && i<segments.size(); i++) {
+            for (int i = start; i < start + count && i < segments.size(); i++) {
                 result.add(segments.get(i));
             }
         } else {
             // TODO filter segments
         }
+
         return result;
     }
 

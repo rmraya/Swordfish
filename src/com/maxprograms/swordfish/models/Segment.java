@@ -63,7 +63,7 @@ public class Segment implements Comparable<Segment> {
         StringBuilder html = new StringBuilder();
         html.append("<tr id=\"");
         html.append(id);
-        html.append("\"><td class='fixed'><input type='checkbox' class='rowCheck'></td><td class='fixed'>");
+        html.append("\"><td class='middle'><input type='checkbox' class='rowCheck'></td><td class='middle center noWrap'>");
         html.append(id);
         html.append("</td>");
         html.append("<td lang=\"");

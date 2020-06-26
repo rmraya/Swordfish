@@ -29,6 +29,7 @@ import java.io.OutputStream;
 import java.lang.System.Logger;
 import java.lang.System.Logger.Level;
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.time.LocalDate;
@@ -50,7 +51,9 @@ import com.maxprograms.converters.Join;
 import com.maxprograms.languages.Language;
 import com.maxprograms.languages.LanguageUtils;
 import com.maxprograms.swordfish.models.Project;
+import com.maxprograms.swordfish.models.Segment;
 import com.maxprograms.swordfish.models.SourceFile;
+import com.maxprograms.swordfish.xliff.XliffStore;
 import com.maxprograms.xliff2.Resegmenter;
 import com.maxprograms.xliff2.ToXliff2;
 import com.sun.net.httpserver.HttpExchange;
@@ -73,6 +76,8 @@ public class ProjectsHandler implements HttpHandler {
 	protected String conversionError = "";
 	private String srxFile;
 	private String catalogFile;
+
+	private Map<String, XliffStore> projectStores;
 
 	@Override
 	public void handle(HttpExchange exchange) throws IOException {
@@ -101,6 +106,7 @@ public class ProjectsHandler implements HttpHandler {
 	}
 
 	private JSONObject processRequest(String url, String request) {
+		logger.log(Level.INFO, url);
 		JSONObject response = new JSONObject();
 		try {
 			if ("/projects/create".equals(url)) {
@@ -117,6 +123,8 @@ public class ProjectsHandler implements HttpHandler {
 				response = getProcessStatus(request);
 			} else if ("/projects/files".equals(url)) {
 				response = getProjectFiles(request);
+			} else if ("/projects/segments".equals(url)) {
+				response = getSegments(request);
 			} else {
 				response.put(Constants.REASON, "Unknown request");
 			}
@@ -256,6 +264,53 @@ public class ProjectsHandler implements HttpHandler {
 		return new JSONObject();
 	}
 
+	private JSONObject getSegments(String request) {
+		JSONObject result = new JSONObject();
+		if (projects == null) {
+			try {
+				loadProjectsList();
+			} catch (IOException e) {
+				logger.log(Level.ERROR, "Error loading project list", e);
+				result.put(Constants.REASON, e.getMessage());
+				return result;
+			}
+		}
+		JSONObject json = new JSONObject(request);
+		String project = json.getString("project");
+
+		if (projectStores == null) {
+			projectStores = new Hashtable<>();
+			logger.log(Level.INFO, "Created store map");
+		}
+
+		if (!projectStores.containsKey(project)) {
+			try {
+				XliffStore store = new XliffStore(projects.get(project).getXliff());
+				projectStores.put(project, store);
+			} catch (SAXException | IOException | ParserConfigurationException | URISyntaxException e) {
+				logger.log(Level.ERROR, "Error creating project store", e);
+				result.put(Constants.REASON, e.getMessage());
+				return result;
+			}
+		}
+		JSONArray files = json.getJSONArray("files");
+		List<String> filesList = new ArrayList<>();
+		for (int i = 0; i < files.length(); i++) {
+			filesList.add(files.getString(i));
+		}
+		List<Segment> list = projectStores.get(project).getSegments(filesList, json.getInt("start"),
+				json.getInt("count"), json.getString("filterText"), json.getString("filterLanguage"),
+				json.getBoolean("caseSensitiveFilter"), json.getBoolean("filterUntranslated"),
+				json.getBoolean("regExp"));
+		JSONArray array = new JSONArray();
+		Iterator<Segment> it = list.iterator();
+		while (it.hasNext()) {
+			array.put(it.next().toHTML());
+		}
+		result.put("segments", array);
+		return result;
+	}
+
 	private JSONObject createProject(String request) {
 		JSONObject result = new JSONObject();
 		if (projects == null) {
@@ -368,7 +423,7 @@ public class ProjectsHandler implements HttpHandler {
 						if (xliffs.size() > 1) {
 							File main = new File(projectFolder, p.getId() + ".xlf");
 							Join.join(xliffs, main.getAbsolutePath());
-							for (int i=0 ; i<xliffs.size() ; i++) {
+							for (int i = 0; i < xliffs.size(); i++) {
 								File x = new File(xliffs.get(i));
 								Files.delete(x.toPath());
 							}
@@ -376,7 +431,7 @@ public class ProjectsHandler implements HttpHandler {
 						} else {
 							p.setXliff(xliffs.get(0));
 						}
-						
+
 						p.setFiles(sourceFiles);
 						projects.put(id, p);
 						projectsList.getJSONArray("projects").put(p.toJSON());
