@@ -282,7 +282,10 @@ class Swordfish {
         });
         ipcMain.on('get-files', (event: IpcMainEvent, arg: any) => {
             Swordfish.getFiles(event, arg);
-        })
+        });
+        ipcMain.on('get-segments', (event: IpcMainEvent, arg: any) => {
+            Swordfish.getSegmenst(event, arg);
+        });
     } // end constructor
 
     static createWindow(): void {
@@ -1059,6 +1062,21 @@ class Swordfish {
         this.currentPreferences.srcLang = arg.srcLang;
         this.currentPreferences.tgtLang = arg.tgtLang;
         writeFileSync(Swordfish.path.join(app.getPath('appData'), app.name, 'preferences.json'), JSON.stringify(this.currentPreferences));
+    }
+
+    static getSegmenst(event: IpcMainEvent, arg: any): void {
+        Swordfish.sendRequest('/projects/segments', arg,
+            (data: any) => {
+                if (data.status === Swordfish.SUCCESS) {
+                    event.sender.send('set-segments', data.segments);
+                } else {
+                    dialog.showErrorBox('Error', data.reason);
+                }
+            },
+            (reason: string) => {
+                dialog.showErrorBox('Error', reason);
+            }
+        );
     }
 }
 
