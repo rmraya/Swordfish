@@ -22,15 +22,17 @@ class VerticalSplit {
     left: HTMLDivElement;
     divider: HTMLDivElement;
     right: HTMLDivElement;
-
+    weights: number[];
     currentSum: number;
 
-    constructor(parent: HTMLDivElement, leftPercentage: number) {
+    constructor(parent: HTMLDivElement) {
         parent.style.display = 'flex';
         parent.style.flexDirection = 'row';
 
+        this.weights = [50, 50];
+
         this.left = document.createElement('div');
-        this.left.style.width = leftPercentage + '%';
+        this.left.style.width = '50%';
         parent.appendChild(this.left);
 
         this.divider = document.createElement('div');
@@ -45,8 +47,28 @@ class VerticalSplit {
         parent.appendChild(this.divider);
 
         this.right = document.createElement('div');
-        this.right.style.width = (100 - leftPercentage) + '%';
+        this.right.style.width = '50%';
         parent.appendChild(this.right);
+
+        let config: any = { attributes: true, childList: false, subtree: false };
+        let observer = new MutationObserver((mutationsList) => {
+            for (let mutation of mutationsList) {
+                if (mutation.type === 'attributes') {
+                    this.left.style.height = parent.clientHeight + 'px';
+                    this.right.style.height = parent.clientHeight + 'px';
+                    let width = parent.clientWidth - this.divider.clientWidth;
+                    this.left.style.width = (width * this.weights[0] / (this.weights[0] + this.weights[1])) + 'px';
+                    this.right.style.width = (width * this.weights[1] / (this.weights[0] + this.weights[1])) + 'px';
+                }
+            }
+        });
+        observer.observe(parent, config);
+    }
+
+    setWeights(weights: number[]): void {
+        this.weights = weights;
+        this.left.style.width = weights[0] + '%';
+        this.right.style.width = weights[1] + '%';
     }
 
     leftPanel(): HTMLDivElement {
@@ -69,6 +91,7 @@ class VerticalSplit {
         var rightWidth: number = this.currentSum - leftWidth;
         this.left.style.width = leftWidth + 'px';
         this.right.style.width = rightWidth + 'px';
+        this.weights = [leftWidth, rightWidth];
     }
 }
 
@@ -84,9 +107,13 @@ class ThreeVerticalPanels {
     centerWidth: number;
     rightWidth: number;
 
+    weights: number[];
+
     constructor(parent: HTMLDivElement) {
         parent.style.display = 'flex';
         parent.style.flexDirection = 'row';
+
+        this.weights = [33.3, 33.3, 33.3];
 
         this.left = document.createElement('div');
         this.left.style.width = '33%';
@@ -121,9 +148,26 @@ class ThreeVerticalPanels {
         this.right = document.createElement('div');
         this.right.style.width = '33%';
         parent.appendChild(this.right);
+
+        let config: any = { attributes: true, childList: false, subtree: false };
+        let observer = new MutationObserver((mutationsList) => {
+            for (let mutation of mutationsList) {
+                if (mutation.type === 'attributes') {
+                    this.left.style.height = parent.clientHeight + 'px';
+                    this.center.style.height = parent.clientHeight + 'px';
+                    this.right.style.height = parent.clientHeight + 'px';
+                    let width = parent.clientWidth - this.leftDivider.clientWidth - this.rightDivider.clientWidth;
+                    this.left.style.width = (width * this.weights[0] / (this.weights[0] + this.weights[1] + this.weights[2])) + 'px';
+                    this.center.style.width = (width * this.weights[1] / (this.weights[0] + this.weights[1] + this.weights[2])) + 'px';
+                    this.right.style.width = (width * this.weights[3] / (this.weights[0] + this.weights[1] + this.weights[2])) + 'px';
+                }
+            }
+        });
+        observer.observe(parent, config);
     }
 
     setWeights(weights: number[]): void {
+        this.weights = weights;
         this.left.style.width = weights[0] + '%';
         this.center.style.width = weights[1] + '%';
         this.right.style.width = weights[2] + '%';
@@ -156,6 +200,7 @@ class ThreeVerticalPanels {
         this.centerWidth = sum - this.leftWidth - this.rightWidth;
         this.left.style.width = this.leftWidth + 'px';
         this.center.style.width = this.centerWidth + 'px';
+        this.weights = [this.leftWidth, this.centerWidth, this.rightWidth];
     }
 
     rightDragEnd(ev: DragEvent) {
@@ -167,23 +212,26 @@ class ThreeVerticalPanels {
         this.rightWidth = sum - this.leftWidth - this.centerWidth;
         this.center.style.width = this.centerWidth + 'px';
         this.right.style.width = this.rightWidth + 'px';
+        this.weights = [this.leftWidth, this.centerWidth, this.rightWidth];
     }
 }
 
 class HorizontalSplit {
 
-    currentSum: number;
-
     top: HTMLDivElement;
     divider: HTMLDivElement;
     bottom: HTMLDivElement;
+    weights: number[];
+    currentSum: number;
 
-    constructor(parent: HTMLDivElement, topPercentage: number) {
+    constructor(parent: HTMLDivElement) {
         parent.style.display = 'flex';
         parent.style.flexDirection = 'column';
 
+        this.weights = [50, 50];
+
         this.top = document.createElement('div');
-        this.top.style.height = topPercentage + '%';
+        this.top.style.height = '50%';
         parent.appendChild(this.top);
 
         this.divider = document.createElement('div');
@@ -198,8 +246,28 @@ class HorizontalSplit {
         parent.appendChild(this.divider);
 
         this.bottom = document.createElement('div');
-        this.bottom.style.height = (100 - topPercentage) + '%';
+        this.bottom.style.height = '50%';
         parent.appendChild(this.bottom);
+
+        let config: any = { attributes: true, childList: false, subtree: false };
+        let observer = new MutationObserver((mutationsList) => {
+            for (let mutation of mutationsList) {
+                if (mutation.type === 'attributes') {
+                    this.top.style.width = parent.clientWidth + 'px';
+                    this.bottom.style.width = parent.clientWidth + 'px';
+                    let height = parent.clientHeight - this.divider.clientHeight;
+                    this.top.style.height = (height * this.weights[0] / (this.weights[0] + this.weights[1])) + 'px';
+                    this.bottom.style.height = (height * this.weights[1] / (this.weights[0] + this.weights[1])) + 'px';
+                }
+            }
+        });
+        observer.observe(parent, config);
+    }
+
+    setWeights(weights: number[]): void {
+        this.weights = weights;
+        this.top.style.height = weights[0] + '%';
+        this.bottom.style.height = weights[1] + '%';
     }
 
     topPanel(): HTMLDivElement {
@@ -222,6 +290,7 @@ class HorizontalSplit {
         var bottomHeight: number = this.currentSum - topHeight;
         this.top.style.height = topHeight + 'px';
         this.bottom.style.height = bottomHeight + 'px';
+        this.weights = [topHeight, bottomHeight];
     }
 }
 
@@ -237,9 +306,13 @@ class ThreeHorizontalPanels {
     centerHeight: number;
     bottomHeight: number;
 
+    weights: number[];
+
     constructor(parent: HTMLDivElement) {
         parent.style.display = 'flex';
         parent.style.flexDirection = 'column';
+
+        this.weights = [33.3, 33.3, 33.3];
 
         this.top = document.createElement('div');
         this.top.style.height = '33%';
@@ -274,9 +347,26 @@ class ThreeHorizontalPanels {
         this.bottom = document.createElement('div');
         this.bottom.style.height = '33%';
         parent.appendChild(this.bottom);
+
+        let config: any = { attributes: true, childList: false, subtree: false };
+        let observer = new MutationObserver((mutationsList) => {
+            for (let mutation of mutationsList) {
+                if (mutation.type === 'attributes') {
+                    this.top.style.width = parent.clientWidth + 'px';
+                    this.center.style.width = parent.clientWidth + 'px';
+                    this.bottom.style.width = parent.clientWidth + 'px';
+                    let height = parent.clientHeight - this.topDivider.clientHeight - this.bottomDivider.clientHeight;
+                    this.top.style.height = (height * this.weights[0] / (this.weights[0] + this.weights[1] + this.weights[2])) + 'px';
+                    this.center.style.height = (height * this.weights[1] / (this.weights[0] + this.weights[1] + this.weights[2])) + 'px';
+                    this.bottom.style.height = (height * this.weights[3] / (this.weights[0] + this.weights[1] + this.weights[2])) + 'px';
+                }
+            }
+        });
+        observer.observe(parent, config);
     }
 
     setWeights(weights: number[]): void {
+        this.weights = weights;
         this.top.style.height = weights[0] + '%';
         this.center.style.height = weights[1] + '%';
         this.bottom.style.height = weights[2] + '%';
@@ -309,6 +399,7 @@ class ThreeHorizontalPanels {
         this.centerHeight = sum - this.topHeight - this.bottomHeight;
         this.top.style.height = this.topHeight + 'px';
         this.center.style.height = this.centerHeight + 'px';
+        this.weights = [this.topHeight, this.centerHeight, this.bottomHeight];
     }
 
 
@@ -321,5 +412,6 @@ class ThreeHorizontalPanels {
         this.bottomHeight = sum - this.topHeight - this.centerHeight;
         this.center.style.height = this.centerHeight + 'px';
         this.bottom.style.height = this.bottomHeight + 'px';
+        this.weights = [this.topHeight, this.centerHeight, this.bottomHeight];
     }
 }

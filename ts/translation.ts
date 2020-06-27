@@ -31,8 +31,10 @@ class TranslationView {
     memoryArea: HTMLDivElement;
     machineArea: HTMLDivElement;
     termsArea: HTMLDivElement;
+    statusArea: HTMLDivElement;
 
     projectId: string;
+    projectFiles: string[];
     tbody: HTMLTableSectionElement;
     filesTableBody: HTMLTableSectionElement;
 
@@ -60,19 +62,19 @@ class TranslationView {
         this.mainArea.style.display = 'flex';
         div.appendChild(this.mainArea);
 
-        let verticalPanels: ThreeVerticalPanels = new ThreeVerticalPanels(this.mainArea);
-        verticalPanels.setWeights([20, 55, 25])
+        let verticalPanels: VerticalSplit = new VerticalSplit(this.mainArea);
+        verticalPanels.setWeights([75,25]);
         this.filesArea = verticalPanels.leftPanel();
 
-        this.translationArea = verticalPanels.centerPanel();
+        this.translationArea = verticalPanels.leftPanel();
         this.translationArea.style.height = '100%';
 
         this.rightPanel = verticalPanels.rightPanel();
 
-        this.buildFilesArea();
         this.buildTranslationArea();
         this.buildRightSide();
 
+        this.electron.ipcRenderer.send('get-files', { project: this.projectId });
         this.electron.ipcRenderer.on('set-files', (event: Electron.IpcRendererEvent, arg: any) => {
             this.setFiles(arg);
         });
@@ -82,7 +84,7 @@ class TranslationView {
         setTimeout(() => {
             this.mainArea.style.width = this.container.clientWidth + 'px';
             this.mainArea.style.height = (document.getElementById('mainContainer').clientHeight - 34) + 'px';
-            this.watchSizes(projectId);
+            this.watchSizes();
         }, 200);
     }
 
@@ -90,9 +92,9 @@ class TranslationView {
         return this.container;
     }
 
-    watchSizes(id: string): void {
+    watchSizes(): void {
         let targetNode: HTMLElement = document.getElementById('mainContainer');
-        let area = document.getElementById('main' + id);
+        let area = document.getElementById('main' + this.projectId);
         let config: any = { attributes: true, childList: false, subtree: false };
         let observer = new MutationObserver((mutationsList) => {
             for (let mutation of mutationsList) {
@@ -105,48 +107,8 @@ class TranslationView {
         observer.observe(targetNode, config);
     }
 
-    buildFilesArea(): void {
-        this.filesArea.classList.add('divContainer');
-        let title: HTMLDivElement = document.createElement('div');
-        title.classList.add('titlepanel');
-        title.innerText = 'Project Files';
-        this.filesArea.appendChild(title);
-
-        let table: HTMLTableElement = document.createElement('table');
-        table.classList.add('fill_width');
-        table.classList.add('stripes');
-        this.filesArea.appendChild(table);
-
-        this.filesTableBody = document.createElement('tbody');
-        table.appendChild(this.filesTableBody);
-
-        this.electron.ipcRenderer.send('get-files', { project: this.projectId });
-    }
-
     setFiles(arg: any): void {
-        if (this.projectId !== arg.project) {
-            return;
-        }
-        var files: string[] = arg.files;
-        let length = files.length;
-        for (let i = 0; i < length; i++) {
-            let tr: HTMLTableRowElement = document.createElement('tr');            
-            this.filesTableBody.appendChild(tr);
-
-            let td: HTMLTableCellElement = document.createElement('td');
-            td.classList.add('middle');
-            let check : HTMLInputElement = document.createElement('input');
-            check.type = 'checkbox';
-            check.checked = true;
-            td.appendChild(check);
-            tr.appendChild(td);
-
-            td = document.createElement('td');
-            td.classList.add('middle');
-            // td.classList.add('noWrap');
-            td.innerText = files[i];
-            tr.appendChild(td);
-        }
+        this.projectFiles = arg.files;
         this.getSegments();
     }
 
@@ -160,12 +122,15 @@ class TranslationView {
     }
 
     buildTranslationArea(): void {
-        this.translationArea.classList.add('divContainer');
+        let tableContainer : HTMLDivElement = document.createElement('div');
+        tableContainer.classList.add('divContainer');
+        tableContainer.classList.add('fill_width');
+        this.translationArea.appendChild(tableContainer);
 
         let table: HTMLTableElement = document.createElement('table');
         table.classList.add('fill_width');
         table.classList.add('stripes');
-        this.translationArea.appendChild(table);
+        tableContainer.appendChild(table);
 
         let thead: HTMLTableSectionElement = document.createElement('thead');
         table.appendChild(thead);
@@ -195,6 +160,23 @@ class TranslationView {
 
         this.tbody = document.createElement('tbody');
         table.appendChild(this.tbody);
+
+        this.statusArea = document.createElement('div');
+        this.statusArea.classList.add('toolbar');
+        this.statusArea.innerText = 'Staus area'
+        this.translationArea.appendChild(this.statusArea);
+
+        let config: any = { attributes: true, childList: false, subtree: false };
+        let observer = new MutationObserver((mutationsList) => {
+            for (let mutation of mutationsList) {
+                if (mutation.type === 'attributes') {
+                    tableContainer.style.height = (this.translationArea.clientHeight - 34) + 'px';
+                    tableContainer.style.width = this.translationArea.clientWidth + 'px';
+                }
+            }
+        });
+        observer.observe(this.translationArea, config);
+        
     }
 
     buildRightSide(): void {
@@ -231,4 +213,5 @@ class TranslationView {
             this.tbody.insertAdjacentHTML('beforeend', arg[i]);
         }
     }
+
 }
