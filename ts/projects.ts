@@ -37,8 +37,8 @@ class ProjectsView {
         let addFileButton = document.createElement('a');
         addFileButton.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path d="m 21,16.166667 h -2.454545 v -2.5 h -1.636364 v 2.5 h -2.454546 v 1.666666 h 2.454546 v 2.5 h 1.636364 v -2.5 H 21 Z m -5.727273,4.166666 V 22 H 3 V 2 h 8.336455 c 2.587909,0 8.027181,6.0191667 8.027181,8.011667 V 12 h -1.636363 v -1.285833 c 0,-3.4225003 -4.909091,-2.0475003 -4.909091,-2.0475003 0,0 1.242,-5 -2.158364,-5 H 4.6363636 V 20.333333 Z" /></svg>' +
             '<span class="tooltiptext bottomTooltip">Translate Single File</span>';
-            addFileButton.className = 'tooltip';
-            addFileButton.addEventListener('click', () => {
+        addFileButton.className = 'tooltip';
+        addFileButton.addEventListener('click', () => {
             this.addFile();
         });
         topBar.appendChild(addFileButton);
@@ -58,7 +58,7 @@ class ProjectsView {
         topBar.appendChild(span0);
 
         let openButton = document.createElement('a');
-        openButton.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 0 24 24" width="24"><path d="M20 6h-8l-2-2H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2zm0 12H4V8h16v10z"/></svg>' +
+        openButton.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 0 24 24" width="24"><path d="M19 19H5V5h7V3H5c-1.11 0-2 .9-2 2v14c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2v-7h-2v7zM14 3v2h3.59l-9.83 9.83 1.41 1.41L19 6.41V10h2V3h-7z"/></svg>' +
             '<span class="tooltiptext bottomTooltip">Open Project</span>';
         openButton.className = 'tooltip';
         openButton.addEventListener('click', () => {
@@ -137,14 +137,34 @@ class ProjectsView {
 
         // finish setup
 
-        this.setSizes();
         this.loadProjects();
+
+        this.watchSizes();
+
+        setTimeout(() => {
+            this.setSizes();
+        }, 200);
     }
 
     setSizes(): void {
-        let body = document.getElementById('body');
-        this.tableContainer.style.height = (body.clientHeight - 65) + 'px';
+        let main = document.getElementById('main');
+        this.container.style.width = main.clientWidth + 'px';
+        this.container.style.height = main.clientHeight + 'px';
+        this.tableContainer.style.height = (main.clientHeight - 65) + 'px';
         this.tableContainer.style.width = this.container.clientWidth + 'px';
+    }
+
+    watchSizes(): void {
+        let targetNode: HTMLElement = document.getElementById('main');
+        let config: any = { attributes: true, childList: false, subtree: false };
+        let observer = new MutationObserver((mutationsList) => {
+            for (let mutation of mutationsList) {
+                if (mutation.type === 'attributes') {
+                  this.setSizes();
+                }
+            }
+        });
+        observer.observe(targetNode, config);
     }
 
     addFile(): void {
@@ -264,7 +284,7 @@ class ProjectsView {
             td.classList.add('middle');
             td.classList.add('center');
             td.style.minWidth = '170px';
-                td.innerText = p.subject;
+            td.innerText = p.subject;
             tr.append(td);
             this.tbody.appendChild(tr);
         }

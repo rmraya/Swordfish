@@ -99,7 +99,6 @@ class TabHolder {
 
         this.contentHolder = document.createElement('div');
         this.contentHolder.id = id;
-        this.contentHolder.classList.add('fill_width');
         parent.appendChild(this.contentHolder);
     }
 
@@ -137,7 +136,7 @@ class TabHolder {
         this.tabs.delete(tab);
         this.tabsList.splice(this.tabsList.indexOf("tab"), 1);
         if (tab === this.selectedTab && this.tabsList.length > 1) {
-            this.selectTab(this.tabsList[this.tabsList.length - 1]);
+            this.selectTab(this.tabsList[0]);
         }
     }
 

@@ -20,7 +20,8 @@ SOFTWARE.
 class GlossariesView {
 
     container: HTMLDivElement;
-
+    tableContainer: HTMLDivElement;
+    
     constructor(div: HTMLDivElement) {
         this.container = div;
         let topBar: HTMLDivElement = document.createElement('div');
@@ -53,6 +54,35 @@ class GlossariesView {
             this.modifyGlossary()
         });
         topBar.appendChild(modifyButton);
+
+        this.tableContainer = document.createElement('div');
+        this.tableContainer.classList.add('divContainer');
+        this.container.appendChild(this.tableContainer);
+
+        this.watchSizes();
+
+        setTimeout(() => {
+            this.setSizes();
+        }, 200);
+    }
+
+    setSizes(): void {
+        let body = document.getElementById('body');
+        this.tableContainer.style.height = (body.clientHeight - 65) + 'px';
+        this.tableContainer.style.width = this.container.clientWidth + 'px';
+    }
+
+    watchSizes(): void {
+        let targetNode: HTMLElement = document.getElementById('main');
+        let config: any = { attributes: true, childList: false, subtree: false };
+        let observer = new MutationObserver((mutationsList) => {
+            for (let mutation of mutationsList) {
+                if (mutation.type === 'attributes') {
+                  this.setSizes();
+                }
+            }
+        });
+        observer.observe(targetNode, config);
     }
 
     addGlossary(): void {

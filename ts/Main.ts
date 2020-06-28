@@ -22,6 +22,7 @@ class Main {
     electron = require('electron');
 
     static tabHolder: TabHolder;
+    mainContainer: HTMLDivElement;
     static main: HTMLDivElement;
 
     projectsView: ProjectsView;
@@ -30,21 +31,30 @@ class Main {
 
     constructor() {
 
-        let container: HTMLDivElement = document.getElementById('mainContainer') as HTMLDivElement;
-        Main.tabHolder = new TabHolder(container, 'main');
+        this.mainContainer = document.getElementById('mainContainer') as HTMLDivElement;
+        Main.tabHolder = new TabHolder(this.mainContainer, 'main');
 
         Main.main = document.getElementById('main') as HTMLDivElement;
 
         let projectsTab = new Tab('projects', 'Projects', false);
-        this.buildProjectsTab(projectsTab.getContainer());
+        this.projectsView = new ProjectsView(projectsTab.getContainer());
+        projectsTab.getLabel().addEventListener('click', () => {
+            this.projectsView.setSizes();
+        });
         Main.tabHolder.addTab(projectsTab);
 
         let memoriesTab = new Tab('memories', 'Memories', false);
-        this.buildMemoriesTab(memoriesTab.getContainer());
+        this.memoriesView = new MemoriesView(memoriesTab.getContainer());
+        memoriesTab.getLabel().addEventListener('click', () => {
+            this.memoriesView.setSizes();
+        });
         Main.tabHolder.addTab(memoriesTab);
 
         let glossariesTab = new Tab('glossaries', 'Glossaries', false);
-        this.buildGlossariesTab(glossariesTab.getContainer());
+        this.glossariesView = new GlossariesView(glossariesTab.getContainer());
+        glossariesTab.getLabel().addEventListener('click', () => {
+            this.glossariesView.setSizes();
+        });
         Main.tabHolder.addTab(glossariesTab);
 
         Main.tabHolder.selectTab('projects');
@@ -59,9 +69,6 @@ class Main {
         window.addEventListener('resize', () => {
             this.resizePanels();
         });
-        window.addEventListener('load', () => {
-            this.resizePanels();
-        })
         this.electron.ipcRenderer.on('view-projects', () => {
             Main.tabHolder.selectTab('projects');
         });
@@ -88,7 +95,22 @@ class Main {
         });
         this.electron.ipcRenderer.on('open-projects', () => {
             this.projectsView.openProjects();
-        })
+        });
+
+        let config: any = { attributes: true, childList: false, subtree: false };
+        let observer = new MutationObserver((mutationsList) => {
+            for (let mutation of mutationsList) {
+                if (mutation.type === 'attributes') {
+                    Main.main.style.height = (this.mainContainer.clientHeight - 31) + 'px';
+                    Main.main.style.width = this.mainContainer.clientWidth + 'px';
+                }
+            }
+        });
+        observer.observe(this.mainContainer, config);
+
+        setTimeout(() => {
+            this.resizePanels();
+        }, 200);
     }
 
     setStatus(arg: any): void {
@@ -107,28 +129,18 @@ class Main {
             return;
         }
         let tab = new Tab(arg.id, arg.description, true);
-        new TranslationView(tab.getContainer(), arg.id);
+        let view: TranslationView = new TranslationView(tab.getContainer(), arg.id);
         Main.tabHolder.addTab(tab);
         Main.tabHolder.selectTab(arg.id);
-    }
-
-    buildProjectsTab(div: HTMLDivElement): void {
-        this.projectsView = new ProjectsView(div);
-    }
-
-    buildMemoriesTab(div: HTMLDivElement): void {
-        this.memoriesView = new MemoriesView(div);
-    }
-
-    buildGlossariesTab(div: HTMLDivElement): void {
-        this.glossariesView = new GlossariesView(div);
+        tab.getLabel().addEventListener('click', () => {
+            view.setSize();
+        });
     }
 
     resizePanels(): void {
         let body = document.getElementById('body');
-        let main = document.getElementById('mainContainer');
-        main.style.width = body.clientWidth + 'px';
-        main.style.height = (body.clientHeight - 31) + 'px';
+        this.mainContainer.style.width = body.clientWidth + 'px';
+        this.mainContainer.style.height = body.clientHeight + 'px';
     }
 }
 

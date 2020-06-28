@@ -40,8 +40,6 @@ class TranslationView {
 
     constructor(div: HTMLDivElement, projectId: string) {
         this.container = div;
-        this.container.style.width = '100%';
-        this.container.style.height = '100%';
         this.projectId = projectId;
 
         let topBar: HTMLDivElement = document.createElement('div');
@@ -63,7 +61,7 @@ class TranslationView {
         div.appendChild(this.mainArea);
 
         let verticalPanels: VerticalSplit = new VerticalSplit(this.mainArea);
-        verticalPanels.setWeights([75,25]);
+        verticalPanels.setWeights([75, 25]);
         this.filesArea = verticalPanels.leftPanel();
 
         this.translationArea = verticalPanels.leftPanel();
@@ -80,11 +78,12 @@ class TranslationView {
         });
         this.electron.ipcRenderer.on('set-segments', (event: Electron.IpcRendererEvent, arg: any) => {
             this.setSegments(arg);
-        })
+        });
+
+        this.watchSizes();
+
         setTimeout(() => {
-            this.mainArea.style.width = this.container.clientWidth + 'px';
-            this.mainArea.style.height = (document.getElementById('mainContainer').clientHeight - 34) + 'px';
-            this.watchSizes();
+            this.setSize();
         }, 200);
     }
 
@@ -92,15 +91,21 @@ class TranslationView {
         return this.container;
     }
 
+    setSize() {
+        let main = document.getElementById('main');
+        this.container.style.width = main.clientWidth + 'px';
+        this.container.style.height = main.clientHeight + 'px';
+        this.mainArea.style.height = (main.clientHeight - 34) + 'px';
+        this.mainArea.style.width = this.container.clientWidth + 'px';
+    }
+
     watchSizes(): void {
-        let targetNode: HTMLElement = document.getElementById('mainContainer');
-        let area = document.getElementById('main' + this.projectId);
+        let targetNode: HTMLElement = document.getElementById('main');
         let config: any = { attributes: true, childList: false, subtree: false };
         let observer = new MutationObserver((mutationsList) => {
             for (let mutation of mutationsList) {
                 if (mutation.type === 'attributes') {
-                    area.style.height = (targetNode.clientHeight - 34) + 'px';
-                    area.style.width = this.container.clientWidth + 'px';
+                   this.setSize();
                 }
             }
         });
@@ -122,7 +127,7 @@ class TranslationView {
     }
 
     buildTranslationArea(): void {
-        let tableContainer : HTMLDivElement = document.createElement('div');
+        let tableContainer: HTMLDivElement = document.createElement('div');
         tableContainer.classList.add('divContainer');
         tableContainer.classList.add('fill_width');
         this.translationArea.appendChild(tableContainer);
@@ -176,7 +181,6 @@ class TranslationView {
             }
         });
         observer.observe(this.translationArea, config);
-        
     }
 
     buildRightSide(): void {
@@ -208,7 +212,7 @@ class TranslationView {
     setSegments(arg: any): void {
         this.tbody.innerHTML = '';
         let length = arg.length;
-        
+
         for (let i = 0; i < length; i++) {
             this.tbody.insertAdjacentHTML('beforeend', arg[i]);
         }
