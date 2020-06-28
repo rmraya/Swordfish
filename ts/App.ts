@@ -292,7 +292,7 @@ class Swordfish {
 
         if (Swordfish.currentDefaults === undefined) {
             let size: Size = screen.getPrimaryDisplay().workAreaSize;
-            Swordfish.currentDefaults = { width: size.width * 0.9, height: size.height * 0.9, x: 0, y: 0 };
+            Swordfish.currentDefaults = { width: Math.round(size.width * 0.9), height: Math.round(size.height * 0.9), x: 0, y: 0 };
         }
 
         this.mainWindow = new BrowserWindow({
