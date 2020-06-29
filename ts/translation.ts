@@ -38,6 +38,8 @@ class TranslationView {
     tbody: HTMLTableSectionElement;
     filesTableBody: HTMLTableSectionElement;
 
+    pagesSpan: HTMLSpanElement;
+
     constructor(div: HTMLDivElement, projectId: string) {
         this.container = div;
         this.projectId = projectId;
@@ -105,7 +107,7 @@ class TranslationView {
         let observer = new MutationObserver((mutationsList) => {
             for (let mutation of mutationsList) {
                 if (mutation.type === 'attributes') {
-                   this.setSize();
+                    this.setSize();
                 }
             }
         });
@@ -157,10 +159,12 @@ class TranslationView {
 
         th = document.createElement('th');
         th.innerText = 'Source'
+        th.style.minWidth = '40%';
         tr.appendChild(th);
 
         th = document.createElement('th');
         th.innerText = 'Target'
+        th.style.minWidth = '40%';
         tr.appendChild(th);
 
         this.tbody = document.createElement('tbody');
@@ -168,8 +172,74 @@ class TranslationView {
 
         this.statusArea = document.createElement('div');
         this.statusArea.classList.add('toolbar');
-        this.statusArea.innerText = 'Staus area'
+        this.statusArea.style.borderTopColor = 'var(--accent-color)';
         this.translationArea.appendChild(this.statusArea);
+
+        let firstLink: HTMLAnchorElement = document.createElement('a');
+        firstLink.classList.add('tooltip');
+        firstLink.innerHTML = '<svg width="24" height="24" viewBox="0 0 24 24">' +
+            '<path d="M18.41 16.59L13.82 12l4.59-4.59L17 6l-6 6 6 6zM6 6h2v12H6z" /></svg>' +
+            '<span class="tooltiptext topTooltip">First Page</span>';
+        firstLink.addEventListener('click', () => {
+            // TODO
+        });
+        this.statusArea.appendChild(firstLink);
+
+        let previousLink: HTMLAnchorElement = document.createElement('a');
+        previousLink.classList.add('tooltip');
+        previousLink.innerHTML = '<svg width="24" height="24" viewBox="0 0 24 24">' +
+            '<path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z" /></svg>' +
+            '<span class="tooltiptext topTooltip">Previous Page</span>';
+        previousLink.addEventListener('click', () => {
+            // TODO
+        });
+        this.statusArea.appendChild(previousLink);
+
+        let pageSpan: HTMLSpanElement = document.createElement('span');
+        pageSpan.innerText = 'Page'
+        pageSpan.style.marginLeft = '10px';
+        pageSpan.style.marginTop = '4px';
+        this.statusArea.appendChild(pageSpan);
+
+        let pageDiv: HTMLDivElement = document.createElement('div');
+        pageDiv.classList.add('tooltip');
+        pageDiv.innerHTML = ' <input id="page' + this.projectId +
+            '" type="number" style="margin-left: 10px; margin-top:4px; width: 50px;" value="0">' +
+            '<span class="tooltiptext topTooltip">Enter page number and press ENTER</span>'
+        this.statusArea.appendChild(pageDiv);
+
+        let ofSpan: HTMLSpanElement = document.createElement('span');
+        ofSpan.innerText = 'of'
+        ofSpan.style.marginLeft = '10px';
+        ofSpan.style.marginTop = '4px';
+        this.statusArea.appendChild(ofSpan);
+
+        this.pagesSpan = document.createElement('span');
+        this.pagesSpan.innerText = 'of'
+        this.pagesSpan.style.marginLeft = '10px';
+        this.pagesSpan.style.marginTop = '4px';
+        this.pagesSpan.innerText = '0';
+        this.statusArea.appendChild(this.pagesSpan);
+
+        let nextLink: HTMLAnchorElement = document.createElement('a');
+        nextLink.classList.add('tooltip');
+        nextLink.innerHTML = '<svg width="24" height="24" viewBox="0 0 24 24">' +
+            '<path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z" /></svg>' +
+            '<span class="tooltiptext topTooltip">Next Page</span>';
+        nextLink.addEventListener('click', () => {
+            // TODO
+        });
+        this.statusArea.appendChild(nextLink);
+
+        let lastLink: HTMLAnchorElement = document.createElement('a');
+        lastLink.classList.add('tooltip');
+        lastLink.innerHTML = '<svg width="24" height="24" viewBox="0 0 24 24">' +
+            '<path d="M5.59 7.41L10.18 12l-4.59 4.59L7 18l6-6-6-6zM16 6h2v12h-2z" /></svg>' +
+            '<span class="tooltiptext topTooltip">Last Page</span>';
+        lastLink.addEventListener('click', () => {
+            // TODO
+        });
+        this.statusArea.appendChild(lastLink);
 
         let config: any = { attributes: true, childList: false, subtree: false };
         let observer = new MutationObserver((mutationsList) => {

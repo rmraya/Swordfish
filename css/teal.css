@@ -15,10 +15,11 @@
 
 	--input-background: #fefefe;
 	--input-color: #2e2e2e;
+	--focus-border: #f57c00;
 	--disabled-input: #bdbdbd;
 
-	--even-row-background: #cdcdcd;
-	--odd-row-background: #bcbcbc;
+	--even-row-background: #ececec;
+	--odd-row-background: #fcfcfc;
 
 	--highlight-color: #ecf01b;
 	--error-color: #960303;
@@ -180,15 +181,11 @@ input {
 
 input:focus {
 	outline: none !important;
-	border: 1px solid var(--accent-color);
+	border: 1px solid var(--focus-border);
 }
 
 input:disabled {
 	background-color: var(--disabled-input);
-}
-
-input[type=number]:focus {
-	border: 1px solid transparent;
 }
 
 input[type=number] {
@@ -210,7 +207,7 @@ select {
 
 select:focus {
 	outline: none !important;
-	border: 1px solid var(--accent-color);
+	border: 1px solid var(--focus-border);
 }
 
 option {
@@ -230,7 +227,7 @@ textarea {
 
 textarea:focus {
 	outline: none !important;
-	border: 1px solid var(--accent-color);
+	border: 1px solid var(--focus-border);
 }
 
 button {
@@ -361,6 +358,7 @@ label {
 svg {
 	fill: var(--normal-color);
 	stroke: var(--normal-color);
+	stroke-width: 0.3;
 }
 
 /* tabs */
