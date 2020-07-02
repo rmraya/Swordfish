@@ -40,6 +40,11 @@ class TranslationView {
 
     pagesSpan: HTMLSpanElement;
 
+    maxPage: number;
+    currentPage: number;
+    rowsPage: number = 500;
+    maxRows: number;
+
     constructor(div: HTMLDivElement, projectId: string) {
         this.container = div;
         this.projectId = projectId;
@@ -181,7 +186,7 @@ class TranslationView {
             '<path d="M18.41 16.59L13.82 12l4.59-4.59L17 6l-6 6 6 6zM6 6h2v12H6z" /></svg>' +
             '<span class="tooltiptext topTooltip">First Page</span>';
         firstLink.addEventListener('click', () => {
-            // TODO
+            this.firstPage();
         });
         this.statusArea.appendChild(firstLink);
 
@@ -191,22 +196,37 @@ class TranslationView {
             '<path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z" /></svg>' +
             '<span class="tooltiptext topTooltip">Previous Page</span>';
         previousLink.addEventListener('click', () => {
-            // TODO
+            this.previousPage();
         });
         this.statusArea.appendChild(previousLink);
 
-        let pageSpan: HTMLSpanElement = document.createElement('span');
-        pageSpan.innerText = 'Page'
-        pageSpan.style.marginLeft = '10px';
-        pageSpan.style.marginTop = '4px';
-        this.statusArea.appendChild(pageSpan);
+        let pageLabel: HTMLLabelElement = document.createElement('label');
+        pageLabel.innerText = 'Page';
+        pageLabel.setAttribute('for', 'page' + this.projectId);
+        pageLabel.style.marginLeft = '10px';
+        pageLabel.style.marginTop = '4px';
+        this.statusArea.appendChild(pageLabel);
 
         let pageDiv: HTMLDivElement = document.createElement('div');
         pageDiv.classList.add('tooltip');
-        pageDiv.innerHTML = ' <input id="page' + this.projectId +
-            '" type="number" style="margin-left: 10px; margin-top:4px; width: 50px;" value="0">' +
-            '<span class="tooltiptext topTooltip">Enter page number and press ENTER</span>'
         this.statusArea.appendChild(pageDiv);
+
+        let pageInput: HTMLInputElement = document.createElement('input');
+        pageInput.id = 'page' + this.projectId;
+        pageInput.type = 'number';
+        pageInput.style.marginLeft = '10px';
+        pageInput.style.marginTop = '4px';
+        pageInput.style.width = '50px';
+        pageInput.value = '0';
+        pageInput.addEventListener('change', () => {
+            let page = Number.parseInt(pageInput.value);
+            if (page >= 0 && page <= this.maxPage) {
+                this.currentPage = page;
+                this.getSegments();
+            }
+        });
+        pageDiv.appendChild(pageInput);
+        pageDiv.insertAdjacentHTML('beforeend', '<span class="tooltiptext topTooltip">Enter page number and press ENTER</span>');
 
         let ofSpan: HTMLSpanElement = document.createElement('span');
         ofSpan.innerText = 'of'
@@ -227,7 +247,7 @@ class TranslationView {
             '<path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z" /></svg>' +
             '<span class="tooltiptext topTooltip">Next Page</span>';
         nextLink.addEventListener('click', () => {
-            // TODO
+            this.nextPage();
         });
         this.statusArea.appendChild(nextLink);
 
@@ -237,9 +257,34 @@ class TranslationView {
             '<path d="M5.59 7.41L10.18 12l-4.59 4.59L7 18l6-6-6-6zM16 6h2v12h-2z" /></svg>' +
             '<span class="tooltiptext topTooltip">Last Page</span>';
         lastLink.addEventListener('click', () => {
-            // TODO
+            this.lastPage();
         });
         this.statusArea.appendChild(lastLink);
+
+        let rowsLabel: HTMLLabelElement = document.createElement('label');
+        rowsLabel.innerText = 'Rows/Page';
+        rowsLabel.setAttribute('for', 'rows_page' + this.projectId);
+        rowsLabel.style.marginLeft = '10px';
+        rowsLabel.style.marginTop = '4px';
+        this.statusArea.appendChild(rowsLabel);
+
+        let rowDiv = document.createElement('div');
+        rowDiv.classList.add('tooltip');
+        this.statusArea.appendChild(rowDiv);
+
+        let rowsInput: HTMLInputElement = document.createElement('input');
+        rowsInput.id = 'rows_page' + this.projectId;
+        rowsInput.type = 'number';
+        rowsInput.style.marginLeft = '10px';
+        rowsInput.style.marginTop = '4px';
+        rowsInput.style.width = '50px';
+        rowsInput.value = '500';
+        rowsInput.addEventListener('change', () => {
+            this.rowsPage = Number.parseInt(rowsInput.value);
+            this.firstPage();
+        });
+        rowDiv.appendChild(rowsInput);
+        rowDiv.insertAdjacentHTML('beforeend', '<span class="tooltiptext topTooltip">Enter number of rows/page and press ENTER</span>');
 
         let config: any = { attributes: true, childList: false, subtree: false };
         let observer = new MutationObserver((mutationsList) => {
@@ -282,10 +327,32 @@ class TranslationView {
     setSegments(arg: any): void {
         this.tbody.innerHTML = '';
         let length = arg.length;
-
         for (let i = 0; i < length; i++) {
             this.tbody.insertAdjacentHTML('beforeend', arg[i]);
         }
     }
 
+    firstPage(): void {
+        this.currentPage = 0;
+        this.getSegments();
+    }
+
+    previousPage(): void {
+        if (this.currentPage > 1) {
+            this.currentPage--;
+            this.getSegments();
+        }
+    }
+
+    nextPage(): void {
+        if (this.currentPage < this.maxPage) {
+            this.currentPage++;
+            this.getSegments();
+        }
+    }
+
+    lastPage(): void {
+        this.currentPage = this.maxPage;
+        this.getSegments();
+    }
 }

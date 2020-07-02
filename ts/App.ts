@@ -306,7 +306,7 @@ class Swordfish {
                 nodeIntegration: true
             },
             show: false,
-            icon: 'icons/icon.png'
+            icon: this.iconPath
         });
         this.contents = this.mainWindow.webContents;
         var fileMenu: Menu = Menu.buildFromTemplate([
