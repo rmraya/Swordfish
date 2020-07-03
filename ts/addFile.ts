@@ -109,7 +109,7 @@ class AddFile {
     addProject(): void {
         let name: string = (document.getElementById('nameInput') as HTMLInputElement).value;
         if (name === '') {
-            window.alert('Select file');
+            this.electron.ipcRenderer.send('show-message', { type: 'warning', message: 'Select file' });
             return;
         }
 
@@ -117,22 +117,22 @@ class AddFile {
         let client: string = (document.getElementById('clientInput') as HTMLInputElement).value;
         let srcLang = (document.getElementById('srcLangSelect') as HTMLSelectElement).value;
         if (srcLang === 'none') {
-            window.alert('Select source language');
+            this.electron.ipcRenderer.send('show-message', { type: 'warning', message: 'Select source language' });
             return;
         }
         let tgtLang = (document.getElementById('tgtLangSelect') as HTMLSelectElement).value;
         if (tgtLang === 'none') {
-            window.alert('Select target language');
+            this.electron.ipcRenderer.send('show-message', { type: 'warning', message: 'Select target language' });
             return;
         }
         let type = (document.getElementById('typeSelect') as HTMLSelectElement).value;
         if (type === 'none') {
-            window.alert('Select file type');
+            this.electron.ipcRenderer.send('show-message', { type: 'warning', message: 'Select file type' });
             return;
         }
         let charset = (document.getElementById('charsetSelect') as HTMLSelectElement).value;
         if (charset === 'none') {
-            window.alert('Select character set');
+            this.electron.ipcRenderer.send('show-message', { type: 'warning', message: 'Select character set' });
             return;
         }
         let array: any[] = [{ file: name, type: type, encoding: charset }];

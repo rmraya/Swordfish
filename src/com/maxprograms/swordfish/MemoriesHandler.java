@@ -43,16 +43,16 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import javax.xml.parsers.ParserConfigurationException;
 
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-import org.xml.sax.SAXException;
-
 import com.maxprograms.swordfish.models.Memory;
 import com.maxprograms.tmengine.ITmEngine;
 import com.maxprograms.tmengine.MapDbEngine;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+import org.xml.sax.SAXException;
 
 public class MemoriesHandler implements HttpHandler {
 
@@ -90,6 +90,7 @@ public class MemoriesHandler implements HttpHandler {
 	}
 
 	private JSONObject processRequest(String url, String request) {
+		logger.log(Level.INFO, url);
 		JSONObject response = new JSONObject();
 		try {
 			if ("/memories/create".equals(url)) {
@@ -203,7 +204,7 @@ public class MemoriesHandler implements HttpHandler {
 	}
 
 	private static JSONObject updateMemory(String request) throws IOException {
-		Memory mem = new Memory(request);
+		Memory mem = new Memory(new JSONObject(request));
 		memories.put(mem.getId(), mem);
 		saveMemoriesList();
 		return new JSONObject();
@@ -402,7 +403,7 @@ public class MemoriesHandler implements HttpHandler {
 		Iterator<Memory> it = vector.iterator();
 		while (it.hasNext()) {
 			Memory m = it.next();
-			array.put(new JSONObject(m.toJSON()));
+			array.put(m.toJSON());
 		}
 		return result;
 	}
@@ -416,9 +417,13 @@ public class MemoriesHandler implements HttpHandler {
 		if (!json.has("creationDate")) {
 			json.put("creationDate", System.currentTimeMillis());
 		}
-		Memory mem = new Memory(json.toString());
-		MapDbEngine engine = new MapDbEngine(mem.getId(), getWorkFolder());
-		engine.close();
+		Memory mem = new Memory(json);
+		if (Memory.LOCAL.equals(mem.getType())) {
+			MapDbEngine engine = new MapDbEngine(mem.getId(), getWorkFolder());
+			engine.close();
+		} else {
+			// TODO create memory on the remote server using REST
+		}
 		if (memories == null) {
 			loadMemoriesList();
 		}
@@ -450,7 +455,7 @@ public class MemoriesHandler implements HttpHandler {
 		while (it.hasNext()) {
 			String key = it.next();
 			JSONObject obj = json.getJSONObject(key);
-			memories.put(key, new Memory(obj.toString()));
+			memories.put(key, new Memory(obj));
 		}
 		if (firstRun) {
 			firstRun = false;
@@ -476,7 +481,7 @@ public class MemoriesHandler implements HttpHandler {
 		while (it.hasNext()) {
 			String key = it.next();
 			Memory m = memories.get(key);
-			json.put(key, new JSONObject(m.toJSON()));
+			json.put(key, m.toJSON());
 		}
 		File home = new File(getWorkFolder());
 		File list = new File(home, "memories.json");

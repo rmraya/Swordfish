@@ -80,12 +80,12 @@ class AddProject {
     addProject(): void {
         let name: string = (document.getElementById('nameInput') as HTMLInputElement).value;
         if (name === '') {
-            window.alert('Enter name');
+            this.electron.ipcRenderer.send('show-message', { type: 'warning', message: 'Enter name' });
             return;
         }
         let length = this.addedFiles.size;
         if (length === 0) {
-            window.alert('Add files');
+            this.electron.ipcRenderer.send('show-message', { type: 'warning', message: 'Add files' });
             return;
         }
         let error = '';
@@ -98,19 +98,19 @@ class AddProject {
             }
         });
         if (error !== '') {
-            window.alert(error);
+            this.electron.ipcRenderer.send('show-message', { type: 'warning', message: error });
             return;
         }
         let subject: string = (document.getElementById('subjectInput') as HTMLInputElement).value;
         let client: string = (document.getElementById('clientInput') as HTMLInputElement).value;
         let srcLang = (document.getElementById('srcLangSelect') as HTMLSelectElement).value;
         if (srcLang === 'none') {
-            window.alert('Select source language');
+            this.electron.ipcRenderer.send('show-message', { type: 'warning', message: 'Select source language' });
             return;
         }
         let tgtLang = (document.getElementById('tgtLangSelect') as HTMLSelectElement).value;
         if (tgtLang === 'none') {
-            window.alert('Select target language');
+            this.electron.ipcRenderer.send('show-message', { type: 'warning', message: 'Select target language' });
             return;
         }
 

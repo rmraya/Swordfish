@@ -128,9 +128,6 @@ class ProjectsView {
 
         // event listeners
 
-        window.addEventListener('resize', () => {
-            this.setSizes()
-        });
         this.electron.ipcRenderer.on('set-projects', (event: Electron.IpcRendererEvent, arg: any) => {
             this.displayProjects(arg);
         });
@@ -160,11 +157,15 @@ class ProjectsView {
         let observer = new MutationObserver((mutationsList) => {
             for (let mutation of mutationsList) {
                 if (mutation.type === 'attributes') {
-                  this.setSizes();
+                    this.setSizes();
                 }
             }
         });
         observer.observe(targetNode, config);
+    }
+
+    loadProjects(): void {
+        this.electron.ipcRenderer.send('get-projects');
     }
 
     addFile(): void {
@@ -198,10 +199,6 @@ class ProjectsView {
 
     removeProject(): void {
         // TODO
-    }
-
-    loadProjects(): void {
-        this.electron.ipcRenderer.send('get-projects');
     }
 
     importProject(): void {

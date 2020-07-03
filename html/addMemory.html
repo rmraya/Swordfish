@@ -19,10 +19,10 @@
         </tr>
         <tr>
             <td class="middle">
-                <label for="projectSelect">Project</label>
+                <label for="projectInput">Project</label>
             </td>
             <td class="fill_width middle">
-                <input list="projects" name="projectInput" class="fill_width middle">
+                <input list="projects" id="projectInput" class="fill_width middle">
                 <datalist id="projects">
                     
                 </datalist>
@@ -30,10 +30,10 @@
         </tr>
         <tr>
             <td class="middle">
-                <label for="subjectSelect">Subject</label>
+                <label for="subjectInput">Subject</label>
             </td>
             <td class="fill_width middle">
-                <input list="subjects" name="subjectInput" class="fill_width middle">
+                <input list="subjects" id="subjectInput" class="fill_width middle">
                 <datalist id="subjects">
                     
                 </datalist>
@@ -41,10 +41,10 @@
         </tr>
         <tr>
             <td class="middle">
-                <label for="clientSelect">Client</label>
+                <label for="clientInput">Client</label>
             </td>
             <td class="fill_width middle">
-                <input list="clients" name="clientInput" class="fill_width middle">
+                <input list="clients" id="clientInput" class="fill_width middle">
                 <datalist id="clients">
                     
                 </datalist>
@@ -64,10 +64,26 @@
         </tr>
         <tr>
             <td class="middle">
-                <label for="urlInput">URL</label>
+                <label for="urlInput" class="noWrap">Server URL</label>
             </td>
             <td class="fill_width middle">
                 <input type="text" id="urlInput" class="fill_width" disabled>
+            </td>
+        </tr>
+        <tr>
+            <td class="middle">
+                <label for="userInput" class="noWrap">User Name</label>
+            </td>
+            <td class="fill_width middle">
+                <input type="text" id="userInput" class="fill_width" disabled>
+            </td>
+        </tr>
+        <tr>
+            <td class="middle">
+                <label for="passInput">Password</label>
+            </td>
+            <td class="fill_width middle">
+                <input type="password" id="passInput" class="fill_width" disabled>
             </td>
         </tr>
     </table>

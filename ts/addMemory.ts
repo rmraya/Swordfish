@@ -46,19 +46,37 @@ class AddMemory {
             let body: HTMLBodyElement = document.getElementById('body') as HTMLBodyElement;
             this.electron.ipcRenderer.send('add-memory-height', { width: body.clientWidth, height: body.clientHeight });
         });
+        document.getElementById('addMemoryButton').addEventListener('click', () => {
+            this.addMemory();
+        });
     }
 
     addMemory(): void {
         let name: string = (document.getElementById('nameInput') as HTMLInputElement).value;
         if (name === '') {
-            window.alert('Enter name');
+            this.electron.ipcRenderer.send('show-message', { type: 'warning', message: 'Enter name' });
             return;
         }
-        let project: string = (document.getElementById('projectInput') as HTMLSelectElement).value;
-        let subject: string = (document.getElementById('subjectInput') as HTMLSelectElement).value;
-        let client: string = (document.getElementById('clientInput') as HTMLSelectElement).value;
         let type: string = (document.getElementById('typeSelect') as HTMLSelectElement).value;
-        // TODO
+        let server: string = '';
+        if (type !== 'Local') {
+            server = (document.getElementById('urlInput') as HTMLInputElement).value;
+            if (server === '') {
+                this.electron.ipcRenderer.send('show-message', { type: 'warning', message: 'Enter server URL' });
+                return;
+            }
+        }
+        let params: any = {
+            name: name,
+            project: (document.getElementById('projectInput') as HTMLInputElement).value,
+            subject: (document.getElementById('subjectInput') as HTMLInputElement).value,
+            client: (document.getElementById('clientInput') as HTMLInputElement).value,
+            type: type,
+            server: server,
+            user: (document.getElementById('userInput') as HTMLInputElement).value,
+            password: (document.getElementById('passInput') as HTMLInputElement).value
+        }
+        this.electron.ipcRenderer.send('add-memory', params);
     }
 
     setClients(arg: any): void {
@@ -72,6 +90,8 @@ class AddMemory {
     typeChanged(): void {
         let type: string = (document.getElementById('typeSelect') as HTMLSelectElement).value;
         (document.getElementById('urlInput') as HTMLInputElement).disabled = (type === 'Local');
+        (document.getElementById('userInput') as HTMLInputElement).disabled = (type === 'Local');
+        (document.getElementById('passInput') as HTMLInputElement).disabled = (type === 'Local');
     }
 }
 

@@ -182,6 +182,9 @@ class Swordfish {
         ipcMain.on('get-projects', (event: IpcMainEvent, arg: any) => {
             Swordfish.getProjects(event);
         });
+        ipcMain.on('get-memories', (event: IpcMainEvent, arg: any) => {
+            Swordfish.getMemories(event);
+        });
         ipcMain.on('show-add-file', () => {
             Swordfish.addFile();
         });
@@ -230,13 +233,16 @@ class Swordfish {
             this.createProject(arg);
         });
         ipcMain.on('show-add-memory', () => {
-            Swordfish.addMemory();
+            Swordfish.showAddMemory();
         });
         ipcMain.on('add-memory-height', (event: IpcMainEvent, arg: any) => {
             let rect: Rectangle = Swordfish.addMemoryWindow.getBounds();
             rect.height = arg.height + this.verticalPadding;
             Swordfish.addMemoryWindow.setBounds(rect);
         });
+        ipcMain.on('add-memory', (event:IpcMainEvent, arg: any) => {
+            this.addMemory(arg);
+        })
         ipcMain.on('get-clients', (event: IpcMainEvent, arg: any) => {
             // TODO
         });
@@ -338,7 +344,7 @@ class Swordfish {
             { label: 'Open Project', accelerator: 'CmdOrCtrl+O', click: () => { Swordfish.openProjects(); } }
         ]);
         var memoriesMenu: Menu = Menu.buildFromTemplate([
-            { label: 'Add Memory', click: () => { this.addMemory(); } }
+            { label: 'Add Memory', click: () => { Swordfish.showAddMemory(); } }
         ]);
         var glossariesMenu: Menu = Menu.buildFromTemplate([]);
         var helpMenu: Menu = Menu.buildFromTemplate([
@@ -627,6 +633,27 @@ class Swordfish {
         );
     }
 
+    static getMemories(event: IpcMainEvent): void {
+        Swordfish.contents.send('start-waiting');
+        Swordfish.contents.send('set-status', 'Loading memories');
+        Swordfish.sendRequest('/memories/list', {},
+            (data: any) => {
+                Swordfish.contents.send('set-status', '');
+                Swordfish.contents.send('end-waiting');
+                if (data.status === Swordfish.SUCCESS) {
+                    console.log(JSON.stringify(data))
+                    event.sender.send('set-memories', data.memories);
+                } else {
+                    dialog.showMessageBox({ type: 'error', message: data.reason });
+                }
+            },
+            (reason: string) => {
+                Swordfish.contents.send('set-status', '');
+                dialog.showMessageBox({ type: 'error', message: reason });
+            }
+        );
+    }
+
     selectSourceFiles(event: IpcMainEvent): void {
         let any: string[] = [];
         if (process.platform === 'linux') {
@@ -709,7 +736,7 @@ class Swordfish {
         this.contents.send('view-memories');
     }
 
-    static addMemory() {
+    static showAddMemory() {
         this.addMemoryWindow = new BrowserWindow({
             parent: this.mainWindow,
             width: 450,
@@ -1076,6 +1103,22 @@ class Swordfish {
             (reason: string) => {
                 dialog.showErrorBox('Error', reason);
             }
+        );
+    }
+
+    addMemory(arg: any): void  {
+        Swordfish.sendRequest('/memories/create', arg,
+        (data: any) => {
+            if (data.status === Swordfish.SUCCESS) {
+                Swordfish.addMemoryWindow.close();
+                Swordfish.contents.send('request-memories');
+            } else {
+                dialog.showErrorBox('Error', data.reason);
+            }
+        },
+        (reason: string) => {
+            dialog.showErrorBox('Error', reason);
+        }
         );
     }
 }

@@ -78,6 +78,10 @@ class Main {
         this.electron.ipcRenderer.on('view-memories', () => {
             Main.tabHolder.selectTab('memories');
         });
+        this.electron.ipcRenderer.on('request-memories', () => {
+            this.memoriesView.loadMemories();
+        });
+
         this.electron.ipcRenderer.on('view-glossaries', () => {
             Main.tabHolder.selectTab('glossaries');
         });
