@@ -33,6 +33,7 @@ class Swordfish {
     static aboutWindow: BrowserWindow;
     static licensesWindow: BrowserWindow;
     static addMemoryWindow: BrowserWindow;
+    static importTmxWindow: BrowserWindow;
     static addProjectWindow: BrowserWindow;
     static addFileWindow: BrowserWindow;
     static defaultLangsWindow: BrowserWindow;
@@ -243,9 +244,20 @@ class Swordfish {
         ipcMain.on('add-memory', (event: IpcMainEvent, arg: any) => {
             this.addMemory(arg);
         });
-        ipcMain.on('import-tmx', (event: IpcMainEvent, arg: any) => {
-            Swordfish.importTMX(arg);
-        })
+        ipcMain.on('show-import-tmx', (event: IpcMainEvent, arg: any) => {
+            Swordfish.showImportTMX(arg);
+        });
+        ipcMain.on('import-tmx-height', (event: IpcMainEvent, arg: any) => {
+            let rect: Rectangle = Swordfish.importTmxWindow.getBounds();
+            rect.height = arg.height + this.verticalPadding;
+            Swordfish.importTmxWindow.setBounds(rect);
+        });
+        ipcMain.on('import-tmx-file', (event: IpcMainEvent, arg: any) => {
+            Swordfish.importTmxFile(arg);
+        });
+        ipcMain.on('get-tmx-file', (event: IpcMainEvent, arg: any) => {
+            this.getTmxFile(event);
+        });
         ipcMain.on('get-clients', (event: IpcMainEvent, arg: any) => {
             // TODO
         });
@@ -319,7 +331,7 @@ class Swordfish {
         });
         this.contents = this.mainWindow.webContents;
         var fileMenu: Menu = Menu.buildFromTemplate([
-            { label: 'Translate Single File', click: () => { Swordfish.addFile(); } }
+            { label: 'Translate Single File', accelerator: 'CmdOrCtrl+N', click: () => { Swordfish.addFile(); } }
         ]);
         var editMenu: Menu = Menu.buildFromTemplate([
             { label: 'Undo', accelerator: 'CmdOrCtrl+Z', click: () => { this.contents.undo(); } },
@@ -343,11 +355,15 @@ class Swordfish {
             new MenuItem({ label: 'Toggle Development Tools', accelerator: 'F12', role: 'toggleDevTools' }),
         ]);
         var projectsMenu: Menu = Menu.buildFromTemplate([
-            { label: 'New Project', accelerator: 'CmdOrCtrl+n', click: () => { Swordfish.addProject(); } },
+            { label: 'New Project', accelerator: 'CmdOrCtrl+Shift+N', click: () => { Swordfish.addProject(); } },
             { label: 'Open Project', accelerator: 'CmdOrCtrl+O', click: () => { Swordfish.openProjects(); } }
         ]);
         var memoriesMenu: Menu = Menu.buildFromTemplate([
-            { label: 'Add Memory', click: () => { Swordfish.showAddMemory(); } }
+            { label: 'Add Memory', click: () => { Swordfish.showAddMemory(); } },
+            { label: 'Remove Memory', click: () => { Swordfish.removeMemory(); } },
+            new MenuItem({ type: 'separator' }),
+            { label: 'Import TMX File', click: () => {Swordfish.importTMX();}},
+            { label: 'Export as TMX File', click: () => {Swordfish.exportTMX();}}
         ]);
         var glossariesMenu: Menu = Menu.buildFromTemplate([]);
         var helpMenu: Menu = Menu.buildFromTemplate([
@@ -1124,7 +1140,93 @@ class Swordfish {
         );
     }
 
-    static importTMX(memory: any): void {
+    static showImportTMX(memory: string): void {
+        this.importTmxWindow = new BrowserWindow({
+            parent: this.mainWindow,
+            width: 600,
+            useContentSize: true,
+            minimizable: false,
+            maximizable: false,
+            resizable: false,
+            show: false,
+            icon: this.iconPath,
+            webPreferences: {
+                nodeIntegration: true
+            }
+        });
+        this.importTmxWindow.setMenu(null);
+        this.importTmxWindow.loadURL('file://' + this.path.join(app.getAppPath(), 'html', 'importTmx.html'));
+        this.importTmxWindow.once('ready-to-show', (event: IpcMainEvent) => {
+            event.sender.send('get-height');
+            event.sender.send('set-memory', memory);
+            this.importTmxWindow.show();
+        });
+    }
+
+    static importTMX(): void {
+       Swordfish.mainWindow.webContents.send('import-tmx');
+    }
+
+    static importTmxFile(arg: any): void {
+        console.log(JSON.stringify(arg))
+        Swordfish.importTmxWindow.close();
+        Swordfish.mainWindow.focus();
+        Swordfish.contents.send('start-waiting');
+        Swordfish.contents.send('set-status', 'Importing TMX');
+        Swordfish.sendRequest('/memories/import', arg,
+            (data: any) => {
+                if (data.status !== Swordfish.SUCCESS) {
+                    Swordfish.contents.send('end-waiting');
+                    Swordfish.contents.send('set-status', '');
+                    dialog.showErrorBox('Error', data.reason);
+                }
+                Swordfish.currentStatus = data;
+                let processId: string = data.process;
+                var intervalObject = setInterval(() => {
+                    if (Swordfish.currentStatus.result) {
+                        if (Swordfish.currentStatus.result === Swordfish.COMPLETED) {
+                            Swordfish.contents.send('end-waiting');
+                            Swordfish.contents.send('set-status', '');
+                            clearInterval(intervalObject);
+                            return;
+                        } else if (Swordfish.currentStatus.result === Swordfish.PROCESSING) {
+                            // it's OK, keep waiting
+                        } else if (Swordfish.currentStatus.result === Swordfish.ERROR) {
+                            Swordfish.contents.send('end-waiting');
+                            Swordfish.contents.send('set-status', '');
+                            clearInterval(intervalObject);
+                            dialog.showErrorBox('Error', Swordfish.currentStatus.reason);
+                            return;
+                        } else {
+                            Swordfish.contents.send('end-waiting');
+                            Swordfish.contents.send('set-status', '');
+                            clearInterval(intervalObject);
+                            dialog.showErrorBox('Error', 'Unknown error importing file');
+                            return;
+                        }
+                    }
+                    Swordfish.getImportProgress(processId);
+                }, 500);
+            },
+            (reason: string) => {
+                dialog.showErrorBox('Error', reason);
+            }
+        );
+
+    }
+
+    static getImportProgress(process: string): void {
+        this.sendRequest('/memories/status', { process: process },
+            (data: any) => {
+                Swordfish.currentStatus = data;
+            },
+            (reason: string) => {
+                dialog.showErrorBox('Error', reason);
+            }
+        );
+    }
+
+    getTmxFile(event: IpcMainEvent): void {
         let anyFile: string[] = [];
         if (process.platform === 'linux') {
             anyFile = ['*'];
@@ -1137,63 +1239,17 @@ class Swordfish {
             ]
         }).then((value) => {
             if (!value.canceled) {
-                Swordfish.mainWindow.focus();
-                Swordfish.contents.send('start-waiting');
-                Swordfish.contents.send('set-status', 'Importing TMX');
-                Swordfish.sendRequest('/memories/import', { memory: memory, tmx: value.filePaths[0] },
-                    (data: any) => {
-                        if (data.status !== Swordfish.SUCCESS) {
-                            Swordfish.contents.send('end-waiting');
-                            Swordfish.contents.send('set-status', '');
-                            dialog.showErrorBox('Error', data.reason);
-                        }
-                        Swordfish.currentStatus = data;
-                        let processId: string = data.process;
-                        var intervalObject = setInterval(() => {
-                            if (Swordfish.currentStatus.result) {
-                                if (Swordfish.currentStatus.result === Swordfish.COMPLETED) {
-                                    Swordfish.contents.send('end-waiting');
-                                    Swordfish.contents.send('set-status', '');
-                                    clearInterval(intervalObject);
-                                    return;
-                                } else if (Swordfish.currentStatus.result === Swordfish.PROCESSING) {
-                                    // it's OK, keep waiting
-                                } else if (Swordfish.currentStatus.result === Swordfish.ERROR) {
-                                    Swordfish.contents.send('end-waiting');
-                                    Swordfish.contents.send('set-status', '');
-                                    clearInterval(intervalObject);
-                                    dialog.showErrorBox('Error', Swordfish.currentStatus.reason);
-                                    return;
-                                } else {
-                                    Swordfish.contents.send('end-waiting');
-                                    Swordfish.contents.send('set-status', '');
-                                    clearInterval(intervalObject);
-                                    dialog.showErrorBox('Error', 'Unknown error importing file');
-                                    return;
-                                }
-                            }
-                            Swordfish.getImportProgress(processId);
-                        }, 500);
-                    },
-                    (reason: string) => {
-                        dialog.showErrorBox('Error', reason);
-                    }
-                );
+                event.sender.send('set-tmx-file', value.filePaths[0]);
             }
-        }).catch((error) => {
-            console.log(error);
         });
     }
 
-    static getImportProgress(process: string): void {
-        this.sendRequest('/memories/status', { process: process },
-            (data: any) => {
-                Swordfish.currentStatus = data;
-            },
-            (reason: string) => {
-                dialog.showErrorBox('Error', reason);
-            }
-        );
+    static exportTMX(): void {
+        Swordfish.mainWindow.webContents.send('export-tmx');
+    }
+
+    static removeMemory(): void {
+        Swordfish.mainWindow.webContents.send('remove-memory');
     }
 }
 

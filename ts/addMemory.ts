@@ -26,6 +26,10 @@ class AddMemory {
         this.electron.ipcRenderer.on('set-theme', (event: Electron.IpcRendererEvent, arg: any) => {
             (document.getElementById('theme') as HTMLLinkElement).href = arg;
         });
+        this.electron.ipcRenderer.send('get-project-names');
+        this.electron.ipcRenderer.on('set-project-names', (event: Electron.IpcRendererEvent, arg: any) => {
+            this.setProjectNames(arg);
+        });
         this.electron.ipcRenderer.send('get-clients');
         this.electron.ipcRenderer.on('set-clients', (event: Electron.IpcRendererEvent, arg: any) => {
             this.setClients(arg);
@@ -37,6 +41,9 @@ class AddMemory {
         document.addEventListener('keydown', (event: KeyboardEvent) => {
             if (event.key === 'Escape') {
                 window.close();
+            }
+            if (event.key === 'Enter') {
+                this.addMemory();
             }
         });
         document.getElementById('typeSelect').addEventListener("change", () => {
@@ -77,6 +84,10 @@ class AddMemory {
             password: (document.getElementById('passInput') as HTMLInputElement).value
         }
         this.electron.ipcRenderer.send('add-memory', params);
+    }
+
+    setProjectNames(arg: any): void {
+        // TODO
     }
 
     setClients(arg: any): void {

@@ -100,6 +100,15 @@ class Main {
         this.electron.ipcRenderer.on('open-projects', () => {
             this.projectsView.openProjects();
         });
+        this.electron.ipcRenderer.on('remove-memory', () => {
+            this.memoriesView.removeMemory();
+        });
+        this.electron.ipcRenderer.on('import-tmx', () => {
+            this.memoriesView.importTMX();
+        });
+        this.electron.ipcRenderer.on('import-tmx', () => {
+            this.memoriesView.exportTMX();
+        });
 
         let config: any = { attributes: true, childList: false, subtree: false };
         let observer = new MutationObserver((mutationsList) => {

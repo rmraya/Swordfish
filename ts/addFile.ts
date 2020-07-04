@@ -37,6 +37,10 @@ class AddFile {
             if (event.key === 'Escape') {
                 window.close();
             }
+
+            if (event.key === 'Enter') {
+                this.addProject();
+            }
         });
         document.getElementById('addFilesButton').addEventListener('click', () => {
             this.electron.ipcRenderer.send('select-source-files');
