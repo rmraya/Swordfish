@@ -24,9 +24,12 @@ class MemoriesView {
     container: HTMLDivElement;
     tableContainer: HTMLDivElement;
     tbody: HTMLTableSectionElement;
+    selected: Map<string, any>;
 
     constructor(div: HTMLDivElement) {
+        this.selected = new Map<string, any>();
         this.container = div;
+
         let topBar: HTMLDivElement = document.createElement('div');
         topBar.className = 'toolbar';
         this.container.appendChild(topBar);
@@ -78,12 +81,10 @@ class MemoriesView {
 
         let memoriesTable = document.createElement('table');
         memoriesTable.classList.add('fill_width');
-        memoriesTable.classList.add('stripes');
         this.tableContainer.appendChild(memoriesTable);
 
         memoriesTable.innerHTML =
             '<thead><tr>' +
-            '<th><input type="checkbox"></th>' +
             '<th style="padding-left:5px;padding-right:5px;">Name</th>' +
             '<th style="padding-left:5px;padding-right:5px;">Project</th>' +
             '<th style="padding-left:5px;padding-right:5px;">Client</th>' +
@@ -93,7 +94,6 @@ class MemoriesView {
 
         this.tbody = document.createElement('tbody');
         memoriesTable.appendChild(this.tbody);
-        // event listeners
 
         this.electron.ipcRenderer.on('set-memories', (event: Electron.IpcRendererEvent, arg: any) => {
             this.displayMemories(arg);
@@ -106,7 +106,6 @@ class MemoriesView {
         setTimeout(() => {
             this.setSizes();
         }, 200);
-
     }
 
     setSizes(): void {
@@ -139,14 +138,34 @@ class MemoriesView {
     }
 
     removeMemory(): void {
-        // TODO
+        if (this.selected.size === 0) {
+            this.electron.ipcRenderer.send('show-message', { type: 'warning', message: 'Select memory' });
+            return;
+        }
+        for (let key of this.selected.keys()) {
+            // TODO
+        }
     }
 
     importTMX(): void {
-        // TODO
+        if (this.selected.size === 0) {
+            this.electron.ipcRenderer.send('show-message', { type: 'warning', message: 'Select memory' });
+            return;
+        }
+        if (this.selected.size > 1) {
+            this.electron.ipcRenderer.send('show-message', { type: 'warning', message: 'Select one memory' });
+            return;
+        }
+        for (let key of this.selected.keys()) {
+            this.electron.ipcRenderer.send('import-tmx', key);
+        }
     }
 
     exportTMX(): void {
+        if (this.selected.size === 0) {
+            this.electron.ipcRenderer.send('show-message', { type: 'warning', message: 'Select memory' });
+            return;
+        }
         // TODO
     }
 
@@ -155,21 +174,15 @@ class MemoriesView {
         let length = memories.length;
         for (let i = 0; i < length; i++) {
             let p = memories[i];
-            let tr = document.createElement('tr');
-            tr.className = 'discover';
+            let tr: HTMLTableRowElement = document.createElement('tr');
+            tr.id = p.id;
+            tr.classList.add('discover');
+            tr.addEventListener('click', (event: MouseEvent) => {
+                this.clicked(event, p);
+            });
+            this.tbody.appendChild(tr);
 
             let td = document.createElement('td');
-            td.classList.add('fixed');
-            td.classList.add('middle');
-            td.id = p.id;
-            let check: HTMLInputElement = document.createElement('input');
-            check.type = 'checkbox';
-            check.classList.add('projectCheck');
-            check.setAttribute('data', p.id);
-            td.appendChild(check);
-            tr.appendChild(td);
-
-            td = document.createElement('td');
             td.classList.add('noWrap');
             td.classList.add('middle');
             td.innerText = p.name;
@@ -206,8 +219,24 @@ class MemoriesView {
             td.style.minWidth = '170px';
             td.innerText = p.creationString;
             tr.append(td);
+        }
+    }
 
-            this.tbody.appendChild(tr);
+    clicked(event: MouseEvent, memory: any): void {
+        let tr: HTMLTableRowElement = event.currentTarget as HTMLTableRowElement;
+        let isSelected: boolean = this.selected.has(memory.id);
+        if (!isSelected) {
+            if (!(event.ctrlKey || event.metaKey)) {
+                for (let key of this.selected.keys()) {
+                    document.getElementById(key).classList.remove('selected');
+                }
+                this.selected.clear()
+            }
+            this.selected.set(memory.id, memory);
+            tr.classList.add('selected');
+        } else {
+            this.selected.delete(memory.id);
+            tr.classList.remove('selected');
         }
     }
 }

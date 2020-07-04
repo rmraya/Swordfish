@@ -26,7 +26,7 @@ public class Constants {
 
 	public static final String APPNAME = "Swordfish";
 	public static final String VERSION = "4.0.0";
-	public static final String BUILD = "20200531_1042";
+	public static final String BUILD = "20200704_1351";
 
 	public static final String REASON = "reason";
 	public static final String STATUS = "status";
@@ -34,7 +34,6 @@ public class Constants {
 	public static final String SUCCESS = "Success";
 	public static final String ERROR = "Error";
 	public static final String COMPLETED = "Completed";
-	public static final String PENDING = "Pending";
 	public static final String LOADING = "Loading";
 	public static final String SAVING = "Saving";
 	public static final String PROCESSING = "Processing";

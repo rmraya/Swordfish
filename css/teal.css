@@ -20,6 +20,8 @@
 
 	--even-row-background: #ececec;
 	--odd-row-background: #fcfcfc;
+	--selected-row: #4db6ac;
+	--highlight-row: #b2dfdb;
 
 	--highlight-color: #ecf01b;
 	--error-color: #960303;
@@ -45,7 +47,8 @@ body {
 .vdivider {
 	width: 100%;
 	height: 2px;
-	background: var(--accent-color);	position: relative;
+	background: var(--accent-color);
+	position: relative;
 	cursor: row-resize;
 	display: block;
 	z-index: 5;
@@ -68,7 +71,7 @@ footer {
 }
 
 a {
-	color: var( --accent-color);
+	color: var(--accent-color);
 	cursor: pointer;
 }
 
@@ -124,6 +127,18 @@ td.fixed {
 	cursor: default !important;
 }
 
+tr.selected {
+	background-color: var(--selected-row);
+}
+
+tr.selected:hover {
+	background-color: var(--accent-color) !important;
+	color: var(--accent-contrast);
+}
+
+tr.discover:hover {
+	background-color: var(--highlight-row);
+}
 
 th {
 	position: sticky;
@@ -297,6 +312,7 @@ label {
 	flex-direction: row;
 	vertical-align: middle;
 }
+
 /* toolbars */
 
 .toolbar {
@@ -507,8 +523,9 @@ svg {
 	color: var(--error-color) !important;
 }
 
-.divContainer {  /* Any container that needs to scroll content */
-    width: 100%;
-    height: 100%;
-    overflow: auto;
+.divContainer {
+	/* Any container that needs to scroll content */
+	width: 100%;
+	height: 100%;
+	overflow: auto;
 }

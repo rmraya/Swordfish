@@ -25,9 +25,10 @@ class ProjectsView {
     tableContainer: HTMLDivElement;
     tbody: HTMLTableSectionElement;
 
-    descriptions: Map<string, string>;
+    selected: Map<string, any>;
 
     constructor(div: HTMLDivElement) {
+        this.selected = new Map<string, any>();
         this.container = div;
 
         let topBar: HTMLDivElement = document.createElement('div');
@@ -109,12 +110,10 @@ class ProjectsView {
 
         let projectsTable = document.createElement('table');
         projectsTable.classList.add('fill_width');
-        projectsTable.classList.add('stripes');
         this.tableContainer.appendChild(projectsTable);
 
         projectsTable.innerHTML =
             '<thead><tr>' +
-            '<th><input type="checkbox"></th>' +
             '<th>Description</th><th>Status</th>' +
             '<th style="padding-left:5px;padding-right:5px;">Src.Lang.</th>' +
             '<th style="padding-left:5px;padding-right:5px;">Tgt.Lang.</th>' +
@@ -177,23 +176,14 @@ class ProjectsView {
     }
 
     openProjects(): void {
-        let selected: string[] = [];
-        let list: HTMLCollectionOf<Element> = document.getElementsByClassName('projectCheck');
-        let length = list.length;
-        for (let i = 0; i < length; i++) {
-            let check: HTMLInputElement = list[i] as HTMLInputElement;
-            if (check.checked) {
-                selected.push(check.getAttribute('data'));
-            }
-        }
-        if (selected.length === 0) {
+        if (this.selected.size === 0) {
             this.electron.ipcRenderer.send('show-message', { type: 'warning', message: 'Select project' });
             return;
         }
-        length = selected.length;
-        for (let i = 0; i < length; i++) {
-            let description = this.descriptions.get(selected[i]);
-            this.electron.ipcRenderer.send('add-tab', { id: selected[i], description: description });
+        for (let key of this.selected.keys()) {
+            let project = this.selected.get(key);
+            let description = project.description;
+            this.electron.ipcRenderer.send('add-tab', { id: key, description: description });
         }
     }
 
@@ -210,31 +200,23 @@ class ProjectsView {
     }
 
     displayProjects(projects: any[]) {
-        this.descriptions = new Map<string, string>();
         this.tbody.innerHTML = '';
         let length = projects.length;
         for (let i = 0; i < length; i++) {
             let p = projects[i];
             let tr = document.createElement('tr');
+            tr.id = p.id;
             tr.className = 'discover';
+            tr.addEventListener('click', (event: MouseEvent) => {
+                this.clicked(event, p);
+            });
+            this.tbody.appendChild(tr);
 
             let td = document.createElement('td');
-            td.classList.add('fixed');
-            td.classList.add('middle');
-            td.id = p.id;
-            let check: HTMLInputElement = document.createElement('input');
-            check.type = 'checkbox';
-            check.classList.add('projectCheck');
-            check.setAttribute('data', p.id);
-            td.appendChild(check);
-            tr.appendChild(td);
-
-            td = document.createElement('td');
             td.classList.add('noWrap');
             td.classList.add('middle');
             td.innerText = p.description;
             tr.append(td);
-            this.descriptions.set(p.id, p.description);
 
             td = document.createElement('td');
             td.classList.add('center');
@@ -283,7 +265,24 @@ class ProjectsView {
             td.style.minWidth = '170px';
             td.innerText = p.subject;
             tr.append(td);
-            this.tbody.appendChild(tr);
+        }
+    }
+
+    clicked(event: MouseEvent, project: any): void {
+        let tr: HTMLTableRowElement = event.currentTarget as HTMLTableRowElement;
+        let isSelected: boolean = this.selected.has(project.id);
+        if (!isSelected) {
+            if (!(event.ctrlKey || event.metaKey)) {
+                for (let key of this.selected.keys()) {
+                    document.getElementById(key).classList.remove('selected');
+                }
+                this.selected.clear()
+            }
+            this.selected.set(project.id, project);
+            tr.classList.add('selected');
+        } else {
+            this.selected.delete(project.id);
+            tr.classList.remove('selected');
         }
     }
 }

@@ -143,7 +143,7 @@ public class MemoriesHandler implements HttpHandler {
 		if (openTasks == null) {
 			openTasks = new ConcurrentHashMap<>();
 		}
-		openTasks.put(process, new String[] { Constants.PENDING });
+		openTasks.put(process, new String[] { Constants.PROCESSING });
 		new Thread(() -> {
 			try {
 				if (memories == null) {
@@ -248,7 +248,7 @@ public class MemoriesHandler implements HttpHandler {
 		if (openTasks == null) {
 			openTasks = new ConcurrentHashMap<>();
 		}
-		openTasks.put(process, new String[] { Constants.PENDING });
+		openTasks.put(process, new String[] { Constants.PROCESSING });
 		new Thread(() -> {
 			try {
 				if (openEngines == null) {
@@ -299,7 +299,7 @@ public class MemoriesHandler implements HttpHandler {
 		if (openTasks == null) {
 			openTasks = new ConcurrentHashMap<>();
 		}
-		openTasks.put(process, new String[] { Constants.PENDING });
+		openTasks.put(process, new String[] { Constants.PROCESSING });
 		new Thread(() -> {
 			try {
 				if (memories == null) {
@@ -358,7 +358,7 @@ public class MemoriesHandler implements HttpHandler {
 			if (openTasks == null) {
 				openTasks = new ConcurrentHashMap<>();
 			}
-			openTasks.put(process, new String[] { Constants.PENDING });
+			openTasks.put(process, new String[] { Constants.PROCESSING });
 			new Thread(() -> {
 				try {
 					JSONArray array = json.getJSONArray("memories");

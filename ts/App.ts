@@ -240,8 +240,11 @@ class Swordfish {
             rect.height = arg.height + this.verticalPadding;
             Swordfish.addMemoryWindow.setBounds(rect);
         });
-        ipcMain.on('add-memory', (event:IpcMainEvent, arg: any) => {
+        ipcMain.on('add-memory', (event: IpcMainEvent, arg: any) => {
             this.addMemory(arg);
+        });
+        ipcMain.on('import-tmx', (event: IpcMainEvent, arg: any) => {
+            Swordfish.importTMX(arg);
         })
         ipcMain.on('get-clients', (event: IpcMainEvent, arg: any) => {
             // TODO
@@ -641,7 +644,6 @@ class Swordfish {
                 Swordfish.contents.send('set-status', '');
                 Swordfish.contents.send('end-waiting');
                 if (data.status === Swordfish.SUCCESS) {
-                    console.log(JSON.stringify(data))
                     event.sender.send('set-memories', data.memories);
                 } else {
                     dialog.showMessageBox({ type: 'error', message: data.reason });
@@ -655,15 +657,15 @@ class Swordfish {
     }
 
     selectSourceFiles(event: IpcMainEvent): void {
-        let any: string[] = [];
+        let anyFile: string[] = [];
         if (process.platform === 'linux') {
-            any = ['*'];
+            anyFile = ['*'];
         }
         dialog.showOpenDialog({
             properties: ['openFile', 'multiSelections'],
 
             filters: [
-                { name: 'Any File', extensions: any },
+                { name: 'Any File', extensions: anyFile },
                 { name: 'Adobe InDesign Interchange', extensions: ['inx'] },
                 { name: 'Adobe InDesign IDML', extensions: ['idml'] },
                 { name: 'DITA Map', extensions: ['ditamap', 'dita', 'xml'] },
@@ -1106,19 +1108,91 @@ class Swordfish {
         );
     }
 
-    addMemory(arg: any): void  {
+    addMemory(arg: any): void {
         Swordfish.sendRequest('/memories/create', arg,
-        (data: any) => {
-            if (data.status === Swordfish.SUCCESS) {
-                Swordfish.addMemoryWindow.close();
-                Swordfish.contents.send('request-memories');
-            } else {
-                dialog.showErrorBox('Error', data.reason);
+            (data: any) => {
+                if (data.status === Swordfish.SUCCESS) {
+                    Swordfish.addMemoryWindow.close();
+                    Swordfish.contents.send('request-memories');
+                } else {
+                    dialog.showErrorBox('Error', data.reason);
+                }
+            },
+            (reason: string) => {
+                dialog.showErrorBox('Error', reason);
             }
-        },
-        (reason: string) => {
-            dialog.showErrorBox('Error', reason);
+        );
+    }
+
+    static importTMX(memory: any): void {
+        let anyFile: string[] = [];
+        if (process.platform === 'linux') {
+            anyFile = ['*'];
         }
+        dialog.showOpenDialog({
+            properties: ['openFile'],
+            filters: [
+                { name: 'TMX File', extensions: ['tmx'] },
+                { name: 'Any File', extensions: anyFile }
+            ]
+        }).then((value) => {
+            if (!value.canceled) {
+                Swordfish.mainWindow.focus();
+                Swordfish.contents.send('start-waiting');
+                Swordfish.contents.send('set-status', 'Importing TMX');
+                Swordfish.sendRequest('/memories/import', { memory: memory, tmx: value.filePaths[0] },
+                    (data: any) => {
+                        if (data.status !== Swordfish.SUCCESS) {
+                            Swordfish.contents.send('end-waiting');
+                            Swordfish.contents.send('set-status', '');
+                            dialog.showErrorBox('Error', data.reason);
+                        }
+                        Swordfish.currentStatus = data;
+                        let processId: string = data.process;
+                        var intervalObject = setInterval(() => {
+                            if (Swordfish.currentStatus.result) {
+                                if (Swordfish.currentStatus.result === Swordfish.COMPLETED) {
+                                    Swordfish.contents.send('end-waiting');
+                                    Swordfish.contents.send('set-status', '');
+                                    clearInterval(intervalObject);
+                                    return;
+                                } else if (Swordfish.currentStatus.result === Swordfish.PROCESSING) {
+                                    // it's OK, keep waiting
+                                } else if (Swordfish.currentStatus.result === Swordfish.ERROR) {
+                                    Swordfish.contents.send('end-waiting');
+                                    Swordfish.contents.send('set-status', '');
+                                    clearInterval(intervalObject);
+                                    dialog.showErrorBox('Error', Swordfish.currentStatus.reason);
+                                    return;
+                                } else {
+                                    Swordfish.contents.send('end-waiting');
+                                    Swordfish.contents.send('set-status', '');
+                                    clearInterval(intervalObject);
+                                    dialog.showErrorBox('Error', 'Unknown error importing file');
+                                    return;
+                                }
+                            }
+                            Swordfish.getImportProgress(processId);
+                        }, 500);
+                    },
+                    (reason: string) => {
+                        dialog.showErrorBox('Error', reason);
+                    }
+                );
+            }
+        }).catch((error) => {
+            console.log(error);
+        });
+    }
+
+    static getImportProgress(process: string): void {
+        this.sendRequest('/memories/status', { process: process },
+            (data: any) => {
+                Swordfish.currentStatus = data;
+            },
+            (reason: string) => {
+                dialog.showErrorBox('Error', reason);
+            }
         );
     }
 }
