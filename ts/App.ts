@@ -40,9 +40,7 @@ class Swordfish {
 
     static contents: webContents;
     javapath: string = Swordfish.path.join(app.getAppPath(), 'bin', 'java');
-    classpath: string = Swordfish.path.join('lib', 'h2-1.4.200.jar')
-        + Swordfish.path.separator
-        + Swordfish.path.join('lib', 'mariadb-java-client-2.4.3.jar');
+    
     static appHome: string = Swordfish.path.join(app.getPath('appData'), app.name);
     static iconPath: string = Swordfish.path.join(app.getAppPath(), 'icons', 'icon.png');
     verticalPadding: number = 46;
@@ -73,7 +71,6 @@ class Swordfish {
     constructor() {
 
         console.log('javapath:  ' + this.javapath);
-        console.log('classpath: ' + this.classpath);
         console.log('appHome:   ' + Swordfish.appHome);
 
         app.allowRendererProcessReuse = true;
@@ -89,8 +86,6 @@ class Swordfish {
             }
         }
 
-        // TODO remove H2 and MariaDB driver or add their licenses 
-
         if (process.platform == 'win32') {
             this.javapath = Swordfish.path.join(app.getAppPath(), 'bin', 'java.exe');
         }
@@ -99,7 +94,7 @@ class Swordfish {
             mkdirSync(Swordfish.appHome, { recursive: true });
         }
 
-        this.ls = spawn(this.javapath, ['-cp', this.classpath, '--module-path', 'lib', '-m', 'swordfish/com.maxprograms.swordfish.TmsServer', '-port', '8070'], { cwd: app.getAppPath() });
+        this.ls = spawn(this.javapath, ['--module-path', 'lib', '-m', 'swordfish/com.maxprograms.swordfish.TmsServer', '-port', '8070'], { cwd: app.getAppPath() });
 
         this.ls.stdout.on('data', (data) => {
             console.log(`stdout: ${data}`);
@@ -125,7 +120,7 @@ class Swordfish {
                 req.write(data);
                 req.end();
                 console.log('Restarting server');
-                this.ls = spawn(this.javapath, ['-cp', this.classpath, '--module-path', 'lib', '-m', 'swordfish/com.maxprograms.swordfish.TmsServer', '-port', '8070'], { cwd: app.getAppPath() });
+                this.ls = spawn(this.javapath, ['--module-path', 'lib', '-m', 'swordfish/com.maxprograms.swordfish.TmsServer', '-port', '8070'], { cwd: app.getAppPath() });
             }
         });
 
@@ -255,14 +250,23 @@ class Swordfish {
         ipcMain.on('import-tmx-file', (event: IpcMainEvent, arg: any) => {
             Swordfish.importTmxFile(arg);
         });
+        ipcMain.on('remove-memories', (event: IpcMainEvent, arg: any) => {
+            this.removeMemories(arg);
+        });
+        ipcMain.on('export-memories', (event: IpcMainEvent, arg: any) => {
+            this.exportMemories(arg);
+        });
         ipcMain.on('get-tmx-file', (event: IpcMainEvent, arg: any) => {
             this.getTmxFile(event);
         });
         ipcMain.on('get-clients', (event: IpcMainEvent, arg: any) => {
-            // TODO
+            this.getClients(event);
+        });
+        ipcMain.on('get-project-names', (event: IpcMainEvent, arg: any) => {
+            this.getProjectNames(event);
         });
         ipcMain.on('get-subjects', (event: IpcMainEvent, arg: any) => {
-            // TODO
+            this.getSubjects(event);
         });
         ipcMain.on('get-types', (event: IpcMainEvent, arg: any) => {
             this.getTypes(event);
@@ -362,8 +366,8 @@ class Swordfish {
             { label: 'Add Memory', click: () => { Swordfish.showAddMemory(); } },
             { label: 'Remove Memory', click: () => { Swordfish.removeMemory(); } },
             new MenuItem({ type: 'separator' }),
-            { label: 'Import TMX File', click: () => {Swordfish.importTMX();}},
-            { label: 'Export as TMX File', click: () => {Swordfish.exportTMX();}}
+            { label: 'Import TMX File', click: () => { Swordfish.importTMX(); } },
+            { label: 'Export as TMX File', click: () => { Swordfish.exportTMX(); } }
         ]);
         var glossariesMenu: Menu = Menu.buildFromTemplate([]);
         var helpMenu: Menu = Menu.buildFromTemplate([
@@ -1029,6 +1033,51 @@ class Swordfish {
         );
     }
 
+    getClients(event: IpcMainEvent): void {
+        Swordfish.sendRequest('/services/getClients', {},
+            (data: any) => {
+                if (data.status === Swordfish.SUCCESS) {
+                    event.sender.send('set-clients', data.clients);
+                } else {
+                    dialog.showErrorBox('Error', data.reason);
+                }
+            },
+            (reason: string) => {
+                dialog.showErrorBox('Error', reason);
+            }
+        );
+    }
+
+    getProjectNames(event: IpcMainEvent): void {
+        Swordfish.sendRequest('/services/getProjects', {},
+            (data: any) => {
+                if (data.status === Swordfish.SUCCESS) {
+                    event.sender.send('set-project-names', data.projects);
+                } else {
+                    dialog.showErrorBox('Error', data.reason);
+                }
+            },
+            (reason: string) => {
+                dialog.showErrorBox('Error', reason);
+            }
+        );
+    }
+
+    getSubjects(event: IpcMainEvent): void {
+        Swordfish.sendRequest('/services/getSubjects', {},
+            (data: any) => {
+                if (data.status === Swordfish.SUCCESS) {
+                    event.sender.send('set-subjects', data.subjects);
+                } else {
+                    dialog.showErrorBox('Error', data.reason);
+                }
+            },
+            (reason: string) => {
+                dialog.showErrorBox('Error', reason);
+            }
+        );
+    }
+
     browseSRX(event: IpcMainEvent): void {
         dialog.showOpenDialog({
             title: 'Default SRX File',
@@ -1164,7 +1213,7 @@ class Swordfish {
     }
 
     static importTMX(): void {
-       Swordfish.mainWindow.webContents.send('import-tmx');
+        Swordfish.mainWindow.webContents.send('import-tmx');
     }
 
     static importTmxFile(arg: any): void {
@@ -1205,7 +1254,7 @@ class Swordfish {
                             return;
                         }
                     }
-                    Swordfish.getImportProgress(processId);
+                    Swordfish.getMemoriesProgress(processId);
                 }, 500);
             },
             (reason: string) => {
@@ -1215,7 +1264,7 @@ class Swordfish {
 
     }
 
-    static getImportProgress(process: string): void {
+    static getMemoriesProgress(process: string): void {
         this.sendRequest('/memories/status', { process: process },
             (data: any) => {
                 Swordfish.currentStatus = data;
@@ -1250,6 +1299,63 @@ class Swordfish {
 
     static removeMemory(): void {
         Swordfish.mainWindow.webContents.send('remove-memory');
+    }
+
+    removeMemories(arg: string[]) {
+        dialog.showMessageBox(Swordfish.mainWindow, { type: "question", message: "Delete selected memories?", buttons: ["Yes", "No"], defaultId: 1 }
+        ).then((result: any) => {
+            if (result.response === 0) {
+                Swordfish.contents.send('start-waiting');
+                Swordfish.contents.send('set-status', 'Removing memories');
+                Swordfish.sendRequest('/memories/delete', { memories: arg },
+                    (data: any) => {
+                        if (data.status !== Swordfish.SUCCESS) {
+                            Swordfish.contents.send('end-waiting');
+                            Swordfish.contents.send('set-status', '');
+                            dialog.showErrorBox('Error', data.reason);
+                        }
+                        Swordfish.currentStatus = data;
+                        let processId: string = data.process;
+                        var intervalObject = setInterval(() => {
+                            if (Swordfish.currentStatus.result) {
+                                if (Swordfish.currentStatus.result === Swordfish.COMPLETED) {
+                                    Swordfish.contents.send('end-waiting');
+                                    Swordfish.contents.send('set-status', '');
+                                    clearInterval(intervalObject);
+                                    Swordfish.contents.send('request-memories');
+                                    return;
+                                } else if (Swordfish.currentStatus.result === Swordfish.PROCESSING) {
+                                    // it's OK, keep waiting
+                                } else if (Swordfish.currentStatus.result === Swordfish.ERROR) {
+                                    Swordfish.contents.send('end-waiting');
+                                    Swordfish.contents.send('set-status', '');
+                                    clearInterval(intervalObject);
+                                    dialog.showErrorBox('Error', Swordfish.currentStatus.reason);
+                                    return;
+                                } else {
+                                    Swordfish.contents.send('end-waiting');
+                                    Swordfish.contents.send('set-status', '');
+                                    clearInterval(intervalObject);
+                                    dialog.showErrorBox('Error', 'Unknown error removing memories');
+                                    return;
+                                }
+                            }
+                            Swordfish.getMemoriesProgress(processId);
+                        }, 500);
+                    },
+                    (reason: string) => {
+                        dialog.showErrorBox('Error', reason);
+                    }
+                );
+            }
+        });
+    }
+
+    exportMemories(memories: any[]) : void {
+        // TODO
+        for (let i=0 ; i<memories.length ; i++) {
+            console.log(JSON.stringify(memories[i]));
+        }
     }
 }
 

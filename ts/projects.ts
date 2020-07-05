@@ -114,7 +114,7 @@ class ProjectsView {
 
         projectsTable.innerHTML =
             '<thead><tr>' +
-            '<th>Description</th><th>Status</th>' +
+            '<th>Name</th><th>Status</th>' +
             '<th style="padding-left:5px;padding-right:5px;">Src.Lang.</th>' +
             '<th style="padding-left:5px;padding-right:5px;">Tgt.Lang.</th>' +
             '<th style="padding-left:5px;padding-right:5px;">Created</th>' +

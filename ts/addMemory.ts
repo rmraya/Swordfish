@@ -86,16 +86,31 @@ class AddMemory {
         this.electron.ipcRenderer.send('add-memory', params);
     }
 
-    setProjectNames(arg: any): void {
-        // TODO
+    setProjectNames(projects: string[]): void {
+        let options: string = '';
+        let length: number = projects.length;
+        for (let i=0 ; i<length ; i++) {
+            options = options + '<option value="' + projects[i] + '">'
+        }
+        document.getElementById('projects').innerHTML = options;
     }
 
-    setClients(arg: any): void {
-        // TODO
+    setClients(clients: string[]): void {
+        let options: string = '';
+        let length: number = clients.length;
+        for (let i=0 ; i<length ; i++) {
+            options = options + '<option value="' + clients[i] + '">'
+        }
+        document.getElementById('clients').innerHTML = options;
     }
 
-    setSubjects(arg: any): void {
-        // TODO
+    setSubjects(subjects: string[]): void {
+        let options: string = '';
+        let length: number = subjects.length;
+        for (let i=0 ; i<length ; i++) {
+            options = options + '<option value="' + subjects[i] + '">'
+        }
+        document.getElementById('subjects').innerHTML = options;
     }
 
     typeChanged(): void {

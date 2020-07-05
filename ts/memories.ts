@@ -142,9 +142,11 @@ class MemoriesView {
             this.electron.ipcRenderer.send('show-message', { type: 'warning', message: 'Select memory' });
             return;
         }
+        let memories: string[] = [];
         for (let key of this.selected.keys()) {
-            // TODO
+            memories.push(key);
         }
+        this.electron.ipcRenderer.send('remove-memories', memories);
     }
 
     importTMX(): void {
@@ -166,7 +168,12 @@ class MemoriesView {
             this.electron.ipcRenderer.send('show-message', { type: 'warning', message: 'Select memory' });
             return;
         }
-        // TODO
+        let memories: any[] = [];
+        for (let key of this.selected.keys()) {
+            let mem = { memory: key, name: this.selected.get(key).name }
+            memories.push(mem);
+        }
+        this.electron.ipcRenderer.send('export-memories', memories);
     }
 
     displayMemories(memories: any[]) {

@@ -106,7 +106,7 @@ class Main {
         this.electron.ipcRenderer.on('import-tmx', () => {
             this.memoriesView.importTMX();
         });
-        this.electron.ipcRenderer.on('import-tmx', () => {
+        this.electron.ipcRenderer.on('export-tmx', () => {
             this.memoriesView.exportTMX();
         });
 

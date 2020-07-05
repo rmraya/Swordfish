@@ -18,7 +18,11 @@ SOFTWARE.
 *****************************************************************************/
 package com.maxprograms.swordfish;
 
+import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -27,6 +31,8 @@ import java.lang.System.Logger.Level;
 import java.net.URI;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
@@ -48,6 +54,10 @@ import org.xml.sax.SAXException;
 public class ServicesHandler implements HttpHandler {
 
     private static Logger logger = System.getLogger(ServicesHandler.class.getName());
+
+    private static JSONObject clients;
+    private static JSONObject subjects;
+    private static JSONObject projects;
 
     @Override
     public void handle(HttpExchange exchange) throws IOException {
@@ -86,6 +96,12 @@ public class ServicesHandler implements HttpHandler {
                 result = getCharsets();
             } else if ("/services/getFileType".equals(url)) {
                 result = getFileType(request);
+            } else if ("/services/getClients".equals(url)) {
+                result = getClients();
+            } else if ("/services/getSubjects".equals(url)) {
+                result = getSubjects();
+            } else if ("/services/getProjects".equals(url)) {
+                result = getProjects();
             } else {
                 result = new JSONObject();
                 result.put("url", url);
@@ -110,7 +126,7 @@ public class ServicesHandler implements HttpHandler {
         JSONObject result = new JSONObject();
         JSONArray array = new JSONArray();
         String[] formats = FileFormats.getFormats();
-        for (int i=0 ; i<formats.length ; i++) {
+        for (int i = 0; i < formats.length; i++) {
             String format = formats[i];
             JSONObject json = new JSONObject();
             json.put("code", FileFormats.getShortName(format));
@@ -193,6 +209,144 @@ public class ServicesHandler implements HttpHandler {
         } catch (SAXException | IOException | ParserConfigurationException e) {
             logger.log(Level.ERROR, "Error getting languages", e);
             result.put(Constants.REASON, e.getMessage());
+        }
+        return result;
+    }
+
+    private static JSONObject getClients() throws IOException {
+        if (clients != null) {
+            return clients;
+        }
+        File clientsFile = new File(TmsServer.getWorkFolder(), "clients.json");
+        if (!clientsFile.exists()) {
+            clients = new JSONObject();
+            clients.put("clients", new JSONArray());
+            return clients;
+        }
+        StringBuffer buffer = new StringBuffer();
+        try (FileReader input = new FileReader(clientsFile)) {
+            try (BufferedReader reader = new BufferedReader(input)) {
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    buffer.append(line);
+                }
+            }
+        }
+        clients = new JSONObject(buffer.toString());
+        return clients;
+    }
+
+    private static JSONObject getSubjects() throws IOException {
+        if (subjects != null) {
+            return subjects;
+        }
+        File subjectsFile = new File(TmsServer.getWorkFolder(), "subjects.json");
+        if (!subjectsFile.exists()) {
+            subjects = new JSONObject();
+            subjects.put("subjects", new JSONArray());
+            return subjects;
+        }
+        StringBuffer buffer = new StringBuffer();
+        try (FileReader input = new FileReader(subjectsFile)) {
+            try (BufferedReader reader = new BufferedReader(input)) {
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    buffer.append(line);
+                }
+            }
+        }
+        subjects = new JSONObject(buffer.toString());
+        return subjects;
+    }
+
+    private static JSONObject getProjects() throws IOException {
+        if (projects != null) {
+            return projects;
+        }
+        File projectsFile = new File(TmsServer.getWorkFolder(), "projects.json");
+        if (!projectsFile.exists()) {
+            projects = new JSONObject();
+            projects.put("projects", new JSONArray());
+            return projects;
+        }
+        StringBuffer buffer = new StringBuffer();
+        try (FileReader input = new FileReader(projectsFile)) {
+            try (BufferedReader reader = new BufferedReader(input)) {
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    buffer.append(line);
+                }
+            }
+        }
+        projects = new JSONObject(buffer.toString());
+        return projects;
+    }
+
+    public static void addClient(String client) throws IOException {
+        if (client == null || client.isEmpty()) {
+            return;
+        }
+        getClients();
+        JSONArray array = clients.getJSONArray("clients");
+        for (int i = 0; i < array.length(); i++) {
+            if (client.equals(array.getString(i))) {
+                return;
+            }
+        }
+        clients.put("clients", insertString(client, array));
+        File clientsFile = new File(TmsServer.getWorkFolder(), "clients.json");
+        try (FileOutputStream out = new FileOutputStream(clientsFile)) {
+            out.write(clients.toString().getBytes(StandardCharsets.UTF_8));
+        }
+    }
+
+    public static void addSubject(String subject) throws IOException {
+        if (subject == null || subject.isEmpty()) {
+            return;
+        }
+        getSubjects();
+        JSONArray array = subjects.getJSONArray("subjects");
+        for (int i = 0; i < array.length(); i++) {
+            if (subject.equals(array.getString(i))) {
+                return;
+            }
+        }
+        subjects.put("subjects", insertString(subject, array));
+        File subjectsFile = new File(TmsServer.getWorkFolder(), "subjects.json");
+        try (FileOutputStream out = new FileOutputStream(subjectsFile)) {
+            out.write(subjects.toString().getBytes(StandardCharsets.UTF_8));
+        }
+    }
+
+    public static void addProject(String project) throws IOException {
+        if (project == null || project.isEmpty()) {
+            return;
+        }
+        getProjects();
+        JSONArray array = projects.getJSONArray("projects");
+        for (int i = 0; i < array.length(); i++) {
+            if (project.equals(array.getString(i))) {
+                return;
+            }
+        }
+        projects.put("projects", insertString(project, array));
+        File projectsFile = new File(TmsServer.getWorkFolder(), "projects.json");
+        try (FileOutputStream out = new FileOutputStream(projectsFile)) {
+            out.write(projects.toString().getBytes(StandardCharsets.UTF_8));
+        }
+    }
+
+    private static JSONArray insertString(String string, JSONArray array) {
+        JSONArray result = new JSONArray();
+        List<String> list = new ArrayList<>();
+        list.add(string);
+        for (int i = 0; i < array.length(); i++) {
+            list.add(array.getString(i));
+        }
+        Collections.sort(list);
+        Iterator<String> it = list.iterator();
+        while (it.hasNext()) {
+            result.put(it.next());
         }
         return result;
     }

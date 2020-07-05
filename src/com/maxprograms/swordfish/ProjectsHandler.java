@@ -111,8 +111,6 @@ public class ProjectsHandler implements HttpHandler {
 		try {
 			if ("/projects/create".equals(url)) {
 				response = createProject(request);
-			} else if ("/projects/update".equals(url)) {
-				response = updateProject(request);
 			} else if ("/projects/list".equals(url)) {
 				response = listProjects(request);
 			} else if ("/projects/delete".equals(url)) {
@@ -257,11 +255,6 @@ public class ProjectsHandler implements HttpHandler {
 		try (FileOutputStream out = new FileOutputStream(list)) {
 			out.write(bytes);
 		}
-	}
-
-	private JSONObject updateProject(String request) {
-		// TODO
-		return new JSONObject();
 	}
 
 	private JSONObject getSegments(String request) {
@@ -430,6 +423,11 @@ public class ProjectsHandler implements HttpHandler {
 							p.setXliff(main.getAbsolutePath());
 						} else {
 							p.setXliff(xliffs.get(0));
+						}
+						ServicesHandler.addClient(json.getString("client"));
+						ServicesHandler.addSubject(json.getString("subject"));
+						if (!p.getDescription().endsWith(sourceFiles.get(0).getFile())) {
+							ServicesHandler.addProject(p.getDescription());
 						}
 
 						p.setFiles(sourceFiles);

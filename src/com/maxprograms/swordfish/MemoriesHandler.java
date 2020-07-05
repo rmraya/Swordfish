@@ -428,6 +428,8 @@ public class MemoriesHandler implements HttpHandler {
 			loadMemoriesList();
 		}
 		memories.put(mem.getId(), mem);
+		ServicesHandler.addClient(json.getString("client"));
+		ServicesHandler.addSubject(json.getString("subject"));
 		saveMemoriesList();
 		result.put("id", mem.getId());
 		return result;

@@ -130,12 +130,22 @@ class AddProject {
         this.electron.ipcRenderer.send('create-project', params);
     }
 
-    setClients(arg: any): void {
-        // TODO
+    setClients(clients: string[]): void {
+        let options: string = '';
+        let length: number = clients.length;
+        for (let i=0 ; i<length ; i++) {
+            options = options + '<option value="' + clients[i] + '">'
+        }
+        document.getElementById('clients').innerHTML = options;
     }
 
-    setSubjects(arg: any): void {
-        // TODO
+    setSubjects(subjects: string[]): void {
+        let options: string = '';
+        let length: number = subjects.length;
+        for (let i=0 ; i<length ; i++) {
+            options = options + '<option value="' + subjects[i] + '">'
+        }
+        document.getElementById('subjects').innerHTML = options;
     }
 
     setLanguages(arg: any): void {
