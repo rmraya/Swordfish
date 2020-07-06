@@ -26,9 +26,11 @@ class ProjectsView {
     tbody: HTMLTableSectionElement;
 
     selected: Map<string, any>;
+    shouldOpen: string;
 
     constructor(div: HTMLDivElement) {
         this.selected = new Map<string, any>();
+        this.shouldOpen = '';
         this.container = div;
 
         let topBar: HTMLDivElement = document.createElement('div');
@@ -53,38 +55,34 @@ class ProjectsView {
         });
         topBar.appendChild(addProjectButton);
 
-        let span0 = document.createElement('span');
-        span0.style.width = '30px';
-        span0.innerHTML = '&nbsp;';
-        topBar.appendChild(span0);
-
-        let openButton = document.createElement('a');
-        openButton.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 0 24 24" width="24"><path d="M19 19H5V5h7V3H5c-1.11 0-2 .9-2 2v14c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2v-7h-2v7zM14 3v2h3.59l-9.83 9.83 1.41 1.41L19 6.41V10h2V3h-7z"/></svg>' +
-            '<span class="tooltiptext bottomTooltip">Open Project</span>';
-        openButton.className = 'tooltip';
-        openButton.addEventListener('click', () => {
+        let translateButton = document.createElement('a');
+        translateButton.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 0 24 24" width="24"><path d="M19 19H5V5h7V3H5c-1.11 0-2 .9-2 2v14c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2v-7h-2v7zM14 3v2h3.59l-9.83 9.83 1.41 1.41L19 6.41V10h2V3h-7z"/></svg>' +
+            '<span class="tooltiptext bottomTooltip">Translate Project</span>';
+        translateButton.className = 'tooltip';
+        translateButton.addEventListener('click', () => {
             this.openProjects();
         });
-        topBar.appendChild(openButton);
+        translateButton.style.marginLeft = '20px';
+        topBar.appendChild(translateButton);
 
-        let span1 = document.createElement('span');
-        span1.style.width = '10px';
-        span1.innerHTML = '&nbsp;';
-        topBar.appendChild(span1);
+        let exportTranslations = document.createElement('a');
+        exportTranslations.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 0 24 24" width="24"><path d="M19 12v7H5v-7H3v7c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2v-7h-2zm-6 .67l2.59-2.58L17 11.5l-5 5-5-5 1.41-1.41L11 12.67V3h2v9.67z"/></svg>' +
+            '<span class="tooltiptext bottomTooltip">Export Translations</span>';
+        exportTranslations.className = 'tooltip';
+        exportTranslations.addEventListener('click', () => {
+            this.exportTranslations();
+        });
+        topBar.appendChild(exportTranslations);
 
         let removeButton = document.createElement('a');
-        removeButton.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path d="M12 2c5.514 0 10 4.486 10 10s-4.486 10-10 10-10-4.486-10-10 4.486-10 10-10zm0-2c-6.627 0-12 5.373-12 12s5.373 12 12 12 12-5.373 12-12-5.373-12-12-12zm6 13h-12v-2h12v2z"/></svg>' +
+        removeButton.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 0 24 24" width="24"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM8 9h8v10H8V9zm7.5-5l-1-1h-5l-1 1H5v2h14V4h-3.5z"/></svg>' +
             '<span class="tooltiptext bottomTooltip">Remove Project</span>';
         removeButton.className = 'tooltip';
         removeButton.addEventListener('click', () => {
             this.removeProject();
         });
+        removeButton.style.marginLeft = '20px';
         topBar.appendChild(removeButton);
-
-        let span2 = document.createElement('span');
-        span2.style.width = '30px';
-        span2.innerHTML = '&nbsp;';
-        topBar.appendChild(span2);
 
         let importButton = document.createElement('a');
         importButton.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path d="M8 9v-4l8 7-8 7v-4h-8v-6h8zm2-7v2h12v16h-12v2h14v-20h-14z"/></svg>' +
@@ -93,6 +91,7 @@ class ProjectsView {
         importButton.addEventListener('click', () => {
             this.importProject();
         });
+        importButton.style.marginLeft = '20px';
         topBar.appendChild(importButton);
 
         let exportButton = document.createElement('a');
@@ -133,7 +132,7 @@ class ProjectsView {
 
         // finish setup
 
-        this.loadProjects();
+        this.loadProjects({});
 
         this.watchSizes();
 
@@ -163,8 +162,11 @@ class ProjectsView {
         observer.observe(targetNode, config);
     }
 
-    loadProjects(): void {
+    loadProjects(arg: any): void {
         this.electron.ipcRenderer.send('get-projects');
+        if (arg.open) {
+            this.shouldOpen = arg.open;
+        }
     }
 
     addFile(): void {
@@ -187,6 +189,21 @@ class ProjectsView {
         }
     }
 
+    exportTranslations(): void {
+        if (this.selected.size === 0) {
+            this.electron.ipcRenderer.send('show-message', { type: 'warning', message: 'Select project' });
+            return;
+        }
+        if (this.selected.size > 1) {
+            this.electron.ipcRenderer.send('show-message', { type: 'warning', message: 'Select one project' });
+            return;
+        }
+        for (let key of this.selected.keys()) {
+            let project = this.selected.get(key);
+            this.electron.ipcRenderer.send('export-translations', project);
+        }
+    }
+
     removeProject(): void {
         // TODO
     }
@@ -197,9 +214,22 @@ class ProjectsView {
 
     exportProject(): void {
         // TODO
+        if (this.selected.size === 0) {
+            this.electron.ipcRenderer.send('show-message', { type: 'warning', message: 'Select project' });
+            return;
+        }
+        if (this.selected.size > 1) {
+            this.electron.ipcRenderer.send('show-message', { type: 'warning', message: 'Select one project' });
+            return;
+        }
+        for (let key of this.selected.keys()) {
+            let project = this.selected.get(key);
+           //  this.electron.ipcRenderer.send('export-translations', project);
+        }
     }
 
     displayProjects(projects: any[]) {
+        this.selected.clear();
         this.tbody.innerHTML = '';
         let length = projects.length;
         for (let i = 0; i < length; i++) {
@@ -211,6 +241,9 @@ class ProjectsView {
                 this.clicked(event, p);
             });
             this.tbody.appendChild(tr);
+            if (this.shouldOpen === p.id) {
+                this.selected.set(p.id, p);
+            }
 
             let td = document.createElement('td');
             td.classList.add('noWrap');
@@ -266,6 +299,10 @@ class ProjectsView {
             td.innerText = p.subject;
             tr.append(td);
         }
+        if (this.shouldOpen !== '') {
+            this.openProjects();
+            this.shouldOpen = '';
+        }
     }
 
     clicked(event: MouseEvent, project: any): void {
@@ -276,7 +313,7 @@ class ProjectsView {
                 for (let key of this.selected.keys()) {
                     document.getElementById(key).classList.remove('selected');
                 }
-                this.selected.clear()
+                this.selected.clear();
             }
             this.selected.set(project.id, project);
             tr.classList.add('selected');

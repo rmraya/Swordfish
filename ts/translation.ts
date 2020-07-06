@@ -53,6 +53,15 @@ class TranslationView {
         topBar.className = 'toolbar';
         div.appendChild(topBar);
 
+        let exportTranslations = document.createElement('a');
+        exportTranslations.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 0 24 24" width="24"><path d="M19 12v7H5v-7H3v7c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2v-7h-2zm-6 .67l2.59-2.58L17 11.5l-5 5-5-5 1.41-1.41L11 12.67V3h2v9.67z"/></svg>' +
+            '<span class="tooltiptext bottomTooltip">Export Translations</span>';
+        exportTranslations.className = 'tooltip';
+        exportTranslations.addEventListener('click', () => {
+            this.exportTranslations();
+        });
+        topBar.appendChild(exportTranslations);
+
         let statisticsButton = document.createElement('a');
         statisticsButton.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 0 24 24" width="24"><path d="M9 17H7v-7h2v7zm4 0h-2V7h2v10zm4 0h-2v-4h2v4zm2.5 2.1h-15V5h15v14.1zm0-16.1h-15c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h15c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2z"/></svg>' +
             '<span class="tooltiptext bottomTooltip">Project Statistics</span>';
@@ -117,6 +126,10 @@ class TranslationView {
             }
         });
         observer.observe(targetNode, config);
+    }
+
+    exportTranslations() {
+        this.electron.ipcRenderer.send('export-translations', {id: this.projectId, files: this.projectFiles});
     }
 
     setFiles(arg: any): void {

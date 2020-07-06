@@ -72,8 +72,17 @@ class Main {
         this.electron.ipcRenderer.on('view-projects', () => {
             Main.tabHolder.selectTab('projects');
         });
-        this.electron.ipcRenderer.on('request-projects', () => {
-            this.projectsView.loadProjects();
+        this.electron.ipcRenderer.on('request-projects', (event: Electron.IpcRendererEvent, arg: any) => {
+            this.projectsView.loadProjects(arg);
+        });
+        this.electron.ipcRenderer.on('export-translations', (event: Electron.IpcRendererEvent, arg: any) => {
+            this.projectsView.exportTranslations();
+        });
+        this.electron.ipcRenderer.on('import-project', (event: Electron.IpcRendererEvent, arg: any) => {
+            this.projectsView.importProject();
+        });
+        this.electron.ipcRenderer.on('export-project', (event: Electron.IpcRendererEvent, arg: any) => {
+            this.projectsView.exportProject();
         });
         this.electron.ipcRenderer.on('view-memories', () => {
             Main.tabHolder.selectTab('memories');
@@ -97,7 +106,7 @@ class Main {
         this.electron.ipcRenderer.on('add-tab', (event: Electron.IpcRendererEvent, arg: any) => {
             this.addTab(arg);
         });
-        this.electron.ipcRenderer.on('open-projects', () => {
+        this.electron.ipcRenderer.on('translate-projects', () => {
             this.projectsView.openProjects();
         });
         this.electron.ipcRenderer.on('remove-memory', () => {

@@ -35,7 +35,7 @@ class MemoriesView {
         this.container.appendChild(topBar);
 
         let addButton = document.createElement('a');
-        addButton.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path d="M12 2c5.514 0 10 4.486 10 10s-4.486 10-10 10-10-4.486-10-10 4.486-10 10-10zm0-2c-6.627 0-12 5.373-12 12s5.373 12 12 12 12-5.373 12-12-5.373-12-12-12zm6 13h-5v5h-2v-5h-5v-2h5v-5h2v5h5v2z"/></svg>' +
+        addButton.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 0 24 24" width="24"><path d="M20 6h-8l-2-2H4c-1.11 0-1.99.89-1.99 2L2 18c0 1.11.89 2 2 2h16c1.11 0 2-.89 2-2V8c0-1.11-.89-2-2-2zm0 12H4V6h5.17l2 2H20v10zm-8-4h2v2h2v-2h2v-2h-2v-2h-2v2h-2z"/></svg>' +
             '<span class="tooltiptext bottomTooltip">Add Memory</span>';
         addButton.className = 'tooltip';
         addButton.addEventListener('click', () => {
@@ -44,7 +44,7 @@ class MemoriesView {
         topBar.appendChild(addButton);
 
         let removeButton = document.createElement('a');
-        removeButton.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path d="M12 2c5.514 0 10 4.486 10 10s-4.486 10-10 10-10-4.486-10-10 4.486-10 10-10zm0-2c-6.627 0-12 5.373-12 12s5.373 12 12 12 12-5.373 12-12-5.373-12-12-12zm6 13h-12v-2h12v2z"/></svg>' +
+        removeButton.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 0 24 24" width="24"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM8 9h8v10H8V9zm7.5-5l-1-1h-5l-1 1H5v2h14V4h-3.5z"/></svg>' +
             '<span class="tooltiptext bottomTooltip">Remove Memory</span>';
         removeButton.className = 'tooltip';
         removeButton.addEventListener('click', () => {
@@ -52,10 +52,6 @@ class MemoriesView {
         });
         topBar.appendChild(removeButton);
 
-        let span1 = document.createElement('span');
-        span1.style.width = '30px';
-        span1.innerHTML = '&nbsp;';
-        topBar.appendChild(span1);
 
         let importButton = document.createElement('a');
         importButton.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path d="M8 9v-4l8 7-8 7v-4h-8v-6h8zm2-7v2h12v16h-12v2h14v-20h-14z"/></svg>' +
@@ -64,6 +60,7 @@ class MemoriesView {
         importButton.addEventListener('click', () => {
             this.importTMX();
         });
+        importButton.style.marginLeft = '20px';
         topBar.appendChild(importButton);
 
         let exportButton = document.createElement('a');
