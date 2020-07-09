@@ -20,7 +20,7 @@ SOFTWARE.
 import { Buffer } from "buffer";
 import { execFileSync, spawn, ChildProcessWithoutNullStreams } from "child_process";
 import { app, BrowserWindow, dialog, ipcMain, Menu, MenuItem, shell, webContents, nativeTheme, Rectangle, IpcMainEvent, screen, Size } from "electron";
-import { existsSync, mkdirSync, readFile, readFileSync, writeFile, writeFileSync } from "fs";
+import { existsSync, mkdirSync, readFileSync, writeFileSync } from "fs";
 import { ClientRequest, request, IncomingMessage } from "http";
 
 class Swordfish {
@@ -230,6 +230,9 @@ class Swordfish {
         ipcMain.on('create-project', (event: IpcMainEvent, arg: any) => {
             this.createProject(arg);
         });
+        ipcMain.on('remove-projects', (event: IpcMainEvent, arg: any) => {
+            Swordfish.removeProjects(arg);
+        });
         ipcMain.on('show-add-memory', () => {
             Swordfish.showAddMemory();
         });
@@ -362,6 +365,7 @@ class Swordfish {
         ]);
         var projectsMenu: Menu = Menu.buildFromTemplate([
             { label: 'New Project', accelerator: 'CmdOrCtrl+Shift+N', click: () => { Swordfish.addProject(); } },
+            { label: 'Remove Projects', click: () => { Swordfish.contents.send('remove-projects'); } },
             { label: 'Translate Projects', accelerator: 'CmdOrCtrl+O', click: () => { Swordfish.translateProjects(); } },
             { label: 'Export Translations', click: () => { Swordfish.contents.send('export-translations'); } },
             new MenuItem({ type: 'separator' }),
@@ -1162,6 +1166,26 @@ class Swordfish {
                 dialog.showErrorBox('Error', reason);
             }
         );
+    }
+
+    static removeProjects(arg: any) {
+        dialog.showMessageBox(Swordfish.mainWindow, { type: "question", message: "Delete selected projects?", buttons: ["Yes", "No"], defaultId: 1 }
+        ).then((result: any) => {
+            if (result.response === 0) {
+                Swordfish.sendRequest('/projects/delete', arg,
+                    (data: any) => {
+                        if (data.status === Swordfish.SUCCESS) {
+                            Swordfish.contents.send('request-projects', {});
+                        } else {
+                            dialog.showErrorBox('Error', data.reason);
+                        }
+                    },
+                    (reason: string) => {
+                        dialog.showErrorBox('Error', reason);
+                    }
+                );
+            }
+        });
     }
 
     addMemory(arg: any): void {

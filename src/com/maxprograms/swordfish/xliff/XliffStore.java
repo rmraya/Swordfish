@@ -119,4 +119,8 @@ public class XliffStore {
         return result;
     }
 
+	public void close() {
+        // TODO
+	}
+
 }

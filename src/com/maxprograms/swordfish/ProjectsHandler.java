@@ -114,7 +114,7 @@ public class ProjectsHandler implements HttpHandler {
 			} else if ("/projects/list".equals(url)) {
 				response = listProjects(request);
 			} else if ("/projects/delete".equals(url)) {
-				response = deleteProject(request);
+				response = deleteProjects(request);
 			} else if ("/projects/export".equals(url)) {
 				response = exportProject(request);
 			} else if ("/projects/status".equals(url)) {
@@ -184,9 +184,38 @@ public class ProjectsHandler implements HttpHandler {
 		return new JSONObject();
 	}
 
-	private JSONObject deleteProject(String request) {
-		// TODO
-		return new JSONObject();
+	private JSONObject deleteProjects(String request) {
+		JSONObject result = new JSONObject();
+		try {
+			JSONObject json = new JSONObject(request);
+			JSONArray projects = json.getJSONArray("projects");
+			for (int i = 0; i < projects.length(); i++) {
+				String project = projects.getString(i);
+				if (projectStores != null && projectStores.containsKey(project)) {
+					XliffStore store = projectStores.get(project);
+					store.close();
+					projectStores.remove(project);
+				}
+				TmsServer.deleteFolder(new File(getWorkFolder(), project).getAbsolutePath());
+				removeFromList(project);
+			}
+			saveProjectsList();
+		} catch (IOException e) {
+			logger.log(Level.ERROR, e);
+			result.put(Constants.REASON, e.getMessage());
+		}
+		return result;
+	}
+
+	private void removeFromList(String id) {
+		JSONArray array = projectsList.getJSONArray("projects");
+		for (int i=0 ; i<array.length() ; i++) {
+			JSONObject project = array.getJSONObject(i);
+			if (project.get("id").equals(id)) {
+				array.remove(i);
+				break;
+			}
+		}		
 	}
 
 	private JSONObject listProjects(String request) {

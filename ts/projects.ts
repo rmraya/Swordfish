@@ -79,7 +79,7 @@ class ProjectsView {
             '<span class="tooltiptext bottomTooltip">Remove Project</span>';
         removeButton.className = 'tooltip';
         removeButton.addEventListener('click', () => {
-            this.removeProject();
+            this.removeProjects();
         });
         removeButton.style.marginLeft = '20px';
         topBar.appendChild(removeButton);
@@ -204,8 +204,16 @@ class ProjectsView {
         }
     }
 
-    removeProject(): void {
-        // TODO
+    removeProjects(): void {
+        if (this.selected.size === 0) {
+            this.electron.ipcRenderer.send('show-message', { type: 'warning', message: 'Select project' });
+            return;
+        }
+        let projects: string[] = [];
+        for (let key of this.selected.keys()) {
+            projects.push(key);
+        }
+        this.electron.ipcRenderer.send('remove-projects', { projects: projects });
     }
 
     importProject(): void {
@@ -224,7 +232,7 @@ class ProjectsView {
         }
         for (let key of this.selected.keys()) {
             let project = this.selected.get(key);
-           //  this.electron.ipcRenderer.send('export-translations', project);
+            //  this.electron.ipcRenderer.send('export-translations', project);
         }
     }
 

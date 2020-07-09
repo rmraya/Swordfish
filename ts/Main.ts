@@ -75,6 +75,9 @@ class Main {
         this.electron.ipcRenderer.on('request-projects', (event: Electron.IpcRendererEvent, arg: any) => {
             this.projectsView.loadProjects(arg);
         });
+        this.electron.ipcRenderer.on('remove-projects', () => {
+            this.projectsView.removeProjects();
+        });
         this.electron.ipcRenderer.on('export-translations', (event: Electron.IpcRendererEvent, arg: any) => {
             this.projectsView.exportTranslations();
         });
