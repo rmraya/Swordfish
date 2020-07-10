@@ -87,7 +87,7 @@ public class XliffStore {
             currentUnit = e.getAttributeValue("id");
         }
         if ("segment".equals(e.getName())) {
-            segments.add(new Segment(currentFile, currentUnit, e, srcLang, tgtLang));
+            segments.add(new Segment(currentFile, currentUnit, e));
         }
         List<Element> children = e.getChildren();
         Iterator<Element> it = children.iterator();
@@ -120,7 +120,18 @@ public class XliffStore {
     }
 
 	public void close() {
-        // TODO
-	}
+        xliffFile = "";
+        files.clear();
+        segments.clear();
+        document = null;
+    }
 
+    public String getSrcLang() {
+        return srcLang;
+    }
+
+    public String getTgtLang() {
+        return tgtLang;
+    }
+    
 }

@@ -24,22 +24,20 @@ import com.maxprograms.xml.Element;
 
 public class Segment implements Comparable<Segment> {
 
+    public static final String INITIAL = "initial";
+    public static final String TRANSLATED = "translated";
+    public static final String REVIEWED = "reviewed";
+    public static final String FINAL = "final";
+
     private String file;
     private String unit;
-    private String id;
-    private Element source;
-    private String srcLang;
-    private Element target;
-    private String tgtLang;
+    private Element segment;
 
-    public Segment(String file, String unit, Element e, String srcLang, String tgtLang) {
+    public Segment(String file, String unit, Element e) {
         this.file = file;
         this.unit = unit;
-        id = e.getAttributeValue("id");
-        source = e.getChild("source");
-        this.srcLang = srcLang;
-        target = e.getChild("target");
-        this.tgtLang = tgtLang;
+        segment = e;
+       
     }
 
     public String getFile() {
@@ -51,19 +49,22 @@ public class Segment implements Comparable<Segment> {
     }
 
     public String getId() {
-        return id;
+        return segment.getAttributeValue("id");
     }
 
     @Override
     public int compareTo(Segment o) {
-        return (file + unit + id).compareTo(o.getFile() + o.getUnit() + o.getId());
+        return (file + unit + getId()).compareTo(o.getFile() + o.getUnit() + o.getId());
     }
 
-    public String toHTML() {
+    public String toHTML(int id, String srcLang, String tgtLang) {
+        String status = segment.getAttributeValue("state", INITIAL);
         StringBuilder html = new StringBuilder();
         html.append("<tr id=\"");
-        html.append(id);
-        html.append("\"><td class='middle'><input type='checkbox' class='rowCheck'></td><td class='middle center noWrap'>");
+        html.append(segment.getAttributeValue("id"));
+        html.append("\"><td class='middle center noWrap ");
+        html.append(status);
+        html.append("'>");
         html.append(id);
         html.append("</td>");
         html.append("<td lang=\"");
@@ -73,9 +74,9 @@ public class Segment implements Comparable<Segment> {
             html.append(" dir='rtl'");
         }
         html.append('>');
-        html.append(getHTML(source));
+        html.append(getHTML(segment.getChild("source")));
         html.append("</td>");
-        
+        html.append("<td class='middle'><input type='checkbox' class='rowCheck'></td>");
         html.append("<td lang=\"");
         html.append(tgtLang);
         html.append("\"");
@@ -83,7 +84,7 @@ public class Segment implements Comparable<Segment> {
             html.append(" dir='rtl'");
         }
         html.append('>');
-        html.append(getHTML(target));
+        html.append(getHTML(segment.getChild("target")));
         html.append("</td>");
 
         html.append("</tr>");

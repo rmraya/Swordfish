@@ -129,7 +129,7 @@ class TranslationView {
     }
 
     exportTranslations() {
-        this.electron.ipcRenderer.send('export-translations', {id: this.projectId, files: this.projectFiles});
+        this.electron.ipcRenderer.send('export-translations', { id: this.projectId, files: this.projectFiles });
     }
 
     setFiles(arg: any): void {
@@ -165,19 +165,18 @@ class TranslationView {
 
         let th = document.createElement('th');
         th.classList.add('fixed');
-        tr.appendChild(th);
-
-        let selectAll: HTMLInputElement = document.createElement('input');
-        selectAll.type = 'checkbox';
-        th.appendChild(selectAll);
-
-        th = document.createElement('th');
         th.innerText = '#'
         tr.appendChild(th);
 
         th = document.createElement('th');
         th.innerText = 'Source'
         th.style.minWidth = '40%';
+        tr.appendChild(th);
+
+        th = document.createElement('th');
+        let selectAll: HTMLInputElement = document.createElement('input');
+        selectAll.type = 'checkbox';
+        th.appendChild(selectAll);
         tr.appendChild(th);
 
         th = document.createElement('th');

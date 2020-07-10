@@ -209,13 +209,13 @@ public class ProjectsHandler implements HttpHandler {
 
 	private void removeFromList(String id) {
 		JSONArray array = projectsList.getJSONArray("projects");
-		for (int i=0 ; i<array.length() ; i++) {
+		for (int i = 0; i < array.length(); i++) {
 			JSONObject project = array.getJSONObject(i);
 			if (project.get("id").equals(id)) {
 				array.remove(i);
 				break;
 			}
-		}		
+		}
 	}
 
 	private JSONObject listProjects(String request) {
@@ -320,14 +320,16 @@ public class ProjectsHandler implements HttpHandler {
 		for (int i = 0; i < files.length(); i++) {
 			filesList.add(files.getString(i));
 		}
-		List<Segment> list = projectStores.get(project).getSegments(filesList, json.getInt("start"),
+		XliffStore store = projectStores.get(project);
+		List<Segment> list = store.getSegments(filesList, json.getInt("start"),
 				json.getInt("count"), json.getString("filterText"), json.getString("filterLanguage"),
 				json.getBoolean("caseSensitiveFilter"), json.getBoolean("filterUntranslated"),
 				json.getBoolean("regExp"));
 		JSONArray array = new JSONArray();
 		Iterator<Segment> it = list.iterator();
+		int count = json.getInt("start");
 		while (it.hasNext()) {
-			array.put(it.next().toHTML());
+			array.put(it.next().toHTML(1 + count++, store.getSrcLang(), store.getTgtLang()));
 		}
 		result.put("segments", array);
 		return result;

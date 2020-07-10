@@ -127,6 +127,22 @@ td.fixed {
 	cursor: default !important;
 }
 
+td.initial {
+	border-right: 3px solid var(--normal-background);
+}
+
+td.translated {
+	border-right: 3px solid #03a9f4;
+}
+
+td.reviewed {
+	border-right: 3px solid #ff9800;
+}
+
+td.final {
+	border-right: 3px solid #009688;
+}
+
 tr.selected {
 	background-color: var(--selected-row);
 }

@@ -232,7 +232,7 @@ class ProjectsView {
         }
         for (let key of this.selected.keys()) {
             let project = this.selected.get(key);
-            //  this.electron.ipcRenderer.send('export-translations', project);
+            //  this.electron.ipcRenderer.send('export-project', project);
         }
     }
 
@@ -247,6 +247,9 @@ class ProjectsView {
             tr.className = 'discover';
             tr.addEventListener('click', (event: MouseEvent) => {
                 this.clicked(event, p);
+            });
+            tr.addEventListener('dblclick', (event: MouseEvent) => {
+                this.dblclicked(event, p);
             });
             this.tbody.appendChild(tr);
             if (this.shouldOpen === p.id) {
@@ -311,6 +314,17 @@ class ProjectsView {
             this.openProjects();
             this.shouldOpen = '';
         }
+    }
+
+    dblclicked(event: MouseEvent, project: any): void {
+        for (let key of this.selected.keys()) {
+            document.getElementById(key).classList.remove('selected');
+        }
+        this.selected.clear();
+        this.selected.set(project.id, project);
+        let tr: HTMLTableRowElement = event.currentTarget as HTMLTableRowElement;
+        tr.classList.add('selected');
+        this.openProjects();
     }
 
     clicked(event: MouseEvent, project: any): void {
