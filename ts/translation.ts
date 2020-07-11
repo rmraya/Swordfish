@@ -36,7 +36,8 @@ class TranslationView {
     projectId: string;
     projectFiles: string[];
     tbody: HTMLTableSectionElement;
-    filesTableBody: HTMLTableSectionElement;
+    sourceTh: HTMLTableCellElement;
+    targetTh: HTMLTableCellElement;
 
     pagesSpan: HTMLSpanElement;
 
@@ -44,6 +45,11 @@ class TranslationView {
     currentPage: number;
     rowsPage: number = 500;
     maxRows: number;
+
+    currentCell: HTMLTableCellElement;
+    currentContent: string;
+    currentId: string;
+    textArea: HTMLTextAreaElement;
 
     constructor(div: HTMLDivElement, projectId: string) {
         this.container = div;
@@ -168,10 +174,10 @@ class TranslationView {
         th.innerText = '#'
         tr.appendChild(th);
 
-        th = document.createElement('th');
-        th.innerText = 'Source'
-        th.style.minWidth = '40%';
-        tr.appendChild(th);
+        this.sourceTh = document.createElement('th');
+        this.sourceTh.innerText = 'Source'
+        this.sourceTh.style.minWidth = '200px';
+        tr.appendChild(this.sourceTh);
 
         th = document.createElement('th');
         let selectAll: HTMLInputElement = document.createElement('input');
@@ -179,10 +185,10 @@ class TranslationView {
         th.appendChild(selectAll);
         tr.appendChild(th);
 
-        th = document.createElement('th');
-        th.innerText = 'Target'
-        th.style.minWidth = '40%';
-        tr.appendChild(th);
+        this.targetTh = document.createElement('th');
+        this.targetTh.innerText = 'Target'
+        this.targetTh.style.minWidth = '200px';
+        tr.appendChild(this.targetTh);
 
         this.tbody = document.createElement('tbody');
         table.appendChild(this.tbody);
@@ -304,6 +310,8 @@ class TranslationView {
                 if (mutation.type === 'attributes') {
                     tableContainer.style.height = (this.translationArea.clientHeight - 34) + 'px';
                     tableContainer.style.width = this.translationArea.clientWidth + 'px';
+                    this.sourceTh.style.minWidth = (this.translationArea.clientWidth * 0.4) + 'px';
+                    this.targetTh.style.minWidth = (this.translationArea.clientWidth * 0.4) + 'px';
                 }
             }
         });
@@ -342,6 +350,12 @@ class TranslationView {
         for (let i = 0; i < length; i++) {
             this.tbody.insertAdjacentHTML('beforeend', arg[i]);
         }
+        let rows: HTMLCollectionOf<HTMLTableRowElement> = this.tbody.getElementsByTagName('tr');
+        length = rows.length;
+        for (let i = 0; i < rows.length; i++) {
+            let row: HTMLTableRowElement = rows[i];
+            row.addEventListener('click', (event: MouseEvent) => this.rowClickListener(event));
+        }
     }
 
     firstPage(): void {
@@ -366,5 +380,43 @@ class TranslationView {
     lastPage(): void {
         this.currentPage = this.maxPage;
         this.getSegments();
+    }
+
+    rowClickListener(event: MouseEvent): void {
+
+        var element: Element = event.target as Element;
+        var x: string = element.tagName;
+
+        if (x === 'TEXTAREA') {
+            // already editing
+            return;
+        }
+
+        if (this.textArea !== undefined) {
+            this.saveEdit();
+        }
+
+        let row: HTMLTableRowElement = event.currentTarget as HTMLTableRowElement;
+        this.currentId = row.id;
+        this.currentCell = row.getElementsByClassName('target')[0] as HTMLTableCellElement;
+        this.currentContent = this.currentCell.innerHTML;
+        this.textArea = document.createElement('textarea');
+        this.textArea.lang = this.currentCell.lang;
+        this.textArea.style.height = (this.currentCell.clientHeight - 8) + 'px';
+        this.textArea.style.width = (this.currentCell.clientWidth - 8) + 'px';
+        this.textArea.value = this.currentContent;
+        this.currentCell.setAttribute('style', 'padding: 0px;');
+        this.currentCell.innerHTML = '';
+        this.currentCell.appendChild(this.textArea);
+        this.textArea.focus();
+    }
+
+    saveEdit(): void {
+        if (this.textArea !== undefined) {
+            let text: string = this.textArea.value;
+            this.currentCell.innerText = text;
+            this.textArea = undefined;
+            // TODO send to server
+        }
     }
 }

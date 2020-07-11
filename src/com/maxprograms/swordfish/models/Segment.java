@@ -19,7 +19,10 @@ SOFTWARE.
 
 package com.maxprograms.swordfish.models;
 
+import java.io.IOException;
+
 import com.maxprograms.swordfish.Utils;
+import com.maxprograms.swordfish.xliff.XliffUtils;
 import com.maxprograms.xml.Element;
 
 public class Segment implements Comparable<Segment> {
@@ -37,7 +40,7 @@ public class Segment implements Comparable<Segment> {
         this.file = file;
         this.unit = unit;
         segment = e;
-       
+
     }
 
     public String getFile() {
@@ -57,7 +60,8 @@ public class Segment implements Comparable<Segment> {
         return (file + unit + getId()).compareTo(o.getFile() + o.getUnit() + o.getId());
     }
 
-    public String toHTML(int id, String srcLang, String tgtLang) {
+    public String toHTML(int id, String srcLang, String tgtLang, boolean clearTags, String filterText,
+            boolean caseSensitive, boolean regExp) {
         String status = segment.getAttributeValue("state", INITIAL);
         StringBuilder html = new StringBuilder();
         html.append("<tr id=\"");
@@ -74,27 +78,35 @@ public class Segment implements Comparable<Segment> {
             html.append(" dir='rtl'");
         }
         html.append('>');
-        html.append(getHTML(segment.getChild("source")));
+        html.append(getHTML(segment.getChild("source"), clearTags, filterText, caseSensitive, regExp));
         html.append("</td>");
         html.append("<td class='middle'><input type='checkbox' class='rowCheck'></td>");
-        html.append("<td lang=\"");
+        html.append("<td class='target' lang=\"");
         html.append(tgtLang);
         html.append("\"");
         if (Utils.isBiDi(tgtLang)) {
             html.append(" dir='rtl'");
         }
         html.append('>');
-        html.append(getHTML(segment.getChild("target")));
+        html.append(getHTML(segment.getChild("target"), clearTags, filterText, caseSensitive, regExp));
         html.append("</td>");
 
         html.append("</tr>");
         return html.toString();
     }
 
-    public String getHTML(Element e) {
+    public String getHTML(Element e, boolean clearTags, String filterText, boolean caseSensitive, boolean regExp) {
         if (e == null) {
             return "";
         }
+        try {
+            String tagged = XliffUtils.pureText(e, clearTags, filterText, caseSensitive, regExp);
+            return tagged;
+        } catch (IOException e1) {
+            // TODO Auto-generated catch block
+            e1.printStackTrace();
+        }
+
         return e.getText(); // TODO
     }
 }

@@ -60,6 +60,7 @@ import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 
 import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 import org.xml.sax.SAXException;
 
@@ -320,16 +321,26 @@ public class ProjectsHandler implements HttpHandler {
 		for (int i = 0; i < files.length(); i++) {
 			filesList.add(files.getString(i));
 		}
+
 		XliffStore store = projectStores.get(project);
-		List<Segment> list = store.getSegments(filesList, json.getInt("start"),
-				json.getInt("count"), json.getString("filterText"), json.getString("filterLanguage"),
-				json.getBoolean("caseSensitiveFilter"), json.getBoolean("filterUntranslated"),
-				json.getBoolean("regExp"));
+		int count = json.getInt("start");
+		String filterText = json.getString("filterText");
+		boolean caseSensitiveFilter = json.getBoolean("caseSensitiveFilter");
+		boolean regExp = json.getBoolean("regExp");
+		List<Segment> list = store.getSegments(filesList, json.getInt("start"), json.getInt("count"), filterText,
+				json.getString("filterLanguage"), caseSensitiveFilter, json.getBoolean("filterUntranslated"), regExp);
 		JSONArray array = new JSONArray();
 		Iterator<Segment> it = list.iterator();
-		int count = json.getInt("start");
+		
 		while (it.hasNext()) {
-			array.put(it.next().toHTML(1 + count++, store.getSrcLang(), store.getTgtLang()));
+			// try {
+				array.put(it.next().toHTML(1 + count++, store.getSrcLang(), store.getTgtLang(), true, filterText,
+						caseSensitiveFilter, regExp));
+						/*
+			} catch (IOException e) {
+				logger.log(Level.ERROR, e);
+			}
+			*/
 		}
 		result.put("segments", array);
 		return result;

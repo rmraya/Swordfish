@@ -19,7 +19,10 @@ SOFTWARE.
 
 package com.maxprograms.swordfish.xliff;
 
+import java.io.BufferedReader;
+import java.io.File;
 import java.io.FileOutputStream;
+import java.io.FileReader;
 import java.io.IOException;
 import java.lang.System.Logger;
 import java.lang.System.Logger.Level;
@@ -33,6 +36,7 @@ import java.util.Vector;
 
 import javax.xml.parsers.ParserConfigurationException;
 
+import com.maxprograms.swordfish.TmsServer;
 import com.maxprograms.swordfish.models.Segment;
 import com.maxprograms.xml.Catalog;
 import com.maxprograms.xml.Document;
@@ -41,6 +45,7 @@ import com.maxprograms.xml.Indenter;
 import com.maxprograms.xml.SAXBuilder;
 import com.maxprograms.xml.XMLOutputter;
 
+import org.json.JSONObject;
 import org.xml.sax.SAXException;
 
 public class XliffStore {
@@ -62,7 +67,7 @@ public class XliffStore {
             throws SAXException, IOException, ParserConfigurationException, URISyntaxException {
         this.xliffFile = xliffFile;
         SAXBuilder builder = new SAXBuilder();
-        builder.setEntityResolver(new Catalog("catalog/catalog.xml")); // TODO make configurable
+        builder.setEntityResolver(new Catalog(getCatalogFile()));
         document = builder.build(xliffFile);
         parseDocument();
         logger.log(Level.INFO, "loadded " + segments.size() + " segments");
@@ -119,7 +124,7 @@ public class XliffStore {
         return result;
     }
 
-	public void close() {
+    public void close() {
         xliffFile = "";
         files.clear();
         segments.clear();
@@ -133,5 +138,19 @@ public class XliffStore {
     public String getTgtLang() {
         return tgtLang;
     }
-    
+
+    private String getCatalogFile() throws IOException {
+        File preferences = new File(TmsServer.getWorkFolder(), "preferences.json");
+		StringBuilder builder = new StringBuilder();
+		try (FileReader reader = new FileReader(preferences)) {
+			try (BufferedReader buffer = new BufferedReader(reader)) {
+				String line = "";
+				while ((line = buffer.readLine()) != null) {
+					builder.append(line);
+				}
+			}
+		}
+		JSONObject json = new JSONObject(builder.toString());
+		return json.getString("catalog");
+	}
 }
