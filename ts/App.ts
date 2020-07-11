@@ -233,6 +233,9 @@ class Swordfish {
         ipcMain.on('remove-projects', (event: IpcMainEvent, arg: any) => {
             Swordfish.removeProjects(arg);
         });
+        ipcMain.on('close-project', (event: IpcMainEvent, arg: any) => {
+            Swordfish.closeProject(arg);
+        });
         ipcMain.on('show-add-memory', () => {
             Swordfish.showAddMemory();
         });
@@ -309,9 +312,6 @@ class Swordfish {
         });
         ipcMain.on('add-tab', (event: IpcMainEvent, arg: any) => {
             Swordfish.contents.send('add-tab', arg);
-        });
-        ipcMain.on('get-files', (event: IpcMainEvent, arg: any) => {
-            Swordfish.getFiles(event, arg);
         });
         ipcMain.on('get-segments', (event: IpcMainEvent, arg: any) => {
             Swordfish.getSegmenst(event, arg);
@@ -509,11 +509,11 @@ class Swordfish {
         // TODO
     }
     static saveEdits(): void {
-        // TODO
+        Swordfish.contents.send('save-edit');
     }
 
     static cancelEdit(): void {
-        // TODO
+        Swordfish.contents.send('cancel-edit');
     }
 
     static replaceText(): void {
@@ -806,6 +806,7 @@ class Swordfish {
                     try {
                         success(JSON.parse(rawData));
                     } catch (e) {
+                        console.log('Received data: ' + rawData);
                         error(e.message);
                     }
                 });
@@ -1109,21 +1110,6 @@ class Swordfish {
         });
     }
 
-    static getFiles(event: IpcMainEvent, arg: any): void {
-        Swordfish.sendRequest('/projects/files', arg,
-            (data: any) => {
-                if (data.status === Swordfish.SUCCESS) {
-                    event.sender.send('set-files', { files: data.files, project: arg.project });
-                } else {
-                    dialog.showErrorBox('Error', data.reason);
-                }
-            },
-            (reason: string) => {
-                dialog.showErrorBox('Error', reason);
-            }
-        );
-    }
-
     static getDefaultLanguages() {
         this.defaultLangsWindow = new BrowserWindow({
             parent: this.mainWindow,
@@ -1370,6 +1356,19 @@ class Swordfish {
         for (let i = 0; i < memories.length; i++) {
             console.log(JSON.stringify(memories[i]));
         }
+    }
+
+    static closeProject(arg: any): void {
+        Swordfish.sendRequest('/projects/close', arg,
+            (data: any) => {
+                if (data.status !== Swordfish.SUCCESS) {
+                    dialog.showErrorBox('Error', data.reason);
+                }
+            },
+            (reason: string) => {
+                dialog.showErrorBox('Error', reason);
+            }
+        );
     }
 }
 

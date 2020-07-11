@@ -51,11 +51,12 @@ import com.maxprograms.converters.Join;
 import com.maxprograms.languages.Language;
 import com.maxprograms.languages.LanguageUtils;
 import com.maxprograms.swordfish.models.Project;
-import com.maxprograms.swordfish.models.Segment;
 import com.maxprograms.swordfish.models.SourceFile;
 import com.maxprograms.swordfish.xliff.XliffStore;
+import com.maxprograms.swordfish.xliff.XliffUtils;
 import com.maxprograms.xliff2.Resegmenter;
 import com.maxprograms.xliff2.ToXliff2;
+import com.maxprograms.xml.Element;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 
@@ -78,7 +79,7 @@ public class ProjectsHandler implements HttpHandler {
 	private String srxFile;
 	private String catalogFile;
 
-	private Map<String, XliffStore> projectStores;
+	private ConcurrentHashMap<String, XliffStore> projectStores;
 
 	@Override
 	public void handle(HttpExchange exchange) throws IOException {
@@ -120,6 +121,8 @@ public class ProjectsHandler implements HttpHandler {
 				response = exportProject(request);
 			} else if ("/projects/status".equals(url)) {
 				response = getProcessStatus(request);
+			} else if ("/projects/close".equals(url)) {
+				response = closeProject(request);
 			} else if ("/projects/files".equals(url)) {
 				response = getProjectFiles(request);
 			} else if ("/projects/segments".equals(url)) {
@@ -299,10 +302,15 @@ public class ProjectsHandler implements HttpHandler {
 			}
 		}
 		JSONObject json = new JSONObject(request);
+		System.out.println(json.toString(2));
 		String project = json.getString("project");
-
+		if (project == null) {
+			logger.log(Level.ERROR, "Null project requested");
+			result.put(Constants.REASON, "Null project requested");
+			return result;
+		}
 		if (projectStores == null) {
-			projectStores = new Hashtable<>();
+			projectStores = new ConcurrentHashMap<>();
 			logger.log(Level.INFO, "Created store map");
 		}
 
@@ -323,26 +331,32 @@ public class ProjectsHandler implements HttpHandler {
 		}
 
 		XliffStore store = projectStores.get(project);
+		if (store == null) {
+			logger.log(Level.ERROR, "Store is null");
+			result.put(Constants.REASON, "Store is null");
+			return result;
+		}
 		int count = json.getInt("start");
 		String filterText = json.getString("filterText");
 		boolean caseSensitiveFilter = json.getBoolean("caseSensitiveFilter");
 		boolean regExp = json.getBoolean("regExp");
-		List<Segment> list = store.getSegments(filesList, json.getInt("start"), json.getInt("count"), filterText,
-				json.getString("filterLanguage"), caseSensitiveFilter, json.getBoolean("filterUntranslated"), regExp);
-		JSONArray array = new JSONArray();
-		Iterator<Segment> it = list.iterator();
-		
-		while (it.hasNext()) {
-			// try {
-				array.put(it.next().toHTML(1 + count++, store.getSrcLang(), store.getTgtLang(), true, filterText,
-						caseSensitiveFilter, regExp));
-						/*
-			} catch (IOException e) {
-				logger.log(Level.ERROR, e);
+		try {
+			List<Element> list = store.getSegments(filesList, json.getInt("start"), json.getInt("count"), filterText,
+					json.getString("filterLanguage"), caseSensitiveFilter, json.getBoolean("filterUntranslated"),
+					regExp);
+			JSONArray array = new JSONArray();
+			Iterator<Element> it = list.iterator();
+
+			while (it.hasNext()) {
+				Element seg = it.next();
+				array.put(XliffUtils.toHTML(1 + count++, seg, true, filterText, caseSensitiveFilter, regExp));
+
 			}
-			*/
+			result.put("segments", array);
+		} catch (IOException | JSONException | SAXException | ParserConfigurationException e) {
+			logger.log(Level.ERROR, "Error loading segments", e);
+			result.put(Constants.REASON, e.getMessage());
 		}
-		result.put("segments", array);
 		return result;
 	}
 
@@ -518,5 +532,31 @@ public class ProjectsHandler implements HttpHandler {
 			Files.createDirectories(workFolder.toPath());
 		}
 		return workFolder;
+	}
+
+	private JSONObject closeProject(String request) {
+		JSONObject result = new JSONObject();
+		if (projects == null) {
+			result.put(Constants.REASON, "Project list not loaded");
+			return result;
+		}
+		if (projectStores == null) {
+			result.put(Constants.REASON, "Projects map is null");
+			return result;
+		}
+		JSONObject json = new JSONObject(request);
+		String project = json.getString("project");
+		if (projectStores.containsKey(project)) {
+			try {
+				projectStores.get(project).close();
+				projectStores.remove(project);
+			} catch (Exception e) {
+				logger.log(Level.ERROR, e);
+				result.put(Constants.REASON, e.getMessage());
+			}
+		} else {
+			result.put(Constants.REASON, "Project is not open");
+		}
+		return result;
 	}
 }

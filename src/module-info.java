@@ -23,7 +23,9 @@ module swordfish {
 	
 	opens com.maxprograms.swordfish to mapdb;
 	opens com.maxprograms.swordfish.models to mapdb;
+	opens com.maxprograms.swordfish.xliff to mapdb;
 
+	requires mapdb;
 	requires java.base;
 	requires java.xml;
 	requires java.sql;

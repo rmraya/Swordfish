@@ -20,6 +20,7 @@ SOFTWARE.
 package com.maxprograms.swordfish.xliff;
 
 import java.io.BufferedReader;
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.FileReader;
@@ -27,55 +28,76 @@ import java.io.IOException;
 import java.lang.System.Logger;
 import java.lang.System.Logger.Level;
 import java.net.URISyntaxException;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
-import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
-import java.util.Vector;
 
 import javax.xml.parsers.ParserConfigurationException;
 
 import com.maxprograms.swordfish.TmsServer;
-import com.maxprograms.swordfish.models.Segment;
 import com.maxprograms.xml.Catalog;
 import com.maxprograms.xml.Document;
 import com.maxprograms.xml.Element;
 import com.maxprograms.xml.Indenter;
+import com.maxprograms.xml.PI;
 import com.maxprograms.xml.SAXBuilder;
 import com.maxprograms.xml.XMLOutputter;
 
 import org.json.JSONObject;
+import org.mapdb.DB;
+import org.mapdb.DBMaker;
+import org.mapdb.BTreeMap;
 import org.xml.sax.SAXException;
 
 public class XliffStore {
 
     Logger logger = System.getLogger(XliffStore.class.getName());
 
+    private DB mapdb;
+    private BTreeMap<Integer, String> tree;
+    private BTreeMap<Integer, String> files;
     private String xliffFile;
     private Document document;
 
-    private Map<String, Element> files;
-    private List<Segment> segments;
+    private int index;
 
     private String currentFile;
     private String currentUnit;
     private String srcLang;
     private String tgtLang;
 
+    private SAXBuilder builder;
+
     public XliffStore(String xliffFile)
             throws SAXException, IOException, ParserConfigurationException, URISyntaxException {
         this.xliffFile = xliffFile;
-        SAXBuilder builder = new SAXBuilder();
+        File xliff = new File(xliffFile);
+        File model = new File(xliff.getParentFile(), "model");
+        boolean needsLoading = !model.exists();
+
+        try {
+            mapdb = DBMaker.newFileDB(model).closeOnJvmShutdown().asyncWriteEnable().make();
+            tree = mapdb.getTreeMap("segments");
+            files = mapdb.getTreeMap("files");
+        } catch (Error ioe) {
+            logger.log(Level.ERROR, ioe);
+            throw new IOException(ioe.getMessage());
+        }
+        builder = new SAXBuilder();
         builder.setEntityResolver(new Catalog(getCatalogFile()));
-        document = builder.build(xliffFile);
-        parseDocument();
-        logger.log(Level.INFO, "loadded " + segments.size() + " segments");
+        if (needsLoading) {
+            document = builder.build(xliffFile);
+            parseDocument();
+            mapdb.commit();
+            logger.log(Level.INFO, "loadded " + tree.size() + " segments");
+        } else {
+            logger.log(Level.INFO, "Skipped parsing " + tree.size() + " segments");
+        }
     }
 
     private void parseDocument() {
-        files = new Hashtable<>();
-        segments = new Vector<>();
+        index = 0;
         recurse(document.getRootElement());
     }
 
@@ -86,13 +108,17 @@ public class XliffStore {
         }
         if ("file".equals(e.getName())) {
             currentFile = e.getAttributeValue("original");
-            files.put(currentFile, e);
+            files.put(currentFile.hashCode(), currentFile);
         }
         if ("unit".equals(e.getName())) {
             currentUnit = e.getAttributeValue("id");
         }
         if ("segment".equals(e.getName())) {
-            segments.add(new Segment(currentFile, currentUnit, e));
+            JSONObject json = new JSONObject();
+            json.put("currentFile", currentFile);
+            json.put("currentUnit", currentUnit);
+            json.put("segment", e.toString());
+            tree.put(index++, json.toString());
         }
         List<Element> children = e.getChildren();
         Iterator<Element> it = children.iterator();
@@ -110,25 +136,31 @@ public class XliffStore {
         }
     }
 
-    public List<Segment> getSegments(List<String> files, int start, int count, String filterText, String filterLanguage,
-            boolean caseSensitiveFilter, boolean filterUntranslated, boolean regExp) {
-        List<Segment> result = new ArrayList<>();
+    public List<Element> getSegments(List<String> files, int start, int count, String filterText, String filterLanguage,
+            boolean caseSensitiveFilter, boolean filterUntranslated, boolean regExp)
+            throws SAXException, IOException, ParserConfigurationException {
+        List<Element> result = new ArrayList<>();
         if (filterText.isEmpty()) {
-            for (int i = start; i < start + count && i < segments.size(); i++) {
-                result.add(segments.get(i));
+            for (int i = start; i < start + count && i < tree.size(); i++) {
+                JSONObject  json = new JSONObject(tree.get(i));
+                String string = json.getString("segment");
+                byte[] bytes = string.getBytes(StandardCharsets.UTF_8);
+                Document d = builder.build(new ByteArrayInputStream(bytes));
+                Element segment = d.getRootElement();
+                segment.addContent(new PI("currentFile", json.getString("currentFile")));
+                segment.addContent(new PI("currentUnit", json.getString("currentUnit")));
+                result.add(segment);
             }
         } else {
             // TODO filter segments
         }
-
         return result;
     }
 
     public void close() {
-        xliffFile = "";
-        files.clear();
-        segments.clear();
-        document = null;
+        mapdb.commit();
+        mapdb.close();
+        logger.log(Level.INFO, "Closed store");
     }
 
     public String getSrcLang() {
@@ -141,16 +173,16 @@ public class XliffStore {
 
     private String getCatalogFile() throws IOException {
         File preferences = new File(TmsServer.getWorkFolder(), "preferences.json");
-		StringBuilder builder = new StringBuilder();
-		try (FileReader reader = new FileReader(preferences)) {
-			try (BufferedReader buffer = new BufferedReader(reader)) {
-				String line = "";
-				while ((line = buffer.readLine()) != null) {
-					builder.append(line);
-				}
-			}
-		}
-		JSONObject json = new JSONObject(builder.toString());
-		return json.getString("catalog");
-	}
+        StringBuilder builder = new StringBuilder();
+        try (FileReader reader = new FileReader(preferences)) {
+            try (BufferedReader buffer = new BufferedReader(reader)) {
+                String line = "";
+                while ((line = buffer.readLine()) != null) {
+                    builder.append(line);
+                }
+            }
+        }
+        JSONObject json = new JSONObject(builder.toString());
+        return json.getString("catalog");
+    }
 }

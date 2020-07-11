@@ -22,6 +22,9 @@ package com.maxprograms.swordfish;
 public class Utils {
     
     public static boolean isBiDi(String code) {
+		if (code == null || code.isEmpty()) {
+			return false;
+		}
 		return code.startsWith("ar") || code.startsWith("fa") || code.startsWith("az") || code.startsWith("ur")
 				|| code.startsWith("pa-PK") || code.startsWith("ps") || code.startsWith("prs") || code.startsWith("ug")
 				|| code.startsWith("he") || code.startsWith("ji") || code.startsWith("yi");

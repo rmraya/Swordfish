@@ -186,7 +186,9 @@ class ProjectsView {
             let project = this.selected.get(key);
             let description = project.description;
             this.electron.ipcRenderer.send('add-tab', { id: key, description: description });
+            document.getElementById(key).classList.remove('selected');
         }
+        this.selected.clear();
     }
 
     exportTranslations(): void {
@@ -322,8 +324,6 @@ class ProjectsView {
         }
         this.selected.clear();
         this.selected.set(project.id, project);
-        let tr: HTMLTableRowElement = event.currentTarget as HTMLTableRowElement;
-        tr.classList.add('selected');
         this.openProjects();
     }
 

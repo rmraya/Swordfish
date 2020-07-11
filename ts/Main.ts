@@ -19,18 +19,20 @@ SOFTWARE.
 
 class Main {
 
-    electron = require('electron');
+    static electron = require('electron');
 
     static tabHolder: TabHolder;
+    static translationViews: Map<string, TranslationView>;
+    
     mainContainer: HTMLDivElement;
     static main: HTMLDivElement;
 
     projectsView: ProjectsView;
     memoriesView: MemoriesView;
     glossariesView: GlossariesView;
-
+    
     constructor() {
-
+        Main.translationViews = new Map<string, TranslationView>();
         this.mainContainer = document.getElementById('mainContainer') as HTMLDivElement;
         Main.tabHolder = new TabHolder(this.mainContainer, 'main');
 
@@ -59,69 +61,92 @@ class Main {
 
         Main.tabHolder.selectTab('projects');
 
-        this.electron.ipcRenderer.send('get-theme');
-        this.electron.ipcRenderer.on('set-theme', (event: Electron.IpcRendererEvent, arg: any) => {
+        
+        var observerOptions = {
+            childList: true,
+            attributes: false
+        }
+        var tabsObserver = new MutationObserver((mutationList, observer) => {
+            mutationList.forEach((mutation) => {
+                switch(mutation.type) {
+                  case 'childList':
+                       Main.checkTabs();
+                    break;
+                  case 'attributes':
+                    break;
+                }
+            });
+        });
+        tabsObserver.observe(Main.tabHolder.getTabsHolder(), observerOptions);
+
+        Main.electron.ipcRenderer.send('get-theme');
+        Main.electron.ipcRenderer.on('set-theme', (event: Electron.IpcRendererEvent, arg: any) => {
             (document.getElementById('theme') as HTMLLinkElement).href = arg;
         });
-        this.electron.ipcRenderer.on('request-theme', () => {
-            this.electron.ipcRenderer.send('get-theme');
+        Main.electron.ipcRenderer.on('request-theme', () => {
+            Main.electron.ipcRenderer.send('get-theme');
         });
         window.addEventListener('resize', () => {
             this.resizePanels();
         });
-        this.electron.ipcRenderer.on('view-projects', () => {
+        Main.electron.ipcRenderer.on('view-projects', () => {
             Main.tabHolder.selectTab('projects');
         });
-        this.electron.ipcRenderer.on('request-projects', (event: Electron.IpcRendererEvent, arg: any) => {
+        Main.electron.ipcRenderer.on('request-projects', (event: Electron.IpcRendererEvent, arg: any) => {
             this.projectsView.loadProjects(arg);
         });
-        this.electron.ipcRenderer.on('remove-projects', () => {
+        Main.electron.ipcRenderer.on('remove-projects', () => {
             this.projectsView.removeProjects();
         });
-        this.electron.ipcRenderer.on('export-translations', (event: Electron.IpcRendererEvent, arg: any) => {
+        Main.electron.ipcRenderer.on('export-translations', (event: Electron.IpcRendererEvent, arg: any) => {
             this.projectsView.exportTranslations();
         });
-        this.electron.ipcRenderer.on('import-project', (event: Electron.IpcRendererEvent, arg: any) => {
+        Main.electron.ipcRenderer.on('import-project', (event: Electron.IpcRendererEvent, arg: any) => {
             this.projectsView.importProject();
         });
-        this.electron.ipcRenderer.on('export-project', (event: Electron.IpcRendererEvent, arg: any) => {
+        Main.electron.ipcRenderer.on('export-project', (event: Electron.IpcRendererEvent, arg: any) => {
             this.projectsView.exportProject();
         });
-        this.electron.ipcRenderer.on('view-memories', () => {
+        Main.electron.ipcRenderer.on('view-memories', () => {
             Main.tabHolder.selectTab('memories');
         });
-        this.electron.ipcRenderer.on('request-memories', () => {
+        Main.electron.ipcRenderer.on('request-memories', () => {
             this.memoriesView.loadMemories();
         });
-
-        this.electron.ipcRenderer.on('view-glossaries', () => {
+        Main.electron.ipcRenderer.on('view-glossaries', () => {
             Main.tabHolder.selectTab('glossaries');
         });
-        this.electron.ipcRenderer.on('start-waiting', () => {
+        Main.electron.ipcRenderer.on('start-waiting', () => {
             document.getElementById('body').classList.add("wait");
         });
-        this.electron.ipcRenderer.on('end-waiting', () => {
+        Main.electron.ipcRenderer.on('end-waiting', () => {
             document.getElementById('body').classList.remove("wait");
         });
-        this.electron.ipcRenderer.on('set-status', (event: Electron.IpcRendererEvent, arg: any) => {
+        Main.electron.ipcRenderer.on('set-status', (event: Electron.IpcRendererEvent, arg: any) => {
             this.setStatus(arg);
         });
-        this.electron.ipcRenderer.on('add-tab', (event: Electron.IpcRendererEvent, arg: any) => {
+        Main.electron.ipcRenderer.on('add-tab', (event: Electron.IpcRendererEvent, arg: any) => {
             this.addTab(arg);
         });
-        this.electron.ipcRenderer.on('translate-projects', () => {
+        Main.electron.ipcRenderer.on('translate-projects', () => {
             this.projectsView.openProjects();
         });
-        this.electron.ipcRenderer.on('remove-memory', () => {
+        Main.electron.ipcRenderer.on('remove-memory', () => {
             this.memoriesView.removeMemory();
         });
-        this.electron.ipcRenderer.on('import-tmx', () => {
+        Main.electron.ipcRenderer.on('import-tmx', () => {
             this.memoriesView.importTMX();
         });
-        this.electron.ipcRenderer.on('export-tmx', () => {
+        Main.electron.ipcRenderer.on('export-tmx', () => {
             this.memoriesView.exportTMX();
         });
-
+        Main.electron.ipcRenderer.on('cancel-edit', () => {
+            this.cancelEdit();
+        });
+        Main.electron.ipcRenderer.on('save-edit', () => {
+            this.saveEdit();
+        });
+        
         let config: any = { attributes: true, childList: false, subtree: false };
         let observer = new MutationObserver((mutationsList) => {
             for (let mutation of mutationsList) {
@@ -160,12 +185,43 @@ class Main {
         tab.getLabel().addEventListener('click', () => {
             view.setSize();
         });
+        Main.translationViews.set(arg.id, view);
     }
 
     resizePanels(): void {
         let body = document.getElementById('body');
         this.mainContainer.style.width = body.clientWidth + 'px';
         this.mainContainer.style.height = body.clientHeight + 'px';
+    }
+
+    static checkTabs(): void { 
+        for (let key of Main.translationViews.keys()) {
+            
+            
+            if (!Main.tabHolder.has(key)) {
+                console.log('MUST CLOSE ' +key);
+                Main.translationViews.get(key).close();
+                Main.translationViews.delete(key);
+                
+                Main.electron.ipcRenderer.send('close-project', {project: key});
+                break;
+            }
+            
+        }
+    }
+
+    cancelEdit(): void  {
+        let selected = Main.tabHolder.getSelected();
+        if ( Main.translationViews.has(selected)) {
+            Main.translationViews.get(selected).cancelEdit();
+        }
+    }
+
+    saveEdit(): void  {
+        let selected = Main.tabHolder.getSelected();
+        if ( Main.translationViews.has(selected)) {
+            Main.translationViews.get(selected).saveEdit();
+        }
     }
 }
 

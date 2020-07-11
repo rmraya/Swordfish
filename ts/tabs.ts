@@ -127,6 +127,10 @@ class TabHolder {
         this.selectedTab = tab;
     }
 
+    getSelected() : string {
+        return this.selectedTab;
+    }
+
     closeTab(tab: string): void {
         this.tabsHolder.removeChild(this.labels.get(tab));
         this.labels.delete(tab);
@@ -140,5 +144,9 @@ class TabHolder {
 
     has(tab: string): boolean {
         return this.labels.has(tab);
+    }
+
+    getTabsHolder(): HTMLDivElement {
+        return this.tabsHolder;
     }
 }

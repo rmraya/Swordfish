@@ -30,7 +30,9 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import com.maxprograms.swordfish.Constants;
 import com.maxprograms.swordfish.TmsServer;
+import com.maxprograms.swordfish.Utils;
 import com.maxprograms.xml.Attribute;
 import com.maxprograms.xml.Element;
 import com.maxprograms.xml.TextNode;
@@ -261,5 +263,67 @@ public class XliffUtils {
 
     private static String unquote(String string) {
         return string.replaceAll("\"", "\u200B\u2033");
+    }
+
+
+    public static String toHTML(int index, Element seg, boolean clearTags, String filterText,
+            boolean caseSensitive, boolean regExp) {
+        String status = seg.getAttributeValue("state", Constants.INITIAL);
+        StringBuilder html = new StringBuilder();
+        Element source = seg.getChild("source");
+        String srcLang = source.getAttributeValue("xml:lang");
+        Element target = seg.getChild("target");
+        String tgtLang = ""; 
+        if (target != null) {
+            tgtLang = target.getAttributeValue("xml:lang");
+        }
+        html.append("<tr data-id=\"");
+        html.append(seg.getAttributeValue("id"));
+        html.append("\" data-file=\"");
+        html.append(cleanString(seg.getPI("currentFile").get(0).getData()));
+        html.append("\" data-unit=\"");
+        html.append(cleanString(seg.getPI("currentUnit").get(0).getData()));
+        html.append("\"><td class='middle center noWrap ");
+        html.append(status);
+        html.append("'>");
+        html.append(index);
+        html.append("</td>");
+        html.append("<td lang=\"");
+        html.append(srcLang);
+        html.append("\"");
+        if (Utils.isBiDi(srcLang)) {
+            html.append(" dir='rtl'");
+        }
+        html.append('>');
+        html.append(getHTML(source, clearTags, filterText, caseSensitive, regExp));
+        html.append("</td>");
+        html.append("<td class='middle'><input type='checkbox' class='rowCheck'></td>");
+        html.append("<td class='target' lang=\"");
+        html.append(tgtLang);
+        html.append("\"");
+        if (Utils.isBiDi(tgtLang)) {
+            html.append(" dir='rtl'");
+        }
+        html.append('>');
+        html.append(getHTML(target, clearTags, filterText, caseSensitive, regExp));
+        html.append("</td>");
+
+        html.append("</tr>");
+        return html.toString();
+    }
+
+    private static String getHTML(Element e, boolean clearTags, String filterText, boolean caseSensitive, boolean regExp) {
+        if (e == null) {
+            return "";
+        }
+        try {
+            String tagged = XliffUtils.pureText(e, clearTags, filterText, caseSensitive, regExp);
+            return tagged;
+        } catch (IOException e1) {
+            // TODO Auto-generated catch block
+            e1.printStackTrace();
+        }
+
+        return e.getText(); // TODO
     }
 }

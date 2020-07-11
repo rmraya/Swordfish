@@ -22,6 +22,8 @@ class TranslationView {
     electron = require('electron');
 
     container: HTMLDivElement;
+    observer: MutationObserver;
+    rowsObserver: MutationObserver;
 
     mainArea: HTMLDivElement;
     filesArea: HTMLDivElement;
@@ -34,8 +36,7 @@ class TranslationView {
     statusArea: HTMLDivElement;
 
     projectId: string;
-    projectFiles: string[];
-    tbody: HTMLTableSectionElement;
+    private tbody: HTMLTableSectionElement;
     sourceTh: HTMLTableCellElement;
     targetTh: HTMLTableCellElement;
 
@@ -48,8 +49,9 @@ class TranslationView {
 
     currentCell: HTMLTableCellElement;
     currentContent: string;
-    currentId: string;
+    currentId: any;
     textArea: HTMLTextAreaElement;
+    currentTags: string[] = [];
 
     constructor(div: HTMLDivElement, projectId: string) {
         this.container = div;
@@ -94,10 +96,6 @@ class TranslationView {
         this.buildTranslationArea();
         this.buildRightSide();
 
-        this.electron.ipcRenderer.send('get-files', { project: this.projectId });
-        this.electron.ipcRenderer.on('set-files', (event: Electron.IpcRendererEvent, arg: any) => {
-            this.setFiles(arg);
-        });
         this.electron.ipcRenderer.on('set-segments', (event: Electron.IpcRendererEvent, arg: any) => {
             this.setSegments(arg);
         });
@@ -107,6 +105,13 @@ class TranslationView {
         setTimeout(() => {
             this.setSize();
         }, 200);
+
+        this.getSegments();
+    }
+
+    close(): void {
+        this.rowsObserver.disconnect();
+        this.observer.disconnect();
     }
 
     getContainer(): HTMLDivElement {
@@ -124,23 +129,18 @@ class TranslationView {
     watchSizes(): void {
         let targetNode: HTMLElement = document.getElementById('main');
         let config: any = { attributes: true, childList: false, subtree: false };
-        let observer = new MutationObserver((mutationsList) => {
+        this.observer = new MutationObserver((mutationsList) => {
             for (let mutation of mutationsList) {
                 if (mutation.type === 'attributes') {
                     this.setSize();
                 }
             }
         });
-        observer.observe(targetNode, config);
+        this.observer.observe(targetNode, config);
     }
 
     exportTranslations() {
-        this.electron.ipcRenderer.send('export-translations', { id: this.projectId, files: this.projectFiles });
-    }
-
-    setFiles(arg: any): void {
-        this.projectFiles = arg.files;
-        this.getSegments();
+        this.electron.ipcRenderer.send('export-translations', { project: this.projectId });
     }
 
     getSegments(): void {
@@ -148,7 +148,6 @@ class TranslationView {
             project: this.projectId, files: [], start: 0, count: 10000, filterText: '',
             filterLanguage: '', caseSensitiveFilter: false, filterUntranslated: false, regExp: false
         };
-
         this.electron.ipcRenderer.send('get-segments', params);
     }
 
@@ -305,7 +304,7 @@ class TranslationView {
         rowDiv.insertAdjacentHTML('beforeend', '<span class="tooltiptext topTooltip">Enter number of rows/page and press ENTER</span>');
 
         let config: any = { attributes: true, childList: false, subtree: false };
-        let observer = new MutationObserver((mutationsList) => {
+        this.rowsObserver = new MutationObserver((mutationsList) => {
             for (let mutation of mutationsList) {
                 if (mutation.type === 'attributes') {
                     tableContainer.style.height = (this.translationArea.clientHeight - 34) + 'px';
@@ -315,7 +314,7 @@ class TranslationView {
                 }
             }
         });
-        observer.observe(this.translationArea, config);
+        this.rowsObserver.observe(this.translationArea, config);
     }
 
     buildRightSide(): void {
@@ -397,14 +396,14 @@ class TranslationView {
         }
 
         let row: HTMLTableRowElement = event.currentTarget as HTMLTableRowElement;
-        this.currentId = row.id;
+        this.currentId = { id: row.getAttribute('data-id'), file: row.getAttribute('data-file'), unit: row.getAttribute('data-unit') };
         this.currentCell = row.getElementsByClassName('target')[0] as HTMLTableCellElement;
         this.currentContent = this.currentCell.innerHTML;
         this.textArea = document.createElement('textarea');
         this.textArea.lang = this.currentCell.lang;
         this.textArea.style.height = (this.currentCell.clientHeight - 8) + 'px';
         this.textArea.style.width = (this.currentCell.clientWidth - 8) + 'px';
-        this.textArea.value = this.currentContent;
+        this.textArea.innerHTML = this.cleanTags(this.currentContent);
         this.currentCell.setAttribute('style', 'padding: 0px;');
         this.currentCell.innerHTML = '';
         this.currentCell.appendChild(this.textArea);
@@ -413,10 +412,53 @@ class TranslationView {
 
     saveEdit(): void {
         if (this.textArea !== undefined) {
-            let text: string = this.textArea.value;
-            this.currentCell.innerText = text;
+            let edited: string = this.restoretags(this.textArea.value, this.currentTags);
+            this.currentCell.innerHTML = edited;
             this.textArea = undefined;
             // TODO send to server
         }
+    }
+
+    cancelEdit(): void {
+        this.currentCell.innerHTML = this.currentContent;
+        this.textArea = undefined;
+    }
+
+
+    cleanTags(unit: string): string {
+        var index: number = unit.indexOf('<img ');
+        var tagNumber: number = 1;
+        this.currentTags = [];
+        while (index >= 0) {
+            let start: string = unit.slice(0, index);
+            let rest: string = unit.slice(index + 1);
+            let end: number = rest.indexOf('>');
+            let tag: string = '<' + rest.slice(0, end) + '/>';
+            this.currentTags.push(tag);
+            unit = start + '[[' + tagNumber++ + ']]' + rest.slice(end + 1);
+            index = unit.indexOf('<img ');
+        }
+        index = unit.indexOf('<span');
+        while (index >= 0) {
+            let start: string = unit.slice(0, index);
+            let rest: string = unit.slice(index + 1);
+            let end: number = rest.indexOf('>');
+            unit = start + rest.slice(end + 1);
+            index = unit.indexOf('<span');
+        }
+        index = unit.indexOf('</span>');
+        while (index >= 0) {
+            unit = unit.replace('</span>', '');
+            index = unit.indexOf('</span>');
+        }
+        return unit;
+    }
+
+    restoretags(text: string, originalTags: string[]): string {
+        let length: number = originalTags.length;
+        for (let i: number = 0; i < length; i++) {
+            text = text.replace('[[' + (i + 1) + ']]', originalTags[i]);
+        }
+        return text;
     }
 }

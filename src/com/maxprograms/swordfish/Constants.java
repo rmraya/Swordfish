@@ -38,4 +38,9 @@ public class Constants {
 	public static final String SAVING = "Saving";
 	public static final String PROCESSING = "Processing";
 	public static final String NULLSTORE = "Null Store";
+
+	public static final String INITIAL = "initial";
+    public static final String TRANSLATED = "translated";
+    public static final String REVIEWED = "reviewed";
+    public static final String FINAL = "final";
 }
