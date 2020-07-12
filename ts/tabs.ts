@@ -127,7 +127,7 @@ class TabHolder {
         this.selectedTab = tab;
     }
 
-    getSelected() : string {
+    getSelected(): string {
         return this.selectedTab;
     }
 

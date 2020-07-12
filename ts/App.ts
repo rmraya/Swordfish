@@ -19,7 +19,7 @@ SOFTWARE.
 
 import { Buffer } from "buffer";
 import { execFileSync, spawn, ChildProcessWithoutNullStreams } from "child_process";
-import { app, BrowserWindow, dialog, ipcMain, Menu, MenuItem, shell, webContents, nativeTheme, Rectangle, IpcMainEvent, screen, Size } from "electron";
+import { app, clipboard, BrowserWindow, dialog, ipcMain, Menu, MenuItem, shell, webContents, nativeTheme, Rectangle, IpcMainEvent, screen, Size } from "electron";
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "fs";
 import { ClientRequest, request, IncomingMessage } from "http";
 
@@ -316,6 +316,12 @@ class Swordfish {
         ipcMain.on('get-segments', (event: IpcMainEvent, arg: any) => {
             Swordfish.getSegmenst(event, arg);
         });
+        ipcMain.on('paste-tag', (event: IpcMainEvent, arg: any) => {
+            // let old: string = clipboard.readHTML();
+            clipboard.writeHTML(arg);
+            Swordfish.contents.paste();
+            // clipboard.writeHTML(old);
+        });
     } // end constructor
 
     static createWindow(): void {
@@ -342,6 +348,18 @@ class Swordfish {
         var fileMenu: Menu = Menu.buildFromTemplate([
             { label: 'Translate Single File', accelerator: 'CmdOrCtrl+N', click: () => { Swordfish.addFile(); } }
         ]);
+        var tagsMenu: Menu = Menu.buildFromTemplate([
+            { label: 'Insert Tag "1"', accelerator: 'CmdOrCtrl+1', click: () => { Swordfish.contents.send('insert tag', { tag: 1 }); } },
+            { label: 'Insert Tag "2"', accelerator: 'CmdOrCtrl+2', click: () => { Swordfish.contents.send('insert tag', { tag: 2 }); } },
+            { label: 'Insert Tag "3"', accelerator: 'CmdOrCtrl+3', click: () => { Swordfish.contents.send('insert tag', { tag: 3 }); } },
+            { label: 'Insert Tag "4"', accelerator: 'CmdOrCtrl+4', click: () => { Swordfish.contents.send('insert tag', { tag: 4 }); } },
+            { label: 'Insert Tag "5"', accelerator: 'CmdOrCtrl+5', click: () => { Swordfish.contents.send('insert tag', { tag: 5 }); } },
+            { label: 'Insert Tag "6"', accelerator: 'CmdOrCtrl+6', click: () => { Swordfish.contents.send('insert tag', { tag: 6 }); } },
+            { label: 'Insert Tag "7"', accelerator: 'CmdOrCtrl+7', click: () => { Swordfish.contents.send('insert tag', { tag: 7 }); } },
+            { label: 'Insert Tag "8"', accelerator: 'CmdOrCtrl+8', click: () => { Swordfish.contents.send('insert tag', { tag: 8 }); } },
+            { label: 'Insert Tag "8"', accelerator: 'CmdOrCtrl+9', click: () => { Swordfish.contents.send('insert tag', { tag: 9 }); } },
+            { label: 'Insert Tag "10"', accelerator: 'CmdOrCtrl+0', click: () => { Swordfish.contents.send('insert tag', { tag: 10 }); } }
+        ]);
         var editMenu: Menu = Menu.buildFromTemplate([
             { label: 'Undo', accelerator: 'CmdOrCtrl+Z', click: () => { this.contents.undo(); } },
             new MenuItem({ type: 'separator' }),
@@ -352,6 +370,12 @@ class Swordfish {
             new MenuItem({ type: 'separator' }),
             { label: 'Confirm Edit', accelerator: 'Alt+Enter', click: () => { this.saveEdits(); } },
             { label: 'Cancel Edit', accelerator: 'Esc', click: () => { this.cancelEdit(); } },
+            new MenuItem({ type: 'separator' }),
+            { label: 'Insert Tag', accelerator: 'CmdOrCtrl+T', click: () => { Swordfish.contents.send('insert-tag'); } },
+            new MenuItem({ label: 'Quick Tags', submenu: tagsMenu }),
+            { label: 'Insert Next Tag', accelerator: 'CmdOrCtrl+Shift+T', click: () => { Swordfish.contents.send('insert-next-tag'); } },
+            { label: 'Insert Remaining Tags', accelerator: 'CmdOrCtrl+Alt+T', click: () => { Swordfish.contents.send('insert-remaining-tags'); } },
+            { label: 'Remove all Tags', accelerator: 'CmdOrCtrl+Shift+R', click: () => { Swordfish.contents.send('remove-tags'); } },
             new MenuItem({ type: 'separator' }),
             { label: 'Replace Text...', accelerator: 'CmdOrCtrl+F', click: () => { this.replaceText(); } }
         ]);
@@ -389,6 +413,9 @@ class Swordfish {
             { label: 'Release History', click: () => { this.showReleaseHistory(); } },
             { label: 'Support Group', click: () => { this.showSupportGroup(); } }
         ]);
+        var tasksMenu: Menu = Menu.buildFromTemplate([
+            { label: 'Copy Source to Target', accelerator: 'CmdOrCtrl+P', click: () => { Swordfish.contents.send('copy-source'); } }
+        ]);
         var template: MenuItem[] = [
             new MenuItem({ label: '&File', role: 'fileMenu', submenu: fileMenu }),
             new MenuItem({ label: '&Edit', role: 'editMenu', submenu: editMenu }),
@@ -396,6 +423,7 @@ class Swordfish {
             new MenuItem({ label: '&Projects', submenu: projectsMenu }),
             new MenuItem({ label: '&Memories', submenu: memoriesMenu }),
             new MenuItem({ label: '&Glossaries', submenu: glossariesMenu }),
+            new MenuItem({ label: '&Tasks', submenu: tasksMenu }),
             new MenuItem({ label: '&Help', role: 'help', submenu: helpMenu })
         ];
         if (process.platform === 'darwin') {
@@ -428,14 +456,14 @@ class Swordfish {
         if (process.platform === 'win32') {
             template[0].submenu.append(new MenuItem({ type: 'separator' }));
             template[0].submenu.append(new MenuItem({ label: 'Exit', accelerator: 'Alt+F4', role: 'quit', click: () => { app.quit(); } }));
-            template[7].submenu.append(new MenuItem({ type: 'separator' }));
-            template[7].submenu.append(new MenuItem({ label: 'About...', click: () => { this.showAbout(); } }));
+            template[8].submenu.append(new MenuItem({ type: 'separator' }));
+            template[8].submenu.append(new MenuItem({ label: 'About...', click: () => { this.showAbout(); } }));
         }
         if (process.platform === 'linux') {
             template[0].submenu.append(new MenuItem({ type: 'separator' }));
             template[0].submenu.append(new MenuItem({ label: 'Quit', accelerator: 'Ctrl+Q', role: 'quit', click: () => { app.quit(); } }));
-            template[7].submenu.append(new MenuItem({ type: 'separator' }));
-            template[7].submenu.append(new MenuItem({ label: 'About...', click: () => { this.showAbout(); } }));
+            template[8].submenu.append(new MenuItem({ type: 'separator' }));
+            template[8].submenu.append(new MenuItem({ label: 'About...', click: () => { this.showAbout(); } }));
         }
         Menu.setApplicationMenu(Menu.buildFromTemplate(template));
     }
@@ -1143,7 +1171,8 @@ class Swordfish {
         Swordfish.sendRequest('/projects/segments', arg,
             (data: any) => {
                 if (data.status === Swordfish.SUCCESS) {
-                    event.sender.send('set-segments', data.segments);
+                    data.project = arg.project;
+                    event.sender.send('set-segments', data);
                 } else {
                     dialog.showErrorBox('Error', data.reason);
                 }

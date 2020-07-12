@@ -112,6 +112,9 @@ public class XliffStore {
         }
         if ("unit".equals(e.getName())) {
             currentUnit = e.getAttributeValue("id");
+            Element originalData = e.getChild("originalData");
+            Element matches = e.getChild("mtc:matches");
+            Element glossary = e.getChild("gls:glossary");
         }
         if ("segment".equals(e.getName())) {
             JSONObject json = new JSONObject();

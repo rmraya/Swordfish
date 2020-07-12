@@ -50,7 +50,6 @@ class TranslationView {
     currentCell: HTMLTableCellElement;
     currentContent: string;
     currentId: any;
-    textArea: HTMLTextAreaElement;
     currentTags: string[] = [];
 
     constructor(div: HTMLDivElement, projectId: string) {
@@ -97,7 +96,9 @@ class TranslationView {
         this.buildRightSide();
 
         this.electron.ipcRenderer.on('set-segments', (event: Electron.IpcRendererEvent, arg: any) => {
-            this.setSegments(arg);
+            if (arg.project === this.projectId) {
+                this.setSegments(arg.segments);
+            }
         });
 
         this.watchSizes();
@@ -383,82 +384,74 @@ class TranslationView {
 
     rowClickListener(event: MouseEvent): void {
 
-        var element: Element = event.target as Element;
+        var element: HTMLElement = event.target as HTMLElement;
+
         var x: string = element.tagName;
 
-        if (x === 'TEXTAREA') {
-            // already editing
+        if (x === 'TD' && element.contentEditable === 'true') {
+            // already editing clicked cell
             return;
         }
-
-        if (this.textArea !== undefined) {
+        if (this.currentCell) {
             this.saveEdit();
         }
-
         let row: HTMLTableRowElement = event.currentTarget as HTMLTableRowElement;
         this.currentId = { id: row.getAttribute('data-id'), file: row.getAttribute('data-file'), unit: row.getAttribute('data-unit') };
+        let source: HTMLTableCellElement = row.getElementsByClassName('source')[0] as HTMLTableCellElement;
+        this.harvestTags(source.innerHTML);
+
         this.currentCell = row.getElementsByClassName('target')[0] as HTMLTableCellElement;
         this.currentContent = this.currentCell.innerHTML;
-        this.textArea = document.createElement('textarea');
-        this.textArea.lang = this.currentCell.lang;
-        this.textArea.style.height = (this.currentCell.clientHeight - 8) + 'px';
-        this.textArea.style.width = (this.currentCell.clientWidth - 8) + 'px';
-        this.textArea.innerHTML = this.cleanTags(this.currentContent);
-        this.currentCell.setAttribute('style', 'padding: 0px;');
-        this.currentCell.innerHTML = '';
-        this.currentCell.appendChild(this.textArea);
-        this.textArea.focus();
+        this.currentCell.contentEditable = 'true';
+        this.currentCell.classList.add('editing');
+        this.currentCell.focus();
     }
 
     saveEdit(): void {
-        if (this.textArea !== undefined) {
-            let edited: string = this.restoretags(this.textArea.value, this.currentTags);
-            this.currentCell.innerHTML = edited;
-            this.textArea = undefined;
+        if (this.currentCell) {
+            this.currentCell.classList.remove('editing');
+            this.currentCell.contentEditable = 'false';
+            this.currentCell = undefined;
             // TODO send to server
         }
     }
 
     cancelEdit(): void {
-        this.currentCell.innerHTML = this.currentContent;
-        this.textArea = undefined;
+        if (this.currentCell) {
+            this.currentCell.innerHTML = this.currentContent;
+            this.currentCell.classList.remove('editing');
+            this.currentCell.contentEditable = 'false';
+            this.currentCell = undefined;
+        }
     }
 
-
-    cleanTags(unit: string): string {
-        var index: number = unit.indexOf('<img ');
+    harvestTags(source: string): void {
+        var index: number = source.indexOf('<img ');
         var tagNumber: number = 1;
         this.currentTags = [];
         while (index >= 0) {
-            let start: string = unit.slice(0, index);
-            let rest: string = unit.slice(index + 1);
+            let start: string = source.slice(0, index);
+            let rest: string = source.slice(index + 1);
             let end: number = rest.indexOf('>');
             let tag: string = '<' + rest.slice(0, end) + '/>';
             this.currentTags.push(tag);
-            unit = start + '[[' + tagNumber++ + ']]' + rest.slice(end + 1);
-            index = unit.indexOf('<img ');
+            source = start + '[[' + tagNumber++ + ']]' + rest.slice(end + 1);
+            index = source.indexOf('<img ');
         }
-        index = unit.indexOf('<span');
-        while (index >= 0) {
-            let start: string = unit.slice(0, index);
-            let rest: string = unit.slice(index + 1);
-            let end: number = rest.indexOf('>');
-            unit = start + rest.slice(end + 1);
-            index = unit.indexOf('<span');
-        }
-        index = unit.indexOf('</span>');
-        while (index >= 0) {
-            unit = unit.replace('</span>', '');
-            index = unit.indexOf('</span>');
-        }
-        return unit;
     }
 
-    restoretags(text: string, originalTags: string[]): string {
-        let length: number = originalTags.length;
-        for (let i: number = 0; i < length; i++) {
-            text = text.replace('[[' + (i + 1) + ']]', originalTags[i]);
+    copySource(): void {
+        if (this.currentCell) {
+            let row = this.currentCell.parentElement;
+            let source: HTMLTableCellElement = row.getElementsByClassName('source')[0] as HTMLTableCellElement;
+            this.currentCell.innerHTML = source.innerHTML;
         }
-        return text;
+    }
+
+    inserTag(arg: any): void {
+        let tag: number = arg.tag;
+        if (this.currentTags.length >= tag) {
+            this.electron.ipcRenderer.send('paste-tag', this.currentTags[tag - 1]);
+        }
     }
 }

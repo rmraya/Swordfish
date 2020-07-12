@@ -22,6 +22,8 @@ package com.maxprograms.swordfish.xliff;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.lang.System.Logger;
+import java.lang.System.Logger.Level;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.HashMap;
@@ -39,6 +41,8 @@ import com.maxprograms.xml.TextNode;
 import com.maxprograms.xml.XMLNode;
 
 public class XliffUtils {
+
+   
 
     public static final String STYLE = "class='highlighted'";
 
@@ -215,7 +219,7 @@ public class XliffUtils {
                     + "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"" + (width + 1)
                     + "px\" height=\"17px\" version=\"1.1\"><g>" + "<rect style=\"fill:#009688\" width=\"" + width
                     + "px\" height=\"16px\" x=\"1\" y=\"1\" rx=\"3\" ry=\"3\" />"
-                    + "<text style=\"font-size:12px;font-style:normal;font-weight:normal;text-align:center;font-family:Sans;\" x=\"6\" y=\"14\" fill=\"#ffffff\" fill-opacity=\"1\">\n"
+                    + "<text style=\"font-size:12px;font-style:normal;font-weight:normal;text-align:center;font-family:sans-serif;\" x=\"6\" y=\"14\" fill=\"#ffffff\" fill-opacity=\"1\">\n"
                     + "<tspan>" + tag + "</tspan></text></g></svg>";
             try (FileOutputStream out = new FileOutputStream(f)) {
                 out.write(svg.getBytes(StandardCharsets.UTF_8));
@@ -288,7 +292,7 @@ public class XliffUtils {
         html.append("'>");
         html.append(index);
         html.append("</td>");
-        html.append("<td lang=\"");
+        html.append("<td class='source' lang=\"");
         html.append(srcLang);
         html.append("\"");
         if (Utils.isBiDi(srcLang)) {
@@ -320,10 +324,9 @@ public class XliffUtils {
             String tagged = XliffUtils.pureText(e, clearTags, filterText, caseSensitive, regExp);
             return tagged;
         } catch (IOException e1) {
-            // TODO Auto-generated catch block
-            e1.printStackTrace();
+            Logger logger = System.getLogger(XliffUtils.class.getName());
+            logger.log(Level.ERROR, e1);
         }
-
-        return e.getText(); // TODO
+        return e.getText(); 
     }
 }

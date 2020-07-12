@@ -120,6 +120,10 @@ td {
 	font-size: medium;
 }
 
+td.editing {
+	background-color: var(--normal-background) !important;
+}
+
 td.fixed {
 	text-align: center;
 	vertical-align: middle;

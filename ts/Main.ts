@@ -146,6 +146,12 @@ class Main {
         Main.electron.ipcRenderer.on('save-edit', () => {
             this.saveEdit();
         });
+        Main.electron.ipcRenderer.on('copy-source', () => {
+            this.copySource();
+        });
+        Main.electron.ipcRenderer.on('insert tag', (event: Electron.IpcRendererEvent, arg: any) => {
+            this.inserTag(arg);
+        });
         
         let config: any = { attributes: true, childList: false, subtree: false };
         let observer = new MutationObserver((mutationsList) => {
@@ -221,6 +227,20 @@ class Main {
         let selected = Main.tabHolder.getSelected();
         if ( Main.translationViews.has(selected)) {
             Main.translationViews.get(selected).saveEdit();
+        }
+    }
+
+    copySource(): void {
+        let selected = Main.tabHolder.getSelected();
+        if ( Main.translationViews.has(selected)) {
+            Main.translationViews.get(selected).copySource();
+        }
+    }
+
+    inserTag(arg: any) {
+        let selected = Main.tabHolder.getSelected();
+        if ( Main.translationViews.has(selected)) {
+            Main.translationViews.get(selected).inserTag(arg);
         }
     }
 }
