@@ -93,7 +93,7 @@ class Swordfish {
             mkdirSync(Swordfish.appHome, { recursive: true });
         }
 
-        this.ls = spawn(this.javapath, ['--module-path', 'lib', '-m', 'swordfish/com.maxprograms.swordfish.TmsServer', '-port', '8070'], { cwd: app.getAppPath() });
+        this.ls = spawn(this.javapath, ['-cp', 'lib/h2-1.4.200.jar', '--module-path', 'lib', '-m', 'swordfish/com.maxprograms.swordfish.TmsServer', '-port', '8070'], { cwd: app.getAppPath() });
 
         this.ls.stdout.on('data', (data) => {
             console.log(`stdout: ${data}`);

@@ -22,171 +22,23 @@ package com.maxprograms.swordfish.xliff;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.lang.System.Logger;
-import java.lang.System.Logger.Level;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
-import com.maxprograms.swordfish.Constants;
 import com.maxprograms.swordfish.TmsServer;
-import com.maxprograms.swordfish.Utils;
 import com.maxprograms.xml.Attribute;
 import com.maxprograms.xml.Element;
-import com.maxprograms.xml.TextNode;
-import com.maxprograms.xml.XMLNode;
-
-import org.json.JSONObject;
 
 public class XliffUtils {
 
     public static final String STYLE = "class='highlighted'";
-
-    private static int maxTag;
-    private static int tag;
-    private static Pattern pattern;
-    private static String lastFilterText;
+    private static int maxTag =0;
 
     private XliffUtils() {
         // empty for security
-    }
-
-    public static String pureText(Element seg, boolean clearTags, String filterText, boolean caseSensitive,
-            boolean regExp, JSONObject originalData) throws IOException {
-        if (seg == null) {
-            return "";
-        }
-        if (clearTags) {
-            tag = 1;
-        }
-        List<XMLNode> list = seg.getContent();
-        Iterator<XMLNode> it = list.iterator();
-        StringBuilder text = new StringBuilder();
-        while (it.hasNext()) {
-            XMLNode o = it.next();
-            if (o.getNodeType() == XMLNode.TEXT_NODE) {
-                if (filterText == null || filterText.isEmpty()) {
-                    text.append(cleanString(((TextNode) o).getText()));
-                } else {
-                    if (regExp) {
-                        if (pattern == null || !filterText.equals(lastFilterText)) {
-                            pattern = Pattern.compile(filterText);
-                            lastFilterText = filterText;
-                        }
-                        String s = ((TextNode) o).getText();
-                        Matcher matcher = pattern.matcher(s);
-                        if (matcher.find()) {
-                            StringBuilder sb = new StringBuilder();
-                            do {
-                                int start = matcher.start();
-                                int end = matcher.end();
-                                sb.append(cleanString(s.substring(0, start)));
-                                sb.append("<span " + STYLE + ">");
-                                sb.append(cleanString(s.substring(start, end)));
-                                sb.append("</span>");
-                                s = s.substring(end);
-                                matcher = pattern.matcher(s);
-                            } while (matcher.find());
-                            sb.append(cleanString(s));
-                            text.append(sb.toString());
-                        } else {
-                            text.append(cleanString(s));
-                        }
-                    } else {
-                        String s = cleanString(((TextNode) o).getText());
-                        String t = cleanString(filterText);
-                        if (caseSensitive) {
-                            if (s.indexOf(t) != -1) {
-                                text.append(highlight(s, t, caseSensitive));
-                            } else {
-                                text.append(s);
-                            }
-                        } else {
-                            if (s.toLowerCase().indexOf(t.toLowerCase()) != -1) {
-                                text.append(highlight(s, t, caseSensitive));
-                            } else {
-                                text.append(s);
-                            }
-                        }
-                    }
-                }
-            } else if (o.getNodeType() == XMLNode.ELEMENT_NODE) {
-                // empty: <cp>, <ph>, <sc>, <ec>, <sm> and <em>.
-                // paired: <pc>, <mrk>,
-                Element e = (Element) o;
-                String type = e.getName();
-                if (type.equals("pc")) {
-                    checkSVG();
-                    String header = getHeader(e);
-                    text.append("<img data-ref='");
-                    text.append(e.getAttributeValue("id"));
-                    text.append("' src='");
-                    text.append(TmsServer.getWorkFolder().toURI().toURL().toString());
-                    text.append("images/");
-                    text.append(tag++);
-                    text.append(".svg' align='bottom' alt='' title=\"");
-                    text.append(unquote(cleanAngles(header)));
-                    text.append("\"/>");
-                    text.append(pureText(e, false, filterText, caseSensitive, regExp, originalData));
-                    checkSVG();
-                    String tail = getTail(e);
-                    text.append("<img data-ref='/");
-                    text.append(e.getAttributeValue("id"));
-                    text.append("' src='");
-                    text.append(TmsServer.getWorkFolder().toURI().toURL().toString());
-                    text.append("images/");
-                    text.append(tag++);
-                    text.append(".svg' align='bottom' alt='' title=\"");
-                    text.append(unquote(cleanAngles(tail)));
-                    text.append("\"/>");
-                } else if (type.equals("mrk")) {
-                    checkSVG();
-                    String header = getHeader(e);
-                    text.append("<img data-ref='");
-                    text.append(e.getAttributeValue("id"));
-                    text.append("' src='");
-                    text.append(TmsServer.getWorkFolder().toURI().toURL().toString());
-                    text.append("images/");
-                    text.append(tag++);
-                    text.append(".svg' align='bottom' alt='' title=\"");
-                    text.append(unquote(cleanAngles(header)));
-                    text.append("\"/>");
-                    text.append("<span " + STYLE + ">");
-                    text.append(e.getText());
-                    text.append("</span>");
-                    checkSVG();
-                    String tail = getTail(e);
-                    text.append("<img data-ref='/");
-                    text.append(e.getAttributeValue("id"));
-                    text.append("' src='");
-                    text.append(TmsServer.getWorkFolder().toURI().toURL().toString());
-                    text.append("images/");
-                    text.append(tag++);
-                    text.append(".svg' align='bottom' alt='' title=\"");
-                    text.append(unquote(cleanAngles(tail)));
-                    text.append("\"/>");
-                } else if (type.equals("cp")) {
-                    // TODO handle codepoint tags
-                } else {
-                    checkSVG();
-                    String dataRef = e.getAttributeValue("dataRef");
-                    text.append("<img data-ref='");
-                    text.append(dataRef);
-                    text.append("' src='");
-                    text.append(TmsServer.getWorkFolder().toURI().toURL().toString());
-                    text.append("images/");
-                    text.append(tag++);
-                    text.append(".svg' align='bottom' alt='' title=\"");
-                    text.append(unquote(cleanAngles(originalData.getString(dataRef))));
-                    text.append("\"/>");
-                }
-            }
-        }
-        return text.toString();
     }
 
     protected static String highlight(String string, String target, boolean caseSensitive) {
@@ -214,11 +66,7 @@ public class XliffUtils {
         return result;
     }
 
-    public static void resetTags() {
-        maxTag = 0;
-    }
-
-    private static void checkSVG() throws IOException {
+    public static void checkSVG(int tag) throws IOException {
         if (tag <= maxTag) {
             return;
         }
@@ -248,14 +96,14 @@ public class XliffUtils {
         }
     }
 
-    private static String cleanAngles(String string) {
+    public static String cleanAngles(String string) {
         String res = string.replace("&", "&amp;");
         res = res.replace("<", "\u200B\u2039");
         res = res.replace(">", "\u200B\u203A");
         return res;
     }
 
-    private static String getHeader(Element e) {
+    public static String getHeader(Element e) {
         StringBuilder result = new StringBuilder();
         result.append('<');
         result.append(e.getName());
@@ -273,7 +121,7 @@ public class XliffUtils {
         return result.toString();
     }
 
-    private static String getTail(Element e) {
+    public static String getTail(Element e) {
         return "</" + e.getName() + ">";
     }
 
@@ -285,70 +133,8 @@ public class XliffUtils {
         return string.replace("\"", "&quot;");
     }
 
-    private static String unquote(String string) {
+    public static String unquote(String string) {
         return string.replaceAll("\"", "\u200B\u2033");
-    }
-
-    public static String toHTML(int index, Element seg, boolean clearTags, String filterText, boolean caseSensitive,
-            boolean regExp) {
-        String status = seg.getAttributeValue("state", Constants.INITIAL);
-        StringBuilder html = new StringBuilder();
-        Element source = seg.getChild("source");
-        String srcLang = source.getAttributeValue("xml:lang");
-        Element target = seg.getChild("target");
-        String tgtLang = "";
-        if (target != null) {
-            tgtLang = target.getAttributeValue("xml:lang");
-        }
-        JSONObject meta = new JSONObject(seg.getPI("metadata").get(0).getData());
-        html.append("<tr data-id=\"");
-        html.append(seg.getAttributeValue("id"));
-        html.append("\" data-file=\"");
-        html.append(cleanString(seg.getPI("currentFile").get(0).getData()));
-        html.append("\" data-unit=\"");
-        html.append(cleanString(seg.getPI("currentUnit").get(0).getData()));
-        html.append("\"><td class='middle center noWrap ");
-        html.append(status);
-        html.append("'>");
-        html.append(index);
-        html.append("</td>");
-        html.append("<td class='source' lang=\"");
-        html.append(srcLang);
-        html.append("\"");
-        if (Utils.isBiDi(srcLang)) {
-            html.append(" dir='rtl'");
-        }
-        html.append('>');
-        html.append(getHTML(source, clearTags, filterText, caseSensitive, regExp, meta));
-        html.append("</td>");
-        html.append("<td class='middle'><input type='checkbox' class='rowCheck'></td>");
-        html.append("<td class='target' lang=\"");
-        html.append(tgtLang);
-        html.append("\"");
-        if (Utils.isBiDi(tgtLang)) {
-            html.append(" dir='rtl'");
-        }
-        html.append('>');
-        html.append(getHTML(target, clearTags, filterText, caseSensitive, regExp, meta));
-        html.append("</td>");
-
-        html.append("</tr>");
-        return html.toString();
-    }
-
-    private static String getHTML(Element e, boolean clearTags, String filterText, boolean caseSensitive,
-            boolean regExp, JSONObject originalData) {
-        if (e == null) {
-            return "";
-        }
-        try {
-            String tagged = XliffUtils.pureText(e, clearTags, filterText, caseSensitive, regExp, originalData);
-            return tagged;
-        } catch (IOException e1) {
-            Logger logger = System.getLogger(XliffUtils.class.getName());
-            logger.log(Level.ERROR, e1);
-        }
-        return e.getText();
     }
 
     public static List<String> harvestTags(String source) {

@@ -32,6 +32,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.sql.SQLException;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -41,7 +42,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.SortedSet;
 import java.util.TreeSet;
-import java.util.concurrent.ConcurrentHashMap;
 
 import javax.xml.parsers.ParserConfigurationException;
 
@@ -53,10 +53,8 @@ import com.maxprograms.languages.LanguageUtils;
 import com.maxprograms.swordfish.models.Project;
 import com.maxprograms.swordfish.models.SourceFile;
 import com.maxprograms.swordfish.xliff.XliffStore;
-import com.maxprograms.swordfish.xliff.XliffUtils;
 import com.maxprograms.xliff2.Resegmenter;
 import com.maxprograms.xliff2.ToXliff2;
-import com.maxprograms.xml.Element;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 
@@ -68,7 +66,7 @@ import org.xml.sax.SAXException;
 public class ProjectsHandler implements HttpHandler {
 
 	private static Logger logger = System.getLogger(ProjectsHandler.class.getName());
-	private static ConcurrentHashMap<String, Project> projects;
+	private static Hashtable<String, Project> projects;
 	private static Map<String, String> processes;
 	private static boolean firstRun = true;
 
@@ -79,7 +77,7 @@ public class ProjectsHandler implements HttpHandler {
 	private String srxFile;
 	private String catalogFile;
 
-	private ConcurrentHashMap<String, XliffStore> projectStores;
+	private Hashtable<String, XliffStore> projectStores;
 
 	@Override
 	public void handle(HttpExchange exchange) throws IOException {
@@ -208,7 +206,7 @@ public class ProjectsHandler implements HttpHandler {
 				removeFromList(project);
 			}
 			saveProjectsList();
-		} catch (IOException e) {
+		} catch (IOException | SQLException e) {
 			logger.log(Level.ERROR, e);
 			result.put(Constants.REASON, e.getMessage());
 		}
@@ -243,7 +241,7 @@ public class ProjectsHandler implements HttpHandler {
 	}
 
 	private void loadProjectsList() throws IOException {
-		projects = new ConcurrentHashMap<>();
+		projects = new Hashtable<>();
 		File home = getWorkFolder();
 		File list = new File(home, "projects.json");
 		if (!list.exists()) {
@@ -306,7 +304,6 @@ public class ProjectsHandler implements HttpHandler {
 			}
 		}
 		JSONObject json = new JSONObject(request);
-		System.out.println(json.toString(2));
 		String project = json.getString("project");
 		if (project == null) {
 			logger.log(Level.ERROR, "Null project requested");
@@ -314,15 +311,16 @@ public class ProjectsHandler implements HttpHandler {
 			return result;
 		}
 		if (projectStores == null) {
-			projectStores = new ConcurrentHashMap<>();
+			projectStores = new Hashtable<>();
 			logger.log(Level.INFO, "Created store map");
 		}
 
 		if (!projectStores.containsKey(project)) {
 			try {
-				XliffStore store = new XliffStore(projects.get(project).getXliff());
+				Project prj = projects.get(project);
+				XliffStore store = new XliffStore(prj.getXliff(), prj.getSourceLang().getCode(), prj.getTargetLang().getCode());
 				projectStores.put(project, store);
-			} catch (SAXException | IOException | ParserConfigurationException | URISyntaxException e) {
+			} catch (SAXException | IOException | ParserConfigurationException | URISyntaxException | SQLException e) {
 				logger.log(Level.ERROR, "Error creating project store", e);
 				result.put(Constants.REASON, e.getMessage());
 				return result;
@@ -340,28 +338,21 @@ public class ProjectsHandler implements HttpHandler {
 			result.put(Constants.REASON, "Store is null");
 			return result;
 		}
-		int count = json.getInt("start");
 		String filterText = json.getString("filterText");
 		boolean caseSensitiveFilter = json.getBoolean("caseSensitiveFilter");
 		boolean regExp = json.getBoolean("regExp");
 		try {
-			List<Element> list = store.getSegments(filesList, json.getInt("start"), json.getInt("count"), filterText,
+			List<String> list = store.getSegments(filesList, json.getInt("start"), json.getInt("count"), filterText,
 					json.getString("filterLanguage"), caseSensitiveFilter, json.getBoolean("filterUntranslated"),
 					regExp);
 			JSONArray array = new JSONArray();
-			Iterator<Element> it = list.iterator();
+			Iterator<String> it = list.iterator();
 
 			while (it.hasNext()) {
-				Element seg = it.next();
-				try {
-					array.put(XliffUtils.toHTML(1 + count++, seg, true, filterText, caseSensitiveFilter, regExp));
-				} catch (Exception ex) {
-					System.out.println(seg.toString());
-					throw ex;
-				}
+				array.put(it.next());
 			}
 			result.put("segments", array);
-		} catch (IOException | JSONException | SAXException | ParserConfigurationException e) {
+		} catch (IOException | JSONException | SAXException | ParserConfigurationException | SQLException e) {
 			logger.log(Level.ERROR, "Error loading segments", e);
 			result.put(Constants.REASON, e.getMessage());
 		}
@@ -380,7 +371,6 @@ public class ProjectsHandler implements HttpHandler {
 			}
 		}
 		JSONObject json = new JSONObject(request);
-		System.out.println(json.toString(2));
 		String project = json.getString("project");
 		if (project == null) {
 			logger.log(Level.ERROR, "Null project requested");
@@ -388,15 +378,16 @@ public class ProjectsHandler implements HttpHandler {
 			return result;
 		}
 		if (projectStores == null) {
-			projectStores = new ConcurrentHashMap<>();
+			projectStores = new Hashtable<>();
 			logger.log(Level.INFO, "Created store map");
 		}
 
 		if (!projectStores.containsKey(project)) {
 			try {
-				XliffStore store = new XliffStore(projects.get(project).getXliff());
+				Project prj = projects.get(project);
+				XliffStore store = new XliffStore(prj.getXliff(), prj.getSourceLang().getCode(), prj.getTargetLang().getCode());
 				projectStores.put(project, store);
-			} catch (SAXException | IOException | ParserConfigurationException | URISyntaxException e) {
+			} catch (SAXException | IOException | ParserConfigurationException | URISyntaxException | SQLException e) {
 				logger.log(Level.ERROR, "Error creating project store", e);
 				result.put(Constants.REASON, e.getMessage());
 				return result;
@@ -409,7 +400,12 @@ public class ProjectsHandler implements HttpHandler {
 			result.put(Constants.REASON, "Store is null");
 			return result;
 		}
-		result.put("count", store.size());
+		try {
+			result.put("count", store.size());
+		} catch (SQLException sql) {
+			logger.log(Level.ERROR, "Error retrieving count", sql);
+			result.put(Constants.REASON, sql.getMessage());
+		}
 		return result;
 	}
 
@@ -601,8 +597,10 @@ public class ProjectsHandler implements HttpHandler {
 		String project = json.getString("project");
 		if (projectStores.containsKey(project)) {
 			try {
-				projectStores.get(project).close();
+				XliffStore prj = projectStores.get(project);
 				projectStores.remove(project);
+				prj.close();
+				prj = null;
 			} catch (Exception e) {
 				logger.log(Level.ERROR, e);
 				result.put(Constants.REASON, e.getMessage());

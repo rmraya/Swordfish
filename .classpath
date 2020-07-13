@@ -32,5 +32,6 @@
 			<attribute name="module" value="true"/>
 		</attributes>
 	</classpathentry>
+	<classpathentry kind="lib" path="jars/h2-1.4.200.jar"/>
 	<classpathentry kind="output" path="out"/>
 </classpath>

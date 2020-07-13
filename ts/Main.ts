@@ -202,13 +202,12 @@ class Main {
 
     static checkTabs(): void { 
         for (let key of Main.translationViews.keys()) {
-            
-            
             if (!Main.tabHolder.has(key)) {
                 console.log('MUST CLOSE ' +key);
-                Main.translationViews.get(key).close();
+                let view: TranslationView = Main.translationViews.get(key);
+                view.close();
+                view = undefined;
                 Main.translationViews.delete(key);
-                
                 Main.electron.ipcRenderer.send('close-project', {project: key});
                 break;
             }

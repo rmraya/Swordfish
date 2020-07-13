@@ -29,139 +29,233 @@ import java.lang.System.Logger;
 import java.lang.System.Logger.Level;
 import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Vector;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.xml.parsers.ParserConfigurationException;
 
 import com.maxprograms.swordfish.TmsServer;
+import com.maxprograms.swordfish.Utils;
 import com.maxprograms.xml.Catalog;
 import com.maxprograms.xml.Document;
 import com.maxprograms.xml.Element;
 import com.maxprograms.xml.Indenter;
-import com.maxprograms.xml.PI;
 import com.maxprograms.xml.SAXBuilder;
+import com.maxprograms.xml.TextNode;
+import com.maxprograms.xml.XMLNode;
 import com.maxprograms.xml.XMLOutputter;
 
 import org.json.JSONObject;
-import org.mapdb.BTreeMap;
-import org.mapdb.DB;
-import org.mapdb.DBMaker;
 import org.xml.sax.SAXException;
 
 public class XliffStore {
 
     Logger logger = System.getLogger(XliffStore.class.getName());
 
-    private DB mapdb;
-    private BTreeMap<Integer, String> tree;
-    private BTreeMap<String, String> files;
-    private BTreeMap<Integer, Integer> hashes;
-    private JSONObject currentMap;
     private String xliffFile;
+    private SAXBuilder builder;
     private Document document;
 
-    private int index;
+    private File database;
+    private Connection conn;
+    private PreparedStatement insertUnit;
+    private PreparedStatement insertSegment;
+    private PreparedStatement insertMatch;
+    private PreparedStatement insertTerm;
 
+    private int index;
+    private long nextId;
     private String currentFile;
     private String currentUnit;
+    private String state;
+    private boolean translate;
+    private int tagCount;
     private String srcLang;
     private String tgtLang;
 
-    private SAXBuilder builder;
+    private static int tag;
+    private static Pattern pattern;
+    private static String lastFilterText;
 
-    public XliffStore(String xliffFile)
-            throws SAXException, IOException, ParserConfigurationException, URISyntaxException {
+    public XliffStore(String xliffFile, String srcLang, String tgtLang)
+            throws SAXException, IOException, ParserConfigurationException, URISyntaxException, SQLException {
         this.xliffFile = xliffFile;
+        this.srcLang = srcLang;
+        this.tgtLang = tgtLang;
         File xliff = new File(xliffFile);
-        File model = new File(xliff.getParentFile(), "model");
-        boolean needsLoading = !model.exists();
 
-        try {
-            mapdb = DBMaker.newFileDB(model).closeOnJvmShutdown().asyncWriteEnable().make();
-            tree = mapdb.getTreeMap("segments");
-            files = mapdb.getTreeMap("files");
-            hashes = mapdb.getTreeMap("hashes");
-        } catch (Error ioe) {
-            logger.log(Level.ERROR, ioe);
-            throw new IOException(ioe.getMessage());
+        database = new File(xliff.getParentFile(), "h2data");
+        boolean needsLoading = !database.exists();
+        if (!database.exists()) {
+            database.mkdirs();
         }
         builder = new SAXBuilder();
         builder.setEntityResolver(new Catalog(getCatalogFile()));
+
+        String url = "jdbc:h2:" + database.getAbsolutePath() + "/db";
+        conn = DriverManager.getConnection(url);
+        conn.setAutoCommit(false);
         if (needsLoading) {
+            logger.log(Level.INFO, "Creating database");
+            createTables();
             document = builder.build(xliffFile);
-            parseDocument();
-            mapdb.commit();
-            logger.log(Level.INFO, "loadded " + tree.size() + " segments");
-        } else {
-            logger.log(Level.INFO, "Skipped parsing " + tree.size() + " segments");
+            loadDocument();
+            conn.commit();
         }
     }
 
-    private void parseDocument() {
-        index = 0;
+    private void createTables() throws SQLException {
+        String query1 = "CREATE TABLE units (file VARCHAR(50), " + "unitId VARCHAR(50) NOT NULL, "
+                + "data VARCHAR(6000) NOT NULL, PRIMARY KEY(file, unitId) );";
+        String query2 = "CREATE TABLE segments (file VARCHAR(50), unitId VARCHAR(50) NOT NULL, "
+                + "segId VARCHAR(50) NOT NULL, type CHAR(1) NOT NULL DEFAULT 'S', state VARCHAR(12) DEFAULT 'initial', child INTEGER, "
+                + "translate CHAR(1), tags INTEGER DEFAULT 0, source VARCHAR(6000) NOT NULL, sourceText VARCHAR(6000) NOT NULL, "
+                + "target VARCHAR(6000) NOT NULL, targetText VARCHAR(6000) NOT NULL, "
+                + "PRIMARY KEY(file, unitId, segId, type) );";
+        String query3 = "CREATE TABLE matches (file VARCHAR(50), unitId VARCHAR(50) NOT NULL, "
+                + "segId VARCHAR(50) NOT NULL, matchid varchar(256), origin VARCHAR(256), type CHAR(2) NOT NULL DEFAULT 'TM', "
+                + "similarity FLOAT DEFAULT 0.0, source VARCHAR(6000) NOT NULL, target VARCHAR(6000) NOT NULL, "
+                + "PRIMARY KEY(file, unitId, segId, matchid) );";
+        String query4 = "CREATE TABLE terms (file VARCHAR(50), unitId VARCHAR(50) NOT NULL, "
+                + "segId VARCHAR(50) NOT NULL, termid varchar(256),  "
+                + "origin VARCHAR(256), source VARCHAR(6000) NOT NULL, target VARCHAR(6000) NOT NULL, "
+                + "PRIMARY KEY(file, unitId, segId, termid) );";
+        try (Statement stmt = conn.createStatement()) {
+            stmt.execute(query1);
+            stmt.execute(query2);
+            stmt.execute(query3);
+            stmt.execute(query4);
+            conn.commit();
+        }
+    }
+
+    private void loadDocument() throws SQLException {
+        nextId = System.currentTimeMillis();
+        insertUnit = conn.prepareStatement("INSERT INTO units (file, unitId, data) VALUES (?,?,?)");
+        insertSegment = conn.prepareStatement(
+                "INSERT INTO segments (file, unitId, segId, type, state, child, translate, tags, source, sourceText, target, targetText) VALUES (?,?,?,?,?,?,?,?,?,?,?,?)");
         recurse(document.getRootElement());
+        insertUnit.close();
+        insertSegment.close();
     }
 
-    private void recurse(Element e) {
-        if ("xliff".equals(e.getName())) {
-            srcLang = e.getAttributeValue("srcLang");
-            tgtLang = e.getAttributeValue("trgLang");
-        }
+    private void recurse(Element e) throws SQLException {
         if ("file".equals(e.getName())) {
-            currentFile = e.getAttributeValue("original");
-            currentMap = new JSONObject();
+            srcLang = e.getAttributeValue("srcLang");
+            String tgt = e.getAttributeValue("tgtLang");
+            if (!tgt.isEmpty()) {
+                tgtLang = tgt;
+            }
+            currentFile = e.getAttributeValue("id");
+            index = 0;
         }
         if ("unit".equals(e.getName())) {
+            tagCount = 0;
             currentUnit = e.getAttributeValue("id");
-            Element originalData = e.getChild("originalData");
-            Element matches = e.getChild("mtc:matches");
-            Element glossary = e.getChild("gls:glossary");
-            JSONObject json = new JSONObject();
-            json.put("translate", e.getAttributeValue("translate", "yes"));
-            json.put("space", e.getAttributeValue("xml:space", "default"));
+            translate = e.getAttributeValue("translate", "yes").equals("yes");
             JSONObject data = new JSONObject();
+
+            Element originalData = e.getChild("originalData");
             if (originalData != null) {
                 List<Element> list = originalData.getChildren();
                 for (int i = 0; i < list.size(); i++) {
                     Element d = list.get(i);
                     data.put(d.getAttributeValue("id"), d.getText());
+                    tagCount++;
                 }
             }
-            json.put("originalData", data);
-            if (matches == null) {
-                matches = new Element("mtc:matches");
+            if (tagCount > 0) {
+                insertUnit.setString(1, currentFile);
+                insertUnit.setString(2, currentUnit);
+                insertUnit.setString(3, data.toString());
+                insertUnit.execute();
             }
-            json.put("matches", matches.toString());
-            if (glossary == null) {
-                glossary = new Element("gls:glossary");
-            }
-            json.put("glossary", glossary.toString());
-            currentMap.put(currentUnit, json);
+            // Element matches = e.getChild("mtc:matches");
+            // Element glossary = e.getChild("gls:glossary");
+
+            // TODO store matches and terms
         }
         if ("segment".equals(e.getName())) {
-            JSONObject json = new JSONObject();
-            json.put("currentFile", currentFile);
-            json.put("currentUnit", currentUnit);
-            json.put("segment", e.toString());
-            int hash = (currentFile + currentUnit + e.getAttributeValue("id")).hashCode();
-            hashes.put(hash, index);
-            tree.put(index++, json.toString());
+            String id = e.getAttributeValue("id");
+            if (id.isEmpty()) {
+                id = "" + nextId++;
+                e.setAttribute("id", id);
+            }
+            Element source = e.getChild("source");
+            source.setAttribute("xml:lang", srcLang);
+            Element target = e.getChild("target");
+            if (target == null) {
+                target = new Element("target");
+            }
+            target.setAttribute("xml:lang", tgtLang);
+            state = e.getAttributeValue("state", "initial");
+            insertSegment.setString(1, currentFile);
+            insertSegment.setString(2, currentUnit);
+            insertSegment.setString(3, id);
+            insertSegment.setString(4, "S");
+            insertSegment.setString(5, state);
+            insertSegment.setInt(6, index++);
+            insertSegment.setString(7, translate ? "Y" : "N");
+            insertSegment.setInt(8, tagCount);
+            insertSegment.setNString(9, source.toString());
+            insertSegment.setNString(10, pureText(source));
+            insertSegment.setNString(11, target != null ? target.toString() : "");
+            insertSegment.setNString(12, target != null ? pureText(target) : "");
+            insertSegment.execute();
         }
-
+        if ("ignorable".equals(e.getName())) {
+            String id = e.getAttributeValue("id");
+            if (id.isEmpty()) {
+                id = "" + nextId++;
+                e.setAttribute("id", id);
+            }
+            Element source = e.getChild("source");
+            Element target = e.getChild("target");
+            insertSegment.setString(1, currentFile);
+            insertSegment.setString(2, currentUnit);
+            insertSegment.setString(3, id);
+            insertSegment.setString(4, "I");
+            insertSegment.setString(5, "");
+            insertSegment.setInt(6, index++);
+            insertSegment.setString(7, "N");
+            insertSegment.setInt(8, tagCount);
+            insertSegment.setNString(9, source.toString());
+            insertSegment.setNString(10, pureText(source));
+            insertSegment.setNString(11, target != null ? target.toString() : "");
+            insertSegment.setNString(12, target != null ? pureText(target) : "");
+            insertSegment.execute();
+        }
         List<Element> children = e.getChildren();
         Iterator<Element> it = children.iterator();
         while (it.hasNext()) {
             recurse(it.next());
         }
         if ("file".equals(e.getName())) {
-            files.put(currentFile, currentMap.toString());
+            conn.commit();
         }
     }
 
-    public int size() {
-        return tree.size();
+    public int size() throws SQLException {
+        int count = 0;
+        String sql = "SELECT count(*) FROM segments WHERE type='S'";
+        try (Statement stmt = conn.createStatement()) {
+            try (ResultSet rs = stmt.executeQuery(sql)) {
+                while (rs.next()) {
+                    count = rs.getInt(1);
+                }
+            }
+        }
+        return count;
     }
 
     public void saveXliff() throws IOException {
@@ -173,43 +267,71 @@ public class XliffStore {
         }
     }
 
-    public List<Element> getSegments(List<String> filesList, int start, int count, String filterText,
+    public synchronized List<String> getSegments(List<String> filesList, int start, int count, String filterText,
             String filterLanguage, boolean caseSensitiveFilter, boolean filterUntranslated, boolean regExp)
-            throws SAXException, IOException, ParserConfigurationException {
-        List<Element> result = new ArrayList<>();
+            throws SQLException, SAXException, IOException, ParserConfigurationException {
+        List<String> result = new Vector<>();
         if (filterText.isEmpty()) {
-            JSONObject unitsData = new JSONObject();
-            String lastFile = "";
-            for (int i = start; i < start + count && i < tree.size(); i++) {
-                JSONObject json = new JSONObject(tree.get(i));
-                String file = json.getString("currentFile");
-                String unit = json.getString("currentUnit");
-                String seg = json.getString("segment");
-                if (!lastFile.equals(file)) {
-                    unitsData = new JSONObject(files.get(file));
-                    lastFile = file;
+            int index = start;
+            String query = "SELECT file, unitId, segId, child, source, target, tags, state FROM segments WHERE type='S' ORDER BY file, child LIMIT "
+                    + count + " OFFSET " + start + " ";
+            PreparedStatement prep = conn.prepareStatement("SELECT data FROM units WHERE file=? AND unitId=?");
+            try (Statement stmt = conn.createStatement()) {
+                try (ResultSet rs = stmt.executeQuery(query)) {
+                    while (rs.next()) {
+                        String file = rs.getString(1);
+                        String unit = rs.getString(2);
+                        String segId = rs.getString(3);
+                        String src = rs.getNString(5);
+                        String tgt = rs.getNString(6);
+                        int tags = rs.getInt(7);
+                        String state = rs.getString(8);
+
+                        JSONObject tagsData = new JSONObject();
+                        if (tags > 0) {
+                            prep.setString(1, file);
+                            prep.setString(2, unit);
+                            String data = "";
+                            try (ResultSet rs2 = prep.executeQuery()) {
+                                while (rs2.next()) {
+                                    data = rs2.getString(1);
+                                }
+                            }
+                            tagsData = new JSONObject(data);
+                        }
+
+                        byte[] srcBytes = src.getBytes(StandardCharsets.UTF_8);
+                        Document d = builder.build(new ByteArrayInputStream(srcBytes));
+                        Element source = d.getRootElement();
+
+                        Element target = new Element("target");
+                        if (tgt != null && !tgt.isBlank()) {
+                            byte[] tgtBytes = tgt.getBytes(StandardCharsets.UTF_8);
+                            d = builder.build(new ByteArrayInputStream(tgtBytes));
+                            target = d.getRootElement();
+                        }
+
+                        try {
+                            result.add(segmentToHTML(index++, file, unit, segId, state, source, target, filterText,
+                                    caseSensitiveFilter, regExp, tagsData));
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                            throw e;
+                        }
+                    }
                 }
-                JSONObject unitMeta = new JSONObject();
-                if (unitsData.has(unit) && unitsData.getJSONObject(unit).has("originalData")) {
-                    unitMeta = unitsData.getJSONObject(unit).getJSONObject("originalData");
-                }
-                byte[] bytes = seg.getBytes(StandardCharsets.UTF_8);
-                Document d = builder.build(new ByteArrayInputStream(bytes));
-                Element segment = d.getRootElement();
-                segment.addContent(new PI("currentFile", file));
-                segment.addContent(new PI("currentUnit", unit));
-                segment.addContent(new PI("metadata", unitMeta.toString()));
-                result.add(segment);
             }
+            prep.close();
         } else {
             // TODO filter segments
         }
         return result;
     }
 
-    public void close() {
-        mapdb.commit();
-        mapdb.close();
+    public void close() throws SQLException {
+        conn.commit();
+        conn.close();
+        conn = null;
         logger.log(Level.INFO, "Closed store");
     }
 
@@ -242,15 +364,221 @@ public class XliffStore {
         String segment = json.getString("segment");
         String translation = json.getString("translation");
 
-        int hash = (file + unit + segment).hashCode();
-        int position = hashes.get(hash);
-        System.out.println(tree.get(position));
         System.out.println(translation);
 
         List<String> list = XliffUtils.harvestTags(translation);
         for (int i = 0; i < list.size(); i++) {
             System.out.println(i + ": " + list.get(i));
         }
+    }
 
+    private String pureText(Element e) {
+        StringBuilder string = new StringBuilder();
+        List<XMLNode> content = e.getContent();
+        Iterator<XMLNode> it = content.iterator();
+        while (it.hasNext()) {
+            XMLNode n = it.next();
+            if (n.getNodeType() == XMLNode.TEXT_NODE) {
+                TextNode t = (TextNode) n;
+                string.append(t.getText());
+            }
+            if (n.getNodeType() == XMLNode.ELEMENT_NODE) {
+                Element el = (Element) n;
+                if ("mrk".equals(el.getName()) || "pc".equals(el.getName())) {
+                    string.append(pureText(el));
+                }
+            }
+        }
+        return string.toString();
+    }
+
+    private String segmentToHTML(int index, String file, String unit, String id, String status, Element source,
+            Element target, String filterText, boolean caseSensitive, boolean regExp, JSONObject meta) {
+        StringBuilder html = new StringBuilder();
+        html.append("<tr data-id=\"");
+        html.append(id);
+        html.append("\" data-file=\"");
+        html.append(file);
+        html.append("\" data-unit=\"");
+        html.append(unit);
+        html.append("\"><td class='middle center noWrap ");
+        html.append(status);
+        html.append("'>");
+        html.append(index);
+        html.append("</td>");
+        html.append("<td class='source' lang=\"");
+        html.append(srcLang);
+        html.append("\"");
+        if (Utils.isBiDi(srcLang)) {
+            html.append(" dir='rtl'");
+        }
+        html.append('>');
+        tag = 1;
+        html.append(elementToHTML(source, filterText, caseSensitive, regExp, meta));
+        html.append("</td>");
+        html.append("<td class='middle'><input type='checkbox' class='rowCheck'></td>");
+        html.append("<td class='target' lang=\"");
+        html.append(tgtLang);
+        html.append("\"");
+        if (Utils.isBiDi(tgtLang)) {
+            html.append(" dir='rtl'");
+        }
+        html.append('>');
+        tag = 1;
+        html.append(elementToHTML(target, filterText, caseSensitive, regExp, meta));
+        html.append("</td>");
+
+        html.append("</tr>");
+        return html.toString();
+    }
+
+    private String elementToHTML(Element e, String filterText, boolean caseSensitive, boolean regExp,
+            JSONObject originalData) {
+        if (e == null) {
+            return "";
+        }
+        try {
+            String tagged = addHtmlTags(e, filterText, caseSensitive, regExp, originalData);
+            return tagged;
+        } catch (IOException e1) {
+            Logger logger = System.getLogger(XliffUtils.class.getName());
+            logger.log(Level.ERROR, e1);
+        }
+        return e.getText();
+    }
+
+    private String addHtmlTags(Element seg, String filterText, boolean caseSensitive, boolean regExp,
+            JSONObject originalData) throws IOException {
+        if (seg == null) {
+            return "";
+        }
+        List<XMLNode> list = seg.getContent();
+        Iterator<XMLNode> it = list.iterator();
+        StringBuilder text = new StringBuilder();
+        while (it.hasNext()) {
+            XMLNode o = it.next();
+            if (o.getNodeType() == XMLNode.TEXT_NODE) {
+                if (filterText == null || filterText.isEmpty()) {
+                    text.append(XliffUtils.cleanString(((TextNode) o).getText()));
+                } else {
+                    if (regExp) {
+                        if (pattern == null || !filterText.equals(lastFilterText)) {
+                            pattern = Pattern.compile(filterText);
+                            lastFilterText = filterText;
+                        }
+                        String s = ((TextNode) o).getText();
+                        Matcher matcher = pattern.matcher(s);
+                        if (matcher.find()) {
+                            StringBuilder sb = new StringBuilder();
+                            do {
+                                int start = matcher.start();
+                                int end = matcher.end();
+                                sb.append(XliffUtils.cleanString(s.substring(0, start)));
+                                sb.append("<span " + XliffUtils.STYLE + ">");
+                                sb.append(XliffUtils.cleanString(s.substring(start, end)));
+                                sb.append("</span>");
+                                s = s.substring(end);
+                                matcher = pattern.matcher(s);
+                            } while (matcher.find());
+                            sb.append(XliffUtils.cleanString(s));
+                            text.append(sb.toString());
+                        } else {
+                            text.append(XliffUtils.cleanString(s));
+                        }
+                    } else {
+                        String s = XliffUtils.cleanString(((TextNode) o).getText());
+                        String t = XliffUtils.cleanString(filterText);
+                        if (caseSensitive) {
+                            if (s.indexOf(t) != -1) {
+                                text.append(XliffUtils.highlight(s, t, caseSensitive));
+                            } else {
+                                text.append(s);
+                            }
+                        } else {
+                            if (s.toLowerCase().indexOf(t.toLowerCase()) != -1) {
+                                text.append(XliffUtils.highlight(s, t, caseSensitive));
+                            } else {
+                                text.append(s);
+                            }
+                        }
+                    }
+                }
+            } else if (o.getNodeType() == XMLNode.ELEMENT_NODE) {
+                // empty: <cp>, <ph>, <sc>, <ec>, <sm> and <em>.
+                // paired: <pc>, <mrk>,
+                Element e = (Element) o;
+                String type = e.getName();
+                if (type.equals("pc")) {
+                    XliffUtils.checkSVG(tag);
+                    String header = XliffUtils.getHeader(e);
+                    text.append("<img data-ref='");
+                    text.append(e.getAttributeValue("id"));
+                    text.append("' src='");
+                    text.append(TmsServer.getWorkFolder().toURI().toURL().toString());
+                    text.append("images/");
+                    text.append(tag++);
+                    text.append(".svg' align='bottom' alt='' title=\"");
+                    text.append(XliffUtils.unquote(XliffUtils.cleanAngles(header)));
+                    text.append("\"/>");
+                    text.append(addHtmlTags(e, filterText, caseSensitive, regExp, originalData));
+                    XliffUtils.checkSVG(tag);
+                    String tail = XliffUtils.getTail(e);
+                    text.append("<img data-ref='/");
+                    text.append(e.getAttributeValue("id"));
+                    text.append("' src='");
+                    text.append(TmsServer.getWorkFolder().toURI().toURL().toString());
+                    text.append("images/");
+                    text.append(tag++);
+                    text.append(".svg' align='bottom' alt='' title=\"");
+                    text.append(XliffUtils.unquote(XliffUtils.cleanAngles(tail)));
+                    text.append("\"/>");
+                } else if (type.equals("mrk")) {
+                    XliffUtils.checkSVG(tag);
+                    String header = XliffUtils.getHeader(e);
+                    text.append("<img data-ref='");
+                    text.append(e.getAttributeValue("id"));
+                    text.append("' src='");
+                    text.append(TmsServer.getWorkFolder().toURI().toURL().toString());
+                    text.append("images/");
+                    text.append(tag++);
+                    text.append(".svg' align='bottom' alt='' title=\"");
+                    text.append(XliffUtils.unquote(XliffUtils.cleanAngles(header)));
+                    text.append("\"/>");
+                    text.append("<span " + XliffUtils.STYLE + ">");
+                    text.append(e.getText());
+                    text.append("</span>");
+                    XliffUtils.checkSVG(tag);
+                    String tail = XliffUtils.getTail(e);
+                    text.append("<img data-ref='/");
+                    text.append(e.getAttributeValue("id"));
+                    text.append("' src='");
+                    text.append(TmsServer.getWorkFolder().toURI().toURL().toString());
+                    text.append("images/");
+                    text.append(tag++);
+                    text.append(".svg' align='bottom' alt='' title=\"");
+                    text.append(XliffUtils.unquote(XliffUtils.cleanAngles(tail)));
+                    text.append("\"/>");
+                } else if (type.equals("cp")) {
+                    // TODO handle codepoint tags
+                } else {
+                    XliffUtils.checkSVG(tag);
+                    String dataRef = e.getAttributeValue("dataRef");
+                    text.append("<img data-ref='");
+                    text.append(dataRef);
+                    text.append("' src='");
+                    text.append(TmsServer.getWorkFolder().toURI().toURL().toString());
+                    text.append("images/");
+                    text.append(tag++);
+                    text.append(".svg' align='bottom' alt='' title=\"");
+                    String title = "";
+                    if (originalData.has(dataRef)) {
+                        title = originalData.getString(dataRef);
+                    } 
+                    text.append(XliffUtils.unquote(XliffUtils.cleanAngles(title)));
+                    text.append("\"/>");
+                }
+            }
+        }
+        return text.toString();
     }
 }
