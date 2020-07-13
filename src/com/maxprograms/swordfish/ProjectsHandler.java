@@ -127,6 +127,10 @@ public class ProjectsHandler implements HttpHandler {
 				response = getProjectFiles(request);
 			} else if ("/projects/segments".equals(url)) {
 				response = getSegments(request);
+			} else if ("/projects/count".equals(url)) {
+				response = getSegmentsCount(request);
+			} else if ("/projects/save".equals(url)) {
+				response = save(request);
 			} else {
 				response.put(Constants.REASON, "Unknown request");
 			}
@@ -349,14 +353,63 @@ public class ProjectsHandler implements HttpHandler {
 
 			while (it.hasNext()) {
 				Element seg = it.next();
-				array.put(XliffUtils.toHTML(1 + count++, seg, true, filterText, caseSensitiveFilter, regExp));
-
+				try {
+					array.put(XliffUtils.toHTML(1 + count++, seg, true, filterText, caseSensitiveFilter, regExp));
+				} catch (Exception ex) {
+					System.out.println(seg.toString());
+					throw ex;
+				}
 			}
 			result.put("segments", array);
 		} catch (IOException | JSONException | SAXException | ParserConfigurationException e) {
 			logger.log(Level.ERROR, "Error loading segments", e);
 			result.put(Constants.REASON, e.getMessage());
 		}
+		return result;
+	}
+
+	private JSONObject getSegmentsCount(String request) {
+		JSONObject result = new JSONObject();
+		if (projects == null) {
+			try {
+				loadProjectsList();
+			} catch (IOException e) {
+				logger.log(Level.ERROR, "Error loading project list", e);
+				result.put(Constants.REASON, e.getMessage());
+				return result;
+			}
+		}
+		JSONObject json = new JSONObject(request);
+		System.out.println(json.toString(2));
+		String project = json.getString("project");
+		if (project == null) {
+			logger.log(Level.ERROR, "Null project requested");
+			result.put(Constants.REASON, "Null project requested");
+			return result;
+		}
+		if (projectStores == null) {
+			projectStores = new ConcurrentHashMap<>();
+			logger.log(Level.INFO, "Created store map");
+		}
+
+		if (!projectStores.containsKey(project)) {
+			try {
+				XliffStore store = new XliffStore(projects.get(project).getXliff());
+				projectStores.put(project, store);
+			} catch (SAXException | IOException | ParserConfigurationException | URISyntaxException e) {
+				logger.log(Level.ERROR, "Error creating project store", e);
+				result.put(Constants.REASON, e.getMessage());
+				return result;
+			}
+		}
+
+		XliffStore store = projectStores.get(project);
+		if (store == null) {
+			logger.log(Level.ERROR, "Store is null");
+			result.put(Constants.REASON, "Store is null");
+			return result;
+		}
+		result.put("count", store.size());
 		return result;
 	}
 
@@ -556,6 +609,21 @@ public class ProjectsHandler implements HttpHandler {
 			}
 		} else {
 			result.put(Constants.REASON, "Project is not open");
+		}
+		return result;
+	}
+
+	private JSONObject save(String request) {
+		JSONObject result = new JSONObject();
+		JSONObject json = new JSONObject(request);
+		String project = json.getString("project");
+		try {
+			if (projectStores.containsKey(project)) {
+				projectStores.get(project).saveSegment(json);
+			}
+		} catch (IOException e) {
+			logger.log(Level.ERROR, e);
+			result.put(Constants.REASON, e.getMessage());
 		}
 		return result;
 	}

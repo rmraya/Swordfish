@@ -43,9 +43,11 @@ class TranslationView {
     pagesSpan: HTMLSpanElement;
 
     maxPage: number;
-    currentPage: number;
+    pageInput: HTMLInputElement;
+    currentPage: number = 0;
     rowsPage: number = 500;
     maxRows: number;
+    segmentsCount: number;
 
     currentCell: HTMLTableCellElement;
     currentContent: string;
@@ -95,6 +97,11 @@ class TranslationView {
         this.buildTranslationArea();
         this.buildRightSide();
 
+        this.electron.ipcRenderer.on('set-segments-count', (event: Electron.IpcRendererEvent, arg: any) => {
+            if (arg.project === this.projectId) {
+                this.setSegmentsCount(arg.count);
+            }
+        });
         this.electron.ipcRenderer.on('set-segments', (event: Electron.IpcRendererEvent, arg: any) => {
             if (arg.project === this.projectId) {
                 this.setSegments(arg.segments);
@@ -107,7 +114,7 @@ class TranslationView {
             this.setSize();
         }, 200);
 
-        this.getSegments();
+        this.electron.ipcRenderer.send('get-segments-count', { project: this.projectId });
     }
 
     close(): void {
@@ -144,9 +151,24 @@ class TranslationView {
         this.electron.ipcRenderer.send('export-translations', { project: this.projectId });
     }
 
+    setSegmentsCount(count: number): void {
+
+        this.segmentsCount = count;
+
+        this.maxPage = Math.ceil(this.segmentsCount / this.rowsPage);
+        if (this.maxPage * this.rowsPage < this.segmentsCount) {
+            this.maxPage++;
+        }
+
+        this.pagesSpan.innerText = 'of ' + this.maxPage;
+        this.pageInput.value = '1';
+        this.getSegments();
+    }
+
     getSegments(): void {
+        this.container.classList.add('wait');
         let params: any = {
-            project: this.projectId, files: [], start: 0, count: 10000, filterText: '',
+            project: this.projectId, files: [], start: this.currentPage * this.rowsPage, count: this.rowsPage, filterText: '',
             filterLanguage: '', caseSensitiveFilter: false, filterUntranslated: false, regExp: false
         };
         this.electron.ipcRenderer.send('get-segments', params);
@@ -229,21 +251,20 @@ class TranslationView {
         pageDiv.classList.add('tooltip');
         this.statusArea.appendChild(pageDiv);
 
-        let pageInput: HTMLInputElement = document.createElement('input');
-        pageInput.id = 'page' + this.projectId;
-        pageInput.type = 'number';
-        pageInput.style.marginLeft = '10px';
-        pageInput.style.marginTop = '4px';
-        pageInput.style.width = '50px';
-        pageInput.value = '0';
-        pageInput.addEventListener('change', () => {
-            let page = Number.parseInt(pageInput.value);
+        this.pageInput = document.createElement('input');
+        this.pageInput.type = 'number';
+        this.pageInput.style.marginLeft = '10px';
+        this.pageInput.style.marginTop = '4px';
+        this.pageInput.style.width = '50px';
+        this.pageInput.value = '0';
+        this.pageInput.addEventListener('change', () => {
+            let page = Number.parseInt(this.pageInput.value);
             if (page >= 0 && page <= this.maxPage) {
                 this.currentPage = page;
                 this.getSegments();
             }
         });
-        pageDiv.appendChild(pageInput);
+        pageDiv.appendChild(this.pageInput);
         pageDiv.insertAdjacentHTML('beforeend', '<span class="tooltiptext topTooltip">Enter page number and press ENTER</span>');
 
         let ofSpan: HTMLSpanElement = document.createElement('span');
@@ -296,9 +317,15 @@ class TranslationView {
         rowsInput.style.marginLeft = '10px';
         rowsInput.style.marginTop = '4px';
         rowsInput.style.width = '50px';
-        rowsInput.value = '500';
+        rowsInput.value = '' + this.rowsPage;
         rowsInput.addEventListener('change', () => {
             this.rowsPage = Number.parseInt(rowsInput.value);
+            this.maxPage = Math.ceil(this.segmentsCount / this.rowsPage);
+            if (this.maxPage * this.rowsPage < this.segmentsCount) {
+                this.maxPage++;
+            }
+            this.pagesSpan.innerText = 'of ' + this.maxPage;
+            this.pageInput.value = '1';
             this.firstPage();
         });
         rowDiv.appendChild(rowsInput);
@@ -356,29 +383,34 @@ class TranslationView {
             let row: HTMLTableRowElement = rows[i];
             row.addEventListener('click', (event: MouseEvent) => this.rowClickListener(event));
         }
+        this.container.classList.remove('wait');
     }
 
     firstPage(): void {
         this.currentPage = 0;
+        this.pageInput.value = '' + (this.currentPage + 1);
         this.getSegments();
     }
 
     previousPage(): void {
         if (this.currentPage > 1) {
             this.currentPage--;
+            this.pageInput.value = '' + (this.currentPage + 1);
             this.getSegments();
         }
     }
 
     nextPage(): void {
-        if (this.currentPage < this.maxPage) {
+        if (this.currentPage < this.maxPage - 1) {
             this.currentPage++;
+            this.pageInput.value = '' + (this.currentPage + 1);
             this.getSegments();
         }
     }
 
     lastPage(): void {
-        this.currentPage = this.maxPage;
+        this.currentPage = this.maxPage - 1;
+        this.pageInput.value = '' + (this.currentPage + 1);
         this.getSegments();
     }
 
@@ -411,8 +443,12 @@ class TranslationView {
         if (this.currentCell) {
             this.currentCell.classList.remove('editing');
             this.currentCell.contentEditable = 'false';
+            let translation = this.currentCell.innerHTML;
             this.currentCell = undefined;
             // TODO send to server
+            this.electron.ipcRenderer.send('save-translation', {
+                project: this.projectId, file: this.currentId.file, unit: this.currentId.unit, segment: this.currentId.id, translation: translation
+            });
         }
     }
 

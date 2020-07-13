@@ -313,14 +313,18 @@ class Swordfish {
         ipcMain.on('add-tab', (event: IpcMainEvent, arg: any) => {
             Swordfish.contents.send('add-tab', arg);
         });
+        ipcMain.on('get-segments-count', (event: IpcMainEvent, arg: any) => {
+            Swordfish.getSegmenstCount(event, arg);
+        });
         ipcMain.on('get-segments', (event: IpcMainEvent, arg: any) => {
             Swordfish.getSegmenst(event, arg);
         });
         ipcMain.on('paste-tag', (event: IpcMainEvent, arg: any) => {
-            // let old: string = clipboard.readHTML();
             clipboard.writeHTML(arg);
             Swordfish.contents.paste();
-            // clipboard.writeHTML(old);
+        });
+        ipcMain.on('save-translation', (event: IpcMainEvent, arg: any) => {
+            Swordfish.saveTranslation(arg);
         });
     } // end constructor
 
@@ -1167,6 +1171,22 @@ class Swordfish {
         writeFileSync(Swordfish.path.join(app.getPath('appData'), app.name, 'preferences.json'), JSON.stringify(this.currentPreferences));
     }
 
+    static getSegmenstCount(event: IpcMainEvent, arg: any): void {
+        Swordfish.sendRequest('/projects/count', arg,
+            (data: any) => {
+                if (data.status === Swordfish.SUCCESS) {
+                    data.project = arg.project;
+                    event.sender.send('set-segments-count', data);
+                } else {
+                    dialog.showErrorBox('Error', data.reason);
+                }
+            },
+            (reason: string) => {
+                dialog.showErrorBox('Error', reason);
+            }
+        );
+    }
+
     static getSegmenst(event: IpcMainEvent, arg: any): void {
         Swordfish.sendRequest('/projects/segments', arg,
             (data: any) => {
@@ -1389,6 +1409,19 @@ class Swordfish {
 
     static closeProject(arg: any): void {
         Swordfish.sendRequest('/projects/close', arg,
+            (data: any) => {
+                if (data.status !== Swordfish.SUCCESS) {
+                    dialog.showErrorBox('Error', data.reason);
+                }
+            },
+            (reason: string) => {
+                dialog.showErrorBox('Error', reason);
+            }
+        );
+    }
+
+    static saveTranslation(arg: any): void {
+        Swordfish.sendRequest('/projects/save', arg,
             (data: any) => {
                 if (data.status !== Swordfish.SUCCESS) {
                     dialog.showErrorBox('Error', data.reason);

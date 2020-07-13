@@ -45,9 +45,9 @@ import com.maxprograms.xml.SAXBuilder;
 import com.maxprograms.xml.XMLOutputter;
 
 import org.json.JSONObject;
+import org.mapdb.BTreeMap;
 import org.mapdb.DB;
 import org.mapdb.DBMaker;
-import org.mapdb.BTreeMap;
 import org.xml.sax.SAXException;
 
 public class XliffStore {
@@ -56,7 +56,9 @@ public class XliffStore {
 
     private DB mapdb;
     private BTreeMap<Integer, String> tree;
-    private BTreeMap<Integer, String> files;
+    private BTreeMap<String, String> files;
+    private BTreeMap<Integer, Integer> hashes;
+    private JSONObject currentMap;
     private String xliffFile;
     private Document document;
 
@@ -80,6 +82,7 @@ public class XliffStore {
             mapdb = DBMaker.newFileDB(model).closeOnJvmShutdown().asyncWriteEnable().make();
             tree = mapdb.getTreeMap("segments");
             files = mapdb.getTreeMap("files");
+            hashes = mapdb.getTreeMap("hashes");
         } catch (Error ioe) {
             logger.log(Level.ERROR, ioe);
             throw new IOException(ioe.getMessage());
@@ -108,26 +111,57 @@ public class XliffStore {
         }
         if ("file".equals(e.getName())) {
             currentFile = e.getAttributeValue("original");
-            files.put(currentFile.hashCode(), currentFile);
+            currentMap = new JSONObject();
         }
         if ("unit".equals(e.getName())) {
             currentUnit = e.getAttributeValue("id");
             Element originalData = e.getChild("originalData");
             Element matches = e.getChild("mtc:matches");
             Element glossary = e.getChild("gls:glossary");
+            JSONObject json = new JSONObject();
+            json.put("translate", e.getAttributeValue("translate", "yes"));
+            json.put("space", e.getAttributeValue("xml:space", "default"));
+            JSONObject data = new JSONObject();
+            if (originalData != null) {
+                List<Element> list = originalData.getChildren();
+                for (int i = 0; i < list.size(); i++) {
+                    Element d = list.get(i);
+                    data.put(d.getAttributeValue("id"), d.getText());
+                }
+            }
+            json.put("originalData", data);
+            if (matches == null) {
+                matches = new Element("mtc:matches");
+            }
+            json.put("matches", matches.toString());
+            if (glossary == null) {
+                glossary = new Element("gls:glossary");
+            }
+            json.put("glossary", glossary.toString());
+            currentMap.put(currentUnit, json);
         }
         if ("segment".equals(e.getName())) {
             JSONObject json = new JSONObject();
             json.put("currentFile", currentFile);
             json.put("currentUnit", currentUnit);
             json.put("segment", e.toString());
+            int hash = (currentFile + currentUnit + e.getAttributeValue("id")).hashCode();
+            hashes.put(hash, index);
             tree.put(index++, json.toString());
         }
+
         List<Element> children = e.getChildren();
         Iterator<Element> it = children.iterator();
         while (it.hasNext()) {
             recurse(it.next());
         }
+        if ("file".equals(e.getName())) {
+            files.put(currentFile, currentMap.toString());
+        }
+    }
+
+    public int size() {
+        return tree.size();
     }
 
     public void saveXliff() throws IOException {
@@ -139,19 +173,32 @@ public class XliffStore {
         }
     }
 
-    public List<Element> getSegments(List<String> files, int start, int count, String filterText, String filterLanguage,
-            boolean caseSensitiveFilter, boolean filterUntranslated, boolean regExp)
+    public List<Element> getSegments(List<String> filesList, int start, int count, String filterText,
+            String filterLanguage, boolean caseSensitiveFilter, boolean filterUntranslated, boolean regExp)
             throws SAXException, IOException, ParserConfigurationException {
         List<Element> result = new ArrayList<>();
         if (filterText.isEmpty()) {
+            JSONObject unitsData = new JSONObject();
+            String lastFile = "";
             for (int i = start; i < start + count && i < tree.size(); i++) {
-                JSONObject  json = new JSONObject(tree.get(i));
-                String string = json.getString("segment");
-                byte[] bytes = string.getBytes(StandardCharsets.UTF_8);
+                JSONObject json = new JSONObject(tree.get(i));
+                String file = json.getString("currentFile");
+                String unit = json.getString("currentUnit");
+                String seg = json.getString("segment");
+                if (!lastFile.equals(file)) {
+                    unitsData = new JSONObject(files.get(file));
+                    lastFile = file;
+                }
+                JSONObject unitMeta = new JSONObject();
+                if (unitsData.has(unit) && unitsData.getJSONObject(unit).has("originalData")) {
+                    unitMeta = unitsData.getJSONObject(unit).getJSONObject("originalData");
+                }
+                byte[] bytes = seg.getBytes(StandardCharsets.UTF_8);
                 Document d = builder.build(new ByteArrayInputStream(bytes));
                 Element segment = d.getRootElement();
-                segment.addContent(new PI("currentFile", json.getString("currentFile")));
-                segment.addContent(new PI("currentUnit", json.getString("currentUnit")));
+                segment.addContent(new PI("currentFile", file));
+                segment.addContent(new PI("currentUnit", unit));
+                segment.addContent(new PI("metadata", unitMeta.toString()));
                 result.add(segment);
             }
         } else {
@@ -187,5 +234,23 @@ public class XliffStore {
         }
         JSONObject json = new JSONObject(builder.toString());
         return json.getString("catalog");
+    }
+
+    public void saveSegment(JSONObject json) throws IOException {
+        String file = json.getString("file");
+        String unit = json.getString("unit");
+        String segment = json.getString("segment");
+        String translation = json.getString("translation");
+
+        int hash = (file + unit + segment).hashCode();
+        int position = hashes.get(hash);
+        System.out.println(tree.get(position));
+        System.out.println(translation);
+
+        List<String> list = XliffUtils.harvestTags(translation);
+        for (int i = 0; i < list.size(); i++) {
+            System.out.println(i + ": " + list.get(i));
+        }
+
     }
 }

@@ -26,7 +26,7 @@ import java.lang.System.Logger;
 import java.lang.System.Logger.Level;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
-import java.util.HashMap;
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.regex.Matcher;
@@ -40,15 +40,14 @@ import com.maxprograms.xml.Element;
 import com.maxprograms.xml.TextNode;
 import com.maxprograms.xml.XMLNode;
 
-public class XliffUtils {
+import org.json.JSONObject;
 
-   
+public class XliffUtils {
 
     public static final String STYLE = "class='highlighted'";
 
     private static int maxTag;
     private static int tag;
-    private static HashMap<String, String> tags;
     private static Pattern pattern;
     private static String lastFilterText;
 
@@ -57,17 +56,11 @@ public class XliffUtils {
     }
 
     public static String pureText(Element seg, boolean clearTags, String filterText, boolean caseSensitive,
-            boolean regExp) throws IOException {
-
+            boolean regExp, JSONObject originalData) throws IOException {
         if (seg == null) {
             return "";
         }
         if (clearTags) {
-            if (tags != null) {
-                tags.clear();
-                tags = null;
-            }
-            tags = new HashMap<>();
             tag = 1;
         }
         List<XMLNode> list = seg.getContent();
@@ -129,19 +122,21 @@ public class XliffUtils {
                 if (type.equals("pc")) {
                     checkSVG();
                     String header = getHeader(e);
-                    tags.put("[[" + tag + "]]", header);
-                    text.append("<img src='");
+                    text.append("<img data-ref='");
+                    text.append(e.getAttributeValue("id"));
+                    text.append("' src='");
                     text.append(TmsServer.getWorkFolder().toURI().toURL().toString());
                     text.append("images/");
                     text.append(tag++);
                     text.append(".svg' align='bottom' alt='' title=\"");
                     text.append(unquote(cleanAngles(header)));
                     text.append("\"/>");
-                    text.append(pureText(e, false, filterText, caseSensitive, regExp));
+                    text.append(pureText(e, false, filterText, caseSensitive, regExp, originalData));
                     checkSVG();
                     String tail = getTail(e);
-                    tags.put("[[" + tag + "]]", tail);
-                    text.append("<img src='");
+                    text.append("<img data-ref='/");
+                    text.append(e.getAttributeValue("id"));
+                    text.append("' src='");
                     text.append(TmsServer.getWorkFolder().toURI().toURL().toString());
                     text.append("images/");
                     text.append(tag++);
@@ -149,19 +144,44 @@ public class XliffUtils {
                     text.append(unquote(cleanAngles(tail)));
                     text.append("\"/>");
                 } else if (type.equals("mrk")) {
-                    text.append("<span " + STYLE + ">");
-                    text.append(e.getText());
-                    text.append("</span>");
-                } else {
                     checkSVG();
-                    String element = e.toString();
-                    tags.put("[[" + tag + "]]", element);
-                    text.append("<img src='");
+                    String header = getHeader(e);
+                    text.append("<img data-ref='");
+                    text.append(e.getAttributeValue("id"));
+                    text.append("' src='");
                     text.append(TmsServer.getWorkFolder().toURI().toURL().toString());
                     text.append("images/");
                     text.append(tag++);
                     text.append(".svg' align='bottom' alt='' title=\"");
-                    text.append(unquote(cleanAngles(element)));
+                    text.append(unquote(cleanAngles(header)));
+                    text.append("\"/>");
+                    text.append("<span " + STYLE + ">");
+                    text.append(e.getText());
+                    text.append("</span>");
+                    checkSVG();
+                    String tail = getTail(e);
+                    text.append("<img data-ref='/");
+                    text.append(e.getAttributeValue("id"));
+                    text.append("' src='");
+                    text.append(TmsServer.getWorkFolder().toURI().toURL().toString());
+                    text.append("images/");
+                    text.append(tag++);
+                    text.append(".svg' align='bottom' alt='' title=\"");
+                    text.append(unquote(cleanAngles(tail)));
+                    text.append("\"/>");
+                } else if (type.equals("cp")) {
+                    // TODO handle codepoint tags
+                } else {
+                    checkSVG();
+                    String dataRef = e.getAttributeValue("dataRef");
+                    text.append("<img data-ref='");
+                    text.append(dataRef);
+                    text.append("' src='");
+                    text.append(TmsServer.getWorkFolder().toURI().toURL().toString());
+                    text.append("images/");
+                    text.append(tag++);
+                    text.append(".svg' align='bottom' alt='' title=\"");
+                    text.append(unquote(cleanAngles(originalData.getString(dataRef))));
                     text.append("\"/>");
                 }
             }
@@ -269,18 +289,18 @@ public class XliffUtils {
         return string.replaceAll("\"", "\u200B\u2033");
     }
 
-
-    public static String toHTML(int index, Element seg, boolean clearTags, String filterText,
-            boolean caseSensitive, boolean regExp) {
+    public static String toHTML(int index, Element seg, boolean clearTags, String filterText, boolean caseSensitive,
+            boolean regExp) {
         String status = seg.getAttributeValue("state", Constants.INITIAL);
         StringBuilder html = new StringBuilder();
         Element source = seg.getChild("source");
         String srcLang = source.getAttributeValue("xml:lang");
         Element target = seg.getChild("target");
-        String tgtLang = ""; 
+        String tgtLang = "";
         if (target != null) {
             tgtLang = target.getAttributeValue("xml:lang");
         }
+        JSONObject meta = new JSONObject(seg.getPI("metadata").get(0).getData());
         html.append("<tr data-id=\"");
         html.append(seg.getAttributeValue("id"));
         html.append("\" data-file=\"");
@@ -299,7 +319,7 @@ public class XliffUtils {
             html.append(" dir='rtl'");
         }
         html.append('>');
-        html.append(getHTML(source, clearTags, filterText, caseSensitive, regExp));
+        html.append(getHTML(source, clearTags, filterText, caseSensitive, regExp, meta));
         html.append("</td>");
         html.append("<td class='middle'><input type='checkbox' class='rowCheck'></td>");
         html.append("<td class='target' lang=\"");
@@ -309,24 +329,41 @@ public class XliffUtils {
             html.append(" dir='rtl'");
         }
         html.append('>');
-        html.append(getHTML(target, clearTags, filterText, caseSensitive, regExp));
+        html.append(getHTML(target, clearTags, filterText, caseSensitive, regExp, meta));
         html.append("</td>");
 
         html.append("</tr>");
         return html.toString();
     }
 
-    private static String getHTML(Element e, boolean clearTags, String filterText, boolean caseSensitive, boolean regExp) {
+    private static String getHTML(Element e, boolean clearTags, String filterText, boolean caseSensitive,
+            boolean regExp, JSONObject originalData) {
         if (e == null) {
             return "";
         }
         try {
-            String tagged = XliffUtils.pureText(e, clearTags, filterText, caseSensitive, regExp);
+            String tagged = XliffUtils.pureText(e, clearTags, filterText, caseSensitive, regExp, originalData);
             return tagged;
         } catch (IOException e1) {
             Logger logger = System.getLogger(XliffUtils.class.getName());
             logger.log(Level.ERROR, e1);
         }
-        return e.getText(); 
+        return e.getText();
+    }
+
+    public static List<String> harvestTags(String source) {
+        int index = source.indexOf("<img ");
+        int tagNumber = 1;
+        List<String> currentTags = new ArrayList<>();
+        while (index >= 0) {
+            String start = source.substring(0, index);
+            String rest = source.substring(index + 1);
+            int end = rest.indexOf('>');
+            String tag = '<' + rest.substring(0, end) + "/>";
+            currentTags.add(tag);
+            source = start + "[[" + tagNumber++ + "]]" + rest.substring(end + 1);
+            index = source.indexOf("<img ");
+        }
+        return currentTags;
     }
 }
