@@ -35,8 +35,10 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Vector;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -71,6 +73,10 @@ public class XliffStore {
     private PreparedStatement insertSegment;
     private PreparedStatement insertMatch;
     private PreparedStatement insertTerm;
+    private PreparedStatement getUnitData;
+    private PreparedStatement getSource;
+    private PreparedStatement getTarget;
+    private PreparedStatement updateTarget;
     private boolean preserve;
 
     private int index;
@@ -109,9 +115,14 @@ public class XliffStore {
             logger.log(Level.INFO, "Creating database");
             createTables();
             document = builder.build(xliffFile);
-            loadDocument();
+            parseDocument();
             conn.commit();
         }
+        getUnitData = conn.prepareStatement("SELECT data FROM units WHERE file=? AND unitId=?");
+        getSource = conn.prepareStatement("SELECT source FROM segments WHERE file=? AND unitId=? AND segId=?");
+        getTarget = conn.prepareStatement("SELECT target FROM segments WHERE file=? AND unitId=? AND segId=?");
+        updateTarget = conn
+                .prepareStatement("UPDATE segments SET target=?, targetText=? WHERE file=? AND unitId=? AND segId=?");
     }
 
     private void createTables() throws SQLException {
@@ -139,7 +150,7 @@ public class XliffStore {
         }
     }
 
-    private void loadDocument() throws SQLException {
+    private void parseDocument() throws SQLException {
         nextId = System.currentTimeMillis();
         insertUnit = conn.prepareStatement("INSERT INTO units (file, unitId, data) VALUES (?,?,?)");
         insertSegment = conn.prepareStatement(
@@ -194,14 +205,18 @@ public class XliffStore {
             }
             Element source = e.getChild("source");
             source.setAttribute("xml:lang", srcLang);
+            boolean sourcePreserve = "preserve".equals(source.getAttributeValue("xml:space", "default"));
             Element target = e.getChild("target");
             if (target == null) {
                 target = new Element("target");
+                if (sourcePreserve) {
+                    target.setAttribute("xml:space", "preserve");
+                }
             }
             target.setAttribute("xml:lang", tgtLang);
+
             state = e.getAttributeValue("state", "initial");
-            preserve = preserve | "preserve".equals(source.getAttributeValue("xml:space", "default"))
-                    | "preserve".equals(target.getAttributeValue("xml:space", "default"));
+            preserve = preserve | sourcePreserve | "preserve".equals(target.getAttributeValue("xml:space", "default"));
             insertSegment.setString(1, currentFile);
             insertSegment.setString(2, currentUnit);
             insertSegment.setString(3, id);
@@ -280,7 +295,7 @@ public class XliffStore {
             int index = start;
             String query = "SELECT file, unitId, segId, child, source, target, tags, state, space FROM segments WHERE type='S' ORDER BY file, child LIMIT "
                     + count + " OFFSET " + start + " ";
-            PreparedStatement prep = conn.prepareStatement("SELECT data FROM units WHERE file=? AND unitId=?");
+
             try (Statement stmt = conn.createStatement()) {
                 try (ResultSet rs = stmt.executeQuery(query)) {
                     while (rs.next()) {
@@ -295,26 +310,21 @@ public class XliffStore {
 
                         JSONObject tagsData = new JSONObject();
                         if (tags > 0) {
-                            prep.setString(1, file);
-                            prep.setString(2, unit);
+                            getUnitData.setString(1, file);
+                            getUnitData.setString(2, unit);
                             String data = "";
-                            try (ResultSet rs2 = prep.executeQuery()) {
+                            try (ResultSet rs2 = getUnitData.executeQuery()) {
                                 while (rs2.next()) {
                                     data = rs2.getString(1);
                                 }
                             }
                             tagsData = new JSONObject(data);
                         }
-
-                        byte[] srcBytes = src.getBytes(StandardCharsets.UTF_8);
-                        Document d = builder.build(new ByteArrayInputStream(srcBytes));
-                        Element source = d.getRootElement();
+                        Element source = buildElement(src);
 
                         Element target = new Element("target");
                         if (tgt != null && !tgt.isBlank()) {
-                            byte[] tgtBytes = tgt.getBytes(StandardCharsets.UTF_8);
-                            d = builder.build(new ByteArrayInputStream(tgtBytes));
-                            target = d.getRootElement();
+                            target = buildElement(tgt);
                         }
 
                         try {
@@ -327,7 +337,6 @@ public class XliffStore {
                     }
                 }
             }
-            prep.close();
         } else {
             // TODO filter segments
         }
@@ -335,6 +344,10 @@ public class XliffStore {
     }
 
     public void close() throws SQLException {
+        getUnitData.close();
+        getSource.close();
+        getTarget.close();
+        updateTarget.close();
         conn.commit();
         conn.close();
         conn = null;
@@ -364,18 +377,61 @@ public class XliffStore {
         return json.getString("catalog");
     }
 
-    public void saveSegment(JSONObject json) throws IOException {
+    public synchronized void saveSegment(JSONObject json)
+            throws IOException, SQLException, SAXException, ParserConfigurationException {
         String file = json.getString("file");
         String unit = json.getString("unit");
         String segment = json.getString("segment");
         String translation = json.getString("translation");
 
-        System.out.println(translation);
-
-        List<String> list = XliffUtils.harvestTags(translation);
-        for (int i = 0; i < list.size(); i++) {
-            System.out.println(i + ": " + list.get(i));
+        String src = "";
+        getSource.setString(1, file);
+        getSource.setString(2, unit);
+        getSource.setString(3, segment);
+        try (ResultSet rs = getSource.executeQuery()) {
+            while (rs.next()) {
+                src = rs.getNString(1);
+            }
         }
+        Element source = buildElement(src);
+
+        Map<String, String> tags = getTags(source);
+
+        List<String[]> list = XliffUtils.harvestTags(translation);
+        if (!list.isEmpty()) {
+            for (int i = 0; i < list.size(); i++) {
+                String code = list.get(i)[0];
+                String img = list.get(i)[1];
+                if (tags.containsKey(code)) {
+                    translation = replace(translation, img, tags.get(code));
+                } else {
+                    translation = replace(translation, img, "");
+                }
+            }
+        }
+        Element translated = buildElement("<target>" + translation + "</target>");
+
+        String tgt = "";
+        getTarget.setString(1, file);
+        getTarget.setString(2, unit);
+        getTarget.setString(3, segment);
+        try (ResultSet rs = getTarget.executeQuery()) {
+            while (rs.next()) {
+                tgt = rs.getNString(1);
+            }
+        }
+
+        Element target = buildElement(tgt);
+        target.setContent(translated.getContent());
+        String pureTarget = pureText(target);
+
+        updateTarget.setNString(1, target.toString());
+        updateTarget.setNString(2, pureTarget);
+        updateTarget.setString(3, file);
+        updateTarget.setString(4, unit);
+        updateTarget.setString(5, segment);
+        updateTarget.executeUpdate();
+        conn.commit();
     }
 
     private String pureText(Element e) {
@@ -595,5 +651,41 @@ public class XliffStore {
             }
         }
         return text.toString();
+    }
+
+    private String replace(String source, String target, String replacement) {
+        int start = source.indexOf(target);
+        while (start != -1) {
+            source = source.substring(0, start) + replacement + source.substring(start + target.length());
+            start += replacement.length();
+            start = source.indexOf(target, start);
+        }
+        return source;
+    }
+
+    private Element buildElement(String string) throws SAXException, IOException, ParserConfigurationException {
+        Document doc = builder.build(new ByteArrayInputStream(string.getBytes(StandardCharsets.UTF_8)));
+        return doc.getRootElement();
+    }
+
+    private Map<String, String> getTags(Element root) {
+        Map<String, String> result = new Hashtable<>();
+        List<XMLNode> content = root.getContent();
+        Iterator<XMLNode> it = content.iterator();
+        while (it.hasNext()) {
+            XMLNode node = it.next();
+            if (node.getNodeType() == XMLNode.ELEMENT_NODE) {
+                Element e = (Element) node;
+                if ("mrk".equals(e.getName()) || "pc".equals(e.getName())) {
+                    result.put(e.getAttributeValue("id"), XliffUtils.getHeader(e));
+                    result.put("/" + e.getAttributeValue("id"), XliffUtils.getTail(e));
+                } else if ("cp".equals(e.getName())) {
+                    // TODO handle codepoint tags
+                } else {
+                    result.put(e.getAttributeValue("id"), e.toString());
+                }
+            }
+        }
+        return result;
     }
 }

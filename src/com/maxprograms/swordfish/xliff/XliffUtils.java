@@ -137,7 +137,8 @@ public class XliffUtils {
         return string.replaceAll("\"", "\u200B\u2033");
     }
 
-    public static List<String> harvestTags(String source) {
+    public static List<String[]> harvestTags(String source) {
+        List<String[]> result = new ArrayList<>();
         int index = source.indexOf("<img ");
         int tagNumber = 1;
         List<String> currentTags = new ArrayList<>();
@@ -145,11 +146,18 @@ public class XliffUtils {
             String start = source.substring(0, index);
             String rest = source.substring(index + 1);
             int end = rest.indexOf('>');
-            String tag = '<' + rest.substring(0, end) + "/>";
+            String tag = '<' + rest.substring(0, end) + ">";
             currentTags.add(tag);
             source = start + "[[" + tagNumber++ + "]]" + rest.substring(end + 1);
             index = source.indexOf("<img ");
         }
-        return currentTags;
+        for (int i=0 ; i<currentTags.size() ; i++) {
+            String tag = currentTags.get(i);
+            int start = tag.indexOf("data-ref=\"") + 10;
+            int end = tag.indexOf("\"", start);
+            String code = tag.substring(start, end);
+            result.add(new String[]{code, tag});
+        }
+        return result;
     }
 }
