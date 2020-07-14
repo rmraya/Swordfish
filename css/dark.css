@@ -535,6 +535,10 @@ svg {
 	color: var(--error-color) !important;
 }
 
+.preserve {
+	white-space: pre-wrap;
+}
+
 .divContainer {
 	/* Any container that needs to scroll content */
 	width: 100%;

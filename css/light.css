@@ -1,28 +1,22 @@
 :root {
 	--normal-background: #f5f5f5;
 	--normal-color: #101010;
-
 	--accent-color: #3465aa;
 	--accent-alternative: #0551bb;
 	--accent-contrast: #ffffff;
-
 	--tooltip-background: #0d47a1;
 	--tooltip-color: #fefefe;
-
 	--tabHolder-background: #9a9a9a;
 	--tab-background: #dedede;
 	--tab-hover: #cdcdcd;
-
 	--input-background: #fefefe;
 	--input-color: #2e2e2e;
 	--focus-border: #f57c00;
 	--disabled-input: #999999;
-
 	--even-row-background: #ececec;
 	--odd-row-background: #fcfcfc;
 	--selected-row: #b0bec5;
 	--highlight-row: #bbdefb;
-
 	--highlight-color: #ecf01b;
 	--error-color: #960303;
 }
@@ -497,12 +491,10 @@ svg {
 .tooltip .tooltiptext {
 	background-color: var(--tooltip-background);
 	color: var(--tooltip-color);
-
 	visibility: hidden;
 	padding: 4px;
 	border-radius: 2px;
 	white-space: nowrap;
-
 	/* Position the tooltip */
 	position: absolute;
 	z-index: 100;
@@ -541,6 +533,10 @@ svg {
 
 .error {
 	color: var(--error-color) !important;
+}
+
+.preserve {
+	white-space: pre-wrap;
 }
 
 .divContainer {

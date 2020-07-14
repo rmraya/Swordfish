@@ -35,7 +35,6 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Vector;
@@ -72,6 +71,7 @@ public class XliffStore {
     private PreparedStatement insertSegment;
     private PreparedStatement insertMatch;
     private PreparedStatement insertTerm;
+    private boolean preserve;
 
     private int index;
     private long nextId;
@@ -119,7 +119,7 @@ public class XliffStore {
                 + "data VARCHAR(6000) NOT NULL, PRIMARY KEY(file, unitId) );";
         String query2 = "CREATE TABLE segments (file VARCHAR(50), unitId VARCHAR(50) NOT NULL, "
                 + "segId VARCHAR(50) NOT NULL, type CHAR(1) NOT NULL DEFAULT 'S', state VARCHAR(12) DEFAULT 'initial', child INTEGER, "
-                + "translate CHAR(1), tags INTEGER DEFAULT 0, source VARCHAR(6000) NOT NULL, sourceText VARCHAR(6000) NOT NULL, "
+                + "translate CHAR(1), tags INTEGER DEFAULT 0, space CHAR(1) DEFAULT 'N', source VARCHAR(6000) NOT NULL, sourceText VARCHAR(6000) NOT NULL, "
                 + "target VARCHAR(6000) NOT NULL, targetText VARCHAR(6000) NOT NULL, "
                 + "PRIMARY KEY(file, unitId, segId, type) );";
         String query3 = "CREATE TABLE matches (file VARCHAR(50), unitId VARCHAR(50) NOT NULL, "
@@ -143,7 +143,7 @@ public class XliffStore {
         nextId = System.currentTimeMillis();
         insertUnit = conn.prepareStatement("INSERT INTO units (file, unitId, data) VALUES (?,?,?)");
         insertSegment = conn.prepareStatement(
-                "INSERT INTO segments (file, unitId, segId, type, state, child, translate, tags, source, sourceText, target, targetText) VALUES (?,?,?,?,?,?,?,?,?,?,?,?)");
+                "INSERT INTO segments (file, unitId, segId, type, state, child, translate, tags, space, source, sourceText, target, targetText) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)");
         recurse(document.getRootElement());
         insertUnit.close();
         insertSegment.close();
@@ -163,6 +163,7 @@ public class XliffStore {
             tagCount = 0;
             currentUnit = e.getAttributeValue("id");
             translate = e.getAttributeValue("translate", "yes").equals("yes");
+            preserve = "preserve".equals(e.getAttributeValue("xml:space", "default"));
             JSONObject data = new JSONObject();
 
             Element originalData = e.getChild("originalData");
@@ -199,6 +200,8 @@ public class XliffStore {
             }
             target.setAttribute("xml:lang", tgtLang);
             state = e.getAttributeValue("state", "initial");
+            preserve = preserve | "preserve".equals(source.getAttributeValue("xml:space", "default"))
+                    | "preserve".equals(target.getAttributeValue("xml:space", "default"));
             insertSegment.setString(1, currentFile);
             insertSegment.setString(2, currentUnit);
             insertSegment.setString(3, id);
@@ -207,10 +210,11 @@ public class XliffStore {
             insertSegment.setInt(6, index++);
             insertSegment.setString(7, translate ? "Y" : "N");
             insertSegment.setInt(8, tagCount);
-            insertSegment.setNString(9, source.toString());
-            insertSegment.setNString(10, pureText(source));
-            insertSegment.setNString(11, target != null ? target.toString() : "");
-            insertSegment.setNString(12, target != null ? pureText(target) : "");
+            insertSegment.setString(9, preserve ? "Y" : "N");
+            insertSegment.setNString(10, source.toString());
+            insertSegment.setNString(11, pureText(source));
+            insertSegment.setNString(12, target != null ? target.toString() : "");
+            insertSegment.setNString(13, target != null ? pureText(target) : "");
             insertSegment.execute();
         }
         if ("ignorable".equals(e.getName())) {
@@ -229,10 +233,11 @@ public class XliffStore {
             insertSegment.setInt(6, index++);
             insertSegment.setString(7, "N");
             insertSegment.setInt(8, tagCount);
-            insertSegment.setNString(9, source.toString());
-            insertSegment.setNString(10, pureText(source));
-            insertSegment.setNString(11, target != null ? target.toString() : "");
-            insertSegment.setNString(12, target != null ? pureText(target) : "");
+            insertSegment.setString(9, preserve ? "Y" : "N");
+            insertSegment.setNString(10, source.toString());
+            insertSegment.setNString(11, pureText(source));
+            insertSegment.setNString(12, target != null ? target.toString() : "");
+            insertSegment.setNString(13, target != null ? pureText(target) : "");
             insertSegment.execute();
         }
         List<Element> children = e.getChildren();
@@ -273,7 +278,7 @@ public class XliffStore {
         List<String> result = new Vector<>();
         if (filterText.isEmpty()) {
             int index = start;
-            String query = "SELECT file, unitId, segId, child, source, target, tags, state FROM segments WHERE type='S' ORDER BY file, child LIMIT "
+            String query = "SELECT file, unitId, segId, child, source, target, tags, state, space FROM segments WHERE type='S' ORDER BY file, child LIMIT "
                     + count + " OFFSET " + start + " ";
             PreparedStatement prep = conn.prepareStatement("SELECT data FROM units WHERE file=? AND unitId=?");
             try (Statement stmt = conn.createStatement()) {
@@ -286,6 +291,7 @@ public class XliffStore {
                         String tgt = rs.getNString(6);
                         int tags = rs.getInt(7);
                         String state = rs.getString(8);
+                        boolean preserve = "Y".equals(rs.getString(9));
 
                         JSONObject tagsData = new JSONObject();
                         if (tags > 0) {
@@ -313,7 +319,7 @@ public class XliffStore {
 
                         try {
                             result.add(segmentToHTML(index++, file, unit, segId, state, source, target, filterText,
-                                    caseSensitiveFilter, regExp, tagsData));
+                                    caseSensitiveFilter, regExp, preserve, tagsData));
                         } catch (Exception e) {
                             e.printStackTrace();
                             throw e;
@@ -393,7 +399,8 @@ public class XliffStore {
     }
 
     private String segmentToHTML(int index, String file, String unit, String id, String status, Element source,
-            Element target, String filterText, boolean caseSensitive, boolean regExp, JSONObject meta) {
+            Element target, String filterText, boolean caseSensitive, boolean regExp, boolean preserve,
+            JSONObject meta) {
         StringBuilder html = new StringBuilder();
         html.append("<tr data-id=\"");
         html.append(id);
@@ -406,7 +413,11 @@ public class XliffStore {
         html.append("'>");
         html.append(index);
         html.append("</td>");
-        html.append("<td class='source' lang=\"");
+        html.append("<td class='source");
+        if (preserve) {
+            html.append(" preserve");
+        }
+        html.append("' lang=\"");
         html.append(srcLang);
         html.append("\"");
         if (Utils.isBiDi(srcLang)) {
@@ -417,7 +428,11 @@ public class XliffStore {
         html.append(elementToHTML(source, filterText, caseSensitive, regExp, meta));
         html.append("</td>");
         html.append("<td class='middle'><input type='checkbox' class='rowCheck'></td>");
-        html.append("<td class='target' lang=\"");
+        html.append("<td class='target");
+        if (preserve) {
+            html.append(" preserve");
+        }
+        html.append("' lang=\"");
         html.append(tgtLang);
         html.append("\"");
         if (Utils.isBiDi(tgtLang)) {
@@ -573,7 +588,7 @@ public class XliffStore {
                     String title = "";
                     if (originalData.has(dataRef)) {
                         title = originalData.getString(dataRef);
-                    } 
+                    }
                     text.append(XliffUtils.unquote(XliffUtils.cleanAngles(title)));
                     text.append("\"/>");
                 }

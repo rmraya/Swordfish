@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<srx version="2.0" xmlns="http://www.lisa.org/srx20" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.lisa.org/srx20 srx20.xsd">
-  <!--   =======================================================   -->
-  <!--   Copyright 2008-2020 © Maxprograms                         -->
-  <!--   This file is made available under the terms of the        -->
-  <!--   Eclipse Public License (EPL)                              -->
-  <!--   Revision: 7E2-B-8                                         -->
-  <!--   http://www.maxprograms.com                                -->
-  <!--   =======================================================   -->
+<srx version="2.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.lisa.org/srx20 srx20.xsd" xmlns="http://www.lisa.org/srx20">
+  <!--    =======================================================    -->
+  <!--    Copyright 2008-2020 © Maxprograms                          -->
+  <!--    This file is made available under the terms of the         -->
+  <!--    Eclipse Public License (EPL)                               -->
+  <!--    Revision: 7E2-B-8                                          -->
+  <!--    http://www.maxprograms.com                                 -->
+  <!--    =======================================================    -->
   <header cascade="yes" segmentsubflows="yes">
     <formathandle include="no" type="start"/>
     <formathandle include="yes" type="end"/>
@@ -14,7 +14,7 @@
   </header>
   <body>
     <languagerules>
-<languagerule languagerulename="Catalan">
+      <languagerule languagerulename="Catalan">
         <rule break="no">
           <beforebreak>\ba\. C\.</beforebreak>
           <afterbreak>\s</afterbreak>
@@ -879,13 +879,13 @@
           <beforebreak>\búlt\.</beforebreak>
           <afterbreak>\s</afterbreak>
         </rule>
-       </languagerule>
-
-<languagerule languagerulename="Chinese">
-<rule>
-<beforebreak>[｡。．！？]+</beforebreak></rule></languagerule>
-
-<languagerule languagerulename="Czech">
+      </languagerule>
+      <languagerule languagerulename="Chinese">
+        <rule>
+          <beforebreak>[｡。．！？]+</beforebreak>
+        </rule>
+      </languagerule>
+      <languagerule languagerulename="Czech">
         <rule break="no">
           <beforebreak>\ba kol\.</beforebreak>
           <afterbreak>\s</afterbreak>
@@ -1214,9 +1214,8 @@
           <beforebreak>\bspol\.</beforebreak>
           <afterbreak>\s</afterbreak>
         </rule>
-       </languagerule>
-
-<languagerule languagerulename="Danish">
+      </languagerule>
+      <languagerule languagerulename="Danish">
         <rule break="no">
           <beforebreak>\b[Aa]dm\.</beforebreak>
           <afterbreak>\s</afterbreak>
@@ -2045,9 +2044,8 @@
           <beforebreak>\bøvr\.</beforebreak>
           <afterbreak>\s</afterbreak>
         </rule>
-       </languagerule>
-
-<languagerule languagerulename="Dutch">
+      </languagerule>
+      <languagerule languagerulename="Dutch">
         <rule break="no">
           <beforebreak>\b[Aa]\.d\.</beforebreak>
           <afterbreak>\s</afterbreak>
@@ -3308,133 +3306,494 @@
           <beforebreak>\b[Zz]w\.bew\.</beforebreak>
           <afterbreak>\s</afterbreak>
         </rule>
-       </languagerule>
-
-<languagerule languagerulename="English">
-<rule break="no"><beforebreak>\b[Aa]bs\.</beforebreak><afterbreak>\s</afterbreak></rule>
-<rule break="no"><beforebreak>\b[Aa]bstr\.</beforebreak><afterbreak>\s</afterbreak></rule>
-<rule break="no"><beforebreak>\bAdd\.</beforebreak><afterbreak>\s</afterbreak></rule>
-<rule break="no"><beforebreak>\bapp\.</beforebreak><afterbreak>\s</afterbreak></rule>
-<rule break="no"><beforebreak>\bappr\.</beforebreak><afterbreak>\s</afterbreak></rule>
-<rule break="no"><beforebreak>\b[Aa]pprox\.</beforebreak><afterbreak>\s</afterbreak></rule>
-<rule break="no"><beforebreak>\b[Aa]pr\.</beforebreak><afterbreak>\s</afterbreak></rule>
-<rule break="no"><beforebreak>\b[Aa]tm\.</beforebreak><afterbreak>\s</afterbreak></rule>
-<rule break="no"><beforebreak>\b[Aa]ug\.</beforebreak><afterbreak>\s</afterbreak></rule>
-<rule break="no"><beforebreak>\b[Bb]ill\.</beforebreak><afterbreak>\s</afterbreak></rule>
-<rule break="no"><beforebreak>\b[Bb]n\.</beforebreak><afterbreak>\s</afterbreak></rule>
-<rule break="no"><beforebreak>\b[Bb]ull\.</beforebreak><afterbreak>\s</afterbreak></rule>
-<rule break="no"><beforebreak>\b[Cc]a\.</beforebreak><afterbreak>\s</afterbreak></rule>
-<rule break="no"><beforebreak>\b[Cc]alc\.</beforebreak><afterbreak>\s</afterbreak></rule>
-<rule break="no"><beforebreak>\b[Cc]apt\.</beforebreak><afterbreak>\s</afterbreak></rule>
-<rule break="no"><beforebreak>\bCdn\.</beforebreak><afterbreak>\s</afterbreak></rule>
-<rule break="no"><beforebreak>\bcert\.</beforebreak><afterbreak>\s</afterbreak></rule>
-<rule break="no"><beforebreak>\bC[Ff]\.</beforebreak><afterbreak>\s</afterbreak></rule>
-<rule break="no"><beforebreak>\bCh\.</beforebreak><afterbreak>\s</afterbreak></rule>
-<rule break="no"><beforebreak>\b[Cc]hap\.</beforebreak><afterbreak>\s</afterbreak></rule>
-<rule break="no"><beforebreak>\bcirc\.</beforebreak><afterbreak>\s</afterbreak></rule>
-<rule break="no"><beforebreak>\b[Cc]oeff\.</beforebreak><afterbreak>\s</afterbreak></rule>
-<rule break="no"><beforebreak>\b[Cc]ol\.</beforebreak><afterbreak>\s</afterbreak></rule>
-<rule break="no"><beforebreak>\bCom\.</beforebreak><afterbreak>\s</afterbreak></rule>
-<rule break="no"><beforebreak>\b[Cc]onc\.</beforebreak><afterbreak>\s</afterbreak></rule>
-<rule break="no"><beforebreak>\b[Cc]ond\.</beforebreak><afterbreak>\s</afterbreak></rule>
-<rule break="no"><beforebreak>\bD\.</beforebreak><afterbreak>\s</afterbreak></rule>
-<rule break="no"><beforebreak>\b[Dd]ec\.</beforebreak><afterbreak>\s</afterbreak></rule>
-<rule break="no"><beforebreak>\b[Dd]eriv\.</beforebreak><afterbreak>\s</afterbreak></rule>
-<rule break="no"><beforebreak>\b[Dd]ia\.</beforebreak><afterbreak>\s</afterbreak></rule>
-<rule break="no"><beforebreak>\b[Dd]iam\.</beforebreak><afterbreak>\s</afterbreak></rule>
-<rule break="no"><beforebreak>\b[Dd]in\.</beforebreak><afterbreak>\s</afterbreak></rule>
-<rule break="no"><beforebreak>\b[Dd]ir\.</beforebreak><afterbreak>\s</afterbreak></rule>
-<rule break="no"><beforebreak>\bDiv\.</beforebreak><afterbreak>\s</afterbreak></rule>
-<rule break="no"><beforebreak>\bdoc\.com\.</beforebreak><afterbreak>\s</afterbreak></rule>
-<rule break="no"><beforebreak>\b[Dd]ocs\.</beforebreak><afterbreak>\s</afterbreak></rule>
-<rule break="no"><beforebreak>\b[Dd]ott\.</beforebreak><afterbreak>\s</afterbreak></rule>
-<rule break="no"><beforebreak>\b[Dd]r\.</beforebreak><afterbreak>\s</afterbreak></rule>
-<rule break="no"><beforebreak>\b[Ee]\.g\.</beforebreak><afterbreak>\s</afterbreak></rule>
-<rule break="no"><beforebreak>\beg\.</beforebreak><afterbreak>\s</afterbreak></rule>
-<rule break="no"><beforebreak>\b[Ee]sp\.</beforebreak><afterbreak>\s</afterbreak></rule>
-<rule break="no"><beforebreak>\b[Ee]st\.</beforebreak><afterbreak>\s</afterbreak></rule>
-<rule break="no"><beforebreak>\bestim\.</beforebreak><afterbreak>\s</afterbreak></rule>
-<rule break="no"><beforebreak>\b[Ee]xc\.</beforebreak><afterbreak>\s</afterbreak></rule>
-<rule break="no"><beforebreak>\b[Ee]xcl\.</beforebreak><afterbreak>\s</afterbreak></rule>
-<rule break="no"><beforebreak>\b[Ff]eb\.</beforebreak><afterbreak>\s</afterbreak></rule>
-<rule break="no"><beforebreak>\b[Ff]ed\.</beforebreak><afterbreak>\s</afterbreak></rule>
-<rule break="no"><beforebreak>\bF[Ii][Gg]\.</beforebreak><afterbreak>\s</afterbreak></rule>
-<rule break="no"><beforebreak>\bFIGS\.</beforebreak><afterbreak>\s</afterbreak></rule>
-<rule break="no"><beforebreak>\b[Ff]ri\.</beforebreak><afterbreak>\s</afterbreak></rule>
-<rule break="no"><beforebreak>\b[Gg]ovt\.</beforebreak><afterbreak>\s</afterbreak></rule>
-<rule break="no"><beforebreak>\b[Ii]\.e\.</beforebreak><afterbreak>\s</afterbreak></rule>
-<rule break="no"><beforebreak>\bie\.</beforebreak><afterbreak>\s</afterbreak></rule>
-<rule break="no"><beforebreak>\b[Ii]nc\.</beforebreak><afterbreak>\s</afterbreak></rule>
-<rule break="no"><beforebreak>\b[Ii]ncl\.</beforebreak><afterbreak>\s</afterbreak></rule>
-<rule break="no"><beforebreak>\b[Ii]nd\.</beforebreak><afterbreak>\s</afterbreak></rule>
-<rule break="no"><beforebreak>\b[Ii]ng\.</beforebreak><afterbreak>\s</afterbreak></rule>
-<rule break="no"><beforebreak>\bINT\.</beforebreak><afterbreak>\s</afterbreak></rule>
-<rule break="no"><beforebreak>\b[Jj]an\.</beforebreak><afterbreak>\s</afterbreak></rule>
-<rule break="no"><beforebreak>\bJul\.</beforebreak><afterbreak>\s</afterbreak></rule>
-<rule break="no"><beforebreak>\bJun\.</beforebreak><afterbreak>\s</afterbreak></rule>
-<rule break="no"><beforebreak>\bLtd\.</beforebreak><afterbreak>\s</afterbreak></rule>
-<rule break="no"><beforebreak>\b[Mm]ar\.</beforebreak><afterbreak>\s</afterbreak></rule>
-<rule break="no"><beforebreak>\b[Mm]ax\.</beforebreak><afterbreak>\s</afterbreak></rule>
-<rule break="no"><beforebreak>\b[Mm]essrs\.</beforebreak><afterbreak>\s</afterbreak></rule>
-<rule break="no"><beforebreak>\b[Mm]fg\.</beforebreak><afterbreak>\s</afterbreak></rule>
-<rule break="no"><beforebreak>\b[Mm]gr\.</beforebreak><afterbreak>\s</afterbreak></rule>
-<rule break="no"><beforebreak>\b[Mm]ill\.</beforebreak><afterbreak>\s</afterbreak></rule>
-<rule break="no"><beforebreak>\b[Mm]isc\.</beforebreak><afterbreak>\s</afterbreak></rule>
-<rule break="no"><beforebreak>\b[Mm]M\.</beforebreak><afterbreak>\s</afterbreak></rule>
-<rule break="no"><beforebreak>\b[Mm]on\.</beforebreak><afterbreak>\s</afterbreak></rule>
-<rule break="no"><beforebreak>\bM[Rr]\.</beforebreak><afterbreak>\s</afterbreak></rule>
-<rule break="no"><beforebreak>\bM[Rr][Ss]\.</beforebreak><afterbreak>\s</afterbreak></rule>
-<rule break="no"><beforebreak>\b[Mm]s\.</beforebreak><afterbreak>\s</afterbreak></rule>
-<rule break="no"><beforebreak>\b[Mm]t\.</beforebreak><afterbreak>\s</afterbreak></rule>
-<rule break="no"><beforebreak>\b[Nn]eg\.</beforebreak><afterbreak>\s</afterbreak></rule>
-<rule break="no"><beforebreak>\bN[Oo]\.</beforebreak><afterbreak>\s</afterbreak></rule>
-<rule break="no"><beforebreak>\b[Nn]os\.</beforebreak><afterbreak>\s</afterbreak></rule>
-<rule break="no"><beforebreak>\b[Nn]ov\.</beforebreak><afterbreak>\s</afterbreak></rule>
-<rule break="no"><beforebreak>\bN°\.</beforebreak><afterbreak>\s</afterbreak></rule>
-<rule break="no"><beforebreak>\b[Oo]\.J\.</beforebreak><afterbreak>\s</afterbreak></rule>
-<rule break="no"><beforebreak>\bObj\.</beforebreak><afterbreak>\s</afterbreak></rule>
-<rule break="no"><beforebreak>\b[Oo]ct\.</beforebreak><afterbreak>\s</afterbreak></rule>
-<rule break="no"><beforebreak>\bpag\.</beforebreak><afterbreak>\s</afterbreak></rule>
-<rule break="no"><beforebreak>\b[Pp]ar\.</beforebreak><afterbreak>\s</afterbreak></rule>
-<rule break="no"><beforebreak>\b[Pp]ara\.</beforebreak><afterbreak>\s</afterbreak></rule>
-<rule break="no"><beforebreak>\b[Pp]os\.</beforebreak><afterbreak>\s</afterbreak></rule>
-<rule break="no"><beforebreak>\b[Pp]p\.</beforebreak><afterbreak>\s</afterbreak></rule>
-<rule break="no"><beforebreak>\b[Pp]rep\.</beforebreak><afterbreak>\s</afterbreak></rule>
-<rule break="no"><beforebreak>\b[Pp]rof\.</beforebreak><afterbreak>\s</afterbreak></rule>
-<rule break="no"><beforebreak>\bPte\.</beforebreak><afterbreak>\s</afterbreak></rule>
-<rule break="no"><beforebreak>\bPvt\.</beforebreak><afterbreak>\s</afterbreak></rule>
-<rule break="no"><beforebreak>\b[Rr]ec\.</beforebreak><afterbreak>\s</afterbreak></rule>
-<rule break="no"><beforebreak>\b[Rr]ef\.</beforebreak><afterbreak>\s</afterbreak></rule>
-<rule break="no"><beforebreak>\b[Rr]eg\.</beforebreak><afterbreak>\s</afterbreak></rule>
-<rule break="no"><beforebreak>\b[Rr]es\.</beforebreak><afterbreak>\s</afterbreak></rule>
-<rule break="no"><beforebreak>\b[Rr]esp\.</beforebreak><afterbreak>\s</afterbreak></rule>
-<rule break="no"><beforebreak>\b[Rr]ev\.</beforebreak><afterbreak>\s</afterbreak></rule>
-<rule break="no"><beforebreak>\b[Ss]at\.</beforebreak><afterbreak>\s</afterbreak></rule>
-<rule break="no"><beforebreak>\b[Ss]ep\.</beforebreak><afterbreak>\s</afterbreak></rule>
-<rule break="no"><beforebreak>\b[Ss]ept\.</beforebreak><afterbreak>\s</afterbreak></rule>
-<rule break="no"><beforebreak>\bsp\.</beforebreak><afterbreak>\s</afterbreak></rule>
-<rule break="no"><beforebreak>\bspp\.</beforebreak><afterbreak>\s</afterbreak></rule>
-<rule break="no"><beforebreak>\b[Ss]q\.</beforebreak><afterbreak>\s</afterbreak></rule>
-<rule break="no"><beforebreak>\b[Ss]t\.</beforebreak><afterbreak>\s</afterbreak></rule>
-<rule break="no"><beforebreak>\b[Ss]ta\.</beforebreak><afterbreak>\s</afterbreak></rule>
-<rule break="no"><beforebreak>\b[Ss]un\.</beforebreak><afterbreak>\s</afterbreak></rule>
-<rule break="no"><beforebreak>\b[Ss]uppl\.</beforebreak><afterbreak>\s</afterbreak></rule>
-<rule break="no"><beforebreak>\b[Tt]el\.</beforebreak><afterbreak>\s</afterbreak></rule>
-<rule break="no"><beforebreak>\b[Tt]emp\.</beforebreak><afterbreak>\s</afterbreak></rule>
-<rule break="no"><beforebreak>\b[Tt]hu\.</beforebreak><afterbreak>\s</afterbreak></rule>
-<rule break="no"><beforebreak>\b[Tt]hur\.</beforebreak><afterbreak>\s</afterbreak></rule>
-<rule break="no"><beforebreak>\b[Tt]hurs\.</beforebreak><afterbreak>\s</afterbreak></rule>
-<rule break="no"><beforebreak>\b[Tt]ue\.</beforebreak><afterbreak>\s</afterbreak></rule>
-<rule break="no"><beforebreak>\b[Tt]ues\.</beforebreak><afterbreak>\s</afterbreak></rule>
-<rule break="no"><beforebreak>\b[Uu]niv\.</beforebreak><afterbreak>\s</afterbreak></rule>
-<rule break="no"><beforebreak>\bU\.K\.</beforebreak><afterbreak>\s</afterbreak></rule>
-<rule break="no"><beforebreak>\b[Uu]til\.</beforebreak><afterbreak>\s</afterbreak></rule>
-<rule break="no"><beforebreak>\b[Vv]iz\.</beforebreak><afterbreak>\s</afterbreak></rule>
-<rule break="no"><beforebreak>\bvs\.</beforebreak><afterbreak>\s</afterbreak></rule>
-<rule break="no"><beforebreak>\b[Ww]ed\.</beforebreak><afterbreak>\s</afterbreak></rule>
-</languagerule>
-
-<languagerule languagerulename="Finnish">
+      </languagerule>
+      <languagerule languagerulename="English">
+        <rule break="no">
+          <beforebreak>\b[Aa]bs\.</beforebreak>
+          <afterbreak>\s</afterbreak>
+        </rule>
+        <rule break="no">
+          <beforebreak>\b[Aa]bstr\.</beforebreak>
+          <afterbreak>\s</afterbreak>
+        </rule>
+        <rule break="no">
+          <beforebreak>\bAdd\.</beforebreak>
+          <afterbreak>\s</afterbreak>
+        </rule>
+        <rule break="no">
+          <beforebreak>\bapp\.</beforebreak>
+          <afterbreak>\s</afterbreak>
+        </rule>
+        <rule break="no">
+          <beforebreak>\bappr\.</beforebreak>
+          <afterbreak>\s</afterbreak>
+        </rule>
+        <rule break="no">
+          <beforebreak>\b[Aa]pprox\.</beforebreak>
+          <afterbreak>\s</afterbreak>
+        </rule>
+        <rule break="no">
+          <beforebreak>\b[Aa]pr\.</beforebreak>
+          <afterbreak>\s</afterbreak>
+        </rule>
+        <rule break="no">
+          <beforebreak>\b[Aa]tm\.</beforebreak>
+          <afterbreak>\s</afterbreak>
+        </rule>
+        <rule break="no">
+          <beforebreak>\b[Aa]ug\.</beforebreak>
+          <afterbreak>\s</afterbreak>
+        </rule>
+        <rule break="no">
+          <beforebreak>\b[Bb]ill\.</beforebreak>
+          <afterbreak>\s</afterbreak>
+        </rule>
+        <rule break="no">
+          <beforebreak>\b[Bb]n\.</beforebreak>
+          <afterbreak>\s</afterbreak>
+        </rule>
+        <rule break="no">
+          <beforebreak>\b[Bb]ull\.</beforebreak>
+          <afterbreak>\s</afterbreak>
+        </rule>
+        <rule break="no">
+          <beforebreak>\b[Cc]a\.</beforebreak>
+          <afterbreak>\s</afterbreak>
+        </rule>
+        <rule break="no">
+          <beforebreak>\b[Cc]alc\.</beforebreak>
+          <afterbreak>\s</afterbreak>
+        </rule>
+        <rule break="no">
+          <beforebreak>\b[Cc]apt\.</beforebreak>
+          <afterbreak>\s</afterbreak>
+        </rule>
+        <rule break="no">
+          <beforebreak>\bCdn\.</beforebreak>
+          <afterbreak>\s</afterbreak>
+        </rule>
+        <rule break="no">
+          <beforebreak>\bcert\.</beforebreak>
+          <afterbreak>\s</afterbreak>
+        </rule>
+        <rule break="no">
+          <beforebreak>\bC[Ff]\.</beforebreak>
+          <afterbreak>\s</afterbreak>
+        </rule>
+        <rule break="no">
+          <beforebreak>\bCh\.</beforebreak>
+          <afterbreak>\s</afterbreak>
+        </rule>
+        <rule break="no">
+          <beforebreak>\b[Cc]hap\.</beforebreak>
+          <afterbreak>\s</afterbreak>
+        </rule>
+        <rule break="no">
+          <beforebreak>\bcirc\.</beforebreak>
+          <afterbreak>\s</afterbreak>
+        </rule>
+        <rule break="no">
+          <beforebreak>\b[Cc]oeff\.</beforebreak>
+          <afterbreak>\s</afterbreak>
+        </rule>
+        <rule break="no">
+          <beforebreak>\b[Cc]ol\.</beforebreak>
+          <afterbreak>\s</afterbreak>
+        </rule>
+        <rule break="no">
+          <beforebreak>\bCom\.</beforebreak>
+          <afterbreak>\s</afterbreak>
+        </rule>
+        <rule break="no">
+          <beforebreak>\b[Cc]onc\.</beforebreak>
+          <afterbreak>\s</afterbreak>
+        </rule>
+        <rule break="no">
+          <beforebreak>\b[Cc]ond\.</beforebreak>
+          <afterbreak>\s</afterbreak>
+        </rule>
+        <rule break="no">
+          <beforebreak>\bD\.</beforebreak>
+          <afterbreak>\s</afterbreak>
+        </rule>
+        <rule break="no">
+          <beforebreak>\b[Dd]ec\.</beforebreak>
+          <afterbreak>\s</afterbreak>
+        </rule>
+        <rule break="no">
+          <beforebreak>\b[Dd]eriv\.</beforebreak>
+          <afterbreak>\s</afterbreak>
+        </rule>
+        <rule break="no">
+          <beforebreak>\b[Dd]ia\.</beforebreak>
+          <afterbreak>\s</afterbreak>
+        </rule>
+        <rule break="no">
+          <beforebreak>\b[Dd]iam\.</beforebreak>
+          <afterbreak>\s</afterbreak>
+        </rule>
+        <rule break="no">
+          <beforebreak>\b[Dd]in\.</beforebreak>
+          <afterbreak>\s</afterbreak>
+        </rule>
+        <rule break="no">
+          <beforebreak>\b[Dd]ir\.</beforebreak>
+          <afterbreak>\s</afterbreak>
+        </rule>
+        <rule break="no">
+          <beforebreak>\bDiv\.</beforebreak>
+          <afterbreak>\s</afterbreak>
+        </rule>
+        <rule break="no">
+          <beforebreak>\bdoc\.com\.</beforebreak>
+          <afterbreak>\s</afterbreak>
+        </rule>
+        <rule break="no">
+          <beforebreak>\b[Dd]ocs\.</beforebreak>
+          <afterbreak>\s</afterbreak>
+        </rule>
+        <rule break="no">
+          <beforebreak>\b[Dd]ott\.</beforebreak>
+          <afterbreak>\s</afterbreak>
+        </rule>
+        <rule break="no">
+          <beforebreak>\b[Dd]r\.</beforebreak>
+          <afterbreak>\s</afterbreak>
+        </rule>
+        <rule break="no">
+          <beforebreak>\b[Ee]\.g\.</beforebreak>
+          <afterbreak>\s</afterbreak>
+        </rule>
+        <rule break="no">
+          <beforebreak>\beg\.</beforebreak>
+          <afterbreak>\s</afterbreak>
+        </rule>
+        <rule break="no">
+          <beforebreak>\b[Ee]sp\.</beforebreak>
+          <afterbreak>\s</afterbreak>
+        </rule>
+        <rule break="no">
+          <beforebreak>\b[Ee]st\.</beforebreak>
+          <afterbreak>\s</afterbreak>
+        </rule>
+        <rule break="no">
+          <beforebreak>\bestim\.</beforebreak>
+          <afterbreak>\s</afterbreak>
+        </rule>
+        <rule break="no">
+          <beforebreak>\b[Ee]xc\.</beforebreak>
+          <afterbreak>\s</afterbreak>
+        </rule>
+        <rule break="no">
+          <beforebreak>\b[Ee]xcl\.</beforebreak>
+          <afterbreak>\s</afterbreak>
+        </rule>
+        <rule break="no">
+          <beforebreak>\b[Ff]eb\.</beforebreak>
+          <afterbreak>\s</afterbreak>
+        </rule>
+        <rule break="no">
+          <beforebreak>\b[Ff]ed\.</beforebreak>
+          <afterbreak>\s</afterbreak>
+        </rule>
+        <rule break="no">
+          <beforebreak>\bF[Ii][Gg]\.</beforebreak>
+          <afterbreak>\s</afterbreak>
+        </rule>
+        <rule break="no">
+          <beforebreak>\bFIGS\.</beforebreak>
+          <afterbreak>\s</afterbreak>
+        </rule>
+        <rule break="no">
+          <beforebreak>\b[Ff]ri\.</beforebreak>
+          <afterbreak>\s</afterbreak>
+        </rule>
+        <rule break="no">
+          <beforebreak>\b[Gg]ovt\.</beforebreak>
+          <afterbreak>\s</afterbreak>
+        </rule>
+        <rule break="no">
+          <beforebreak>\b[Ii]\.e\.</beforebreak>
+          <afterbreak>\s</afterbreak>
+        </rule>
+        <rule break="no">
+          <beforebreak>\bie\.</beforebreak>
+          <afterbreak>\s</afterbreak>
+        </rule>
+        <rule break="no">
+          <beforebreak>\b[Ii]nc\.</beforebreak>
+          <afterbreak>\s</afterbreak>
+        </rule>
+        <rule break="no">
+          <beforebreak>\b[Ii]ncl\.</beforebreak>
+          <afterbreak>\s</afterbreak>
+        </rule>
+        <rule break="no">
+          <beforebreak>\b[Ii]nd\.</beforebreak>
+          <afterbreak>\s</afterbreak>
+        </rule>
+        <rule break="no">
+          <beforebreak>\b[Ii]ng\.</beforebreak>
+          <afterbreak>\s</afterbreak>
+        </rule>
+        <rule break="no">
+          <beforebreak>\bINT\.</beforebreak>
+          <afterbreak>\s</afterbreak>
+        </rule>
+        <rule break="no">
+          <beforebreak>\b[Jj]an\.</beforebreak>
+          <afterbreak>\s</afterbreak>
+        </rule>
+        <rule break="no">
+          <beforebreak>\bJul\.</beforebreak>
+          <afterbreak>\s</afterbreak>
+        </rule>
+        <rule break="no">
+          <beforebreak>\bJun\.</beforebreak>
+          <afterbreak>\s</afterbreak>
+        </rule>
+        <rule break="no">
+          <beforebreak>\bLtd\.</beforebreak>
+          <afterbreak>\s</afterbreak>
+        </rule>
+        <rule break="no">
+          <beforebreak>\b[Mm]ar\.</beforebreak>
+          <afterbreak>\s</afterbreak>
+        </rule>
+        <rule break="no">
+          <beforebreak>\b[Mm]ax\.</beforebreak>
+          <afterbreak>\s</afterbreak>
+        </rule>
+        <rule break="no">
+          <beforebreak>\b[Mm]essrs\.</beforebreak>
+          <afterbreak>\s</afterbreak>
+        </rule>
+        <rule break="no">
+          <beforebreak>\b[Mm]fg\.</beforebreak>
+          <afterbreak>\s</afterbreak>
+        </rule>
+        <rule break="no">
+          <beforebreak>\b[Mm]gr\.</beforebreak>
+          <afterbreak>\s</afterbreak>
+        </rule>
+        <rule break="no">
+          <beforebreak>\b[Mm]ill\.</beforebreak>
+          <afterbreak>\s</afterbreak>
+        </rule>
+        <rule break="no">
+          <beforebreak>\b[Mm]isc\.</beforebreak>
+          <afterbreak>\s</afterbreak>
+        </rule>
+        <rule break="no">
+          <beforebreak>\b[Mm]M\.</beforebreak>
+          <afterbreak>\s</afterbreak>
+        </rule>
+        <rule break="no">
+          <beforebreak>\b[Mm]on\.</beforebreak>
+          <afterbreak>\s</afterbreak>
+        </rule>
+        <rule break="no">
+          <beforebreak>\bM[Rr]\.</beforebreak>
+          <afterbreak>\s</afterbreak>
+        </rule>
+        <rule break="no">
+          <beforebreak>\bM[Rr][Ss]\.</beforebreak>
+          <afterbreak>\s</afterbreak>
+        </rule>
+        <rule break="no">
+          <beforebreak>\b[Mm]s\.</beforebreak>
+          <afterbreak>\s</afterbreak>
+        </rule>
+        <rule break="no">
+          <beforebreak>\b[Mm]t\.</beforebreak>
+          <afterbreak>\s</afterbreak>
+        </rule>
+        <rule break="no">
+          <beforebreak>\b[Nn]eg\.</beforebreak>
+          <afterbreak>\s</afterbreak>
+        </rule>
+        <rule break="no">
+          <beforebreak>\bN[Oo]\.</beforebreak>
+          <afterbreak>\s</afterbreak>
+        </rule>
+        <rule break="no">
+          <beforebreak>\b[Nn]os\.</beforebreak>
+          <afterbreak>\s</afterbreak>
+        </rule>
+        <rule break="no">
+          <beforebreak>\b[Nn]ov\.</beforebreak>
+          <afterbreak>\s</afterbreak>
+        </rule>
+        <rule break="no">
+          <beforebreak>\bN°\.</beforebreak>
+          <afterbreak>\s</afterbreak>
+        </rule>
+        <rule break="no">
+          <beforebreak>\b[Oo]\.J\.</beforebreak>
+          <afterbreak>\s</afterbreak>
+        </rule>
+        <rule break="no">
+          <beforebreak>\bObj\.</beforebreak>
+          <afterbreak>\s</afterbreak>
+        </rule>
+        <rule break="no">
+          <beforebreak>\b[Oo]ct\.</beforebreak>
+          <afterbreak>\s</afterbreak>
+        </rule>
+        <rule break="no">
+          <beforebreak>\bpag\.</beforebreak>
+          <afterbreak>\s</afterbreak>
+        </rule>
+        <rule break="no">
+          <beforebreak>\b[Pp]ar\.</beforebreak>
+          <afterbreak>\s</afterbreak>
+        </rule>
+        <rule break="no">
+          <beforebreak>\b[Pp]ara\.</beforebreak>
+          <afterbreak>\s</afterbreak>
+        </rule>
+        <rule break="no">
+          <beforebreak>\b[Pp]os\.</beforebreak>
+          <afterbreak>\s</afterbreak>
+        </rule>
+        <rule break="no">
+          <beforebreak>\b[Pp]p\.</beforebreak>
+          <afterbreak>\s</afterbreak>
+        </rule>
+        <rule break="no">
+          <beforebreak>\b[Pp]rep\.</beforebreak>
+          <afterbreak>\s</afterbreak>
+        </rule>
+        <rule break="no">
+          <beforebreak>\b[Pp]rof\.</beforebreak>
+          <afterbreak>\s</afterbreak>
+        </rule>
+        <rule break="no">
+          <beforebreak>\bPte\.</beforebreak>
+          <afterbreak>\s</afterbreak>
+        </rule>
+        <rule break="no">
+          <beforebreak>\bPvt\.</beforebreak>
+          <afterbreak>\s</afterbreak>
+        </rule>
+        <rule break="no">
+          <beforebreak>\b[Rr]ec\.</beforebreak>
+          <afterbreak>\s</afterbreak>
+        </rule>
+        <rule break="no">
+          <beforebreak>\b[Rr]ef\.</beforebreak>
+          <afterbreak>\s</afterbreak>
+        </rule>
+        <rule break="no">
+          <beforebreak>\b[Rr]eg\.</beforebreak>
+          <afterbreak>\s</afterbreak>
+        </rule>
+        <rule break="no">
+          <beforebreak>\b[Rr]es\.</beforebreak>
+          <afterbreak>\s</afterbreak>
+        </rule>
+        <rule break="no">
+          <beforebreak>\b[Rr]esp\.</beforebreak>
+          <afterbreak>\s</afterbreak>
+        </rule>
+        <rule break="no">
+          <beforebreak>\b[Rr]ev\.</beforebreak>
+          <afterbreak>\s</afterbreak>
+        </rule>
+        <rule break="no">
+          <beforebreak>\b[Ss]at\.</beforebreak>
+          <afterbreak>\s</afterbreak>
+        </rule>
+        <rule break="no">
+          <beforebreak>\b[Ss]ep\.</beforebreak>
+          <afterbreak>\s</afterbreak>
+        </rule>
+        <rule break="no">
+          <beforebreak>\b[Ss]ept\.</beforebreak>
+          <afterbreak>\s</afterbreak>
+        </rule>
+        <rule break="no">
+          <beforebreak>\bsp\.</beforebreak>
+          <afterbreak>\s</afterbreak>
+        </rule>
+        <rule break="no">
+          <beforebreak>\bspp\.</beforebreak>
+          <afterbreak>\s</afterbreak>
+        </rule>
+        <rule break="no">
+          <beforebreak>\b[Ss]q\.</beforebreak>
+          <afterbreak>\s</afterbreak>
+        </rule>
+        <rule break="no">
+          <beforebreak>\b[Ss]t\.</beforebreak>
+          <afterbreak>\s</afterbreak>
+        </rule>
+        <rule break="no">
+          <beforebreak>\b[Ss]ta\.</beforebreak>
+          <afterbreak>\s</afterbreak>
+        </rule>
+        <rule break="no">
+          <beforebreak>\b[Ss]un\.</beforebreak>
+          <afterbreak>\s</afterbreak>
+        </rule>
+        <rule break="no">
+          <beforebreak>\b[Ss]uppl\.</beforebreak>
+          <afterbreak>\s</afterbreak>
+        </rule>
+        <rule break="no">
+          <beforebreak>\b[Tt]el\.</beforebreak>
+          <afterbreak>\s</afterbreak>
+        </rule>
+        <rule break="no">
+          <beforebreak>\b[Tt]emp\.</beforebreak>
+          <afterbreak>\s</afterbreak>
+        </rule>
+        <rule break="no">
+          <beforebreak>\b[Tt]hu\.</beforebreak>
+          <afterbreak>\s</afterbreak>
+        </rule>
+        <rule break="no">
+          <beforebreak>\b[Tt]hur\.</beforebreak>
+          <afterbreak>\s</afterbreak>
+        </rule>
+        <rule break="no">
+          <beforebreak>\b[Tt]hurs\.</beforebreak>
+          <afterbreak>\s</afterbreak>
+        </rule>
+        <rule break="no">
+          <beforebreak>\b[Tt]ue\.</beforebreak>
+          <afterbreak>\s</afterbreak>
+        </rule>
+        <rule break="no">
+          <beforebreak>\b[Tt]ues\.</beforebreak>
+          <afterbreak>\s</afterbreak>
+        </rule>
+        <rule break="no">
+          <beforebreak>\b[Uu]niv\.</beforebreak>
+          <afterbreak>\s</afterbreak>
+        </rule>
+        <rule break="no">
+          <beforebreak>\bU\.K\.</beforebreak>
+          <afterbreak>\s</afterbreak>
+        </rule>
+        <rule break="no">
+          <beforebreak>\b[Uu]til\.</beforebreak>
+          <afterbreak>\s</afterbreak>
+        </rule>
+        <rule break="no">
+          <beforebreak>\b[Vv]iz\.</beforebreak>
+          <afterbreak>\s</afterbreak>
+        </rule>
+        <rule break="no">
+          <beforebreak>\bvs\.</beforebreak>
+          <afterbreak>\s</afterbreak>
+        </rule>
+        <rule break="no">
+          <beforebreak>\b[Ww]ed\.</beforebreak>
+          <afterbreak>\s</afterbreak>
+        </rule>
+      </languagerule>
+      <languagerule languagerulename="Finnish">
         <rule break="no">
           <beforebreak>\balav\.</beforebreak>
           <afterbreak>\s</afterbreak>
@@ -4091,9 +4450,8 @@
           <beforebreak>\b[Yy]st\.</beforebreak>
           <afterbreak>\s</afterbreak>
         </rule>
-       </languagerule>
-
-<languagerule languagerulename="French">
+      </languagerule>
+      <languagerule languagerulename="French">
         <rule break="no">
           <beforebreak>\b[Aa]dd\.</beforebreak>
           <afterbreak>\s</afterbreak>
@@ -4614,9 +4972,8 @@
           <beforebreak>\b[Vv]ar\.</beforebreak>
           <afterbreak>\s</afterbreak>
         </rule>
-       </languagerule>
-
-<languagerule languagerulename="German">
+      </languagerule>
+      <languagerule languagerulename="German">
         <rule break="no">
           <beforebreak>\b[Aa]bb\.</beforebreak>
           <afterbreak>\s</afterbreak>
@@ -5053,9 +5410,8 @@
           <beforebreak>\bzzgl\.</beforebreak>
           <afterbreak>\s</afterbreak>
         </rule>
-       </languagerule>
-
-<languagerule languagerulename="Italian">
+      </languagerule>
+      <languagerule languagerulename="Italian">
         <rule break="no">
           <beforebreak>\b[Aa]bst\.</beforebreak>
           <afterbreak>\s</afterbreak>
@@ -5644,13 +6000,13 @@
           <beforebreak>\b[Vv]al\.p\.</beforebreak>
           <afterbreak>\s</afterbreak>
         </rule>
-       </languagerule>
-
-<languagerule languagerulename="Japanese">
-<rule>
-<beforebreak>[｡。．！？]+</beforebreak></rule></languagerule>
-
-<languagerule languagerulename="Polish">
+      </languagerule>
+      <languagerule languagerulename="Japanese">
+        <rule>
+          <beforebreak>[｡。．！？]+</beforebreak>
+        </rule>
+      </languagerule>
+      <languagerule languagerulename="Polish">
         <rule break="no">
           <beforebreak>\ba\.</beforebreak>
           <afterbreak>\s</afterbreak>
@@ -6651,49 +7007,48 @@
           <beforebreak>\bżeń\.</beforebreak>
           <afterbreak>\s</afterbreak>
         </rule>
-       <rule break="no">
-            <beforebreak>\bust\.</beforebreak>
-            <afterbreak>\s</afterbreak>
+        <rule break="no">
+          <beforebreak>\bust\.</beforebreak>
+          <afterbreak>\s</afterbreak>
         </rule>
         <rule break="no">
-            <beforebreak>\bpar\.</beforebreak>
-            <afterbreak>\s</afterbreak>
-        </rule>
-            <rule break="no">
-            <beforebreak>\bok\.</beforebreak>
-        <afterbreak>\s</afterbreak>
+          <beforebreak>\bpar\.</beforebreak>
+          <afterbreak>\s</afterbreak>
         </rule>
         <rule break="no">
-            <beforebreak>\bim\.</beforebreak>
-            <afterbreak>\s</afterbreak>
+          <beforebreak>\bok\.</beforebreak>
+          <afterbreak>\s</afterbreak>
         </rule>
         <rule break="no">
-            <beforebreak>\bst\.</beforebreak>
-            <afterbreak>\s</afterbreak>
+          <beforebreak>\bim\.</beforebreak>
+          <afterbreak>\s</afterbreak>
         </rule>
         <rule break="no">
-            <beforebreak>[0-9]{2,4}r\.</beforebreak>
-            <afterbreak>\s</afterbreak>
+          <beforebreak>\bst\.</beforebreak>
+          <afterbreak>\s</afterbreak>
         </rule>
         <rule break="no">
-            <beforebreak>\bkom\.</beforebreak>
-            <afterbreak>\s</afterbreak>
+          <beforebreak>[0-9]{2,4}r\.</beforebreak>
+          <afterbreak>\s</afterbreak>
         </rule>
         <rule break="no">
-            <beforebreak>\bk\.c\.</beforebreak>
-            <afterbreak>\s</afterbreak>
+          <beforebreak>\bkom\.</beforebreak>
+          <afterbreak>\s</afterbreak>
         </rule>
         <rule break="no">
-            <beforebreak>\s\(Dz\.</beforebreak>
-            <afterbreak>\s</afterbreak>
+          <beforebreak>\bk\.c\.</beforebreak>
+          <afterbreak>\s</afterbreak>
         </rule>
         <rule break="no">
-            <beforebreak>\bk\.p\.a\.</beforebreak>
-            <afterbreak>\s</afterbreak>
+          <beforebreak>\s\(Dz\.</beforebreak>
+          <afterbreak>\s</afterbreak>
         </rule>
-</languagerule>
-
-<languagerule languagerulename="Portuguese">
+        <rule break="no">
+          <beforebreak>\bk\.p\.a\.</beforebreak>
+          <afterbreak>\s</afterbreak>
+        </rule>
+      </languagerule>
+      <languagerule languagerulename="Portuguese">
         <rule break="no">
           <beforebreak>\bAdd\.</beforebreak>
           <afterbreak>\s</afterbreak>
@@ -6878,9 +7233,8 @@
           <beforebreak>\bvar\.</beforebreak>
           <afterbreak>\s</afterbreak>
         </rule>
-       </languagerule>
-
-    <languagerule languagerulename="Spanish">
+      </languagerule>
+      <languagerule languagerulename="Spanish">
         <rule break="no">
           <beforebreak>\bAp\.</beforebreak>
           <afterbreak>\s</afterbreak>
@@ -7193,9 +7547,8 @@
           <beforebreak>\bvs\.</beforebreak>
           <afterbreak>\s</afterbreak>
         </rule>
-       </languagerule>
-
-<languagerule languagerulename="Swedish">
+      </languagerule>
+      <languagerule languagerulename="Swedish">
         <rule break="no">
           <beforebreak>\b[Aa]dr\.</beforebreak>
           <afterbreak>\s</afterbreak>
@@ -7572,69 +7925,83 @@
           <beforebreak>\bö\.</beforebreak>
           <afterbreak>\s</afterbreak>
         </rule>
-       </languagerule>
-
-<languagerule languagerulename="Thai">
+      </languagerule>
+      <languagerule languagerulename="Thai">
         <rule break="yes">
           <beforebreak>.*</beforebreak>
           <afterbreak>\s</afterbreak>
         </rule>
-       </languagerule>
-
-<languagerule languagerulename="default">
-<rule break="no">
-<beforebreak>\w\s+[A-Z]\.</beforebreak>
-<afterbreak>\s+[A-Z]</afterbreak></rule>
-<rule break="no">
-<beforebreak>[\.\?!]+["'”\)]?</beforebreak>
-<afterbreak>\s+[a-zƒšœžßàáâãäåæçèéêëìíîïðñòóôõöøùúûüýþÿ]</afterbreak></rule>
-<rule break="no">
-<beforebreak>[\(\[\{][\.\?!][\)\]\}]</beforebreak></rule>
-<rule break="no">
-<beforebreak>\b\S{1,4}\.</beforebreak>
-<afterbreak>(\s|\xA0)[0-9\[\(]+</afterbreak></rule>
-<rule break="no">
-<beforebreak>\b\S{1,4}\.</beforebreak>
-<afterbreak>(\s|\xA0)[A-Z]{1,2}\d</afterbreak></rule>
-<rule break="no">
-<beforebreak>\b[Ee][Tt][Cc]\.</beforebreak>
-<afterbreak>\s</afterbreak></rule>
-<rule break="no">
-<beforebreak>\b:</beforebreak>
-<afterbreak>\s+\{\d\}</afterbreak></rule>
-<rule>
-<beforebreak>[\.\?!]+</beforebreak>
-<afterbreak>\s</afterbreak></rule>
-<rule>
-<beforebreak>\S:+["'”\)]?</beforebreak>
-<afterbreak>\s</afterbreak></rule>
-<rule>
-<beforebreak>\u2029</beforebreak></rule>
-<rule>
-<beforebreak>\S[\.\?!]+["'”\)]?</beforebreak>
-<afterbreak>\s</afterbreak></rule>
-<rule>
-<beforebreak>\S\t+</beforebreak></rule>
-</languagerule>
-</languagerules>
+      </languagerule>
+      <languagerule languagerulename="default">
+        <rule break="no">
+          <beforebreak>\w\s+[A-Z]\.</beforebreak>
+          <afterbreak>\s+[A-Z]</afterbreak>
+        </rule>
+        <rule break="no">
+          <beforebreak>\s+[A-Z]\.</beforebreak>
+          <afterbreak>\s+[A-Z][a-z]+</afterbreak>
+        </rule>
+        <rule break="no">
+          <beforebreak>[\.\?!]+["'”\)]?</beforebreak>
+          <afterbreak>\s+[a-zƒšœžßàáâãäåæçèéêëìíîïðñòóôõöøùúûüýþÿ]</afterbreak>
+        </rule>
+        <rule break="no">
+          <beforebreak>[\(\[\{][\.\?!][\)\]\}]</beforebreak>
+        </rule>
+        <rule break="no">
+          <beforebreak>\b\S{1,4}\.</beforebreak>
+          <afterbreak>(\s|\xA0)[0-9\[\(]+</afterbreak>
+        </rule>
+        <rule break="no">
+          <beforebreak>\b\S{1,4}\.</beforebreak>
+          <afterbreak>(\s|\xA0)[A-Z]{1,2}\d</afterbreak>
+        </rule>
+        <rule break="no">
+          <beforebreak>\b[Ee][Tt][Cc]\.</beforebreak>
+          <afterbreak>\s</afterbreak>
+        </rule>
+        <rule break="no">
+          <beforebreak>\b:</beforebreak>
+          <afterbreak>\s+\{\d\}</afterbreak>
+        </rule>
+        <rule>
+          <beforebreak>[\.\?!]+</beforebreak>
+          <afterbreak>\s</afterbreak>
+        </rule>
+        <rule>
+          <beforebreak>\S:+["'”\)]?</beforebreak>
+          <afterbreak>\s</afterbreak>
+        </rule>
+        <rule>
+          <beforebreak>\u2029</beforebreak>
+        </rule>
+        <rule>
+          <beforebreak>\S[\.\?!]+["'”\)]?</beforebreak>
+          <afterbreak>\s</afterbreak>
+        </rule>
+        <rule>
+          <beforebreak>\S\t+</beforebreak>
+        </rule>
+      </languagerule>
+    </languagerules>
     <maprules>
-<languagemap languagepattern="ca.*" languagerulename="Catalan"/>
-<languagemap languagepattern="zh.*" languagerulename="Chinese"/>
-<languagemap languagepattern="cs.*" languagerulename="Czech"/>
-<languagemap languagepattern="da.*" languagerulename="Danish"/>
-<languagemap languagepattern="nl.*" languagerulename="Dutch"/>
-<languagemap languagepattern="en.*" languagerulename="English"/>
-<languagemap languagepattern="fi.*" languagerulename="Finnish"/>
-<languagemap languagepattern="fr.*" languagerulename="French"/>
-<languagemap languagepattern="de.*" languagerulename="German"/>
-<languagemap languagepattern="it.*" languagerulename="Italian"/>
-<languagemap languagepattern="ja*" languagerulename="Japanese"/>
-<languagemap languagepattern="pl.*" languagerulename="Polish"/>
-<languagemap languagepattern="pt.*" languagerulename="Portuguese"/>
-<languagemap languagepattern="es.*" languagerulename="Spanish"/>
-<languagemap languagepattern="sv.*" languagerulename="Swedish"/>
-<languagemap languagepattern="th.*" languagerulename="Thai"/>
-<languagemap languagepattern=".*" languagerulename="default"/>
-</maprules>
+      <languagemap languagerulename="Catalan" languagepattern="ca.*"/>
+      <languagemap languagerulename="Chinese" languagepattern="zh.*"/>
+      <languagemap languagerulename="Czech" languagepattern="cs.*"/>
+      <languagemap languagerulename="Danish" languagepattern="da.*"/>
+      <languagemap languagerulename="Dutch" languagepattern="nl.*"/>
+      <languagemap languagerulename="English" languagepattern="en.*"/>
+      <languagemap languagerulename="Finnish" languagepattern="fi.*"/>
+      <languagemap languagerulename="French" languagepattern="fr.*"/>
+      <languagemap languagerulename="German" languagepattern="de.*"/>
+      <languagemap languagerulename="Italian" languagepattern="it.*"/>
+      <languagemap languagerulename="Japanese" languagepattern="ja*"/>
+      <languagemap languagerulename="Polish" languagepattern="pl.*"/>
+      <languagemap languagerulename="Portuguese" languagepattern="pt.*"/>
+      <languagemap languagerulename="Spanish" languagepattern="es.*"/>
+      <languagemap languagerulename="Swedish" languagepattern="sv.*"/>
+      <languagemap languagerulename="Thai" languagepattern="th.*"/>
+      <languagemap languagerulename="default" languagepattern=".*"/>
+    </maprules>
   </body>
 </srx>
