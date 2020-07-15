@@ -45,8 +45,8 @@ import java.util.regex.Pattern;
 
 import javax.xml.parsers.ParserConfigurationException;
 
+import com.maxprograms.swordfish.Constants;
 import com.maxprograms.swordfish.TmsServer;
-import com.maxprograms.swordfish.Utils;
 import com.maxprograms.xml.Catalog;
 import com.maxprograms.xml.Document;
 import com.maxprograms.xml.Element;
@@ -90,6 +90,7 @@ public class XliffStore {
     private String tgtLang;
 
     private static int tag;
+    private Map<String, String> tagsMap;
     private static Pattern pattern;
     private static String lastFilterText;
 
@@ -121,8 +122,8 @@ public class XliffStore {
         getUnitData = conn.prepareStatement("SELECT data FROM units WHERE file=? AND unitId=?");
         getSource = conn.prepareStatement("SELECT source FROM segments WHERE file=? AND unitId=? AND segId=?");
         getTarget = conn.prepareStatement("SELECT target FROM segments WHERE file=? AND unitId=? AND segId=?");
-        updateTarget = conn
-                .prepareStatement("UPDATE segments SET target=?, targetText=? WHERE file=? AND unitId=? AND segId=?");
+        updateTarget = conn.prepareStatement(
+                "UPDATE segments SET target=?, targetText=?, state=? WHERE file=? AND unitId=? AND segId=?");
     }
 
     private void createTables() throws SQLException {
@@ -214,8 +215,9 @@ public class XliffStore {
                 }
             }
             target.setAttribute("xml:lang", tgtLang);
+            String targetText = pureText(target);
+            state = e.getAttributeValue("state", targetText.isEmpty() ? "initial" : "translated");
 
-            state = e.getAttributeValue("state", "initial");
             preserve = preserve | sourcePreserve | "preserve".equals(target.getAttributeValue("xml:space", "default"));
             insertSegment.setString(1, currentFile);
             insertSegment.setString(2, currentUnit);
@@ -229,7 +231,7 @@ public class XliffStore {
             insertSegment.setNString(10, source.toString());
             insertSegment.setNString(11, pureText(source));
             insertSegment.setNString(12, target != null ? target.toString() : "");
-            insertSegment.setNString(13, target != null ? pureText(target) : "");
+            insertSegment.setNString(13, target != null ? targetText : "");
             insertSegment.execute();
         }
         if ("ignorable".equals(e.getName())) {
@@ -287,13 +289,13 @@ public class XliffStore {
         }
     }
 
-    public synchronized List<String> getSegments(List<String> filesList, int start, int count, String filterText,
+    public synchronized List<JSONObject> getSegments(List<String> filesList, int start, int count, String filterText,
             String filterLanguage, boolean caseSensitiveFilter, boolean filterUntranslated, boolean regExp)
             throws SQLException, SAXException, IOException, ParserConfigurationException {
-        List<String> result = new Vector<>();
+        List<JSONObject> result = new Vector<>();
         if (filterText.isEmpty()) {
             int index = start;
-            String query = "SELECT file, unitId, segId, child, source, target, tags, state, space FROM segments WHERE type='S' ORDER BY file, child LIMIT "
+            String query = "SELECT file, unitId, segId, child, source, target, tags, state, space, translate FROM segments WHERE type='S' ORDER BY file, child LIMIT "
                     + count + " OFFSET " + start + " ";
 
             try (Statement stmt = conn.createStatement()) {
@@ -307,6 +309,7 @@ public class XliffStore {
                         int tags = rs.getInt(7);
                         String state = rs.getString(8);
                         boolean preserve = "Y".equals(rs.getString(9));
+                        boolean translate = "Y".equals(rs.getString(10));
 
                         JSONObject tagsData = new JSONObject();
                         if (tags > 0) {
@@ -327,13 +330,20 @@ public class XliffStore {
                             target = buildElement(tgt);
                         }
 
-                        try {
-                            result.add(segmentToHTML(index++, file, unit, segId, state, source, target, filterText,
-                                    caseSensitiveFilter, regExp, preserve, tagsData));
-                        } catch (Exception e) {
-                            e.printStackTrace();
-                            throw e;
-                        }
+                        tagsMap = new Hashtable<>();
+                        JSONObject row = new JSONObject();
+                        row.put("index", index++);
+                        row.put("file", file);
+                        row.put("unit", unit);
+                        row.put("segment", segId);
+                        row.put("state", state);
+                        row.put("translate", translate);
+                        row.put("preserve", preserve);
+                        tag = 1;
+                        row.put("source", addHtmlTags(source, filterText, caseSensitiveFilter, regExp, tagsData));
+                        tag = 1;
+                        row.put("target", addHtmlTags(target, filterText, caseSensitiveFilter, regExp, tagsData));
+                        result.add(row);
                     }
                 }
             }
@@ -382,7 +392,7 @@ public class XliffStore {
         String file = json.getString("file");
         String unit = json.getString("unit");
         String segment = json.getString("segment");
-        String translation = json.getString("translation");
+        String translation = json.getString("translation").replace("&nbsp;", "\u00A0");
 
         String src = "";
         getSource.setString(1, file);
@@ -427,11 +437,18 @@ public class XliffStore {
 
         updateTarget.setNString(1, target.toString());
         updateTarget.setNString(2, pureTarget);
-        updateTarget.setString(3, file);
-        updateTarget.setString(4, unit);
-        updateTarget.setString(5, segment);
+        updateTarget.setString(3, pureTarget.isBlank() ? Constants.INITIAL : Constants.TRANSLATED);
+        updateTarget.setString(4, file);
+        updateTarget.setString(5, unit);
+        updateTarget.setString(6, segment);
         updateTarget.executeUpdate();
         conn.commit();
+
+        propagate(source, target, pureTarget);
+    }
+
+    private void propagate(Element source, Element target, String pureTarget) {
+        // TODO
     }
 
     private String pureText(Element e) {
@@ -452,70 +469,6 @@ public class XliffStore {
             }
         }
         return string.toString();
-    }
-
-    private String segmentToHTML(int index, String file, String unit, String id, String status, Element source,
-            Element target, String filterText, boolean caseSensitive, boolean regExp, boolean preserve,
-            JSONObject meta) {
-        StringBuilder html = new StringBuilder();
-        html.append("<tr data-id=\"");
-        html.append(id);
-        html.append("\" data-file=\"");
-        html.append(file);
-        html.append("\" data-unit=\"");
-        html.append(unit);
-        html.append("\"><td class='middle center noWrap ");
-        html.append(status);
-        html.append("'>");
-        html.append(index);
-        html.append("</td>");
-        html.append("<td class='source");
-        if (preserve) {
-            html.append(" preserve");
-        }
-        html.append("' lang=\"");
-        html.append(srcLang);
-        html.append("\"");
-        if (Utils.isBiDi(srcLang)) {
-            html.append(" dir='rtl'");
-        }
-        html.append('>');
-        tag = 1;
-        html.append(elementToHTML(source, filterText, caseSensitive, regExp, meta));
-        html.append("</td>");
-        html.append("<td class='middle'><input type='checkbox' class='rowCheck'></td>");
-        html.append("<td class='target");
-        if (preserve) {
-            html.append(" preserve");
-        }
-        html.append("' lang=\"");
-        html.append(tgtLang);
-        html.append("\"");
-        if (Utils.isBiDi(tgtLang)) {
-            html.append(" dir='rtl'");
-        }
-        html.append('>');
-        tag = 1;
-        html.append(elementToHTML(target, filterText, caseSensitive, regExp, meta));
-        html.append("</td>");
-
-        html.append("</tr>");
-        return html.toString();
-    }
-
-    private String elementToHTML(Element e, String filterText, boolean caseSensitive, boolean regExp,
-            JSONObject originalData) {
-        if (e == null) {
-            return "";
-        }
-        try {
-            String tagged = addHtmlTags(e, filterText, caseSensitive, regExp, originalData);
-            return tagged;
-        } catch (IOException e1) {
-            Logger logger = System.getLogger(XliffUtils.class.getName());
-            logger.log(Level.ERROR, e1);
-        }
-        return e.getText();
     }
 
     private String addHtmlTags(Element seg, String filterText, boolean caseSensitive, boolean regExp,
@@ -580,73 +533,100 @@ public class XliffStore {
                 Element e = (Element) o;
                 String type = e.getName();
                 if (type.equals("pc")) {
-                    XliffUtils.checkSVG(tag);
-                    String header = XliffUtils.getHeader(e);
-                    text.append("<img data-ref='");
-                    text.append(e.getAttributeValue("id"));
-                    text.append("' src='");
-                    text.append(TmsServer.getWorkFolder().toURI().toURL().toString());
-                    text.append("images/");
-                    text.append(tag++);
-                    text.append(".svg' align='bottom' alt='' title=\"");
-                    text.append(XliffUtils.unquote(XliffUtils.cleanAngles(header)));
-                    text.append("\"/>");
+                    String id = e.getAttributeValue("id");
+                    if (!tagsMap.containsKey("pc" + id)) {
+                        XliffUtils.checkSVG(tag);
+                        String header = XliffUtils.getHeader(e);
+                        StringBuilder sb = new StringBuilder();
+                        sb.append("<img data-ref='");
+                        sb.append(id);
+                        sb.append("' src='");
+                        sb.append(TmsServer.getWorkFolder().toURI().toURL().toString());
+                        sb.append("images/");
+                        sb.append(tag++);
+                        sb.append(".svg' align='bottom' alt='' title=\"");
+                        sb.append(XliffUtils.unquote(XliffUtils.cleanAngles(header)));
+                        sb.append("\"/>");
+                        tagsMap.put("pc" + id, sb.toString());
+                    }
+                    text.append(tagsMap.get("pc" + id));
                     text.append(addHtmlTags(e, filterText, caseSensitive, regExp, originalData));
-                    XliffUtils.checkSVG(tag);
-                    String tail = XliffUtils.getTail(e);
-                    text.append("<img data-ref='/");
-                    text.append(e.getAttributeValue("id"));
-                    text.append("' src='");
-                    text.append(TmsServer.getWorkFolder().toURI().toURL().toString());
-                    text.append("images/");
-                    text.append(tag++);
-                    text.append(".svg' align='bottom' alt='' title=\"");
-                    text.append(XliffUtils.unquote(XliffUtils.cleanAngles(tail)));
-                    text.append("\"/>");
+                    if (!tagsMap.containsKey("/pc" + id)) {
+                        XliffUtils.checkSVG(tag);
+                        String tail = "</pc>";
+                        StringBuilder sb = new StringBuilder();
+                        sb.append("<img data-ref='/");
+                        sb.append(e.getAttributeValue("id"));
+                        sb.append("' src='");
+                        sb.append(TmsServer.getWorkFolder().toURI().toURL().toString());
+                        sb.append("images/");
+                        sb.append(tag++);
+                        sb.append(".svg' align='bottom' alt='' title=\"");
+                        sb.append(XliffUtils.unquote(XliffUtils.cleanAngles(tail)));
+                        sb.append("\"/>");
+                        tagsMap.put("/pc" + id, sb.toString());
+                    }
+                    text.append("/" + tagsMap.get(e.getName() + id));
                 } else if (type.equals("mrk")) {
-                    XliffUtils.checkSVG(tag);
-                    String header = XliffUtils.getHeader(e);
-                    text.append("<img data-ref='");
-                    text.append(e.getAttributeValue("id"));
-                    text.append("' src='");
-                    text.append(TmsServer.getWorkFolder().toURI().toURL().toString());
-                    text.append("images/");
-                    text.append(tag++);
-                    text.append(".svg' align='bottom' alt='' title=\"");
-                    text.append(XliffUtils.unquote(XliffUtils.cleanAngles(header)));
-                    text.append("\"/>");
+                    String id = e.getAttributeValue("id");
+                    if (!tagsMap.containsKey("mrk" + id)) {
+                        XliffUtils.checkSVG(tag);
+                        String header = XliffUtils.getHeader(e);
+                        StringBuilder sb = new StringBuilder();
+                        sb.append("<img data-ref='");
+                        sb.append(id);
+                        sb.append("' src='");
+                        sb.append(TmsServer.getWorkFolder().toURI().toURL().toString());
+                        sb.append("images/");
+                        sb.append(tag++);
+                        sb.append(".svg' align='bottom' alt='' title=\"");
+                        sb.append(XliffUtils.unquote(XliffUtils.cleanAngles(header)));
+                        sb.append("\"/>");
+                        tagsMap.put("mrk" + id, sb.toString());
+                    }
+                    text.append(tagsMap.get(e.getName() + id));
                     text.append("<span " + XliffUtils.STYLE + ">");
                     text.append(e.getText());
                     text.append("</span>");
-                    XliffUtils.checkSVG(tag);
-                    String tail = XliffUtils.getTail(e);
-                    text.append("<img data-ref='/");
-                    text.append(e.getAttributeValue("id"));
-                    text.append("' src='");
-                    text.append(TmsServer.getWorkFolder().toURI().toURL().toString());
-                    text.append("images/");
-                    text.append(tag++);
-                    text.append(".svg' align='bottom' alt='' title=\"");
-                    text.append(XliffUtils.unquote(XliffUtils.cleanAngles(tail)));
-                    text.append("\"/>");
+                    if (!tagsMap.containsKey("/mrk" + id)) {
+                        XliffUtils.checkSVG(tag);
+                        String tail = "</mrk>";
+                        StringBuilder sb = new StringBuilder();
+                        sb.append("<img data-ref='/");
+                        sb.append(e.getAttributeValue("id"));
+                        sb.append("' src='");
+                        sb.append(TmsServer.getWorkFolder().toURI().toURL().toString());
+                        sb.append("images/");
+                        sb.append(tag++);
+                        sb.append(".svg' align='bottom' alt='' title=\"");
+                        sb.append(XliffUtils.unquote(XliffUtils.cleanAngles(tail)));
+                        sb.append("\"/>");
+                        tagsMap.put("/mrk" + id, sb.toString());
+                    }
+                    text.append(tagsMap.get("/mrk" + id));
                 } else if (type.equals("cp")) {
                     // TODO handle codepoint tags
                 } else {
-                    XliffUtils.checkSVG(tag);
                     String dataRef = e.getAttributeValue("dataRef");
-                    text.append("<img data-ref='");
-                    text.append(dataRef);
-                    text.append("' src='");
-                    text.append(TmsServer.getWorkFolder().toURI().toURL().toString());
-                    text.append("images/");
-                    text.append(tag++);
-                    text.append(".svg' align='bottom' alt='' title=\"");
-                    String title = "";
-                    if (originalData.has(dataRef)) {
-                        title = originalData.getString(dataRef);
+                    if (!tagsMap.containsKey(dataRef)) {
+                        XliffUtils.checkSVG(tag);
+                        StringBuilder sb = new StringBuilder();
+                        sb.append("<img data-ref='");
+                        sb.append(dataRef);
+                        sb.append("' src='");
+                        sb.append(TmsServer.getWorkFolder().toURI().toURL().toString());
+                        sb.append("images/");
+                        sb.append(tag++);
+                        sb.append(".svg' align='bottom' alt='' title=\"");
+                        String title = "";
+                        if (originalData.has(dataRef)) {
+                            title = originalData.getString(dataRef);
+                        }
+                        sb.append(XliffUtils.unquote(XliffUtils.cleanAngles(title)));
+                        sb.append("\"/>");
+                        tagsMap.put(dataRef, sb.toString());
                     }
-                    text.append(XliffUtils.unquote(XliffUtils.cleanAngles(title)));
-                    text.append("\"/>");
+                    text.append(tagsMap.get(dataRef));
                 }
             }
         }

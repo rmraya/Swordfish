@@ -168,12 +168,16 @@ class Swordfish {
                 this.openFile(path);
             });
         }
-
-        if (process.platform === 'win32') {
-            nativeTheme.on('updated', () => {
-                Swordfish.setTheme();
-            });
-        }
+        nativeTheme.on('updated', () => {
+            if (Swordfish.currentPreferences.theme === 'system') {            
+                if (nativeTheme.shouldUseDarkColors) {
+                    Swordfish.currentCss = 'file://' + Swordfish.path.join(app.getAppPath(), 'css', 'dark.css');
+                } else {
+                    Swordfish.currentCss = 'file://' + Swordfish.path.join(app.getAppPath(), 'css', 'light.css');
+                }
+                Swordfish.contents.send('set-theme', Swordfish.currentCss);
+            }
+        });
         ipcMain.on('get-projects', (event: IpcMainEvent, arg: any) => {
             Swordfish.getProjects(event);
         });

@@ -179,6 +179,8 @@ th {
 .highlighted {
 	color: var(--highlight-color);
 	background: var(--accent-color);
+	padding-left: 2px;
+	padding-right: 2px;
 }
 
 .right {

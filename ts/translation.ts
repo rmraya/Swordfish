@@ -21,6 +21,11 @@ class TranslationView {
 
     electron = require('electron');
 
+    static SVG_BLANK: string = "<svg xmlns='http://www.w3.org/2000/svg' height='24' viewBox='0 0 24 24' width='24'></svg>";
+    static SVG_TRANSLATED: string = "<svg xmlns='http://www.w3.org/2000/svg' height='24' viewBox='0 0 24 24' width='24'><g><g><path d='M19,5v14H5V5H19 M19,3H5C3.9,3,3,3.9,3,5v14c0,1.1,0.9,2,2,2h14c1.1,0,2-0.9,2-2V5C21,3.9,20.1,3,19,3L19,3z'/></g><path d='M14,17H7v-2h7V17z M17,13H7v-2h10V13z M17,9H7V7h10V9z'/></g></svg>";
+    static SVG_FINAL: string = "<svg xmlns='http://www.w3.org/2000/svg' height='24' viewBox='0 0 24 24' width='24'><path d='M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V5h14v14zM17.99 9l-1.41-1.42-6.59 6.59-2.58-2.57-1.42 1.41 4 3.99z'/></svg>";
+    static SVG_LOCK: string = "<svg xmlns='http://www.w3.org/2000/svg' height='24' viewBox='0 0 24 24' width='24'><path d='M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zM9 6c0-1.66 1.34-3 3-3s3 1.34 3 3v2H9V6zm9 14H6V10h12v10zm-6-3c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2z'/></svg>";
+
     container: HTMLDivElement;
     observer: MutationObserver;
     rowsObserver: MutationObserver;
@@ -50,6 +55,8 @@ class TranslationView {
     segmentsCount: number;
 
     currentCell: HTMLTableCellElement;
+    currentState: HTMLTableCellElement;
+    currentTranslate: HTMLTableCellElement;
     currentContent: string;
     currentId: any;
     currentTags: string[] = [];
@@ -202,9 +209,8 @@ class TranslationView {
         tr.appendChild(this.sourceTh);
 
         th = document.createElement('th');
-        let selectAll: HTMLInputElement = document.createElement('input');
-        selectAll.type = 'checkbox';
-        th.appendChild(selectAll);
+        th.innerText = 'Status';
+        th.colSpan = 2;
         tr.appendChild(th);
 
         this.targetTh = document.createElement('th');
@@ -371,17 +377,57 @@ class TranslationView {
         // TODO
     }
 
-    setSegments(arg: any): void {
+    setSegments(arg: any[]): void {
         this.tbody.innerHTML = '';
         let length = arg.length;
         for (let i = 0; i < length; i++) {
-            this.tbody.insertAdjacentHTML('beforeend', arg[i]);
-        }
-        let rows: HTMLCollectionOf<HTMLTableRowElement> = this.tbody.getElementsByTagName('tr');
-        length = rows.length;
-        for (let i = 0; i < rows.length; i++) {
-            let row: HTMLTableRowElement = rows[i];
-            row.addEventListener('click', (event: MouseEvent) => this.rowClickListener(event));
+            let row: any = arg[i];
+            let tr: HTMLTableRowElement = document.createElement('tr');
+            tr.setAttribute('data-file', row.file);
+            tr.setAttribute('data-unit', row.unit);
+            tr.setAttribute('data-id', row.segment);
+            tr.addEventListener('click', (event: MouseEvent) => this.rowClickListener(event));
+            this.tbody.appendChild(tr);
+
+            let td: HTMLTableCellElement = document.createElement('td');
+            td.classList.add('middle');
+            td.classList.add('center');
+            td.classList.add('initial');
+            td.innerText = row.index;
+            tr.appendChild(td);
+
+            td = document.createElement('td');
+            td.classList.add('source');
+            td.classList.add('initial');
+            td.innerHTML = row.source;
+            tr.appendChild(td);
+
+            td = document.createElement('td');
+            td.classList.add('middle');
+            td.classList.add('center');
+            td.classList.add('translate');
+            td.innerHTML = row.translate ? TranslationView.SVG_BLANK : TranslationView.SVG_LOCK;
+            tr.appendChild(td);
+
+            td = document.createElement('td');
+            td.classList.add('middle');
+            td.classList.add('state');
+            td.classList.add(row.state);
+            if (row.state === 'initial') {
+                td.innerHTML = TranslationView.SVG_BLANK;
+            }
+            if (row.state === 'translated') {
+                td.innerHTML = TranslationView.SVG_TRANSLATED;
+            }
+            if (row.state === 'final') {
+                td.innerHTML = TranslationView.SVG_FINAL;
+            }
+            tr.appendChild(td);
+
+            td = document.createElement('td');
+            td.classList.add('target');
+            td.innerHTML = row.target;
+            tr.appendChild(td);
         }
         this.container.classList.remove('wait');
     }
@@ -393,7 +439,7 @@ class TranslationView {
     }
 
     previousPage(): void {
-        if (this.currentPage > 1) {
+        if (this.currentPage > 0) {
             this.currentPage--;
             this.pageInput.value = '' + (this.currentPage + 1);
             this.getSegments();
@@ -433,6 +479,8 @@ class TranslationView {
         this.harvestTags(source.innerHTML);
 
         this.currentCell = row.getElementsByClassName('target')[0] as HTMLTableCellElement;
+        this.currentState = row.getElementsByClassName('state')[0] as HTMLTableCellElement;
+        this.currentTranslate = row.getElementsByClassName('translate')[0] as HTMLTableCellElement;
         this.currentContent = this.currentCell.innerHTML;
         this.currentCell.contentEditable = 'true';
         this.currentCell.classList.add('editing');
@@ -445,6 +493,19 @@ class TranslationView {
             this.currentCell.contentEditable = 'false';
             let translation = this.currentCell.innerHTML;
             this.currentCell = undefined;
+            if (translation === '') {
+                if (this.currentState.classList.contains('translated')) {
+                    this.currentState.classList.remove('translated');
+                    this.currentState.classList.add('initial');
+                    this.currentState.innerHTML = TranslationView.SVG_BLANK;
+                }
+            } else {
+                if (this.currentState.classList.contains('initial')) {
+                    this.currentState.classList.remove('initial');
+                    this.currentState.classList.add('translated');
+                    this.currentState.innerHTML = TranslationView.SVG_TRANSLATED;
+                }
+            }
             // TODO send to server
             this.electron.ipcRenderer.send('save-translation', {
                 project: this.projectId, file: this.currentId.file, unit: this.currentId.unit, segment: this.currentId.id, translation: translation

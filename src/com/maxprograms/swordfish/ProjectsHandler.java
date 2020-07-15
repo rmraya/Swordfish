@@ -342,12 +342,11 @@ public class ProjectsHandler implements HttpHandler {
 		boolean caseSensitiveFilter = json.getBoolean("caseSensitiveFilter");
 		boolean regExp = json.getBoolean("regExp");
 		try {
-			List<String> list = store.getSegments(filesList, json.getInt("start"), json.getInt("count"), filterText,
+			List<JSONObject> list = store.getSegments(filesList, json.getInt("start"), json.getInt("count"), filterText,
 					json.getString("filterLanguage"), caseSensitiveFilter, json.getBoolean("filterUntranslated"),
 					regExp);
 			JSONArray array = new JSONArray();
-			Iterator<String> it = list.iterator();
-
+			Iterator<JSONObject> it = list.iterator();
 			while (it.hasNext()) {
 				array.put(it.next());
 			}
