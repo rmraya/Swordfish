@@ -42,6 +42,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.SortedSet;
 import java.util.TreeSet;
+import java.util.zip.DataFormatException;
 
 import javax.xml.parsers.ParserConfigurationException;
 
@@ -352,7 +353,8 @@ public class ProjectsHandler implements HttpHandler {
 				array.put(it.next());
 			}
 			result.put("segments", array);
-		} catch (IOException | JSONException | SAXException | ParserConfigurationException | SQLException e) {
+		} catch (IOException | JSONException | SAXException | ParserConfigurationException | SQLException
+				| DataFormatException e) {
 			logger.log(Level.ERROR, "Error loading segments", e);
 			result.put(Constants.REASON, e.getMessage());
 		}
@@ -620,7 +622,8 @@ public class ProjectsHandler implements HttpHandler {
 			if (projectStores.containsKey(project)) {
 				result.put("propagated", projectStores.get(project).saveSegment(json));
 			}
-		} catch (IOException | SQLException | SAXException | ParserConfigurationException e) {
+		} catch (IOException | SQLException | SAXException | ParserConfigurationException | JSONException
+				| DataFormatException e) {
 			logger.log(Level.ERROR, e);
 			result.put(Constants.REASON, e.getMessage());
 		}

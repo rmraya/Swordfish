@@ -42,6 +42,7 @@ import java.util.Map;
 import java.util.Vector;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.zip.DataFormatException;
 
 import javax.xml.parsers.ParserConfigurationException;
 
@@ -58,6 +59,7 @@ import com.maxprograms.xml.XMLNode;
 import com.maxprograms.xml.XMLOutputter;
 
 import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 import org.xml.sax.SAXException;
 
@@ -125,7 +127,7 @@ public class XliffStore {
             parseDocument();
             conn.commit();
         }
-        getUnitData = conn.prepareStatement("SELECT data FROM units WHERE file=? AND unitId=?");
+        getUnitData = conn.prepareStatement("SELECT data, compressed FROM units WHERE file=? AND unitId=?");
         getSource = conn.prepareStatement("SELECT source FROM segments WHERE file=? AND unitId=? AND segId=?");
         getTarget = conn.prepareStatement("SELECT target FROM segments WHERE file=? AND unitId=? AND segId=?");
         updateTarget = conn.prepareStatement(
@@ -139,7 +141,7 @@ public class XliffStore {
 
     private void createTables() throws SQLException {
         String query1 = "CREATE TABLE units (file VARCHAR(50), " + "unitId VARCHAR(50) NOT NULL, "
-                + "data VARCHAR(6000) NOT NULL, PRIMARY KEY(file, unitId) );";
+                + "data VARCHAR(6000) NOT NULL, compressed CHAR(1) NOT NULL DEFAULT 'N', PRIMARY KEY(file, unitId) );";
         String query2 = "CREATE TABLE segments (file VARCHAR(50), unitId VARCHAR(50) NOT NULL, "
                 + "segId VARCHAR(50) NOT NULL, type CHAR(1) NOT NULL DEFAULT 'S', state VARCHAR(12) DEFAULT 'initial', child INTEGER, "
                 + "translate CHAR(1), tags INTEGER DEFAULT 0, space CHAR(1) DEFAULT 'N', source VARCHAR(6000) NOT NULL, sourceText VARCHAR(6000) NOT NULL, "
@@ -164,7 +166,7 @@ public class XliffStore {
 
     private void parseDocument() throws SQLException {
         nextId = System.currentTimeMillis();
-        insertUnit = conn.prepareStatement("INSERT INTO units (file, unitId, data) VALUES (?,?,?)");
+        insertUnit = conn.prepareStatement("INSERT INTO units (file, unitId, data, compressed) VALUES (?,?,?,?)");
         insertSegment = conn.prepareStatement(
                 "INSERT INTO segments (file, unitId, segId, type, state, child, translate, tags, space, source, sourceText, target, targetText) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)");
         recurse(document.getRootElement());
@@ -199,9 +201,16 @@ public class XliffStore {
                 }
             }
             if (tagCount > 0) {
+                String dataString = data.toString();
                 insertUnit.setString(1, currentFile);
                 insertUnit.setString(2, currentUnit);
-                insertUnit.setString(3, data.toString());
+                if (dataString.length() > 6000) {
+                    insertUnit.setString(3, Compression.compress(dataString));
+                    insertUnit.setString(4, "Y");
+                } else {
+                    insertUnit.setString(3, dataString);
+                    insertUnit.setString(4, "N");
+                }
                 insertUnit.execute();
             }
             // Element matches = e.getChild("mtc:matches");
@@ -302,7 +311,8 @@ public class XliffStore {
 
     public synchronized List<JSONObject> getSegments(List<String> filesList, int start, int count, String filterText,
             String filterLanguage, boolean caseSensitiveFilter, boolean filterUntranslated, boolean regExp)
-            throws SQLException, SAXException, IOException, ParserConfigurationException {
+            throws SQLException, SAXException, IOException, ParserConfigurationException, JSONException,
+            DataFormatException {
         List<JSONObject> result = new Vector<>();
         if (filterText.isEmpty()) {
             int index = start;
@@ -322,15 +332,7 @@ public class XliffStore {
 
                     JSONObject tagsData = new JSONObject();
                     if (tags > 0) {
-                        getUnitData.setString(1, file);
-                        getUnitData.setString(2, unit);
-                        String data = "";
-                        try (ResultSet rs2 = getUnitData.executeQuery()) {
-                            while (rs2.next()) {
-                                data = rs2.getString(1);
-                            }
-                        }
-                        tagsData = new JSONObject(data);
+                        tagsData = getUnitData(file, unit);
                     }
                     Element source = buildElement(src);
 
@@ -359,6 +361,23 @@ public class XliffStore {
             // TODO filter segments
         }
         return result;
+    }
+
+    private JSONObject getUnitData(String file, String unit) throws SQLException, JSONException, DataFormatException {
+        getUnitData.setString(1, file);
+        getUnitData.setString(2, unit);
+        String data = "";
+        boolean compressed = false;
+        try (ResultSet rs = getUnitData.executeQuery()) {
+            while (rs.next()) {
+                data = rs.getString(1);
+                compressed = "Y".equals(rs.getString(2));
+            }
+        }
+        if (compressed) {
+            return new JSONObject(Compression.decompress(data));
+        }
+        return new JSONObject(data);
     }
 
     public void close() throws SQLException {
@@ -399,7 +418,8 @@ public class XliffStore {
     }
 
     public synchronized JSONArray saveSegment(JSONObject json)
-            throws IOException, SQLException, SAXException, ParserConfigurationException {
+            throws IOException, SQLException, SAXException, ParserConfigurationException, JSONException,
+            DataFormatException {
         JSONArray result = new JSONArray();
         String file = json.getString("file");
         String unit = json.getString("unit");
@@ -468,7 +488,8 @@ public class XliffStore {
     }
 
     private JSONArray propagate(Element source, Element target, String pureTarget)
-            throws SQLException, SAXException, IOException, ParserConfigurationException {
+            throws SQLException, SAXException, IOException, ParserConfigurationException, JSONException,
+            DataFormatException {
         JSONArray result = new JSONArray();
         String dummySource = dummyTagger(source);
         String query = "SELECT file, unitId, segId, source, state, tags, space FROM segments WHERE translate='Y' AND type='S' AND state <> 'final' ";
@@ -487,15 +508,7 @@ public class XliffStore {
                     if (similarity == 100 && Constants.INITIAL.equals(state)) {
                         JSONObject tagsData = new JSONObject();
                         if (tags > 0) {
-                            getUnitData.setString(1, file);
-                            getUnitData.setString(2, unit);
-                            String data = "";
-                            try (ResultSet rs2 = getUnitData.executeQuery()) {
-                                while (rs2.next()) {
-                                    data = rs2.getString(1);
-                                }
-                            }
-                            tagsData = new JSONObject(data);
+                            tagsData = getUnitData(file, unit);
                         }
 
                         tagsMap = new Hashtable<>();
