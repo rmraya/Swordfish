@@ -1429,6 +1429,10 @@ class Swordfish {
             (data: any) => {
                 if (data.status !== Swordfish.SUCCESS) {
                     dialog.showErrorBox('Error', data.reason);
+                    return;
+                }
+                if (data.propagated.length > 0) {
+                    Swordfish.contents.send('auto-propagate', {project: arg.project, rows: data.propagated});
                 }
             },
             (reason: string) => {

@@ -318,7 +318,8 @@ public class ProjectsHandler implements HttpHandler {
 		if (!projectStores.containsKey(project)) {
 			try {
 				Project prj = projects.get(project);
-				XliffStore store = new XliffStore(prj.getXliff(), prj.getSourceLang().getCode(), prj.getTargetLang().getCode());
+				XliffStore store = new XliffStore(prj.getXliff(), prj.getSourceLang().getCode(),
+						prj.getTargetLang().getCode());
 				projectStores.put(project, store);
 			} catch (SAXException | IOException | ParserConfigurationException | URISyntaxException | SQLException e) {
 				logger.log(Level.ERROR, "Error creating project store", e);
@@ -384,7 +385,8 @@ public class ProjectsHandler implements HttpHandler {
 		if (!projectStores.containsKey(project)) {
 			try {
 				Project prj = projects.get(project);
-				XliffStore store = new XliffStore(prj.getXliff(), prj.getSourceLang().getCode(), prj.getTargetLang().getCode());
+				XliffStore store = new XliffStore(prj.getXliff(), prj.getSourceLang().getCode(),
+						prj.getTargetLang().getCode());
 				projectStores.put(project, store);
 			} catch (SAXException | IOException | ParserConfigurationException | URISyntaxException | SQLException e) {
 				logger.log(Level.ERROR, "Error creating project store", e);
@@ -616,7 +618,7 @@ public class ProjectsHandler implements HttpHandler {
 		String project = json.getString("project");
 		try {
 			if (projectStores.containsKey(project)) {
-				projectStores.get(project).saveSegment(json);
+				result.put("propagated", projectStores.get(project).saveSegment(json));
 			}
 		} catch (IOException | SQLException | SAXException | ParserConfigurationException e) {
 			logger.log(Level.ERROR, e);

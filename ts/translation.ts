@@ -506,7 +506,6 @@ class TranslationView {
                     this.currentState.innerHTML = TranslationView.SVG_TRANSLATED;
                 }
             }
-            // TODO send to server
             this.electron.ipcRenderer.send('save-translation', {
                 project: this.projectId, file: this.currentId.file, unit: this.currentId.unit, segment: this.currentId.id, translation: translation
             });
@@ -549,6 +548,29 @@ class TranslationView {
         let tag: number = arg.tag;
         if (this.currentTags.length >= tag) {
             this.electron.ipcRenderer.send('paste-tag', this.currentTags[tag - 1]);
+        }
+    }
+
+    autoPropagate(rows: any): void {
+        let length = rows.length;
+        for (let i = 0; i < length; i++) {
+            this.updateBody(rows[i]);
+        }
+    }
+
+    updateBody(data: any): void {
+        let rows: HTMLCollectionOf<HTMLTableRowElement> = this.tbody.getElementsByTagName('tr');
+        let length = rows.length;
+        for (let i = 0; i < length; i++) {
+            let row: HTMLTableRowElement = rows[i];
+            if (row.getAttribute('data-file') === data.file && row.getAttribute('data-unit') === data.unit
+                && row.getAttribute('data-id') === data.segment) {
+                (row.getElementsByClassName('target')[0] as HTMLTableCellElement).innerHTML = data.target;
+                let state = row.getElementsByClassName('state')[0] as HTMLTableCellElement;
+                state.classList.remove('initial');
+                state.classList.add('translated');
+                state.innerHTML = TranslationView.SVG_TRANSLATED;
+            }
         }
     }
 }
