@@ -130,6 +130,8 @@ public class ProjectsHandler implements HttpHandler {
 				response = getSegmentsCount(request);
 			} else if ("/projects/save".equals(url)) {
 				response = save(request);
+			} else if ("/projects/matches".equals(url)) {
+				response = getMatches(request);
 			} else {
 				response.put(Constants.REASON, "Unknown request");
 			}
@@ -353,8 +355,7 @@ public class ProjectsHandler implements HttpHandler {
 				array.put(it.next());
 			}
 			result.put("segments", array);
-		} catch (IOException | JSONException | SAXException | ParserConfigurationException | SQLException
-				| DataFormatException e) {
+		} catch (IOException | SAXException | ParserConfigurationException | SQLException | DataFormatException e) {
 			logger.log(Level.ERROR, "Error loading segments", e);
 			result.put(Constants.REASON, e.getMessage());
 		}
@@ -622,7 +623,22 @@ public class ProjectsHandler implements HttpHandler {
 			if (projectStores.containsKey(project)) {
 				result.put("propagated", projectStores.get(project).saveSegment(json));
 			}
-		} catch (IOException | SQLException | SAXException | ParserConfigurationException | JSONException
+		} catch (IOException | SQLException | SAXException | ParserConfigurationException | DataFormatException e) {
+			logger.log(Level.ERROR, e);
+			result.put(Constants.REASON, e.getMessage());
+		}
+		return result;
+	}
+
+	private JSONObject getMatches(String request) {
+		JSONObject result = new JSONObject();
+		JSONObject json = new JSONObject(request);
+		String project = json.getString("project");
+		try {
+			if (projectStores.containsKey(project)) {
+				result.put("matches", projectStores.get(project).getTaggedtMatches(json));
+			}
+		} catch (SQLException | SAXException | IOException | ParserConfigurationException | JSONException
 				| DataFormatException e) {
 			logger.log(Level.ERROR, e);
 			result.put(Constants.REASON, e.getMessage());

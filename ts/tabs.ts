@@ -100,6 +100,19 @@ class TabHolder {
         parent.appendChild(this.contentHolder);
     }
 
+    clear(): void {
+        this.labels.forEach((value, key) => {
+            this.tabsHolder.removeChild(value);
+        });
+        this.labels.clear();
+        this.tabs.forEach((value, key) => {
+            this.contentHolder.removeChild(value);
+        });
+        this.tabs.clear();
+        this.tabsList = [];
+        this.selectedTab = undefined;
+    }
+
     addTab(tab: Tab): void {
         tab.setParent(this);
         this.tabsHolder.appendChild(tab.getLabel());
@@ -107,10 +120,13 @@ class TabHolder {
         this.contentHolder.appendChild(tab.getContainer());
         this.tabs.set(tab.getId(), tab.getContainer());
         this.tabsList.push(tab.getId());
+        if (this.tabsList.length === 1) {
+            this.selectTab(tab.getId());
+        }
     }
 
     selectTab(tab: string): void {
-        this.labels.forEach(function (value, key) {
+        this.labels.forEach((value, key) => {
             if (value.classList.contains('selectedTab')) {
                 value.classList.remove('selectedTab');
             }
@@ -118,7 +134,7 @@ class TabHolder {
         this.labels.get(tab).classList.add('selectedTab');
         this.labels.get(tab).blur();
 
-        this.tabs.forEach(function (value, key) {
+        this.tabs.forEach((value, key) => {
             if (!value.classList.contains('hidden')) {
                 value.classList.add('hidden');
             }
@@ -148,5 +164,9 @@ class TabHolder {
 
     getTabsHolder(): HTMLDivElement {
         return this.tabsHolder;
+    }
+
+    size(): number {
+        return this.tabsList.length;
     }
 }

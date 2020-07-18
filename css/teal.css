@@ -19,6 +19,8 @@
 	--highlight-row: #b2dfdb;
 	--highlight-color: #ecf01b;
 	--error-color: #960303;
+	--difference-color: #101010;
+	--difference-background: #b2dfdb;
 }
 
 body {
@@ -178,7 +180,14 @@ th {
 
 .highlighted {
 	color: var(--highlight-color);
-	background: var(--accent-color);
+	background-color: var(--accent-color);
+	padding-left: 2px;
+	padding-right: 2px;
+}
+
+.difference {
+	color: var(--difference-color);
+	background-color: var(--difference-background);
 	padding-left: 2px;
 	padding-right: 2px;
 }

@@ -143,8 +143,8 @@ class Main {
         Main.electron.ipcRenderer.on('cancel-edit', () => {
             this.cancelEdit();
         });
-        Main.electron.ipcRenderer.on('save-edit', () => {
-            this.saveEdit();
+        Main.electron.ipcRenderer.on('save-edit', (event: Electron.IpcRendererEvent, arg: any) => {
+            this.saveEdit(arg);
         });
         Main.electron.ipcRenderer.on('copy-source', () => {
             this.copySource();
@@ -155,6 +155,9 @@ class Main {
         Main.electron.ipcRenderer.on('auto-propagate', (event: Electron.IpcRendererEvent, arg: any) => {
             this.autoPropagate(arg);
         });        
+        Main.electron.ipcRenderer.on('set-matches', (event: Electron.IpcRendererEvent, arg: any) => {
+            this.setMatches(arg);
+        });
         let config: any = { attributes: true, childList: false, subtree: false };
         let observer = new MutationObserver((mutationsList) => {
             for (let mutation of mutationsList) {
@@ -224,10 +227,10 @@ class Main {
         }
     }
 
-    saveEdit(): void  {
+    saveEdit(arg: any): void  {
         let selected = Main.tabHolder.getSelected();
         if ( Main.translationViews.has(selected)) {
-            Main.translationViews.get(selected).saveEdit();
+            Main.translationViews.get(selected).saveEdit(arg.confirm);
         }
     }
 
@@ -249,6 +252,13 @@ class Main {
         let selected = Main.tabHolder.getSelected();
         if ( Main.translationViews.has(selected)) {
             Main.translationViews.get(selected).autoPropagate(arg.rows);
+        }
+    }
+
+    setMatches(arg: any): void {
+        let selected = Main.tabHolder.getSelected();
+        if ( Main.translationViews.has(selected)) {
+            Main.translationViews.get(selected).setMatches(arg.matches);
         }
     }
 }

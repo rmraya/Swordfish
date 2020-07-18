@@ -61,6 +61,8 @@ class TranslationView {
     currentId: any;
     currentTags: string[] = [];
 
+    tmMatches: TmMatches;
+
     constructor(div: HTMLDivElement, projectId: string) {
         this.container = div;
         this.projectId = projectId;
@@ -78,10 +80,42 @@ class TranslationView {
         });
         topBar.appendChild(exportTranslations);
 
+        let saveEdit = document.createElement('a');
+        saveEdit.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 0 24 24" width="24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm4.59-12.42L10 14.17l-2.59-2.58L6 13l4 4 8-8z"/></svg>' +
+            '<span class="tooltiptext bottomTooltip">Save Changes</span>';
+        saveEdit.className = 'tooltip';
+        saveEdit.style.marginLeft = '20px';
+        saveEdit.addEventListener('click', () => {
+            this.saveEdit(false);
+        });
+        topBar.appendChild(saveEdit);
+
+        let cancelEdit = document.createElement('a');
+        cancelEdit.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 0 24 24" width="24"><path d="M12 2C6.47 2 2 6.47 2 12s4.47 10 10 10 10-4.47 10-10S17.53 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm3.59-13L12 10.59 8.41 7 7 8.41 10.59 12 7 15.59 8.41 17 12 13.41 15.59 17 17 15.59 13.41 12 17 8.41z"/></svg>' +
+            '<span class="tooltiptext bottomTooltip">Discard Changes</span>';
+        cancelEdit.className = 'tooltip';
+        cancelEdit.addEventListener('click', () => {
+            this.cancelEdit();
+        });
+        topBar.appendChild(cancelEdit);
+
+
+        let confirmEdit = document.createElement('a');
+        confirmEdit.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 0 24 24" width="24"><path d="M18 7l-1.41-1.41-6.34 6.34 1.41 1.41L18 7zm4.24-1.41L11.66 16.17 7.48 12l-1.41 1.41L11.66 19l12-12-1.42-1.41zM.41 13.41L6 19l1.41-1.41L1.83 12 .41 13.41z"/></svg>' +
+            '<span class="tooltiptext bottomTooltip">Confirm Translation</span>';
+        confirmEdit.className = 'tooltip';
+        confirmEdit.style.marginLeft = '20px';
+        confirmEdit.addEventListener('click', () => {
+            this.saveEdit(true);
+        });
+        topBar.appendChild(confirmEdit);
+
+
         let statisticsButton = document.createElement('a');
         statisticsButton.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 0 24 24" width="24"><path d="M9 17H7v-7h2v7zm4 0h-2V7h2v10zm4 0h-2v-4h2v4zm2.5 2.1h-15V5h15v14.1zm0-16.1h-15c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h15c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2z"/></svg>' +
             '<span class="tooltiptext bottomTooltip">Project Statistics</span>';
         statisticsButton.className = 'tooltip';
+        statisticsButton.style.marginLeft = '20px';
         statisticsButton.addEventListener('click', () => {
             this.generateStatistics()
         });
@@ -210,7 +244,7 @@ class TranslationView {
 
         th = document.createElement('th');
         th.innerText = 'Status';
-        th.colSpan = 2;
+        th.colSpan = 3;
         tr.appendChild(th);
 
         this.targetTh = document.createElement('th');
@@ -359,6 +393,20 @@ class TranslationView {
         memoryTitle.classList.add('titlepanel');
         memoryTitle.innerText = 'Translation Memory';
         this.memoryArea.appendChild(memoryTitle);
+        let matchesContainer = document.createElement('div');
+        matchesContainer.classList.add('fill_width');
+        this.memoryArea.appendChild(matchesContainer);
+        this.tmMatches = new TmMatches(matchesContainer, this.projectId);
+
+        let config: any = { attributes: true, childList: false, subtree: false };
+        let observer = new MutationObserver((mutationsList) => {
+            for (let mutation of mutationsList) {
+                if (mutation.type === 'attributes') {
+                    matchesContainer.style.height = (this.memoryArea.clientHeight - memoryTitle.clientHeight) + 'px';
+                }
+            }
+        });
+        observer.observe(this.memoryArea, config);
 
         this.machineArea = horizontalSplit.centerPanel();
         let machineTitle: HTMLDivElement = document.createElement('div');
@@ -379,6 +427,7 @@ class TranslationView {
 
     setSegments(arg: any[]): void {
         this.tbody.innerHTML = '';
+        this.tbody.parentElement.scrollTo({ top: 0, left: 0 });
         let length = arg.length;
         for (let i = 0; i < length; i++) {
             let row: any = arg[i];
@@ -399,6 +448,9 @@ class TranslationView {
             td = document.createElement('td');
             td.classList.add('source');
             td.classList.add('initial');
+            if (row.preserve) {
+                td.classList.add('preserve');
+            }
             td.innerHTML = row.source;
             tr.appendChild(td);
 
@@ -407,6 +459,13 @@ class TranslationView {
             td.classList.add('center');
             td.classList.add('translate');
             td.innerHTML = row.translate ? TranslationView.SVG_BLANK : TranslationView.SVG_LOCK;
+            tr.appendChild(td);
+
+            td = document.createElement('td');
+            td.classList.add('middle');
+            td.classList.add('center');
+            td.classList.add('match');
+            td.innerHTML = row.match;
             tr.appendChild(td);
 
             td = document.createElement('td');
@@ -426,6 +485,9 @@ class TranslationView {
 
             td = document.createElement('td');
             td.classList.add('target');
+            if (row.preserve) {
+                td.classList.add('preserve');
+            }
             td.innerHTML = row.target;
             tr.appendChild(td);
         }
@@ -471,7 +533,7 @@ class TranslationView {
             return;
         }
         if (this.currentCell) {
-            this.saveEdit();
+            this.saveEdit(false);
         }
         let row: HTMLTableRowElement = event.currentTarget as HTMLTableRowElement;
         this.currentId = { id: row.getAttribute('data-id'), file: row.getAttribute('data-file'), unit: row.getAttribute('data-unit') };
@@ -484,30 +546,56 @@ class TranslationView {
         this.currentContent = this.currentCell.innerHTML;
         this.currentCell.contentEditable = 'true';
         this.currentCell.classList.add('editing');
+
+        this.tmMatches.clear();
+
+        this.electron.ipcRenderer.send('get-matches', {
+            project: this.projectId,
+            file: this.currentId.file,
+            unit: this.currentId.unit,
+            segment: this.currentId.id
+        });
+
         this.currentCell.focus();
     }
 
-    saveEdit(): void {
+    saveEdit(confirm: boolean): void {
         if (this.currentCell) {
             this.currentCell.classList.remove('editing');
             this.currentCell.contentEditable = 'false';
             let translation = this.currentCell.innerHTML;
             this.currentCell = undefined;
-            if (translation === '') {
-                if (this.currentState.classList.contains('translated')) {
-                    this.currentState.classList.remove('translated');
-                    this.currentState.classList.add('initial');
-                    this.currentState.innerHTML = TranslationView.SVG_BLANK;
-                }
+
+            if (confirm) {
+                this.currentState.classList.remove('initial');
+                this.currentState.classList.remove('translated');
+                this.currentState.classList.add('final');
+                this.currentState.innerHTML = TranslationView.SVG_FINAL;
             } else {
-                if (this.currentState.classList.contains('initial')) {
-                    this.currentState.classList.remove('initial');
-                    this.currentState.classList.add('translated');
-                    this.currentState.innerHTML = TranslationView.SVG_TRANSLATED;
+                if (translation === '') {
+                    if (this.currentState.classList.contains('translated')) {
+                        this.currentState.classList.remove('translated');
+                        this.currentState.classList.add('initial');
+                        this.currentState.innerHTML = TranslationView.SVG_BLANK;
+                    }
+                } else {
+                    if (this.currentState.classList.contains('initial')) {
+                        this.currentState.classList.remove('initial');
+                        this.currentState.classList.add('translated');
+                        this.currentState.innerHTML = TranslationView.SVG_TRANSLATED;
+                    }
                 }
             }
+            if (this.currentContent === translation && !confirm) {
+                // nothing changed and not confirming
+                return;
+            }
             this.electron.ipcRenderer.send('save-translation', {
-                project: this.projectId, file: this.currentId.file, unit: this.currentId.unit, segment: this.currentId.id, translation: translation
+                project: this.projectId,
+                file: this.currentId.file,
+                unit: this.currentId.unit,
+                segment: this.currentId.id, translation: translation,
+                confirm: confirm
             });
         }
     }
@@ -551,7 +639,7 @@ class TranslationView {
         }
     }
 
-    autoPropagate(rows: any): void {
+    autoPropagate(rows: any[]): void {
         let length = rows.length;
         for (let i = 0; i < length; i++) {
             this.updateBody(rows[i]);
@@ -570,6 +658,20 @@ class TranslationView {
                 state.classList.remove('initial');
                 state.classList.add('translated');
                 state.innerHTML = TranslationView.SVG_TRANSLATED;
+            }
+        }
+    }
+
+    setMatches(matches: any[]): void {
+        // TODO
+        let lengtyh = matches.length;
+        for (let i=0 ; i<lengtyh ; i++) {
+            let match = matches[i];
+            if (match.type === 'TM') {
+                this.tmMatches.add(match);
+            }
+            if (match.type === 'MT') {
+                // TODO
             }
         }
     }
