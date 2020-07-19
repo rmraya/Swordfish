@@ -158,6 +158,9 @@ class Main {
         Main.electron.ipcRenderer.on('set-matches', (event: Electron.IpcRendererEvent, arg: any) => {
             this.setMatches(arg);
         });
+        Main.electron.ipcRenderer.on('set-target', (event: Electron.IpcRendererEvent, arg: any) => {
+            this.setTarget(arg);
+        });
         let config: any = { attributes: true, childList: false, subtree: false };
         let observer = new MutationObserver((mutationsList) => {
             for (let mutation of mutationsList) {
@@ -259,6 +262,15 @@ class Main {
         let selected = Main.tabHolder.getSelected();
         if ( Main.translationViews.has(selected)) {
             Main.translationViews.get(selected).setMatches(arg.matches);
+        }
+    }
+
+    setTarget(arg: any): void {
+        let selected = Main.tabHolder.getSelected();
+        if ( Main.translationViews.has(selected)) {
+            console.log('accepting ' + JSON.stringify(arg))
+           
+            Main.translationViews.get(selected).setTarget(arg);
         }
     }
 }

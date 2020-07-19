@@ -189,7 +189,7 @@ class TranslationView {
     }
 
     exportTranslations() {
-        this.electron.ipcRenderer.send('export-translations', { project: this.projectId });
+        this.electron.ipcRenderer.send('export-open-project', { project: this.projectId });
     }
 
     setSegmentsCount(count: number): void {
@@ -465,7 +465,9 @@ class TranslationView {
             td.classList.add('middle');
             td.classList.add('center');
             td.classList.add('match');
-            td.innerHTML = row.match;
+            if (row.match > 0) {
+                td.innerHTML = row.match + '%';
+            }
             tr.appendChild(td);
 
             td = document.createElement('td');
@@ -653,25 +655,56 @@ class TranslationView {
             let row: HTMLTableRowElement = rows[i];
             if (row.getAttribute('data-file') === data.file && row.getAttribute('data-unit') === data.unit
                 && row.getAttribute('data-id') === data.segment) {
-                (row.getElementsByClassName('target')[0] as HTMLTableCellElement).innerHTML = data.target;
-                let state = row.getElementsByClassName('state')[0] as HTMLTableCellElement;
-                state.classList.remove('initial');
-                state.classList.add('translated');
-                state.innerHTML = TranslationView.SVG_TRANSLATED;
+                if (data.match < 100) {
+                    (row.getElementsByClassName('match')[0] as HTMLTableCellElement).innerHTML = data.match + '%';
+                } else {
+                    (row.getElementsByClassName('match')[0] as HTMLTableCellElement).innerHTML = data.match + '%';
+                    (row.getElementsByClassName('target')[0] as HTMLTableCellElement).innerHTML = data.target;
+                    let state = row.getElementsByClassName('state')[0] as HTMLTableCellElement;
+                    state.classList.remove('initial');
+                    state.classList.add('translated');
+                    state.innerHTML = TranslationView.SVG_TRANSLATED;
+                }
+                break;
             }
         }
     }
 
     setMatches(matches: any[]): void {
-        // TODO
         let lengtyh = matches.length;
-        for (let i=0 ; i<lengtyh ; i++) {
+        for (let i = 0; i < lengtyh; i++) {
             let match = matches[i];
+            match.project = this.projectId;
             if (match.type === 'TM') {
                 this.tmMatches.add(match);
             }
             if (match.type === 'MT') {
                 // TODO
+            }
+        }
+    }
+
+    setTarget(arg: any): void {
+        let rows: HTMLCollectionOf<HTMLTableRowElement> = this.tbody.getElementsByTagName('tr');
+        let length = rows.length;
+        for (let i = 0; i < length; i++) {
+            let row: HTMLTableRowElement = rows[i];
+            if (row.getAttribute('data-file') === arg.file && row.getAttribute('data-unit') === arg.unit
+                && row.getAttribute('data-id') === arg.segment) {
+                (row.getElementsByClassName('target')[0] as HTMLTableCellElement).innerHTML = arg.target;
+                let state = row.getElementsByClassName('state')[0] as HTMLTableCellElement;
+                state.classList.remove('initial');
+                state.classList.add('translated');
+                state.innerHTML = TranslationView.SVG_TRANSLATED;
+
+                this.currentCell = row.getElementsByClassName('target')[0] as HTMLTableCellElement;
+                this.currentState = row.getElementsByClassName('state')[0] as HTMLTableCellElement;
+                this.currentTranslate = row.getElementsByClassName('translate')[0] as HTMLTableCellElement;
+                this.currentContent = this.currentCell.innerHTML;
+                this.currentCell.contentEditable = 'true';
+                this.currentCell.classList.add('editing');
+                this.currentCell.focus();
+                break;
             }
         }
     }

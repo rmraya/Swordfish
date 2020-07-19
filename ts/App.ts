@@ -193,6 +193,9 @@ class Swordfish {
         ipcMain.on('export-translations', (event: IpcMainEvent, arg: any) => {
             Swordfish.exportTranslations(arg);
         });
+        ipcMain.on('export-open-project', (event: IpcMainEvent, arg: any) => {
+            Swordfish.exportOpenProject(arg);
+        });
         ipcMain.on('get-theme', (event: IpcMainEvent, arg: any) => {
             event.sender.send('set-theme', Swordfish.currentCss);
         });
@@ -333,6 +336,9 @@ class Swordfish {
         ipcMain.on('get-matches', (event: IpcMainEvent, arg: any) => {
             Swordfish.getMatches(arg);
         });
+        ipcMain.on('accept-match', (event: IpcMainEvent, arg: any) => {
+            Swordfish.contents.send('set-target', arg);
+        });
     } // end constructor
 
     static createWindow(): void {
@@ -381,7 +387,6 @@ class Swordfish {
             new MenuItem({ type: 'separator' }),
             { label: 'Save Changes', accelerator: 'Alt+Enter', click: () => { this.saveEdits(false); } },
             { label: 'Discard Changes', accelerator: 'Esc', click: () => { this.cancelEdit(); } },
-            { label: 'Confirm Translation', accelerator: 'CmdOrCtrl+E', click: () => { this.saveEdits(true); } },
             new MenuItem({ type: 'separator' }),
             { label: 'Insert Tag', accelerator: 'CmdOrCtrl+T', click: () => { Swordfish.contents.send('insert-tag'); } },
             new MenuItem({ label: 'Quick Tags', submenu: tagsMenu }),
@@ -426,7 +431,10 @@ class Swordfish {
             { label: 'Support Group', click: () => { this.showSupportGroup(); } }
         ]);
         var tasksMenu: Menu = Menu.buildFromTemplate([
-            { label: 'Copy Source to Target', accelerator: 'CmdOrCtrl+P', click: () => { Swordfish.contents.send('copy-source'); } }
+
+            { label: 'Confirm Translation', accelerator: 'CmdOrCtrl+E', click: () => { this.saveEdits(true); } },
+            { label: 'Copy Source to Target', accelerator: 'CmdOrCtrl+P', click: () => { Swordfish.contents.send('copy-source'); } },
+            { label: 'Accept TM Match', accelerator: 'CmdOrCtrl+Alt+A', click: () => { Swordfish.contents.send('accept-tm-match'); } }
         ]);
         var template: MenuItem[] = [
             new MenuItem({ label: '&File', role: 'fileMenu', submenu: fileMenu }),
@@ -587,12 +595,96 @@ class Swordfish {
         });
     }
 
+    static exportOpenProject(arg: any): void {
+        Swordfish.sendRequest('/projects/get', arg,
+            (data: any) => { 
+                Swordfish.exportTranslations(data);
+            },
+            (reason: string) => {
+                dialog.showErrorBox('Error', reason);
+            }
+        );
+    }
+
     static exportTranslations(project: any): void {
-        // TODO
-        if (project.files.length > 1) {
-            // needs folder
+        if (project.files.length === 1 && project.files[0].type !== 'DITA Map') {
+            let parsed: any = Swordfish.getSaveName(project.files[0], project.targetLang);
+            dialog.showSaveDialog(Swordfish.mainWindow, {
+                defaultPath: parsed.defaultPath,
+                filters: parsed.filters,
+                properties: ['createDirectory', 'showOverwriteConfirmation']
+            }).then((value) => {
+                if (!value.canceled) {
+                    Swordfish.sendRequest('/projects/export', { project: project.id, output: value.filePath },
+                        (data: any) => {
+                            Swordfish.exportProject(data);
+                        }, (reason: string) => {
+                            dialog.showErrorBox('Error', reason);
+                        }
+                    );
+                }
+            }).catch((error) => {
+                console.log(error);
+            });
         } else {
-            // needs file name
+            dialog.showSaveDialog(Swordfish.mainWindow, { properties: ['createDirectory'] }).then((value) => {
+                if (!value.canceled) {
+                    Swordfish.sendRequest('/projects/export', { project: project.id, output: value.filePath },
+                        (data: any) => {
+                            Swordfish.exportProject(data);
+                        }, (reason: string) => {
+                            dialog.showErrorBox('Error', reason);
+                        }
+                    );
+                }
+            }).catch((error) => {
+                console.log(error);
+            });
+        }
+    }
+
+    static exportProject(data: any): void {
+        if (data.status !== Swordfish.SUCCESS) {
+            dialog.showErrorBox('Error', data.reason);
+        }
+        Swordfish.contents.send('start-waiting');
+        Swordfish.contents.send('set-status', 'Exporting translations');
+        Swordfish.currentStatus = data;
+        let processId: string = data.process;
+        var intervalObject = setInterval(() => {
+            if (Swordfish.currentStatus.progress) {
+                if (Swordfish.currentStatus.progress === Swordfish.COMPLETED) {
+                    Swordfish.contents.send('end-waiting');
+                    Swordfish.contents.send('set-status', '');
+                    clearInterval(intervalObject);
+                    dialog.showMessageBox(Swordfish.mainWindow, { type: 'info', message: 'Translations exported' });
+                    return;
+                } else if (Swordfish.currentStatus.progress === Swordfish.PROCESSING) {
+                    // it's OK, keep waiting
+                } else if (Swordfish.currentStatus.progress === Swordfish.ERROR) {
+                    Swordfish.contents.send('end-waiting');
+                    Swordfish.contents.send('set-status', '');
+                    clearInterval(intervalObject);
+                    dialog.showErrorBox('Error', Swordfish.currentStatus.reason);
+                    return;
+                } else {
+                    Swordfish.contents.send('end-waiting');
+                    Swordfish.contents.send('set-status', '');
+                    clearInterval(intervalObject);
+                    dialog.showErrorBox('Error', 'Unknown error exporting translations');
+                    return;
+                }
+            }
+            Swordfish.getProjectsProgress(processId);
+        }, 500);
+    }
+
+    static getSaveName(file: any, lang: string): any {
+        let name = file.file.substr(0, file.file.lastIndexOf('.'));
+        let extension = file.file.substr(file.file.lastIndexOf('.'));
+        return {
+            defaultPath: name + '_' + lang + extension,
+            filters: [{ name: file.type, extensions: extension }, { name: 'Any File', extensions: '*' }]
         }
     }
 

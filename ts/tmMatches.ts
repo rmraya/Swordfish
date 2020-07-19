@@ -25,12 +25,13 @@ class TmMatches {
     projectId: string;
 
     tabHolder: TabHolder;
-
+    matches: Map<string, any>;
     origin: HTMLSpanElement;
 
     constructor(div: HTMLDivElement, projectId: string) {
         this.container = div;
         this.projectId = projectId;
+        this.matches = new Map<string, any>();
 
         let tabContainer: HTMLDivElement = document.createElement('div');
         tabContainer.classList.add('fill_width');
@@ -58,6 +59,10 @@ class TmMatches {
         this.origin.style.marginLeft = '10px';
         toolbar.appendChild(this.origin);
 
+        this.electron.ipcRenderer.on('accept-tm-match', () => {
+            this.acceptTranslation();
+        });
+        
         let config: any = { attributes: true, childList: false, subtree: false };
         let observer = new MutationObserver((mutationsList) => {
             for (let mutation of mutationsList) {
@@ -72,12 +77,11 @@ class TmMatches {
     clear(): void {
         this.tabHolder.clear();
         this.origin.innerText = '';
-        console.log('cleared');
+        this.matches.clear();
     }
 
     add(match: any) {
-        console.log(JSON.stringify(match));
-
+        this.matches.set(match.matchId, match);
         let tab = new Tab(match.matchId, match.similarity + '%', false);
 
         let div: HTMLDivElement = tab.getContainer();
@@ -116,6 +120,11 @@ class TmMatches {
     }
 
     acceptTranslation(): void {
-        // TODO
+        if (this.tabHolder.size() === 0) {
+            return;
+        }
+        let selected: string = this.tabHolder.getSelected();
+        let match: any = this.matches.get(selected);
+        this.electron.ipcRenderer.send('accept-match', match);
     }
 }

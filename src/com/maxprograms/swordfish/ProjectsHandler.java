@@ -70,15 +70,13 @@ public class ProjectsHandler implements HttpHandler {
 	private static Hashtable<String, Project> projects;
 	private static Map<String, String> processes;
 	private static boolean firstRun = true;
-
 	protected JSONObject projectsList;
 
-	protected boolean converting;
-	protected String conversionError = "";
 	private String srxFile;
 	private String catalogFile;
 
 	private Hashtable<String, XliffStore> projectStores;
+	private boolean shouldClose;
 
 	@Override
 	public void handle(HttpExchange exchange) throws IOException {
@@ -114,6 +112,8 @@ public class ProjectsHandler implements HttpHandler {
 				response = createProject(request);
 			} else if ("/projects/list".equals(url)) {
 				response = listProjects(request);
+			} else if ("/projects/get".equals(url)) {
+				response = getProject(request);
 			} else if ("/projects/delete".equals(url)) {
 				response = deleteProjects(request);
 			} else if ("/projects/export".equals(url)) {
@@ -147,6 +147,16 @@ public class ProjectsHandler implements HttpHandler {
 			response.put(Constants.REASON, j.getMessage());
 		}
 		return response;
+	}
+
+	private JSONObject getProject(String request) {
+		JSONObject json = new JSONObject(request);
+		if (!projects.containsKey(json.getString("project"))) {
+			JSONObject result = new JSONObject();
+			result.put(Constants.REASON, "Project does not exist");
+			return result;
+		}
+		return projects.get(json.getString("project")).toJSON();
 	}
 
 	private JSONObject getProjectFiles(String request) {
@@ -189,8 +199,56 @@ public class ProjectsHandler implements HttpHandler {
 	}
 
 	private JSONObject exportProject(String request) {
-		// TODO
-		return new JSONObject();
+		JSONObject result = new JSONObject();
+		JSONObject json = new JSONObject(request);
+		String project = json.getString("project");
+		String output = json.getString("output");
+		if (projectStores == null) {
+			projectStores = new Hashtable<>();
+			logger.log(Level.INFO, "Created store map");
+		}
+		shouldClose = false;
+		if (!projectStores.containsKey(project)) {
+			shouldClose = true;
+			try {
+				Project prj = projects.get(project);
+				XliffStore store = new XliffStore(prj.getXliff(), prj.getSourceLang().getCode(),
+						prj.getTargetLang().getCode());
+				projectStores.put(project, store);
+			} catch (SAXException | IOException | ParserConfigurationException | URISyntaxException | SQLException e) {
+				logger.log(Level.ERROR, "Error creating project store", e);
+				result.put(Constants.REASON, e.getMessage());
+				return result;
+			}
+		}
+		String id = "" + System.currentTimeMillis();
+		result.put("process", id);
+		if (processes == null) {
+			processes = new Hashtable<>();
+		}
+		processes.put(id, Constants.PROCESSING);
+		try {
+			Thread thread = new Thread() {
+				@Override
+				public void run() {
+					try {
+						projectStores.get(project).exportTranslations(output);
+						if (shouldClose) {
+							closeProject(request);
+						}
+						processes.put(id, Constants.COMPLETED);
+					} catch (IOException | SAXException | ParserConfigurationException | SQLException e) {
+						logger.log(Level.ERROR, e);
+						processes.put(id, e.getMessage());
+					}
+				}
+			};
+			thread.start();
+		} catch (Exception e) {
+			logger.log(Level.ERROR, "Error exporting translations", e);
+			result.put(Constants.REASON, e.getMessage());
+		}
+		return result;
 	}
 
 	private JSONObject deleteProjects(String request) {
@@ -433,9 +491,6 @@ public class ProjectsHandler implements HttpHandler {
 		}
 		String filesRoot = Join.findTreeRoot(filesList);
 
-		conversionError = "";
-		converting = true;
-
 		String id = "" + System.currentTimeMillis();
 		result.put("process", id);
 		if (processes == null) {
@@ -546,10 +601,8 @@ public class ProjectsHandler implements HttpHandler {
 						processes.put(id, Constants.COMPLETED);
 					} catch (IOException | SAXException | ParserConfigurationException e) {
 						logger.log(Level.ERROR, e.getMessage(), e);
-						conversionError = e.getMessage();
-						processes.put(id, conversionError);
+						processes.put(id, e.getMessage());
 					}
-					converting = false;
 				}
 			};
 			thread.start();

@@ -201,8 +201,9 @@ class ProjectsView {
             return;
         }
         for (let key of this.selected.keys()) {
-            let project = this.selected.get(key);
-            this.electron.ipcRenderer.send('export-translations', project);
+            console.log(key);
+            console.log(JSON.stringify(this.selected.get(key)));
+            this.electron.ipcRenderer.send('export-translations', this.selected.get(key));
         }
     }
 
