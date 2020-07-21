@@ -675,10 +675,10 @@ class TranslationView {
         for (let i = 0; i < lengtyh; i++) {
             let match = matches[i];
             match.project = this.projectId;
-            if (match.type === 'TM') {
+            if (match.type === 'tm') {
                 this.tmMatches.add(match);
             }
-            if (match.type === 'MT') {
+            if (match.type === 'mt') {
                 // TODO
             }
         }

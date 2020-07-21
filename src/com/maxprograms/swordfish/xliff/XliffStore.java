@@ -78,6 +78,7 @@ public class XliffStore {
     private PreparedStatement insertUnit;
     private PreparedStatement insertSegment;
     private PreparedStatement insertMatch;
+    private PreparedStatement updateMatch;
     private PreparedStatement getMatches;
     private PreparedStatement bestMatch;
     private PreparedStatement insertTerm;
@@ -134,9 +135,11 @@ public class XliffStore {
         updateTarget = conn.prepareStatement(
                 "UPDATE segments SET target=?, targetText=?, state=? WHERE file=? AND unitId=? AND segId=?");
         insertMatch = conn.prepareStatement(
-                "INSERT INTO matches (file, unitId, segId, matchId, origin, type, similarity, source, target) VALUES(?,?,?,?,?,?,?,?,?)");
+                "INSERT INTO matches (file, unitId, segId, matchId, origin, type, similarity, source, target, data, compressed) VALUES(?,?,?,?,?,?,?,?,?,?,?)");
+        updateMatch = conn.prepareStatement(
+                "UPDATE matches SET origin=?, type=?, similarity=?, source=?, target=?, data=?, compressed=? WHERE file=? AND unitId=? AND segId=? AND matchId=?");
         getMatches = conn.prepareStatement(
-                "SELECT file, unitId, segId, matchId, origin, type, similarity, source, target FROM matches WHERE file=? AND unitId=? AND segId=? ORDER BY similarity DESC");
+                "SELECT file, unitId, segId, matchId, origin, type, similarity, source, target, data, compressed FROM matches WHERE file=? AND unitId=? AND segId=? ORDER BY similarity DESC");
         bestMatch = conn.prepareStatement(
                 "SELECT type, similarity FROM matches WHERE file=? AND unitId=? AND segId=? ORDER BY similarity DESC LIMIT 1");
         stmt = conn.createStatement();
@@ -151,9 +154,9 @@ public class XliffStore {
                 + "target VARCHAR(6000) NOT NULL, targetText VARCHAR(6000) NOT NULL, "
                 + "PRIMARY KEY(file, unitId, segId, type) );";
         String query3 = "CREATE TABLE matches (file VARCHAR(50), unitId VARCHAR(50) NOT NULL, "
-                + "segId VARCHAR(50) NOT NULL, matchId varchar(256), origin VARCHAR(256), type CHAR(2) NOT NULL DEFAULT 'TM', "
-                + "similarity INTEGER DEFAULT 0, source VARCHAR(6000) NOT NULL, target VARCHAR(6000) NOT NULL, "
-                + "PRIMARY KEY(file, unitId, segId, matchid) );";
+                + "segId VARCHAR(50) NOT NULL, matchId varchar(256), origin VARCHAR(256), type CHAR(2) NOT NULL DEFAULT 'tm', "
+                + "similarity INTEGER DEFAULT 0, source VARCHAR(6000) NOT NULL, target VARCHAR(6000) NOT NULL, data VARCHAR(6000) NOT NULL, "
+                + "compressed CHAR(1) NOT NULL DEFAULT 'N', PRIMARY KEY(file, unitId, segId, matchid) );";
         String query4 = "CREATE TABLE terms (file VARCHAR(50), unitId VARCHAR(50) NOT NULL, "
                 + "segId VARCHAR(50) NOT NULL, termid varchar(256),  "
                 + "origin VARCHAR(256), source VARCHAR(6000) NOT NULL, target VARCHAR(6000) NOT NULL, "
@@ -203,6 +206,10 @@ public class XliffStore {
                     tagCount++;
                 }
             }
+            Element matches = e.getChild("mtc:matches");
+            if (matches != null) {
+                // TODO process matches
+            }
             if (tagCount > 0) {
                 String dataString = data.toString();
                 insertUnit.setString(1, currentFile);
@@ -216,7 +223,6 @@ public class XliffStore {
                 }
                 insertUnit.execute();
             }
-            // Element matches = e.getChild("mtc:matches");
             // Element glossary = e.getChild("gls:glossary");
 
             // TODO store matches and terms
@@ -378,7 +384,7 @@ public class XliffStore {
                 similarity = rs.getInt(2);
             }
         }
-        if (type.isEmpty() || "MT".equals(type)) {
+        if (type.isEmpty() || "mt".equals(type)) {
             return 0;
         }
         return similarity;
@@ -410,6 +416,7 @@ public class XliffStore {
         getTarget.close();
         updateTarget.close();
         insertMatch.close();
+        updateMatch.close();
         getMatches.close();
         bestMatch.close();
         stmt.close();
@@ -535,12 +542,11 @@ public class XliffStore {
                     String state = rs.getString(5);
                     int tags = rs.getInt(6);
                     boolean preserve = "Y".equals(rs.getString(7));
+                    JSONObject tagsData = new JSONObject();
+                    if (tags > 0) {
+                        tagsData = getUnitData(file, unit);
+                    }
                     if (similarity == 100 && Constants.INITIAL.equals(state)) {
-                        JSONObject tagsData = new JSONObject();
-                        if (tags > 0) {
-                            tagsData = getUnitData(file, unit);
-                        }
-
                         tagsMap = new Hashtable<>();
                         tag = 1;
                         addHtmlTags(candidate, "", false, false, tagsData);
@@ -561,7 +567,7 @@ public class XliffStore {
                         translated.setContent(target.getContent());
                         updateTarget(file, unit, segment, translated, pureText(translated), false);
                     }
-                    insertMatch(file, unit, segment, "Self", "TM", similarity, source, target);
+                    insertMatch(file, unit, segment, "Self", "tm", similarity, source, target, tagsData);
                     if (similarity < 100) {
                         int best = getBestMatch(file, unit, segment);
                         JSONObject row = new JSONObject();
@@ -578,13 +584,71 @@ public class XliffStore {
     }
 
     private synchronized void insertMatch(String file, String unit, String segment, String origin, String type,
-            int similarity, Element source, Element target) throws SQLException {
+            int similarity, Element source, Element target, JSONObject tagsData) throws SQLException {
         String matchId = "" + pureText(source).hashCode();
         JSONArray matches = getMatches(file, unit, segment);
+        String data = "";
+        boolean compressed = false;
+        if (!source.getChildren().isEmpty() || !target.getChildren().isEmpty()) {
+            List<String> added = new Vector<>();
+            Element originalData = new Element("originalData");
+            List<Element> children = source.getChildren();
+            Iterator<Element> it = children.iterator();
+            while (it.hasNext()) {
+                Element tag = it.next();
+                if ("mrk".equals(tag.getName()) || "pc".equals(tag.getName()) || "cp".equals(tag.getName())) {
+                    continue;
+                }
+                String dataRef = tag.getAttributeValue("dataRef");
+                if (!added.contains(dataRef) && tagsData.has(dataRef)) {
+                    Element d = new Element("data");
+                    d.setAttribute("id", dataRef);
+                    d.setText(tagsData.getString("dataRef"));
+                    originalData.addContent(d);
+                    added.add(dataRef);
+                } else {
+                    tag.removeAttribute("dataRef");
+                }
+            }
+            children = target.getChildren();
+            it = children.iterator();
+            while (it.hasNext()) {
+                Element tag = it.next();
+                if ("mrk".equals(tag.getName()) || "pc".equals(tag.getName()) || "cp".equals(tag.getName())) {
+                    continue;
+                }
+                String dataRef = tag.getAttributeValue("dataRef");
+                if (!added.contains(dataRef) && tagsData.has(dataRef)) {
+                    Element d = new Element("data");
+                    d.setAttribute("id", dataRef);
+                    d.setText(tagsData.getString("dataRef"));
+                    originalData.addContent(d);
+                    added.add(dataRef);
+                } else {
+                    tag.removeAttribute("dataRef");
+                }
+            }
+            data = originalData.toString();
+            if (data.length() > 6000) {
+                data = Compression.compress(data);
+                compressed = true;
+            }
+        }
         for (int i = 0; i < matches.length(); i++) {
             JSONObject match = matches.getJSONObject(i);
             if (match.getString("matchId").equals(matchId)) {
-                // TODO update match
+                updateMatch.setString(1, origin);
+                updateMatch.setString(2, "tm");
+                updateMatch.setInt(3, similarity);
+                updateMatch.setNString(4, source.toString());
+                updateMatch.setNString(5, target.toString());
+                updateMatch.setString(6, data);
+                updateMatch.setString(7, compressed ? "Y" : "N");
+                updateMatch.setString(8, file);
+                updateMatch.setString(9, unit);
+                updateMatch.setString(10, segment);
+                updateMatch.setString(11, matchId);
+                updateMatch.execute();
                 return;
             }
         }
@@ -597,6 +661,8 @@ public class XliffStore {
         insertMatch.setInt(7, similarity);
         insertMatch.setNString(8, source.toString());
         insertMatch.setNString(9, target.toString());
+        insertMatch.setString(10, data);
+        insertMatch.setString(11, compressed ? "Y" : "N");
         insertMatch.execute();
     }
 
@@ -883,7 +949,7 @@ public class XliffStore {
         String segment = json.getString("segment");
 
         JSONObject originalData = getUnitData(file, unit);
-        String dummy = "";
+        String originalSource = "";
 
         getSource.setString(1, file);
         getSource.setString(2, unit);
@@ -891,7 +957,7 @@ public class XliffStore {
         try (ResultSet rs = getSource.executeQuery()) {
             while (rs.next()) {
                 String src = rs.getNString(1);
-                dummy = dummyTagger(buildElement(src));
+                originalSource = addHtmlTags(buildElement(src), "", false, false, originalData);
             }
         }
 
@@ -911,7 +977,8 @@ public class XliffStore {
 
                 String src = rs.getNString(8);
                 Element source = buildElement(src);
-                DifferenceTagger tagger = new DifferenceTagger(dummy, dummyTagger(source));
+                String taggedSource = addHtmlTags(source, "", false, false, originalData);
+                DifferenceTagger tagger = new DifferenceTagger(originalSource, taggedSource);
 
                 match.put("source", tagger.getYDifferences());
 
@@ -924,7 +991,8 @@ public class XliffStore {
         return result;
     }
 
-    public void exportTranslations(String output) throws SAXException, IOException, ParserConfigurationException, SQLException {
+    public void exportTranslations(String output)
+            throws SAXException, IOException, ParserConfigurationException, SQLException {
         updateXliff();
         List<String> result = Merge.merge(xliffFile, output, getCatalogFile(), true);
         if (!"0".equals(result.get(0))) {
