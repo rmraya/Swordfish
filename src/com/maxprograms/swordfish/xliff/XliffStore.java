@@ -47,6 +47,7 @@ import java.util.zip.DataFormatException;
 import javax.xml.parsers.ParserConfigurationException;
 
 import com.maxprograms.converters.Merge;
+import com.maxprograms.stats.RepetitionAnalysis;
 import com.maxprograms.swordfish.Constants;
 import com.maxprograms.swordfish.TmsServer;
 import com.maxprograms.tmengine.MatchQuality;
@@ -75,6 +76,7 @@ public class XliffStore {
 
     private File database;
     private Connection conn;
+    private PreparedStatement insertFile;
     private PreparedStatement insertUnit;
     private PreparedStatement insertSegment;
     private PreparedStatement insertMatch;
@@ -152,46 +154,49 @@ public class XliffStore {
     }
 
     private void createTables() throws SQLException {
-        String query1 = "CREATE TABLE units (file VARCHAR(50), " + "unitId VARCHAR(50) NOT NULL, "
+        String files = "CREATE TABLE files (id VARCHAR(50) NOT NULL, name VARCHAR(350) NOT NULL, PRIMARY KEY(id));";
+        String units = "CREATE TABLE units (file VARCHAR(50), " + "unitId VARCHAR(50) NOT NULL, "
                 + "data VARCHAR(6000) NOT NULL, compressed CHAR(1) NOT NULL DEFAULT 'N', PRIMARY KEY(file, unitId) );";
-        String query2 = "CREATE TABLE segments (file VARCHAR(50), unitId VARCHAR(50) NOT NULL, "
+        String segments = "CREATE TABLE segments (file VARCHAR(50), unitId VARCHAR(50) NOT NULL, "
                 + "segId VARCHAR(50) NOT NULL, type CHAR(1) NOT NULL DEFAULT 'S', state VARCHAR(12) DEFAULT 'initial', child INTEGER, "
                 + "translate CHAR(1), tags INTEGER DEFAULT 0, space CHAR(1) DEFAULT 'N', source VARCHAR(6000) NOT NULL, sourceText VARCHAR(6000) NOT NULL, "
-                + "target VARCHAR(6000) NOT NULL, targetText VARCHAR(6000) NOT NULL, "
+                + "target VARCHAR(6000) NOT NULL, targetText VARCHAR(6000) NOT NULL, words INTEGER NOT NULL DEFAULT 0, "
                 + "PRIMARY KEY(file, unitId, segId, type) );";
-        String query3 = "CREATE TABLE matches (file VARCHAR(50), unitId VARCHAR(50) NOT NULL, "
+        String matches = "CREATE TABLE matches (file VARCHAR(50), unitId VARCHAR(50) NOT NULL, "
                 + "segId VARCHAR(50) NOT NULL, matchId varchar(256), origin VARCHAR(256), type CHAR(2) NOT NULL DEFAULT 'tm', "
                 + "similarity INTEGER DEFAULT 0, source VARCHAR(6000) NOT NULL, target VARCHAR(6000) NOT NULL, data VARCHAR(6000) NOT NULL, "
                 + "compressed CHAR(1) NOT NULL DEFAULT 'N', PRIMARY KEY(file, unitId, segId, matchid) );";
-        String query4 = "CREATE TABLE terms (file VARCHAR(50), unitId VARCHAR(50) NOT NULL, "
+        String terms = "CREATE TABLE terms (file VARCHAR(50), unitId VARCHAR(50) NOT NULL, "
                 + "segId VARCHAR(50) NOT NULL, termid varchar(256),  "
                 + "origin VARCHAR(256), source VARCHAR(6000) NOT NULL, target VARCHAR(6000) NOT NULL, "
                 + "PRIMARY KEY(file, unitId, segId, termid) );";
         try (Statement stmt = conn.createStatement()) {
-            stmt.execute(query1);
-            stmt.execute(query2);
-            stmt.execute(query3);
-            stmt.execute(query4);
+            stmt.execute(files);
+            stmt.execute(units);
+            stmt.execute(segments);
+            stmt.execute(matches);
+            stmt.execute(terms);
             conn.commit();
         }
     }
 
     private void parseDocument() throws SQLException {
+        insertFile = conn.prepareStatement("INSERT INTO files (id, name) VALUES (?,?)");
         insertUnit = conn.prepareStatement("INSERT INTO units (file, unitId, data, compressed) VALUES (?,?,?,?)");
         insertSegment = conn.prepareStatement(
-                "INSERT INTO segments (file, unitId, segId, type, state, child, translate, tags, space, source, sourceText, target, targetText) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)");
+                "INSERT INTO segments (file, unitId, segId, type, state, child, translate, tags, space, source, sourceText, target, targetText, words) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)");
         recurse(document.getRootElement());
+        insertFile.close();
         insertUnit.close();
         insertSegment.close();
     }
 
     private void recurse(Element e) throws SQLException {
         if ("file".equals(e.getName())) {
-            String tgt = e.getAttributeValue("tgtLang");
-            if (!tgt.isEmpty()) {
-                tgtLang = tgt;
-            }
             currentFile = e.getAttributeValue("id");
+            insertFile.setString(1, currentFile);
+            insertFile.setNString(2, e.getAttributeValue("original"));
+            insertFile.execute();
             index = 0;
         }
         if ("unit".equals(e.getName())) {
@@ -252,11 +257,9 @@ public class XliffStore {
                 }
             }
             state = e.getAttributeValue("state", pureText(target).isEmpty() ? "initial" : "translated");
-
             preserve = preserve | sourcePreserve | "preserve".equals(target.getAttributeValue("xml:space", "default"));
 
-            insertSegment(currentFile, currentUnit, id, "S", state, index++, translate, tagCount, preserve, source,
-                    target);
+            insertSegment(currentFile, currentUnit, id, "S", translate, source, target);
         }
         if ("ignorable".equals(e.getName())) {
             String id = e.getAttributeValue("id");
@@ -264,8 +267,7 @@ public class XliffStore {
                 id = "i" + nextId++;
                 e.setAttribute("id", id);
             }
-            insertSegment(currentFile, currentUnit, id, "I", state, index++, false, tagCount, true,
-                    e.getChild("source"), e.getChild("target"));
+            insertSegment(currentFile, currentUnit, id, "I", false, e.getChild("source"), e.getChild("target"));
         }
         List<Element> children = e.getChildren();
         Iterator<Element> it = children.iterator();
@@ -277,25 +279,27 @@ public class XliffStore {
         }
     }
 
-    private synchronized void insertSegment(String file, String unit, String segment, String type, String stat, int idx,
-            boolean translate, int count, boolean pres, Element source, Element target) throws SQLException {
+    private synchronized void insertSegment(String file, String unit, String segment, String type, boolean translate,
+            Element source, Element target) throws SQLException {
         source.setAttribute("xml:lang", srcLang);
         if (target != null) {
             target.setAttribute("xml:lang", tgtLang);
         }
+        String pureSource = pureText(source);
         insertSegment.setString(1, file);
         insertSegment.setString(2, unit);
         insertSegment.setString(3, segment);
         insertSegment.setString(4, type);
-        insertSegment.setString(5, stat);
-        insertSegment.setInt(6, idx);
+        insertSegment.setString(5, state);
+        insertSegment.setInt(6, index++);
         insertSegment.setString(7, translate ? "Y" : "N");
-        insertSegment.setInt(8, count);
-        insertSegment.setString(9, pres ? "Y" : "N");
+        insertSegment.setInt(8, tagCount);
+        insertSegment.setString(9, preserve ? "Y" : "N");
         insertSegment.setNString(10, source.toString());
-        insertSegment.setNString(11, pureText(source));
+        insertSegment.setNString(11, pureSource);
         insertSegment.setNString(12, target != null ? target.toString() : "");
         insertSegment.setNString(13, target != null ? pureText(target) : "");
+        insertSegment.setInt(14, type.equals("S") ? RepetitionAnalysis.wordCount(pureSource, srcLang) : 0);
         insertSegment.execute();
     }
 
@@ -733,8 +737,6 @@ public class XliffStore {
                     string.append('{');
                     string.append(dummy++);
                     string.append('}');
-                } else if ("cp".equals(el.getName())) {
-                    // TODO handle codepoint tags
                 } else {
                     string.append('{');
                     string.append(dummy++);
@@ -899,7 +901,22 @@ public class XliffStore {
                     }
                     text.append(tagsMap.get("/mrk" + id));
                 } else if (type.equals("cp")) {
-                    // TODO handle codepoint tags
+                    String hex = "cp" + e.getAttributeValue("hex");
+                    if (!tagsMap.containsKey(hex)) {
+                        XliffUtils.checkSVG(tag);
+                        StringBuilder sb = new StringBuilder();
+                        sb.append("<img data-ref='");
+                        sb.append(hex);
+                        sb.append("' src='");
+                        sb.append(TmsServer.getWorkFolder().toURI().toURL().toString());
+                        sb.append("images/");
+                        sb.append(tag++);
+                        sb.append(".svg' align='bottom' alt='' title=\"");
+                        sb.append(XliffUtils.unquote(XliffUtils.cleanAngles(e.toString())));
+                        sb.append("\"/>");
+                        tagsMap.put(hex, sb.toString());
+                    }
+                    text.append(tagsMap.get(hex));
                 } else {
                     String dataRef = e.getAttributeValue("dataRef");
                     if (!tagsMap.containsKey(dataRef)) {
@@ -954,7 +971,7 @@ public class XliffStore {
                     result.put(e.getAttributeValue("id"), XliffUtils.getHeader(e));
                     result.put("/" + e.getAttributeValue("id"), XliffUtils.getTail(e));
                 } else if ("cp".equals(e.getName())) {
-                    // TODO handle codepoint tags
+                    result.put("cp" + e.getAttributeValue("hex"), e.toString());
                 } else {
                     result.put(e.getAttributeValue("id"), e.toString());
                 }
