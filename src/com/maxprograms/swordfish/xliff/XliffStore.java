@@ -86,29 +86,35 @@ public class XliffStore {
     private PreparedStatement getSource;
     private PreparedStatement getTarget;
     private PreparedStatement updateTarget;
+    private PreparedStatement unitMatches;
+
     private Statement stmt;
     private boolean preserve;
 
     private int index;
-    private long nextId;
+    private int nextId;
     private String currentFile;
     private String currentUnit;
     private String state;
     private boolean translate;
     private int tagCount;
+
     private String srcLang;
     private String tgtLang;
 
     private static int tag;
     private Map<String, String> tagsMap;
+
     private static Pattern pattern;
     private static String lastFilterText;
 
-    public XliffStore(String xliffFile, String srcLang, String tgtLang)
+    public XliffStore(String xliffFile, String sourceLang, String targetLang)
             throws SAXException, IOException, ParserConfigurationException, URISyntaxException, SQLException {
+
         this.xliffFile = xliffFile;
-        this.srcLang = srcLang;
-        this.tgtLang = tgtLang;
+        srcLang = sourceLang;
+        tgtLang = targetLang;
+
         File xliff = new File(xliffFile);
 
         database = new File(xliff.getParentFile(), "h2data");
@@ -171,7 +177,6 @@ public class XliffStore {
     }
 
     private void parseDocument() throws SQLException {
-        nextId = System.currentTimeMillis();
         insertUnit = conn.prepareStatement("INSERT INTO units (file, unitId, data, compressed) VALUES (?,?,?,?)");
         insertSegment = conn.prepareStatement(
                 "INSERT INTO segments (file, unitId, segId, type, state, child, translate, tags, space, source, sourceText, target, targetText) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)");
@@ -182,7 +187,6 @@ public class XliffStore {
 
     private void recurse(Element e) throws SQLException {
         if ("file".equals(e.getName())) {
-            srcLang = e.getAttributeValue("srcLang");
             String tgt = e.getAttributeValue("tgtLang");
             if (!tgt.isEmpty()) {
                 tgtLang = tgt;
@@ -192,6 +196,7 @@ public class XliffStore {
         }
         if ("unit".equals(e.getName())) {
             tagCount = 0;
+            nextId = 0;
             currentUnit = e.getAttributeValue("id");
             translate = e.getAttributeValue("translate", "yes").equals("yes");
             preserve = "preserve".equals(e.getAttributeValue("xml:space", "default"));
@@ -208,7 +213,11 @@ public class XliffStore {
             }
             Element matches = e.getChild("mtc:matches");
             if (matches != null) {
-                // TODO process matches
+                List<Element> m = matches.getChildren("mtc:match");
+                Iterator<Element> mit = m.iterator();
+                while (mit.hasNext()) {
+                    insertMatch(currentFile, currentUnit, mit.next());
+                }
             }
             if (tagCount > 0) {
                 String dataString = data.toString();
@@ -225,16 +234,15 @@ public class XliffStore {
             }
             // Element glossary = e.getChild("gls:glossary");
 
-            // TODO store matches and terms
+            // TODO store terms
         }
         if ("segment".equals(e.getName())) {
             String id = e.getAttributeValue("id");
             if (id.isEmpty()) {
-                id = "" + nextId++;
+                id = "s" + nextId++;
                 e.setAttribute("id", id);
             }
             Element source = e.getChild("source");
-            source.setAttribute("xml:lang", srcLang);
             boolean sourcePreserve = "preserve".equals(source.getAttributeValue("xml:space", "default"));
             Element target = e.getChild("target");
             if (target == null) {
@@ -243,48 +251,21 @@ public class XliffStore {
                     target.setAttribute("xml:space", "preserve");
                 }
             }
-            target.setAttribute("xml:lang", tgtLang);
-            String targetText = pureText(target);
-            state = e.getAttributeValue("state", targetText.isEmpty() ? "initial" : "translated");
+            state = e.getAttributeValue("state", pureText(target).isEmpty() ? "initial" : "translated");
 
             preserve = preserve | sourcePreserve | "preserve".equals(target.getAttributeValue("xml:space", "default"));
-            insertSegment.setString(1, currentFile);
-            insertSegment.setString(2, currentUnit);
-            insertSegment.setString(3, id);
-            insertSegment.setString(4, "S");
-            insertSegment.setString(5, state);
-            insertSegment.setInt(6, index++);
-            insertSegment.setString(7, translate ? "Y" : "N");
-            insertSegment.setInt(8, tagCount);
-            insertSegment.setString(9, preserve ? "Y" : "N");
-            insertSegment.setNString(10, source.toString());
-            insertSegment.setNString(11, pureText(source));
-            insertSegment.setNString(12, target != null ? target.toString() : "");
-            insertSegment.setNString(13, target != null ? targetText : "");
-            insertSegment.execute();
+
+            insertSegment(currentFile, currentUnit, id, "S", state, index++, translate, tagCount, preserve, source,
+                    target);
         }
         if ("ignorable".equals(e.getName())) {
             String id = e.getAttributeValue("id");
             if (id.isEmpty()) {
-                id = "" + nextId++;
+                id = "i" + nextId++;
                 e.setAttribute("id", id);
             }
-            Element source = e.getChild("source");
-            Element target = e.getChild("target");
-            insertSegment.setString(1, currentFile);
-            insertSegment.setString(2, currentUnit);
-            insertSegment.setString(3, id);
-            insertSegment.setString(4, "I");
-            insertSegment.setString(5, "");
-            insertSegment.setInt(6, index++);
-            insertSegment.setString(7, "N");
-            insertSegment.setInt(8, tagCount);
-            insertSegment.setString(9, preserve ? "Y" : "N");
-            insertSegment.setNString(10, source.toString());
-            insertSegment.setNString(11, pureText(source));
-            insertSegment.setNString(12, target != null ? target.toString() : "");
-            insertSegment.setNString(13, target != null ? pureText(target) : "");
-            insertSegment.execute();
+            insertSegment(currentFile, currentUnit, id, "I", state, index++, false, tagCount, true,
+                    e.getChild("source"), e.getChild("target"));
         }
         List<Element> children = e.getChildren();
         Iterator<Element> it = children.iterator();
@@ -294,6 +275,48 @@ public class XliffStore {
         if ("file".equals(e.getName())) {
             conn.commit();
         }
+    }
+
+    private synchronized void insertSegment(String file, String unit, String segment, String type, String stat, int idx,
+            boolean translate, int count, boolean pres, Element source, Element target) throws SQLException {
+        source.setAttribute("xml:lang", srcLang);
+        if (target != null) {
+            target.setAttribute("xml:lang", tgtLang);
+        }
+        insertSegment.setString(1, file);
+        insertSegment.setString(2, unit);
+        insertSegment.setString(3, segment);
+        insertSegment.setString(4, type);
+        insertSegment.setString(5, stat);
+        insertSegment.setInt(6, idx);
+        insertSegment.setString(7, translate ? "Y" : "N");
+        insertSegment.setInt(8, count);
+        insertSegment.setString(9, pres ? "Y" : "N");
+        insertSegment.setNString(10, source.toString());
+        insertSegment.setNString(11, pureText(source));
+        insertSegment.setNString(12, target != null ? target.toString() : "");
+        insertSegment.setNString(13, target != null ? pureText(target) : "");
+        insertSegment.execute();
+    }
+
+    private void insertMatch(String file, String unit, Element match) throws SQLException {
+        Element originalData = match.getChild("originalData");
+        Element source = match.getChild("source");
+        Element target = match.getChild("target");
+        JSONObject tagsData = new JSONObject();
+        if (originalData != null) {
+            List<Element> list = originalData.getChildren();
+            for (int i = 0; i < list.size(); i++) {
+                Element d = list.get(i);
+                tagsData.put(d.getAttributeValue("id"), d.getText());
+            }
+        }
+        String segment = match.getAttributeValue("ref"); // TODO check if it points to a fragment
+        String type = match.getAttributeValue("type", "tm");
+        String origin = match.getAttributeValue("origin");
+        int similarity = Math.round(Float.parseFloat(match.getAttributeValue("similarity", "0'0")));
+
+        insertMatch(file, unit, segment, origin, type, similarity, source, target, tagsData);
     }
 
     public int size() throws SQLException {
@@ -1002,7 +1025,11 @@ public class XliffStore {
 
     public void updateXliff() throws SQLException, SAXException, IOException, ParserConfigurationException {
         document = builder.build(xliffFile);
+        document.getRootElement().setAttribute("xmlns:mtc", "urn:oasis:names:tc:xliff:matches:2.0");
+        unitMatches = conn.prepareStatement(
+                "SELECT file, unitId, segId, matchId, origin, type, similarity, source, target, data, compressed FROM matches WHERE file=? AND unitId=? ORDER BY segId, similarity DESC");
         recurseUpdating(document.getRootElement());
+        unitMatches.close();
         saveXliff();
     }
 
@@ -1016,6 +1043,10 @@ public class XliffStore {
             tagCount = 0;
             currentUnit = e.getAttributeValue("id");
             translate = e.getAttributeValue("translate", "yes").equals("yes");
+            Element matches = getUnitMatches(currentFile, currentUnit);
+            if (matches != null) {
+                insertMatches(e, matches);
+            }
         }
         if ("segment".equals(e.getName())) {
             String id = e.getAttributeValue("id");
@@ -1045,5 +1076,34 @@ public class XliffStore {
         while (it.hasNext()) {
             recurseUpdating(it.next());
         }
+    }
+
+    private void insertMatches(Element unit, Element matches) {
+        Element old = unit.getChild("mtc:matches");
+        if (old != null) {
+            unit.removeChild(old);
+        }
+        unit.getContent().add(0, matches);
+    }
+
+    private Element getUnitMatches(String file, String unit)
+            throws SQLException, SAXException, IOException, ParserConfigurationException {
+        Element matches = new Element("mtc:matches");
+        unitMatches.setString(1, file);
+        unitMatches.setString(2, unit);
+        try (ResultSet rs = unitMatches.executeQuery()) {
+            while (rs.next()) {
+                Element match = new Element("mtc:match");
+                match.setAttribute("ref", rs.getString(3));
+                match.setAttribute("id", rs.getString(4));
+                match.setAttribute("origin", rs.getString(5));
+                match.setAttribute("type", rs.getString(6));
+                match.setAttribute("similarity", "" + rs.getInt(7));
+                match.addContent(buildElement(rs.getNString(8)));
+                match.addContent(buildElement(rs.getNString(9)));
+                matches.addContent(match);
+            }
+        }
+        return matches.getChildren().isEmpty() ? null : matches;
     }
 }
