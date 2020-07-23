@@ -58,7 +58,7 @@ class AddFile {
         let options: string = '';
         let length: number = clients.length;
         for (let i=0 ; i<length ; i++) {
-            options = options + '<option value="' + clients[i] + '">'
+            options = options + '<option value="' + clients[i] + '">' + clients[i] + '</option>';
         }
         document.getElementById('clients').innerHTML = options;
     }
@@ -67,7 +67,7 @@ class AddFile {
         let options: string = '';
         let length: number = subjects.length;
         for (let i=0 ; i<length ; i++) {
-            options = options + '<option value="' + subjects[i] + '">'
+            options = options + '<option value="' + subjects[i] + '">'+ subjects[i] + '</option>';
         }
         document.getElementById('subjects').innerHTML = options;
     }

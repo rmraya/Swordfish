@@ -90,7 +90,9 @@ public class MemoriesHandler implements HttpHandler {
 	}
 
 	private JSONObject processRequest(String url, String request) {
-		logger.log(Level.INFO, url);
+		if (TmsServer.isDebug()) {
+			logger.log(Level.INFO, url);
+		}
 		JSONObject response = new JSONObject();
 		try {
 			if ("/memories/create".equals(url)) {

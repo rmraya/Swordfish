@@ -105,7 +105,9 @@ public class ProjectsHandler implements HttpHandler {
 	}
 
 	private JSONObject processRequest(String url, String request) {
-		logger.log(Level.INFO, url);
+		if (TmsServer.isDebug()) {
+			logger.log(Level.INFO, url);
+		}
 		JSONObject response = new JSONObject();
 		try {
 			if ("/projects/create".equals(url)) {
@@ -205,7 +207,9 @@ public class ProjectsHandler implements HttpHandler {
 		String output = json.getString("output");
 		if (projectStores == null) {
 			projectStores = new Hashtable<>();
-			logger.log(Level.INFO, "Created store map");
+			if (TmsServer.isDebug()) {
+				logger.log(Level.INFO, "Created store map");
+			}
 		}
 		shouldClose = false;
 		if (!projectStores.containsKey(project)) {
@@ -373,7 +377,9 @@ public class ProjectsHandler implements HttpHandler {
 		}
 		if (projectStores == null) {
 			projectStores = new Hashtable<>();
-			logger.log(Level.INFO, "Created store map");
+			if (TmsServer.isDebug()) {
+				logger.log(Level.INFO, "Created store map");
+			}
 		}
 
 		if (!projectStores.containsKey(project)) {
@@ -440,7 +446,9 @@ public class ProjectsHandler implements HttpHandler {
 		}
 		if (projectStores == null) {
 			projectStores = new Hashtable<>();
-			logger.log(Level.INFO, "Created store map");
+			if (TmsServer.isDebug()) {
+				logger.log(Level.INFO, "Created store map");
+			}
 		}
 
 		if (!projectStores.containsKey(project)) {
@@ -565,7 +573,9 @@ public class ProjectsHandler implements HttpHandler {
 									}
 								}
 								if (!"0".equals(res.get(0))) {
-									logger.log(Level.INFO, "Conversion failed for: " + file.toString(2));
+									if (TmsServer.isDebug()) {
+										logger.log(Level.INFO, "Conversion failed for: " + file.toString(2));
+									}
 									try {
 										TmsServer.deleteFolder(projectFolder.getAbsolutePath());
 									} catch (IOException e) {

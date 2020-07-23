@@ -140,6 +140,18 @@ class Main {
         Main.electron.ipcRenderer.on('export-tmx', () => {
             this.memoriesView.exportTMX();
         });
+        Main.electron.ipcRenderer.on('first-page', () => {
+            this.firstPage();
+        });
+        Main.electron.ipcRenderer.on('previous-page', () => {
+            this.previousPage();
+        });
+        Main.electron.ipcRenderer.on('next-page', () => {
+            this.nextPage();
+        });
+        Main.electron.ipcRenderer.on('last-page', () => {
+            this.lastPage();
+        });
         Main.electron.ipcRenderer.on('cancel-edit', () => {
             this.cancelEdit();
         });
@@ -233,7 +245,7 @@ class Main {
     saveEdit(arg: any): void  {
         let selected = Main.tabHolder.getSelected();
         if ( Main.translationViews.has(selected)) {
-            Main.translationViews.get(selected).saveEdit(arg.confirm);
+            Main.translationViews.get(selected).saveEdit(arg);
         }
     }
 
@@ -268,11 +280,38 @@ class Main {
     setTarget(arg: any): void {
         let selected = Main.tabHolder.getSelected();
         if ( Main.translationViews.has(selected)) {
-            console.log('accepting ' + JSON.stringify(arg))
-           
             Main.translationViews.get(selected).setTarget(arg);
         }
     }
+
+    firstPage(): void {
+        let selected = Main.tabHolder.getSelected();
+        if ( Main.translationViews.has(selected)) {
+            Main.translationViews.get(selected).firstPage();
+        }
+    }
+
+    previousPage(): void {
+        let selected = Main.tabHolder.getSelected();
+        if ( Main.translationViews.has(selected)) {
+            Main.translationViews.get(selected).previousPage();
+        }
+    }
+
+    nextPage(): void {
+        let selected = Main.tabHolder.getSelected();
+        if ( Main.translationViews.has(selected)) {
+            Main.translationViews.get(selected).nextPage();
+        }
+    }
+
+    lastPage(): void {
+        let selected = Main.tabHolder.getSelected();
+        if ( Main.translationViews.has(selected)) {
+            Main.translationViews.get(selected).lastPage();
+        }
+    }
+
 }
 
 new Main();

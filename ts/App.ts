@@ -385,8 +385,8 @@ class Swordfish {
             { label: 'Paste', accelerator: 'CmdOrCtrl+V', click: () => { this.contents.paste(); } },
             { label: 'Select All', accelerator: 'CmdOrCtrl+A', click: () => { this.contents.selectAll(); } },
             new MenuItem({ type: 'separator' }),
-            { label: 'Save Changes', accelerator: 'Alt+Enter', click: () => { this.saveEdits(false); } },
-            { label: 'Discard Changes', accelerator: 'Esc', click: () => { this.cancelEdit(); } },
+            { label: 'Save Changes', accelerator: 'Alt+Enter', click: () => { Swordfish.contents.send('save-edit', { confirm: false, next: 'none' }); } },
+            { label: 'Discard Changes', accelerator: 'Esc', click: () => { Swordfish.contents.send('cancel-edit'); } },
             new MenuItem({ type: 'separator' }),
             { label: 'Insert Tag', accelerator: 'CmdOrCtrl+T', click: () => { Swordfish.contents.send('insert-tag'); } },
             new MenuItem({ label: 'Quick Tags', submenu: tagsMenu }),
@@ -400,6 +400,11 @@ class Swordfish {
             { label: 'Projects', accelerator: 'CmdOrCtrl+Alt+1', click: () => { this.viewProjects(); } },
             { label: 'Memories', accelerator: 'CmdOrCtrl+Alt+2', click: () => { this.viewMemories(); } },
             { label: 'Glossaries', accelerator: 'CmdOrCtrl+Alt+3', click: () => { this.viewGlossaries(); } },
+            new MenuItem({ type: 'separator' }),
+            { label: 'First Page', accelerator: 'CmdOrCtrl+Shift+Home', click: () => {  Swordfish.contents.send('first-page'); } },
+            { label: 'Previous Page', accelerator: 'CmdOrCtrl+Home', click: () => { Swordfish.contents.send('previous-page');  } },
+            { label: 'Next Page', accelerator: 'CmdOrCtrl+End', click: () => { Swordfish.contents.send('next-page');  } },
+            { label: 'Last Page', accelerator: 'CmdOrCtrl+Shift+End', click: () => { Swordfish.contents.send('last-page');  } },
             new MenuItem({ type: 'separator' }),
             new MenuItem({ label: 'Toggle Full Screen', role: 'togglefullscreen' }),
             new MenuItem({ label: 'Toggle Development Tools', accelerator: 'F12', role: 'toggleDevTools' }),
@@ -431,8 +436,10 @@ class Swordfish {
             { label: 'Support Group', click: () => { this.showSupportGroup(); } }
         ]);
         var tasksMenu: Menu = Menu.buildFromTemplate([
-
-            { label: 'Confirm Translation', accelerator: 'CmdOrCtrl+E', click: () => { this.saveEdits(true); } },
+            { label: 'Confirm Translation', accelerator: 'CmdOrCtrl+E', click: () => { Swordfish.contents.send('save-edit', { confirm: true, next: 'none' }); } },
+            { label: 'Confirm and go to Next Untranslated', accelerator: 'Alt+Down', click: () => { Swordfish.contents.send('save-edit', { confirm: true, next: 'untranslated' }); } },
+            { label: 'Confirm and go to Next Unconfirmed', accelerator: 'Alt+Shift+Down', click: () => { Swordfish.contents.send('save-edit', { confirm: true, next: 'unconfirmed' }); } },
+            new MenuItem({ type: 'separator' }),
             { label: 'Copy Source to Target', accelerator: 'CmdOrCtrl+P', click: () => { Swordfish.contents.send('copy-source'); } },
             { label: 'Accept TM Match', accelerator: 'CmdOrCtrl+Alt+A', click: () => { Swordfish.contents.send('accept-tm-match'); } }
         ]);
@@ -557,14 +564,6 @@ class Swordfish {
         // TODO
     }
 
-    static saveEdits(confirm: boolean): void {
-        Swordfish.contents.send('save-edit', { confirm: confirm });
-    }
-
-    static cancelEdit(): void {
-        Swordfish.contents.send('cancel-edit');
-    }
-
     static replaceText(): void {
         // TODO
     }
@@ -597,7 +596,7 @@ class Swordfish {
 
     static exportOpenProject(arg: any): void {
         Swordfish.sendRequest('/projects/get', arg,
-            (data: any) => { 
+            (data: any) => {
                 Swordfish.exportTranslations(data);
             },
             (reason: string) => {

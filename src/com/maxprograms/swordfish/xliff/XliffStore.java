@@ -131,7 +131,9 @@ public class XliffStore {
         conn = DriverManager.getConnection(url);
         conn.setAutoCommit(false);
         if (needsLoading) {
-            logger.log(Level.INFO, "Creating database");
+            if (TmsServer.isDebug()) {
+                logger.log(Level.INFO, "Creating database");
+            }
             createTables();
             document = builder.build(xliffFile);
             parseDocument();
@@ -450,7 +452,9 @@ public class XliffStore {
         conn.commit();
         conn.close();
         conn = null;
-        logger.log(Level.INFO, "Closed store");
+        if (TmsServer.isDebug()) {
+            logger.log(Level.INFO, "Closed store");
+        }
     }
 
     public String getSrcLang() {

@@ -86,7 +86,7 @@ class TranslationView {
         saveEdit.className = 'tooltip';
         saveEdit.style.marginLeft = '20px';
         saveEdit.addEventListener('click', () => {
-            this.saveEdit(false);
+            this.saveEdit({ confirm: false, next: 'none' });
         });
         topBar.appendChild(saveEdit);
 
@@ -106,7 +106,7 @@ class TranslationView {
         confirmEdit.className = 'tooltip';
         confirmEdit.style.marginLeft = '20px';
         confirmEdit.addEventListener('click', () => {
-            this.saveEdit(true);
+            this.saveEdit({ confirm: true, next: 'none' });
         });
         topBar.appendChild(confirmEdit);
 
@@ -561,7 +561,9 @@ class TranslationView {
         this.currentCell.focus();
     }
 
-    saveEdit(confirm: boolean): void {
+    saveEdit(arg: any): void {
+        let confirm: boolean = arg.confirm;
+        let next: string = arg.next;
         if (this.currentCell) {
             this.currentCell.classList.remove('editing');
             this.currentCell.contentEditable = 'false';
@@ -599,6 +601,12 @@ class TranslationView {
                 segment: this.currentId.id, translation: translation,
                 confirm: confirm
             });
+            if (next === 'untranslated') {
+                // TODO
+            }
+            if (next === 'unconfirmed') {
+                // TODO
+            }
         }
     }
 

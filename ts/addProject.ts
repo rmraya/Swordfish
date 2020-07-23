@@ -133,8 +133,8 @@ class AddProject {
     setClients(clients: string[]): void {
         let options: string = '';
         let length: number = clients.length;
-        for (let i=0 ; i<length ; i++) {
-            options = options + '<option value="' + clients[i] + '">'
+        for (let i = 0; i < length; i++) {
+            options = options + '<option value="' + clients[i] + '">' + clients[i] + '</option>';
         }
         document.getElementById('clients').innerHTML = options;
     }
@@ -142,8 +142,8 @@ class AddProject {
     setSubjects(subjects: string[]): void {
         let options: string = '';
         let length: number = subjects.length;
-        for (let i=0 ; i<length ; i++) {
-            options = options + '<option value="' + subjects[i] + '">'
+        for (let i = 0; i < length; i++) {
+            options = options + '<option value="' + subjects[i] + '">' + subjects[i] + '</option>';
         }
         document.getElementById('subjects').innerHTML = options;
     }

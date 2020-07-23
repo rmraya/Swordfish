@@ -82,7 +82,9 @@ public class TmsServer implements HttpHandler {
 		server.createContext("/", this);
 		server.setExecutor(new ThreadPoolExecutor(4, 8, 30, TimeUnit.SECONDS, new ArrayBlockingQueue<Runnable>(100)));
 		server.start();
-		logger.log(Level.INFO, "TMS server started");
+		if (debug) {
+			logger.log(Level.INFO, "TMS server started");
+		}
 	}
 
 	@Override
@@ -137,7 +139,9 @@ public class TmsServer implements HttpHandler {
 				}
 			}
 			if ("stop".equals(command)) {
-				logger.log(Level.INFO, "Stopping server");
+				if (debug) {
+					logger.log(Level.INFO, "Stopping server");
+				}
 				System.exit(0);
 			}
 		} catch (IOException e) {
