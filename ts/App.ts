@@ -401,10 +401,10 @@ class Swordfish {
             { label: 'Memories', accelerator: 'CmdOrCtrl+Alt+2', click: () => { this.viewMemories(); } },
             { label: 'Glossaries', accelerator: 'CmdOrCtrl+Alt+3', click: () => { this.viewGlossaries(); } },
             new MenuItem({ type: 'separator' }),
-            { label: 'First Page', accelerator: 'CmdOrCtrl+Shift+Home', click: () => {  Swordfish.contents.send('first-page'); } },
-            { label: 'Previous Page', accelerator: 'CmdOrCtrl+Home', click: () => { Swordfish.contents.send('previous-page');  } },
-            { label: 'Next Page', accelerator: 'CmdOrCtrl+End', click: () => { Swordfish.contents.send('next-page');  } },
-            { label: 'Last Page', accelerator: 'CmdOrCtrl+Shift+End', click: () => { Swordfish.contents.send('last-page');  } },
+            { label: 'First Page', accelerator: 'CmdOrCtrl+Shift+Home', click: () => { Swordfish.contents.send('first-page'); } },
+            { label: 'Previous Page', accelerator: 'CmdOrCtrl+Home', click: () => { Swordfish.contents.send('previous-page'); } },
+            { label: 'Next Page', accelerator: 'CmdOrCtrl+End', click: () => { Swordfish.contents.send('next-page'); } },
+            { label: 'Last Page', accelerator: 'CmdOrCtrl+Shift+End', click: () => { Swordfish.contents.send('last-page'); } },
             new MenuItem({ type: 'separator' }),
             new MenuItem({ label: 'Toggle Full Screen', role: 'togglefullscreen' }),
             new MenuItem({ label: 'Toggle Development Tools', accelerator: 'F12', role: 'toggleDevTools' }),
@@ -437,8 +437,8 @@ class Swordfish {
         ]);
         var tasksMenu: Menu = Menu.buildFromTemplate([
             { label: 'Confirm Translation', accelerator: 'CmdOrCtrl+E', click: () => { Swordfish.contents.send('save-edit', { confirm: true, next: 'none' }); } },
-            { label: 'Confirm and go to Next Untranslated', accelerator: 'Alt+Down', click: () => { Swordfish.contents.send('save-edit', { confirm: true, next: 'untranslated' }); } },
-            { label: 'Confirm and go to Next Unconfirmed', accelerator: 'Alt+Shift+Down', click: () => { Swordfish.contents.send('save-edit', { confirm: true, next: 'unconfirmed' }); } },
+            { label: 'Confirm and go to Next Untranslated', accelerator: 'Ctrl+Alt+Down', click: () => { Swordfish.contents.send('save-edit', { confirm: true, next: 'untranslated' }); } },
+            { label: 'Confirm and go to Next Unconfirmed', accelerator: 'Ctrl+Shift+Down', click: () => { Swordfish.contents.send('save-edit', { confirm: true, next: 'unconfirmed' }); } },
             new MenuItem({ type: 'separator' }),
             { label: 'Copy Source to Target', accelerator: 'CmdOrCtrl+P', click: () => { Swordfish.contents.send('copy-source'); } },
             { label: 'Accept TM Match', accelerator: 'CmdOrCtrl+Alt+A', click: () => { Swordfish.contents.send('accept-tm-match'); } }

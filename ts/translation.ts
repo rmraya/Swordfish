@@ -222,8 +222,8 @@ class TranslationView {
         this.translationArea.appendChild(tableContainer);
 
         let table: HTMLTableElement = document.createElement('table');
-        table.classList.add('fill_width');
         table.classList.add('stripes');
+        table.style.width = 'calc(100% - 2px)';
         tableContainer.appendChild(table);
 
         let thead: HTMLTableSectionElement = document.createElement('thead');
@@ -590,17 +590,16 @@ class TranslationView {
                     }
                 }
             }
-            if (this.currentContent === translation && !confirm) {
-                // nothing changed and not confirming
-                return;
+            if (this.currentContent !== translation) {
+                // text changed 
+                this.electron.ipcRenderer.send('save-translation', {
+                    project: this.projectId,
+                    file: this.currentId.file,
+                    unit: this.currentId.unit,
+                    segment: this.currentId.id, translation: translation,
+                    confirm: confirm
+                });
             }
-            this.electron.ipcRenderer.send('save-translation', {
-                project: this.projectId,
-                file: this.currentId.file,
-                unit: this.currentId.unit,
-                segment: this.currentId.id, translation: translation,
-                confirm: confirm
-            });
             if (next === 'untranslated') {
                 // TODO
             }
