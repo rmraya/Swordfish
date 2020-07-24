@@ -51,7 +51,38 @@ class Swordfish {
         srcLang: 'none',
         tgtLang: 'none',
         catalog: Swordfish.path.join(app.getAppPath(), 'catalog', 'catalog.xml'),
-        srx: Swordfish.path.join(app.getAppPath(), 'srx', 'default.srx')
+        srx: Swordfish.path.join(app.getAppPath(), 'srx', 'default.srx'),
+        google: {
+            enabled: false,
+            apiKey: '',
+            srcLang: 'none',
+            tgtLang: 'none',
+            neural: false
+        },
+        azure: {
+            enabled: false,
+            apiKey: '',
+            srcLang: 'none',
+            tgtLang: 'none'
+        },
+        yandex: {
+            enabled: false,
+            apiKey: '',
+            srcLang: 'none',
+            tgtLang: 'none'
+        },
+        deepl: {
+            enabled: false,
+            apiKey: '',
+            srcLang: 'none',
+            tgtLang: 'none'
+        },
+        myMemory: {
+            enabled: false,
+            apiKey: '',
+            srcLang: 'none',
+            tgtLang: 'none'
+        }
     }
     static currentCss: string;
     static currentStatus: any;
@@ -310,6 +341,9 @@ class Swordfish {
         });
         ipcMain.on('browse-catalog', (event: IpcMainEvent, arg: any) => {
             this.browseCatalog(event);
+        });
+        ipcMain.on('get-mt-languages', (event: IpcMainEvent, arg: any) => {
+            this.getMtLanguages(event);
         });
         ipcMain.on('open-license', (event: IpcMainEvent, arg: any) => {
             Swordfish.openLicense(arg.type);
@@ -874,6 +908,17 @@ class Swordfish {
                 data.srcLang = Swordfish.currentPreferences.srcLang;
                 data.tgtLang = Swordfish.currentPreferences.tgtLang;
                 event.sender.send('set-languages', data);
+            },
+            (reason: string) => {
+                dialog.showErrorBox('Error', reason);
+            }
+        );
+    }
+
+    getMtLanguages(event: IpcMainEvent): void {
+        Swordfish.sendRequest('/services/getMTLanguages', {},
+            (data: any) => {
+                event.sender.send('set-mt-languages', data);
             },
             (reason: string) => {
                 dialog.showErrorBox('Error', reason);

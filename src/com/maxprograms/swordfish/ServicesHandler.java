@@ -16,6 +16,7 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE 
 SOFTWARE.
 *****************************************************************************/
+
 package com.maxprograms.swordfish;
 
 import java.io.BufferedReader;
@@ -102,6 +103,8 @@ public class ServicesHandler implements HttpHandler {
                 result = getSubjects();
             } else if ("/services/getProjects".equals(url)) {
                 result = getProjects();
+            } else if ("/services/getMTLanguages".equals(url)) {
+                result = getMTLanguages();
             } else {
                 result = new JSONObject();
                 result.put("url", url);
@@ -208,6 +211,17 @@ public class ServicesHandler implements HttpHandler {
             result.put("languages", array);
         } catch (SAXException | IOException | ParserConfigurationException e) {
             logger.log(Level.ERROR, "Error getting languages", e);
+            result.put(Constants.REASON, e.getMessage());
+        }
+        return result;
+    }
+
+    private static JSONObject getMTLanguages() {
+        JSONObject result = new JSONObject();
+        try {
+            result = MTUtils.getMTLanguages();
+        } catch (IOException e) {
+            logger.log(Level.ERROR, "Error getting MT languages", e);
             result.put(Constants.REASON, e.getMessage());
         }
         return result;

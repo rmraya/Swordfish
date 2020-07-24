@@ -9,44 +9,15 @@
 
 <body id="body">
 
-    <table class="fill_width">
-        <tr>
-            <td class="noWrap middle"><label for="srcLangSelect">Default Source Language</label></td>
-            <td class="fill_width middle"><select id="srcLangSelect" class="fill_width"></select></td>
-        </tr>
-        <tr>
-            <td class="noWrap middle"><label for="tgtLangSelect">Default Target Language</label></td>
-            <td class="fill_width middle"><select id="tgtLangSelect" class="fill_width"></select></td>
-        </tr>
-    </table>
+    <div id="main">
+        <!-- preferences tabs -->
+    </div>
 
-    <table class="fill_width">
-        <tr>
-            <td class="noWrap middle"><label for="defaultSRX">Default SRX File</label></td>
-            <td class="fill_width middle"><input id="defaultSRX" type="text" class="fill_width"></td>
-            <td class="middle"><button id="browseSRX" class="dark">Browse...</button></td>
-        </tr>
-        <tr>
-            <td class="noWrap middle"><label for="defaultCatalog">Default Catalog</label></td>
-            <td class="fill_width middle"><input id="defaultCatalog" type="text" class="fill_width"></td>
-            <td class="middle"><button id="browseCatalog" class="dark">Browse...</button></td>
-        </tr>
-        <tr>
-            <td class="middle"><label for="themeColor">Theme</label></td>
-            <td class="middle" colspan="2">
-                <select id="themeColor">
-                    <option value="system">System Default</option>
-                    <option value="dark">Dark</option>
-                    <option value="light">Light</option>
-                    <option value="teal">Teal</option>
-                </select>
-            </td>
-        </tr>
-    </table>
     <div class="buttonArea">
         <button id="save">Save Preferences</button>
     </div>
 
+    <script src="../js/tabs.js"></script>
     <script src="../js/preferences.js"></script>
 </body>
 
