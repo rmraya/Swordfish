@@ -53,6 +53,7 @@ import com.maxprograms.languages.Language;
 import com.maxprograms.languages.LanguageUtils;
 import com.maxprograms.swordfish.models.Project;
 import com.maxprograms.swordfish.models.SourceFile;
+import com.maxprograms.swordfish.mt.MT;
 import com.maxprograms.swordfish.xliff.XliffStore;
 import com.maxprograms.xliff2.Resegmenter;
 import com.maxprograms.xliff2.ToXliff2;
@@ -134,6 +135,8 @@ public class ProjectsHandler implements HttpHandler {
 				response = save(request);
 			} else if ("/projects/matches".equals(url)) {
 				response = getMatches(request);
+			} else if ("/projects/machineTranslate".equals(url)) {
+				response = machineTranslate(request);
 			} else {
 				response.put(Constants.REASON, "Unknown request");
 			}
@@ -703,6 +706,27 @@ public class ProjectsHandler implements HttpHandler {
 			}
 		} catch (SQLException | SAXException | IOException | ParserConfigurationException | JSONException
 				| DataFormatException e) {
+			logger.log(Level.ERROR, e);
+			result.put(Constants.REASON, e.getMessage());
+		}
+		return result;
+	}
+
+	private JSONObject machineTranslate(String request) {
+		JSONObject result = new JSONObject();
+		try {
+			MT translator = new MT();
+			if (!translator.hasEngines()) {
+				result.put(Constants.REASON, "MT engines not enabled");
+				return result;
+			}
+			JSONObject json = new JSONObject(request);
+			String project = json.getString("project");
+			if (projectStores.containsKey(project)) {
+				result.put("matches", projectStores.get(project).machineTranslate(json, translator));
+			}
+		} catch (IOException | SQLException | InterruptedException | JSONException | SAXException
+				| ParserConfigurationException e) {
 			logger.log(Level.ERROR, e);
 			result.put(Constants.REASON, e.getMessage());
 		}

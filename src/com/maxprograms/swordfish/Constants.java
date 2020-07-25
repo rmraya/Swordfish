@@ -42,5 +42,8 @@ public class Constants {
 	public static final String INITIAL = "initial";
     public static final String TRANSLATED = "translated";
     public static final String REVIEWED = "reviewed";
-    public static final String FINAL = "final";
+	public static final String FINAL = "final";
+	
+	public static final String TM = "tm";
+	public static final String MT = "mt";
 }

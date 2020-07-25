@@ -23,14 +23,14 @@ class Main {
 
     static tabHolder: TabHolder;
     static translationViews: Map<string, TranslationView>;
-    
+
     mainContainer: HTMLDivElement;
     static main: HTMLDivElement;
 
     projectsView: ProjectsView;
     memoriesView: MemoriesView;
     glossariesView: GlossariesView;
-    
+
     constructor() {
         Main.translationViews = new Map<string, TranslationView>();
         this.mainContainer = document.getElementById('mainContainer') as HTMLDivElement;
@@ -61,19 +61,19 @@ class Main {
 
         Main.tabHolder.selectTab('projects');
 
-        
+
         var observerOptions = {
             childList: true,
             attributes: false
         }
         var tabsObserver = new MutationObserver((mutationList, observer) => {
             mutationList.forEach((mutation) => {
-                switch(mutation.type) {
-                  case 'childList':
-                       Main.checkTabs();
-                    break;
-                  case 'attributes':
-                    break;
+                switch (mutation.type) {
+                    case 'childList':
+                        Main.checkTabs();
+                        break;
+                    case 'attributes':
+                        break;
                 }
             });
         });
@@ -166,12 +166,15 @@ class Main {
         });
         Main.electron.ipcRenderer.on('auto-propagate', (event: Electron.IpcRendererEvent, arg: any) => {
             this.autoPropagate(arg);
-        });        
+        });
         Main.electron.ipcRenderer.on('set-matches', (event: Electron.IpcRendererEvent, arg: any) => {
             this.setMatches(arg);
         });
         Main.electron.ipcRenderer.on('set-target', (event: Electron.IpcRendererEvent, arg: any) => {
             this.setTarget(arg);
+        });
+        Main.electron.ipcRenderer.on('get-mt-matches', () => {
+            this.getMachineTranslations();
         });
         let config: any = { attributes: true, childList: false, subtree: false };
         let observer = new MutationObserver((mutationsList) => {
@@ -220,98 +223,104 @@ class Main {
         this.mainContainer.style.height = body.clientHeight + 'px';
     }
 
-    static checkTabs(): void { 
+    static checkTabs(): void {
         for (let key of Main.translationViews.keys()) {
             if (!Main.tabHolder.has(key)) {
-                console.log('MUST CLOSE ' +key);
+                console.log('MUST CLOSE ' + key);
                 let view: TranslationView = Main.translationViews.get(key);
                 view.close();
                 view = undefined;
                 Main.translationViews.delete(key);
-                Main.electron.ipcRenderer.send('close-project', {project: key});
+                Main.electron.ipcRenderer.send('close-project', { project: key });
                 break;
             }
-            
+
         }
     }
 
-    cancelEdit(): void  {
+    cancelEdit(): void {
         let selected = Main.tabHolder.getSelected();
-        if ( Main.translationViews.has(selected)) {
+        if (Main.translationViews.has(selected)) {
             Main.translationViews.get(selected).cancelEdit();
         }
     }
 
-    saveEdit(arg: any): void  {
+    saveEdit(arg: any): void {
         let selected = Main.tabHolder.getSelected();
-        if ( Main.translationViews.has(selected)) {
+        if (Main.translationViews.has(selected)) {
             Main.translationViews.get(selected).saveEdit(arg);
         }
     }
 
     copySource(): void {
         let selected = Main.tabHolder.getSelected();
-        if ( Main.translationViews.has(selected)) {
+        if (Main.translationViews.has(selected)) {
             Main.translationViews.get(selected).copySource();
         }
     }
 
     inserTag(arg: any): void {
         let selected = Main.tabHolder.getSelected();
-        if ( Main.translationViews.has(selected)) {
+        if (Main.translationViews.has(selected)) {
             Main.translationViews.get(selected).inserTag(arg);
         }
     }
 
     autoPropagate(arg: any): void {
         let selected = Main.tabHolder.getSelected();
-        if ( Main.translationViews.has(selected)) {
+        if (Main.translationViews.has(selected)) {
             Main.translationViews.get(selected).autoPropagate(arg.rows);
         }
     }
 
     setMatches(arg: any): void {
         let selected = Main.tabHolder.getSelected();
-        if ( Main.translationViews.has(selected)) {
+        if (Main.translationViews.has(selected)) {
             Main.translationViews.get(selected).setMatches(arg.matches);
         }
     }
 
     setTarget(arg: any): void {
         let selected = Main.tabHolder.getSelected();
-        if ( Main.translationViews.has(selected)) {
+        if (Main.translationViews.has(selected)) {
             Main.translationViews.get(selected).setTarget(arg);
         }
     }
 
     firstPage(): void {
         let selected = Main.tabHolder.getSelected();
-        if ( Main.translationViews.has(selected)) {
+        if (Main.translationViews.has(selected)) {
             Main.translationViews.get(selected).firstPage();
         }
     }
 
     previousPage(): void {
         let selected = Main.tabHolder.getSelected();
-        if ( Main.translationViews.has(selected)) {
+        if (Main.translationViews.has(selected)) {
             Main.translationViews.get(selected).previousPage();
         }
     }
 
     nextPage(): void {
         let selected = Main.tabHolder.getSelected();
-        if ( Main.translationViews.has(selected)) {
+        if (Main.translationViews.has(selected)) {
             Main.translationViews.get(selected).nextPage();
         }
     }
 
     lastPage(): void {
         let selected = Main.tabHolder.getSelected();
-        if ( Main.translationViews.has(selected)) {
+        if (Main.translationViews.has(selected)) {
             Main.translationViews.get(selected).lastPage();
         }
     }
 
+    getMachineTranslations(): void {
+        let selected = Main.tabHolder.getSelected();
+        if (Main.translationViews.has(selected)) {
+            Main.translationViews.get(selected).getMachineTranslations();
+        }
+    }
 }
 
 new Main();

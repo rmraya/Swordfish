@@ -17,7 +17,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 *****************************************************************************/
 
-package com.maxprograms.swordfish;
+package com.maxprograms.swordfish.mt;
 
 import java.io.IOException;
 import java.util.ArrayList;

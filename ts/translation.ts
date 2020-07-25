@@ -62,6 +62,7 @@ class TranslationView {
     currentTags: string[] = [];
 
     tmMatches: TmMatches;
+    mtMatches: MtMatches;
 
     constructor(div: HTMLDivElement, projectId: string) {
         this.container = div;
@@ -393,7 +394,7 @@ class TranslationView {
         memoryTitle.classList.add('titlepanel');
         memoryTitle.innerText = 'Translation Memory';
         this.memoryArea.appendChild(memoryTitle);
-        let matchesContainer = document.createElement('div');
+        let matchesContainer: HTMLDivElement = document.createElement('div');
         matchesContainer.classList.add('fill_width');
         this.memoryArea.appendChild(matchesContainer);
         this.tmMatches = new TmMatches(matchesContainer, this.projectId);
@@ -413,6 +414,19 @@ class TranslationView {
         machineTitle.classList.add('titlepanel');
         machineTitle.innerText = 'Machine Translation';
         this.machineArea.appendChild(machineTitle);
+        let mtContainer: HTMLDivElement = document.createElement('div');
+        mtContainer.classList.add('fill_width');
+        this.machineArea.appendChild(mtContainer);
+        this.mtMatches = new MtMatches(mtContainer, this.projectId);
+
+        observer = new MutationObserver((mutationsList) => {
+            for (let mutation of mutationsList) {
+                if (mutation.type === 'attributes') {
+                    mtContainer.style.height = (this.machineArea.clientHeight - machineTitle.clientHeight) + 'px';
+                }
+            }
+        });
+        observer.observe(this.machineArea, config);
 
         this.termsArea = horizontalSplit.bottomPanel();
         let termsTitle: HTMLDivElement = document.createElement('div');
@@ -535,7 +549,7 @@ class TranslationView {
             return;
         }
         if (this.currentCell) {
-            this.saveEdit(false);
+            this.saveEdit({ confirm: false });
         }
         let row: HTMLTableRowElement = event.currentTarget as HTMLTableRowElement;
         this.currentId = { id: row.getAttribute('data-id'), file: row.getAttribute('data-file'), unit: row.getAttribute('data-unit') };
@@ -550,6 +564,7 @@ class TranslationView {
         this.currentCell.classList.add('editing');
 
         this.tmMatches.clear();
+        this.mtMatches.clear();
 
         this.electron.ipcRenderer.send('get-matches', {
             project: this.projectId,
@@ -559,6 +574,17 @@ class TranslationView {
         });
 
         this.currentCell.focus();
+    }
+
+    getMachineTranslations() {
+        if (this.currentCell) {
+            this.electron.ipcRenderer.send('machine-translate', {
+                project: this.projectId,
+                file: this.currentId.file,
+                unit: this.currentId.unit,
+                segment: this.currentId.id
+            });
+        }
     }
 
     saveEdit(arg: any): void {
@@ -678,6 +704,8 @@ class TranslationView {
     }
 
     setMatches(matches: any[]): void {
+        this.tmMatches.clear();
+        this.mtMatches.clear();
         let lengtyh = matches.length;
         for (let i = 0; i < lengtyh; i++) {
             let match = matches[i];
@@ -686,12 +714,13 @@ class TranslationView {
                 this.tmMatches.add(match);
             }
             if (match.type === 'mt') {
-                // TODO
+                this.mtMatches.add(match);
             }
         }
     }
 
     setTarget(arg: any): void {
+        console.log(JSON.stringify(arg));
         let rows: HTMLCollectionOf<HTMLTableRowElement> = this.tbody.getElementsByTagName('tr');
         let length = rows.length;
         for (let i = 0; i < length; i++) {

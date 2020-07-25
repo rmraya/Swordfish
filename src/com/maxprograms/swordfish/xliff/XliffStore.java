@@ -35,6 +35,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.Collection;
 import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.List;
@@ -50,6 +51,7 @@ import com.maxprograms.converters.Merge;
 import com.maxprograms.stats.RepetitionAnalysis;
 import com.maxprograms.swordfish.Constants;
 import com.maxprograms.swordfish.TmsServer;
+import com.maxprograms.swordfish.mt.MT;
 import com.maxprograms.tmengine.MatchQuality;
 import com.maxprograms.xml.Catalog;
 import com.maxprograms.xml.Document;
@@ -61,6 +63,7 @@ import com.maxprograms.xml.XMLNode;
 import com.maxprograms.xml.XMLOutputter;
 
 import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 import org.xml.sax.SAXException;
 
@@ -140,7 +143,8 @@ public class XliffStore {
             conn.commit();
         }
         getUnitData = conn.prepareStatement("SELECT data, compressed FROM units WHERE file=? AND unitId=?");
-        getSource = conn.prepareStatement("SELECT source FROM segments WHERE file=? AND unitId=? AND segId=?");
+        getSource = conn
+                .prepareStatement("SELECT source, sourceText FROM segments WHERE file=? AND unitId=? AND segId=?");
         getTarget = conn.prepareStatement("SELECT target, state FROM segments WHERE file=? AND unitId=? AND segId=?");
         updateTarget = conn.prepareStatement(
                 "UPDATE segments SET target=?, targetText=?, state=? WHERE file=? AND unitId=? AND segId=?");
@@ -318,7 +322,7 @@ public class XliffStore {
             }
         }
         String segment = match.getAttributeValue("ref"); // TODO check if it points to a fragment
-        String type = match.getAttributeValue("type", "tm");
+        String type = match.getAttributeValue("type", Constants.TM);
         String origin = match.getAttributeValue("origin");
         int similarity = Math.round(Float.parseFloat(match.getAttributeValue("similarity", "0'0")));
 
@@ -413,7 +417,7 @@ public class XliffStore {
                 similarity = rs.getInt(2);
             }
         }
-        if (type.isEmpty() || "mt".equals(type)) {
+        if (type.isEmpty() || Constants.MT.equals(type)) {
             return 0;
         }
         return similarity;
@@ -598,7 +602,7 @@ public class XliffStore {
                         translated.setContent(target.getContent());
                         updateTarget(file, unit, segment, translated, pureText(translated), false);
                     }
-                    insertMatch(file, unit, segment, "Self", "tm", similarity, source, target, tagsData);
+                    insertMatch(file, unit, segment, "Self", Constants.TM, similarity, source, target, tagsData);
                     if (similarity < 100) {
                         int best = getBestMatch(file, unit, segment);
                         JSONObject row = new JSONObject();
@@ -617,6 +621,9 @@ public class XliffStore {
     private synchronized void insertMatch(String file, String unit, String segment, String origin, String type,
             int similarity, Element source, Element target, JSONObject tagsData) throws SQLException {
         String matchId = "" + pureText(source).hashCode();
+        if (Constants.MT.equals(type)) {
+            matchId = origin;
+        }
         JSONArray matches = getMatches(file, unit, segment);
         String data = "";
         boolean compressed = false;
@@ -669,7 +676,7 @@ public class XliffStore {
             JSONObject match = matches.getJSONObject(i);
             if (match.getString("matchId").equals(matchId)) {
                 updateMatch.setString(1, origin);
-                updateMatch.setString(2, "tm");
+                updateMatch.setString(2, Constants.TM);
                 updateMatch.setInt(3, similarity);
                 updateMatch.setNString(4, source.toString());
                 updateMatch.setNString(5, target.toString());
@@ -1126,5 +1133,50 @@ public class XliffStore {
             }
         }
         return matches.getChildren().isEmpty() ? null : matches;
+    }
+
+    public JSONArray machineTranslate(JSONObject json, MT translator) throws SQLException, IOException,
+            InterruptedException, JSONException, SAXException, ParserConfigurationException {
+        JSONArray result = new JSONArray();
+
+        String file = json.getString("file");
+        String unit = json.getString("unit");
+        String segment = json.getString("segment");
+
+        String src = "";
+        getSource.setString(1, file);
+        getSource.setString(2, unit);
+        getSource.setString(3, segment);
+        try (ResultSet rs = getSource.executeQuery()) {
+            while (rs.next()) {
+                src = rs.getNString(2);
+            }
+        }
+        Element source = buildElement("<source>" + src + "</source>");
+        JSONObject tagsData = new JSONObject();
+        List<JSONObject> translations = translator.translate(src);
+        Iterator<JSONObject> it = translations.iterator();
+        while (it.hasNext()) {
+            JSONObject translation = it.next();
+            String origin = translation.getString("key");
+            source.setAttribute("xml:lang", translation.getString("srcLang"));
+            Element target = buildElement("<target>" + translation.getString("target") + "</target>");
+            target.setAttribute("xml:lang", translation.getString("tgtLang"));
+            insertMatch(file, unit, segment, origin, Constants.MT, 0, source, target, tagsData);
+
+            JSONObject match = new JSONObject();
+            match.put("file", file);
+            match.put("unit", unit);
+            match.put("segment", segment);
+            match.put("matchId", origin);
+            match.put("origin", origin);
+            match.put("type", Constants.MT);
+            match.put("similarity", 0);
+            match.put("source", src);
+            match.put("target", translation.getString("target"));
+            result.put(match);
+        }
+        conn.commit();
+        return result;
     }
 }

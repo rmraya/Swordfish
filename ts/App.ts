@@ -370,8 +370,14 @@ class Swordfish {
         ipcMain.on('get-matches', (event: IpcMainEvent, arg: any) => {
             Swordfish.getMatches(arg);
         });
+        ipcMain.on('machine-translate', (event: IpcMainEvent, arg: any) => {
+            Swordfish.machineTranslate(arg);
+        });
         ipcMain.on('accept-match', (event: IpcMainEvent, arg: any) => {
             Swordfish.contents.send('set-target', arg);
+        });
+        ipcMain.on('get-mt-matches', () => {
+            Swordfish.contents.send('get-mt-matches');
         });
     } // end constructor
 
@@ -475,7 +481,11 @@ class Swordfish {
             { label: 'Confirm and go to Next Unconfirmed', accelerator: 'Ctrl+Shift+Down', click: () => { Swordfish.contents.send('save-edit', { confirm: true, next: 'unconfirmed' }); } },
             new MenuItem({ type: 'separator' }),
             { label: 'Copy Source to Target', accelerator: 'CmdOrCtrl+P', click: () => { Swordfish.contents.send('copy-source'); } },
-            { label: 'Accept TM Match', accelerator: 'CmdOrCtrl+Alt+A', click: () => { Swordfish.contents.send('accept-tm-match'); } }
+            { label: 'Accept TM Match', accelerator: 'CmdOrCtrl+Alt+A', click: () => { Swordfish.contents.send('accept-tm-match'); } },
+            new MenuItem({ type: 'separator' }),
+            { label: 'Accept Machine Translation', click: () => { Swordfish.contents.send('accept-mt-match'); } },
+            { label: 'Get Machine Translations', accelerator: 'CmdOrCtrl+L', click: () => { Swordfish.contents.send('get-mt-matches'); } },
+            { label: 'Apply MT to all Segments', click: () => { Swordfish.contents.send('apply-mt-all'); } }
         ]);
         var template: MenuItem[] = [
             new MenuItem({ label: '&File', role: 'fileMenu', submenu: fileMenu }),
@@ -1094,7 +1104,10 @@ class Swordfish {
                 nodeIntegration: true
             }
         });
-        this.settingsWindow.setMenu(null);
+        if (process.platform !== 'darwin') {
+            // need to copy & paste
+            this.settingsWindow.setMenu(null);
+        }
         this.settingsWindow.loadURL('file://' + this.path.join(app.getAppPath(), 'html', 'preferences.html'));
         this.settingsWindow.once('ready-to-show', (event: IpcMainEvent) => {
             event.sender.send('get-height');
@@ -1582,7 +1595,7 @@ class Swordfish {
         );
     }
 
-    static getMatches(arg: any) {
+    static getMatches(arg: any): void {
         Swordfish.sendRequest('/projects/matches', arg,
             (data: any) => {
                 if (data.status !== Swordfish.SUCCESS) {
@@ -1590,6 +1603,29 @@ class Swordfish {
                     return;
                 }
                 if (data.matches.length > 0) {
+                    Swordfish.contents.send('set-matches', { project: arg.project, matches: data.matches });
+                }
+            },
+            (reason: string) => {
+                dialog.showErrorBox('Error', reason);
+            }
+        );
+    }
+
+    static machineTranslate(arg: any): void {
+        Swordfish.contents.send('start-waiting');
+        Swordfish.contents.send('set-status', 'Translating');
+        Swordfish.sendRequest('/projects/machineTranslate', arg,
+            (data: any) => {
+                Swordfish.contents.send('end-waiting');
+                Swordfish.contents.send('set-status', '');
+                if (data.status !== Swordfish.SUCCESS) {
+                    dialog.showErrorBox('Error', data.reason);
+                    return;
+                }
+                if (data.matches.length > 0) {
+                    Swordfish.contents.send('end-waiting');
+                    Swordfish.contents.send('set-status', '');
                     Swordfish.contents.send('set-matches', { project: arg.project, matches: data.matches });
                 }
             },
