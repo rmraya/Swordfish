@@ -420,10 +420,10 @@ class Swordfish {
         var editMenu: Menu = Menu.buildFromTemplate([
             { label: 'Undo', accelerator: 'CmdOrCtrl+Z', click: () => { this.contents.undo(); } },
             new MenuItem({ type: 'separator' }),
-            { label: 'Cut', accelerator: 'CmdOrCtrl+X', click: () => { this.contents.cut(); } },
+            { label: 'Cut', accelerator: 'CmdOrCtrl+X', click: () => { Swordfish.cut(); } },
             { label: 'Copy', accelerator: 'CmdOrCtrl+C', click: () => { this.contents.copy(); } },
             { label: 'Paste', accelerator: 'CmdOrCtrl+V', click: () => { this.contents.paste(); } },
-            { label: 'Select All', accelerator: 'CmdOrCtrl+A', click: () => { this.contents.selectAll(); } },
+            { label: 'Select All', accelerator: 'CmdOrCtrl+A', click: () => { Swordfish.selectAll(); } },
             new MenuItem({ type: 'separator' }),
             { label: 'Save Changes', accelerator: 'Alt+Enter', click: () => { Swordfish.contents.send('save-edit', { confirm: false, next: 'none' }); } },
             { label: 'Discard Changes', accelerator: 'Esc', click: () => { Swordfish.contents.send('cancel-edit'); } },
@@ -543,6 +543,18 @@ class Swordfish {
         if (!this.stopping) {
             this.stopping = true;
             this.ls.kill();
+        }
+    }
+
+    static cut(): void {
+        if (Swordfish.mainWindow.isFocused) {
+            Swordfish.contents.cut();
+        }
+    }
+
+    static selectAll(): void {
+        if (Swordfish.mainWindow.isFocused) {
+            Swordfish.contents.selectAll();
         }
     }
 

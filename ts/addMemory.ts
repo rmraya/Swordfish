@@ -45,34 +45,8 @@ class AddMemory {
             if (event.key === 'Enter') {
                 this.addMemory();
             }
-            if ((event.ctrlKey || event.metaKey) && event.keyCode === 67) { // Ctrl or Cmd + C
-                var element: HTMLElement = event.target as HTMLElement;
-                var type: string = element.tagName;
-                if (type === 'INPUT') {
-                    let input: HTMLInputElement = (element as HTMLInputElement);
-                    let start: number = input.selectionStart;
-                    let end: number = input.selectionEnd;
-                    if (end > start) {
-                        navigator.clipboard.writeText(input.value.substring(start, end));
-                    }
-                }
-            }
-            if ((event.ctrlKey || event.metaKey) && event.keyCode === 86) { // Ctrl or Cmd + V
-                var element: HTMLElement = event.target as HTMLElement;
-                var type: string = element.tagName;
-                if (type === 'INPUT') {
-                    navigator.clipboard.readText().then(
-                        (clipText: string) => {
-                            let input: HTMLInputElement = (element as HTMLInputElement);
-                            let currentText: string = input.value;
-                            let start: number = input.selectionStart;
-                            let newText: string = currentText.substring(0, start) + clipText + currentText.substring(start);
-                            input.value = newText;
-                        }
-                    );
-                }
-            }
         });
+        document.addEventListener('keydown', (event: KeyboardEvent) => { KeyboardHandler.keyListener(event); });
         document.getElementById('typeSelect').addEventListener("change", () => {
             this.typeChanged();
         });
@@ -116,7 +90,7 @@ class AddMemory {
     setProjectNames(projects: string[]): void {
         let options: string = '';
         let length: number = projects.length;
-        for (let i=0 ; i<length ; i++) {
+        for (let i = 0; i < length; i++) {
             options = options + '<option value="' + projects[i] + '">'
         }
         document.getElementById('projects').innerHTML = options;
@@ -125,7 +99,7 @@ class AddMemory {
     setClients(clients: string[]): void {
         let options: string = '';
         let length: number = clients.length;
-        for (let i=0 ; i<length ; i++) {
+        for (let i = 0; i < length; i++) {
             options = options + '<option value="' + clients[i] + '">'
         }
         document.getElementById('clients').innerHTML = options;
@@ -134,7 +108,7 @@ class AddMemory {
     setSubjects(subjects: string[]): void {
         let options: string = '';
         let length: number = subjects.length;
-        for (let i=0 ; i<length ; i++) {
+        for (let i = 0; i < length; i++) {
             options = options + '<option value="' + subjects[i] + '">'
         }
         document.getElementById('subjects').innerHTML = options;
