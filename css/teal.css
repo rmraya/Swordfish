@@ -173,6 +173,11 @@ th {
 	background-color: var(--even-row-background) !important;
 }
 
+.currentRow {
+	border-top: 1px solid var(--focus-border);
+	border-bottom: 1px solid var(--focus-border);
+}
+
 .fixed {
 	width: 1px;
 	text-align: center;
