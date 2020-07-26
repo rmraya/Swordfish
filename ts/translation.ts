@@ -54,6 +54,7 @@ class TranslationView {
     maxRows: number;
     segmentsCount: number;
 
+    currentRow: HTMLTableRowElement;
     currentCell: HTMLTableCellElement;
     currentState: HTMLTableCellElement;
     currentTranslate: HTMLTableCellElement;
@@ -542,23 +543,27 @@ class TranslationView {
 
         var element: HTMLElement = event.target as HTMLElement;
 
-        var x: string = element.tagName;
+        var type: string = element.tagName;
 
-        if (x === 'TD' && element.contentEditable === 'true') {
+        if (type === 'TD' && element.contentEditable === 'true') {
             // already editing clicked cell
             return;
+        }
+        if (this.currentRow) {
+            this.currentRow.classList.remove('currentRow');
         }
         if (this.currentCell) {
             this.saveEdit({ confirm: false });
         }
-        let row: HTMLTableRowElement = event.currentTarget as HTMLTableRowElement;
-        this.currentId = { id: row.getAttribute('data-id'), file: row.getAttribute('data-file'), unit: row.getAttribute('data-unit') };
-        let source: HTMLTableCellElement = row.getElementsByClassName('source')[0] as HTMLTableCellElement;
+        this.currentRow = event.currentTarget as HTMLTableRowElement;
+        this.currentRow.classList.add('currentRow');
+        this.currentId = { id: this.currentRow.getAttribute('data-id'), file: this.currentRow.getAttribute('data-file'), unit: this.currentRow.getAttribute('data-unit') };
+        let source: HTMLTableCellElement = this.currentRow.getElementsByClassName('source')[0] as HTMLTableCellElement;
         this.harvestTags(source.innerHTML);
 
-        this.currentCell = row.getElementsByClassName('target')[0] as HTMLTableCellElement;
-        this.currentState = row.getElementsByClassName('state')[0] as HTMLTableCellElement;
-        this.currentTranslate = row.getElementsByClassName('translate')[0] as HTMLTableCellElement;
+        this.currentCell = this.currentRow.getElementsByClassName('target')[0] as HTMLTableCellElement;
+        this.currentState = this.currentRow.getElementsByClassName('state')[0] as HTMLTableCellElement;
+        this.currentTranslate = this.currentRow.getElementsByClassName('translate')[0] as HTMLTableCellElement;
         this.currentContent = this.currentCell.innerHTML;
         this.currentCell.contentEditable = 'true';
         this.currentCell.classList.add('editing');
@@ -573,7 +578,9 @@ class TranslationView {
             segment: this.currentId.id
         });
 
-        this.currentCell.focus();
+        if (element.classList.contains('target')) {
+            this.currentCell.focus();
+        }
     }
 
     getMachineTranslations() {

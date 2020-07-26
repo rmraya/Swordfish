@@ -1104,10 +1104,7 @@ class Swordfish {
                 nodeIntegration: true
             }
         });
-        if (process.platform !== 'darwin') {
-            // need to copy & paste
-            this.settingsWindow.setMenu(null);
-        }
+        this.settingsWindow.setMenu(null);
         this.settingsWindow.loadURL('file://' + this.path.join(app.getAppPath(), 'html', 'preferences.html'));
         this.settingsWindow.once('ready-to-show', (event: IpcMainEvent) => {
             event.sender.send('get-height');

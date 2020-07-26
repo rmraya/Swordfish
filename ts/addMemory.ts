@@ -45,6 +45,33 @@ class AddMemory {
             if (event.key === 'Enter') {
                 this.addMemory();
             }
+            if ((event.ctrlKey || event.metaKey) && event.keyCode === 67) { // Ctrl or Cmd + C
+                var element: HTMLElement = event.target as HTMLElement;
+                var type: string = element.tagName;
+                if (type === 'INPUT') {
+                    let input: HTMLInputElement = (element as HTMLInputElement);
+                    let start: number = input.selectionStart;
+                    let end: number = input.selectionEnd;
+                    if (end > start) {
+                        navigator.clipboard.writeText(input.value.substring(start, end));
+                    }
+                }
+            }
+            if ((event.ctrlKey || event.metaKey) && event.keyCode === 86) { // Ctrl or Cmd + V
+                var element: HTMLElement = event.target as HTMLElement;
+                var type: string = element.tagName;
+                if (type === 'INPUT') {
+                    navigator.clipboard.readText().then(
+                        (clipText: string) => {
+                            let input: HTMLInputElement = (element as HTMLInputElement);
+                            let currentText: string = input.value;
+                            let start: number = input.selectionStart;
+                            let newText: string = currentText.substring(0, start) + clipText + currentText.substring(start);
+                            input.value = newText;
+                        }
+                    );
+                }
+            }
         });
         document.getElementById('typeSelect').addEventListener("change", () => {
             this.typeChanged();
