@@ -37,11 +37,11 @@ class KeyboardHandler {
         }
 
         if ((event.ctrlKey || event.metaKey) && (event.key === 'c' || event.key === 'C')) {
-            let selected: Selection = window.getSelection();
-            navigator.clipboard.writeText(selected.toString());
+            navigator.clipboard.writeText(window.getSelection().toString());
         }
 
         if ((event.ctrlKey || event.metaKey) && (event.key === 'v' || event.key === 'V')) {
+            event.preventDefault();
             var element: HTMLElement = event.target as HTMLElement;
             var type: string = element.tagName;
             if (type === 'INPUT' || type === 'TEXTAREA' || element.contentEditable) {
@@ -49,6 +49,7 @@ class KeyboardHandler {
                 navigator.clipboard.readText().then(
                     (clipText: string) => {
                         selected.getRangeAt(0).insertNode(document.createTextNode(clipText));
+                        selected.collapseToEnd();
                     }
                 );
             }
