@@ -475,10 +475,16 @@ class Swordfish {
             { label: 'Release History', click: () => { this.showReleaseHistory(); } },
             { label: 'Support Group', click: () => { this.showSupportGroup(); } }
         ]);
+        let nextUntranslatedKey = 'Ctrl+Alt+Down';
+        let nextUnconfirmedKey= 'Ctrl+Shift+Down';
+        if (process.platform === 'win32') { // TODO check on Linux
+            nextUntranslatedKey = 'Alt+Down';
+            nextUnconfirmedKey = 'Alt+Shift+Down';
+        }
         var tasksMenu: Menu = Menu.buildFromTemplate([
             { label: 'Confirm Translation', accelerator: 'CmdOrCtrl+E', click: () => { Swordfish.contents.send('save-edit', { confirm: true, next: 'none' }); } },
-            { label: 'Confirm and go to Next Untranslated', accelerator: 'Ctrl+Alt+Down', click: () => { Swordfish.contents.send('save-edit', { confirm: true, next: 'untranslated' }); } },
-            { label: 'Confirm and go to Next Unconfirmed', accelerator: 'Ctrl+Shift+Down', click: () => { Swordfish.contents.send('save-edit', { confirm: true, next: 'unconfirmed' }); } },
+            { label: 'Confirm and go to Next Untranslated', accelerator: nextUntranslatedKey, click: () => { Swordfish.contents.send('save-edit', { confirm: true, next: 'untranslated' }); } },
+            { label: 'Confirm and go to Next Unconfirmed', accelerator: nextUnconfirmedKey, click: () => { Swordfish.contents.send('save-edit', { confirm: true, next: 'unconfirmed' }); } },
             new MenuItem({ type: 'separator' }),
             { label: 'Copy Source to Target', accelerator: 'CmdOrCtrl+P', click: () => { Swordfish.contents.send('copy-source'); } },
             { label: 'Accept TM Match', accelerator: 'CmdOrCtrl+Alt+A', click: () => { Swordfish.contents.send('accept-tm-match'); } },
