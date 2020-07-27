@@ -20,52 +20,35 @@ SOFTWARE.
 class KeyboardHandler {
 
     static keyListener(event: KeyboardEvent): void {
-        if ((event.ctrlKey || event.metaKey) && event.keyCode === 88) { // Ctrl or Cmd + X
+        if ((event.ctrlKey || event.metaKey) && (event.key === 'x' || event.key === 'X')) {
             var element: HTMLElement = event.target as HTMLElement;
             var type: string = element.tagName;
-            if (type === 'INPUT') {
-                let input: HTMLInputElement = (element as HTMLInputElement);
-                let currentText: string = input.value;
-                let start: number = input.selectionStart;
-                let end: number = input.selectionEnd;
-                if (end > start) {
-                    navigator.clipboard.writeText(currentText.substring(start, end));
-                    input.value = currentText.substring(0, start) + currentText.substring(end);
-                    input.setSelectionRange(start,start);
-                }
+            if (type === 'INPUT' || type === 'TEXTAREA' || element.contentEditable) {
+                window.getSelection().deleteFromDocument();
             }
         }
-        if ((event.ctrlKey || event.metaKey) && event.keyCode === 65) { // Ctrl or Cmd + A
+
+        if ((event.ctrlKey || event.metaKey) && (event.key === 'a' || event.key === 'A')) {
             var element: HTMLElement = event.target as HTMLElement;
             var type: string = element.tagName;
-            if (type === 'INPUT') {
-                let input: HTMLInputElement = (element as HTMLInputElement);
-                input.setSelectionRange(0, input.value.length);
+            if (type === 'INPUT' || type === 'TEXTAREA' || element.contentEditable) {
+                window.getSelection().selectAllChildren(element);
             }
         }
-        if ((event.ctrlKey || event.metaKey) && event.keyCode === 67) { // Ctrl or Cmd + C
-            var element: HTMLElement = event.target as HTMLElement;
-            var type: string = element.tagName;
-            if (type === 'INPUT') {
-                let input: HTMLInputElement = (element as HTMLInputElement);
-                let start: number = input.selectionStart;
-                let end: number = input.selectionEnd;
-                if (end > start) {
-                    navigator.clipboard.writeText(input.value.substring(start, end));
-                }
-            }
+
+        if ((event.ctrlKey || event.metaKey) && (event.key === 'c' || event.key === 'C')) {
+            let selected: Selection = window.getSelection();
+            navigator.clipboard.writeText(selected.toString());
         }
-        if ((event.ctrlKey || event.metaKey) && event.keyCode === 86) { // Ctrl or Cmd + V
+
+        if ((event.ctrlKey || event.metaKey) && (event.key === 'v' || event.key === 'V')) {
             var element: HTMLElement = event.target as HTMLElement;
             var type: string = element.tagName;
-            if (type === 'INPUT') {
+            if (type === 'INPUT' || type === 'TEXTAREA' || element.contentEditable) {
+                let selected: Selection = window.getSelection();
                 navigator.clipboard.readText().then(
                     (clipText: string) => {
-                        let input: HTMLInputElement = (element as HTMLInputElement);
-                        let currentText: string = input.value;
-                        let start: number = input.selectionStart;
-                        let newText: string = currentText.substring(0, start) + clipText + currentText.substring(start);
-                        input.value = newText;
+                        selected.getRangeAt(0).insertNode(document.createTextNode(clipText));
                     }
                 );
             }

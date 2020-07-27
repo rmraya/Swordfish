@@ -61,7 +61,8 @@ class Main {
 
         Main.tabHolder.selectTab('projects');
 
-
+        document.addEventListener('keydown', (event: KeyboardEvent) => { KeyboardHandler.keyListener(event); });
+        
         var observerOptions = {
             childList: true,
             attributes: false
