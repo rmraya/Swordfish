@@ -62,7 +62,8 @@ class Main {
         Main.tabHolder.selectTab('projects');
 
         document.addEventListener('keydown', (event: KeyboardEvent) => { KeyboardHandler.keyListener(event); });
-        
+        document.addEventListener('paste', (event) => {event.preventDefault()});
+
         var observerOptions = {
             childList: true,
             attributes: false
@@ -173,6 +174,18 @@ class Main {
         });
         Main.electron.ipcRenderer.on('set-target', (event: Electron.IpcRendererEvent, arg: any) => {
             this.setTarget(arg);
+        });
+        Main.electron.ipcRenderer.on('cut-text', () => {
+            this.cutText();
+        });
+        Main.electron.ipcRenderer.on('copy-text', () => {
+            this.copyText();
+        });
+        Main.electron.ipcRenderer.on('paste-text', () => {
+            this.pasteText();
+        });
+        Main.electron.ipcRenderer.on('select-all', () => {
+            this.selectAll();
         });
         Main.electron.ipcRenderer.on('get-mt-matches', () => {
             this.getMachineTranslations();
@@ -320,6 +333,34 @@ class Main {
         let selected = Main.tabHolder.getSelected();
         if (Main.translationViews.has(selected)) {
             Main.translationViews.get(selected).getMachineTranslations();
+        }
+    }
+
+    cutText(): void {
+        let selected = Main.tabHolder.getSelected();
+        if (Main.translationViews.has(selected)) {
+            Main.translationViews.get(selected).cutText();
+        }
+    }
+
+    copyText(): void {
+        let selected = Main.tabHolder.getSelected();
+        if (Main.translationViews.has(selected)) {
+            Main.translationViews.get(selected).copyText();
+        }
+    }
+
+    pasteText(): void {
+        let selected = Main.tabHolder.getSelected();
+        if (Main.translationViews.has(selected)) {
+            Main.translationViews.get(selected).pasteText();
+        }
+    }
+
+    selectAll(): void {
+        let selected = Main.tabHolder.getSelected();
+        if (Main.translationViews.has(selected)) {
+            Main.translationViews.get(selected).selectAll();
         }
     }
 }

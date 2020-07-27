@@ -41,7 +41,7 @@ class TranslationView {
     statusArea: HTMLDivElement;
 
     projectId: string;
-    private tbody: HTMLTableSectionElement;
+    tbody: HTMLTableSectionElement;
     sourceTh: HTMLTableCellElement;
     targetTh: HTMLTableCellElement;
 
@@ -540,47 +540,16 @@ class TranslationView {
     }
 
     rowClickListener(event: MouseEvent): void {
-
         var element: HTMLElement = event.target as HTMLElement;
-
         var type: string = element.tagName;
-
         if (type === 'TD' && element.contentEditable === 'true') {
             // already editing clicked cell
             return;
         }
-        if (this.currentRow) {
-            this.currentRow.classList.remove('currentRow');
-        }
         if (this.currentCell) {
             this.saveEdit({ confirm: false });
         }
-        this.currentRow = event.currentTarget as HTMLTableRowElement;
-        this.currentRow.classList.add('currentRow');
-        this.currentId = { id: this.currentRow.getAttribute('data-id'), file: this.currentRow.getAttribute('data-file'), unit: this.currentRow.getAttribute('data-unit') };
-        let source: HTMLTableCellElement = this.currentRow.getElementsByClassName('source')[0] as HTMLTableCellElement;
-        this.harvestTags(source.innerHTML);
-
-        this.currentCell = this.currentRow.getElementsByClassName('target')[0] as HTMLTableCellElement;
-        this.currentState = this.currentRow.getElementsByClassName('state')[0] as HTMLTableCellElement;
-        this.currentTranslate = this.currentRow.getElementsByClassName('translate')[0] as HTMLTableCellElement;
-        this.currentContent = this.currentCell.innerHTML;
-        this.currentCell.contentEditable = 'true';
-        this.currentCell.classList.add('editing');
-
-        this.tmMatches.clear();
-        this.mtMatches.clear();
-
-        this.electron.ipcRenderer.send('get-matches', {
-            project: this.projectId,
-            file: this.currentId.file,
-            unit: this.currentId.unit,
-            segment: this.currentId.id
-        });
-
-        if (element.classList.contains('target')) {
-            this.currentCell.focus();
-        }
+        this.selectRow(event.currentTarget as HTMLTableRowElement, element.classList.contains('target'));
     }
 
     getMachineTranslations() {
@@ -634,11 +603,76 @@ class TranslationView {
                 });
             }
             if (next === 'untranslated') {
-                // TODO
+                let found: boolean = false;
+                let rows: HTMLCollection = this.tbody.rows;
+                let length: number = rows.length;
+                for (let i: number = this.currentRow.rowIndex; i < length; i++) {
+                    let row: HTMLTableRowElement = (rows[i] as HTMLTableRowElement);
+                    let cell: HTMLTableCellElement = row.getElementsByClassName('state')[0] as HTMLTableCellElement;
+                    if (cell.classList.contains('initial')) {
+                        found = true;
+                        this.selectRow(row, true);
+                        row.scrollTo({ top: 40, left: 0, behavior: 'smooth' });
+                        break;
+                    }
+                }
+                if (!found) {
+                    this.electron.ipcRenderer.send('show-message', { type: 'warning', message: 'No more untranslated segments on this page' });
+                }
             }
             if (next === 'unconfirmed') {
-                // TODO
+                let found: boolean = false;
+                let rows: HTMLCollection = this.tbody.rows;
+                let length: number = rows.length;
+                for (let i: number = this.currentRow.rowIndex; i < length; i++) {
+                    let row: HTMLTableRowElement = (rows[i] as HTMLTableRowElement);
+                    let cell: HTMLTableCellElement = row.getElementsByClassName('state')[0] as HTMLTableCellElement;
+                    if (cell.classList.contains('translated')) {
+                        found = true;
+                        this.selectRow(row, true);
+                        row.scrollTo({ top: 40, left: 0, behavior: 'smooth' });
+                        break;
+                    }
+                }
+                if (!found) {
+                    this.electron.ipcRenderer.send('show-message', { type: 'warning', message: 'No more unconfirmed segments on this page' });
+                }
             }
+        }
+    }
+
+    selectRow(row: HTMLTableRowElement, focus: boolean) {
+        if (this.currentRow) {
+            this.currentRow.classList.remove('currentRow');
+        }
+        this.currentRow = row;
+        this.currentRow.classList.add('currentRow');
+        this.currentId = {
+            id: this.currentRow.getAttribute('data-id'),
+            file: this.currentRow.getAttribute('data-file'),
+            unit: this.currentRow.getAttribute('data-unit')
+        };
+        let source: HTMLTableCellElement = this.currentRow.getElementsByClassName('source')[0] as HTMLTableCellElement;
+        this.harvestTags(source.innerHTML);
+
+        this.currentCell = this.currentRow.getElementsByClassName('target')[0] as HTMLTableCellElement;
+        this.currentState = this.currentRow.getElementsByClassName('state')[0] as HTMLTableCellElement;
+        this.currentTranslate = this.currentRow.getElementsByClassName('translate')[0] as HTMLTableCellElement;
+        this.currentContent = this.currentCell.innerHTML;
+        this.currentCell.contentEditable = 'true';
+        this.currentCell.classList.add('editing');
+
+        this.tmMatches.clear();
+        this.mtMatches.clear();
+
+        this.electron.ipcRenderer.send('get-matches', {
+            project: this.projectId,
+            file: this.currentId.file,
+            unit: this.currentId.unit,
+            segment: this.currentId.id
+        });
+        if (focus) {
+            this.currentCell.focus();
         }
     }
 
@@ -749,6 +783,28 @@ class TranslationView {
                 this.currentCell.focus();
                 break;
             }
+        }
+    }
+
+    cutText(): void {
+        if (this.currentCell) {
+            this.electron.webContents.getFocusedWebContents().cut();
+        }
+    }
+
+    copyText(): void {
+        navigator.clipboard.writeText(window.getSelection().toString());
+    }
+
+    pasteText(): void {
+        if (this.currentCell) {
+            this.electron.webContents.getFocusedWebContents().paste();
+        }
+    }
+
+    selectAll(): void {
+        if (this.currentCell) {
+            window.getSelection().selectAllChildren(this.currentCell);
         }
     }
 }

@@ -21,6 +21,7 @@ class KeyboardHandler {
 
     static keyListener(event: KeyboardEvent): void {
         if ((event.ctrlKey || event.metaKey) && (event.key === 'x' || event.key === 'X')) {
+            event.preventDefault();
             var element: HTMLElement = event.target as HTMLElement;
             var type: string = element.tagName;
             if (type === 'INPUT' || type === 'TEXTAREA' || element.contentEditable) {
@@ -29,6 +30,7 @@ class KeyboardHandler {
         }
 
         if ((event.ctrlKey || event.metaKey) && (event.key === 'a' || event.key === 'A')) {
+            event.preventDefault();
             var element: HTMLElement = event.target as HTMLElement;
             var type: string = element.tagName;
             if (type === 'INPUT' || type === 'TEXTAREA' || element.contentEditable) {
@@ -37,6 +39,7 @@ class KeyboardHandler {
         }
 
         if ((event.ctrlKey || event.metaKey) && (event.key === 'c' || event.key === 'C')) {
+            event.preventDefault();
             navigator.clipboard.writeText(window.getSelection().toString());
         }
 
