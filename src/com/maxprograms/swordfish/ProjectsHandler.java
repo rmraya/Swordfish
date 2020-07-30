@@ -137,6 +137,10 @@ public class ProjectsHandler implements HttpHandler {
 				response = getMatches(request);
 			} else if ("/projects/machineTranslate".equals(url)) {
 				response = machineTranslate(request);
+			} else if ("/projects/tmTranslate".equals(url)) {
+				response = tmTranslate(request);
+			} else if ("/projects/projectMemories".equals(url)) {
+				response = getProjectMemories(request);
 			} else {
 				response.put(Constants.REASON, "Unknown request");
 			}
@@ -727,6 +731,32 @@ public class ProjectsHandler implements HttpHandler {
 			}
 		} catch (IOException | SQLException | InterruptedException | JSONException | SAXException
 				| ParserConfigurationException e) {
+			logger.log(Level.ERROR, e);
+			result.put(Constants.REASON, e.getMessage());
+		}
+		return result;
+	}
+
+	private JSONObject tmTranslate(String request) {
+		JSONObject result = new JSONObject();
+		try {
+			JSONObject json = new JSONObject(request);
+			String project = json.getString("project");
+			if (projectStores.containsKey(project)) {
+				result.put("matches", projectStores.get(project).tmTranslate(json));
+			}
+		} catch (IOException | SQLException | JSONException | SAXException | ParserConfigurationException e) {
+			logger.log(Level.ERROR, e);
+			result.put(Constants.REASON, e.getMessage());
+		}
+		return result;
+	}
+
+	private JSONObject getProjectMemories(String request) {
+		JSONObject result = new JSONObject();
+		try {
+			result.put("memories", MemoriesHandler.getMemories());
+		} catch (IOException e) {
 			logger.log(Level.ERROR, e);
 			result.put(Constants.REASON, e.getMessage());
 		}

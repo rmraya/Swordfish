@@ -65,6 +65,9 @@ class TranslationView {
     tmMatches: TmMatches;
     mtMatches: MtMatches;
 
+    memSelect: HTMLSelectElement;
+    glossSelect: HTMLSelectElement;
+
     constructor(div: HTMLDivElement, projectId: string) {
         this.container = div;
         this.projectId = projectId;
@@ -73,55 +76,7 @@ class TranslationView {
         topBar.className = 'toolbar';
         div.appendChild(topBar);
 
-        let exportTranslations = document.createElement('a');
-        exportTranslations.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 0 24 24" width="24"><path d="M19 12v7H5v-7H3v7c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2v-7h-2zm-6 .67l2.59-2.58L17 11.5l-5 5-5-5 1.41-1.41L11 12.67V3h2v9.67z"/></svg>' +
-            '<span class="tooltiptext bottomTooltip">Export Translations</span>';
-        exportTranslations.className = 'tooltip';
-        exportTranslations.addEventListener('click', () => {
-            this.exportTranslations();
-        });
-        topBar.appendChild(exportTranslations);
-
-        let saveEdit = document.createElement('a');
-        saveEdit.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 0 24 24" width="24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm4.59-12.42L10 14.17l-2.59-2.58L6 13l4 4 8-8z"/></svg>' +
-            '<span class="tooltiptext bottomTooltip">Save Changes</span>';
-        saveEdit.className = 'tooltip';
-        saveEdit.style.marginLeft = '20px';
-        saveEdit.addEventListener('click', () => {
-            this.saveEdit({ confirm: false, next: 'none' });
-        });
-        topBar.appendChild(saveEdit);
-
-        let cancelEdit = document.createElement('a');
-        cancelEdit.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 0 24 24" width="24"><path d="M12 2C6.47 2 2 6.47 2 12s4.47 10 10 10 10-4.47 10-10S17.53 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm3.59-13L12 10.59 8.41 7 7 8.41 10.59 12 7 15.59 8.41 17 12 13.41 15.59 17 17 15.59 13.41 12 17 8.41z"/></svg>' +
-            '<span class="tooltiptext bottomTooltip">Discard Changes</span>';
-        cancelEdit.className = 'tooltip';
-        cancelEdit.addEventListener('click', () => {
-            this.cancelEdit();
-        });
-        topBar.appendChild(cancelEdit);
-
-
-        let confirmEdit = document.createElement('a');
-        confirmEdit.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 0 24 24" width="24"><path d="M18 7l-1.41-1.41-6.34 6.34 1.41 1.41L18 7zm4.24-1.41L11.66 16.17 7.48 12l-1.41 1.41L11.66 19l12-12-1.42-1.41zM.41 13.41L6 19l1.41-1.41L1.83 12 .41 13.41z"/></svg>' +
-            '<span class="tooltiptext bottomTooltip">Confirm Translation</span>';
-        confirmEdit.className = 'tooltip';
-        confirmEdit.style.marginLeft = '20px';
-        confirmEdit.addEventListener('click', () => {
-            this.saveEdit({ confirm: true, next: 'none' });
-        });
-        topBar.appendChild(confirmEdit);
-
-
-        let statisticsButton = document.createElement('a');
-        statisticsButton.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 0 24 24" width="24"><path d="M9 17H7v-7h2v7zm4 0h-2V7h2v10zm4 0h-2v-4h2v4zm2.5 2.1h-15V5h15v14.1zm0-16.1h-15c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h15c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2z"/></svg>' +
-            '<span class="tooltiptext bottomTooltip">Project Statistics</span>';
-        statisticsButton.className = 'tooltip';
-        statisticsButton.style.marginLeft = '20px';
-        statisticsButton.addEventListener('click', () => {
-            this.generateStatistics()
-        });
-        topBar.appendChild(statisticsButton);
+        this.buildTopBar(topBar);
 
         this.mainArea = document.createElement('div');
         this.mainArea.id = 'main' + projectId;
@@ -150,7 +105,6 @@ class TranslationView {
                 this.setSegments(arg.segments);
             }
         });
-
         this.watchSizes();
 
         setTimeout(() => {
@@ -158,6 +112,118 @@ class TranslationView {
         }, 200);
 
         this.electron.ipcRenderer.send('get-segments-count', { project: this.projectId });
+        this.electron.ipcRenderer.send('get-project-memories', { project: this.projectId });
+        this.electron.ipcRenderer.send('get-project-glossaries', { project: this.projectId });
+    }
+
+    buildTopBar(topBar: HTMLDivElement): void {
+        let exportTranslations = document.createElement('a');
+        exportTranslations.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 0 24 24" width="24"><path d="M19 12v7H5v-7H3v7c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2v-7h-2zm-6 .67l2.59-2.58L17 11.5l-5 5-5-5 1.41-1.41L11 12.67V3h2v9.67z"/></svg>' +
+            '<span class="tooltiptext bottomTooltip">Export Translations</span>';
+        exportTranslations.className = 'tooltip';
+        exportTranslations.addEventListener('click', () => {
+            this.exportTranslations();
+        });
+        topBar.appendChild(exportTranslations);
+
+        let saveEdit = document.createElement('a');
+        saveEdit.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 0 24 24" width="24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm4.59-12.42L10 14.17l-2.59-2.58L6 13l4 4 8-8z"/></svg>' +
+            '<span class="tooltiptext bottomTooltip">Save Changes</span>';
+        saveEdit.className = 'tooltip';
+        saveEdit.style.marginLeft = '20px';
+        saveEdit.addEventListener('click', () => {
+            this.saveEdit({ confirm: false, next: 'none' });
+        });
+        topBar.appendChild(saveEdit);
+
+        let cancelEdit = document.createElement('a');
+        cancelEdit.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 0 24 24" width="24"><path d="M12 2C6.47 2 2 6.47 2 12s4.47 10 10 10 10-4.47 10-10S17.53 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm3.59-13L12 10.59 8.41 7 7 8.41 10.59 12 7 15.59 8.41 17 12 13.41 15.59 17 17 15.59 13.41 12 17 8.41z"/></svg>' +
+            '<span class="tooltiptext bottomTooltip">Discard Changes</span>';
+        cancelEdit.className = 'tooltip';
+        cancelEdit.addEventListener('click', () => {
+            this.cancelEdit();
+        });
+        topBar.appendChild(cancelEdit);
+
+        let confirmEdit = document.createElement('a');
+        confirmEdit.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 0 24 24" width="24"><path d="M18 7l-1.41-1.41-6.34 6.34 1.41 1.41L18 7zm4.24-1.41L11.66 16.17 7.48 12l-1.41 1.41L11.66 19l12-12-1.42-1.41zM.41 13.41L6 19l1.41-1.41L1.83 12 .41 13.41z"/></svg>' +
+            '<span class="tooltiptext bottomTooltip">Confirm Translation</span>';
+        confirmEdit.className = 'tooltip';
+        confirmEdit.style.marginLeft = '20px';
+        confirmEdit.addEventListener('click', () => {
+            this.saveEdit({ confirm: true, next: 'none' });
+        });
+        topBar.appendChild(confirmEdit);
+
+        let findInPage = document.createElement('a');
+        findInPage.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 0 24 24" width="24"><path d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zM6 4h7l5 5v8.58l-1.84-1.84c1.28-1.94 1.07-4.57-.64-6.28C14.55 8.49 13.28 8 12 8c-1.28 0-2.55.49-3.53 1.46-1.95 1.95-1.95 5.11 0 7.05.97.97 2.25 1.46 3.53 1.46.96 0 1.92-.28 2.75-.83L17.6 20H6V4zm8.11 11.1c-.56.56-1.31.88-2.11.88s-1.55-.31-2.11-.88c-.56-.56-.88-1.31-.88-2.11s.31-1.55.88-2.11c.56-.57 1.31-.88 2.11-.88s1.55.31 2.11.88c.56.56.88 1.31.88 2.11s-.31 1.55-.88 2.11z"/></svg>' +
+            '<span class="tooltiptext bottomTooltip">Find in Page</span>';
+        findInPage.className = 'tooltip';
+        findInPage.style.marginLeft = '20px';
+        findInPage.addEventListener('click', () => {
+            this.electron.ipcRenderer.send('show-find');
+        });
+        topBar.appendChild(findInPage);
+
+        let filterText = document.createElement('a');
+        filterText.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" enable-background="new 0 0 24 24" height="24" viewBox="0 0 24 24" width="24"><path d="M7,6h10l-5.01,6.3L7,6z M4.25,5.61C6.27,8.2,10,13,10,13v6c0,0.55,0.45,1,1,1h2c0.55,0,1-0.45,1-1v-6 c0,0,3.72-4.8,5.74-7.39C20.25,4.95,19.78,4,18.95,4H5.04C4.21,4,3.74,4.95,4.25,5.61z"/></svg>' +
+            '<span class="tooltiptext bottomTooltip">Filter Text</span>';
+        filterText.className = 'tooltip';
+        filterText.addEventListener('click', () => {
+            this.electron.ipcRenderer.send('show-filter');
+        });
+        topBar.appendChild(filterText);
+
+        let statisticsButton = document.createElement('a');
+        statisticsButton.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 0 24 24" width="24"><path d="M9 17H7v-7h2v7zm4 0h-2V7h2v10zm4 0h-2v-4h2v4zm2.5 2.1h-15V5h15v14.1zm0-16.1h-15c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h15c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2z"/></svg>' +
+            '<span class="tooltiptext bottomTooltip">Project Statistics</span>';
+        statisticsButton.className = 'tooltip';
+        statisticsButton.style.marginLeft = '20px';
+        statisticsButton.addEventListener('click', () => {
+            this.generateStatistics()
+        });
+        topBar.appendChild(statisticsButton);
+
+        let filler: HTMLSpanElement = document.createElement('span');
+        filler.innerHTML = '&nbsp;';
+        filler.className = 'fill_width';
+        topBar.appendChild(filler);
+
+        let memLabel: HTMLLabelElement = document.createElement('label');
+        memLabel.style.marginTop = '4px';
+        memLabel.innerHTML = 'Memory';
+        memLabel.setAttribute('for', 'memSelect' + this.projectId);
+        topBar.appendChild(memLabel);
+
+        this.memSelect = document.createElement('select');
+        this.memSelect.id = 'memSelect' + this.projectId;
+        this.memSelect.style.marginTop = '4px';
+        this.memSelect.style.minWidth = '180px';
+        topBar.appendChild(this.memSelect);
+        
+        let requestTranslation = document.createElement('a');
+        requestTranslation.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path d="M21 21h-1.713l-.658-1.846h-3l-.663 1.846h-1.659l3.04-8h1.603l3.05 8zm-2.814-3.12l-1.049-3.018-1.054 3.018h2.103zm-9.464-12.037l.125-.562-1.02-.199-.101.464c-.345-.05-.712-.057-1.083-.019.009-.249.023-.494.045-.728h1.141v-.966h-1.004c.049-.246.092-.394.134-.533l-.997-.3c-.072.245-.134.484-.195.833h-1.138v.966h1.014c-.027.312-.043.637-.048.964-1.119.411-1.595 1.195-1.595 1.905 0 .84.663 1.578 1.709 1.482 1.301-.118 2.169-1.1 2.679-2.308.525.303.746.814.548 1.286-.185.436-.725.852-1.757.831v1.041c1.146.018 2.272-.417 2.715-1.469.431-1.028-.062-2.151-1.172-2.688zm-1.342.71c-.162.36-.375.717-.648.998-.041-.3-.07-.628-.086-.978.249-.032.499-.038.734-.02zm-1.758.336c.028.44.078.844.148 1.205-.927.169-.963-.744-.148-1.205zm15.378 5.111c.552 0 1 .449 1 1v8c0 .551-.448 1-1 1h-8c-.552 0-1-.449-1-1v-8c0-.551.448-1 1-1h8zm0-2h-8c-1.656 0-3 1.343-3 3v8c0 1.657 1.344 3 3 3h8c1.657 0 3-1.343 3-3v-8c0-1.657-1.343-3-3-3zm-13 3c0-.342.035-.677.102-1h-5.102c-.552 0-1-.449-1-1v-8c0-.551.448-1 1-1h8c.552 0 1 .449 1 1v5.101c.323-.066.657-.101 1-.101h1v-5c0-1.657-1.343-3-3-3h-8c-1.656 0-3 1.343-3 3v8c0 1.657 1.344 3 3 3h5v-1z"/></svg>' +
+            '<span class="tooltiptext bottomTooltip">Translate all Segments</span>';
+        requestTranslation.className = 'tooltip';
+        requestTranslation.style.marginLeft = '4px';
+        requestTranslation.addEventListener('click', () => {
+            this.electron.ipcRenderer.send('search-memory-all');
+        });
+        topBar.appendChild(requestTranslation);
+
+        let glossLabel: HTMLLabelElement = document.createElement('label');
+        glossLabel.style.marginLeft = '20px';
+        glossLabel.style.marginTop = '4px';
+        glossLabel.innerHTML = 'Glossary';
+        glossLabel.setAttribute('for', 'glossSelect' + this.projectId);
+        topBar.appendChild(glossLabel);
+
+        this.glossSelect = document.createElement('select');
+        this.glossSelect.id = 'glossSelect' + this.projectId;
+        this.glossSelect.style.marginTop = '4px';
+        this.glossSelect.style.marginRight = '10px';
+        this.glossSelect.style.minWidth = '180px';
+        topBar.appendChild(this.glossSelect);
     }
 
     close(): void {
@@ -563,6 +629,18 @@ class TranslationView {
         }
     }
 
+    getTmMatches() {
+        if (this.currentCell) {
+            this.electron.ipcRenderer.send('tm-translate', {
+                project: this.projectId,
+                file: this.currentId.file,
+                unit: this.currentId.unit,
+                segment: this.currentId.id,
+                memory: this.memSelect.value
+            });
+        } 
+    }
+
     saveEdit(arg: any): void {
         let confirm: boolean = arg.confirm;
         let next: string = arg.next;
@@ -683,6 +761,10 @@ class TranslationView {
             this.currentCell.contentEditable = 'false';
             this.currentCell = undefined;
         }
+        if (this.currentRow) {
+            this.currentRow.classList.remove('currentRow');
+            this.currentRow = undefined;
+        }
     }
 
     harvestTags(source: string): void {
@@ -761,7 +843,6 @@ class TranslationView {
     }
 
     setTarget(arg: any): void {
-        console.log(JSON.stringify(arg));
         let rows: HTMLCollectionOf<HTMLTableRowElement> = this.tbody.getElementsByTagName('tr');
         let length = rows.length;
         for (let i = 0; i < length; i++) {
@@ -786,25 +867,13 @@ class TranslationView {
         }
     }
 
-    cutText(): void {
-        if (this.currentCell) {
-            this.electron.webContents.getFocusedWebContents().cut();
+    setProjectMemories(memories: any[]) : void {
+        let options = '<option value="none" class="error">-- Select Memory --</option>';
+        let length = memories.length;
+        for (let i=0 ; i<length ; i++) {
+            let mem: string[] = memories[i];
+            options = options + '<option value="' + mem[0] + '">' + mem[1] + '</option>';
         }
-    }
-
-    copyText(): void {
-        navigator.clipboard.writeText(window.getSelection().toString());
-    }
-
-    pasteText(): void {
-        if (this.currentCell) {
-            this.electron.webContents.getFocusedWebContents().paste();
-        }
-    }
-
-    selectAll(): void {
-        if (this.currentCell) {
-            window.getSelection().selectAllChildren(this.currentCell);
-        }
+        this.memSelect.innerHTML = options;
     }
 }

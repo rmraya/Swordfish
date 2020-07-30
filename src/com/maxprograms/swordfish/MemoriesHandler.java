@@ -410,6 +410,25 @@ public class MemoriesHandler implements HttpHandler {
 		return result;
 	}
 
+	public static JSONArray getMemories() throws IOException {
+		JSONArray result = new JSONArray();
+		if (memories == null) {
+			loadMemoriesList();
+		}
+		Vector<Memory> vector = new Vector<>();
+		vector.addAll(memories.values());
+		Collections.sort(vector);
+		Iterator<Memory> it = vector.iterator();
+		while (it.hasNext()) {
+			Memory m = it.next();
+			JSONArray array = new JSONArray();
+			array.put(m.getId());
+			array.put(m.getName());
+			result.put(array);
+		}
+		return result;
+	}
+
 	private static JSONObject createMemory(String request) throws IOException {
 		JSONObject result = new JSONObject();
 		JSONObject json = new JSONObject(request);
@@ -516,7 +535,7 @@ public class MemoriesHandler implements HttpHandler {
 		openEngines.put(id, new MapDbEngine(id, getWorkFolder()));
 	}
 
-	private static void closeMemory(String id) throws IOException, SQLException {
+	public static void closeMemory(String id) throws IOException, SQLException {
 		if (openEngines == null) {
 			openEngines = new ConcurrentHashMap<>();
 			logger.log(Level.WARNING, "Closing memory when 'openEngine' is null");
@@ -599,4 +618,25 @@ public class MemoriesHandler implements HttpHandler {
 		return result;
 	}
 
+	public static ITmEngine open(String memory) throws IOException {
+		if (memories == null) {
+			loadMemoriesList();
+		}
+		Memory mem = memories.get(memory);
+		if (openEngines == null) {
+			openEngines = new ConcurrentHashMap<>();
+		}
+		boolean wasOpen = openEngines.containsKey(mem.getId());
+		if (!wasOpen) {
+			openMemory(mem.getId());
+		}
+		return openEngines.get(mem.getId());
+	}
+
+	public static String getName(String memory) throws IOException {
+		if (memories == null) {
+			loadMemoriesList();
+		}
+		return memories.get(memory).getName();
+	}
 }

@@ -32,6 +32,6 @@ module swordfish {
 	requires transitive openxliff;
 	requires transitive jdk.httpserver;
 	requires transitive json;
+	requires transitive tmengine;
 	requires java.logging;
-	requires tmengine;
 }

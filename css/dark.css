@@ -401,6 +401,10 @@ label {
 	stroke: var(--normal-color);
 }
 
+.toolbar a:hover {
+	background-color: var(--input-background);
+}
+
 svg {
 	fill: var(--normal-color);
 	stroke: var(--normal-color);

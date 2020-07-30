@@ -61,9 +61,6 @@ class Main {
 
         Main.tabHolder.selectTab('projects');
 
-        document.addEventListener('keydown', (event: KeyboardEvent) => { KeyboardHandler.keyListener(event); });
-        document.addEventListener('paste', (event) => {event.preventDefault()});
-
         var observerOptions = {
             childList: true,
             attributes: false
@@ -175,20 +172,14 @@ class Main {
         Main.electron.ipcRenderer.on('set-target', (event: Electron.IpcRendererEvent, arg: any) => {
             this.setTarget(arg);
         });
-        Main.electron.ipcRenderer.on('cut-text', () => {
-            this.cutText();
-        });
-        Main.electron.ipcRenderer.on('copy-text', () => {
-            this.copyText();
-        });
-        Main.electron.ipcRenderer.on('paste-text', () => {
-            this.pasteText();
-        });
-        Main.electron.ipcRenderer.on('select-all', () => {
-            this.selectAll();
-        });
         Main.electron.ipcRenderer.on('get-mt-matches', () => {
             this.getMachineTranslations();
+        });
+        Main.electron.ipcRenderer.on('get-tm-matches', () => {
+            this.getTmMatches();
+        });
+        Main.electron.ipcRenderer.on('set-project-memories', (event: Electron.IpcRendererEvent, arg: any) => {
+            this.setProjectMemories(arg);
         });
         let config: any = { attributes: true, childList: false, subtree: false };
         let observer = new MutationObserver((mutationsList) => {
@@ -336,31 +327,17 @@ class Main {
         }
     }
 
-    cutText(): void {
+    getTmMatches(): void {
         let selected = Main.tabHolder.getSelected();
         if (Main.translationViews.has(selected)) {
-            Main.translationViews.get(selected).cutText();
+            Main.translationViews.get(selected).getTmMatches();
         }
     }
 
-    copyText(): void {
+    setProjectMemories(arg: any) : void {
         let selected = Main.tabHolder.getSelected();
         if (Main.translationViews.has(selected)) {
-            Main.translationViews.get(selected).copyText();
-        }
-    }
-
-    pasteText(): void {
-        let selected = Main.tabHolder.getSelected();
-        if (Main.translationViews.has(selected)) {
-            Main.translationViews.get(selected).pasteText();
-        }
-    }
-
-    selectAll(): void {
-        let selected = Main.tabHolder.getSelected();
-        if (Main.translationViews.has(selected)) {
-            Main.translationViews.get(selected).selectAll();
+            Main.translationViews.get(selected).setProjectMemories(arg.memories);
         }
     }
 }

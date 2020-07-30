@@ -38,7 +38,6 @@ class Swordfish {
     static addFileWindow: BrowserWindow;
     static defaultLangsWindow: BrowserWindow;
 
-    static contents: webContents;
     javapath: string = Swordfish.path.join(app.getAppPath(), 'bin', 'java');
 
     static appHome: string = Swordfish.path.join(app.getPath('appData'), app.name);
@@ -206,7 +205,7 @@ class Swordfish {
                 } else {
                     Swordfish.currentCss = 'file://' + Swordfish.path.join(app.getAppPath(), 'css', 'light.css');
                 }
-                Swordfish.contents.send('set-theme', Swordfish.currentCss);
+                Swordfish.mainWindow.webContents.send('set-theme', Swordfish.currentCss);
             }
         });
         ipcMain.on('get-projects', (event: IpcMainEvent, arg: any) => {
@@ -352,7 +351,7 @@ class Swordfish {
             dialog.showMessageBox(arg);
         });
         ipcMain.on('add-tab', (event: IpcMainEvent, arg: any) => {
-            Swordfish.contents.send('add-tab', arg);
+            Swordfish.mainWindow.webContents.send('add-tab', arg);
         });
         ipcMain.on('get-segments-count', (event: IpcMainEvent, arg: any) => {
             Swordfish.getSegmenstCount(event, arg);
@@ -362,7 +361,7 @@ class Swordfish {
         });
         ipcMain.on('paste-tag', (event: IpcMainEvent, arg: any) => {
             clipboard.writeHTML(arg);
-            Swordfish.contents.paste();
+            Swordfish.mainWindow.webContents.paste();
         });
         ipcMain.on('save-translation', (event: IpcMainEvent, arg: any) => {
             Swordfish.saveTranslation(arg);
@@ -374,10 +373,19 @@ class Swordfish {
             Swordfish.machineTranslate(arg);
         });
         ipcMain.on('accept-match', (event: IpcMainEvent, arg: any) => {
-            Swordfish.contents.send('set-target', arg);
+            Swordfish.mainWindow.webContents.send('set-target', arg);
         });
         ipcMain.on('get-mt-matches', () => {
-            Swordfish.contents.send('get-mt-matches');
+            Swordfish.mainWindow.webContents.send('get-mt-matches');
+        });
+        ipcMain.on('search-memory', () => {
+            Swordfish.mainWindow.webContents.send('get-tm-matches');
+        });
+        ipcMain.on('tm-translate', (event: IpcMainEvent, arg: any) => {
+            Swordfish.tmTranslate(arg);
+        });
+        ipcMain.on('get-project-memories', (event: IpcMainEvent, arg: any) => {
+            Swordfish.getProjectMemories(arg);
         });
     } // end constructor
 
@@ -401,38 +409,37 @@ class Swordfish {
             show: false,
             icon: this.iconPath
         });
-        this.contents = this.mainWindow.webContents;
         var fileMenu: Menu = Menu.buildFromTemplate([
             { label: 'Translate Single File', accelerator: 'CmdOrCtrl+N', click: () => { Swordfish.addFile(); } }
         ]);
         var tagsMenu: Menu = Menu.buildFromTemplate([
-            { label: 'Insert Tag "1"', accelerator: 'CmdOrCtrl+1', click: () => { Swordfish.contents.send('insert tag', { tag: 1 }); } },
-            { label: 'Insert Tag "2"', accelerator: 'CmdOrCtrl+2', click: () => { Swordfish.contents.send('insert tag', { tag: 2 }); } },
-            { label: 'Insert Tag "3"', accelerator: 'CmdOrCtrl+3', click: () => { Swordfish.contents.send('insert tag', { tag: 3 }); } },
-            { label: 'Insert Tag "4"', accelerator: 'CmdOrCtrl+4', click: () => { Swordfish.contents.send('insert tag', { tag: 4 }); } },
-            { label: 'Insert Tag "5"', accelerator: 'CmdOrCtrl+5', click: () => { Swordfish.contents.send('insert tag', { tag: 5 }); } },
-            { label: 'Insert Tag "6"', accelerator: 'CmdOrCtrl+6', click: () => { Swordfish.contents.send('insert tag', { tag: 6 }); } },
-            { label: 'Insert Tag "7"', accelerator: 'CmdOrCtrl+7', click: () => { Swordfish.contents.send('insert tag', { tag: 7 }); } },
-            { label: 'Insert Tag "8"', accelerator: 'CmdOrCtrl+8', click: () => { Swordfish.contents.send('insert tag', { tag: 8 }); } },
-            { label: 'Insert Tag "8"', accelerator: 'CmdOrCtrl+9', click: () => { Swordfish.contents.send('insert tag', { tag: 9 }); } },
-            { label: 'Insert Tag "10"', accelerator: 'CmdOrCtrl+0', click: () => { Swordfish.contents.send('insert tag', { tag: 10 }); } }
+            { label: 'Insert Tag "1"', accelerator: 'CmdOrCtrl+1', click: () => { Swordfish.mainWindow.webContents.send('insert tag', { tag: 1 }); } },
+            { label: 'Insert Tag "2"', accelerator: 'CmdOrCtrl+2', click: () => { Swordfish.mainWindow.webContents.send('insert tag', { tag: 2 }); } },
+            { label: 'Insert Tag "3"', accelerator: 'CmdOrCtrl+3', click: () => { Swordfish.mainWindow.webContents.send('insert tag', { tag: 3 }); } },
+            { label: 'Insert Tag "4"', accelerator: 'CmdOrCtrl+4', click: () => { Swordfish.mainWindow.webContents.send('insert tag', { tag: 4 }); } },
+            { label: 'Insert Tag "5"', accelerator: 'CmdOrCtrl+5', click: () => { Swordfish.mainWindow.webContents.send('insert tag', { tag: 5 }); } },
+            { label: 'Insert Tag "6"', accelerator: 'CmdOrCtrl+6', click: () => { Swordfish.mainWindow.webContents.send('insert tag', { tag: 6 }); } },
+            { label: 'Insert Tag "7"', accelerator: 'CmdOrCtrl+7', click: () => { Swordfish.mainWindow.webContents.send('insert tag', { tag: 7 }); } },
+            { label: 'Insert Tag "8"', accelerator: 'CmdOrCtrl+8', click: () => { Swordfish.mainWindow.webContents.send('insert tag', { tag: 8 }); } },
+            { label: 'Insert Tag "8"', accelerator: 'CmdOrCtrl+9', click: () => { Swordfish.mainWindow.webContents.send('insert tag', { tag: 9 }); } },
+            { label: 'Insert Tag "10"', accelerator: 'CmdOrCtrl+0', click: () => { Swordfish.mainWindow.webContents.send('insert tag', { tag: 10 }); } }
         ]);
         var editMenu: Menu = Menu.buildFromTemplate([
-            { label: 'Undo', accelerator: 'CmdOrCtrl+Z', click: () => { this.contents.undo(); } },
+            { label: 'Undo', accelerator: 'CmdOrCtrl+Z', click: () => { Swordfish.mainWindow.webContents.undo(); } },
             new MenuItem({ type: 'separator' }),
-            { label: 'Cut', accelerator: 'CmdOrCtrl+X', click: () => { Swordfish.contents.send('cut-text'); } },
-            { label: 'Copy', accelerator: 'CmdOrCtrl+C', click: () => { Swordfish.contents.send('copy-text'); } },
-            { label: 'Paste', accelerator: 'CmdOrCtrl+V', click: () => { Swordfish.contents.send('paste-text'); } },
-            { label: 'Select All', accelerator: 'CmdOrCtrl+A', click: () => { Swordfish.contents.send('select-all'); } },
+            { label: 'Cut', accelerator: 'CmdOrCtrl+X', click: () => { Swordfish.mainWindow.webContents.cut() } },
+            { label: 'Copy', accelerator: 'CmdOrCtrl+C', click: () => { Swordfish.mainWindow.webContents.copy() } },
+            { label: 'Paste', accelerator: 'CmdOrCtrl+V', click: () => { Swordfish.mainWindow.webContents.paste() } },
+            { label: 'Select All', accelerator: 'CmdOrCtrl+A', click: () => { Swordfish.mainWindow.webContents.selectAll() } },
             new MenuItem({ type: 'separator' }),
-            { label: 'Save Changes', accelerator: 'Alt+Enter', click: () => { Swordfish.contents.send('save-edit', { confirm: false, next: 'none' }); } },
-            { label: 'Discard Changes', accelerator: 'Esc', click: () => { Swordfish.contents.send('cancel-edit'); } },
+            { label: 'Save Changes', accelerator: 'Alt+Enter', click: () => { Swordfish.mainWindow.webContents.send('save-edit', { confirm: false, next: 'none' }); } },
+            { label: 'Discard Changes', accelerator: 'Esc', click: () => { Swordfish.mainWindow.webContents.send('cancel-edit'); } },
             new MenuItem({ type: 'separator' }),
-            { label: 'Insert Tag', accelerator: 'CmdOrCtrl+T', click: () => { Swordfish.contents.send('insert-tag'); } },
+            { label: 'Insert Tag', accelerator: 'CmdOrCtrl+T', click: () => { Swordfish.mainWindow.webContents.send('insert-tag'); } },
             new MenuItem({ label: 'Quick Tags', submenu: tagsMenu }),
-            { label: 'Insert Next Tag', accelerator: 'CmdOrCtrl+Shift+T', click: () => { Swordfish.contents.send('insert-next-tag'); } },
-            { label: 'Insert Remaining Tags', accelerator: 'CmdOrCtrl+Alt+T', click: () => { Swordfish.contents.send('insert-remaining-tags'); } },
-            { label: 'Remove all Tags', accelerator: 'CmdOrCtrl+Shift+R', click: () => { Swordfish.contents.send('remove-tags'); } },
+            { label: 'Insert Next Tag', accelerator: 'CmdOrCtrl+Shift+T', click: () => { Swordfish.mainWindow.webContents.send('insert-next-tag'); } },
+            { label: 'Insert Remaining Tags', accelerator: 'CmdOrCtrl+Alt+T', click: () => { Swordfish.mainWindow.webContents.send('insert-remaining-tags'); } },
+            { label: 'Remove all Tags', accelerator: 'CmdOrCtrl+Shift+R', click: () => { Swordfish.mainWindow.webContents.send('remove-tags'); } },
             new MenuItem({ type: 'separator' }),
             { label: 'Replace Text...', accelerator: 'CmdOrCtrl+F', click: () => { this.replaceText(); } }
         ]);
@@ -441,22 +448,22 @@ class Swordfish {
             { label: 'Memories', accelerator: 'CmdOrCtrl+Alt+2', click: () => { this.viewMemories(); } },
             { label: 'Glossaries', accelerator: 'CmdOrCtrl+Alt+3', click: () => { this.viewGlossaries(); } },
             new MenuItem({ type: 'separator' }),
-            { label: 'First Page', accelerator: 'CmdOrCtrl+Shift+Home', click: () => { Swordfish.contents.send('first-page'); } },
-            { label: 'Previous Page', accelerator: 'CmdOrCtrl+Home', click: () => { Swordfish.contents.send('previous-page'); } },
-            { label: 'Next Page', accelerator: 'CmdOrCtrl+End', click: () => { Swordfish.contents.send('next-page'); } },
-            { label: 'Last Page', accelerator: 'CmdOrCtrl+Shift+End', click: () => { Swordfish.contents.send('last-page'); } },
+            { label: 'First Page', accelerator: 'CmdOrCtrl+Shift+Home', click: () => { Swordfish.mainWindow.webContents.send('first-page'); } },
+            { label: 'Previous Page', accelerator: 'CmdOrCtrl+Home', click: () => { Swordfish.mainWindow.webContents.send('previous-page'); } },
+            { label: 'Next Page', accelerator: 'CmdOrCtrl+End', click: () => { Swordfish.mainWindow.webContents.send('next-page'); } },
+            { label: 'Last Page', accelerator: 'CmdOrCtrl+Shift+End', click: () => { Swordfish.mainWindow.webContents.send('last-page'); } },
             new MenuItem({ type: 'separator' }),
             new MenuItem({ label: 'Toggle Full Screen', role: 'togglefullscreen' }),
             new MenuItem({ label: 'Toggle Development Tools', accelerator: 'F12', role: 'toggleDevTools' }),
         ]);
         var projectsMenu: Menu = Menu.buildFromTemplate([
             { label: 'New Project', accelerator: 'CmdOrCtrl+Shift+N', click: () => { Swordfish.addProject(); } },
-            { label: 'Remove Projects', click: () => { Swordfish.contents.send('remove-projects'); } },
+            { label: 'Remove Projects', click: () => { Swordfish.mainWindow.webContents.send('remove-projects'); } },
             { label: 'Translate Projects', accelerator: 'CmdOrCtrl+O', click: () => { Swordfish.translateProjects(); } },
-            { label: 'Export Translations', click: () => { Swordfish.contents.send('export-translations'); } },
+            { label: 'Export Translations', click: () => { Swordfish.mainWindow.webContents.send('export-translations'); } },
             new MenuItem({ type: 'separator' }),
-            { label: 'Import Project', click: () => { Swordfish.contents.send('import-project'); } },
-            { label: 'Export Project', click: () => { Swordfish.contents.send('export-project'); } }
+            { label: 'Import Project', click: () => { Swordfish.mainWindow.webContents.send('import-project'); } },
+            { label: 'Export Project', click: () => { Swordfish.mainWindow.webContents.send('export-project'); } }
         ]);
         var memoriesMenu: Menu = Menu.buildFromTemplate([
             { label: 'Add Memory', click: () => { Swordfish.showAddMemory(); } },
@@ -476,22 +483,22 @@ class Swordfish {
             { label: 'Support Group', click: () => { this.showSupportGroup(); } }
         ]);
         let nextUntranslatedKey = 'Ctrl+Alt+Down';
-        let nextUnconfirmedKey= 'Ctrl+Shift+Down';
+        let nextUnconfirmedKey = 'Ctrl+Shift+Down';
         if (process.platform === 'win32') { // TODO check on Linux
             nextUntranslatedKey = 'Alt+Down';
             nextUnconfirmedKey = 'Alt+Shift+Down';
         }
         var tasksMenu: Menu = Menu.buildFromTemplate([
-            { label: 'Confirm Translation', accelerator: 'CmdOrCtrl+E', click: () => { Swordfish.contents.send('save-edit', { confirm: true, next: 'none' }); } },
-            { label: 'Confirm and go to Next Untranslated', accelerator: nextUntranslatedKey, click: () => { Swordfish.contents.send('save-edit', { confirm: true, next: 'untranslated' }); } },
-            { label: 'Confirm and go to Next Unconfirmed', accelerator: nextUnconfirmedKey, click: () => { Swordfish.contents.send('save-edit', { confirm: true, next: 'unconfirmed' }); } },
+            { label: 'Confirm Translation', accelerator: 'CmdOrCtrl+E', click: () => { Swordfish.mainWindow.webContents.send('save-edit', { confirm: true, next: 'none' }); } },
+            { label: 'Confirm and go to Next Untranslated', accelerator: nextUntranslatedKey, click: () => { Swordfish.mainWindow.webContents.send('save-edit', { confirm: true, next: 'untranslated' }); } },
+            { label: 'Confirm and go to Next Unconfirmed', accelerator: nextUnconfirmedKey, click: () => { Swordfish.mainWindow.webContents.send('save-edit', { confirm: true, next: 'unconfirmed' }); } },
             new MenuItem({ type: 'separator' }),
-            { label: 'Copy Source to Target', accelerator: 'CmdOrCtrl+P', click: () => { Swordfish.contents.send('copy-source'); } },
-            { label: 'Accept TM Match', accelerator: 'CmdOrCtrl+Alt+A', click: () => { Swordfish.contents.send('accept-tm-match'); } },
+            { label: 'Copy Source to Target', accelerator: 'CmdOrCtrl+P', click: () => { Swordfish.mainWindow.webContents.send('copy-source'); } },
+            { label: 'Accept TM Match', accelerator: 'CmdOrCtrl+Alt+A', click: () => { Swordfish.mainWindow.webContents.send('accept-tm-match'); } },
             new MenuItem({ type: 'separator' }),
-            { label: 'Accept Machine Translation', click: () => { Swordfish.contents.send('accept-mt-match'); } },
-            { label: 'Get Machine Translations', accelerator: 'CmdOrCtrl+L', click: () => { Swordfish.contents.send('get-mt-matches'); } },
-            { label: 'Apply MT to all Segments', click: () => { Swordfish.contents.send('apply-mt-all'); } }
+            { label: 'Accept Machine Translation', click: () => { Swordfish.mainWindow.webContents.send('accept-mt-match'); } },
+            { label: 'Get Machine Translations', accelerator: 'CmdOrCtrl+L', click: () => { Swordfish.mainWindow.webContents.send('get-mt-matches'); } },
+            { label: 'Apply MT to all Segments', click: () => { Swordfish.mainWindow.webContents.send('apply-mt-all'); } }
         ]);
         var template: MenuItem[] = [
             new MenuItem({ label: '&File', role: 'fileMenu', submenu: fileMenu }),
@@ -619,7 +626,7 @@ class Swordfish {
     }
 
     static viewProjects(): void {
-        Swordfish.contents.send('view-projects');
+        Swordfish.mainWindow.webContents.send('view-projects');
     }
 
     static addProject() {
@@ -696,29 +703,29 @@ class Swordfish {
         if (data.status !== Swordfish.SUCCESS) {
             dialog.showErrorBox('Error', data.reason);
         }
-        Swordfish.contents.send('start-waiting');
-        Swordfish.contents.send('set-status', 'Exporting translations');
+        Swordfish.mainWindow.webContents.send('start-waiting');
+        Swordfish.mainWindow.webContents.send('set-status', 'Exporting translations');
         Swordfish.currentStatus = data;
         let processId: string = data.process;
         var intervalObject = setInterval(() => {
             if (Swordfish.currentStatus.progress) {
                 if (Swordfish.currentStatus.progress === Swordfish.COMPLETED) {
-                    Swordfish.contents.send('end-waiting');
-                    Swordfish.contents.send('set-status', '');
+                    Swordfish.mainWindow.webContents.send('end-waiting');
+                    Swordfish.mainWindow.webContents.send('set-status', '');
                     clearInterval(intervalObject);
                     dialog.showMessageBox(Swordfish.mainWindow, { type: 'info', message: 'Translations exported' });
                     return;
                 } else if (Swordfish.currentStatus.progress === Swordfish.PROCESSING) {
                     // it's OK, keep waiting
                 } else if (Swordfish.currentStatus.progress === Swordfish.ERROR) {
-                    Swordfish.contents.send('end-waiting');
-                    Swordfish.contents.send('set-status', '');
+                    Swordfish.mainWindow.webContents.send('end-waiting');
+                    Swordfish.mainWindow.webContents.send('set-status', '');
                     clearInterval(intervalObject);
                     dialog.showErrorBox('Error', Swordfish.currentStatus.reason);
                     return;
                 } else {
-                    Swordfish.contents.send('end-waiting');
-                    Swordfish.contents.send('set-status', '');
+                    Swordfish.mainWindow.webContents.send('end-waiting');
+                    Swordfish.mainWindow.webContents.send('set-status', '');
                     clearInterval(intervalObject);
                     dialog.showErrorBox('Error', 'Unknown error exporting translations');
                     return;
@@ -760,7 +767,7 @@ class Swordfish {
     }
 
     static translateProjects(): void {
-        Swordfish.contents.send('translate-projects');
+        Swordfish.mainWindow.webContents.send('translate-projects');
     }
 
     createProject(arg: any): void {
@@ -771,13 +778,13 @@ class Swordfish {
             Swordfish.addFileWindow.close();
         }
         Swordfish.mainWindow.focus();
-        Swordfish.contents.send('start-waiting');
-        Swordfish.contents.send('set-status', 'Creating project');
+        Swordfish.mainWindow.webContents.send('start-waiting');
+        Swordfish.mainWindow.webContents.send('set-status', 'Creating project');
         Swordfish.sendRequest('/projects/create', arg,
             (data: any) => {
                 if (data.status !== Swordfish.SUCCESS) {
-                    Swordfish.contents.send('end-waiting');
-                    Swordfish.contents.send('set-status', '');
+                    Swordfish.mainWindow.webContents.send('end-waiting');
+                    Swordfish.mainWindow.webContents.send('set-status', '');
                     dialog.showErrorBox('Error', data.reason);
                 }
                 Swordfish.currentStatus = data;
@@ -785,21 +792,21 @@ class Swordfish {
                 var intervalObject = setInterval(() => {
                     if (Swordfish.currentStatus.progress) {
                         if (Swordfish.currentStatus.progress === Swordfish.COMPLETED) {
-                            Swordfish.contents.send('end-waiting');
+                            Swordfish.mainWindow.webContents.send('end-waiting');
                             clearInterval(intervalObject);
-                            Swordfish.contents.send('request-projects', { open: processId });
+                            Swordfish.mainWindow.webContents.send('request-projects', { open: processId });
                             return;
                         } else if (Swordfish.currentStatus.progress === Swordfish.PROCESSING) {
                             // it's OK, keep waiting
                         } else if (Swordfish.currentStatus.progress === Swordfish.ERROR) {
-                            Swordfish.contents.send('end-waiting');
-                            Swordfish.contents.send('set-status', '');
+                            Swordfish.mainWindow.webContents.send('end-waiting');
+                            Swordfish.mainWindow.webContents.send('set-status', '');
                             clearInterval(intervalObject);
                             dialog.showErrorBox('Error', Swordfish.currentStatus.reason);
                             return;
                         } else {
-                            Swordfish.contents.send('end-waiting');
-                            Swordfish.contents.send('set-status', '');
+                            Swordfish.mainWindow.webContents.send('end-waiting');
+                            Swordfish.mainWindow.webContents.send('set-status', '');
                             clearInterval(intervalObject);
                             dialog.showErrorBox('Error', 'Unknown error processing files');
                             return;
@@ -826,12 +833,12 @@ class Swordfish {
     }
 
     static getProjects(event: IpcMainEvent): void {
-        Swordfish.contents.send('start-waiting');
-        Swordfish.contents.send('set-status', 'Loading projects');
+        Swordfish.mainWindow.webContents.send('start-waiting');
+        Swordfish.mainWindow.webContents.send('set-status', 'Loading projects');
         Swordfish.sendRequest('/projects/list', {},
             (data: any) => {
-                Swordfish.contents.send('set-status', '');
-                Swordfish.contents.send('end-waiting');
+                Swordfish.mainWindow.webContents.send('set-status', '');
+                Swordfish.mainWindow.webContents.send('end-waiting');
                 if (data.status === Swordfish.SUCCESS) {
                     event.sender.send('set-projects', data.projects);
                 } else {
@@ -839,19 +846,19 @@ class Swordfish {
                 }
             },
             (reason: string) => {
-                Swordfish.contents.send('set-status', '');
+                Swordfish.mainWindow.webContents.send('set-status', '');
                 dialog.showMessageBox({ type: 'error', message: reason });
             }
         );
     }
 
     static getMemories(event: IpcMainEvent): void {
-        Swordfish.contents.send('start-waiting');
-        Swordfish.contents.send('set-status', 'Loading memories');
+        Swordfish.mainWindow.webContents.send('start-waiting');
+        Swordfish.mainWindow.webContents.send('set-status', 'Loading memories');
         Swordfish.sendRequest('/memories/list', {},
             (data: any) => {
-                Swordfish.contents.send('set-status', '');
-                Swordfish.contents.send('end-waiting');
+                Swordfish.mainWindow.webContents.send('set-status', '');
+                Swordfish.mainWindow.webContents.send('end-waiting');
                 if (data.status === Swordfish.SUCCESS) {
                     event.sender.send('set-memories', data.memories);
                 } else {
@@ -859,7 +866,7 @@ class Swordfish {
                 }
             },
             (reason: string) => {
-                Swordfish.contents.send('set-status', '');
+                Swordfish.mainWindow.webContents.send('set-status', '');
                 dialog.showMessageBox({ type: 'error', message: reason });
             }
         );
@@ -943,7 +950,7 @@ class Swordfish {
     }
 
     static viewMemories(): void {
-        this.contents.send('view-memories');
+        Swordfish.mainWindow.webContents.send('view-memories');
     }
 
     static showAddMemory() {
@@ -969,7 +976,7 @@ class Swordfish {
     }
 
     static viewGlossaries(): void {
-        this.contents.send('view-glossaries');
+        Swordfish.mainWindow.webContents.send('view-glossaries');
     }
 
     static sendRequest(url: string, json: any, success: any, error: any) {
@@ -1149,7 +1156,7 @@ class Swordfish {
     }
 
     static setTheme(): void {
-        Swordfish.contents.send('request-theme');
+        Swordfish.mainWindow.webContents.send('request-theme');
     }
 
     static checkUpdates(silent: boolean): void {
@@ -1371,7 +1378,7 @@ class Swordfish {
                 Swordfish.sendRequest('/projects/delete', arg,
                     (data: any) => {
                         if (data.status === Swordfish.SUCCESS) {
-                            Swordfish.contents.send('request-projects', {});
+                            Swordfish.mainWindow.webContents.send('request-projects', {});
                         } else {
                             dialog.showErrorBox('Error', data.reason);
                         }
@@ -1389,7 +1396,7 @@ class Swordfish {
             (data: any) => {
                 if (data.status === Swordfish.SUCCESS) {
                     Swordfish.addMemoryWindow.close();
-                    Swordfish.contents.send('request-memories');
+                    Swordfish.mainWindow.webContents.send('request-memories');
                 } else {
                     dialog.showErrorBox('Error', data.reason);
                 }
@@ -1430,13 +1437,13 @@ class Swordfish {
     static importTmxFile(arg: any): void {
         Swordfish.importTmxWindow.close();
         Swordfish.mainWindow.focus();
-        Swordfish.contents.send('start-waiting');
-        Swordfish.contents.send('set-status', 'Importing TMX');
+        Swordfish.mainWindow.webContents.send('start-waiting');
+        Swordfish.mainWindow.webContents.send('set-status', 'Importing TMX');
         Swordfish.sendRequest('/memories/import', arg,
             (data: any) => {
                 if (data.status !== Swordfish.SUCCESS) {
-                    Swordfish.contents.send('end-waiting');
-                    Swordfish.contents.send('set-status', '');
+                    Swordfish.mainWindow.webContents.send('end-waiting');
+                    Swordfish.mainWindow.webContents.send('set-status', '');
                     dialog.showErrorBox('Error', data.reason);
                 }
                 Swordfish.currentStatus = data;
@@ -1444,21 +1451,21 @@ class Swordfish {
                 var intervalObject = setInterval(() => {
                     if (Swordfish.currentStatus.result) {
                         if (Swordfish.currentStatus.result === Swordfish.COMPLETED) {
-                            Swordfish.contents.send('end-waiting');
-                            Swordfish.contents.send('set-status', '');
+                            Swordfish.mainWindow.webContents.send('end-waiting');
+                            Swordfish.mainWindow.webContents.send('set-status', '');
                             clearInterval(intervalObject);
                             return;
                         } else if (Swordfish.currentStatus.result === Swordfish.PROCESSING) {
                             // it's OK, keep waiting
                         } else if (Swordfish.currentStatus.result === Swordfish.ERROR) {
-                            Swordfish.contents.send('end-waiting');
-                            Swordfish.contents.send('set-status', '');
+                            Swordfish.mainWindow.webContents.send('end-waiting');
+                            Swordfish.mainWindow.webContents.send('set-status', '');
                             clearInterval(intervalObject);
                             dialog.showErrorBox('Error', Swordfish.currentStatus.reason);
                             return;
                         } else {
-                            Swordfish.contents.send('end-waiting');
-                            Swordfish.contents.send('set-status', '');
+                            Swordfish.mainWindow.webContents.send('end-waiting');
+                            Swordfish.mainWindow.webContents.send('set-status', '');
                             clearInterval(intervalObject);
                             dialog.showErrorBox('Error', 'Unknown error importing file');
                             return;
@@ -1515,13 +1522,13 @@ class Swordfish {
         dialog.showMessageBox(Swordfish.mainWindow, { type: "question", message: "Delete selected memories?", buttons: ["Yes", "No"], defaultId: 1 }
         ).then((result: any) => {
             if (result.response === 0) {
-                Swordfish.contents.send('start-waiting');
-                Swordfish.contents.send('set-status', 'Removing memories');
+                Swordfish.mainWindow.webContents.send('start-waiting');
+                Swordfish.mainWindow.webContents.send('set-status', 'Removing memories');
                 Swordfish.sendRequest('/memories/delete', { memories: arg },
                     (data: any) => {
                         if (data.status !== Swordfish.SUCCESS) {
-                            Swordfish.contents.send('end-waiting');
-                            Swordfish.contents.send('set-status', '');
+                            Swordfish.mainWindow.webContents.send('end-waiting');
+                            Swordfish.mainWindow.webContents.send('set-status', '');
                             dialog.showErrorBox('Error', data.reason);
                         }
                         Swordfish.currentStatus = data;
@@ -1529,22 +1536,22 @@ class Swordfish {
                         var intervalObject = setInterval(() => {
                             if (Swordfish.currentStatus.result) {
                                 if (Swordfish.currentStatus.result === Swordfish.COMPLETED) {
-                                    Swordfish.contents.send('end-waiting');
-                                    Swordfish.contents.send('set-status', '');
+                                    Swordfish.mainWindow.webContents.send('end-waiting');
+                                    Swordfish.mainWindow.webContents.send('set-status', '');
                                     clearInterval(intervalObject);
-                                    Swordfish.contents.send('request-memories');
+                                    Swordfish.mainWindow.webContents.send('request-memories');
                                     return;
                                 } else if (Swordfish.currentStatus.result === Swordfish.PROCESSING) {
                                     // it's OK, keep waiting
                                 } else if (Swordfish.currentStatus.result === Swordfish.ERROR) {
-                                    Swordfish.contents.send('end-waiting');
-                                    Swordfish.contents.send('set-status', '');
+                                    Swordfish.mainWindow.webContents.send('end-waiting');
+                                    Swordfish.mainWindow.webContents.send('set-status', '');
                                     clearInterval(intervalObject);
                                     dialog.showErrorBox('Error', Swordfish.currentStatus.reason);
                                     return;
                                 } else {
-                                    Swordfish.contents.send('end-waiting');
-                                    Swordfish.contents.send('set-status', '');
+                                    Swordfish.mainWindow.webContents.send('end-waiting');
+                                    Swordfish.mainWindow.webContents.send('set-status', '');
                                     clearInterval(intervalObject);
                                     dialog.showErrorBox('Error', 'Unknown error removing memories');
                                     return;
@@ -1589,7 +1596,7 @@ class Swordfish {
                     return;
                 }
                 if (data.propagated.length > 0) {
-                    Swordfish.contents.send('auto-propagate', { project: arg.project, rows: data.propagated });
+                    Swordfish.mainWindow.webContents.send('auto-propagate', { project: arg.project, rows: data.propagated });
                 }
             },
             (reason: string) => {
@@ -1606,7 +1613,7 @@ class Swordfish {
                     return;
                 }
                 if (data.matches.length > 0) {
-                    Swordfish.contents.send('set-matches', { project: arg.project, matches: data.matches });
+                    Swordfish.mainWindow.webContents.send('set-matches', { project: arg.project, matches: data.matches });
                 }
             },
             (reason: string) => {
@@ -1616,21 +1623,59 @@ class Swordfish {
     }
 
     static machineTranslate(arg: any): void {
-        Swordfish.contents.send('start-waiting');
-        Swordfish.contents.send('set-status', 'Translating');
+        Swordfish.mainWindow.webContents.send('start-waiting');
+        Swordfish.mainWindow.webContents.send('set-status', 'Getting Translations');
         Swordfish.sendRequest('/projects/machineTranslate', arg,
             (data: any) => {
-                Swordfish.contents.send('end-waiting');
-                Swordfish.contents.send('set-status', '');
+                Swordfish.mainWindow.webContents.send('end-waiting');
+                Swordfish.mainWindow.webContents.send('set-status', '');
                 if (data.status !== Swordfish.SUCCESS) {
                     dialog.showErrorBox('Error', data.reason);
                     return;
                 }
                 if (data.matches.length > 0) {
-                    Swordfish.contents.send('end-waiting');
-                    Swordfish.contents.send('set-status', '');
-                    Swordfish.contents.send('set-matches', { project: arg.project, matches: data.matches });
+                    Swordfish.mainWindow.webContents.send('set-matches', { project: arg.project, matches: data.matches });
                 }
+            },
+            (reason: string) => {
+                Swordfish.mainWindow.webContents.send('end-waiting');
+                Swordfish.mainWindow.webContents.send('set-status', '');
+                dialog.showErrorBox('Error', reason);
+            }
+        );
+    }
+
+    static tmTranslate(arg: any): void {
+        Swordfish.mainWindow.webContents.send('start-waiting');
+        Swordfish.mainWindow.webContents.send('set-status', 'Searching Memory');
+        Swordfish.sendRequest('/projects/tmTranslate', arg,
+            (data: any) => {
+                Swordfish.mainWindow.webContents.send('end-waiting');
+                Swordfish.mainWindow.webContents.send('set-status', '');
+                if (data.status !== Swordfish.SUCCESS) {
+                    dialog.showErrorBox('Error', data.reason);
+                    return;
+                }
+                if (data.matches.length > 0) {
+                    Swordfish.mainWindow.webContents.send('set-matches', { project: arg.project, matches: data.matches });
+                }
+            },
+            (reason: string) => {
+                Swordfish.mainWindow.webContents.send('end-waiting');
+                Swordfish.mainWindow.webContents.send('set-status', '');
+                dialog.showErrorBox('Error', reason);
+            }
+        );
+    }
+
+    static getProjectMemories(arg: any): void {
+        Swordfish.sendRequest('/projects/projectMemories', arg,
+            (data: any) => {
+                if (data.status !== Swordfish.SUCCESS) {
+                    dialog.showErrorBox('Error', data.reason);
+                    return;
+                }
+                Swordfish.mainWindow.webContents.send('set-project-memories', { project: arg.project, memories: data.memories });
             },
             (reason: string) => {
                 dialog.showErrorBox('Error', reason);

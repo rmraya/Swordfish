@@ -24,8 +24,19 @@ class KeyboardHandler {
             event.preventDefault();
             var element: HTMLElement = event.target as HTMLElement;
             var type: string = element.tagName;
-            if (type === 'INPUT' || type === 'TEXTAREA' || element.contentEditable) {
-                window.getSelection().deleteFromDocument();
+            if (type === 'INPUT') {
+                let input: HTMLInputElement = element as HTMLInputElement;
+                let start: number = input.selectionStart;
+                let end: number = input.selectionEnd;
+                navigator.clipboard.writeText(input.value.substring(start, end));
+                input.setRangeText('');
+            }
+            if (type === 'TEXTAREA') {
+                let area: HTMLTextAreaElement = element as HTMLTextAreaElement;
+                let start: number = area.selectionStart;
+                let end: number = area.selectionEnd;
+                navigator.clipboard.writeText(area.value.substring(start, end));
+                area.setRangeText('');
             }
         }
 
@@ -33,8 +44,13 @@ class KeyboardHandler {
             event.preventDefault();
             var element: HTMLElement = event.target as HTMLElement;
             var type: string = element.tagName;
-            if (type === 'INPUT' || type === 'TEXTAREA' || element.contentEditable) {
-                window.getSelection().selectAllChildren(element);
+            if (type === 'INPUT' ) {
+                let input: HTMLInputElement = element as HTMLInputElement;
+                input.setSelectionRange(0, input.value.length);
+            }
+            if (type === 'TEXTAREA') {
+                let area: HTMLTextAreaElement = element as HTMLTextAreaElement;
+                area.setSelectionRange(0, area.value.length);
             }
         }
 
@@ -47,12 +63,25 @@ class KeyboardHandler {
             event.preventDefault();
             var element: HTMLElement = event.target as HTMLElement;
             var type: string = element.tagName;
-            if (type === 'INPUT' || type === 'TEXTAREA' || element.contentEditable) {
-                let selected: Selection = window.getSelection();
+            if (type === 'INPUT' ) {
                 navigator.clipboard.readText().then(
                     (clipText: string) => {
-                        selected.getRangeAt(0).insertNode(document.createTextNode(clipText));
-                        selected.collapseToEnd();
+                        let input: HTMLInputElement = (element as HTMLInputElement);
+                        let currentText: string = input.value;
+                        let start: number = input.selectionStart;
+                        let newText: string = currentText.substring(0, start) + clipText + currentText.substring(start);
+                        input.value = newText;
+                    }
+                );
+            }
+            if (type === 'TEXTAREA') {
+                navigator.clipboard.readText().then(
+                    (clipText: string) => {
+                        let input: HTMLTextAreaElement = (element as HTMLTextAreaElement);
+                        let currentText: string = input.value;
+                        let start: number = input.selectionStart;
+                        let newText: string = currentText.substring(0, start) + clipText + currentText.substring(start);
+                        input.value = newText;
                     }
                 );
             }
