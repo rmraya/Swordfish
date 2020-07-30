@@ -184,8 +184,12 @@ class ProjectsView {
         }
         for (let key of this.selected.keys()) {
             let project = this.selected.get(key);
-            let description = project.description;
-            this.electron.ipcRenderer.send('add-tab', { id: key, description: description });
+            this.electron.ipcRenderer.send('add-tab', {
+                id: key,
+                description: project.description,
+                srcLang: project.sourceLang,
+                tgtLang: project.targetLang
+            });
             document.getElementById(key).classList.remove('selected');
         }
         this.selected.clear();

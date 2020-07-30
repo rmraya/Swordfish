@@ -216,7 +216,7 @@ class Main {
             return;
         }
         let tab = new Tab(arg.id, arg.description, true);
-        let view: TranslationView = new TranslationView(tab.getContainer(), arg.id);
+        let view: TranslationView = new TranslationView(tab.getContainer(), arg.id, arg.srcLang, arg.tgtLang);
         Main.tabHolder.addTab(tab);
         Main.tabHolder.selectTab(arg.id);
         tab.getLabel().addEventListener('click', () => {

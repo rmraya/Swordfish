@@ -41,6 +41,8 @@ class TranslationView {
     statusArea: HTMLDivElement;
 
     projectId: string;
+    srcLang: string;
+    tgtLang: string;
     tbody: HTMLTableSectionElement;
     sourceTh: HTMLTableCellElement;
     targetTh: HTMLTableCellElement;
@@ -68,9 +70,11 @@ class TranslationView {
     memSelect: HTMLSelectElement;
     glossSelect: HTMLSelectElement;
 
-    constructor(div: HTMLDivElement, projectId: string) {
+    constructor(div: HTMLDivElement, projectId: string, sourceLang: string, targetLang: string) {
         this.container = div;
         this.projectId = projectId;
+        this.srcLang = sourceLang;
+        this.tgtLang = targetLang;
 
         let topBar: HTMLDivElement = document.createElement('div');
         topBar.className = 'toolbar';
@@ -310,7 +314,7 @@ class TranslationView {
         tr.appendChild(th);
 
         this.sourceTh = document.createElement('th');
-        this.sourceTh.innerText = 'Source'
+        this.sourceTh.innerText = 'Source (' + this.srcLang + ')';
         this.sourceTh.style.minWidth = '200px';
         tr.appendChild(this.sourceTh);
 
@@ -320,7 +324,7 @@ class TranslationView {
         tr.appendChild(th);
 
         this.targetTh = document.createElement('th');
-        this.targetTh.innerText = 'Target'
+        this.targetTh.innerText = 'Target (' + this.tgtLang + ')';
         this.targetTh.style.minWidth = '200px';
         tr.appendChild(this.targetTh);
 
@@ -532,6 +536,7 @@ class TranslationView {
 
             td = document.createElement('td');
             td.classList.add('source');
+            td.lang = this.srcLang;
             td.classList.add('initial');
             if (row.preserve) {
                 td.classList.add('preserve');
@@ -572,6 +577,8 @@ class TranslationView {
 
             td = document.createElement('td');
             td.classList.add('target');
+            td.lang = this.tgtLang;
+            td.spellcheck = true;
             if (row.preserve) {
                 td.classList.add('preserve');
             }
