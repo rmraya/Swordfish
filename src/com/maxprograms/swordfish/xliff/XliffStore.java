@@ -678,7 +678,7 @@ public class XliffStore {
             JSONObject match = matches.getJSONObject(i);
             if (match.getString("matchId").equals(matchId)) {
                 updateMatch.setString(1, origin);
-                updateMatch.setString(2, Constants.TM);
+                updateMatch.setString(2, type);
                 updateMatch.setInt(3, similarity);
                 updateMatch.setNString(4, source.toString());
                 updateMatch.setNString(5, target.toString());
@@ -1144,7 +1144,7 @@ public class XliffStore {
             }
         }
         String dummySource = dummyTagger(originalSource);
-        
+
         getMatches.setString(1, file);
         getMatches.setString(2, unit);
         getMatches.setString(3, segment);
@@ -1401,5 +1401,35 @@ public class XliffStore {
         }
         xliff.setContent(newContent);
         return xliff;
+    }
+
+    public void tmTranslateAll(String memory)
+            throws IOException, SQLException, SAXException, ParserConfigurationException {
+        ITmEngine engine = MemoriesHandler.open(memory);
+        String sql = "SELECT file, unitId, segId, sourceText FROM segments WHERE state <> 'final'";
+        try (ResultSet rs = stmt.executeQuery(sql)) {
+            while (rs.next()) {
+                String file = rs.getString(1);
+                String unit = rs.getString(2);
+                String segment = rs.getString(3);
+                String pure = rs.getNString(4);
+                List<Match> matches = engine.searchTranslation(pure, srcLang, tgtLang, 60, false);
+                Iterator<Match> it = matches.iterator();
+                while (it.hasNext()) {
+                    Match m = it.next();
+                    JSONObject tags = new JSONObject();
+                    Element source = toXliff("source", m.getSource(), tags);
+                    source.setAttribute("xml:lang", srcLang);
+                    Element target = toXliff("target", m.getTarget(), tags);
+                    target.setAttribute("xml:lang", tgtLang);
+                    JSONObject obj = new JSONObject();
+                    obj.put("dataRef", tags);
+                    insertMatch(file, unit, segment, MemoriesHandler.getName(memory), Constants.TM, m.getSimilarity(),
+                            source, target, obj);
+                    conn.commit();
+                }
+            }
+        }
+        MemoriesHandler.closeMemory(memory);
     }
 }

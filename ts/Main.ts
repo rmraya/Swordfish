@@ -181,6 +181,9 @@ class Main {
         Main.electron.ipcRenderer.on('set-project-memories', (event: Electron.IpcRendererEvent, arg: any) => {
             this.setProjectMemories(arg);
         });
+        Main.electron.ipcRenderer.on('reload-page', (event: Electron.IpcRendererEvent, arg: any) => {
+            this.reloadPage(arg);
+        });
         let config: any = { attributes: true, childList: false, subtree: false };
         let observer = new MutationObserver((mutationsList) => {
             for (let mutation of mutationsList) {
@@ -334,10 +337,17 @@ class Main {
         }
     }
 
-    setProjectMemories(arg: any) : void {
-        let selected = Main.tabHolder.getSelected();
-        if (Main.translationViews.has(selected)) {
-            Main.translationViews.get(selected).setProjectMemories(arg.memories);
+    setProjectMemories(arg: any): void {
+        let project: string = arg.project;
+        if (Main.translationViews.has(project)) {
+            Main.translationViews.get(project).setProjectMemories(arg);
+        }
+    }
+
+    reloadPage(arg: any): void {
+        let project: string = arg.project;
+        if (Main.translationViews.has(project)) {
+            Main.translationViews.get(project).getSegments();
         }
     }
 }

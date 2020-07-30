@@ -139,6 +139,8 @@ public class ProjectsHandler implements HttpHandler {
 				response = machineTranslate(request);
 			} else if ("/projects/tmTranslate".equals(url)) {
 				response = tmTranslate(request);
+			} else if ("/projects/tmTranslateAll".equals(url)) {
+				response = tmTranslateAll(request);
 			} else if ("/projects/projectMemories".equals(url)) {
 				response = getProjectMemories(request);
 			} else {
@@ -752,6 +754,22 @@ public class ProjectsHandler implements HttpHandler {
 		return result;
 	}
 
+	private JSONObject tmTranslateAll(String request) {
+		JSONObject result = new JSONObject();
+		try {
+			JSONObject json = new JSONObject(request);
+			String project = json.getString("project");
+			String memory = json.getString("memory");
+			if (projectStores.containsKey(project)) {
+				projectStores.get(project).tmTranslateAll(memory);
+			}
+		} catch (IOException | SQLException | JSONException | SAXException | ParserConfigurationException e) {
+			logger.log(Level.ERROR, e);
+			result.put(Constants.REASON, e.getMessage());
+		}
+		return result;
+	}
+	
 	private JSONObject getProjectMemories(String request) {
 		JSONObject result = new JSONObject();
 		try {

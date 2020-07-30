@@ -381,6 +381,9 @@ class Swordfish {
         ipcMain.on('search-memory', () => {
             Swordfish.mainWindow.webContents.send('get-tm-matches');
         });
+        ipcMain.on('search-memory-all', (event: IpcMainEvent, arg: any) => {
+            Swordfish.tmTranslateAll(arg);
+        });
         ipcMain.on('tm-translate', (event: IpcMainEvent, arg: any) => {
             Swordfish.tmTranslate(arg);
         });
@@ -1659,6 +1662,27 @@ class Swordfish {
                 if (data.matches.length > 0) {
                     Swordfish.mainWindow.webContents.send('set-matches', { project: arg.project, matches: data.matches });
                 }
+            },
+            (reason: string) => {
+                Swordfish.mainWindow.webContents.send('end-waiting');
+                Swordfish.mainWindow.webContents.send('set-status', '');
+                dialog.showErrorBox('Error', reason);
+            }
+        );
+    }
+
+    static tmTranslateAll(arg: any): void {
+        Swordfish.mainWindow.webContents.send('start-waiting');
+        Swordfish.mainWindow.webContents.send('set-status', 'Translating Project');
+        Swordfish.sendRequest('/projects/tmTranslateAll', arg,
+            (data: any) => {
+                Swordfish.mainWindow.webContents.send('end-waiting');
+                Swordfish.mainWindow.webContents.send('set-status', '');
+                if (data.status !== Swordfish.SUCCESS) {
+                    dialog.showErrorBox('Error', data.reason);
+                    return;
+                }
+                Swordfish.mainWindow.webContents.send('reload-page', { project: arg.project });
             },
             (reason: string) => {
                 Swordfish.mainWindow.webContents.send('end-waiting');
