@@ -801,6 +801,11 @@ class Swordfish {
                             Swordfish.mainWindow.webContents.send('end-waiting');
                             clearInterval(intervalObject);
                             Swordfish.mainWindow.webContents.send('request-projects', { open: processId });
+                            let targetLanguages = Swordfish.mainWindow.webContents.session.getSpellCheckerLanguages();
+                            if (!targetLanguages.includes(arg.tgtLang)) {
+                                targetLanguages.push(arg.tgtLang);
+                                Swordfish.mainWindow.webContents.session.setSpellCheckerLanguages(targetLanguages);
+                            }
                             return;
                         } else if (Swordfish.currentStatus.progress === Swordfish.PROCESSING) {
                             // it's OK, keep waiting
@@ -845,11 +850,20 @@ class Swordfish {
             (data: any) => {
                 Swordfish.mainWindow.webContents.send('set-status', '');
                 Swordfish.mainWindow.webContents.send('end-waiting');
-                if (data.status === Swordfish.SUCCESS) {
-                    event.sender.send('set-projects', data.projects);
-                } else {
+                if (data.status !== Swordfish.SUCCESS) {
                     dialog.showMessageBox({ type: 'error', message: data.reason });
+                    return;
                 }
+                event.sender.send('set-projects', data.projects);
+                let length = data.projects.length;
+                let targetLanguages: string[] = [];
+                for (let i = 0; i < length; i++) {
+                    let tgtLang: string = data.projects[i].targetLang;
+                    if (!targetLanguages.includes(tgtLang)) {
+                        targetLanguages.push(tgtLang);
+                    }
+                }
+                Swordfish.mainWindow.webContents.session.setSpellCheckerLanguages(targetLanguages);
             },
             (reason: string) => {
                 Swordfish.mainWindow.webContents.send('set-status', '');
