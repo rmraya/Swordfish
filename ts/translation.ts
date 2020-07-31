@@ -55,6 +55,7 @@ class TranslationView {
     rowsPage: number = 500;
     maxRows: number;
     segmentsCount: number;
+    statistics: HTMLSpanElement;
 
     currentRow: HTMLTableRowElement;
     currentCell: HTMLTableCellElement;
@@ -203,6 +204,9 @@ class TranslationView {
         this.memSelect.id = 'memSelect' + this.projectId;
         this.memSelect.style.marginTop = '4px';
         this.memSelect.style.minWidth = '180px';
+        this.memSelect.addEventListener('change', () => {
+            this.electron.ipcRenderer.send('set-project-memory', { project: this.projectId, memory: this.memSelect.value });
+        });
         topBar.appendChild(this.memSelect);
 
         let requestTranslation = document.createElement('a');
@@ -447,6 +451,18 @@ class TranslationView {
         rowDiv.appendChild(rowsInput);
         rowDiv.insertAdjacentHTML('beforeend', '<span class="tooltiptext topTooltip">Enter number of rows/page and press ENTER</span>');
 
+        let filler: HTMLSpanElement = document.createElement('span');
+        filler.innerHTML = '&nbsp;';
+        filler.className = 'fill_width';
+        this.statusArea.appendChild(filler);
+
+        this.statistics = document.createElement('span');
+        this.statistics.classList.add('noWrap');
+        this.statistics.style.paddingRight = '20px';
+        this.statistics.style.paddingTop = '4px';
+        this.statistics.innerHTML = '&nbsp;';
+        this.statusArea.appendChild(this.statistics);
+
         let config: any = { attributes: true, childList: false, subtree: false };
         this.rowsObserver = new MutationObserver((mutationsList) => {
             for (let mutation of mutationsList) {
@@ -688,16 +704,13 @@ class TranslationView {
                     }
                 }
             }
-            if (this.currentContent !== translation) {
-                // text changed 
-                this.electron.ipcRenderer.send('save-translation', {
-                    project: this.projectId,
-                    file: this.currentId.file,
-                    unit: this.currentId.unit,
-                    segment: this.currentId.id, translation: translation,
-                    confirm: confirm
-                });
-            }
+            this.electron.ipcRenderer.send('save-translation', {
+                project: this.projectId,
+                file: this.currentId.file,
+                unit: this.currentId.unit,
+                segment: this.currentId.id, translation: translation,
+                confirm: confirm
+            });
             if (next === 'untranslated') {
                 let found: boolean = false;
                 let rows: HTMLCollection = this.tbody.rows;
@@ -830,6 +843,11 @@ class TranslationView {
             if (row.getAttribute('data-file') === data.file && row.getAttribute('data-unit') === data.unit
                 && row.getAttribute('data-id') === data.segment) {
                 (row.getElementsByClassName('match')[0] as HTMLTableCellElement).innerHTML = data.match + '%';
+                if (data.target) {
+                    (row.getElementsByClassName('state')[0] as HTMLTableCellElement).classList.remove('initial');
+                    (row.getElementsByClassName('state')[0] as HTMLTableCellElement).classList.add('translated');
+                    (row.getElementsByClassName('target')[0] as HTMLTableCellElement).innerHTML = data.target;
+                }
                 break;
             }
         }
@@ -889,5 +907,13 @@ class TranslationView {
             options = options + '<option value="' + mem[0] + '">' + mem[1] + '</option>';
         }
         this.memSelect.innerHTML = options;
+        if (arg.default !== 'none') {
+            this.memSelect.value = arg.default;
+        }
     }
+
+    setStatistics(stats: string): void {
+        this.statistics.innerText = stats;
+    }
+
 }

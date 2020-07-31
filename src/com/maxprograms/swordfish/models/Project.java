@@ -48,6 +48,8 @@ public class Project implements Serializable, Comparable<Project> {
 	private Language targetLang;
 	private LocalDate creationDate;
 	private List<SourceFile> files;
+	private String memory;
+	private String glossary;
 	private String xliff;
 
 	public Project(String id, String description, int status, Language sourceLang, Language targetLang, String client,
@@ -60,6 +62,8 @@ public class Project implements Serializable, Comparable<Project> {
 		this.client = client;
 		this.subject = subject;
 		this.creationDate = creationDate;
+		this.memory = "none";
+		this.glossary = "none";
 	}
 
 	public String getXliff() {
@@ -71,20 +75,22 @@ public class Project implements Serializable, Comparable<Project> {
 	}
 
 	public Project(JSONObject json) throws IOException {
-		this.id = json.getString("id");
-		this.description = json.getString("description");
-		this.status = json.getInt("status");
-		this.sourceLang = LanguageUtils.getLanguage(json.getString("sourceLang"));
-		this.targetLang = LanguageUtils.getLanguage(json.getString("targetLang"));
-		this.client = json.has("client") ? json.getString("client") : "";
-		this.subject = json.has("subject") ? json.getString("subject") : "";
-		this.creationDate = LocalDate.parse(json.getString("creationDate"));
+		id = json.getString("id");
+		description = json.getString("description");
+		status = json.getInt("status");
+		sourceLang = LanguageUtils.getLanguage(json.getString("sourceLang"));
+		targetLang = LanguageUtils.getLanguage(json.getString("targetLang"));
+		client = json.has("client") ? json.getString("client") : "";
+		subject = json.has("subject") ? json.getString("subject") : "";
+		creationDate = LocalDate.parse(json.getString("creationDate"));
 		files = new ArrayList<>();
 		JSONArray filesArray = json.getJSONArray("files");
-		for (int i=0 ; i<filesArray.length() ; i++) {
+		for (int i = 0; i < filesArray.length(); i++) {
 			files.add(new SourceFile(filesArray.getJSONObject(i)));
 		}
-		this.xliff = json.getString("xliff");
+		xliff = json.getString("xliff");
+		memory = json.getString("memory");
+		glossary = json.getString("glossary");
 	}
 
 	public JSONObject toJSON() {
@@ -103,7 +109,9 @@ public class Project implements Serializable, Comparable<Project> {
 			filesArray.put(it.next().toJSON());
 		}
 		json.put("files", filesArray);
-		json.put("xliff", this.xliff);
+		json.put("xliff", xliff);
+		json.put("memory", memory);
+		json.put("glossary", glossary);
 		return json;
 	}
 
@@ -161,6 +169,22 @@ public class Project implements Serializable, Comparable<Project> {
 
 	public void setFiles(List<SourceFile> files) {
 		this.files = files;
+	}
+
+	public String getMemory() {
+		return memory;
+	}
+
+	public void setMemory(String memory) {
+		this.memory = memory;
+	}
+
+	public String getGlossary() {
+		return glossary;
+	}
+
+	public void setGlossary(String glossary) {
+		this.glossary = glossary;
 	}
 
 	@Override

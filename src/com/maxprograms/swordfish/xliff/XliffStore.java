@@ -538,12 +538,40 @@ public class XliffStore {
         String pureTarget = pureText(target);
 
         updateTarget(file, unit, segment, target, pureTarget, confirm);
-
         if (confirm && !pureTarget.isBlank()) {
             result = propagate(source, target, pureTarget);
         }
-        conn.commit();
         return result;
+    }
+
+    public String getTranslationStatus() throws SQLException {
+        int total = 0;
+        int translated = 0;
+        int confirmed = 0;
+        String sql = "SELECT SUM(words) FROM segments";
+        try (ResultSet rs = stmt.executeQuery(sql)) {
+            while (rs.next()) {
+                total = rs.getInt(1);
+            }
+        }
+        sql = "SELECT SUM(words) FROM segments WHERE state='final'";
+        try (ResultSet rs = stmt.executeQuery(sql)) {
+            while (rs.next()) {
+                confirmed = rs.getInt(1);
+            }
+        }
+        sql = "SELECT SUM(words) FROM segments WHERE state <> 'initial'";
+        try (ResultSet rs = stmt.executeQuery(sql)) {
+            while (rs.next()) {
+                translated = rs.getInt(1);
+            }
+        }
+        int percentage = 0;
+        if (total != 0) {
+            percentage = Math.round(confirmed * 100 / total);
+        }
+        return "Words: " + total + "\u00A0\u00A0\u00A0Translated: " + translated + "\u00A0\u00A0\u00A0Confirmed: "
+                + confirmed + " (" + percentage + "%)";
     }
 
     private void updateTarget(String file, String unit, String segment, Element target, String pureTarget,
@@ -552,7 +580,6 @@ public class XliffStore {
         if (confirm) {
             state = Constants.FINAL;
         }
-
         updateTarget.setNString(1, target.toString());
         updateTarget.setNString(2, pureTarget);
         updateTarget.setString(3, state);
@@ -560,6 +587,7 @@ public class XliffStore {
         updateTarget.setString(5, unit);
         updateTarget.setString(6, segment);
         updateTarget.executeUpdate();
+        conn.commit();
     }
 
     private JSONArray propagate(Element source, Element target, String pureTarget)
@@ -577,9 +605,7 @@ public class XliffStore {
                     String file = rs.getString(1);
                     String unit = rs.getString(2);
                     String segment = rs.getString(3);
-                    String state = rs.getString(5);
                     int tags = rs.getInt(6);
-                    boolean preserve = "Y".equals(rs.getString(7));
                     JSONObject tagsData = new JSONObject();
                     if (tags > 0) {
                         tagsData = getUnitData(file, unit);
@@ -606,15 +632,14 @@ public class XliffStore {
                         updateTarget(file, unit, segment, translated, pureText(translated), false);
                     }
                     insertMatch(file, unit, segment, "Self", Constants.TM, similarity, source, target, tagsData);
-                    if (similarity < 100) {
-                        int best = getBestMatch(file, unit, segment);
-                        JSONObject row = new JSONObject();
-                        row.put("file", file);
-                        row.put("unit", unit);
-                        row.put("segment", segment);
-                        row.put("match", best);
-                        result.put(row);
-                    }
+                    conn.commit();
+                    int best = getBestMatch(file, unit, segment);
+                    JSONObject row = new JSONObject();
+                    row.put("file", file);
+                    row.put("unit", unit);
+                    row.put("segment", segment);
+                    row.put("match", best);
+                    result.put(row);
                 }
             }
         }

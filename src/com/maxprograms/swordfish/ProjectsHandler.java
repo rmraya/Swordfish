@@ -143,6 +143,8 @@ public class ProjectsHandler implements HttpHandler {
 				response = tmTranslateAll(request);
 			} else if ("/projects/projectMemories".equals(url)) {
 				response = getProjectMemories(request);
+			} else if ("/projects/setMemory".equals(url)) {
+				response = setProjectMemory(request);
 			} else {
 				response.put(Constants.REASON, "Unknown request");
 			}
@@ -481,6 +483,7 @@ public class ProjectsHandler implements HttpHandler {
 		}
 		try {
 			result.put("count", store.size());
+			result.put("statistics", projectStores.get(project).getTranslationStatus());
 		} catch (SQLException sql) {
 			logger.log(Level.ERROR, "Error retrieving count", sql);
 			result.put(Constants.REASON, sql.getMessage());
@@ -692,9 +695,8 @@ public class ProjectsHandler implements HttpHandler {
 		JSONObject json = new JSONObject(request);
 		String project = json.getString("project");
 		try {
-			if (projectStores.containsKey(project)) {
-				result.put("propagated", projectStores.get(project).saveSegment(json));
-			}
+			result.put("propagated", projectStores.get(project).saveSegment(json));
+			result.put("statistics", projectStores.get(project).getTranslationStatus());
 		} catch (IOException | SQLException | SAXException | ParserConfigurationException | DataFormatException e) {
 			logger.log(Level.ERROR, e);
 			result.put(Constants.REASON, e.getMessage());
@@ -769,15 +771,41 @@ public class ProjectsHandler implements HttpHandler {
 		}
 		return result;
 	}
-	
+
 	private JSONObject getProjectMemories(String request) {
 		JSONObject result = new JSONObject();
+		JSONObject json = new JSONObject(request);
 		try {
 			result.put("memories", MemoriesHandler.getMemories());
+			result.put("default", projects.get(json.getString("project")).getMemory());
 		} catch (IOException e) {
 			logger.log(Level.ERROR, e);
 			result.put(Constants.REASON, e.getMessage());
 		}
 		return result;
 	}
+
+	private JSONObject setProjectMemory(String request) {
+		JSONObject result = new JSONObject();
+		try {
+			JSONObject json = new JSONObject(request);
+			String project = json.getString("project");
+			String memory = json.getString("memory");
+			projects.get(project).setMemory(memory);
+			JSONArray list = projectsList.getJSONArray("projects");
+			for (int i=0 ; i<list.length() ; i++) {
+				JSONObject obj = list.getJSONObject(i);
+				if (project.equals(obj.getString("id"))) {
+					obj.put("memory", memory);
+					break;
+				}
+			}
+			saveProjectsList();
+		} catch (IOException e) {
+			logger.log(Level.ERROR, e);
+			result.put(Constants.REASON, e.getMessage());
+		}
+		return result;
+	}
+
 }

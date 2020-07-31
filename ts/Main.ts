@@ -184,6 +184,9 @@ class Main {
         Main.electron.ipcRenderer.on('reload-page', (event: Electron.IpcRendererEvent, arg: any) => {
             this.reloadPage(arg);
         });
+        Main.electron.ipcRenderer.on('set-statistics', (event: Electron.IpcRendererEvent, arg: any) => {
+            this.setStatistics(arg);
+        });
         let config: any = { attributes: true, childList: false, subtree: false };
         let observer = new MutationObserver((mutationsList) => {
             for (let mutation of mutationsList) {
@@ -348,6 +351,13 @@ class Main {
         let project: string = arg.project;
         if (Main.translationViews.has(project)) {
             Main.translationViews.get(project).getSegments();
+        }
+    }
+
+    setStatistics(arg: any): void {
+        let project: string = arg.project;
+        if (Main.translationViews.has(project)) {
+            Main.translationViews.get(project).setStatistics(arg.statistics);
         }
     }
 }

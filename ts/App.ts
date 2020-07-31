@@ -390,6 +390,9 @@ class Swordfish {
         ipcMain.on('get-project-memories', (event: IpcMainEvent, arg: any) => {
             Swordfish.getProjectMemories(arg);
         });
+        ipcMain.on('set-project-memory', (event: IpcMainEvent, arg: any) => {
+            Swordfish.setProjectMemory(arg);
+        });
     } // end constructor
 
     static createWindow(): void {
@@ -1348,6 +1351,7 @@ class Swordfish {
                 if (data.status === Swordfish.SUCCESS) {
                     data.project = arg.project;
                     event.sender.send('set-segments-count', data);
+                    Swordfish.mainWindow.webContents.send('set-statistics', { project: arg.project, statistics: data.statistics });
                 } else {
                     dialog.showErrorBox('Error', data.reason);
                 }
@@ -1601,6 +1605,7 @@ class Swordfish {
                 if (data.propagated.length > 0) {
                     Swordfish.mainWindow.webContents.send('auto-propagate', { project: arg.project, rows: data.propagated });
                 }
+                Swordfish.mainWindow.webContents.send('set-statistics', { project: arg.project, statistics: data.statistics });
             },
             (reason: string) => {
                 dialog.showErrorBox('Error', reason);
@@ -1699,7 +1704,22 @@ class Swordfish {
                     dialog.showErrorBox('Error', data.reason);
                     return;
                 }
-                Swordfish.mainWindow.webContents.send('set-project-memories', { project: arg.project, memories: data.memories });
+                data.project = arg.project;
+                Swordfish.mainWindow.webContents.send('set-project-memories', data);
+            },
+            (reason: string) => {
+                dialog.showErrorBox('Error', reason);
+            }
+        );
+    }
+
+    static setProjectMemory(arg: any): void {
+        Swordfish.sendRequest('/projects/setMemory', arg,
+            (data: any) => {
+                if (data.status !== Swordfish.SUCCESS) {
+                    dialog.showErrorBox('Error', data.reason);
+                    return;
+                }
             },
             (reason: string) => {
                 dialog.showErrorBox('Error', reason);
