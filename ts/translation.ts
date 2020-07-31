@@ -119,6 +119,7 @@ class TranslationView {
         this.electron.ipcRenderer.send('get-segments-count', { project: this.projectId });
         this.electron.ipcRenderer.send('get-project-memories', { project: this.projectId });
         this.electron.ipcRenderer.send('get-project-glossaries', { project: this.projectId });
+        this.setSpellChecker();
     }
 
     buildTopBar(topBar: HTMLDivElement): void {
@@ -916,4 +917,7 @@ class TranslationView {
         this.statistics.innerText = stats;
     }
 
+    setSpellChecker() : void {
+        this.electron.ipcRenderer.send('spell-language', this.tgtLang);
+    }
 }

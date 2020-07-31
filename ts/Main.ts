@@ -61,11 +61,11 @@ class Main {
 
         Main.tabHolder.selectTab('projects');
 
-        var observerOptions = {
+        let observerOptions = {
             childList: true,
             attributes: false
         }
-        var tabsObserver = new MutationObserver((mutationList, observer) => {
+        let tabsObserver = new MutationObserver((mutationList, observer) => {
             mutationList.forEach((mutation) => {
                 switch (mutation.type) {
                     case 'childList':
@@ -224,6 +224,7 @@ class Main {
         Main.tabHolder.selectTab(arg.id);
         tab.getLabel().addEventListener('click', () => {
             view.setSize();
+            view.setSpellChecker();
         });
         Main.translationViews.set(arg.id, view);
     }
@@ -245,7 +246,6 @@ class Main {
                 Main.electron.ipcRenderer.send('close-project', { project: key });
                 break;
             }
-
         }
     }
 

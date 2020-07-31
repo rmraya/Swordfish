@@ -393,6 +393,9 @@ class Swordfish {
         ipcMain.on('set-project-memory', (event: IpcMainEvent, arg: any) => {
             Swordfish.setProjectMemory(arg);
         });
+        ipcMain.on('spell-language', (event: IpcMainEvent, arg: any) => {
+            Swordfish.mainWindow.webContents.session.setSpellCheckerLanguages([arg]);
+        });
     } // end constructor
 
     static createWindow(): void {
@@ -414,6 +417,30 @@ class Swordfish {
             },
             show: false,
             icon: this.iconPath
+        });
+
+        this.mainWindow.webContents.on('context-menu', (event, params) => {
+            const menu = new Menu()
+
+            // Add each spelling suggestion
+            for (const suggestion of params.dictionarySuggestions) {
+                menu.append(new MenuItem({
+                    label: suggestion,
+                    click: () => this.mainWindow.webContents.replaceMisspelling(suggestion)
+                }));
+            }
+
+            // Allow users to add the misspelled word to the dictionary
+            if (params.misspelledWord) {
+                menu.append(new MenuItem({ type: 'separator' }));
+                menu.append(
+                    new MenuItem({
+                        label: 'Add to dictionary',
+                        click: () => this.mainWindow.webContents.session.addWordToSpellCheckerDictionary(params.misspelledWord)
+                    })
+                );
+            }
+            menu.popup();
         });
         var fileMenu: Menu = Menu.buildFromTemplate([
             { label: 'Translate Single File', accelerator: 'CmdOrCtrl+N', click: () => { Swordfish.addFile(); } }
