@@ -570,8 +570,9 @@ public class XliffStore {
         try (ResultSet rs = stmt.executeQuery(query)) {
             while (rs.next()) {
                 Element candidate = buildElement(rs.getNString(4));
+                int differences = tagDifferences(source, candidate);
                 String dummy = dummyTagger(candidate);
-                int similarity = MatchQuality.similarity(dummySource, dummy);
+                int similarity = MatchQuality.similarity(dummySource, dummy) - differences;
                 if (similarity > THRESHOLD) {
                     String file = rs.getString(1);
                     String unit = rs.getString(2);
@@ -618,6 +619,15 @@ public class XliffStore {
             }
         }
         return result;
+    }
+
+    private int tagDifferences(Element source, Element candidate) {
+        int a = source.getChildren().size();
+        int b = candidate.getChildren().size();
+        if (a > b) {
+            return a - b;
+        }
+        return b - a;
     }
 
     private synchronized void insertMatch(String file, String unit, String segment, String origin, String type,
@@ -1330,15 +1340,18 @@ public class XliffStore {
         String segment = json.getString("segment");
         String memory = json.getString("memory");
 
+        String src = "";
         String pure = "";
         getSource.setString(1, file);
         getSource.setString(2, unit);
         getSource.setString(3, segment);
         try (ResultSet rs = getSource.executeQuery()) {
             while (rs.next()) {
+                src = rs.getNString(1);
                 pure = rs.getNString(2);
             }
         }
+        Element original = buildElement(src);
 
         ITmEngine engine = MemoriesHandler.open(memory);
         List<Match> matches = engine.searchTranslation(pure, srcLang, tgtLang, 60, false);
@@ -1352,8 +1365,9 @@ public class XliffStore {
             target.setAttribute("xml:lang", tgtLang);
             JSONObject obj = new JSONObject();
             obj.put("dataRef", tags);
-            insertMatch(file, unit, segment, MemoriesHandler.getName(memory), Constants.TM, m.getSimilarity(), source,
-                    target, obj);
+            int similarity = m.getSimilarity() - tagDifferences(original, source);
+            insertMatch(file, unit, segment, MemoriesHandler.getName(memory), Constants.TM, similarity, source, target,
+                    obj);
             conn.commit();
         }
         MemoriesHandler.closeMemory(memory);
@@ -1406,13 +1420,15 @@ public class XliffStore {
     public void tmTranslateAll(String memory)
             throws IOException, SQLException, SAXException, ParserConfigurationException {
         ITmEngine engine = MemoriesHandler.open(memory);
-        String sql = "SELECT file, unitId, segId, sourceText FROM segments WHERE state <> 'final'";
+        String sql = "SELECT file, unitId, segId, source, sourceText FROM segments WHERE state <> 'final'";
         try (ResultSet rs = stmt.executeQuery(sql)) {
             while (rs.next()) {
                 String file = rs.getString(1);
                 String unit = rs.getString(2);
                 String segment = rs.getString(3);
-                String pure = rs.getNString(4);
+                String src = rs.getNString(4);
+                String pure = rs.getNString(5);
+                Element original = buildElement(src);
                 List<Match> matches = engine.searchTranslation(pure, srcLang, tgtLang, 60, false);
                 Iterator<Match> it = matches.iterator();
                 while (it.hasNext()) {
@@ -1424,8 +1440,9 @@ public class XliffStore {
                     target.setAttribute("xml:lang", tgtLang);
                     JSONObject obj = new JSONObject();
                     obj.put("dataRef", tags);
-                    insertMatch(file, unit, segment, MemoriesHandler.getName(memory), Constants.TM, m.getSimilarity(),
-                            source, target, obj);
+                    int similarity = m.getSimilarity() - tagDifferences(original, source);
+                    insertMatch(file, unit, segment, MemoriesHandler.getName(memory), Constants.TM, similarity, source,
+                            target, obj);
                     conn.commit();
                 }
             }
