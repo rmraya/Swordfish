@@ -24,7 +24,8 @@ import java.util.Set;
 import java.util.StringTokenizer;
 import java.util.Vector;
 
-import com.maxprograms.tmengine.NGrams;
+import com.maxprograms.swordfish.tm.NGrams;
+
 
 public class DifferenceTagger {
 

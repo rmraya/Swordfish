@@ -282,6 +282,9 @@ public class ServicesHandler implements HttpHandler {
         if (!projectsFile.exists()) {
             projects = new JSONObject();
             projects.put("projects", new JSONArray());
+            try (FileOutputStream out = new FileOutputStream(projectsFile)) {
+                out.write(projects.toString().getBytes(StandardCharsets.UTF_8));
+            }
             return projects;
         }
         StringBuffer buffer = new StringBuffer();

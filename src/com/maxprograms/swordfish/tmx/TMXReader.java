@@ -1,5 +1,5 @@
 /*****************************************************************************
-Copyright (c) 2018-2020 - Maxprograms,  http://www.maxprograms.com/
+Copyright (c) 2007-2020 - Maxprograms,  http://www.maxprograms.com/
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of 
 this software and associated documentation files (the "Software"), to compile, 
@@ -16,22 +16,36 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE 
 SOFTWARE.
 *****************************************************************************/
-module swordfish {
-	
-	exports com.maxprograms.swordfish;
-	exports com.maxprograms.swordfish.models;
-	exports com.maxprograms.swordfish.tm;
-	
-	opens com.maxprograms.swordfish to mapdb;
-	opens com.maxprograms.swordfish.models to mapdb;
-	opens com.maxprograms.swordfish.xliff to mapdb;
 
-	requires mapdb;
-	requires java.base;
-	requires java.xml;
-	requires java.sql;
-	requires transitive openxliff;
-	requires transitive jdk.httpserver;
-	requires transitive json;
-	requires java.logging;
+package com.maxprograms.swordfish.tmx;
+
+import java.io.IOException;
+import java.net.URL;
+
+import javax.xml.parsers.ParserConfigurationException;
+
+import org.xml.sax.SAXException;
+
+import com.maxprograms.swordfish.tm.ITmEngine;
+import com.maxprograms.xml.SAXBuilder;
+
+public class TMXReader {
+
+	private SAXBuilder builder;
+	private TMXContentHandler handler;
+
+	public TMXReader(ITmEngine database) {
+		handler = new TMXContentHandler(database);
+		builder = new SAXBuilder();
+		builder.setEntityResolver(new TMXResolver());
+		builder.setContentHandler(handler);
+	}
+
+	public void parse(URL url) throws IOException, SAXException, ParserConfigurationException {
+		builder.build(url);
+	}
+
+	public int getCount() {
+		return handler.getCount();
+	}
 }

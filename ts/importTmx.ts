@@ -52,7 +52,7 @@ class ImportTMX {
         let options: string = '';
         let length: number = projects.length;
         for (let i = 0; i < length; i++) {
-            options = options + '<option value="' + projects[i] + '">'
+            options = options + '<option value="' + projects[i] + '">' + projects[i] + '</option>';
         }
         document.getElementById('projects').innerHTML = options;
     }
@@ -61,7 +61,7 @@ class ImportTMX {
         let options: string = '';
         let length: number = clients.length;
         for (let i = 0; i < length; i++) {
-            options = options + '<option value="' + clients[i] + '">'
+            options = options + '<option value="' + clients[i] + '">' + clients[i] + '</option>';
         }
         document.getElementById('clients').innerHTML = options;
     }
@@ -70,7 +70,7 @@ class ImportTMX {
         let options: string = '';
         let length: number = subjects.length;
         for (let i = 0; i < length; i++) {
-            options = options + '<option value="' + subjects[i] + '">'
+            options = options + '<option value="' + subjects[i] + '">' + subjects[i] + '</option>';
         }
         document.getElementById('subjects').innerHTML = options;
     }

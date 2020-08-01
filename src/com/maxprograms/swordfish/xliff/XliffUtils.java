@@ -27,15 +27,22 @@ import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
+import java.util.Vector;
 
+import com.maxprograms.swordfish.Constants;
 import com.maxprograms.swordfish.TmsServer;
+import com.maxprograms.swordfish.tm.TMUtils;
 import com.maxprograms.xml.Attribute;
 import com.maxprograms.xml.Element;
+import com.maxprograms.xml.XMLNode;
+
+import org.json.JSONObject;
 
 public class XliffUtils {
 
     public static final String STYLE = "class='highlighted'";
-    private static int maxTag =0;
+    private static int maxTag = 0;
 
     private XliffUtils() {
         // empty for security
@@ -151,12 +158,105 @@ public class XliffUtils {
             source = start + "[[" + tagNumber++ + "]]" + rest.substring(end + 1);
             index = source.indexOf("<img ");
         }
-        for (int i=0 ; i<currentTags.size() ; i++) {
+        for (int i = 0; i < currentTags.size(); i++) {
             String tag = currentTags.get(i);
             int start = tag.indexOf("data-ref=\"") + 10;
             int end = tag.indexOf("\"", start);
             String code = tag.substring(start, end);
-            result.add(new String[]{code, tag});
+            result.add(new String[] { code, tag });
+        }
+        return result;
+    }
+
+    public static Element toXliff(String name, Element tuv, JSONObject tags) {
+        Element xliff = new Element(name);
+        List<XMLNode> newContent = new Vector<>();
+        List<XMLNode> content = tuv.getChild("seg").getContent();
+        Iterator<XMLNode> it = content.iterator();
+        int tag = 1;
+        while (it.hasNext()) {
+            XMLNode node = it.next();
+            if (node.getNodeType() == XMLNode.TEXT_NODE) {
+                newContent.add(node);
+            }
+            if (node.getNodeType() == XMLNode.ELEMENT_NODE) {
+                Element e = (Element) node;
+                if ("ph".equals(e.getName())) {
+                    Element ph = new Element("ph");
+                    tag++;
+                    ph.setAttribute("id", "ph" + tag);
+                    ph.setAttribute("dataRef", "ph" + tag);
+                    newContent.add(ph);
+                    tags.put("ph" + tag, e.getText());
+                }
+                if ("bpt".equals(e.getName())) {
+                    Element sc = new Element("sc");
+                    tag++;
+                    sc.setAttribute("id", e.getAttributeValue("i"));
+                    sc.setAttribute("dataRef", "sc" + tag);
+                    newContent.add(sc);
+                    tags.put("sc" + tag, e.getText());
+                }
+                if ("ept".equals(e.getName())) {
+                    Element ec = new Element("ec");
+                    tag++;
+                    ec.setAttribute("id", e.getAttributeValue("i"));
+                    ec.setAttribute("dataRef", "ec" + tag);
+                    newContent.add(ec);
+                    tags.put("sc" + tag, e.getText());
+                }
+            }
+        }
+        xliff.setContent(newContent);
+        return xliff;
+    }
+
+    public static Element toTu(String key, Element source, Element target, Map<String, String> tags) {
+        String creationDate = TMUtils.creationDate();
+        Element tu = new Element("tu");
+        tu.setAttribute("tuid", key);
+        tu.setAttribute("creationtool", Constants.APPNAME);
+        tu.setAttribute("creationtoolversion", Constants.VERSION);
+        tu.setAttribute("creationdate", creationDate);
+        Element tuv = new Element("tuv");
+        tuv.setAttribute("xml:lang", source.getAttributeValue("xml:lang"));
+        tuv.setAttribute("creationdate", creationDate);
+        tu.addContent(tuv);
+        Element seg = new Element("seg");
+        seg.setContent(toTmx(source, tags));
+        tuv.addContent(seg);
+
+        tuv = new Element("tuv");
+        tuv.setAttribute("xml:lang", target.getAttributeValue("xml:lang"));
+        tuv.setAttribute("creationdate", creationDate);
+        tu.addContent(tuv);
+        seg = new Element("seg");
+        seg.setContent(toTmx(target, tags));
+        tuv.addContent(seg);
+        return tu;
+    }
+
+    private static List<XMLNode> toTmx(Element element, Map<String, String> tags) {
+        List<XMLNode> result = new Vector<>();
+        List<XMLNode> content = element.getContent();
+        Iterator<XMLNode> it = content.iterator();
+        while (it.hasNext()) {
+            XMLNode node = it.next();
+            if (node.getNodeType() == XMLNode.TEXT_NODE) {
+                result.add(node);
+            }
+            if (node.getNodeType() == XMLNode.ELEMENT_NODE) {
+                Element e = (Element)node;
+                if (e.getName().equals("ph")) {
+                    Element ph = new Element("ph");
+                    String id = e.getAttributeValue("id");
+                    ph.setAttribute("x", id);
+                    if (tags.containsKey(id)) {
+                        ph.setText(tags.get(id));
+                    }
+                    result.add(ph);
+                }
+            }
         }
         return result;
     }

@@ -1,5 +1,5 @@
 /*****************************************************************************
-Copyright (c) 2018-2020 - Maxprograms,  http://www.maxprograms.com/
+Copyright (c) 2007-2020 - Maxprograms,  http://www.maxprograms.com/
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of 
 this software and associated documentation files (the "Software"), to compile, 
@@ -16,22 +16,48 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE 
 SOFTWARE.
 *****************************************************************************/
-module swordfish {
-	
-	exports com.maxprograms.swordfish;
-	exports com.maxprograms.swordfish.models;
-	exports com.maxprograms.swordfish.tm;
-	
-	opens com.maxprograms.swordfish to mapdb;
-	opens com.maxprograms.swordfish.models to mapdb;
-	opens com.maxprograms.swordfish.xliff to mapdb;
 
-	requires mapdb;
-	requires java.base;
-	requires java.xml;
-	requires java.sql;
-	requires transitive openxliff;
-	requires transitive jdk.httpserver;
-	requires transitive json;
-	requires java.logging;
+package com.maxprograms.swordfish.tm;
+
+import java.io.Serializable;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+public class TuData implements Serializable {
+
+	private static final long serialVersionUID = -4527612217830153690L;
+	private Set<String> langs;
+	private Map<String, String> props;
+	private List<String> notes;
+	private String creationdate;
+	private String userid;
+
+	public TuData(String userid, String creationdate, Set<String> langs, Map<String,String> props, List<String> notes) {
+		this.userid = userid;
+		this.creationdate = creationdate;
+		this.langs = langs;
+		this.props = props;
+		this.notes = notes;
+	}
+		
+	public String getUser() {
+		return userid;
+	}
+	
+	public String getCreationDate() {
+		return creationdate;
+	}
+	
+	public Set<String> getLangs() {
+		return langs;
+	}
+	
+	public Map<String,String> getProps() {
+		return props;
+	}
+	
+	public List<String> getNotes() {
+		return notes;
+	}
 }

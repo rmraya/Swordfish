@@ -710,7 +710,8 @@ class TranslationView {
                 file: this.currentId.file,
                 unit: this.currentId.unit,
                 segment: this.currentId.id, translation: translation,
-                confirm: confirm
+                confirm: confirm, 
+                memory: this.memSelect.value
             });
             if (next === 'untranslated') {
                 let found: boolean = false;
@@ -906,11 +907,11 @@ class TranslationView {
         for (let i = 0; i < length; i++) {
             let mem: string[] = memories[i];
             options = options + '<option value="' + mem[0] + '">' + mem[1] + '</option>';
+            if (mem[0] === arg.default) {
+                this.memSelect.value = arg.default;
+            }
         }
         this.memSelect.innerHTML = options;
-        if (arg.default !== 'none') {
-            this.memSelect.value = arg.default;
-        }
     }
 
     setStatistics(stats: string): void {

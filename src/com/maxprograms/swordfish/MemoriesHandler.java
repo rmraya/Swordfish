@@ -33,9 +33,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.sql.SQLException;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.Iterator;
-import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.Vector;
@@ -44,13 +42,12 @@ import java.util.concurrent.ConcurrentHashMap;
 import javax.xml.parsers.ParserConfigurationException;
 
 import com.maxprograms.swordfish.models.Memory;
-import com.maxprograms.tmengine.ITmEngine;
-import com.maxprograms.tmengine.MapDbEngine;
+import com.maxprograms.swordfish.tm.ITmEngine;
+import com.maxprograms.swordfish.tm.InternalDatabase;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 
 import org.json.JSONArray;
-import org.json.JSONException;
 import org.json.JSONObject;
 import org.xml.sax.SAXException;
 
@@ -169,7 +166,8 @@ public class MemoriesHandler implements HttpHandler {
 				JSONObject obj = new JSONObject();
 				obj.put("languages", array);
 				openTasks.put(process, new String[] { Constants.COMPLETED, obj.toString() });
-			} catch (IOException | SQLException e) {
+			} catch (IOException | SQLException | ClassNotFoundException | SAXException
+					| ParserConfigurationException e) {
 				logger.log(Level.ERROR, e.getMessage(), e);
 				openTasks.put(process, new String[] { Constants.ERROR, e.getMessage() });
 			}
@@ -265,7 +263,8 @@ public class MemoriesHandler implements HttpHandler {
 				String client = json.has("client") ? json.getString("client") : "";
 				String subject = json.has("subject") ? json.getString("subject") : "";
 				try {
-					engine.storeTMX(tmx.getAbsolutePath(), project, client, subject);
+					int imported = engine.storeTMX(tmx.getAbsolutePath(), project, client, subject);
+					logger.log(Level.INFO, "Imported " + imported);
 					openTasks.put(process, new String[] { Constants.COMPLETED });
 				} catch (Exception e) {
 					openTasks.put(process, new String[] { Constants.ERROR, e.getMessage() });
@@ -274,7 +273,8 @@ public class MemoriesHandler implements HttpHandler {
 				if (!wasOpen) {
 					closeMemory(id);
 				}
-			} catch (IOException | SQLException e) {
+			} catch (IOException | SQLException | ClassNotFoundException | SAXException
+					| ParserConfigurationException e) {
 				logger.log(Level.ERROR, e.getMessage(), e);
 				openTasks.put(process, new String[] { Constants.ERROR, e.getMessage() });
 			}
@@ -318,33 +318,23 @@ public class MemoriesHandler implements HttpHandler {
 				}
 				ITmEngine engine = openEngines.get(mem.getId());
 				File tmx = new File(json.getString("tmx"));
-				Set<String> langSet = new TreeSet<>();
+				Set<String> langSet = Collections.synchronizedSortedSet(new TreeSet<>());
 				if (json.has("languages")) {
 					JSONArray langs = json.getJSONArray("languages");
 					for (int i = 0; i < langs.length(); i++) {
 						langSet.add(langs.getString(i));
 					}
 				}
-				Map<String, String> tmxProps = new HashMap<>();
-				if (!mem.getClient().isEmpty()) {
-					tmxProps.put("client", mem.getClient());
-				}
-				if (!mem.getSubject().isEmpty()) {
-					tmxProps.put("subject", mem.getSubject());
-				}
-				if (!mem.getProject().isEmpty()) {
-					tmxProps.put("project", mem.getProject());
-				}
-				engine.exportMemory(tmx.getAbsolutePath(), langSet, json.getString("srcLang"), tmxProps);
+				engine.exportMemory(tmx.getAbsolutePath(), langSet, json.getString("srcLang"));
 				if (needsClosing) {
 					closeMemory(mem.getId());
 				}
 				openTasks.put(process, new String[] { Constants.COMPLETED });
-			} catch (IOException | JSONException | SAXException | ParserConfigurationException | SQLException e) {
+			} catch (IOException | SAXException | ParserConfigurationException | SQLException
+					| ClassNotFoundException e) {
 				logger.log(Level.ERROR, e.getMessage(), e);
 				openTasks.put(process, new String[] { Constants.ERROR, e.getMessage() });
 			}
-
 		}).start();
 		result.put("process", process);
 		return result;
@@ -429,7 +419,8 @@ public class MemoriesHandler implements HttpHandler {
 		return result;
 	}
 
-	private static JSONObject createMemory(String request) throws IOException {
+	private static JSONObject createMemory(String request)
+			throws IOException, SQLException,  SAXException, ParserConfigurationException {
 		JSONObject result = new JSONObject();
 		JSONObject json = new JSONObject(request);
 		if (!json.has("id")) {
@@ -439,20 +430,16 @@ public class MemoriesHandler implements HttpHandler {
 			json.put("creationDate", System.currentTimeMillis());
 		}
 		Memory mem = new Memory(json);
-		if (Memory.LOCAL.equals(mem.getType())) {
-			MapDbEngine engine = new MapDbEngine(mem.getId(), getWorkFolder());
-			engine.close();
-		} else {
-			// TODO create memory on the remote server using REST
-		}
+		InternalDatabase engine = new InternalDatabase(mem.getId(), getWorkFolder());
+		engine.close();
 		if (memories == null) {
 			loadMemoriesList();
 		}
 		memories.put(mem.getId(), mem);
 		ServicesHandler.addClient(json.getString("client"));
 		ServicesHandler.addSubject(json.getString("subject"));
+		ServicesHandler.addProject(json.getString("project"));
 		saveMemoriesList();
-		result.put("id", mem.getId());
 		return result;
 	}
 
@@ -513,7 +500,7 @@ public class MemoriesHandler implements HttpHandler {
 		}
 	}
 
-	private static String getWorkFolder() throws IOException {
+	public static String getWorkFolder() throws IOException {
 		File home = TmsServer.getWorkFolder();
 		File workFolder = new File(home, "memories");
 		if (!workFolder.exists()) {
@@ -522,17 +509,18 @@ public class MemoriesHandler implements HttpHandler {
 		return workFolder.getAbsolutePath();
 	}
 
-	private static void openMemory(String id) throws IOException {
+	private static void openMemory(String id)
+			throws IOException, SQLException, ClassNotFoundException, SAXException, ParserConfigurationException {
+		if (memories == null) {
+			loadMemoriesList();
+		}
 		if (openEngines == null) {
 			openEngines = new ConcurrentHashMap<>();
 		}
 		if (openEngines.contains(id)) {
 			return;
 		}
-		if (memories == null) {
-			loadMemoriesList();
-		}
-		openEngines.put(id, new MapDbEngine(id, getWorkFolder()));
+		openEngines.put(id, new InternalDatabase(id, getWorkFolder()));
 	}
 
 	public static void closeMemory(String id) throws IOException, SQLException {
@@ -576,7 +564,7 @@ public class MemoriesHandler implements HttpHandler {
 				array.put(it.next());
 			}
 			result.put("clients", array);
-		} catch (IOException | SQLException e) {
+		} catch (IOException | SQLException | ClassNotFoundException | SAXException | ParserConfigurationException e) {
 			result.put(Constants.REASON, e.getMessage());
 		}
 		return result;
@@ -612,13 +600,14 @@ public class MemoriesHandler implements HttpHandler {
 				array.put(it.next());
 			}
 			result.put("subjects", array);
-		} catch (IOException | SQLException e) {
+		} catch (IOException | SQLException | ClassNotFoundException | SAXException | ParserConfigurationException e) {
 			result.put(Constants.REASON, e.getMessage());
 		}
 		return result;
 	}
 
-	public static ITmEngine open(String memory) throws IOException {
+	public static ITmEngine open(String memory)
+			throws IOException, SQLException, ClassNotFoundException, SAXException, ParserConfigurationException {
 		if (memories == null) {
 			loadMemoriesList();
 		}

@@ -679,7 +679,6 @@ public class ProjectsHandler implements HttpHandler {
 				XliffStore prj = projectStores.get(project);
 				projectStores.remove(project);
 				prj.close();
-				prj = null;
 			} catch (Exception e) {
 				logger.log(Level.ERROR, e);
 				result.put(Constants.REASON, e.getMessage());
@@ -749,7 +748,8 @@ public class ProjectsHandler implements HttpHandler {
 			if (projectStores.containsKey(project)) {
 				result.put("matches", projectStores.get(project).tmTranslate(json));
 			}
-		} catch (IOException | SQLException | JSONException | SAXException | ParserConfigurationException e) {
+		} catch (IOException | SQLException | JSONException | SAXException | ParserConfigurationException
+				| ClassNotFoundException e) {
 			logger.log(Level.ERROR, e);
 			result.put(Constants.REASON, e.getMessage());
 		}
@@ -765,7 +765,8 @@ public class ProjectsHandler implements HttpHandler {
 			if (projectStores.containsKey(project)) {
 				projectStores.get(project).tmTranslateAll(memory);
 			}
-		} catch (IOException | SQLException | JSONException | SAXException | ParserConfigurationException e) {
+		} catch (IOException | SQLException | JSONException | SAXException | ParserConfigurationException
+				| ClassNotFoundException e) {
 			logger.log(Level.ERROR, e);
 			result.put(Constants.REASON, e.getMessage());
 		}

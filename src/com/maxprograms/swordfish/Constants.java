@@ -46,4 +46,6 @@ public class Constants {
 	
 	public static final String TM = "tm";
 	public static final String MT = "mt";
+
+	public static final String NONE = "none";
 }

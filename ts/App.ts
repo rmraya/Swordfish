@@ -1442,12 +1442,12 @@ class Swordfish {
     addMemory(arg: any): void {
         Swordfish.sendRequest('/memories/create', arg,
             (data: any) => {
-                if (data.status === Swordfish.SUCCESS) {
-                    Swordfish.addMemoryWindow.close();
-                    Swordfish.mainWindow.webContents.send('request-memories');
-                } else {
+                if (data.status !== Swordfish.SUCCESS) {
                     dialog.showErrorBox('Error', data.reason);
+                    return;
                 }
+                Swordfish.addMemoryWindow.close();
+                Swordfish.mainWindow.webContents.send('request-memories');
             },
             (reason: string) => {
                 dialog.showErrorBox('Error', reason);
@@ -1618,8 +1618,61 @@ class Swordfish {
 
     exportMemories(memories: any[]): void {
         // TODO
-        for (let i = 0; i < memories.length; i++) {
-            console.log(JSON.stringify(memories[i]));
+        if (memories.length === 1) {
+            dialog.showSaveDialog(Swordfish.mainWindow, {
+                defaultPath: memories[0].name + '.tmx',
+                filters: [{ name: 'TMX Files', extensions: ['tmx'] }, { name: 'Any File', extensions: ['*'] }],
+                properties: ['createDirectory', 'showOverwriteConfirmation']
+            }).then((value) => {
+                if (!value.canceled) {
+                    Swordfish.mainWindow.webContents.send('start-waiting');
+                    Swordfish.mainWindow.webContents.send('set-status', 'Exporting memories');
+                    Swordfish.sendRequest('/memories/export', { memory: memories[0].memory, tmx: value.filePath },
+                        (data: any) => {
+                            if (data.status !== Swordfish.SUCCESS) {
+                                Swordfish.mainWindow.webContents.send('end-waiting');
+                                Swordfish.mainWindow.webContents.send('set-status', '');
+                                dialog.showErrorBox('Error', data.reason);
+                            }
+                            Swordfish.currentStatus = data;
+                            let processId: string = data.process;
+                            var intervalObject = setInterval(() => {
+                                if (Swordfish.currentStatus.result) {
+                                    if (Swordfish.currentStatus.result === Swordfish.COMPLETED) {
+                                        Swordfish.mainWindow.webContents.send('end-waiting');
+                                        Swordfish.mainWindow.webContents.send('set-status', '');
+                                        clearInterval(intervalObject);
+                                        return;
+                                    } else if (Swordfish.currentStatus.result === Swordfish.PROCESSING) {
+                                        // it's OK, keep waiting
+                                    } else if (Swordfish.currentStatus.result === Swordfish.ERROR) {
+                                        Swordfish.mainWindow.webContents.send('end-waiting');
+                                        Swordfish.mainWindow.webContents.send('set-status', '');
+                                        clearInterval(intervalObject);
+                                        dialog.showErrorBox('Error', Swordfish.currentStatus.reason);
+                                        return;
+                                    } else {
+                                        Swordfish.mainWindow.webContents.send('end-waiting');
+                                        Swordfish.mainWindow.webContents.send('set-status', '');
+                                        clearInterval(intervalObject);
+                                        dialog.showErrorBox('Error', 'Unknown error exporting memories');
+                                        return;
+                                    }
+                                }
+                                Swordfish.getMemoriesProgress(processId);
+                            }, 500);
+                        }, (reason: string) => {
+                            dialog.showErrorBox('Error', reason);
+                        }
+                    );
+                }
+            }).catch((error) => {
+                console.log(error);
+            });
+        } else {
+            for (let i = 0; i < memories.length; i++) {
+                console.log(JSON.stringify(memories[i]));
+            }
         }
     }
 

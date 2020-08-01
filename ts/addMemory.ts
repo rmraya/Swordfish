@@ -47,9 +47,6 @@ class AddMemory {
             }
         });
         document.addEventListener('keydown', (event: KeyboardEvent) => { KeyboardHandler.keyListener(event); });
-        document.getElementById('typeSelect').addEventListener("change", () => {
-            this.typeChanged();
-        });
         this.electron.ipcRenderer.on('get-height', () => {
             let body: HTMLBodyElement = document.getElementById('body') as HTMLBodyElement;
             this.electron.ipcRenderer.send('add-memory-height', { width: body.clientWidth, height: body.clientHeight });
@@ -65,24 +62,11 @@ class AddMemory {
             this.electron.ipcRenderer.send('show-message', { type: 'warning', message: 'Enter name' });
             return;
         }
-        let type: string = (document.getElementById('typeSelect') as HTMLSelectElement).value;
-        let server: string = '';
-        if (type !== 'Local') {
-            server = (document.getElementById('urlInput') as HTMLInputElement).value;
-            if (server === '') {
-                this.electron.ipcRenderer.send('show-message', { type: 'warning', message: 'Enter server URL' });
-                return;
-            }
-        }
         let params: any = {
             name: name,
             project: (document.getElementById('projectInput') as HTMLInputElement).value,
             subject: (document.getElementById('subjectInput') as HTMLInputElement).value,
-            client: (document.getElementById('clientInput') as HTMLInputElement).value,
-            type: type,
-            server: server,
-            user: (document.getElementById('userInput') as HTMLInputElement).value,
-            password: (document.getElementById('passInput') as HTMLInputElement).value
+            client: (document.getElementById('clientInput') as HTMLInputElement).value
         }
         this.electron.ipcRenderer.send('add-memory', params);
     }
@@ -91,7 +75,7 @@ class AddMemory {
         let options: string = '';
         let length: number = projects.length;
         for (let i = 0; i < length; i++) {
-            options = options + '<option value="' + projects[i] + '">'
+            options = options + '<option value="' + projects[i] + '">' + projects[i] + '</option>';
         }
         document.getElementById('projects').innerHTML = options;
     }
@@ -100,7 +84,7 @@ class AddMemory {
         let options: string = '';
         let length: number = clients.length;
         for (let i = 0; i < length; i++) {
-            options = options + '<option value="' + clients[i] + '">'
+            options = options + '<option value="' + clients[i] + '">' + clients[i] + '</option>';
         }
         document.getElementById('clients').innerHTML = options;
     }
@@ -109,16 +93,9 @@ class AddMemory {
         let options: string = '';
         let length: number = subjects.length;
         for (let i = 0; i < length; i++) {
-            options = options + '<option value="' + subjects[i] + '">'
+            options = options + '<option value="' + subjects[i] + '">' + subjects[i] + '</option>';
         }
         document.getElementById('subjects').innerHTML = options;
-    }
-
-    typeChanged(): void {
-        let type: string = (document.getElementById('typeSelect') as HTMLSelectElement).value;
-        (document.getElementById('urlInput') as HTMLInputElement).disabled = (type === 'Local');
-        (document.getElementById('userInput') as HTMLInputElement).disabled = (type === 'Local');
-        (document.getElementById('passInput') as HTMLInputElement).disabled = (type === 'Local');
     }
 }
 

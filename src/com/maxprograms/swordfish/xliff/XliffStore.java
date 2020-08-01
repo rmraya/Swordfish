@@ -52,9 +52,9 @@ import com.maxprograms.swordfish.Constants;
 import com.maxprograms.swordfish.MemoriesHandler;
 import com.maxprograms.swordfish.TmsServer;
 import com.maxprograms.swordfish.mt.MT;
-import com.maxprograms.tmengine.ITmEngine;
-import com.maxprograms.tmengine.Match;
-import com.maxprograms.tmengine.MatchQuality;
+import com.maxprograms.swordfish.tm.ITmEngine;
+import com.maxprograms.swordfish.tm.Match;
+import com.maxprograms.swordfish.tm.MatchQuality;
 import com.maxprograms.xml.Catalog;
 import com.maxprograms.xml.Document;
 import com.maxprograms.xml.Element;
@@ -457,7 +457,6 @@ public class XliffStore {
         stmt.close();
         conn.commit();
         conn.close();
-        conn = null;
         if (TmsServer.isDebug()) {
             logger.log(Level.INFO, "Closed store");
         }
@@ -495,6 +494,7 @@ public class XliffStore {
         String segment = json.getString("segment");
         String translation = json.getString("translation").replace("&nbsp;", "\u00A0");
         boolean confirm = json.getBoolean("confirm");
+        String memory = json.getString("memory");
 
         String src = "";
         getSource.setString(1, file);
@@ -540,6 +540,30 @@ public class XliffStore {
         updateTarget(file, unit, segment, target, pureTarget, confirm);
         if (confirm && !pureTarget.isBlank()) {
             result = propagate(source, target, pureTarget);
+        }
+        if (!memory.equals(Constants.NONE)) {
+            Thread thread = new Thread() {
+                @Override
+                public void run() {
+                    try {
+                        StringBuilder key = new StringBuilder();
+                        key.append(xliffFile.hashCode());
+                        key.append('-');
+                        key.append(file);
+                        key.append('-');
+                        key.append(unit);
+                        key.append('-');
+                        key.append(segment);
+                        ITmEngine engine = MemoriesHandler.open(memory);
+                        engine.storeTu(XliffUtils.toTu(key.toString(), source, target, tags));
+                        MemoriesHandler.closeMemory(memory);
+                    } catch (IOException | SQLException | ClassNotFoundException | SAXException
+                            | ParserConfigurationException e) {
+                        logger.log(Level.ERROR, e);
+                    }
+                }
+            };
+            thread.start();
         }
         return result;
     }
@@ -657,7 +681,7 @@ public class XliffStore {
 
     private synchronized void insertMatch(String file, String unit, String segment, String origin, String type,
             int similarity, Element source, Element target, JSONObject tagsData) throws SQLException {
-        String matchId = "" + pureText(source).hashCode();
+        String matchId = "" + pureText(source).hashCode() * origin.hashCode();
         if (Constants.MT.equals(type)) {
             matchId = origin;
         }
@@ -1359,7 +1383,7 @@ public class XliffStore {
     }
 
     public JSONArray tmTranslate(JSONObject json)
-            throws SAXException, IOException, ParserConfigurationException, SQLException {
+            throws SAXException, IOException, ParserConfigurationException, SQLException, ClassNotFoundException {
         String file = json.getString("file");
         String unit = json.getString("unit");
         String segment = json.getString("segment");
@@ -1384,9 +1408,9 @@ public class XliffStore {
         while (it.hasNext()) {
             Match m = it.next();
             JSONObject tags = new JSONObject();
-            Element source = toXliff("source", m.getSource(), tags);
+            Element source = XliffUtils.toXliff("source", m.getSource(), tags);
             source.setAttribute("xml:lang", srcLang);
-            Element target = toXliff("target", m.getTarget(), tags);
+            Element target = XliffUtils.toXliff("target", m.getTarget(), tags);
             target.setAttribute("xml:lang", tgtLang);
             JSONObject obj = new JSONObject();
             obj.put("dataRef", tags);
@@ -1399,51 +1423,8 @@ public class XliffStore {
         return getMatches(file, unit, segment);
     }
 
-    private Element toXliff(String name, Element tuv, JSONObject tags) {
-        Element xliff = new Element(name);
-        List<XMLNode> newContent = new Vector<>();
-        List<XMLNode> content = tuv.getChild("seg").getContent();
-        Iterator<XMLNode> it = content.iterator();
-        int tag = 1;
-        while (it.hasNext()) {
-            XMLNode node = it.next();
-            if (node.getNodeType() == XMLNode.TEXT_NODE) {
-                newContent.add(node);
-            }
-            if (node.getNodeType() == XMLNode.ELEMENT_NODE) {
-                Element e = (Element) node;
-                if ("ph".equals(e.getName())) {
-                    Element ph = new Element("ph");
-                    tag++;
-                    ph.setAttribute("id", "ph" + tag);
-                    ph.setAttribute("dataRef", "ph" + tag);
-                    newContent.add(ph);
-                    tags.put("ph" + tag, e.getText());
-                }
-                if ("bpt".equals(e.getName())) {
-                    Element sc = new Element("sc");
-                    tag++;
-                    sc.setAttribute("id", e.getAttributeValue("i"));
-                    sc.setAttribute("dataRef", "sc" + tag);
-                    newContent.add(sc);
-                    tags.put("sc" + tag, e.getText());
-                }
-                if ("ept".equals(e.getName())) {
-                    Element ec = new Element("ec");
-                    tag++;
-                    ec.setAttribute("id", e.getAttributeValue("i"));
-                    ec.setAttribute("dataRef", "ec" + tag);
-                    newContent.add(ec);
-                    tags.put("sc" + tag, e.getText());
-                }
-            }
-        }
-        xliff.setContent(newContent);
-        return xliff;
-    }
-
     public void tmTranslateAll(String memory)
-            throws IOException, SQLException, SAXException, ParserConfigurationException {
+            throws IOException, SQLException, SAXException, ParserConfigurationException, ClassNotFoundException {
         ITmEngine engine = MemoriesHandler.open(memory);
         String sql = "SELECT file, unitId, segId, source, sourceText FROM segments WHERE state <> 'final'";
         try (ResultSet rs = stmt.executeQuery(sql)) {
@@ -1459,9 +1440,9 @@ public class XliffStore {
                 while (it.hasNext()) {
                     Match m = it.next();
                     JSONObject tags = new JSONObject();
-                    Element source = toXliff("source", m.getSource(), tags);
+                    Element source = XliffUtils.toXliff("source", m.getSource(), tags);
                     source.setAttribute("xml:lang", srcLang);
-                    Element target = toXliff("target", m.getTarget(), tags);
+                    Element target = XliffUtils.toXliff("target", m.getTarget(), tags);
                     target.setAttribute("xml:lang", tgtLang);
                     JSONObject obj = new JSONObject();
                     obj.put("dataRef", tags);
