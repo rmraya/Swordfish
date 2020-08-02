@@ -119,6 +119,9 @@ class TranslationView {
         this.electron.ipcRenderer.send('get-segments-count', { project: this.projectId });
         this.electron.ipcRenderer.send('get-project-memories', { project: this.projectId });
         this.electron.ipcRenderer.send('get-project-glossaries', { project: this.projectId });
+        this.electron.ipcRenderer.on('request-memories', () => {
+            this.electron.ipcRenderer.send('get-project-memories', { project: this.projectId });
+        });
         this.setSpellChecker();
     }
 
@@ -902,16 +905,18 @@ class TranslationView {
             this.memSelect.innerHTML = '<option value="none" class="error">-- No Memory --</option>';
             return;
         }
+        let array: string[] = [];
         let options = '<option value="none" class="error">-- Select Memory --</option>';
         let length = memories.length;
         for (let i = 0; i < length; i++) {
             let mem: string[] = memories[i];
+            array.push(mem[0]);
             options = options + '<option value="' + mem[0] + '">' + mem[1] + '</option>';
-            if (mem[0] === arg.default) {
-                this.memSelect.value = arg.default;
-            }
         }
         this.memSelect.innerHTML = options;
+        if (array.includes(arg.default)) {
+            this.memSelect.value = arg.default;
+        }
     }
 
     setStatistics(stats: string): void {
