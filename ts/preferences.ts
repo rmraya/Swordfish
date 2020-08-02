@@ -56,6 +56,9 @@ class Preferences {
     myMemorySrcLang: HTMLSelectElement;
     myMemoryTgtLang: HTMLSelectElement;
 
+    defaultEnglish: HTMLSelectElement;
+    defaultPortuguese: HTMLSelectElement;
+    defaultSpanish: HTMLSelectElement;
 
     constructor() {
 
@@ -76,6 +79,14 @@ class Preferences {
         });
         this.tabHolder.addTab(mtTab);
         this.populateMtTab(mtTab.getContainer());
+
+        let spellcheckTab: Tab = new Tab('spellcheckTab', 'Spellchecker', false);
+        spellcheckTab.getLabel().addEventListener('click', () => {
+            let body: HTMLBodyElement = document.getElementById('body') as HTMLBodyElement;
+            this.electron.ipcRenderer.send('settings-height', { width: body.clientWidth, height: body.clientHeight });
+        });
+        this.tabHolder.addTab(spellcheckTab);
+        this.populateSpellcheckTab(spellcheckTab.getContainer());
 
         let advancedTab: Tab = new Tab('advancedTab', 'Advanced', false);
         advancedTab.getLabel().addEventListener('click', () => {
@@ -207,6 +218,10 @@ class Preferences {
             this.myMemorySrcLang.disabled = !this.enableMyMemory.checked;
             this.myMemoryTgtLang.disabled = !this.enableMyMemory.checked;
         });
+
+        this.defaultEnglish.value = arg.spellchecker.defaultEnglish;
+        this.defaultPortuguese.value = arg.spellchecker.defaultPortuguese;
+        this.defaultSpanish.value = arg.spellchecker.defaultSpanish;
     }
 
     setLanguages(arg: any): void {
@@ -303,6 +318,11 @@ class Preferences {
                 apiKey: this.myMemoryKey.value,
                 srcLang: this.myMemorySrcLang.value,
                 tgtLang: this.myMemoryTgtLang.value
+            },
+            spellchecker: {
+                defaultEnglish: this.defaultEnglish.value,
+                defaultPortuguese: this.defaultPortuguese.value,
+                defaultSpanish: this.defaultSpanish.value
             }
         }
         this.electron.ipcRenderer.send('save-preferences', prefs);
@@ -386,6 +406,105 @@ class Preferences {
             '<option value="light">Light</option>' +
             '<option value="teal">Teal</option>'
         td.appendChild(this.themeColor);
+    }
+
+    populateSpellcheckTab(container: HTMLDivElement): void {
+
+        container.style.paddingTop = '10px';
+
+        let langsTable: HTMLTableElement = document.createElement('table');
+        langsTable.classList.add('fill_width');
+        container.appendChild(langsTable);
+
+        let tr: HTMLTableRowElement = document.createElement('tr');
+        langsTable.appendChild(tr);
+
+        let td: HTMLTableCellElement = document.createElement('td');
+        td.classList.add('middle');
+        td.classList.add('noWrap');
+        tr.appendChild(td);
+
+        let englishLabel: HTMLLabelElement = document.createElement('label');
+        englishLabel.innerText = 'Default English Variant';
+        englishLabel.setAttribute('for', 'defaultEnglish');
+        td.appendChild(englishLabel);
+
+        td = document.createElement('td');
+        td.classList.add('middle');
+        td.classList.add('fill_width');
+        tr.appendChild(td);
+
+        this.defaultEnglish = document.createElement('select');
+        this.defaultEnglish.id = 'defaultEnglish';
+        this.defaultEnglish.classList.add('fill_width');
+        this.defaultEnglish.innerHTML = '<option value="en-AU">English (Australia)</option>' +
+            '<option value="en-CA">English (Canada)</option>' +
+            '<option value="en-GB">English (United Kingdom)</option>' +
+            '<option value="en-US">English (United States)</option>';
+        td.appendChild(this.defaultEnglish);
+
+        tr = document.createElement('tr');
+        langsTable.appendChild(tr);
+
+        td = document.createElement('td');
+        td.classList.add('middle');
+        td.classList.add('noWrap');
+        tr.appendChild(td);
+
+        let portugueseLabel: HTMLLabelElement = document.createElement('label');
+        portugueseLabel.innerText = 'Default Portuguese Variant';
+        portugueseLabel.setAttribute('for', 'defaultPortuguese');
+        td.appendChild(portugueseLabel);
+
+        td = document.createElement('td');
+        td.classList.add('middle');
+        td.classList.add('fill_width');
+        tr.appendChild(td);
+
+        this.defaultPortuguese = document.createElement('select');
+        this.defaultPortuguese.id = 'defaultPortuguese';
+        this.defaultPortuguese.classList.add('fill_width');
+        this.defaultPortuguese.innerHTML = '<option value="pt-BR">Portuguese (Brazil)</option>' +
+            '<option value="pt-PT">Portuguese (Portugal)</option>';
+        td.appendChild(this.defaultPortuguese);
+
+        tr = document.createElement('tr');
+        langsTable.appendChild(tr);
+
+        td = document.createElement('td');
+        td.classList.add('middle');
+        td.classList.add('noWrap');
+        tr.appendChild(td);
+
+        let spanishLabel: HTMLLabelElement = document.createElement('label');
+        spanishLabel.innerText = 'Default Spanish Variant';
+        spanishLabel.setAttribute('for', 'defaultSpanish');
+        td.appendChild(spanishLabel);
+
+        td = document.createElement('td');
+        td.classList.add('middle');
+        td.classList.add('fill_width');
+        tr.appendChild(td);
+
+        this.defaultSpanish = document.createElement('select');
+        this.defaultSpanish.id = 'defaultSpanish';
+        this.defaultSpanish.classList.add('fill_width');
+        this.defaultSpanish.innerHTML = '<option value="es">Spanish</option>' +
+            '<option value="es-419">Spanish (Latin America and the Caribbean)</option>' +
+            '<option value="es-AR">Spanish (Argentina)</option>' +
+            '<option value="es-ES">Spanish (Spain)</option>' +
+            '<option value="es-MX">Spanish (Mexico)</option>' +
+            '<option value="es-US">Spanish (United States)</option>';
+        td.appendChild(this.defaultSpanish);
+
+        let languagesButton = document.createElement('button');
+        languagesButton.innerText = 'Available Spellchecker Languages';
+        languagesButton.style.marginTop = '10px';
+        languagesButton.addEventListener('click', () => {
+            this.electron.ipcRenderer.send('show-spellchecker-langs');
+            languagesButton.blur();
+        });
+        container.appendChild(languagesButton);
     }
 
     populateAdvancedTab(container: HTMLDivElement): void {

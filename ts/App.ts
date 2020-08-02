@@ -37,6 +37,7 @@ class Swordfish {
     static addProjectWindow: BrowserWindow;
     static addFileWindow: BrowserWindow;
     static defaultLangsWindow: BrowserWindow;
+    static spellingLangsWindow: BrowserWindow;
 
     javapath: string = Swordfish.path.join(app.getAppPath(), 'bin', 'java');
 
@@ -81,6 +82,11 @@ class Swordfish {
             apiKey: '',
             srcLang: 'none',
             tgtLang: 'none'
+        },
+        spellchecker: {
+            defaultEnglish: 'en-US',
+            defaultPortuguese: 'pt-BR',
+            defaultSpanish: 'es'
         }
     }
     static currentCss: string;
@@ -396,6 +402,17 @@ class Swordfish {
         ipcMain.on('spell-language', (event: IpcMainEvent, arg: any) => {
             Swordfish.mainWindow.webContents.session.setSpellCheckerLanguages([arg]);
         });
+        ipcMain.on('show-spellchecker-langs', () => {
+            Swordfish.showSpellCheckerLangs();
+        });
+        ipcMain.on('get-spellchecker-langs', (event: IpcMainEvent) => {
+            Swordfish.getSpellCheckerLangs(event);
+        });
+        ipcMain.on('set-spellchecker-height', (event: IpcMainEvent, arg: any) => {
+            let rect: Rectangle = Swordfish.spellingLangsWindow.getBounds();
+            rect.height = arg.height + this.verticalPadding;
+            Swordfish.spellingLangsWindow.setBounds(rect);
+        })
     } // end constructor
 
     static createWindow(): void {
@@ -1814,6 +1831,40 @@ class Swordfish {
                     dialog.showErrorBox('Error', data.reason);
                     return;
                 }
+            },
+            (reason: string) => {
+                dialog.showErrorBox('Error', reason);
+            }
+        );
+    }
+
+    static showSpellCheckerLangs(): void {
+        Swordfish.spellingLangsWindow = new BrowserWindow({
+            parent: this.mainWindow,
+            width: 600,
+            useContentSize: true,
+            minimizable: false,
+            maximizable: false,
+            resizable: false,
+            show: false,
+            icon: this.iconPath,
+            webPreferences: {
+                nodeIntegration: true
+            }
+        });
+        Swordfish.spellingLangsWindow.setMenu(null);
+        Swordfish.spellingLangsWindow.loadURL('file://' + this.path.join(app.getAppPath(), 'html', 'spellingLangs.html'));
+        Swordfish.spellingLangsWindow.once('ready-to-show', (event: IpcMainEvent) => {
+            event.sender.send('get-height');
+            Swordfish.spellingLangsWindow.show();
+        });
+    }
+
+    static getSpellCheckerLangs(event: IpcMainEvent): void {
+        let languages = Swordfish.mainWindow.webContents.session.availableSpellCheckerLanguages;
+        Swordfish.sendRequest('/services/getSpellingLanguages', {languages: languages},
+            (data: any) => {
+                event.sender.send('set-spellchecker-langs', data);
             },
             (reason: string) => {
                 dialog.showErrorBox('Error', reason);

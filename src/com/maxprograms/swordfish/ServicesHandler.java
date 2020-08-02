@@ -106,6 +106,8 @@ public class ServicesHandler implements HttpHandler {
                 result = getProjects();
             } else if ("/services/getMTLanguages".equals(url)) {
                 result = getMTLanguages();
+            } else if ("/services/getSpellingLanguages".equals(url)) {
+                result = getSpellingLanguages(request);
             } else {
                 result = new JSONObject();
                 result.put("url", url);
@@ -365,6 +367,27 @@ public class ServicesHandler implements HttpHandler {
         Iterator<String> it = list.iterator();
         while (it.hasNext()) {
             result.put(it.next());
+        }
+        return result;
+    }
+
+    private JSONObject getSpellingLanguages(String request) {
+        JSONObject result = new JSONObject();
+        try {
+            JSONArray array = new JSONArray();
+            JSONObject json = new JSONObject(request);
+            JSONArray languages = json.getJSONArray("languages");
+            for (int i = 0; i < languages.length(); i++) {
+                String code = languages.getString(i);
+                JSONArray a = new JSONArray();
+                a.put(code);
+                a.put(LanguageUtils.getLanguage(code));
+                array.put(a);
+            }
+            result.put("languages", array);
+        } catch (IOException e) {
+            logger.log(Level.ERROR, e);
+            result.put(Constants.REASON, e.getMessage());
         }
         return result;
     }
