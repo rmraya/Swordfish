@@ -101,6 +101,8 @@ class Swordfish {
     static SAVING: string = 'Saving';
     static PROCESSING: string = 'Processing';
 
+    static spellCheckerLanguages: string[];
+
     ls: ChildProcessWithoutNullStreams;
 
     constructor() {
@@ -185,6 +187,7 @@ class Swordfish {
                 if (Swordfish.currentPreferences.srcLang === 'none') {
                     Swordfish.getDefaultLanguages();
                 }
+                Swordfish.spellCheckerLanguages = Swordfish.mainWindow.webContents.session.availableSpellCheckerLanguages;
             });
             Swordfish.checkUpdates(true);
         });
@@ -400,7 +403,7 @@ class Swordfish {
             Swordfish.setProjectMemory(arg);
         });
         ipcMain.on('spell-language', (event: IpcMainEvent, arg: any) => {
-            Swordfish.mainWindow.webContents.session.setSpellCheckerLanguages([arg]);
+            Swordfish.setSpellcheckerLanguage(arg);
         });
         ipcMain.on('show-spellchecker-langs', () => {
             Swordfish.showSpellCheckerLangs();
@@ -436,9 +439,8 @@ class Swordfish {
             icon: this.iconPath
         });
 
-        this.mainWindow.webContents.on('context-menu', (event, params) => {
-            const menu = new Menu()
-
+        this.mainWindow.webContents.on('context-menu', (event: Electron.Event, params: any) => {
+            const menu = new Menu();
             // Add each spelling suggestion
             for (const suggestion of params.dictionarySuggestions) {
                 menu.append(new MenuItem({
@@ -446,7 +448,6 @@ class Swordfish {
                     click: () => this.mainWindow.webContents.replaceMisspelling(suggestion)
                 }));
             }
-
             // Allow users to add the misspelled word to the dictionary
             if (params.misspelledWord) {
                 menu.append(new MenuItem({ type: 'separator' }));
@@ -845,11 +846,6 @@ class Swordfish {
                             Swordfish.mainWindow.webContents.send('end-waiting');
                             clearInterval(intervalObject);
                             Swordfish.mainWindow.webContents.send('request-projects', { open: processId });
-                            let targetLanguages = Swordfish.mainWindow.webContents.session.getSpellCheckerLanguages();
-                            if (!targetLanguages.includes(arg.tgtLang)) {
-                                targetLanguages.push(arg.tgtLang);
-                                Swordfish.mainWindow.webContents.session.setSpellCheckerLanguages(targetLanguages);
-                            }
                             return;
                         } else if (Swordfish.currentStatus.progress === Swordfish.PROCESSING) {
                             // it's OK, keep waiting
@@ -899,15 +895,6 @@ class Swordfish {
                     return;
                 }
                 event.sender.send('set-projects', data.projects);
-                let length = data.projects.length;
-                let targetLanguages: string[] = [];
-                for (let i = 0; i < length; i++) {
-                    let tgtLang: string = data.projects[i].targetLang;
-                    if (!targetLanguages.includes(tgtLang)) {
-                        targetLanguages.push(tgtLang);
-                    }
-                }
-                Swordfish.mainWindow.webContents.session.setSpellCheckerLanguages(targetLanguages);
             },
             (reason: string) => {
                 Swordfish.mainWindow.webContents.send('set-status', '');
@@ -1861,8 +1848,7 @@ class Swordfish {
     }
 
     static getSpellCheckerLangs(event: IpcMainEvent): void {
-        let languages = Swordfish.mainWindow.webContents.session.availableSpellCheckerLanguages;
-        Swordfish.sendRequest('/services/getSpellingLanguages', {languages: languages},
+        Swordfish.sendRequest('/services/getSpellingLanguages', { languages: Swordfish.spellCheckerLanguages },
             (data: any) => {
                 event.sender.send('set-spellchecker-langs', data);
             },
@@ -1870,6 +1856,22 @@ class Swordfish {
                 dialog.showErrorBox('Error', reason);
             }
         );
+    }
+
+    static setSpellcheckerLanguage(lang: string): void {
+        if (Swordfish.spellCheckerLanguages.includes(lang)) {
+            Swordfish.mainWindow.webContents.session.setSpellCheckerLanguages([lang]);
+            return;
+        }
+        if (lang.startsWith('en')) {
+            Swordfish.mainWindow.webContents.session.setSpellCheckerLanguages([Swordfish.currentPreferences.spellchecker.defaultEnglish]);
+        }
+        if (lang.startsWith('pt')) {
+            Swordfish.mainWindow.webContents.session.setSpellCheckerLanguages([Swordfish.currentPreferences.spellchecker.defaultPortuguese]);
+        }
+        if (lang.startsWith('es')) {
+            Swordfish.mainWindow.webContents.session.setSpellCheckerLanguages([Swordfish.currentPreferences.spellchecker.defaultSpanish]);
+        }
     }
 }
 
