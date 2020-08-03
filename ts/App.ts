@@ -724,7 +724,7 @@ class Swordfish {
                 if (!value.canceled) {
                     Swordfish.sendRequest('/projects/export', { project: project.id, output: value.filePath },
                         (data: any) => {
-                            Swordfish.exportProject(data);
+                            Swordfish.exportProject(data, value.filePath, true);
                         }, (reason: string) => {
                             dialog.showErrorBox('Error', reason);
                         }
@@ -738,7 +738,7 @@ class Swordfish {
                 if (!value.canceled) {
                     Swordfish.sendRequest('/projects/export', { project: project.id, output: value.filePath },
                         (data: any) => {
-                            Swordfish.exportProject(data);
+                            Swordfish.exportProject(data, value.filePath, false);
                         }, (reason: string) => {
                             dialog.showErrorBox('Error', reason);
                         }
@@ -750,7 +750,7 @@ class Swordfish {
         }
     }
 
-    static exportProject(data: any): void {
+    static exportProject(data: any, output: string, isFile: boolean): void {
         if (data.status !== Swordfish.SUCCESS) {
             dialog.showErrorBox('Error', data.reason);
         }
@@ -764,7 +764,24 @@ class Swordfish {
                     Swordfish.mainWindow.webContents.send('end-waiting');
                     Swordfish.mainWindow.webContents.send('set-status', '');
                     clearInterval(intervalObject);
-                    dialog.showMessageBox(Swordfish.mainWindow, { type: 'info', message: 'Translations exported' });
+                    if (isFile) {
+                        dialog.showMessageBox(Swordfish.mainWindow, {
+                            type: 'question',
+                            message: 'Translations exported.\n\nOpen translated file?',
+                            buttons: ['Yes', 'No']
+                        }).then((selection:Electron.MessageBoxReturnValue) => {
+                            if (selection.response === 0) {
+                                shell.openExternal('file://' + output);
+                            }    
+                        });
+                    } else {
+                        dialog.showMessageBox(Swordfish.mainWindow, { type: 'info', message: 'Translations exported.' });
+                    }
+                    let message = 'Open translated file?';
+                    if (!isFile) {
+                        message = 'Open folder?';
+                    }
+                    
                     return;
                 } else if (Swordfish.currentStatus.progress === Swordfish.PROCESSING) {
                     // it's OK, keep waiting
