@@ -24,7 +24,7 @@ public class MatchQuality {
     static final int PENALTY = 2;
 	
     static String LCS(String x, String y) {
-        String result = ""; //$NON-NLS-1$
+        String result = ""; 
         int M = x.length();
         int N = y.length();
         int max = 0;
@@ -80,7 +80,7 @@ public class MatchQuality {
         int count = -1;
         int idx;
         String lcs = LCS(a, b);
-        while (!lcs.trim().equals("") && lcs.length() > longest * PENALTY / 100) { //$NON-NLS-1$
+        while (!lcs.trim().equals("") && lcs.length() > longest * PENALTY / 100) { 
             count++;
             idx = a.indexOf(lcs);
             a = a.substring(0, idx) + a.substring(idx + lcs.length());

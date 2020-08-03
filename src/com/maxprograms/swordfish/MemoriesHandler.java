@@ -94,8 +94,6 @@ public class MemoriesHandler implements HttpHandler {
 		try {
 			if ("/memories/create".equals(url)) {
 				response = createMemory(request);
-			} else if ("/memories/update".equals(url)) {
-				response = updateMemory(request);
 			} else if ("/memories/list".equals(url)) {
 				response = listMemories(request);
 			} else if ("/memories/delete".equals(url)) {
@@ -104,10 +102,6 @@ public class MemoriesHandler implements HttpHandler {
 				response = exportMemory(request);
 			} else if ("/memories/import".equals(url)) {
 				response = importTMX(request);
-			} else if ("/memories/flag".equals(url)) {
-				response = flag(request);
-			} else if ("/memories/search".equals(url)) {
-				response = searchTranslations(request);
 			} else if ("/memories/concordance".equals(url)) {
 				response = concordanceSearch(request);
 			} else if ("/memories/status".equals(url)) {
@@ -203,24 +197,7 @@ public class MemoriesHandler implements HttpHandler {
 		return result;
 	}
 
-	private static JSONObject updateMemory(String request) throws IOException {
-		Memory mem = new Memory(new JSONObject(request));
-		memories.put(mem.getId(), mem);
-		saveMemoriesList();
-		return new JSONObject();
-	}
-
 	private JSONObject concordanceSearch(String request) {
-		// TODO Auto-generated method stub
-		return new JSONObject();
-	}
-
-	private JSONObject searchTranslations(String request) {
-		// TODO Auto-generated method stub
-		return new JSONObject();
-	}
-
-	private JSONObject flag(String request) {
 		// TODO Auto-generated method stub
 		return new JSONObject();
 	}

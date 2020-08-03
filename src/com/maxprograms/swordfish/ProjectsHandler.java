@@ -75,6 +75,7 @@ public class ProjectsHandler implements HttpHandler {
 
 	private String srxFile;
 	private String catalogFile;
+	private boolean paragraphSegmentation;
 
 	private Hashtable<String, XliffStore> projectStores;
 	private boolean shouldClose;
@@ -550,9 +551,9 @@ public class ProjectsHandler implements HttpHandler {
 							sourceFiles.add(sf);
 							if (!FileFormats.XLIFF.equals(sf.getType())) {
 
-								boolean paragraph = false;
+								boolean paragraph = paragraphSegmentation;
 								boolean mustResegment = false;
-								if (!FileFormats.isBilingual(sf.getType())) {
+								if (!paragraphSegmentation && !FileFormats.isBilingual(sf.getType())) {
 									mustResegment = true;
 									paragraph = true;
 								}
@@ -651,6 +652,7 @@ public class ProjectsHandler implements HttpHandler {
 		JSONObject json = new JSONObject(builder.toString());
 		srxFile = json.getString("srx");
 		catalogFile = json.getString("catalog");
+		paragraphSegmentation = json.getBoolean("paragraphSegmentation");
 	}
 
 	private static File getWorkFolder() throws IOException {

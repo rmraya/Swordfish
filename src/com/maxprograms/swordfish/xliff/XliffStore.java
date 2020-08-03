@@ -97,6 +97,9 @@ public class XliffStore {
 
     private Statement stmt;
     private boolean preserve;
+    
+    private String catalog;
+	private boolean acceptUnconfirmed;
 
     private int index;
     private int nextId;
@@ -129,8 +132,9 @@ public class XliffStore {
         if (!database.exists()) {
             database.mkdirs();
         }
+        getCatalogFile();
         builder = new SAXBuilder();
-        builder.setEntityResolver(new Catalog(getCatalogFile()));
+        builder.setEntityResolver(new Catalog(catalog));
 
         String url = "jdbc:h2:" + database.getAbsolutePath() + "/db";
         conn = DriverManager.getConnection(url);
@@ -470,7 +474,7 @@ public class XliffStore {
         return tgtLang;
     }
 
-    private String getCatalogFile() throws IOException {
+    private void getCatalogFile() throws IOException {
         File preferences = new File(TmsServer.getWorkFolder(), "preferences.json");
         StringBuilder builder = new StringBuilder();
         try (FileReader reader = new FileReader(preferences)) {
@@ -482,7 +486,8 @@ public class XliffStore {
             }
         }
         JSONObject json = new JSONObject(builder.toString());
-        return json.getString("catalog");
+        acceptUnconfirmed = json.getBoolean("acceptUnconfirmed");
+        catalog = json.getString("catalog");
     }
 
     public synchronized JSONArray saveSegment(JSONObject json)
@@ -1247,7 +1252,8 @@ public class XliffStore {
     public void exportTranslations(String output)
             throws SAXException, IOException, ParserConfigurationException, SQLException {
         updateXliff();
-        List<String> result = Merge.merge(xliffFile, output, getCatalogFile(), true);
+        getCatalogFile();
+        List<String> result = Merge.merge(xliffFile, output, catalog, acceptUnconfirmed);
         if (!"0".equals(result.get(0))) {
             throw new IOException(result.get(1));
         }

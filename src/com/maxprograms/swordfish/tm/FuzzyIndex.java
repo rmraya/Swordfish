@@ -47,7 +47,7 @@ public class FuzzyIndex {
 		if (!maps.containsKey(lang)) {
 			DB mapdb = null;
 			try {
-				mapdb = DBMaker.newFileDB(new File(folder, "index_" + lang)).closeOnJvmShutdown().asyncWriteEnable().make(); //$NON-NLS-1$
+				mapdb = DBMaker.newFileDB(new File(folder, "index_" + lang)).closeOnJvmShutdown().asyncWriteEnable().make(); 
 			} catch (Error ioe) {
 				throw new IOException(ioe.getMessage());
 			}
@@ -59,8 +59,7 @@ public class FuzzyIndex {
 	}
 
 	synchronized public void commit() {
-		Set<String> set = databases.keySet();
-		Iterator<String> keys = set.iterator();
+		Iterator<String> keys = databases.keySet().iterator();
 		while (keys.hasNext()) {
 			String key = keys.next();
 			databases.get(key).commit();
@@ -86,5 +85,4 @@ public class FuzzyIndex {
 			db.close();
 		}
 	}
-	
 }

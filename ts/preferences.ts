@@ -29,6 +29,8 @@ class Preferences {
 
     defaultSRX: HTMLInputElement;
     defaultCatalog: HTMLInputElement;
+    paragraphSegmentation: HTMLInputElement;
+    acceptUnconfirmed: HTMLInputElement;
 
     enableGoogle: HTMLInputElement;
     googleKey: HTMLInputElement;
@@ -59,6 +61,7 @@ class Preferences {
     defaultEnglish: HTMLSelectElement;
     defaultPortuguese: HTMLSelectElement;
     defaultSpanish: HTMLSelectElement;
+
 
     constructor() {
 
@@ -150,6 +153,8 @@ class Preferences {
         this.tgtLangSelect.value = arg.tgtLang;
         this.defaultSRX.value = arg.srx;
         this.defaultCatalog.value = arg.catalog;
+        this.acceptUnconfirmed.checked = arg.acceptUnconfirmed;
+        this.paragraphSegmentation.checked = arg.paragraphSegmentation;
 
         this.enableGoogle.checked = arg.google.enabled;
         this.googleKey.value = arg.google.apiKey;
@@ -222,6 +227,8 @@ class Preferences {
         this.defaultEnglish.value = arg.spellchecker.defaultEnglish;
         this.defaultPortuguese.value = arg.spellchecker.defaultPortuguese;
         this.defaultSpanish.value = arg.spellchecker.defaultSpanish;
+
+
     }
 
     setLanguages(arg: any): void {
@@ -288,6 +295,8 @@ class Preferences {
             theme: this.themeColor.value,
             catalog: this.defaultCatalog.value,
             srx: this.defaultSRX.value,
+            paragraphSegmentation: this.paragraphSegmentation.checked,
+            acceptUnconfirmed: this.acceptUnconfirmed.checked,
             google: {
                 enabled: this.enableGoogle.checked,
                 apiKey: this.googleKey.value,
@@ -572,6 +581,38 @@ class Preferences {
         td.classList.add('middle');
         td.innerHTML = '<button id="browseCatalog" class="dark">Browse...</button>';
         tr.appendChild(td);
+
+        let row1: HTMLDivElement = document.createElement('div');
+        row1.classList.add('row');
+        row1.classList.add('middle');
+        container.appendChild(row1);
+
+        this.paragraphSegmentation = document.createElement('input');
+        this.paragraphSegmentation.type = 'checkbox';
+        this.paragraphSegmentation.id = 'paragraphSegmentation';
+        row1.appendChild(this.paragraphSegmentation);
+
+        let paragraphLabel: HTMLLabelElement = document.createElement('label');
+        paragraphLabel.innerText = 'Use Paragraph Segmentation';
+        paragraphLabel.setAttribute('for', 'paragraphSegmentation');
+        paragraphLabel.style.marginTop = '4px';
+        row1.appendChild(paragraphLabel);
+
+        let row2: HTMLDivElement = document.createElement('div');
+        row2.classList.add('row');
+        row2.classList.add('middle');
+        container.appendChild(row2);
+
+        this.acceptUnconfirmed = document.createElement('input');
+        this.acceptUnconfirmed.type = 'checkbox';
+        this.acceptUnconfirmed.id = 'acceptUnconfirmed';
+        row2.appendChild(this.acceptUnconfirmed)
+
+        let unconfirmedLabel: HTMLLabelElement = document.createElement('label');
+        unconfirmedLabel.innerText = 'Include Unconfirmed Segments when Exporting Translation';
+        unconfirmedLabel.setAttribute('for', 'acceptUnconfirmed');
+        unconfirmedLabel.style.marginTop = '4px';
+        row2.appendChild(unconfirmedLabel);
     }
 
     populateMtTab(container: HTMLDivElement): void {

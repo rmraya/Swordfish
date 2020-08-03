@@ -52,6 +52,8 @@ class Swordfish {
         tgtLang: 'none',
         catalog: Swordfish.path.join(app.getAppPath(), 'catalog', 'catalog.xml'),
         srx: Swordfish.path.join(app.getAppPath(), 'srx', 'default.srx'),
+        paragraphSegmentation: false,
+        acceptUnconfirmed: false,
         google: {
             enabled: false,
             apiKey: '',
@@ -769,10 +771,10 @@ class Swordfish {
                             type: 'question',
                             message: 'Translations exported.\n\nOpen translated file?',
                             buttons: ['Yes', 'No']
-                        }).then((selection:Electron.MessageBoxReturnValue) => {
+                        }).then((selection: Electron.MessageBoxReturnValue) => {
                             if (selection.response === 0) {
                                 shell.openExternal('file://' + output);
-                            }    
+                            }
                         });
                     } else {
                         dialog.showMessageBox(Swordfish.mainWindow, { type: 'info', message: 'Translations exported.' });
@@ -781,7 +783,7 @@ class Swordfish {
                     if (!isFile) {
                         message = 'Open folder?';
                     }
-                    
+
                     return;
                 } else if (Swordfish.currentStatus.progress === Swordfish.PROCESSING) {
                     // it's OK, keep waiting
@@ -1882,12 +1884,21 @@ class Swordfish {
         }
         if (lang.startsWith('en')) {
             Swordfish.mainWindow.webContents.session.setSpellCheckerLanguages([Swordfish.currentPreferences.spellchecker.defaultEnglish]);
+            return;
         }
         if (lang.startsWith('pt')) {
             Swordfish.mainWindow.webContents.session.setSpellCheckerLanguages([Swordfish.currentPreferences.spellchecker.defaultPortuguese]);
+            return;
         }
         if (lang.startsWith('es')) {
             Swordfish.mainWindow.webContents.session.setSpellCheckerLanguages([Swordfish.currentPreferences.spellchecker.defaultSpanish]);
+            return;
+        }
+        if (lang.length > 2) {
+            lang = lang.substring(0, 2);
+            if (Swordfish.spellCheckerLanguages.includes(lang)) {
+                Swordfish.mainWindow.webContents.session.setSpellCheckerLanguages([lang]);
+            }
         }
     }
 }
