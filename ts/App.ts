@@ -38,6 +38,7 @@ class Swordfish {
     static addFileWindow: BrowserWindow;
     static defaultLangsWindow: BrowserWindow;
     static spellingLangsWindow: BrowserWindow;
+    static findTextWindow: BrowserWindow;
 
     javapath: string = Swordfish.path.join(app.getAppPath(), 'bin', 'java');
 
@@ -417,7 +418,15 @@ class Swordfish {
             let rect: Rectangle = Swordfish.spellingLangsWindow.getBounds();
             rect.height = arg.height + this.verticalPadding;
             Swordfish.spellingLangsWindow.setBounds(rect);
-        })
+        });
+        ipcMain.on('show-find-text',(event: IpcMainEvent, arg: any) => {
+            Swordfish.showFindText(arg);
+        });
+        ipcMain.on('find-text-height',(event: IpcMainEvent, arg: any) => {
+            let rect: Rectangle = Swordfish.findTextWindow.getBounds();
+            rect.height = arg.height + this.verticalPadding;
+            Swordfish.findTextWindow.setBounds(rect);
+        });
     } // end constructor
 
     static createWindow(): void {
@@ -494,12 +503,15 @@ class Swordfish {
             { label: 'Insert Remaining Tags', accelerator: 'CmdOrCtrl+Alt+T', click: () => { Swordfish.mainWindow.webContents.send('insert-remaining-tags'); } },
             { label: 'Remove all Tags', accelerator: 'CmdOrCtrl+Shift+R', click: () => { Swordfish.mainWindow.webContents.send('remove-tags'); } },
             new MenuItem({ type: 'separator' }),
-            { label: 'Replace Text...', accelerator: 'CmdOrCtrl+F', click: () => { this.replaceText(); } }
+            { label: 'Find', accelerator: 'CmdOrCtrl+F', click: () => { this.findText(); } },
+            { label: 'Replace', accelerator: 'CmdOrCtrl+Alt+F', click: () => { this.replaceText(); } },
         ]);
         var viewMenu: Menu = Menu.buildFromTemplate([
-            { label: 'Projects', accelerator: 'CmdOrCtrl+Alt+1', click: () => { this.viewProjects(); } },
-            { label: 'Memories', accelerator: 'CmdOrCtrl+Alt+2', click: () => { this.viewMemories(); } },
-            { label: 'Glossaries', accelerator: 'CmdOrCtrl+Alt+3', click: () => { this.viewGlossaries(); } },
+            { label: 'Projects', accelerator: 'CmdOrCtrl+Alt+1', click: () => { Swordfish.viewProjects(); } },
+            { label: 'Memories', accelerator: 'CmdOrCtrl+Alt+2', click: () => { Swordfish.viewMemories(); } },
+            { label: 'Glossaries', accelerator: 'CmdOrCtrl+Alt+3', click: () => { Swordfish.viewGlossaries(); } },
+            new MenuItem({ type: 'separator' }),
+            { label: 'Close Selected Tab', accelerator:'CmdOrCtrl+W', click: () => {Swordfish.closeSelectedTab(); }},
             new MenuItem({ type: 'separator' }),
             { label: 'First Page', accelerator: 'CmdOrCtrl+Shift+Home', click: () => { Swordfish.mainWindow.webContents.send('first-page'); } },
             { label: 'Previous Page', accelerator: 'CmdOrCtrl+Home', click: () => { Swordfish.mainWindow.webContents.send('previous-page'); } },
@@ -511,9 +523,10 @@ class Swordfish {
         ]);
         var projectsMenu: Menu = Menu.buildFromTemplate([
             { label: 'New Project', accelerator: 'CmdOrCtrl+Shift+N', click: () => { Swordfish.addProject(); } },
-            { label: 'Remove Projects', click: () => { Swordfish.mainWindow.webContents.send('remove-projects'); } },
             { label: 'Translate Projects', accelerator: 'CmdOrCtrl+O', click: () => { Swordfish.translateProjects(); } },
             { label: 'Export Translations', click: () => { Swordfish.mainWindow.webContents.send('export-translations'); } },
+            new MenuItem({ type: 'separator' }),
+            { label: 'Remove Projects', click: () => { Swordfish.mainWindow.webContents.send('remove-projects'); } },
             new MenuItem({ type: 'separator' }),
             { label: 'Import Project', click: () => { Swordfish.mainWindow.webContents.send('import-project'); } },
             { label: 'Export Project', click: () => { Swordfish.mainWindow.webContents.send('export-project'); } }
@@ -674,12 +687,43 @@ class Swordfish {
         // TODO
     }
 
+    static findText(): void {
+        Swordfish.mainWindow.webContents.send('find-text');
+    }
+
+    static showFindText(project: string): void {
+        this.findTextWindow = new BrowserWindow({
+            parent: this.mainWindow,
+            width: 500,
+            minimizable: false,
+            maximizable: false,
+            resizable: false,
+            useContentSize: true,
+            show: false,
+            icon: this.iconPath,
+            webPreferences: {
+                nodeIntegration: true
+            }
+        });
+        this.findTextWindow.setMenu(null);
+        this.findTextWindow.loadURL('file://' + this.path.join(app.getAppPath(), 'html', 'findText.html'));
+        this.findTextWindow.once('ready-to-show', (event: IpcMainEvent) => {
+            event.sender.send('get-height');
+            event.sender.send('set-project', project)
+            this.findTextWindow.show();
+        });
+    }
+
     static replaceText(): void {
         // TODO
     }
 
     static viewProjects(): void {
         Swordfish.mainWindow.webContents.send('view-projects');
+    }
+
+    static closeSelectedTab(): void  {
+        Swordfish.mainWindow.webContents.send('close-tab');
     }
 
     static addProject() {

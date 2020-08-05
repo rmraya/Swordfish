@@ -24,11 +24,13 @@ class Tab {
     labelDiv: HTMLDivElement;
     container: HTMLDivElement;
     parent: TabHolder;
+    closeable: boolean;
 
     constructor(tabId: string, description: string, closeable: boolean) {
         this.id = tabId;
         this.labelDiv = document.createElement('div');
         this.labelDiv.classList.add('tab');
+        this.closeable = closeable;
 
         this.label = document.createElement('a');
         this.label.id = this.id;
@@ -74,13 +76,17 @@ class Tab {
     setContainer(div: HTMLDivElement): void {
         this.container = div;
     }
+
+    canClose(): boolean {
+        return this.closeable;
+    }
 }
 
 class TabHolder {
 
     labels: Map<String, HTMLDivElement>;
     tabs: Map<string, HTMLDivElement>;
-
+    closeable: Map<string, boolean>;
     tabsHolder: HTMLDivElement;
     contentHolder: HTMLDivElement;
 
@@ -90,6 +96,7 @@ class TabHolder {
     constructor(parent: HTMLDivElement, id: string) {
         this.labels = new Map<String, HTMLDivElement>();
         this.tabs = new Map<string, HTMLDivElement>();
+        this.closeable = new Map<string, boolean>();
 
         this.tabsHolder = document.createElement('div');
         this.tabsHolder.classList.add('tabHolder');
@@ -120,6 +127,7 @@ class TabHolder {
         this.contentHolder.appendChild(tab.getContainer());
         this.tabs.set(tab.getId(), tab.getContainer());
         this.tabsList.push(tab.getId());
+        this.closeable.set(tab.getId(), tab.canClose());
         if (this.tabsList.length === 1) {
             this.selectTab(tab.getId());
         }
@@ -147,11 +155,16 @@ class TabHolder {
         return this.selectedTab;
     }
 
+    canClose(tab: string): boolean {
+        return this.closeable.get(tab);
+    }
+
     closeTab(tab: string): void {
         this.tabsHolder.removeChild(this.labels.get(tab));
         this.labels.delete(tab);
         this.contentHolder.removeChild(this.tabs.get(tab));
         this.tabs.delete(tab);
+        this.closeable.delete(tab);
         this.tabsList.splice(this.tabsList.indexOf("tab"), 1);
         if (tab === this.selectedTab && this.tabsList.length > 1) {
             this.selectTab(this.tabsList[0]);

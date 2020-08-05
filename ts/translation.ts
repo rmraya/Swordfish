@@ -926,4 +926,8 @@ class TranslationView {
     setSpellChecker() : void {
         this.electron.ipcRenderer.send('spell-language', this.tgtLang);
     }
+
+    findText(): void {
+        this.electron.ipcRenderer.send('show-find-text', this.projectId);
+    }
 }

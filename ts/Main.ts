@@ -115,6 +115,9 @@ class Main {
         Main.electron.ipcRenderer.on('view-glossaries', () => {
             Main.tabHolder.selectTab('glossaries');
         });
+        Main.electron.ipcRenderer.on('close-tab', () => {
+            this.closeTab();
+        });
         Main.electron.ipcRenderer.on('start-waiting', () => {
             document.getElementById('body').classList.add("wait");
         });
@@ -187,6 +190,9 @@ class Main {
         Main.electron.ipcRenderer.on('set-statistics', (event: Electron.IpcRendererEvent, arg: any) => {
             this.setStatistics(arg);
         });
+        Main.electron.ipcRenderer.on('find-text', () => {
+            this.findText();
+        });
         let config: any = { attributes: true, childList: false, subtree: false };
         let observer = new MutationObserver((mutationsList) => {
             for (let mutation of mutationsList) {
@@ -213,7 +219,7 @@ class Main {
         }
     }
 
-    addTab(arg: any) {
+    addTab(arg: any): void {
         if (Main.tabHolder.has(arg.id)) {
             Main.tabHolder.selectTab(arg.id);
             return;
@@ -227,6 +233,13 @@ class Main {
             view.setSpellChecker();
         });
         Main.translationViews.set(arg.id, view);
+    }
+
+    closeTab(): void {
+        let selected: string = Main.tabHolder.getSelected();
+        if (Main.tabHolder.canClose(selected)) {
+            Main.tabHolder.closeTab(selected);
+        }
     }
 
     resizePanels(): void {
@@ -358,6 +371,13 @@ class Main {
         let project: string = arg.project;
         if (Main.translationViews.has(project)) {
             Main.translationViews.get(project).setStatistics(arg.statistics);
+        }
+    }
+
+    findText(): void{
+        let selected = Main.tabHolder.getSelected();
+        if (Main.translationViews.has(selected)) {
+            Main.translationViews.get(selected).findText();
         }
     }
 }
