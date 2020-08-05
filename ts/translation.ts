@@ -22,6 +22,7 @@ class TranslationView {
     electron = require('electron');
 
     static SVG_BLANK: string = "<svg xmlns='http://www.w3.org/2000/svg' height='24' viewBox='0 0 24 24' width='24'></svg>";
+    static SVG_UNTRANSLATED = "<svg xmlns:svg='http://www.w3.org/2000/svg' height='24' viewBox='0 0 24 24' width='24' version='1.1'><path d='M 19,5 V 19 H 5 V 5 H 19 M 19,3 H 5 C 3.9,3 3,3.9 3,5 v 14 c 0,1.1 0.9,2 2,2 h 14 c 1.1,0 2,-0.9 2,-2 V 5 C 21,3.9 20.1,3 19,3 Z' /></svg>"
     static SVG_TRANSLATED: string = "<svg xmlns='http://www.w3.org/2000/svg' height='24' viewBox='0 0 24 24' width='24'><g><g><path d='M19,5v14H5V5H19 M19,3H5C3.9,3,3,3.9,3,5v14c0,1.1,0.9,2,2,2h14c1.1,0,2-0.9,2-2V5C21,3.9,20.1,3,19,3L19,3z'/></g><path d='M14,17H7v-2h7V17z M17,13H7v-2h10V13z M17,9H7V7h10V9z'/></g></svg>";
     static SVG_FINAL: string = "<svg xmlns='http://www.w3.org/2000/svg' height='24' viewBox='0 0 24 24' width='24'><path d='M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V5h14v14zM17.99 9l-1.41-1.42-6.59 6.59-2.58-2.57-1.42 1.41 4 3.99z'/></svg>";
     static SVG_LOCK: string = "<svg xmlns='http://www.w3.org/2000/svg' height='24' viewBox='0 0 24 24' width='24'><path d='M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zM9 6c0-1.66 1.34-3 3-3s3 1.34 3 3v2H9V6zm9 14H6V10h12v10zm-6-3c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2z'/></svg>";
@@ -155,7 +156,7 @@ class TranslationView {
         topBar.appendChild(cancelEdit);
 
         let confirmEdit = document.createElement('a');
-        confirmEdit.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 0 24 24" width="24"><path d="M18 7l-1.41-1.41-6.34 6.34 1.41 1.41L18 7zm4.24-1.41L11.66 16.17 7.48 12l-1.41 1.41L11.66 19l12-12-1.42-1.41zM.41 13.41L6 19l1.41-1.41L1.83 12 .41 13.41z"/></svg>' +
+        confirmEdit.innerHTML = TranslationView.SVG_FINAL +
             '<span class="tooltiptext bottomTooltip">Confirm Translation</span>';
         confirmEdit.className = 'tooltip';
         confirmEdit.style.marginLeft = '20px';
@@ -163,6 +164,24 @@ class TranslationView {
             this.saveEdit({ confirm: true, next: 'none' });
         });
         topBar.appendChild(confirmEdit);
+
+        let confirmNextUntranslated = document.createElement('a');
+        confirmNextUntranslated.innerHTML = TranslationView.SVG_UNTRANSLATED +
+            '<span class="tooltiptext bottomTooltip">Confirm and go to Next Untranslated</span>';
+        confirmNextUntranslated.className = 'tooltip';
+        confirmNextUntranslated.addEventListener('click', () => {
+            this.saveEdit({ confirm: true, next: 'untranslated' });
+        });
+        topBar.appendChild(confirmNextUntranslated);
+
+        let confirmNextUnconfirmed = document.createElement('a');
+        confirmNextUnconfirmed.innerHTML = TranslationView.SVG_TRANSLATED +
+            '<span class="tooltiptext bottomTooltip">Confirm and go to Next Uncornfirmed</span>';
+        confirmNextUnconfirmed.className = 'tooltip';
+        confirmNextUnconfirmed.addEventListener('click', () => {
+            this.saveEdit({ confirm: true, next: 'unconfirmed' });
+        });
+        topBar.appendChild(confirmNextUnconfirmed);
 
         let findInPage = document.createElement('a');
         findInPage.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 0 24 24" width="24"><path d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zM6 4h7l5 5v8.58l-1.84-1.84c1.28-1.94 1.07-4.57-.64-6.28C14.55 8.49 13.28 8 12 8c-1.28 0-2.55.49-3.53 1.46-1.95 1.95-1.95 5.11 0 7.05.97.97 2.25 1.46 3.53 1.46.96 0 1.92-.28 2.75-.83L17.6 20H6V4zm8.11 11.1c-.56.56-1.31.88-2.11.88s-1.55-.31-2.11-.88c-.56-.56-.88-1.31-.88-2.11s.31-1.55.88-2.11c.56-.57 1.31-.88 2.11-.88s1.55.31 2.11.88c.56.56.88 1.31.88 2.11s-.31 1.55-.88 2.11z"/></svg>' +
@@ -713,7 +732,7 @@ class TranslationView {
                 file: this.currentId.file,
                 unit: this.currentId.unit,
                 segment: this.currentId.id, translation: translation,
-                confirm: confirm, 
+                confirm: confirm,
                 memory: this.memSelect.value
             });
             if (next === 'untranslated') {
@@ -923,7 +942,7 @@ class TranslationView {
         this.statistics.innerText = stats;
     }
 
-    setSpellChecker() : void {
+    setSpellChecker(): void {
         this.electron.ipcRenderer.send('spell-language', this.tgtLang);
     }
 
