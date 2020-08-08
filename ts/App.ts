@@ -39,6 +39,7 @@ class Swordfish {
     static defaultLangsWindow: BrowserWindow;
     static spellingLangsWindow: BrowserWindow;
     static findTextWindow: BrowserWindow;
+    static messagesWindow: BrowserWindow;
 
     javapath: string = Swordfish.path.join(app.getAppPath(), 'bin', 'java');
 
@@ -360,7 +361,7 @@ class Swordfish {
             Swordfish.openLicense(arg.type);
         });
         ipcMain.on('show-message', (event: IpcMainEvent, arg: any) => {
-            dialog.showMessageBox(arg);
+            Swordfish.showMessage(arg);
         });
         ipcMain.on('add-tab', (event: IpcMainEvent, arg: any) => {
             Swordfish.mainWindow.webContents.send('add-tab', arg);
@@ -419,13 +420,18 @@ class Swordfish {
             rect.height = arg.height + this.verticalPadding;
             Swordfish.spellingLangsWindow.setBounds(rect);
         });
-        ipcMain.on('show-find-text',(event: IpcMainEvent, arg: any) => {
+        ipcMain.on('show-find-text', (event: IpcMainEvent, arg: any) => {
             Swordfish.showFindText(arg);
         });
-        ipcMain.on('find-text-height',(event: IpcMainEvent, arg: any) => {
+        ipcMain.on('find-text-height', (event: IpcMainEvent, arg: any) => {
             let rect: Rectangle = Swordfish.findTextWindow.getBounds();
             rect.height = arg.height + this.verticalPadding;
             Swordfish.findTextWindow.setBounds(rect);
+        });
+        ipcMain.on('messages-height', (event: IpcMainEvent, arg: any) => {
+            let rect: Rectangle = Swordfish.messagesWindow.getBounds();
+            rect.height = arg.height + this.verticalPadding;
+            Swordfish.messagesWindow.setBounds(rect);
         });
     } // end constructor
 
@@ -503,15 +509,15 @@ class Swordfish {
             { label: 'Insert Remaining Tags', accelerator: 'CmdOrCtrl+Alt+T', click: () => { Swordfish.mainWindow.webContents.send('insert-remaining-tags'); } },
             { label: 'Remove all Tags', accelerator: 'CmdOrCtrl+Shift+R', click: () => { Swordfish.mainWindow.webContents.send('remove-tags'); } },
             new MenuItem({ type: 'separator' }),
-            { label: 'Find', accelerator: 'CmdOrCtrl+F', click: () => { this.findText(); } },
-            { label: 'Replace', accelerator: 'CmdOrCtrl+Alt+F', click: () => { this.replaceText(); } },
+            { label: 'Find Text', accelerator: 'CmdOrCtrl+F', click: () => { this.findText(); } },
+            { label: 'Replace Text', accelerator: 'CmdOrCtrl+Alt+F', click: () => { this.replaceText(); } },
         ]);
         var viewMenu: Menu = Menu.buildFromTemplate([
             { label: 'Projects', accelerator: 'CmdOrCtrl+Alt+1', click: () => { Swordfish.viewProjects(); } },
             { label: 'Memories', accelerator: 'CmdOrCtrl+Alt+2', click: () => { Swordfish.viewMemories(); } },
             { label: 'Glossaries', accelerator: 'CmdOrCtrl+Alt+3', click: () => { Swordfish.viewGlossaries(); } },
             new MenuItem({ type: 'separator' }),
-            { label: 'Close Selected Tab', accelerator:'CmdOrCtrl+W', click: () => {Swordfish.closeSelectedTab(); }},
+            { label: 'Close Selected Tab', accelerator: 'CmdOrCtrl+W', click: () => { Swordfish.closeSelectedTab(); } },
             new MenuItem({ type: 'separator' }),
             { label: 'First Page', accelerator: 'CmdOrCtrl+Shift+Home', click: () => { Swordfish.mainWindow.webContents.send('first-page'); } },
             { label: 'Previous Page', accelerator: 'CmdOrCtrl+Home', click: () => { Swordfish.mainWindow.webContents.send('previous-page'); } },
@@ -722,7 +728,7 @@ class Swordfish {
         Swordfish.mainWindow.webContents.send('view-projects');
     }
 
-    static closeSelectedTab(): void  {
+    static closeSelectedTab(): void {
         Swordfish.mainWindow.webContents.send('close-tab');
     }
 
@@ -754,7 +760,7 @@ class Swordfish {
                 Swordfish.exportTranslations(data);
             },
             (reason: string) => {
-                dialog.showErrorBox('Error', reason);
+                Swordfish.showMessage({ type: 'error', message: reason });
             }
         );
     }
@@ -772,7 +778,7 @@ class Swordfish {
                         (data: any) => {
                             Swordfish.exportProject(data, value.filePath, true);
                         }, (reason: string) => {
-                            dialog.showErrorBox('Error', reason);
+                            Swordfish.showMessage({ type: 'error', message: reason });
                         }
                     );
                 }
@@ -786,7 +792,7 @@ class Swordfish {
                         (data: any) => {
                             Swordfish.exportProject(data, value.filePath, false);
                         }, (reason: string) => {
-                            dialog.showErrorBox('Error', reason);
+                            Swordfish.showMessage({ type: 'error', message: reason });
                         }
                     );
                 }
@@ -930,7 +936,7 @@ class Swordfish {
                 }, 500);
             },
             (reason: string) => {
-                dialog.showErrorBox('Error', reason);
+                Swordfish.showMessage({ type: 'error', message: reason });
             }
         );
     }
@@ -941,7 +947,7 @@ class Swordfish {
                 Swordfish.currentStatus = data;
             },
             (reason: string) => {
-                dialog.showErrorBox('Error', reason);
+                Swordfish.showMessage({ type: 'error', message: reason });
             }
         );
     }
@@ -1034,7 +1040,7 @@ class Swordfish {
                 event.sender.send('add-source-files', data);
             },
             (reason: string) => {
-                dialog.showErrorBox('Error', reason);
+                Swordfish.showMessage({ type: 'error', message: reason });
             }
         );
     }
@@ -1047,7 +1053,7 @@ class Swordfish {
                 event.sender.send('set-languages', data);
             },
             (reason: string) => {
-                dialog.showErrorBox('Error', reason);
+                Swordfish.showMessage({ type: 'error', message: reason });
             }
         );
     }
@@ -1058,7 +1064,7 @@ class Swordfish {
                 event.sender.send('set-mt-languages', data);
             },
             (reason: string) => {
-                dialog.showErrorBox('Error', reason);
+                Swordfish.showMessage({ type: 'error', message: reason });
             }
         );
     }
@@ -1284,21 +1290,21 @@ class Swordfish {
                     try {
                         const parsedData = JSON.parse(rawData);
                         if (app.getVersion() !== parsedData.version) {
-                            dialog.showMessageBox(this.mainWindow, {
+                            Swordfish.showMessage({
                                 type: 'info',
                                 title: 'Updates Available',
                                 message: 'Version ' + parsedData.version + ' is available'
                             });
                         } else {
                             if (!silent) {
-                                dialog.showMessageBox(this.mainWindow, {
+                                Swordfish.showMessage({
                                     type: 'info',
                                     message: 'There are currently no updates available'
                                 });
                             }
                         }
                     } catch (e) {
-                        dialog.showErrorBox('Error', e.message);
+                        Swordfish.showMessage({ type: 'error', message: e.message });
                     }
                 });
             } else {
@@ -1308,7 +1314,7 @@ class Swordfish {
             }
         }).on('error', (e: any) => {
             if (!silent) {
-                dialog.showErrorBox('Error', e.message);
+                Swordfish.showMessage({ type: 'error', message: e.message });
             }
         });
     }
@@ -1323,7 +1329,7 @@ class Swordfish {
                 }
             },
             (reason: string) => {
-                dialog.showErrorBox('Error', reason);
+                Swordfish.showMessage({ type: 'error', message: reason });
             }
         );
     }
@@ -1338,7 +1344,7 @@ class Swordfish {
                 }
             },
             (reason: string) => {
-                dialog.showErrorBox('Error', reason);
+                Swordfish.showMessage({ type: 'error', message: reason });
             }
         );
     }
@@ -1353,7 +1359,7 @@ class Swordfish {
                 }
             },
             (reason: string) => {
-                dialog.showErrorBox('Error', reason);
+                Swordfish.showMessage({ type: 'error', message: reason });
             }
         );
     }
@@ -1368,7 +1374,7 @@ class Swordfish {
                 }
             },
             (reason: string) => {
-                dialog.showErrorBox('Error', reason);
+                Swordfish.showMessage({ type: 'error', message: reason });
             }
         );
     }
@@ -1383,7 +1389,7 @@ class Swordfish {
                 }
             },
             (reason: string) => {
-                dialog.showErrorBox('Error', reason);
+                Swordfish.showMessage({ type: 'error', message: reason });
             }
         );
     }
@@ -1465,7 +1471,7 @@ class Swordfish {
                 }
             },
             (reason: string) => {
-                dialog.showErrorBox('Error', reason);
+                Swordfish.showMessage({ type: 'error', message: reason });
             }
         );
     }
@@ -1481,7 +1487,7 @@ class Swordfish {
                 }
             },
             (reason: string) => {
-                dialog.showErrorBox('Error', reason);
+                Swordfish.showMessage({ type: 'error', message: reason });
             }
         );
     }
@@ -1499,7 +1505,7 @@ class Swordfish {
                         }
                     },
                     (reason: string) => {
-                        dialog.showErrorBox('Error', reason);
+                        Swordfish.showMessage({ type: 'error', message: reason });
                     }
                 );
             }
@@ -1517,7 +1523,7 @@ class Swordfish {
                 Swordfish.mainWindow.webContents.send('request-memories');
             },
             (reason: string) => {
-                dialog.showErrorBox('Error', reason);
+                Swordfish.showMessage({ type: 'error', message: reason });
             }
         );
     }
@@ -1590,7 +1596,7 @@ class Swordfish {
                 }, 500);
             },
             (reason: string) => {
-                dialog.showErrorBox('Error', reason);
+                Swordfish.showMessage({ type: 'error', message: reason });
             }
         );
 
@@ -1602,7 +1608,7 @@ class Swordfish {
                 Swordfish.currentStatus = data;
             },
             (reason: string) => {
-                dialog.showErrorBox('Error', reason);
+                Swordfish.showMessage({ type: 'error', message: reason });
             }
         );
     }
@@ -1676,7 +1682,7 @@ class Swordfish {
                         }, 500);
                     },
                     (reason: string) => {
-                        dialog.showErrorBox('Error', reason);
+                        Swordfish.showMessage({ type: 'error', message: reason });
                     }
                 );
             }
@@ -1729,7 +1735,7 @@ class Swordfish {
                                 Swordfish.getMemoriesProgress(processId);
                             }, 500);
                         }, (reason: string) => {
-                            dialog.showErrorBox('Error', reason);
+                            Swordfish.showMessage({ type: 'error', message: reason });
                         }
                     );
                 }
@@ -1751,7 +1757,7 @@ class Swordfish {
                 }
             },
             (reason: string) => {
-                dialog.showErrorBox('Error', reason);
+                Swordfish.showMessage({ type: 'error', message: reason });
             }
         );
     }
@@ -1769,7 +1775,7 @@ class Swordfish {
                 Swordfish.mainWindow.webContents.send('set-statistics', { project: arg.project, statistics: data.statistics });
             },
             (reason: string) => {
-                dialog.showErrorBox('Error', reason);
+                Swordfish.showMessage({ type: 'error', message: reason });
             }
         );
     }
@@ -1786,7 +1792,7 @@ class Swordfish {
                 }
             },
             (reason: string) => {
-                dialog.showErrorBox('Error', reason);
+                Swordfish.showMessage({ type: 'error', message: reason });
             }
         );
     }
@@ -1809,7 +1815,7 @@ class Swordfish {
             (reason: string) => {
                 Swordfish.mainWindow.webContents.send('end-waiting');
                 Swordfish.mainWindow.webContents.send('set-status', '');
-                dialog.showErrorBox('Error', reason);
+                Swordfish.showMessage({ type: 'error', message: reason });
             }
         );
     }
@@ -1832,7 +1838,7 @@ class Swordfish {
             (reason: string) => {
                 Swordfish.mainWindow.webContents.send('end-waiting');
                 Swordfish.mainWindow.webContents.send('set-status', '');
-                dialog.showErrorBox('Error', reason);
+                Swordfish.showMessage({ type: 'error', message: reason });
             }
         );
     }
@@ -1853,7 +1859,7 @@ class Swordfish {
             (reason: string) => {
                 Swordfish.mainWindow.webContents.send('end-waiting');
                 Swordfish.mainWindow.webContents.send('set-status', '');
-                dialog.showErrorBox('Error', reason);
+                Swordfish.showMessage({ type: 'error', message: reason });
             }
         );
     }
@@ -1869,7 +1875,7 @@ class Swordfish {
                 Swordfish.mainWindow.webContents.send('set-project-memories', data);
             },
             (reason: string) => {
-                dialog.showErrorBox('Error', reason);
+                Swordfish.showMessage({ type: 'error', message: reason });
             }
         );
     }
@@ -1883,7 +1889,7 @@ class Swordfish {
                 }
             },
             (reason: string) => {
-                dialog.showErrorBox('Error', reason);
+                Swordfish.showMessage({ type: 'error', message: reason });
             }
         );
     }
@@ -1916,7 +1922,7 @@ class Swordfish {
                 event.sender.send('set-spellchecker-langs', data);
             },
             (reason: string) => {
-                dialog.showErrorBox('Error', reason);
+                Swordfish.showMessage({ type: 'error', message: reason });
             }
         );
     }
@@ -1944,6 +1950,30 @@ class Swordfish {
                 Swordfish.mainWindow.webContents.session.setSpellCheckerLanguages([lang]);
             }
         }
+    }
+
+    static showMessage(arg: any): void {
+        Swordfish.messagesWindow = new BrowserWindow({
+            parent: this.mainWindow,
+            width: 400,
+            useContentSize: true,
+            minimizable: false,
+            maximizable: false,
+            resizable: false,
+            show: false,
+            icon: this.iconPath,
+            webPreferences: {
+                nodeIntegration: true
+            }
+        });
+        Swordfish.messagesWindow.setMenu(null);
+        Swordfish.messagesWindow.loadURL('file://' + this.path.join(app.getAppPath(), 'html', 'messages.html'));
+        Swordfish.messagesWindow.once('ready-to-show', (event: IpcMainEvent) => {
+            event.sender.send('set-message', arg);
+            event.sender.send('get-height');
+            Swordfish.messagesWindow.show();
+            Swordfish.messagesWindow.focus();
+        });
     }
 }
 

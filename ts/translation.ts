@@ -184,18 +184,18 @@ class TranslationView {
         topBar.appendChild(confirmNextUnconfirmed);
 
         let findInPage = document.createElement('a');
-        findInPage.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 0 24 24" width="24"><path d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zM6 4h7l5 5v8.58l-1.84-1.84c1.28-1.94 1.07-4.57-.64-6.28C14.55 8.49 13.28 8 12 8c-1.28 0-2.55.49-3.53 1.46-1.95 1.95-1.95 5.11 0 7.05.97.97 2.25 1.46 3.53 1.46.96 0 1.92-.28 2.75-.83L17.6 20H6V4zm8.11 11.1c-.56.56-1.31.88-2.11.88s-1.55-.31-2.11-.88c-.56-.56-.88-1.31-.88-2.11s.31-1.55.88-2.11c.56-.57 1.31-.88 2.11-.88s1.55.31 2.11.88c.56.56.88 1.31.88 2.11s-.31 1.55-.88 2.11z"/></svg>' +
-            '<span class="tooltiptext bottomTooltip">Find in Page</span>';
+        findInPage.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 0 24 24" width="24"><circle cx="11" cy="11" r="6" fill="none" stroke-width="2"/><line x1="15" y1="15" x2="21" y2="21" stroke-width="2"/></svg>' +
+            '<span class="tooltiptext bottomTooltip">Find Text</span>';
         findInPage.className = 'tooltip';
         findInPage.style.marginLeft = '20px';
         findInPage.addEventListener('click', () => {
-            this.electron.ipcRenderer.send('show-find');
+            this.electron.ipcRenderer.send('show-find-text');
         });
         topBar.appendChild(findInPage);
 
         let filterText = document.createElement('a');
-        filterText.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" enable-background="new 0 0 24 24" height="24" viewBox="0 0 24 24" width="24"><path d="M7,6h10l-5.01,6.3L7,6z M4.25,5.61C6.27,8.2,10,13,10,13v6c0,0.55,0.45,1,1,1h2c0.55,0,1-0.45,1-1v-6 c0,0,3.72-4.8,5.74-7.39C20.25,4.95,19.78,4,18.95,4H5.04C4.21,4,3.74,4.95,4.25,5.61z"/></svg>' +
-            '<span class="tooltiptext bottomTooltip">Filter Text</span>';
+        filterText.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 0 24 24" width="24"><path d="M11 6c1.38 0 2.63.56 3.54 1.46L12 10h6V4l-2.05 2.05C14.68 4.78 12.93 4 11 4c-3.53 0-6.43 2.61-6.92 6H6.1c.46-2.28 2.48-4 4.9-4zm5.64 9.14c.66-.9 1.12-1.97 1.28-3.14H15.9c-.46 2.28-2.48 4-4.9 4-1.38 0-2.63-.56-3.54-1.46L10 12H4v6l2.05-2.05C7.32 17.22 9.07 18 11 18c1.55 0 2.98-.51 4.14-1.36L20 21.49 21.49 20l-4.85-4.86z"/></svg>' +
+            '<span class="tooltiptext bottomTooltip">Replace Text</span>';
         filterText.className = 'tooltip';
         filterText.addEventListener('click', () => {
             this.electron.ipcRenderer.send('show-filter');
@@ -304,7 +304,7 @@ class TranslationView {
             this.maxPage++;
         }
 
-        this.pagesSpan.innerText = 'of ' + this.maxPage;
+        this.pagesSpan.innerText = '' + this.maxPage;
         this.pageInput.value = '1';
         this.getSegments();
     }
