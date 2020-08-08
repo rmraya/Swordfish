@@ -6,6 +6,11 @@ An advanced CAT (Computer Aided Translation) tool based on XLIFF Standard that s
 
 Swordfish uses TM (translation Memory) and MT (Machine Translation). Supports In-Context Exact Matches, segment filtering, customization and more.
 
+<div style="width:100%; text-align:center;">
+  <a href="https://www.maxprograms.com/tutorials/TranslateFile.mp4" target="_blank"><img src="https://www.maxprograms.com/images/translateFile.png"></a><br>
+  <i>Swordfish IV running on macOS</i>
+</div>
+
 ## Licenses
 
 Swordfish is available in two modes:
