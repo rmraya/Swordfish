@@ -386,10 +386,6 @@ label {
 	margin-right: 2px;
 }
 
-.toolbar a:hover {
-	text-decoration: none !important;
-}
-
 .toolbar a img {
 	padding-top: 4px;
 }
@@ -403,6 +399,7 @@ label {
 
 .toolbar a:hover {
 	background-color: var(--input-background);
+	text-decoration: none !important;
 }
 
 svg {

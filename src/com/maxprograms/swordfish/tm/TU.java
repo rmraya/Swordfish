@@ -51,7 +51,7 @@ public class TU {
 		userid = data.getUser();
 	}
 
-	public void setProps(Hashtable<String,String> values) {
+	public void setProps(Map<String,String> values) {
 		props = values;
 		if (creationdate != null && props != null) {
 			props.put("creationdate", creationdate); 
@@ -98,7 +98,7 @@ public class TU {
 		langs = set;
 	}
 
-	public void setTuvs(Hashtable<String, Tuv> values) {
+	public void setTuvs(Map<String, Tuv> values) {
 		tuvs = values;
 	}
 

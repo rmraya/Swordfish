@@ -65,7 +65,6 @@ import com.maxprograms.xml.XMLNode;
 import com.maxprograms.xml.XMLOutputter;
 
 import org.json.JSONArray;
-import org.json.JSONException;
 import org.json.JSONObject;
 import org.xml.sax.SAXException;
 
@@ -269,7 +268,7 @@ public class XliffStore {
                 }
             }
             state = e.getAttributeValue("state", pureText(target).isEmpty() ? "initial" : "translated");
-            preserve = preserve | sourcePreserve | "preserve".equals(target.getAttributeValue("xml:space", "default"));
+            preserve = preserve || sourcePreserve || "preserve".equals(target.getAttributeValue("xml:space", "default"));
 
             insertSegment(currentFile, currentUnit, id, "S", translate, source, target);
         }
@@ -562,8 +561,7 @@ public class XliffStore {
                         ITmEngine engine = MemoriesHandler.open(memory);
                         engine.storeTu(XliffUtils.toTu(key.toString(), source, target, tags));
                         MemoriesHandler.closeMemory(memory);
-                    } catch (IOException | SQLException | ClassNotFoundException | SAXException
-                            | ParserConfigurationException e) {
+                    } catch (IOException | SQLException e) {
                         logger.log(Level.ERROR, e);
                     }
                 }
@@ -597,7 +595,7 @@ public class XliffStore {
         }
         int percentage = 0;
         if (total != 0) {
-            percentage = Math.round(confirmed * 100 / total);
+            percentage = Math.round(confirmed * 100f / total);
         }
         return "Words: " + total + "\u00A0\u00A0\u00A0Translated: " + translated + "\u00A0\u00A0\u00A0Confirmed: "
                 + confirmed + " (" + percentage + "%)";
@@ -1344,7 +1342,7 @@ public class XliffStore {
     }
 
     public JSONArray machineTranslate(JSONObject json, MT translator) throws SQLException, IOException,
-            InterruptedException, JSONException, SAXException, ParserConfigurationException {
+            InterruptedException, SAXException, ParserConfigurationException {
         JSONArray result = new JSONArray();
 
         String file = json.getString("file");
@@ -1389,7 +1387,7 @@ public class XliffStore {
     }
 
     public JSONArray tmTranslate(JSONObject json)
-            throws SAXException, IOException, ParserConfigurationException, SQLException, ClassNotFoundException {
+            throws SAXException, IOException, ParserConfigurationException, SQLException {
         String file = json.getString("file");
         String unit = json.getString("unit");
         String segment = json.getString("segment");
@@ -1430,7 +1428,7 @@ public class XliffStore {
     }
 
     public void tmTranslateAll(String memory)
-            throws IOException, SQLException, SAXException, ParserConfigurationException, ClassNotFoundException {
+            throws IOException, SQLException, SAXException, ParserConfigurationException {
         ITmEngine engine = MemoriesHandler.open(memory);
         String sql = "SELECT file, unitId, segId, source, sourceText FROM segments WHERE state <> 'final'";
         try (ResultSet rs = stmt.executeQuery(sql)) {

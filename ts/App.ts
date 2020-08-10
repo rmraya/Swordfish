@@ -19,7 +19,7 @@ SOFTWARE.
 
 import { Buffer } from "buffer";
 import { execFileSync, spawn, ChildProcessWithoutNullStreams } from "child_process";
-import { app, clipboard, BrowserWindow, dialog, ipcMain, Menu, MenuItem, shell, webContents, nativeTheme, Rectangle, IpcMainEvent, screen, Size } from "electron";
+import { app, clipboard, BrowserWindow, dialog, ipcMain, Menu, MenuItem, shell, nativeTheme, Rectangle, IpcMainEvent, screen, Size } from "electron";
 import { existsSync, mkdirSync, readFile, readFileSync, writeFileSync } from "fs";
 import { ClientRequest, request, IncomingMessage } from "http";
 

@@ -20,16 +20,14 @@ SOFTWARE.
 package com.maxprograms.swordfish.tm;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.Set;
 import java.util.Vector;
+
+import com.maxprograms.xml.Element;
 
 import org.mapdb.DB;
 import org.mapdb.DBMaker;
 import org.mapdb.HTreeMap;
-
-import com.maxprograms.xml.Element;
-import com.maxprograms.xml.XMLNode;
 
 public class TuDatabase {
 
@@ -39,7 +37,7 @@ public class TuDatabase {
 	private Set<String> subjects;
 	private Set<String> customers;
 
-	public TuDatabase(File folder) throws IOException {
+	public TuDatabase(File folder) {
 		mapdb = DBMaker.newFileDB(new File(folder, "tudata")).closeOnJvmShutdown().asyncWriteEnable().make();
 		tumap = mapdb.getHashMap("tuvmap");
 		projects = mapdb.getHashSet("projects");
@@ -47,7 +45,7 @@ public class TuDatabase {
 		customers = mapdb.getHashSet("customers");
 	}
 
-	synchronized public void commit() {
+	public synchronized void commit() {
 		mapdb.commit();
 	}
 
@@ -55,14 +53,14 @@ public class TuDatabase {
 		mapdb.compact();
 	}
 
-	synchronized public void close() {
+	public synchronized void close() {
 		mapdb.close();
 	}
 
-	synchronized public void store(String tuid, Element tu) {
+	public synchronized void store(String tuid, Element tu) {
 		tu.removeChild("tuv");
 		if (tu.getChildren().isEmpty()) {
-			tu.setContent(new Vector<XMLNode>());
+			tu.setContent(new Vector<>());
 		}
 		tumap.put(tuid.hashCode(), tu);
 	}

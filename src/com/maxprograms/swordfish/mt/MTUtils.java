@@ -28,11 +28,14 @@ import com.maxprograms.languages.Language;
 import com.maxprograms.languages.LanguageUtils;
 
 import org.json.JSONArray;
-import org.json.JSONException;
 import org.json.JSONObject;
 
 public class MTUtils {
 
+    private MTUtils() {
+	// empty for security
+    }
+        
     private static String[] azureSrcLanguages = { "de", "hi", "pt", "ty", "fil", "lt", "hr", "lv", "ht", "mww",
             "hu", "zh-Hans", "zh-Hant", "uk", "mg", "id", "mi", "ur", "ml", "af", "mr", "ms", "el", "mt",
             "en", "is", "it", "otq", "es", "et", "ar", "pt-pt", "tlh-Latn", "vi", "nb", "ja", "fa", "ro",
@@ -120,7 +123,7 @@ public class MTUtils {
     private static String[] deepLtgtLang = { "de", "en", "fr", "it", "ja", "es", "nl", "pl", "pt", "pt-BR", "ru",
             "zh" };
 
-    public static JSONObject getMTLanguages() throws JSONException, IOException {
+    public static JSONObject getMTLanguages() throws IOException {
         JSONObject result = new JSONObject();
 
         JSONObject google = new JSONObject();

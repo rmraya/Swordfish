@@ -58,7 +58,7 @@ public class FuzzyIndex {
 		return maps.get(lang);
 	}
 
-	synchronized public void commit() {
+	public synchronized void commit() {
 		Iterator<String> keys = databases.keySet().iterator();
 		while (keys.hasNext()) {
 			String key = keys.next();
@@ -75,7 +75,7 @@ public class FuzzyIndex {
 		}
 	}
 
-	synchronized public void close() {
+	public synchronized void close() {
 		Iterator<String> keys = databases.keySet().iterator();
 		while (keys.hasNext()) {
 			String key = keys.next();

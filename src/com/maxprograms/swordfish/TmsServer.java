@@ -80,7 +80,7 @@ public class TmsServer implements HttpHandler {
 		server.createContext("/glossaries", new GlossariesHandler());
 		server.createContext("/services", new ServicesHandler());
 		server.createContext("/", this);
-		server.setExecutor(new ThreadPoolExecutor(4, 8, 30, TimeUnit.SECONDS, new ArrayBlockingQueue<Runnable>(100)));
+		server.setExecutor(new ThreadPoolExecutor(4, 8, 30, TimeUnit.SECONDS, new ArrayBlockingQueue<>(100)));
 		server.start();
 		if (debug) {
 			logger.log(Level.INFO, "TMS server started");
@@ -114,8 +114,8 @@ public class TmsServer implements HttpHandler {
 				case "stop":
 					if (debug) {
 						logger.log(Level.INFO, "Stopping server");
-						break;
 					}
+					break;
 				default:
 					JSONObject unknown = new JSONObject();
 					unknown.put(Constants.STATUS, Constants.ERROR);

@@ -160,8 +160,7 @@ public class MemoriesHandler implements HttpHandler {
 				JSONObject obj = new JSONObject();
 				obj.put("languages", array);
 				openTasks.put(process, new String[] { Constants.COMPLETED, obj.toString() });
-			} catch (IOException | SQLException | ClassNotFoundException | SAXException
-					| ParserConfigurationException e) {
+			} catch (IOException | SQLException  e) {
 				logger.log(Level.ERROR, e.getMessage(), e);
 				openTasks.put(process, new String[] { Constants.ERROR, e.getMessage() });
 			}
@@ -250,8 +249,7 @@ public class MemoriesHandler implements HttpHandler {
 				if (!wasOpen) {
 					closeMemory(id);
 				}
-			} catch (IOException | SQLException | ClassNotFoundException | SAXException
-					| ParserConfigurationException e) {
+			} catch (IOException | SQLException e) {
 				logger.log(Level.ERROR, e.getMessage(), e);
 				openTasks.put(process, new String[] { Constants.ERROR, e.getMessage() });
 			}
@@ -307,8 +305,7 @@ public class MemoriesHandler implements HttpHandler {
 					closeMemory(mem.getId());
 				}
 				openTasks.put(process, new String[] { Constants.COMPLETED });
-			} catch (IOException | SAXException | ParserConfigurationException | SQLException
-					| ClassNotFoundException e) {
+			} catch (IOException | SAXException | ParserConfigurationException | SQLException e) {
 				logger.log(Level.ERROR, e.getMessage(), e);
 				openTasks.put(process, new String[] { Constants.ERROR, e.getMessage() });
 			}
@@ -396,8 +393,7 @@ public class MemoriesHandler implements HttpHandler {
 		return result;
 	}
 
-	private static JSONObject createMemory(String request)
-			throws IOException, SQLException,  SAXException, ParserConfigurationException {
+	private static JSONObject createMemory(String request) throws IOException, SQLException {
 		JSONObject result = new JSONObject();
 		JSONObject json = new JSONObject(request);
 		if (!json.has("id")) {
@@ -486,8 +482,7 @@ public class MemoriesHandler implements HttpHandler {
 		return workFolder.getAbsolutePath();
 	}
 
-	private static void openMemory(String id)
-			throws IOException, SQLException, ClassNotFoundException, SAXException, ParserConfigurationException {
+	private static void openMemory(String id) throws IOException, SQLException {
 		if (memories == null) {
 			loadMemoriesList();
 		}
@@ -511,80 +506,7 @@ public class MemoriesHandler implements HttpHandler {
 		openEngines.get(id).close();
 	}
 
-	public static JSONObject getAllClients(String request) {
-		JSONObject result = new JSONObject();
-		if (openEngines == null) {
-			openEngines = new ConcurrentHashMap<>();
-		}
-		Set<String> clients = new TreeSet<>();
-		try {
-			if (memories == null) {
-				loadMemoriesList();
-			}
-			Set<String> keys = memories.keySet();
-			Iterator<String> it = keys.iterator();
-			while (it.hasNext()) {
-				String id = it.next();
-				clients.add(memories.get(id).getClient());
-				boolean needsClosing = !openEngines.containsKey(id);
-				if (needsClosing) {
-					openMemory(id);
-				}
-				clients.addAll(openEngines.get(id).getAllClients());
-				if (needsClosing) {
-					closeMemory(id);
-				}
-			}
-			JSONArray array = new JSONArray();
-			it = clients.iterator();
-			while (it.hasNext()) {
-				array.put(it.next());
-			}
-			result.put("clients", array);
-		} catch (IOException | SQLException | ClassNotFoundException | SAXException | ParserConfigurationException e) {
-			result.put(Constants.REASON, e.getMessage());
-		}
-		return result;
-	}
-
-	public static JSONObject getAllSubjects(String request) {
-		JSONObject result = new JSONObject();
-		if (openEngines == null) {
-			openEngines = new ConcurrentHashMap<>();
-		}
-		Set<String> subjects = new TreeSet<>();
-		try {
-			if (memories == null) {
-				loadMemoriesList();
-			}
-			Set<String> keys = memories.keySet();
-			Iterator<String> it = keys.iterator();
-			while (it.hasNext()) {
-				String id = it.next();
-				subjects.add(memories.get(id).getSubject());
-				boolean needsClosing = !openEngines.containsKey(id);
-				if (needsClosing) {
-					openMemory(id);
-				}
-				subjects.addAll(openEngines.get(id).getAllSubjects());
-				if (needsClosing) {
-					closeMemory(id);
-				}
-			}
-			JSONArray array = new JSONArray();
-			it = subjects.iterator();
-			while (it.hasNext()) {
-				array.put(it.next());
-			}
-			result.put("subjects", array);
-		} catch (IOException | SQLException | ClassNotFoundException | SAXException | ParserConfigurationException e) {
-			result.put(Constants.REASON, e.getMessage());
-		}
-		return result;
-	}
-
-	public static ITmEngine open(String memory)
-			throws IOException, SQLException, ClassNotFoundException, SAXException, ParserConfigurationException {
+	public static ITmEngine open(String memory) throws IOException, SQLException {
 		if (memories == null) {
 			loadMemoriesList();
 		}

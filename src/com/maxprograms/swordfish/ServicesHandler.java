@@ -122,6 +122,7 @@ public class ServicesHandler implements HttpHandler {
             }
         } catch (Exception j) {
             logger.log(Level.ERROR, j.getMessage(), j);
+            result = new JSONObject();
             result.put(Constants.STATUS, Constants.ERROR);
             result.put(Constants.REASON, j.getMessage());
         }

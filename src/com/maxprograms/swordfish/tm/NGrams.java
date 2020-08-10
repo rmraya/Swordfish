@@ -49,14 +49,14 @@ public class NGrams {
 				ngrams++;
 			}
 			for (int i = 0; i < ngrams; i++) {
-				String gram = ""; 
+				StringBuilder gram = new StringBuilder(); 
 				for (int j = 0; j < NGRAMSIZE; j++) {
 					if (i * NGRAMSIZE + j < length) {
 						char c = array[i * NGRAMSIZE + j];
-						gram = gram + c;
+						gram.append(c);
 					}
 				}
-				table.put("" + gram.hashCode(), ""); 
+				table.put("" + gram.toString().hashCode(), ""); 
 			}
 		}
 

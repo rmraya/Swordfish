@@ -24,7 +24,6 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.lang.System.Logger;
 import java.lang.System.Logger.Level;
-import java.net.MalformedURLException;
 import java.nio.charset.StandardCharsets;
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -79,7 +78,7 @@ public class InternalDatabase implements ITmEngine {
 	private long next;
 
 	public InternalDatabase(String dbname, String workFolder)
-			throws SQLException, IOException, SAXException, ParserConfigurationException {
+			throws SQLException, IOException {
 		this.dbname = dbname;
 		creationDate = TMUtils.tmxDate();
 
@@ -115,7 +114,7 @@ public class InternalDatabase implements ITmEngine {
 		}
 	}
 
-	private void createTable() throws SQLException, IOException {
+	private void createTable() throws SQLException {
 		String sql = "CREATE TABLE tuv (tuid VARCHAR(40) NOT NULL, lang VARCHAR(15) NOT NULL, seg VARCHAR(6000) NOT NULL, puretext VARCHAR(4000) NOT NULL, textlength INTEGER NOT NULL, PRIMARY KEY(tuid, lang));";
 		try (Statement stmt = conn.createStatement()) {
 			stmt.execute(sql);
@@ -146,7 +145,7 @@ public class InternalDatabase implements ITmEngine {
 	}
 
 	@Override
-	synchronized public void commit() throws SQLException {
+	public synchronized void commit() throws SQLException {
 		conn.commit();
 		fuzzyIndex.commit();
 		tuDb.commit();
@@ -154,7 +153,7 @@ public class InternalDatabase implements ITmEngine {
 
 	@Override
 	public int storeTMX(String tmxFile, String project, String customer, String subject)
-			throws SQLException, MalformedURLException, IOException, SAXException, ParserConfigurationException {
+			throws SQLException, IOException, SAXException, ParserConfigurationException {
 		int imported = 0;
 		next = 0l;
 		if (customer == null) {
@@ -439,46 +438,40 @@ public class InternalDatabase implements ITmEngine {
 			Element prop = kt.next();
 			props.put(prop.getAttributeValue("type"), prop.getText());
 		}
-		if (currSubject != null && !currSubject.equals("")) {
-			if (!props.containsKey("subject")) {
-				Element prop = new Element("prop");
-				prop.setAttribute("type", "subject");
-				prop.setText(XMLUtils.cleanText(currSubject));
-				List<Element> content = tu.getChildren();
-				content.add(0, prop);
-				tu.setChildren(content);
-				props.put(prop.getAttributeValue("type"), prop.getText());
-			}
+		if (currSubject != null && !currSubject.equals("") && !props.containsKey("subject")) {
+			Element prop = new Element("prop");
+			prop.setAttribute("type", "subject");
+			prop.setText(XMLUtils.cleanText(currSubject));
+			List<Element> content = tu.getChildren();
+			content.add(0, prop);
+			tu.setChildren(content);
+			props.put(prop.getAttributeValue("type"), prop.getText());
 		}
 		String sub = props.get("subject");
 		if (sub != null) {
 			tuDb.storeSubject(sub);
 		}
-		if (currCustomer != null && !currCustomer.equals("")) {
-			if (!props.containsKey("customer")) {
-				Element prop = new Element("prop");
-				prop.setAttribute("type", "customer");
-				prop.setText(XMLUtils.cleanText(currCustomer));
-				List<Element> content = tu.getChildren();
-				content.add(0, prop);
-				tu.setChildren(content);
-				props.put(prop.getAttributeValue("type"), prop.getText());
-			}
+		if (currCustomer != null && !currCustomer.equals("") && !props.containsKey("customer")) {
+			Element prop = new Element("prop");
+			prop.setAttribute("type", "customer");
+			prop.setText(XMLUtils.cleanText(currCustomer));
+			List<Element> content = tu.getChildren();
+			content.add(0, prop);
+			tu.setChildren(content);
+			props.put(prop.getAttributeValue("type"), prop.getText());
 		}
 		String cust = props.get("customer");
 		if (cust != null) {
 			tuDb.storeCustomer(cust);
 		}
-		if (currProject != null && !currProject.equals("")) {
-			if (!props.containsKey("project")) {
-				Element prop = new Element("prop");
-				prop.setAttribute("type", "project");
-				prop.setText(XMLUtils.cleanText(currProject));
-				List<Element> content = tu.getChildren();
-				content.add(0, prop);
-				tu.setChildren(content);
-				props.put(prop.getAttributeValue("type"), prop.getText());
-			}
+		if (currProject != null && !currProject.equals("") && !props.containsKey("project")) {
+			Element prop = new Element("prop");
+			prop.setAttribute("type", "project");
+			prop.setText(XMLUtils.cleanText(currProject));
+			List<Element> content = tu.getChildren();
+			content.add(0, prop);
+			tu.setChildren(content);
+			props.put(prop.getAttributeValue("type"), prop.getText());
 		}
 		String proj = props.get("project");
 		if (proj != null) {

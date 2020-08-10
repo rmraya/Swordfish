@@ -84,8 +84,8 @@ public class DifferenceTagger {
 		int j = 1;
 		int last = 0;
 
-		Set<Integer> xValues = new LinkedHashSet<Integer>();
-		Set<Integer> yValues = new LinkedHashSet<Integer>();
+		Set<Integer> xValues = new LinkedHashSet<>();
+		Set<Integer> yValues = new LinkedHashSet<>();
 
 		for (i = 1; i < X.size() + 1; i++) {
 			for (j = 1; j < Y.size() + 1; j++) {
@@ -141,7 +141,7 @@ public class DifferenceTagger {
 	}
 
 	private static Vector<String> buildWordList(String src) {
-		Vector<String> result = new Vector<String>();
+		Vector<String> result = new Vector<>();
 		StringTokenizer tokenizer = new StringTokenizer(src, NGrams.TERM_SEPARATORS, true);
 		while (tokenizer.hasMoreElements()) {
 			String tk = tokenizer.nextToken();
@@ -205,11 +205,8 @@ public class DifferenceTagger {
 			// CJK Compatibility forms
 			return true;
 		}
-		if (c >= '\uFF61' && c <= '\uFFDC') {
+		return (c >= '\uFF61' && c <= '\uFFDC');
 			// Halfwidth forms
-			return true;
-		}
-		return false;
 	}
 
 }

@@ -177,7 +177,7 @@ class AddProject {
                 let tr = document.createElement('tr');
                 tr.id = '' + hash;
                 let td = document.createElement('td');
-                let check: HTMLInputElement = document.createElement('input') as HTMLInputElement;
+                let check: HTMLInputElement = document.createElement('input');
                 check.type = 'checkbox';
                 check.classList.add('check');
                 check.setAttribute('data', '' + hash);

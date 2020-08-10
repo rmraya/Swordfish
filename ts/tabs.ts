@@ -84,7 +84,7 @@ class Tab {
 
 class TabHolder {
 
-    labels: Map<String, HTMLDivElement>;
+    labels: Map<string, HTMLDivElement>;
     tabs: Map<string, HTMLDivElement>;
     closeable: Map<string, boolean>;
     tabsHolder: HTMLDivElement;
@@ -94,7 +94,7 @@ class TabHolder {
     selectedTab: string;
 
     constructor(parent: HTMLDivElement, id: string) {
-        this.labels = new Map<String, HTMLDivElement>();
+        this.labels = new Map<string, HTMLDivElement>();
         this.tabs = new Map<string, HTMLDivElement>();
         this.closeable = new Map<string, boolean>();
 
