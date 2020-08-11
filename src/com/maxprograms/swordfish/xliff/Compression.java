@@ -9,6 +9,10 @@ import java.util.zip.Inflater;
 
 public class Compression {
 
+    private Compression() {
+		// private for security
+    }
+
     public static String compress(String string) {
         ByteArrayOutputStream array = new ByteArrayOutputStream();
         byte[] buffer = new byte[2048];

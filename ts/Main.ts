@@ -65,7 +65,7 @@ class Main {
             childList: true,
             attributes: false
         }
-        let tabsObserver = new MutationObserver((mutationList, observer) => {
+        let tabsObserver = new MutationObserver((mutationList) => {
             mutationList.forEach((mutation) => {
                 switch (mutation.type) {
                     case 'childList':
@@ -254,7 +254,6 @@ class Main {
                 console.log('MUST CLOSE ' + key);
                 let view: TranslationView = Main.translationViews.get(key);
                 view.close();
-                view = undefined;
                 Main.translationViews.delete(key);
                 Main.electron.ipcRenderer.send('close-project', { project: key });
                 break;

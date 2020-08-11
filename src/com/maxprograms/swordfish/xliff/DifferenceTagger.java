@@ -29,9 +29,9 @@ import com.maxprograms.swordfish.tm.NGrams;
 
 public class DifferenceTagger {
 
-	private int[][] C;
-	private Vector<String> X;
-	private Vector<String> Y;
+	private int[][] matrix;
+	private Vector<String> xVector;
+	private Vector<String> yVector;
 	private StringBuffer differenceX;
 	private StringBuffer differenceY;
 
@@ -39,27 +39,27 @@ public class DifferenceTagger {
 	public static final String END = "\uF001";
 
 	private void buildMatrix() {
-		for (int i = 0; i < X.size(); i++) {
-			C[i][0] = 0;
+		for (int i = 0; i < xVector.size(); i++) {
+			matrix[i][0] = 0;
 		}
-		for (int j = 0; j < Y.size(); j++) {
-			C[0][j] = 0;
+		for (int j = 0; j < yVector.size(); j++) {
+			matrix[0][j] = 0;
 		}
-		for (int i = 1; i < X.size() + 1; i++) {
-			for (int j = 1; j < Y.size() + 1; j++) {
-				if (X.get(i - 1).equals(Y.get(j - 1))) {
-					C[i][j] = C[i - 1][j - 1] + 1;
+		for (int i = 1; i < xVector.size() + 1; i++) {
+			for (int j = 1; j < yVector.size() + 1; j++) {
+				if (xVector.get(i - 1).equals(yVector.get(j - 1))) {
+					matrix[i][j] = matrix[i - 1][j - 1] + 1;
 				} else {
-					C[i][j] = Math.max(C[i][j - 1], C[i - 1][j]);
+					matrix[i][j] = Math.max(matrix[i][j - 1], matrix[i - 1][j]);
 				}
 			}
 		}
 	}
 
 	public DifferenceTagger(String x, String y) {
-		X = buildWordList(x);
-		Y = buildWordList(y);
-		C = new int[X.size() + 1][Y.size() + 1];
+		xVector = buildWordList(x);
+		yVector = buildWordList(y);
+		matrix = new int[xVector.size() + 1][yVector.size() + 1];
 
 		buildMatrix();
 		difference();
@@ -87,12 +87,12 @@ public class DifferenceTagger {
 		Set<Integer> xValues = new LinkedHashSet<>();
 		Set<Integer> yValues = new LinkedHashSet<>();
 
-		for (i = 1; i < X.size() + 1; i++) {
-			for (j = 1; j < Y.size() + 1; j++) {
-				if (C[i][j] > last) {
+		for (i = 1; i < xVector.size() + 1; i++) {
+			for (j = 1; j < yVector.size() + 1; j++) {
+				if (matrix[i][j] > last) {
 					xValues.add(Integer.valueOf(i - 1));
 					yValues.add(Integer.valueOf(j - 1));
-					last = C[i][j];
+					last = matrix[i][j];
 					break;
 				}
 			}
@@ -100,7 +100,7 @@ public class DifferenceTagger {
 
 		differenceX = new StringBuffer();
 		boolean inDifference = false;
-		for (i = 0; i < X.size(); i++) {
+		for (i = 0; i < xVector.size(); i++) {
 			if (!xValues.contains(Integer.valueOf(i))) {
 				if (!inDifference) {
 					inDifference = true;
@@ -112,7 +112,7 @@ public class DifferenceTagger {
 					differenceX.append(END);
 				}
 			}
-			differenceX.append(X.get(i));
+			differenceX.append(xVector.get(i));
 		}
 		if (inDifference) {
 			inDifference = false;
@@ -120,7 +120,7 @@ public class DifferenceTagger {
 		}
 
 		differenceY = new StringBuffer();
-		for (j = 0; j < Y.size(); j++) {
+		for (j = 0; j < yVector.size(); j++) {
 			if (!yValues.contains(Integer.valueOf(j))) {
 				if (!inDifference) {
 					inDifference = true;
@@ -132,10 +132,9 @@ public class DifferenceTagger {
 					differenceY.append(END);
 				}
 			}
-			differenceY.append(Y.get(j));
+			differenceY.append(yVector.get(j));
 		}
 		if (inDifference) {
-			inDifference = false;
 			differenceY.append(END);
 		}
 	}

@@ -40,8 +40,8 @@ class AddFile {
             if (event.key === 'Enter') {
                 this.addProject();
             }
-            document.addEventListener('keydown', (event: KeyboardEvent) => { KeyboardHandler.keyListener(event); });
         });
+        document.addEventListener('keydown', (event: KeyboardEvent) => { KeyboardHandler.keyListener(event); });
         document.getElementById('addFilesButton').addEventListener('click', () => {
             this.electron.ipcRenderer.send('select-source-files');
             document.getElementById('addFilesButton').blur();

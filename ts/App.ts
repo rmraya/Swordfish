@@ -804,7 +804,7 @@ class Swordfish {
 
     static exportProject(data: any, output: string, isFile: boolean): void {
         if (data.status !== Swordfish.SUCCESS) {
-            dialog.showErrorBox('Error', data.reason);
+            Swordfish.showMessage({type:'error', message: data.reason});
         }
         Swordfish.mainWindow.webContents.send('start-waiting');
         Swordfish.mainWindow.webContents.send('set-status', 'Exporting translations');
@@ -827,13 +827,8 @@ class Swordfish {
                             }
                         });
                     } else {
-                        dialog.showMessageBox(Swordfish.mainWindow, { type: 'info', message: 'Translations exported.' });
+                        Swordfish.showMessage({ type: 'info', message: 'Translations exported.' });
                     }
-                    let message = 'Open translated file?';
-                    if (!isFile) {
-                        message = 'Open folder?';
-                    }
-
                     return;
                 } else if (Swordfish.currentStatus.progress === Swordfish.PROCESSING) {
                     // it's OK, keep waiting
@@ -841,13 +836,13 @@ class Swordfish {
                     Swordfish.mainWindow.webContents.send('end-waiting');
                     Swordfish.mainWindow.webContents.send('set-status', '');
                     clearInterval(intervalObject);
-                    dialog.showErrorBox('Error', Swordfish.currentStatus.reason);
+                    Swordfish.showMessage({type:'error', message: Swordfish.currentStatus.reason});
                     return;
                 } else {
                     Swordfish.mainWindow.webContents.send('end-waiting');
                     Swordfish.mainWindow.webContents.send('set-status', '');
                     clearInterval(intervalObject);
-                    dialog.showErrorBox('Error', 'Unknown error exporting translations');
+                    Swordfish.showMessage({type:'error', message: 'Unknown error exporting translations'});
                     return;
                 }
             }
@@ -905,7 +900,7 @@ class Swordfish {
                 if (data.status !== Swordfish.SUCCESS) {
                     Swordfish.mainWindow.webContents.send('end-waiting');
                     Swordfish.mainWindow.webContents.send('set-status', '');
-                    dialog.showErrorBox('Error', data.reason);
+                    Swordfish.showMessage({type:'error', message: data.reason});
                 }
                 Swordfish.currentStatus = data;
                 let processId: string = data.process;
@@ -922,13 +917,13 @@ class Swordfish {
                             Swordfish.mainWindow.webContents.send('end-waiting');
                             Swordfish.mainWindow.webContents.send('set-status', '');
                             clearInterval(intervalObject);
-                            dialog.showErrorBox('Error', Swordfish.currentStatus.reason);
+                            Swordfish.showMessage({type:'error', message: Swordfish.currentStatus.reason});
                             return;
                         } else {
                             Swordfish.mainWindow.webContents.send('end-waiting');
                             Swordfish.mainWindow.webContents.send('set-status', '');
                             clearInterval(intervalObject);
-                            dialog.showErrorBox('Error', 'Unknown error processing files');
+                            Swordfish.showMessage({ type: 'error', message: 'Unknown error processing files' });
                             return;
                         }
                     }
@@ -960,14 +955,14 @@ class Swordfish {
                 Swordfish.mainWindow.webContents.send('set-status', '');
                 Swordfish.mainWindow.webContents.send('end-waiting');
                 if (data.status !== Swordfish.SUCCESS) {
-                    dialog.showMessageBox({ type: 'error', message: data.reason });
+                    Swordfish.showMessage({type:'error', message: data.reason});
                     return;
                 }
                 event.sender.send('set-projects', data.projects);
             },
             (reason: string) => {
                 Swordfish.mainWindow.webContents.send('set-status', '');
-                dialog.showMessageBox({ type: 'error', message: reason });
+                Swordfish.showMessage({type:'error', message: reason});
             }
         );
     }
@@ -988,6 +983,7 @@ class Swordfish {
             (reason: string) => {
                 Swordfish.mainWindow.webContents.send('set-status', '');
                 dialog.showMessageBox({ type: 'error', message: reason });
+                
             }
         );
     }
@@ -1201,7 +1197,7 @@ class Swordfish {
                 title = 'LGPL 2.1';
                 break;
             default:
-                dialog.showErrorBox('Error', 'Unknow license');
+                Swordfish.showMessage({type:'error', message: 'Unknown license'});
                 return;
         }
         var licenseWindow = new BrowserWindow({
@@ -1317,7 +1313,7 @@ class Swordfish {
                 });
             } else {
                 if (!silent) {
-                    dialog.showErrorBox('Error', 'Updates Request Failed.\nStatus code: ' + res.statusCode);
+                    Swordfish.showMessage({type:'error', message: 'Updates Request Failed.\nStatus code: ' + res.statusCode});
                 }
             }
         }).on('error', (e: any) => {
@@ -1333,7 +1329,7 @@ class Swordfish {
                 if (data.status === Swordfish.SUCCESS) {
                     event.sender.send('set-types', data);
                 } else {
-                    dialog.showErrorBox('Error', data.reason);
+                    Swordfish.showMessage({type:'error', message: data.reason});
                 }
             },
             (reason: string) => {
@@ -1348,7 +1344,7 @@ class Swordfish {
                 if (data.status === Swordfish.SUCCESS) {
                     event.sender.send('set-charsets', data);
                 } else {
-                    dialog.showErrorBox('Error', data.reason);
+                    Swordfish.showMessage({type:'error', message: data.reason});
                 }
             },
             (reason: string) => {
@@ -1363,7 +1359,7 @@ class Swordfish {
                 if (data.status === Swordfish.SUCCESS) {
                     event.sender.send('set-clients', data.clients);
                 } else {
-                    dialog.showErrorBox('Error', data.reason);
+                    Swordfish.showMessage({type:'error', message: data.reason});
                 }
             },
             (reason: string) => {
@@ -1378,7 +1374,7 @@ class Swordfish {
                 if (data.status === Swordfish.SUCCESS) {
                     event.sender.send('set-project-names', data.projects);
                 } else {
-                    dialog.showErrorBox('Error', data.reason);
+                    Swordfish.showMessage({type:'error', message: data.reason});
                 }
             },
             (reason: string) => {
@@ -1393,7 +1389,7 @@ class Swordfish {
                 if (data.status === Swordfish.SUCCESS) {
                     event.sender.send('set-subjects', data.subjects);
                 } else {
-                    dialog.showErrorBox('Error', data.reason);
+                    Swordfish.showMessage({type:'error', message: data.reason});
                 }
             },
             (reason: string) => {
@@ -1475,7 +1471,7 @@ class Swordfish {
                     event.sender.send('set-segments-count', data);
                     Swordfish.mainWindow.webContents.send('set-statistics', { project: arg.project, statistics: data.statistics });
                 } else {
-                    dialog.showErrorBox('Error', data.reason);
+                    Swordfish.showMessage({type:'error', message: data.reason});
                 }
             },
             (reason: string) => {
@@ -1491,7 +1487,7 @@ class Swordfish {
                     data.project = arg.project;
                     event.sender.send('set-segments', data);
                 } else {
-                    dialog.showErrorBox('Error', data.reason);
+                    Swordfish.showMessage({type:'error', message: data.reason});
                 }
             },
             (reason: string) => {
@@ -1509,7 +1505,7 @@ class Swordfish {
                         if (data.status === Swordfish.SUCCESS) {
                             Swordfish.mainWindow.webContents.send('request-projects', {});
                         } else {
-                            dialog.showErrorBox('Error', data.reason);
+                            Swordfish.showMessage({type:'error', message: data.reason});
                         }
                     },
                     (reason: string) => {
@@ -1524,7 +1520,7 @@ class Swordfish {
         Swordfish.sendRequest('/memories/create', arg,
             (data: any) => {
                 if (data.status !== Swordfish.SUCCESS) {
-                    dialog.showErrorBox('Error', data.reason);
+                    Swordfish.showMessage({type:'error', message: data.reason});
                     return;
                 }
                 Swordfish.addMemoryWindow.close();
@@ -1573,7 +1569,7 @@ class Swordfish {
                 if (data.status !== Swordfish.SUCCESS) {
                     Swordfish.mainWindow.webContents.send('end-waiting');
                     Swordfish.mainWindow.webContents.send('set-status', '');
-                    dialog.showErrorBox('Error', data.reason);
+                    Swordfish.showMessage({type:'error', message: data.reason});
                 }
                 Swordfish.currentStatus = data;
                 let processId: string = data.process;
@@ -1590,13 +1586,13 @@ class Swordfish {
                             Swordfish.mainWindow.webContents.send('end-waiting');
                             Swordfish.mainWindow.webContents.send('set-status', '');
                             clearInterval(intervalObject);
-                            dialog.showErrorBox('Error', Swordfish.currentStatus.reason);
+                            Swordfish.showMessage({type:'error', message: Swordfish.currentStatus.reason});
                             return;
                         } else {
                             Swordfish.mainWindow.webContents.send('end-waiting');
                             Swordfish.mainWindow.webContents.send('set-status', '');
                             clearInterval(intervalObject);
-                            dialog.showErrorBox('Error', 'Unknown error importing file');
+                            Swordfish.showMessage({type:'error', message: 'Unknown error importing file'});
                             return;
                         }
                     }
@@ -1658,7 +1654,7 @@ class Swordfish {
                         if (data.status !== Swordfish.SUCCESS) {
                             Swordfish.mainWindow.webContents.send('end-waiting');
                             Swordfish.mainWindow.webContents.send('set-status', '');
-                            dialog.showErrorBox('Error', data.reason);
+                            Swordfish.showMessage({type:'error', message: data.reason});
                         }
                         Swordfish.currentStatus = data;
                         let processId: string = data.process;
@@ -1676,13 +1672,13 @@ class Swordfish {
                                     Swordfish.mainWindow.webContents.send('end-waiting');
                                     Swordfish.mainWindow.webContents.send('set-status', '');
                                     clearInterval(intervalObject);
-                                    dialog.showErrorBox('Error', Swordfish.currentStatus.reason);
+                                    Swordfish.showMessage({type:'error', message: Swordfish.currentStatus.reason});
                                     return;
                                 } else {
                                     Swordfish.mainWindow.webContents.send('end-waiting');
                                     Swordfish.mainWindow.webContents.send('set-status', '');
                                     clearInterval(intervalObject);
-                                    dialog.showErrorBox('Error', 'Unknown error removing memories');
+                                    Swordfish.showMessage({type:'error', message: 'Unknown error removing memories'});
                                     return;
                                 }
                             }
@@ -1713,7 +1709,7 @@ class Swordfish {
                             if (data.status !== Swordfish.SUCCESS) {
                                 Swordfish.mainWindow.webContents.send('end-waiting');
                                 Swordfish.mainWindow.webContents.send('set-status', '');
-                                dialog.showErrorBox('Error', data.reason);
+                                Swordfish.showMessage({type:'error', message: data.reason});
                             }
                             Swordfish.currentStatus = data;
                             let processId: string = data.process;
@@ -1730,13 +1726,13 @@ class Swordfish {
                                         Swordfish.mainWindow.webContents.send('end-waiting');
                                         Swordfish.mainWindow.webContents.send('set-status', '');
                                         clearInterval(intervalObject);
-                                        dialog.showErrorBox('Error', Swordfish.currentStatus.reason);
+                                        Swordfish.showMessage({type:'error', message: Swordfish.currentStatus.reason});
                                         return;
                                     } else {
                                         Swordfish.mainWindow.webContents.send('end-waiting');
                                         Swordfish.mainWindow.webContents.send('set-status', '');
                                         clearInterval(intervalObject);
-                                        dialog.showErrorBox('Error', 'Unknown error exporting memories');
+                                        Swordfish.showMessage({type:'error', message: 'Unknown error exporting memories'});
                                         return;
                                     }
                                 }
@@ -1761,7 +1757,7 @@ class Swordfish {
         Swordfish.sendRequest('/projects/close', arg,
             (data: any) => {
                 if (data.status !== Swordfish.SUCCESS) {
-                    dialog.showErrorBox('Error', data.reason);
+                    Swordfish.showMessage({type:'error', message: data.reason});
                 }
             },
             (reason: string) => {
@@ -1774,7 +1770,7 @@ class Swordfish {
         Swordfish.sendRequest('/projects/save', arg,
             (data: any) => {
                 if (data.status !== Swordfish.SUCCESS) {
-                    dialog.showErrorBox('Error', data.reason);
+                    Swordfish.showMessage({type:'error', message: data.reason});
                     return;
                 }
                 if (data.propagated.length > 0) {
@@ -1792,7 +1788,7 @@ class Swordfish {
         Swordfish.sendRequest('/projects/matches', arg,
             (data: any) => {
                 if (data.status !== Swordfish.SUCCESS) {
-                    dialog.showErrorBox('Error', data.reason);
+                    Swordfish.showMessage({type:'error', message: data.reason});
                     return;
                 }
                 if (data.matches.length > 0) {
@@ -1813,7 +1809,7 @@ class Swordfish {
                 Swordfish.mainWindow.webContents.send('end-waiting');
                 Swordfish.mainWindow.webContents.send('set-status', '');
                 if (data.status !== Swordfish.SUCCESS) {
-                    dialog.showErrorBox('Error', data.reason);
+                    Swordfish.showMessage({type:'error', message: data.reason});
                     return;
                 }
                 if (data.matches.length > 0) {
@@ -1836,7 +1832,7 @@ class Swordfish {
                 Swordfish.mainWindow.webContents.send('end-waiting');
                 Swordfish.mainWindow.webContents.send('set-status', '');
                 if (data.status !== Swordfish.SUCCESS) {
-                    dialog.showErrorBox('Error', data.reason);
+                    Swordfish.showMessage({type:'error', message: data.reason});
                     return;
                 }
                 if (data.matches.length > 0) {
@@ -1859,7 +1855,7 @@ class Swordfish {
                 Swordfish.mainWindow.webContents.send('end-waiting');
                 Swordfish.mainWindow.webContents.send('set-status', '');
                 if (data.status !== Swordfish.SUCCESS) {
-                    dialog.showErrorBox('Error', data.reason);
+                    Swordfish.showMessage({type:'error', message: data.reason});
                     return;
                 }
                 Swordfish.mainWindow.webContents.send('reload-page', { project: arg.project });
@@ -1876,7 +1872,7 @@ class Swordfish {
         Swordfish.sendRequest('/projects/projectMemories', arg,
             (data: any) => {
                 if (data.status !== Swordfish.SUCCESS) {
-                    dialog.showErrorBox('Error', data.reason);
+                    Swordfish.showMessage({type:'error', message: data.reason});
                     return;
                 }
                 data.project = arg.project;
@@ -1892,7 +1888,7 @@ class Swordfish {
         Swordfish.sendRequest('/projects/setMemory', arg,
             (data: any) => {
                 if (data.status !== Swordfish.SUCCESS) {
-                    dialog.showErrorBox('Error', data.reason);
+                    Swordfish.showMessage({type:'error', message: data.reason});
                     return;
                 }
             },

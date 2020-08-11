@@ -35,7 +35,6 @@ public class NGrams {
 
 	public static int[] getNGrams(String source) {
 		String src = source.toLowerCase();
-		// src = normalise(src);
 		List<String> words = buildWordList(src);
 		Map<String, String> table = new Hashtable<>();
 

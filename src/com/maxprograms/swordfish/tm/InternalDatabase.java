@@ -208,8 +208,8 @@ public class InternalDatabase implements ITmEngine {
 							tu.addContent(tuv);
 							count++;
 						} catch (Exception e) {
-							System.err.println(e.getMessage());
-							System.err.println("seg: " + seg);
+							logger.log(Level.ERROR, "Error building tuv", e);
+							logger.log(Level.INFO,"seg: " + seg);
 						}
 					}
 				}
@@ -490,11 +490,7 @@ public class InternalDatabase implements ITmEngine {
 		while (it.hasNext()) {
 			Element tuv = it.next();
 			String lang = LanguageUtils.normalizeCode(tuv.getAttributeValue("xml:lang"));
-			if (lang == null) {
-				// Invalid language code, ignore this tuv
-				continue;
-			}
-			if (!tuLangs.contains(lang)) {
+			if (lang != null && !tuLangs.contains(lang)) {
 				if (exists(tuid, lang)) {
 					delete(tuid, lang);
 				}

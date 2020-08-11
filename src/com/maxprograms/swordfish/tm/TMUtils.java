@@ -70,8 +70,7 @@ public class TMUtils {
 	}
 
 	public static String createId() throws InterruptedException {
-		Date now = new Date();
-		long lng = now.getTime();
+		long lng = System.currentTimeMillis();
 		// wait until we are in the next millisecond
 		// before leaving to ensure uniqueness
 		Thread.sleep(1);

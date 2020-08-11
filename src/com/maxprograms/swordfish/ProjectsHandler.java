@@ -734,10 +734,12 @@ public class ProjectsHandler implements HttpHandler {
 			if (projectStores.containsKey(project)) {
 				result.put("matches", projectStores.get(project).machineTranslate(json, translator));
 			}
-		} catch (IOException | SQLException | InterruptedException | JSONException | SAXException
-				| ParserConfigurationException e) {
+		} catch (IOException | SQLException | JSONException | SAXException | ParserConfigurationException e) {
 			logger.log(Level.ERROR, e);
 			result.put(Constants.REASON, e.getMessage());
+		} catch (InterruptedException e) {
+			logger.log(Level.WARNING, "MT interrupted", e);
+			Thread.currentThread().interrupt();
 		}
 		return result;
 	}

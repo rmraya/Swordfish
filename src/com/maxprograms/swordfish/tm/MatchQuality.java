@@ -22,20 +22,24 @@ package com.maxprograms.swordfish.tm;
 public class MatchQuality {
 
     static final int PENALTY = 2;
-	
-    static String LCS(String x, String y) {
+    
+    private MatchQuality() {
+		// private for security
+    }
+    
+    private static String lcs(String x, String y) {
         String result = ""; 
-        int M = x.length();
-        int N = y.length();
+        int m = x.length();
+        int n = y.length();
         int max = 0;
         int mx = 0;
 
         // opt[i][j] = length of LCS of x[i..M] and y[j..N]
-        int[][] opt = new int[M + 1][N + 1];
+        int[][] opt = new int[m + 1][n + 1];
 
         // fill the matrix
-        for (int i = 1; i <= M; i++) {
-            for (int j = 1; j <= N; j++) {
+        for (int i = 1; i <= m; i++) {
+            for (int j = 1; j <= n; j++) {
                 if (x.charAt(i - 1) == y.charAt(j - 1)) {
                     opt[i][j] = opt[i - 1][j - 1] + 1;
                     if (opt[i][j] > max) {
@@ -79,14 +83,14 @@ public class MatchQuality {
         // a is the longest string
         int count = -1;
         int idx;
-        String lcs = LCS(a, b);
+        String lcs = lcs(a, b);
         while (!lcs.trim().equals("") && lcs.length() > longest * PENALTY / 100) { 
             count++;
             idx = a.indexOf(lcs);
             a = a.substring(0, idx) + a.substring(idx + lcs.length());
             idx = b.indexOf(lcs);
             b = b.substring(0, idx) + b.substring(idx + lcs.length());
-            lcs = LCS(a, b);
+            lcs = lcs(a, b);
         }
         result = 100 * (longest - a.length()) / longest - count * PENALTY;
         if (result < 0) {

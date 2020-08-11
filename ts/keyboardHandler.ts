@@ -22,8 +22,8 @@ class KeyboardHandler {
     static keyListener(event: KeyboardEvent): void {
         if ((event.ctrlKey || event.metaKey) && (event.key === 'x' || event.key === 'X')) {
             event.preventDefault();
-            var element: HTMLElement = event.target as HTMLElement;
-            var type: string = element.tagName;
+            let element: HTMLElement = event.target as HTMLElement;
+            let type: string = element.tagName;
             if (type === 'INPUT') {
                 let input: HTMLInputElement = element as HTMLInputElement;
                 let start: number = input.selectionStart;
@@ -42,8 +42,8 @@ class KeyboardHandler {
 
         if ((event.ctrlKey || event.metaKey) && (event.key === 'a' || event.key === 'A')) {
             event.preventDefault();
-            var element: HTMLElement = event.target as HTMLElement;
-            var type: string = element.tagName;
+            let element: HTMLElement = event.target as HTMLElement;
+            let type: string = element.tagName;
             if (type === 'INPUT' ) {
                 let input: HTMLInputElement = element as HTMLInputElement;
                 input.setSelectionRange(0, input.value.length);
@@ -61,8 +61,8 @@ class KeyboardHandler {
 
         if ((event.ctrlKey || event.metaKey) && (event.key === 'v' || event.key === 'V')) {
             event.preventDefault();
-            var element: HTMLElement = event.target as HTMLElement;
-            var type: string = element.tagName;
+            let element: HTMLElement = event.target as HTMLElement;
+            let type: string = element.tagName;
             if (type === 'INPUT' ) {
                 navigator.clipboard.readText().then(
                     (clipText: string) => {
