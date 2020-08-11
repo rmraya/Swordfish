@@ -77,8 +77,7 @@ public class InternalDatabase implements ITmEngine {
 	private File database;
 	private long next;
 
-	public InternalDatabase(String dbname, String workFolder)
-			throws SQLException, IOException {
+	public InternalDatabase(String dbname, String workFolder) throws SQLException, IOException {
 		this.dbname = dbname;
 		creationDate = TMUtils.tmxDate();
 
@@ -209,7 +208,7 @@ public class InternalDatabase implements ITmEngine {
 							count++;
 						} catch (Exception e) {
 							logger.log(Level.ERROR, "Error building tuv", e);
-							logger.log(Level.INFO,"seg: " + seg);
+							logger.log(Level.INFO, "seg: " + seg);
 						}
 					}
 				}

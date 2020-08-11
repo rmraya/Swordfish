@@ -160,7 +160,7 @@ public class MemoriesHandler implements HttpHandler {
 				JSONObject obj = new JSONObject();
 				obj.put("languages", array);
 				openTasks.put(process, new String[] { Constants.COMPLETED, obj.toString() });
-			} catch (IOException | SQLException  e) {
+			} catch (IOException | SQLException e) {
 				logger.log(Level.ERROR, e.getMessage(), e);
 				openTasks.put(process, new String[] { Constants.ERROR, e.getMessage() });
 			}

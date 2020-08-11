@@ -246,7 +246,7 @@ public class XliffUtils {
                 result.add(node);
             }
             if (node.getNodeType() == XMLNode.ELEMENT_NODE) {
-                Element e = (Element)node;
+                Element e = (Element) node;
                 if (e.getName().equals("ph")) {
                     Element ph = new Element("ph");
                     String id = e.getAttributeValue("id");

@@ -31,32 +31,26 @@ public class TuData implements Serializable {
 	private Map<String, String> props;
 	private List<String> notes;
 	private String creationdate;
-	private String userid;
 
-	public TuData(String userid, String creationdate, Set<String> langs, Map<String,String> props, List<String> notes) {
-		this.userid = userid;
+	public TuData(String creationdate, Set<String> langs, Map<String, String> props, List<String> notes) {
 		this.creationdate = creationdate;
 		this.langs = langs;
 		this.props = props;
 		this.notes = notes;
 	}
-		
-	public String getUser() {
-		return userid;
-	}
-	
+
 	public String getCreationDate() {
 		return creationdate;
 	}
-	
+
 	public Set<String> getLangs() {
 		return langs;
 	}
-	
-	public Map<String,String> getProps() {
+
+	public Map<String, String> getProps() {
 		return props;
 	}
-	
+
 	public List<String> getNotes() {
 		return notes;
 	}

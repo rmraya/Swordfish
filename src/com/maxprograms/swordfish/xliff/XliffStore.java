@@ -96,9 +96,9 @@ public class XliffStore {
 
     private Statement stmt;
     private boolean preserve;
-    
-    private String catalog;
-	private boolean acceptUnconfirmed;
+
+    private static String catalog;
+    private static boolean acceptUnconfirmed;
 
     private int index;
     private int nextId;
@@ -268,7 +268,8 @@ public class XliffStore {
                 }
             }
             state = e.getAttributeValue("state", pureText(target).isEmpty() ? "initial" : "translated");
-            preserve = preserve || sourcePreserve || "preserve".equals(target.getAttributeValue("xml:space", "default"));
+            preserve = preserve || sourcePreserve
+                    || "preserve".equals(target.getAttributeValue("xml:space", "default"));
 
             insertSegment(currentFile, currentUnit, id, "S", translate, source, target);
         }
@@ -473,7 +474,7 @@ public class XliffStore {
         return tgtLang;
     }
 
-    private void getCatalogFile() throws IOException {
+    private static void getCatalogFile() throws IOException {
         File preferences = new File(TmsServer.getWorkFolder(), "preferences.json");
         StringBuilder builder = new StringBuilder();
         try (FileReader reader = new FileReader(preferences)) {
@@ -1247,6 +1248,12 @@ public class XliffStore {
         return result;
     }
 
+    public void exportXliff(String output)
+            throws SAXException, IOException, ParserConfigurationException, SQLException, URISyntaxException {
+        updateXliff();
+        Skeletons.embedSkeletons(xliffFile, output);
+    }
+
     public void exportTranslations(String output)
             throws SAXException, IOException, ParserConfigurationException, SQLException {
         updateXliff();
@@ -1341,8 +1348,8 @@ public class XliffStore {
         return matches.getChildren().isEmpty() ? null : matches;
     }
 
-    public JSONArray machineTranslate(JSONObject json, MT translator) throws SQLException, IOException,
-            InterruptedException, SAXException, ParserConfigurationException {
+    public JSONArray machineTranslate(JSONObject json, MT translator)
+            throws SQLException, IOException, InterruptedException, SAXException, ParserConfigurationException {
         JSONArray result = new JSONArray();
 
         String file = json.getString("file");
@@ -1459,4 +1466,11 @@ public class XliffStore {
         }
         MemoriesHandler.closeMemory(memory);
     }
+
+	public static String getCatalog() throws IOException {
+        if (catalog == null) {
+            getCatalogFile();
+        }
+		return catalog;
+	}
 }

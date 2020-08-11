@@ -120,8 +120,10 @@ public class ProjectsHandler implements HttpHandler {
 				response = getProject(request);
 			} else if ("/projects/delete".equals(url)) {
 				response = deleteProjects(request);
+			} else if ("/projects/translations".equals(url)) {
+				response = exportTranslations(request);
 			} else if ("/projects/export".equals(url)) {
-				response = exportProject(request);
+				response = export(request);
 			} else if ("/projects/status".equals(url)) {
 				response = getProcessStatus(request);
 			} else if ("/projects/close".equals(url)) {
@@ -212,7 +214,7 @@ public class ProjectsHandler implements HttpHandler {
 		return result;
 	}
 
-	private JSONObject exportProject(String request) {
+	private JSONObject exportTranslations(String request) {
 		JSONObject result = new JSONObject();
 		JSONObject json = new JSONObject(request);
 		String project = json.getString("project");
@@ -254,6 +256,62 @@ public class ProjectsHandler implements HttpHandler {
 						}
 						processes.put(id, Constants.COMPLETED);
 					} catch (IOException | SAXException | ParserConfigurationException | SQLException e) {
+						logger.log(Level.ERROR, e);
+						processes.put(id, e.getMessage());
+					}
+				}
+			};
+			thread.start();
+		} catch (Exception e) {
+			logger.log(Level.ERROR, "Error exporting translations", e);
+			result.put(Constants.REASON, e.getMessage());
+		}
+		return result;
+	}
+
+	private JSONObject export(String request) {
+		JSONObject result = new JSONObject();
+		JSONObject json = new JSONObject(request);
+		String project = json.getString("project");
+		String output = json.getString("output");
+		if (projectStores == null) {
+			projectStores = new Hashtable<>();
+			if (TmsServer.isDebug()) {
+				logger.log(Level.INFO, "Created store map");
+			}
+		}
+		shouldClose = false;
+		if (!projectStores.containsKey(project)) {
+			shouldClose = true;
+			try {
+				Project prj = projects.get(project);
+				XliffStore store = new XliffStore(prj.getXliff(), prj.getSourceLang().getCode(),
+						prj.getTargetLang().getCode());
+				projectStores.put(project, store);
+			} catch (SAXException | IOException | ParserConfigurationException | URISyntaxException | SQLException e) {
+				logger.log(Level.ERROR, "Error creating project store", e);
+				result.put(Constants.REASON, e.getMessage());
+				return result;
+			}
+		}
+		String id = "" + System.currentTimeMillis();
+		result.put("process", id);
+		if (processes == null) {
+			processes = new Hashtable<>();
+		}
+		processes.put(id, Constants.PROCESSING);
+		try {
+			Thread thread = new Thread() {
+				@Override
+				public void run() {
+					try {
+						projectStores.get(project).exportXliff(output);
+						if (shouldClose) {
+							closeProject(request);
+						}
+						processes.put(id, Constants.COMPLETED);
+					} catch (IOException | SAXException | ParserConfigurationException | SQLException
+							| URISyntaxException e) {
 						logger.log(Level.ERROR, e);
 						processes.put(id, e.getMessage());
 					}
@@ -796,7 +854,7 @@ public class ProjectsHandler implements HttpHandler {
 			String memory = json.getString("memory");
 			projects.get(project).setMemory(memory);
 			JSONArray list = projectsList.getJSONArray("projects");
-			for (int i=0 ; i<list.length() ; i++) {
+			for (int i = 0; i < list.length(); i++) {
 				JSONObject obj = list.getJSONObject(i);
 				if (project.equals(obj.getString("id"))) {
 					obj.put("memory", memory);

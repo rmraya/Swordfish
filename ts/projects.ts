@@ -228,7 +228,6 @@ class ProjectsView {
     }
 
     exportProject(): void {
-        // TODO
         if (this.selected.size === 0) {
             this.electron.ipcRenderer.send('show-message', { type: 'warning', message: 'Select project' });
             return;
@@ -239,7 +238,7 @@ class ProjectsView {
         }
         for (let key of this.selected.keys()) {
             let project = this.selected.get(key);
-            //  this.electron.ipcRenderer.send('export-project', project);
+            this.electron.ipcRenderer.send('export-xliff', {projectId: key, description: project.description});
         }
     }
 

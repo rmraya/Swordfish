@@ -26,7 +26,6 @@ import java.util.Vector;
 
 import com.maxprograms.swordfish.tm.NGrams;
 
-
 public class DifferenceTagger {
 
 	private int[][] matrix;
@@ -205,7 +204,7 @@ public class DifferenceTagger {
 			return true;
 		}
 		return (c >= '\uFF61' && c <= '\uFFDC');
-			// Halfwidth forms
+		// Halfwidth forms
 	}
 
 }

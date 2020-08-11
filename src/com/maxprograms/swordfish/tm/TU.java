@@ -32,55 +32,48 @@ public class TU {
 	private Map<String, String> props;
 	private List<String> notes;
 	private String creationdate;
-	private String userid;
 	Map<String, Tuv> tuvs;
-	
+
 	public TU() {
 		langs = Collections.synchronizedSet(new HashSet<>());
 		props = new Hashtable<>();
 		notes = new Vector<>();
-		tuvs = new Hashtable<>();		
-		userid = System.getProperty("user.name"); 
+		tuvs = new Hashtable<>();
 	}
-	
+
 	public void setData(TuData data) {
 		langs = data.getLangs();
 		props = data.getProps();
 		notes = data.getNotes();
 		creationdate = data.getCreationDate();
-		userid = data.getUser();
 	}
 
-	public void setProps(Map<String,String> values) {
+	public void setProps(Map<String, String> values) {
 		props = values;
 		if (creationdate != null && props != null) {
-			props.put("creationdate", creationdate); 
+			props.put("creationdate", creationdate);
 		}
 	}
-	
-	public String getUser() {
-		return userid;
-	}
-	
+
 	public String getCreationDate() {
 		return creationdate;
 	}
-	
+
 	public void setCreationDate(String value) {
 		creationdate = value;
 		if (props != null) {
-			props.put("creationdate", value); 
+			props.put("creationdate", value);
 		}
 	}
-	
+
 	public Set<String> getLangs() {
 		return langs;
 	}
-	
-	public Map<String,String> getProps() {
+
+	public Map<String, String> getProps() {
 		return props;
 	}
-	
+
 	public List<String> getNotes() {
 		return notes;
 	}
@@ -113,7 +106,7 @@ public class TU {
 	public Map<String, Tuv> getTuvs() {
 		return tuvs;
 	}
-	
+
 	public void setNotes(List<String> notes) {
 		this.notes = notes;
 	}

@@ -22,13 +22,13 @@ package com.maxprograms.swordfish.tm;
 public class MatchQuality {
 
     static final int PENALTY = 2;
-    
+
     private MatchQuality() {
-		// private for security
+        // private for security
     }
-    
+
     private static String lcs(String x, String y) {
-        String result = ""; 
+        String result = "";
         int m = x.length();
         int n = y.length();
         int max = 0;
@@ -64,10 +64,10 @@ public class MatchQuality {
     }
 
     public static int similarity(String x, String y) {
-    	int result = 0;
-		x = x.trim();
-		y = y.trim();
-		int longest = Math.max(x.length(), y.length());
+        int result = 0;
+        x = x.trim();
+        y = y.trim();
+        int longest = Math.max(x.length(), y.length());
         if (longest == 0) {
             return 0;
         }
@@ -84,7 +84,7 @@ public class MatchQuality {
         int count = -1;
         int idx;
         String lcs = lcs(a, b);
-        while (!lcs.trim().equals("") && lcs.length() > longest * PENALTY / 100) { 
+        while (!lcs.trim().equals("") && lcs.length() > longest * PENALTY / 100) {
             count++;
             idx = a.indexOf(lcs);
             a = a.substring(0, idx) + a.substring(idx + lcs.length());
