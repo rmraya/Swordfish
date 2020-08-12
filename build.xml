@@ -6,7 +6,7 @@
     <path id="Swordfish.classpath">
         <pathelement location="jars/dtd.jar"/>
         <pathelement location="jars/json.jar"/>
-        <pathelement location="jars/jsoup-1.11.3.jar"/>
+        <pathelement location="jars/jsoup.jar"/>
         <pathelement location="jars/mapdb.jar"/>
         <pathelement location="jars/openxliff.jar"/>
         <pathelement location="jars/h2-1.4.200.jar"/>

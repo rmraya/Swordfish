@@ -537,8 +537,8 @@ class Swordfish {
             new MenuItem({ type: 'separator' }),
             { label: 'Remove Projects', click: () => { Swordfish.mainWindow.webContents.send('remove-projects'); } },
             new MenuItem({ type: 'separator' }),
-            { label: 'Import Project', click: () => { Swordfish.mainWindow.webContents.send('import-project'); } },
-            { label: 'Export Project', click: () => { Swordfish.mainWindow.webContents.send('export-project'); } }
+            { label: 'Import XLIFF File', click: () => { Swordfish.mainWindow.webContents.send('import-project'); } },
+            { label: 'Export as XLIFF File', click: () => { Swordfish.mainWindow.webContents.send('export-project'); } }
         ]);
         var memoriesMenu: Menu = Menu.buildFromTemplate([
             { label: 'Add Memory', click: () => { Swordfish.showAddMemory(); } },
@@ -547,7 +547,11 @@ class Swordfish {
             { label: 'Import TMX File', click: () => { Swordfish.importTMX(); } },
             { label: 'Export as TMX File', click: () => { Swordfish.exportTMX(); } }
         ]);
-        var glossariesMenu: Menu = Menu.buildFromTemplate([]);
+        var glossariesMenu: Menu = Menu.buildFromTemplate([
+            { label: 'Add Glossary', click: () => { Swordfish.showAddGlossary(); } },
+            { label: 'Remove Glossary', click: () => { Swordfish.removeGlossary(); } }
+
+        ]);
         var helpMenu: Menu = Menu.buildFromTemplate([
             { label: 'Swordfish User Guide', accelerator: 'F1', click: () => { this.showHelp(); } },
             new MenuItem({ type: 'separator' }),
@@ -2044,6 +2048,14 @@ class Swordfish {
             }
             Swordfish.getProjectsProgress(processId);
         }, 500);
+    }
+
+    static showAddGlossary() : void {
+        // TODO
+    }
+
+    static removeGlossary(): void {
+        // TODO
     }
 }
 

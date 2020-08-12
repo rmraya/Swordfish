@@ -14,14 +14,14 @@
                 <label for="nameInput">Name</label>
             </td>
             <td class="fill_width middle">
-                <input type="text" id="nameInput" class="fill_width">
+                <input type="text" id="nameInput" class="table_input">
             </td>
         </tr>
     </table>
 
     <div class="row">
-        <table class="fill_width">
-            <tr>
+        <table>
+            <tr style="height: 2.5em;">
                 <td class="middle noWrap">
                     <label for="srcLangSelect">Source Language</label>
                 </td>
@@ -31,7 +31,7 @@
                     </select>
                 </td>
             </tr>
-            <tr>
+            <tr style="height: 2.5em;">
                 <td class="middle noWrap">
                     <label for="tgtLangSelect">Target Language</label>
                 </td>
@@ -43,23 +43,23 @@
             </tr>
         </table>
         <table>
-            <tr>
+            <tr style="height: 2.5em;">
                 <td class="middle">
                     <label for="subjectInput">Subject</label>
                 </td>
                 <td class="fill_width middle">
-                    <input list="subjects" id="subjectInput" class="fill_width middle" >
+                    <input list="subjects" id="subjectInput" class="table_input middle" >
                     <datalist id="subjects">
                         <option value="none">
                     </datalist>
                 </td>
             </tr>
-            <tr>
+            <tr style="height: 2.5em;">
                 <td class="middle">
                     <label for="clientInput">Client</label>
                 </td>
                 <td class="fill_width middle">
-                    <input list="clients" id="clientInput" class="fill_width middle" >
+                    <input list="clients" id="clientInput" class="table_input middle" >
                     <datalist id="clients">
                         <option value="none">
                     </datalist>
@@ -67,7 +67,7 @@
             </tr>
         </table>
     </div>
-    <div class="bordered divContainer" style="height: 260px; width:880px" id="tablePanel">
+    <div class="bordered divContainer" style="height: 260px; width:calc(100% - 20px); margin-left: 10px;;" id="tablePanel">
         <table class="stripes">
             <thead>
                 <tr class="noWrap">

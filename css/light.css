@@ -224,6 +224,10 @@ input {
 	font-size: 1rem;
 }
 
+.table_input {
+	width: calc(100% - 10px);
+}
+
 input:focus {
 	outline: none !important;
 	border: 1px solid var(--focus-border);

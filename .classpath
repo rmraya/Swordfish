@@ -12,7 +12,7 @@
 			<attribute name="module" value="true"/>
 		</attributes>
 	</classpathentry>
-	<classpathentry kind="lib" path="jars/jsoup-1.11.3.jar">
+	<classpathentry kind="lib" path="jars/jsoup.jar">
 		<attributes>
 			<attribute name="module" value="true"/>
 		</attributes>

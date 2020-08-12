@@ -2,7 +2,7 @@
 <html lang="en">
 
 <head>
-    <title>Add Memory</title>
+    <title>Import XLIFF File</title>
     <link id="theme" rel="stylesheet" type="text/css" href="../css/light.css">
     <link rel="stylesheet" type="text/css" href="../css/fonts.css">
 </head>
@@ -10,32 +10,32 @@
 <body id="body">
     <table class="fill_width">
         <tr>
-            <td class="middle">
-                <label for="nameInput">Name</label>
+            <td class="middle noWrap">
+                <label for="projectInput">Project Name</label>
             </td>
-            <td class="table_input middle">
-                <input type="text" id="nameInput" class="table_input">
+            <td class="fill_width middle" colspan="2">
+                <input id="projectInput" class="table_input middle">
+                
             </td>
         </tr>
         <tr>
             <td class="middle">
-                <label for="projectInput">Project</label>
+                <label for="xliff" class="noWrap">XLIFF File</label>
             </td>
             <td class="fill_width middle">
-                <input list="projects" id="projectInput" class="table_input middle">
-                <datalist id="projects">
-
-                </datalist>
+                <input id="xliff" class="fill_width middle">
             </td>
+            <td class="middle"><button id="browse">Browse...</button></td>
         </tr>
+       
         <tr>
             <td class="middle">
                 <label for="subjectInput">Subject</label>
             </td>
-            <td class="fill_width middle">
+            <td class="fill_width middle" colspan="2">
                 <input list="subjects" id="subjectInput" class="table_input middle">
                 <datalist id="subjects">
-
+                    
                 </datalist>
             </td>
         </tr>
@@ -43,20 +43,21 @@
             <td class="middle">
                 <label for="clientInput">Client</label>
             </td>
-            <td class="fill_width middle">
+            <td class="fill_width middle" colspan="2">
                 <input list="clients" id="clientInput" class="table_input middle">
                 <datalist id="clients">
-
+                    
                 </datalist>
             </td>
         </tr>
+
     </table>
     <div class="buttonArea">
-        <button id="addMemoryButton">Add Memory</button>
+        <button id="importXliff">Import XLIFF File</button>
     </div>
 
     <script src="../js/keyboardHandler.js"></script>
-    <script src="../js/addMemory.js"></script>
+    <script src="../js/importXliff.js"></script>
 </body>
 
 </html>
