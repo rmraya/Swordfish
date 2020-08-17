@@ -34,6 +34,7 @@ class Swordfish {
     static licensesWindow: BrowserWindow;
     static addMemoryWindow: BrowserWindow;
     static importTmxWindow: BrowserWindow;
+    static importXliffWindow: BrowserWindow;
     static addProjectWindow: BrowserWindow;
     static addFileWindow: BrowserWindow;
     static defaultLangsWindow: BrowserWindow;
@@ -436,6 +437,20 @@ class Swordfish {
         ipcMain.on('export-xliff', (event: IpcMainEvent, arg: any) => {
             Swordfish.exportProject(arg);
         });
+        ipcMain.on('import-xliff', () => {
+            Swordfish.showImportXliff();
+        });
+        ipcMain.on('import-xliff-height', (event: IpcMainEvent, arg: any) => {
+            let rect: Rectangle = Swordfish.importXliffWindow.getBounds();
+            rect.height = arg.height + this.verticalPadding;
+            Swordfish.importXliffWindow.setBounds(rect);
+        });
+        ipcMain.on('browse-xliff-import', (event: IpcMainEvent) => {
+            Swordfish.browseXLIFF(event);
+        });
+        ipcMain.on('import-xliff-file', (event: IpcMainEvent, arg: any) => {
+            Swordfish.importXLIFF(arg);
+        });
     } // end constructor
 
     static createWindow(): void {
@@ -537,7 +552,7 @@ class Swordfish {
             new MenuItem({ type: 'separator' }),
             { label: 'Remove Projects', click: () => { Swordfish.mainWindow.webContents.send('remove-projects'); } },
             new MenuItem({ type: 'separator' }),
-            { label: 'Import XLIFF File', click: () => { Swordfish.mainWindow.webContents.send('import-project'); } },
+            { label: 'Import XLIFF File', click: () => { Swordfish.showImportXliff(); } },
             { label: 'Export as XLIFF File', click: () => { Swordfish.mainWindow.webContents.send('export-project'); } }
         ]);
         var memoriesMenu: Menu = Menu.buildFromTemplate([
@@ -1025,7 +1040,7 @@ class Swordfish {
                 { name: 'TS (Qt Linguist translation source)', extensions: ['ts'] },
                 { name: 'TXML Document', extensions: ['txml'] },
                 { name: 'Visio XML Drawing', extensions: ['vsdx'] },
-                { name: 'WPML XLIFF', extensions: ['xliff'] },
+                { name: 'XLIFF', extensions: ['xlf', 'xliff', 'mqxliff', 'txlf'] },
                 { name: 'XML Document', extensions: ['xml'] }
             ]
         }).then((value) => {
@@ -1610,7 +1625,6 @@ class Swordfish {
                 Swordfish.showMessage({ type: 'error', message: reason });
             }
         );
-
     }
 
     static getMemoriesProgress(process: string): void {
@@ -2050,12 +2064,98 @@ class Swordfish {
         }, 500);
     }
 
-    static showAddGlossary() : void {
+    static showAddGlossary(): void {
         // TODO
     }
 
     static removeGlossary(): void {
         // TODO
+    }
+
+    static showImportXliff(): void {
+        this.importXliffWindow = new BrowserWindow({
+            parent: this.mainWindow,
+            width: 600,
+            useContentSize: true,
+            minimizable: false,
+            maximizable: false,
+            resizable: false,
+            show: false,
+            icon: this.iconPath,
+            webPreferences: {
+                nodeIntegration: true
+            }
+        });
+        this.importXliffWindow.setMenu(null);
+        this.importXliffWindow.loadURL('file://' + this.path.join(app.getAppPath(), 'html', 'importXliff.html'));
+        this.importXliffWindow.once('ready-to-show', (event: IpcMainEvent) => {
+            event.sender.send('get-height');
+            this.importXliffWindow.show();
+        });
+    }
+
+    static browseXLIFF(event: IpcMainEvent): void {
+        dialog.showOpenDialog({
+            title: 'Import XLIFF File',
+            properties: ['openFile'],
+            filters: [
+                { name: 'XLIFF File', extensions: ['xlf'] },
+                { name: 'Any File', extensions: ['*'] }
+            ]
+        }).then((value) => {
+            if (!value.canceled) {
+                event.sender.send('set-xliff', value.filePaths[0]);
+            }
+        }).catch((error) => {
+            console.log(error);
+        });
+    }
+
+    static importXLIFF(arg: any): void {
+        Swordfish.importXliffWindow.close();
+        Swordfish.mainWindow.focus();
+        Swordfish.mainWindow.webContents.send('start-waiting');
+        Swordfish.mainWindow.webContents.send('set-status', 'Importing XLIFF');
+        Swordfish.sendRequest('/projects/import', arg,
+            (data: any) => {
+                if (data.status !== Swordfish.SUCCESS) {
+                    Swordfish.mainWindow.webContents.send('end-waiting');
+                    Swordfish.mainWindow.webContents.send('set-status', '');
+                    Swordfish.showMessage({ type: 'error', message: data.reason });
+                }
+                Swordfish.currentStatus = data;
+                let processId: string = data.process;
+                var intervalObject = setInterval(() => {
+                    if (Swordfish.currentStatus.progress) {
+                        if (Swordfish.currentStatus.progress === Swordfish.COMPLETED) {
+                            Swordfish.mainWindow.webContents.send('end-waiting');
+                            Swordfish.mainWindow.webContents.send('set-status', '');
+                            clearInterval(intervalObject);
+                            Swordfish.mainWindow.webContents.send('request-projects');
+                            return;
+                        } else if (Swordfish.currentStatus.progress === Swordfish.PROCESSING) {
+                            // it's OK, keep waiting
+                        } else if (Swordfish.currentStatus.progress === Swordfish.ERROR) {
+                            Swordfish.mainWindow.webContents.send('end-waiting');
+                            Swordfish.mainWindow.webContents.send('set-status', '');
+                            clearInterval(intervalObject);
+                            Swordfish.showMessage({ type: 'error', message: Swordfish.currentStatus.reason });
+                            return;
+                        } else {
+                            Swordfish.mainWindow.webContents.send('end-waiting');
+                            Swordfish.mainWindow.webContents.send('set-status', '');
+                            clearInterval(intervalObject);
+                            Swordfish.showMessage({ type: 'error', message: 'Unknown error importing file' });
+                            return;
+                        }
+                    }
+                    Swordfish.getProjectsProgress(processId);
+                }, 500);
+            },
+            (reason: string) => {
+                Swordfish.showMessage({ type: 'error', message: reason });
+            }
+        );
     }
 }
 

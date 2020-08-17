@@ -144,16 +144,12 @@ td.final {
 }
 
 tr.selected {
-	background-color: var(--selected-row);
+	background-color: var(--selected-row) !important;
 }
 
-tr.selected:hover {
-	background-color: var(--accent-color) !important;
-	color: var(--accent-contrast);
-}
 
 tr.discover:hover {
-	background-color: var(--highlight-row);
+	background-color: var(--highlight-row) !important;
 }
 
 th {
@@ -166,11 +162,11 @@ th {
 }
 
 .stripes tr:nth-child(odd) {
-	background-color: var(--odd-row-background) !important;
+	background-color: var(--odd-row-background);
 }
 
 .stripes tr:nth-child(even) {
-	background-color: var(--even-row-background) !important;
+	background-color: var(--even-row-background);
 }
 
 .currentRow {

@@ -55,6 +55,7 @@ import com.maxprograms.swordfish.models.Project;
 import com.maxprograms.swordfish.models.SourceFile;
 import com.maxprograms.swordfish.mt.MT;
 import com.maxprograms.swordfish.xliff.XliffStore;
+import com.maxprograms.swordfish.xliff.XliffUtils;
 import com.maxprograms.xliff2.Resegmenter;
 import com.maxprograms.xliff2.ToXliff2;
 import com.sun.net.httpserver.HttpExchange;
@@ -124,6 +125,8 @@ public class ProjectsHandler implements HttpHandler {
 				response = exportTranslations(request);
 			} else if ("/projects/export".equals(url)) {
 				response = export(request);
+			} else if ("/projects/import".equals(url)) {
+				response = importXliff(request);
 			} else if ("/projects/status".equals(url)) {
 				response = getProcessStatus(request);
 			} else if ("/projects/close".equals(url)) {
@@ -655,8 +658,9 @@ public class ProjectsHandler implements HttpHandler {
 									throw new IOException(res.get(1));
 								}
 								xliffs.add(xliff.getAbsolutePath());
+							} else {
+								// TODO import XLIFF
 							}
-
 						}
 						if (xliffs.size() > 1) {
 							File main = new File(projectFolder, p.getId() + ".xlf");
@@ -869,4 +873,59 @@ public class ProjectsHandler implements HttpHandler {
 		return result;
 	}
 
+	private JSONObject importXliff(String request) {
+		JSONObject result = new JSONObject();
+		JSONObject json = new JSONObject(request);
+		String id = "" + System.currentTimeMillis();
+		result.put("process", id);
+		if (processes == null) {
+			processes = new Hashtable<>();
+		}
+		processes.put(id, Constants.PROCESSING);
+		try {
+			String description = json.getString("project");
+			File xliffFile = new File(json.getString("xliff"));
+			if (!xliffFile.exists()) {
+				throw new IOException("XLIFF file does not exist");
+			}
+			Thread thread = new Thread() {
+				@Override
+				public void run() {
+					try {
+						JSONObject details = XliffUtils.getProjectDetails(xliffFile);
+						Project p = new Project(id, description, Project.NEW,
+								LanguageUtils.getLanguage(details.getString("sourceLang")),
+								LanguageUtils.getLanguage(details.getString("targetLang")), json.getString("client"),
+								json.getString("subject"), LocalDate.now());
+						p.setFiles(details.getJSONArray("files"));
+						File projectFolder = new File(getWorkFolder(), id);
+						Files.createDirectories(projectFolder.toPath());
+						File projectXliff = new File(projectFolder, xliffFile.getName());
+						Files.copy(xliffFile.toPath(), projectXliff.toPath());
+						XliffUtils.detachSkeletons(projectXliff);
+						p.setXliff(projectXliff.getAbsolutePath());
+						XliffStore store = new XliffStore(p.getXliff(), p.getSourceLang().getCode(),
+								p.getTargetLang().getCode());
+						store.close();
+						ServicesHandler.addClient(json.getString("client"));
+						ServicesHandler.addSubject(json.getString("subject"));
+						projects.put(id, p);
+						projectsList.getJSONArray("projects").put(p.toJSON());
+						saveProjectsList();
+						processes.put(id, Constants.COMPLETED);
+					} catch (IOException | SAXException | ParserConfigurationException | URISyntaxException
+							| SQLException e) {
+						logger.log(Level.WARNING, e.getMessage(), e);
+						processes.put(id, e.getMessage());
+					}
+				}
+			};
+			thread.start();
+		} catch (IOException e) {
+			logger.log(Level.ERROR, e);
+			result.put(Constants.STATUS, Constants.ERROR);
+			result.put(Constants.REASON, e.getMessage());
+		}
+		return result;
+	}
 }

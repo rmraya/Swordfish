@@ -89,7 +89,7 @@ class ProjectsView {
             '<span class="tooltiptext bottomTooltip">Import XLIFF File</span>';
         importButton.className = 'tooltip';
         importButton.addEventListener('click', () => {
-            this.importProject();
+            this.electron.ipcRenderer.send('import-xliff');
         });
         importButton.style.marginLeft = '20px';
         topBar.appendChild(importButton);
@@ -109,6 +109,7 @@ class ProjectsView {
 
         let projectsTable = document.createElement('table');
         projectsTable.classList.add('fill_width');
+        projectsTable.classList.add('stripes');
         this.tableContainer.appendChild(projectsTable);
 
         projectsTable.innerHTML =
@@ -221,10 +222,6 @@ class ProjectsView {
             projects.push(key);
         }
         this.electron.ipcRenderer.send('remove-projects', { projects: projects });
-    }
-
-    importProject(): void {
-        // TODO
     }
 
     exportProject(): void {

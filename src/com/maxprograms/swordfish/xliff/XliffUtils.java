@@ -30,18 +30,29 @@ import java.util.List;
 import java.util.Map;
 import java.util.Vector;
 
+import javax.xml.parsers.ParserConfigurationException;
+
+import com.maxprograms.converters.FileFormats;
+import com.maxprograms.converters.Utils;
 import com.maxprograms.swordfish.Constants;
 import com.maxprograms.swordfish.TmsServer;
 import com.maxprograms.swordfish.tm.TMUtils;
 import com.maxprograms.xml.Attribute;
+import com.maxprograms.xml.Document;
 import com.maxprograms.xml.Element;
+import com.maxprograms.xml.SAXBuilder;
 import com.maxprograms.xml.XMLNode;
+import com.maxprograms.xml.XMLOutputter;
 
+import org.json.JSONArray;
 import org.json.JSONObject;
+import org.xml.sax.SAXException;
 
 public class XliffUtils {
 
     public static final String STYLE = "class='highlighted'";
+    private static final String NOTXLIFF = "Selected file is not an XLIFF document";
+    private static final String NOTSWORDFISH = "Selected file is not a Swordfish project";
     private static int maxTag = 0;
 
     private XliffUtils() {
@@ -259,5 +270,106 @@ public class XliffUtils {
             }
         }
         return result;
+    }
+
+    public static JSONObject getProjectDetails(File xliffFile) throws IOException {
+        try {
+            JSONObject result = new JSONObject();
+            SAXBuilder builder = new SAXBuilder();
+            Document doc = builder.build(xliffFile);
+            Element xliff = doc.getRootElement();
+            if (!"xliff".equals(xliff.getName())) {
+                throw new IOException(NOTXLIFF);
+            }
+            if (!"2.0".equals(xliff.getAttributeValue("version"))) {
+                throw new IOException(NOTSWORDFISH);
+            }
+            JSONArray filesArray = new JSONArray();
+            List<Element> files = xliff.getChildren("file");
+            Iterator<Element> it = files.iterator();
+            while (it.hasNext()) {
+                Element file = it.next();
+                JSONObject fileObject = new JSONObject();
+                fileObject.put("file", file.getAttributeValue("original"));
+                Element skeleton = file.getChild("skeleton");
+                if (skeleton == null) {
+                    throw new IOException(NOTSWORDFISH);
+                }
+                if (!skeleton.getAttributeValue("href").isEmpty()) {
+                    throw new IOException(NOTSWORDFISH);
+                }
+                Element metadata = file.getChild("mda:metadata");
+                if (metadata == null) {
+                    throw new IOException(NOTSWORDFISH);
+                }
+                boolean isOpenXLIFF = false;
+                List<Element> groups = metadata.getChildren("mda:metaGroup");
+                Iterator<Element> gt = groups.iterator();
+                while (gt.hasNext()) {
+                    Element group = gt.next();
+                    if ("tool".equals(group.getAttributeValue("category"))) {
+                        List<Element> metaList = group.getChildren("mda:meta");
+                        Iterator<Element> mt = metaList.iterator();
+                        while (mt.hasNext()) {
+                            Element meta = mt.next();
+                            if ("tool-id".equals(meta.getAttributeValue("type"))) {
+                                isOpenXLIFF = "OpenXLIFF".equals(meta.getText());
+                            }
+                        }
+                    }
+                    if ("format".equals(group.getAttributeValue("category"))) {
+                        List<Element> metaList = group.getChildren("mda:meta");
+                        Iterator<Element> mt = metaList.iterator();
+                        while (mt.hasNext()) {
+                            Element meta = mt.next();
+                            if ("datatype".equals(meta.getAttributeValue("type"))) {
+                                fileObject.put("type", FileFormats.getFullName(meta.getText()));
+                            }
+                        }
+                    }
+                    if ("PI".equals(group.getAttributeValue("category"))) {
+                        List<Element> metaList = group.getChildren("mda:meta");
+                        Iterator<Element> mt = metaList.iterator();
+                        while (mt.hasNext()) {
+                            Element meta = mt.next();
+                            if ("encoding".equals(meta.getAttributeValue("type"))) {
+                                fileObject.put("encoding", meta.getText());
+                            }
+                        }
+                    }
+                }
+                if (!isOpenXLIFF) {
+                    throw new IOException(NOTSWORDFISH);
+                }
+                filesArray.put(fileObject);
+            }
+            result.put("sourceLang", xliff.getAttributeValue("srcLang"));
+            result.put("targetLang", xliff.getAttributeValue("trgLang"));
+            result.put("files", filesArray);
+            return result;
+        } catch (SAXException | ParserConfigurationException e) {
+            throw new IOException(NOTXLIFF);
+        }
+    }
+
+    public static void detachSkeletons(File xliffFile) throws SAXException, IOException, ParserConfigurationException {
+        SAXBuilder builder = new SAXBuilder();
+        Document doc = builder.build(xliffFile);
+        Element xliff = doc.getRootElement();
+        List<Element> files = xliff.getChildren("file");
+        Iterator<Element> it = files.iterator();
+        while (it.hasNext()) {
+            Element file = it.next();
+            Element skeleton = file.getChild("skeleton");
+            File skl = File.createTempFile("xlf", ".skl", xliffFile.getParentFile());
+            Utils.decodeToFile(skeleton.getText(), skl.getAbsolutePath());
+            skeleton.setContent(new ArrayList<>());
+            skeleton.setAttribute("href", skl.getAbsolutePath());
+        }
+        XMLOutputter outputter = new XMLOutputter();
+        outputter.preserveSpace(true);
+        try (FileOutputStream out = new FileOutputStream(xliffFile)) {
+            outputter.output(doc, out);
+        }
     }
 }

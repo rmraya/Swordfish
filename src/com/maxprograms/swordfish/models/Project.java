@@ -172,6 +172,13 @@ public class Project implements Serializable, Comparable<Project> {
 		this.files = files;
 	}
 
+	public void setFiles(JSONArray array) {
+		files = new ArrayList<>();
+		for (int i=0 ; i<array.length() ; i++) {
+			files.add(new SourceFile(array.getJSONObject(i)));
+		}
+	}
+
 	public String getMemory() {
 		return memory;
 	}

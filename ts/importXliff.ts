@@ -1,17 +1,11 @@
-class ImportTMX {
+class ImportXLIFF {
 
     electron = require('electron');
-
-    memory: string;
 
     constructor() {
         this.electron.ipcRenderer.send('get-theme');
         this.electron.ipcRenderer.on('set-theme', (event: Electron.IpcRendererEvent, arg: any) => {
             (document.getElementById('theme') as HTMLLinkElement).href = arg;
-        });
-        this.electron.ipcRenderer.send('get-project-names');
-        this.electron.ipcRenderer.on('set-project-names', (event: Electron.IpcRendererEvent, arg: any) => {
-            this.setProjectNames(arg);
         });
         this.electron.ipcRenderer.send('get-clients');
         this.electron.ipcRenderer.on('set-clients', (event: Electron.IpcRendererEvent, arg: any) => {
@@ -26,36 +20,24 @@ class ImportTMX {
                 window.close();
             }
             if (event.key === 'Enter') {
-                this.importTMX();
+                this.importXLIFF();
             }
         });
         document.addEventListener('keydown', (event: KeyboardEvent) => { KeyboardHandler.keyListener(event); });
         this.electron.ipcRenderer.on('get-height', () => {
             let body: HTMLBodyElement = document.getElementById('body') as HTMLBodyElement;
-            this.electron.ipcRenderer.send('import-tmx-height', { width: body.clientWidth, height: body.clientHeight });
-        });
-        this.electron.ipcRenderer.on('set-memory', (event: Electron.IpcRendererEvent, arg: any) => {
-            this.memory = arg;
+            this.electron.ipcRenderer.send('import-xliff-height', { width: body.clientWidth, height: body.clientHeight });
         });
         document.getElementById('browse').addEventListener('click', () => {
-            this.electron.ipcRenderer.send('get-tmx-file');
+            this.electron.ipcRenderer.send('browse-xliff-import');
             document.getElementById('browse').blur();
         });
-        this.electron.ipcRenderer.on('set-tmx-file', (event: Electron.IpcRendererEvent, arg: any) => {
-            (document.getElementById('tmx') as HTMLInputElement).value = arg;
+        this.electron.ipcRenderer.on('set-xliff', (event: Electron.IpcRendererEvent, arg: any) => {
+            (document.getElementById('xliff') as HTMLInputElement).value = arg;
         });
-        document.getElementById('importTmx').addEventListener('click', () => {
-            this.importTMX();
+        document.getElementById('importXliff').addEventListener('click', () => {
+            this.importXLIFF();
         });
-    }
-
-    setProjectNames(projects: string[]): void {
-        let options: string = '';
-        let length: number = projects.length;
-        for (let i = 0; i < length; i++) {
-            options = options + '<option value="' + projects[i] + '">' + projects[i] + '</option>';
-        }
-        document.getElementById('projects').innerHTML = options;
     }
 
     setClients(clients: string[]): void {
@@ -76,21 +58,25 @@ class ImportTMX {
         document.getElementById('subjects').innerHTML = options;
     }
 
-    importTMX(): void {
-        let tmx: string = (document.getElementById('tmx') as HTMLInputElement).value;
-        if (tmx === '') {
-            this.electron.ipcRenderer.send('show-message', { type: 'warning', message: 'Select TMX file' });
+    importXLIFF(): void {
+        let project: string = (document.getElementById('projectInput') as HTMLInputElement).value;
+        if (project === '') {
+            this.electron.ipcRenderer.send('show-message', { type: 'warning', message: 'Enter project name' });
+            return;
+        }
+        let xliff: string = (document.getElementById('xliff') as HTMLInputElement).value;
+        if (xliff === '') {
+            this.electron.ipcRenderer.send('show-message', { type: 'warning', message: 'Select XLIFF file' });
             return;
         }
         let params = {
-            memory: this.memory,
-            tmx: tmx,
-            project: (document.getElementById('projectInput') as HTMLInputElement).value,
+            xliff: xliff,
+            project: project,
             subject: (document.getElementById('subjectInput') as HTMLInputElement).value,
             client: (document.getElementById('clientInput') as HTMLInputElement).value
         }
-        this.electron.ipcRenderer.send('import-tmx-file', params);
+        this.electron.ipcRenderer.send('import-xliff-file', params);
     }
 }
 
-new ImportTMX();
+new ImportXLIFF();

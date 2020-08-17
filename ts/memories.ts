@@ -78,6 +78,7 @@ class MemoriesView {
 
         let memoriesTable = document.createElement('table');
         memoriesTable.classList.add('fill_width');
+        memoriesTable.classList.add('stripes');
         this.tableContainer.appendChild(memoriesTable);
 
         memoriesTable.innerHTML =

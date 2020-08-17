@@ -100,9 +100,6 @@ class Main {
         Main.electron.ipcRenderer.on('export-translations', (event: Electron.IpcRendererEvent, arg: any) => {
             this.projectsView.exportTranslations();
         });
-        Main.electron.ipcRenderer.on('import-project', (event: Electron.IpcRendererEvent, arg: any) => {
-            this.projectsView.importProject();
-        });
         Main.electron.ipcRenderer.on('export-project', (event: Electron.IpcRendererEvent, arg: any) => {
             this.projectsView.exportProject();
         });
