@@ -56,7 +56,7 @@ class TranslationView {
     rowsPage: number = 500;
     maxRows: number;
     segmentsCount: number;
-    statistics: HTMLSpanElement;
+    statistics: HTMLDivElement;
 
     currentRow: HTMLTableRowElement;
     currentCell: HTMLTableCellElement;
@@ -479,11 +479,9 @@ class TranslationView {
         filler.className = 'fill_width';
         this.statusArea.appendChild(filler);
 
-        this.statistics = document.createElement('span');
-        this.statistics.classList.add('noWrap');
-        this.statistics.style.paddingRight = '20px';
-        this.statistics.style.paddingTop = '4px';
+        this.statistics = document.createElement('div');
         this.statistics.innerHTML = '&nbsp;';
+        this.statistics.classList.add('stats');
         this.statusArea.appendChild(this.statistics);
 
         let config: any = { attributes: true, childList: false, subtree: false };
@@ -938,8 +936,17 @@ class TranslationView {
         }
     }
 
-    setStatistics(stats: string): void {
-        this.statistics.innerText = stats;
+    setStatistics(stats: any): void {
+        this.statistics.innerHTML = '';
+        let span: HTMLSpanElement = document.createElement('span');
+        span.classList.add('stats');
+        span.innerText = stats.text;
+        this.statistics.appendChild(span);
+
+        let svg: HTMLSpanElement = document.createElement('span');
+        svg.classList.add('stats');
+        svg.innerHTML = stats.svg;
+        this.statistics.appendChild(svg);
     }
 
     setSpellChecker(): void {
