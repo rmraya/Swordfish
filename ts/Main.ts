@@ -364,11 +364,11 @@ class Main {
     }
 
     setStatistics(arg: any): void {
-        console.log(JSON.stringify(arg));
         let project: string = arg.project;
         if (Main.translationViews.has(project)) {
             Main.translationViews.get(project).setStatistics(arg.statistics);
         }
+        this.projectsView.updateStatus(arg);
     }
 
     findText(): void{

@@ -260,54 +260,46 @@ class ProjectsView {
             }
 
             let td = document.createElement('td');
-            td.classList.add('noWrap');
-            td.classList.add('middle');
+            td.classList.add('list');
             td.innerText = p.description;
             tr.append(td);
 
             td = document.createElement('td');
             td.classList.add('center');
-            td.classList.add('middle');
-            if (p.status === 0) {
-                td.innerText = 'New';
-            } else if (p.status === 1) {
-                td.innerText = 'In Progress';
-            } else {
-                td.innerText = 'Completed'
-            }
+            td.classList.add('list');
+            td.style.paddingTop = '4px';
+            td.style.paddingBottom = '0px';
+            td.innerHTML = p.svg;
             tr.append(td);
 
             td = document.createElement('td');
             td.innerText = p.sourceLang;
             td.classList.add('center');
-            td.classList.add('middle');
+            td.classList.add('list');
             tr.append(td);
 
             td = document.createElement('td');
             td.innerText = p.targetLang;
             td.classList.add('center');
-            td.classList.add('middle');
+            td.classList.add('list');
             tr.append(td);
 
             td = document.createElement('td');
-            td.classList.add('noWrap');
-            td.classList.add('middle');
+            td.classList.add('list');
             td.classList.add('center');
             td.style.minWidth = '170px';
             td.innerText = p.creationDate;
             tr.append(td);
 
             td = document.createElement('td');
-            td.classList.add('noWrap');
-            td.classList.add('middle');
+            td.classList.add('list');
             td.classList.add('center');
             td.style.minWidth = '170px';
             td.innerText = p.client;
             tr.append(td);
 
             td = document.createElement('td');
-            td.classList.add('noWrap');
-            td.classList.add('middle');
+            td.classList.add('list');
             td.classList.add('center');
             td.style.minWidth = '170px';
             td.innerText = p.subject;
@@ -343,6 +335,19 @@ class ProjectsView {
         } else {
             this.selected.delete(project.id);
             tr.classList.remove('selected');
+        }
+    }
+
+    updateStatus(arg: any): void {
+        let projectId = arg.project;
+        let svg = arg.statistics.svg;
+        let rows: HTMLCollectionOf<HTMLTableRowElement> = this.tbody.getElementsByTagName('tr');
+        for (let i=0 ; i<rows.length ; i++) {
+            if (rows[i].id === projectId) {
+                let cells:HTMLCollectionOf<HTMLTableCellElement> = rows[i].getElementsByTagName('td');
+                cells[1].innerHTML = svg;
+                break;
+            }
         }
     }
 }

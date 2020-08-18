@@ -364,9 +364,7 @@ public class ProjectsHandler implements HttpHandler {
 
 	private JSONObject listProjects(String request) {
 		JSONObject result = new JSONObject();
-		JSONArray array = new JSONArray();
-		result.put("projects", array);
-		if (projects == null) {
+		if (projectsList == null) {
 			try {
 				loadProjectsList();
 			} catch (IOException e) {
@@ -375,7 +373,13 @@ public class ProjectsHandler implements HttpHandler {
 				return result;
 			}
 		}
-		return projectsList;
+		JSONArray array = projectsList.getJSONArray("projects");
+		for (int i=0 ; i<array.length() ; i++) {
+			int status = array.getJSONObject(i).getInt("status");
+			array.getJSONObject(i).put("svg", XliffUtils.makeSVG(status));
+		}
+		result.put("projects", array);
+		return result;
 	}
 
 	private void loadProjectsList() throws IOException {
@@ -610,6 +614,7 @@ public class ProjectsHandler implements HttpHandler {
 							SourceFile sf = new SourceFile(shortName, FileFormats.getFullName(file.getString("type")),
 									file.getString("encoding"));
 							sourceFiles.add(sf);
+
 							if (!FileFormats.XLIFF.equals(sf.getType())) {
 
 								boolean paragraph = paragraphSegmentation;
@@ -637,6 +642,7 @@ public class ProjectsHandler implements HttpHandler {
 								params.put("srxFile", srxFile);
 								params.put("srcLang", json.getString("srcLang"));
 								params.put("tgtLang", json.getString("tgtLang"));
+								
 								List<String> res = Convert.run(params);
 
 								if ("0".equals(res.get(0))) {
@@ -760,11 +766,29 @@ public class ProjectsHandler implements HttpHandler {
 		try {
 			result.put("propagated", projectStores.get(project).saveSegment(json));
 			result.put("statistics", projectStores.get(project).getTranslationStatus());
+			JSONObject status = projectStores.get(project).getTranslationStatus();
+			updateProjectStatus(project, status.getInt("percentage"));
 		} catch (IOException | SQLException | SAXException | ParserConfigurationException | DataFormatException e) {
 			logger.log(Level.ERROR, e);
 			result.put(Constants.REASON, e.getMessage());
 		}
 		return result;
+	}
+
+	private void updateProjectStatus(String projectId, int status) throws IOException {
+		JSONArray array = projectsList.getJSONArray("projects");
+		for (int i=0 ; i<array.length() ; i++) {
+			JSONObject project = array.getJSONObject(i);
+			if (project.getString("id").equals(projectId)) {
+				int value = project.getInt("status");
+				if (value != status) {
+					array.getJSONObject(i).put("status", status);
+					projectsList.put("projects", array);
+					saveProjectsList();
+				}
+				break;
+			}
+		}
 	}
 
 	private JSONObject getMatches(String request) {

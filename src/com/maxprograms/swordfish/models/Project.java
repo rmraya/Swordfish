@@ -37,8 +37,6 @@ public class Project implements Serializable, Comparable<Project> {
 	private static final long serialVersionUID = -7301458245016833998L;
 
 	public static final int NEW = 0;
-	public static final int INPROGRESS = 1;
-	public static final int COMPLETED = 2;
 
 	private String id;
 	private String description;

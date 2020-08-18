@@ -118,6 +118,11 @@ td {
 	font-size: medium;
 }
 
+td.list {
+	vertical-align: middle;
+	white-space: nowrap;
+}
+
 td.editing {
 	background-color: var(--normal-background) !important;
 }

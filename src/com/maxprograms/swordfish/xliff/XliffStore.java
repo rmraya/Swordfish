@@ -573,6 +573,7 @@ public class XliffStore {
     }
 
     public JSONObject getTranslationStatus() throws SQLException {
+        JSONObject result = new JSONObject();
         int total = 0;
         int translated = 0;
         int confirmed = 0;
@@ -599,20 +600,14 @@ public class XliffStore {
             percentage = Math.round(confirmed * 100f / total);
         }
 
-        JSONObject stats = new JSONObject();
-        stats.put("text", "Words: " + total + "\u00A0\u00A0\u00A0Translated: " + translated
+        result.put("total", total);
+        result.put("translated", translated);
+        result.put("confirmed", confirmed);
+        result.put("percentage", percentage);
+        result.put("text", "Words: " + total + "\u00A0\u00A0\u00A0Translated: " + translated
                 + "\u00A0\u00A0\u00A0Confirmed: " + confirmed);
-        stats.put("svg", makeSVG(percentage));
-
-        return stats;
-    }
-
-    private String makeSVG(int percentage) {
-        double f = percentage * 0.72;
-        return "<svg xmlns='http://www.w3.org/2000/svg' height='24' viewBox='0 0 72 24' width='72' class'stats'>"
-                + "<rect x='0' y='0' width='72' height='24' class='statsRect'/>" + "<rect x='1' y='1' width='" + f
-                + "' height='22' class='statsFiller'/>" + "<text x='50%' y='55%' class='statsText'>" + percentage
-                + "%</text></svg>";
+        result.put("svg", XliffUtils.makeSVG(percentage));
+        return result;
     }
 
     private void updateTarget(String file, String unit, String segment, Element target, String pureTarget,

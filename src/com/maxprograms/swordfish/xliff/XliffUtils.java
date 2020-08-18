@@ -372,4 +372,12 @@ public class XliffUtils {
             outputter.output(doc, out);
         }
     }
+
+    public static String makeSVG(int percentage) {
+        double width = percentage * 0.70;
+        return "<svg xmlns='http://www.w3.org/2000/svg' height='24' viewBox='0 0 72 24' width='72' class'stats'>"
+                + "<rect x='0' y='0' width='72' height='24' class='statsRect'/><rect x='1' y='1' width='" + width
+                + "' height='22' class='statsFiller'/><text x='50%' y='55%' class='statsText'>" + percentage
+                + "%</text></svg>";
+    }
 }
