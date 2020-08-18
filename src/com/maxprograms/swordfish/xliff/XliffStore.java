@@ -166,19 +166,19 @@ public class XliffStore {
 
     private void createTables() throws SQLException {
         String files = "CREATE TABLE files (id VARCHAR(50) NOT NULL, name VARCHAR(350) NOT NULL, PRIMARY KEY(id));";
-        String units = "CREATE TABLE units (file VARCHAR(50), " + "unitId VARCHAR(50) NOT NULL, "
+        String units = "CREATE TABLE units (file VARCHAR(50), " + "unitId VARCHAR(256) NOT NULL, "
                 + "data VARCHAR(6000) NOT NULL, compressed CHAR(1) NOT NULL DEFAULT 'N', PRIMARY KEY(file, unitId) );";
-        String segments = "CREATE TABLE segments (file VARCHAR(50), unitId VARCHAR(50) NOT NULL, "
-                + "segId VARCHAR(50) NOT NULL, type CHAR(1) NOT NULL DEFAULT 'S', state VARCHAR(12) DEFAULT 'initial', child INTEGER, "
+        String segments = "CREATE TABLE segments (file VARCHAR(50), unitId VARCHAR(256) NOT NULL, "
+                + "segId VARCHAR(256) NOT NULL, type CHAR(1) NOT NULL DEFAULT 'S', state VARCHAR(12) DEFAULT 'initial', child INTEGER, "
                 + "translate CHAR(1), tags INTEGER DEFAULT 0, space CHAR(1) DEFAULT 'N', source VARCHAR(6000) NOT NULL, sourceText VARCHAR(6000) NOT NULL, "
                 + "target VARCHAR(6000) NOT NULL, targetText VARCHAR(6000) NOT NULL, words INTEGER NOT NULL DEFAULT 0, "
                 + "PRIMARY KEY(file, unitId, segId, type) );";
-        String matches = "CREATE TABLE matches (file VARCHAR(50), unitId VARCHAR(50) NOT NULL, "
-                + "segId VARCHAR(50) NOT NULL, matchId varchar(256), origin VARCHAR(256), type CHAR(2) NOT NULL DEFAULT 'tm', "
+        String matches = "CREATE TABLE matches (file VARCHAR(50), unitId VARCHAR(256) NOT NULL, "
+                + "segId VARCHAR(256) NOT NULL, matchId varchar(256), origin VARCHAR(256), type CHAR(2) NOT NULL DEFAULT 'tm', "
                 + "similarity INTEGER DEFAULT 0, source VARCHAR(6000) NOT NULL, target VARCHAR(6000) NOT NULL, data VARCHAR(6000) NOT NULL, "
                 + "compressed CHAR(1) NOT NULL DEFAULT 'N', PRIMARY KEY(file, unitId, segId, matchid) );";
-        String terms = "CREATE TABLE terms (file VARCHAR(50), unitId VARCHAR(50) NOT NULL, "
-                + "segId VARCHAR(50) NOT NULL, termid varchar(256),  "
+        String terms = "CREATE TABLE terms (file VARCHAR(50), unitId VARCHAR(256) NOT NULL, "
+                + "segId VARCHAR(256) NOT NULL, termid varchar(256),  "
                 + "origin VARCHAR(256), source VARCHAR(6000) NOT NULL, target VARCHAR(6000) NOT NULL, "
                 + "PRIMARY KEY(file, unitId, segId, termid) );";
         try (Statement stmt = conn.createStatement()) {
