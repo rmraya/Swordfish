@@ -873,8 +873,15 @@ class Swordfish {
     }
 
     static getSaveName(file: any, lang: string): any {
-        let name = file.file.substr(0, file.file.lastIndexOf('.'));
-        let extension = file.file.substr(file.file.lastIndexOf('.'));
+        let fileName: string  = file.file;
+        if (fileName.endsWith('.sdlppx')) {
+            return {
+                defaultPath: fileName.substr(0, fileName.lastIndexOf('.')) + '.sdlrpx',
+                filters: [{ name: file.type, extensions: 'sdlrpx' }, { name: 'Any File', extensions: '*' }]
+            }
+        }
+        let name = fileName.substr(0, fileName.lastIndexOf('.'));
+        let extension = fileName.substr(fileName.lastIndexOf('.'));
         return {
             defaultPath: name + '_' + lang + extension,
             filters: [{ name: file.type, extensions: extension }, { name: 'Any File', extensions: '*' }]
