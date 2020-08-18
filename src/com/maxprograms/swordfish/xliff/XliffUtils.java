@@ -33,7 +33,6 @@ import java.util.Vector;
 import javax.xml.parsers.ParserConfigurationException;
 
 import com.maxprograms.converters.FileFormats;
-import com.maxprograms.converters.Utils;
 import com.maxprograms.swordfish.Constants;
 import com.maxprograms.swordfish.TmsServer;
 import com.maxprograms.swordfish.tm.TMUtils;
@@ -42,7 +41,6 @@ import com.maxprograms.xml.Document;
 import com.maxprograms.xml.Element;
 import com.maxprograms.xml.SAXBuilder;
 import com.maxprograms.xml.XMLNode;
-import com.maxprograms.xml.XMLOutputter;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -349,27 +347,6 @@ public class XliffUtils {
             return result;
         } catch (SAXException | ParserConfigurationException e) {
             throw new IOException(NOTXLIFF);
-        }
-    }
-
-    public static void detachSkeletons(File xliffFile) throws SAXException, IOException, ParserConfigurationException {
-        SAXBuilder builder = new SAXBuilder();
-        Document doc = builder.build(xliffFile);
-        Element xliff = doc.getRootElement();
-        List<Element> files = xliff.getChildren("file");
-        Iterator<Element> it = files.iterator();
-        while (it.hasNext()) {
-            Element file = it.next();
-            Element skeleton = file.getChild("skeleton");
-            File skl = File.createTempFile("xlf", ".skl", xliffFile.getParentFile());
-            Utils.decodeToFile(skeleton.getText(), skl.getAbsolutePath());
-            skeleton.setContent(new ArrayList<>());
-            skeleton.setAttribute("href", skl.getAbsolutePath());
-        }
-        XMLOutputter outputter = new XMLOutputter();
-        outputter.preserveSpace(true);
-        try (FileOutputStream out = new FileOutputStream(xliffFile)) {
-            outputter.output(doc, out);
         }
     }
 

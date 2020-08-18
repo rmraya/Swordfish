@@ -67,9 +67,9 @@ public class Skeletons {
         }
     }
 
-    public static void extractSkeletons(String xliffFile, String outputFile) throws IOException, SAXException,
+    public static void extractSkeletons(File xliffFile, File outputFile) throws IOException, SAXException,
             ParserConfigurationException, URISyntaxException {
-        File xliffParent = new File(xliffFile).getParentFile();
+        File xliffParent = outputFile.getParentFile();
         SAXBuilder builder = new SAXBuilder();
         builder.setEntityResolver(new Catalog(XliffStore.getCatalog()));
         Document doc = builder.build(xliffFile);

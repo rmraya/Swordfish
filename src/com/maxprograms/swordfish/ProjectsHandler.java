@@ -54,6 +54,7 @@ import com.maxprograms.languages.LanguageUtils;
 import com.maxprograms.swordfish.models.Project;
 import com.maxprograms.swordfish.models.SourceFile;
 import com.maxprograms.swordfish.mt.MT;
+import com.maxprograms.swordfish.xliff.Skeletons;
 import com.maxprograms.swordfish.xliff.XliffStore;
 import com.maxprograms.swordfish.xliff.XliffUtils;
 import com.maxprograms.xliff2.Resegmenter;
@@ -926,7 +927,7 @@ public class ProjectsHandler implements HttpHandler {
 						Files.createDirectories(projectFolder.toPath());
 						File projectXliff = new File(projectFolder, xliffFile.getName());
 						Files.copy(xliffFile.toPath(), projectXliff.toPath());
-						XliffUtils.detachSkeletons(projectXliff);
+						Skeletons.extractSkeletons(xliffFile, projectXliff);
 						p.setXliff(projectXliff.getAbsolutePath());
 						XliffStore store = new XliffStore(p.getXliff(), p.getSourceLang().getCode(),
 								p.getTargetLang().getCode());
