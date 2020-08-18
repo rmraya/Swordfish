@@ -143,10 +143,8 @@ public class XliffStore {
                 logger.log(Level.INFO, "Creating database");
             }
             createTables();
-            document = builder.build(xliffFile);
-            parseDocument();
-            conn.commit();
         }
+
         getUnitData = conn.prepareStatement("SELECT data, compressed FROM units WHERE file=? AND unitId=?");
         getSource = conn
                 .prepareStatement("SELECT source, sourceText FROM segments WHERE file=? AND unitId=? AND segId=?");
@@ -162,6 +160,11 @@ public class XliffStore {
         bestMatch = conn.prepareStatement(
                 "SELECT type, similarity FROM matches WHERE file=? AND unitId=? AND segId=? ORDER BY similarity DESC LIMIT 1");
         stmt = conn.createStatement();
+        if (needsLoading) {
+            document = builder.build(xliffFile);
+            parseDocument();
+            conn.commit();
+        }
     }
 
     private void createTables() throws SQLException {

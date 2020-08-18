@@ -931,7 +931,9 @@ public class ProjectsHandler implements HttpHandler {
 						p.setXliff(projectXliff.getAbsolutePath());
 						XliffStore store = new XliffStore(p.getXliff(), p.getSourceLang().getCode(),
 								p.getTargetLang().getCode());
+						JSONObject status = store.getTranslationStatus();
 						store.close();
+						p.setStatus(status.getInt("percentage"));
 						ServicesHandler.addClient(json.getString("client"));
 						ServicesHandler.addSubject(json.getString("subject"));
 						projects.put(id, p);
