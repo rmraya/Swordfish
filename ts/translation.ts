@@ -711,6 +711,16 @@ class TranslationView {
                 this.currentState.classList.add('final');
                 this.currentState.innerHTML = TranslationView.SVG_FINAL;
             } else {
+                if (this.currentState.classList.contains('final')) {
+                    this.currentState.classList.remove('final');
+                    if (translation === '') {
+                        this.currentState.classList.add('initial');
+                        this.currentState.innerHTML = TranslationView.SVG_BLANK;
+                    } else {
+                        this.currentState.classList.add('translated');
+                        this.currentState.innerHTML = TranslationView.SVG_TRANSLATED;
+                    }
+                }
                 if (translation === '') {
                     if (this.currentState.classList.contains('translated')) {
                         this.currentState.classList.remove('translated');

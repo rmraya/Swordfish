@@ -375,7 +375,7 @@ public class ProjectsHandler implements HttpHandler {
 			}
 		}
 		JSONArray array = projectsList.getJSONArray("projects");
-		for (int i=0 ; i<array.length() ; i++) {
+		for (int i = 0; i < array.length(); i++) {
 			int status = array.getJSONObject(i).getInt("status");
 			array.getJSONObject(i).put("svg", XliffUtils.makeSVG(status));
 		}
@@ -616,58 +616,54 @@ public class ProjectsHandler implements HttpHandler {
 									file.getString("encoding"));
 							sourceFiles.add(sf);
 
-							if (!FileFormats.XLIFF.equals(sf.getType())) {
-
-								boolean paragraph = paragraphSegmentation;
-								boolean mustResegment = false;
-								if (!paragraphSegmentation && !FileFormats.isBilingual(sf.getType())) {
-									mustResegment = true;
-									paragraph = true;
-								}
-
-								File source = new File(fullName);
-								File xliff = new File(projectFolder, shortName + ".xlf");
-								if (!xliff.getParentFile().exists()) {
-									Files.createDirectories(xliff.getParentFile().toPath());
-								}
-								File skl = new File(projectFolder, shortName + ".skl");
-
-								Map<String, String> params = new HashMap<>();
-								params.put("source", source.getAbsolutePath());
-								params.put("xliff", xliff.getAbsolutePath());
-								params.put("skeleton", skl.getAbsolutePath());
-								params.put("format", sf.getType());
-								params.put("catalog", catalogFile);
-								params.put("srcEncoding", sf.getEncoding());
-								params.put("paragraph", paragraph ? "yes" : "no");
-								params.put("srxFile", srxFile);
-								params.put("srcLang", json.getString("srcLang"));
-								params.put("tgtLang", json.getString("tgtLang"));
-								
-								List<String> res = Convert.run(params);
-
-								if ("0".equals(res.get(0))) {
-									res = ToXliff2.run(xliff, catalogFile);
-									if (mustResegment && "0".equals(res.get(0))) {
-										res = Resegmenter.run(xliff.getAbsolutePath(), srxFile,
-												json.getString("srcLang"), catalogFile);
-									}
-								}
-								if (!"0".equals(res.get(0))) {
-									if (TmsServer.isDebug()) {
-										logger.log(Level.INFO, "Conversion failed for: " + file.toString(2));
-									}
-									try {
-										TmsServer.deleteFolder(projectFolder.getAbsolutePath());
-									} catch (IOException e) {
-										logger.log(Level.ERROR, e);
-									}
-									throw new IOException(res.get(1));
-								}
-								xliffs.add(xliff.getAbsolutePath());
-							} else {
-								// TODO import XLIFF
+							boolean paragraph = paragraphSegmentation;
+							boolean mustResegment = false;
+							if (!paragraphSegmentation && !FileFormats.isBilingual(sf.getType())) {
+								mustResegment = true;
+								paragraph = true;
 							}
+
+							File source = new File(fullName);
+							File xliff = new File(projectFolder, shortName + ".xlf");
+							if (!xliff.getParentFile().exists()) {
+								Files.createDirectories(xliff.getParentFile().toPath());
+							}
+							File skl = new File(projectFolder, shortName + ".skl");
+
+							Map<String, String> params = new HashMap<>();
+							params.put("source", source.getAbsolutePath());
+							params.put("xliff", xliff.getAbsolutePath());
+							params.put("skeleton", skl.getAbsolutePath());
+							params.put("format", sf.getType());
+							params.put("catalog", catalogFile);
+							params.put("srcEncoding", sf.getEncoding());
+							params.put("paragraph", paragraph ? "yes" : "no");
+							params.put("srxFile", srxFile);
+							params.put("srcLang", json.getString("srcLang"));
+							params.put("tgtLang", json.getString("tgtLang"));
+
+							List<String> res = Convert.run(params);
+
+							if ("0".equals(res.get(0))) {
+								res = ToXliff2.run(xliff, catalogFile);
+								if (mustResegment && "0".equals(res.get(0))) {
+									res = Resegmenter.run(xliff.getAbsolutePath(), srxFile, json.getString("srcLang"),
+											catalogFile);
+								}
+							}
+							if (!"0".equals(res.get(0))) {
+								if (TmsServer.isDebug()) {
+									logger.log(Level.INFO, "Conversion failed for: " + file.toString(2));
+								}
+								try {
+									TmsServer.deleteFolder(projectFolder.getAbsolutePath());
+								} catch (IOException e) {
+									logger.log(Level.ERROR, e);
+								}
+								throw new IOException(res.get(1));
+							}
+							xliffs.add(xliff.getAbsolutePath());
+
 						}
 						if (xliffs.size() > 1) {
 							File main = new File(projectFolder, p.getId() + ".xlf");
@@ -778,7 +774,7 @@ public class ProjectsHandler implements HttpHandler {
 
 	private void updateProjectStatus(String projectId, int status) throws IOException {
 		JSONArray array = projectsList.getJSONArray("projects");
-		for (int i=0 ; i<array.length() ; i++) {
+		for (int i = 0; i < array.length(); i++) {
 			JSONObject project = array.getJSONObject(i);
 			if (project.getString("id").equals(projectId)) {
 				int value = project.getInt("status");

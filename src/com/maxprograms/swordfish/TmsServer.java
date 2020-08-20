@@ -21,6 +21,7 @@ package com.maxprograms.swordfish;
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.File;
+import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -196,4 +197,19 @@ public class TmsServer implements HttpHandler {
 	public static boolean isDebug() {
 		return debug;
 	}
+
+	public static String getCatalogFile() throws IOException {
+        File preferences = new File(getWorkFolder(), "preferences.json");
+        StringBuilder builder = new StringBuilder();
+        try (FileReader reader = new FileReader(preferences)) {
+            try (BufferedReader buffer = new BufferedReader(reader)) {
+                String line = "";
+                while ((line = buffer.readLine()) != null) {
+                    builder.append(line);
+                }
+            }
+        }
+        JSONObject json = new JSONObject(builder.toString());
+        return json.getString("catalog");
+    }
 }

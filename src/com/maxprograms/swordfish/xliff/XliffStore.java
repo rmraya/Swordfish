@@ -333,7 +333,7 @@ public class XliffStore {
         String segment = match.getAttributeValue("ref"); // TODO check if it points to a fragment
         String type = match.getAttributeValue("type", Constants.TM);
         String origin = match.getAttributeValue("origin");
-        int similarity = Math.round(Float.parseFloat(match.getAttributeValue("similarity", "0'0")));
+        int similarity = Math.round(Float.parseFloat(match.getAttributeValue("similarity", "0.0")));
 
         insertMatch(file, unit, segment, origin, type, similarity, source, target, tagsData);
     }

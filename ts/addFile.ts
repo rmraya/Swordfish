@@ -29,7 +29,7 @@ class AddFile {
         this.electron.ipcRenderer.send('get-types');
         this.electron.ipcRenderer.on('set-types', (event: Electron.IpcRendererEvent, arg: any) => {
             this.setTypes(arg);
-        }); this.electron.ipcRenderer.send('get-charsets');
+        }); 
         this.electron.ipcRenderer.on('set-charsets', (event: Electron.IpcRendererEvent, arg: any) => {
             this.setCharsets(arg);
         });
@@ -92,6 +92,7 @@ class AddFile {
             this.typesOption = this.typesOption + '<option value="' + arg.formats[i].code + '">' + arg.formats[i].description + '</option>';
         }
         document.getElementById('typeSelect').innerHTML = this.typesOption;
+        this.electron.ipcRenderer.send('get-charsets');
     }
 
     setCharsets(arg: any): void {
@@ -101,6 +102,7 @@ class AddFile {
             this.charsetOptions = this.charsetOptions + '<option value="' + arg.charsets[i].code + '">' + arg.charsets[i].description + '</option>';
         }
         document.getElementById('charsetSelect').innerHTML = this.charsetOptions;
+        this.electron.ipcRenderer.send('get-selected-file');
     }
 
     addFile(arg: any): void {

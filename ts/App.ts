@@ -97,6 +97,8 @@ class Swordfish {
     static currentCss: string;
     static currentStatus: any;
 
+    static selectedFile: string;
+
     stopping: boolean = false;
 
     static SUCCESS: string = 'Success';
@@ -111,9 +113,6 @@ class Swordfish {
     ls: ChildProcessWithoutNullStreams;
 
     constructor() {
-
-        console.log('javapath:  ' + this.javapath);
-        console.log('appHome:   ' + Swordfish.appHome);
 
         app.allowRendererProcessReuse = true;
         if (!app.requestSingleInstanceLock()) {
@@ -263,6 +262,9 @@ class Swordfish {
             let rect: Rectangle = Swordfish.addFileWindow.getBounds();
             rect.height = arg.height + this.verticalPadding;
             Swordfish.addFileWindow.setBounds(rect);
+        });
+        ipcMain.on('get-selected-file', (event: IpcMainEvent) => {
+            Swordfish.setSelectedFile(event);
         });
         ipcMain.on('get-languages', (event: IpcMainEvent) => {
             this.getLanguages(event);
@@ -496,7 +498,7 @@ class Swordfish {
             menu.popup();
         });
         var fileMenu: Menu = Menu.buildFromTemplate([
-            { label: 'Translate Single File', accelerator: 'CmdOrCtrl+N', click: () => { Swordfish.addFile(); } }
+            { label: 'Open...', accelerator: 'CmdOrCtrl+O', click: () => { Swordfish.addFile(); } }
         ]);
         var tagsMenu: Menu = Menu.buildFromTemplate([
             { label: 'Insert Tag "1"', accelerator: 'CmdOrCtrl+1', click: () => { Swordfish.mainWindow.webContents.send('insert tag', { tag: 1 }); } },
@@ -546,9 +548,9 @@ class Swordfish {
             new MenuItem({ label: 'Toggle Development Tools', accelerator: 'F12', role: 'toggleDevTools' }),
         ]);
         var projectsMenu: Menu = Menu.buildFromTemplate([
-            { label: 'New Project', accelerator: 'CmdOrCtrl+Shift+N', click: () => { Swordfish.addProject(); } },
-            { label: 'Translate Projects', accelerator: 'CmdOrCtrl+O', click: () => { Swordfish.translateProjects(); } },
-            { label: 'Export Translations', click: () => { Swordfish.mainWindow.webContents.send('export-translations'); } },
+            { label: 'New Project', accelerator: 'CmdOrCtrl+N', click: () => { Swordfish.addProject(); } },
+            { label: 'Translate Projects', accelerator: 'CmdOrCtrl+G', click: () => { Swordfish.translateProjects(); } },
+            { label: 'Export Translations', accelerator: 'CmdOrCtrl+S', click: () => { Swordfish.mainWindow.webContents.send('export-translations'); } },
             new MenuItem({ type: 'separator' }),
             { label: 'Remove Projects', click: () => { Swordfish.mainWindow.webContents.send('remove-projects'); } },
             new MenuItem({ type: 'separator' }),
@@ -584,6 +586,7 @@ class Swordfish {
         }
         var tasksMenu: Menu = Menu.buildFromTemplate([
             { label: 'Confirm Translation', accelerator: 'CmdOrCtrl+E', click: () => { Swordfish.mainWindow.webContents.send('save-edit', { confirm: true, next: 'none' }); } },
+            { label: 'Unconfirm Translation', accelerator: 'CmdOrCtrl+Shift+E', click: () => { Swordfish.mainWindow.webContents.send('save-edit', { confirm: false, next: 'none' }); } },
             { label: 'Confirm and go to Next Untranslated', accelerator: nextUntranslatedKey, click: () => { Swordfish.mainWindow.webContents.send('save-edit', { confirm: true, next: 'untranslated' }); } },
             { label: 'Confirm and go to Next Unconfirmed', accelerator: nextUnconfirmedKey, click: () => { Swordfish.mainWindow.webContents.send('save-edit', { confirm: true, next: 'unconfirmed' }); } },
             new MenuItem({ type: 'separator' }),
@@ -873,7 +876,7 @@ class Swordfish {
     }
 
     static getSaveName(file: any, lang: string): any {
-        let fileName: string  = file.file;
+        let fileName: string = file.file;
         if (fileName.endsWith('.sdlppx')) {
             return {
                 defaultPath: fileName.substr(0, fileName.lastIndexOf('.')) + '.sdlrpx',
@@ -889,25 +892,71 @@ class Swordfish {
     }
 
     static addFile() {
-        this.addFileWindow = new BrowserWindow({
-            parent: this.mainWindow,
-            width: 900,
-            minimizable: false,
-            maximizable: false,
-            resizable: false,
-            useContentSize: true,
-            show: false,
-            icon: this.iconPath,
-            webPreferences: {
-                nodeIntegration: true
+        let anyFile: string[] = [];
+        if (process.platform === 'linux') {
+            anyFile = ['*'];
+        }
+        dialog.showOpenDialog({
+            properties: ['openFile'],
+
+            filters: [
+                { name: 'Any File', extensions: anyFile },
+                { name: 'Adobe InDesign Interchange', extensions: ['inx'] },
+                { name: 'Adobe InDesign IDML', extensions: ['idml'] },
+                { name: 'DITA Map', extensions: ['ditamap', 'dita', 'xml'] },
+                { name: 'HTML Page', extensions: ['html', 'htm'] },
+                { name: 'JavaScript', extensions: ['js'] },
+                { name: 'Java Properties', extensions: ['properties'] },
+                { name: 'MIF (Maker Interchange Format)', extensions: ['mif'] },
+                { name: 'Microsoft Office 2007 Document', extensions: ['docx', 'xlsx', 'pptx'] },
+                { name: 'OpenOffice 1.x Document', extensions: ['sxw', 'sxc', 'sxi', 'sxd'] },
+                { name: 'OpenOffice 2.x Document', extensions: ['odt', 'ods', 'odp', 'odg'] },
+                { name: 'Plain Text', extensions: ['txt'] },
+                { name: 'PO (Portable Objects)', extensions: ['po', 'pot'] },
+                { name: 'RC (Windows C/C++ Resources)', extensions: ['rc'] },
+                { name: 'ResX (Windows .NET Resources)', extensions: ['resx'] },
+                { name: 'SDLXLIFF Document', extensions: ['sdlxliff'] },
+                { name: 'SVG (Scalable Vector Graphics)', extensions: ['svg'] },
+                { name: 'Trados Studio Package', extensions: ['sdlppx'] },
+                { name: 'TS (Qt Linguist translation source)', extensions: ['ts'] },
+                { name: 'TXML Document', extensions: ['txml'] },
+                { name: 'Visio XML Drawing', extensions: ['vsdx'] },
+                { name: 'XLIFF', extensions: ['xlf', 'xliff', 'mqxliff', 'txlf'] },
+                { name: 'XML Document', extensions: ['xml'] }
+            ]
+        }).then((value) => {
+            if (!value.canceled) {
+                this.addFileWindow = new BrowserWindow({
+                    parent: this.mainWindow,
+                    width: 900,
+                    minimizable: false,
+                    maximizable: false,
+                    resizable: false,
+                    useContentSize: true,
+                    show: false,
+                    icon: this.iconPath,
+                    webPreferences: {
+                        nodeIntegration: true
+                    }
+                });
+                this.addFileWindow.setMenu(null);
+                this.addFileWindow.loadURL('file://' + this.path.join(app.getAppPath(), 'html', 'addFile.html'));
+                this.addFileWindow.once('ready-to-show', (event: IpcMainEvent) => {
+                    event.sender.send('get-height');
+                    Swordfish.selectedFile = value.filePaths[0];
+                    Swordfish.addFileWindow.show();
+                });
             }
+        }).catch((error) => {
+            console.log(error);
         });
-        this.addFileWindow.setMenu(null);
-        this.addFileWindow.loadURL('file://' + this.path.join(app.getAppPath(), 'html', 'addFile.html'));
-        this.addFileWindow.once('ready-to-show', (event: IpcMainEvent) => {
-            event.sender.send('get-height');
-            this.addFileWindow.show();
-        });
+    }
+
+    static setSelectedFile(event: IpcMainEvent): void {
+        if (Swordfish.selectedFile) {
+            Swordfish.getFileType(event, [Swordfish.selectedFile]);
+            Swordfish.selectedFile = undefined;
+        }
     }
 
     static translateProjects(): void {
@@ -1052,14 +1101,14 @@ class Swordfish {
             ]
         }).then((value) => {
             if (!value.canceled) {
-                this.getFileType(event, value.filePaths);
+                Swordfish.getFileType(event, value.filePaths);
             }
         }).catch((error) => {
             console.log(error);
         });
     }
 
-    getFileType(event: IpcMainEvent, files: string[]): void {
+    static getFileType(event: IpcMainEvent, files: string[]): void {
         Swordfish.sendRequest('/services/getFileType', { files: files },
             (data: any) => {
                 event.sender.send('add-source-files', data);
@@ -1722,7 +1771,6 @@ class Swordfish {
     }
 
     exportMemories(memories: any[]): void {
-        // TODO
         if (memories.length === 1) {
             dialog.showSaveDialog(Swordfish.mainWindow, {
                 defaultPath: memories[0].name + '.tmx',
@@ -1775,6 +1823,7 @@ class Swordfish {
                 console.log(error);
             });
         } else {
+            // TODO
             for (let i = 0; i < memories.length; i++) {
                 console.log(JSON.stringify(memories[i]));
             }

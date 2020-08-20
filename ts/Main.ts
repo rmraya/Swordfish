@@ -98,7 +98,7 @@ class Main {
             this.projectsView.removeProjects();
         });
         Main.electron.ipcRenderer.on('export-translations', (event: Electron.IpcRendererEvent, arg: any) => {
-            this.projectsView.exportTranslations();
+            this.exportTranslations();
         });
         Main.electron.ipcRenderer.on('export-project', (event: Electron.IpcRendererEvent, arg: any) => {
             this.projectsView.exportProject();
@@ -248,7 +248,6 @@ class Main {
     static checkTabs(): void {
         for (let key of Main.translationViews.keys()) {
             if (!Main.tabHolder.has(key)) {
-                console.log('MUST CLOSE ' + key);
                 let view: TranslationView = Main.translationViews.get(key);
                 view.close();
                 Main.translationViews.delete(key);
@@ -371,11 +370,20 @@ class Main {
         this.projectsView.updateStatus(arg);
     }
 
-    findText(): void{
+    findText(): void {
         let selected = Main.tabHolder.getSelected();
         if (Main.translationViews.has(selected)) {
             Main.translationViews.get(selected).findText();
         }
+    }
+
+    exportTranslations(): void {
+        let selected: string = Main.tabHolder.getSelected();
+        if (Main.translationViews.has(selected)) {
+            Main.electron.ipcRenderer.send('export-open-project', { project: selected });
+            return;
+        }
+        this.projectsView.exportTranslations();
     }
 }
 
