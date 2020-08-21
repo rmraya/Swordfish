@@ -16,3 +16,4 @@ package-lock.json
 /Swordfish-linux-x64/
 sonarqube.sh
 .scannerwork
+build_mac.sh

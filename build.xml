@@ -94,15 +94,4 @@
     <target name="dist" depends="link,copyWindows,copyUnix">
         <description>Prepare distribution</description>
     </target>
-    <target name="server" depends="dist">
-        <exec executable="bin/java">
-            <arg value="--module-path"/>
-            <arg value="lib"/>
-            <arg value="-m"/>
-            <arg value="swordfish/com.maxprograms.swordfish.TmsServer"/>
-            <arg value="-port"/>
-            <arg value="8070"/>
-            <arg value="-debug"/>
-        </exec>
-    </target>
 </project>
