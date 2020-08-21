@@ -1258,7 +1258,7 @@ class Swordfish {
                 title = 'GPL2 with Classpath Exception';
                 break;
             case "OpenXLIFF":
-            case "TMEngine":
+            case "H2":
                 licenseFile = 'file://' + this.path.join(app.getAppPath(), 'html', 'licenses', 'EclipsePublicLicense1.0.html');
                 title = 'Eclipse Public License 1.0';
                 break;

@@ -46,8 +46,8 @@ class Licenses {
         document.getElementById('OpenXLIFF').addEventListener('click', () => {
             this.openLicense('OpenXLIFF');
         });
-        document.getElementById('TMEngine').addEventListener('click', () => {
-            this.openLicense('TMEngine');
+        document.getElementById('H2').addEventListener('click', () => {
+            this.openLicense('H2');
         });
         document.getElementById('JSON').addEventListener('click', () => {
             this.openLicense('JSON');
