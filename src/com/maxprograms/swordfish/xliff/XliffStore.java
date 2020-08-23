@@ -500,7 +500,7 @@ public class XliffStore {
         String file = json.getString("file");
         String unit = json.getString("unit");
         String segment = json.getString("segment");
-        String translation = json.getString("translation").replace("&nbsp;", "\u00A0");
+        String translation = json.getString("translation").replace("&nbsp;", "\u00A0").replace("<br>", "\n");
         boolean confirm = json.getBoolean("confirm");
         String memory = json.getString("memory");
 
@@ -580,10 +580,12 @@ public class XliffStore {
         int total = 0;
         int translated = 0;
         int confirmed = 0;
-        String sql = "SELECT SUM(words) FROM segments";
+        int segments = 0;
+        String sql = "SELECT SUM(words), COUNT(*) FROM segments";
         try (ResultSet rs = stmt.executeQuery(sql)) {
             while (rs.next()) {
                 total = rs.getInt(1);
+                segments = rs.getInt(2);
             }
         }
         sql = "SELECT SUM(words) FROM segments WHERE state='final'";
@@ -603,11 +605,12 @@ public class XliffStore {
             percentage = Math.round(confirmed * 100f / total);
         }
 
+        result.put("segments", segments);
         result.put("total", total);
         result.put("translated", translated);
         result.put("confirmed", confirmed);
         result.put("percentage", percentage);
-        result.put("text", "Words: " + total + "\u00A0\u00A0\u00A0Translated: " + translated
+        result.put("text", "Segments: " + segments +  "\u00A0\u00A0\u00A0Words: " + total + "\u00A0\u00A0\u00A0Translated: " + translated
                 + "\u00A0\u00A0\u00A0Confirmed: " + confirmed);
         result.put("svg", XliffUtils.makeSVG(percentage));
         return result;

@@ -86,7 +86,7 @@ class ProjectsView {
 
         let importButton = document.createElement('a');
         importButton.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path d="M8 9v-4l8 7-8 7v-4h-8v-6h8zm2-7v2h12v16h-12v2h14v-20h-14z"/></svg>' +
-            '<span class="tooltiptext bottomTooltip">Import XLIFF File</span>';
+            '<span class="tooltiptext bottomTooltip">Import XLIFF File as Project</span>';
         importButton.className = 'tooltip';
         importButton.addEventListener('click', () => {
             this.electron.ipcRenderer.send('import-xliff');
@@ -96,7 +96,7 @@ class ProjectsView {
 
         let exportButton = document.createElement('a');
         exportButton.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path d="M16 9v-4l8 7-8 7v-4h-8v-6h8zm-16-7v20h14v-2h-12v-16h12v-2h-14z"/></svg>' +
-            '<span class="tooltiptext bottomTooltip">Export as XLIFF File</span>';
+            '<span class="tooltiptext bottomTooltip">Export Project as XLIFF File</span>';
         exportButton.className = 'tooltip';
         exportButton.addEventListener('click', () => {
             this.exportProject();

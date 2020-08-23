@@ -533,6 +533,11 @@ svg {
 	left: 20px;
 }
 
+.bottomCenterTooltip {
+	top: 120%;
+	left: -80px;
+}
+
 .bottomRightTooltip {
 	top: 120%;
 	right: 20px;

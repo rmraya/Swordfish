@@ -527,7 +527,7 @@ class Swordfish {
             new MenuItem({ label: 'Quick Tags', submenu: tagsMenu }),
             { label: 'Insert Next Tag', accelerator: 'CmdOrCtrl+Shift+T', click: () => { Swordfish.mainWindow.webContents.send('insert-next-tag'); } },
             { label: 'Insert Remaining Tags', accelerator: 'CmdOrCtrl+Alt+T', click: () => { Swordfish.mainWindow.webContents.send('insert-remaining-tags'); } },
-            { label: 'Remove all Tags', accelerator: 'CmdOrCtrl+Shift+R', click: () => { Swordfish.mainWindow.webContents.send('remove-tags'); } },
+            { label: 'Remove All Tags', accelerator: 'CmdOrCtrl+Shift+R', click: () => { Swordfish.mainWindow.webContents.send('remove-tags'); } },
             new MenuItem({ type: 'separator' }),
             { label: 'Find Text', accelerator: 'CmdOrCtrl+F', click: () => { this.findText(); } },
             { label: 'Replace Text', accelerator: 'CmdOrCtrl+Alt+F', click: () => { this.replaceText(); } },
@@ -554,15 +554,15 @@ class Swordfish {
             new MenuItem({ type: 'separator' }),
             { label: 'Remove Projects', click: () => { Swordfish.mainWindow.webContents.send('remove-projects'); } },
             new MenuItem({ type: 'separator' }),
-            { label: 'Import XLIFF File', click: () => { Swordfish.showImportXliff(); } },
-            { label: 'Export as XLIFF File', click: () => { Swordfish.mainWindow.webContents.send('export-project'); } }
+            { label: 'Import XLIFF File as Project', click: () => { Swordfish.showImportXliff(); } },
+            { label: 'Export Project as XLIFF File', click: () => { Swordfish.mainWindow.webContents.send('export-project'); } }
         ]);
         var memoriesMenu: Menu = Menu.buildFromTemplate([
             { label: 'Add Memory', click: () => { Swordfish.showAddMemory(); } },
             { label: 'Remove Memory', click: () => { Swordfish.removeMemory(); } },
             new MenuItem({ type: 'separator' }),
             { label: 'Import TMX File', click: () => { Swordfish.importTMX(); } },
-            { label: 'Export as TMX File', click: () => { Swordfish.exportTMX(); } }
+            { label: 'Export Memory as TMX File', click: () => { Swordfish.exportTMX(); } }
         ]);
         var glossariesMenu: Menu = Menu.buildFromTemplate([
             { label: 'Add Glossary', click: () => { Swordfish.showAddGlossary(); } },
@@ -590,12 +590,23 @@ class Swordfish {
             { label: 'Confirm and go to Next Untranslated', accelerator: nextUntranslatedKey, click: () => { Swordfish.mainWindow.webContents.send('save-edit', { confirm: true, next: 'untranslated' }); } },
             { label: 'Confirm and go to Next Unconfirmed', accelerator: nextUnconfirmedKey, click: () => { Swordfish.mainWindow.webContents.send('save-edit', { confirm: true, next: 'unconfirmed' }); } },
             new MenuItem({ type: 'separator' }),
-            { label: 'Copy Source to Target', accelerator: 'CmdOrCtrl+P', click: () => { Swordfish.mainWindow.webContents.send('copy-source'); } },
-            { label: 'Accept TM Match', accelerator: 'CmdOrCtrl+Alt+A', click: () => { Swordfish.mainWindow.webContents.send('accept-tm-match'); } },
+            { label: 'Confirm All Translations', click: () => { Swordfish.mainWindow.webContents.send('confirm-all'); } },
+            { label: 'Unconfirm All Translations', click: () => { Swordfish.mainWindow.webContents.send('unconfirm-all'); } },
+            { label: 'Remove All Translations', click: () => { Swordfish.mainWindow.webContents.send('remove-all'); } },
             new MenuItem({ type: 'separator' }),
-            { label: 'Accept Machine Translation', click: () => { Swordfish.mainWindow.webContents.send('accept-mt-match'); } },
+            { label: 'Copy Source to Target', accelerator: 'CmdOrCtrl+P', click: () => { Swordfish.mainWindow.webContents.send('copy-source'); } },
+            { label: 'Copy Sources to All Empty Targets', accelerator: 'CmdOrCtrl+Shift+P', click: () => { Swordfish.mainWindow.webContents.send('copy-all-sources'); } },
+            { label: 'Pseudo-translate Untranslated Segments',  click: () => { Swordfish.mainWindow.webContents.send('pseudo-translate'); } },
+            new MenuItem({ type: 'separator' }),
+            { label: 'Get Translations from Memory', accelerator: 'CmdOrCtrl+M', click: () => { Swordfish.mainWindow.webContents.send('get-tm-matches'); } },
+            { label: 'Accept Translation Memory Match', accelerator: 'CmdOrCtrl+Alt+M', click: () => { Swordfish.mainWindow.webContents.send('accept-tm-match'); } },
+            { label: 'Apply Translation Memory to All Segments', click: () => { Swordfish.mainWindow.webContents.send('apply-tm-all'); } },
+            { label: 'Accept All 100% Matches', click: () => { Swordfish.mainWindow.webContents.send('accept-all-matches'); } },
+            new MenuItem({ type: 'separator' }),
             { label: 'Get Machine Translations', accelerator: 'CmdOrCtrl+L', click: () => { Swordfish.mainWindow.webContents.send('get-mt-matches'); } },
-            { label: 'Apply MT to all Segments', click: () => { Swordfish.mainWindow.webContents.send('apply-mt-all'); } }
+            { label: 'Accept Machine Translation',accelerator: 'CmdOrCtrl+Alt+L',click: () => { Swordfish.mainWindow.webContents.send('accept-mt-match'); } },
+            { label: 'Apply Machine Translation to All Segments', click: () => { Swordfish.mainWindow.webContents.send('apply-mt-all'); } },
+            { label: 'Accept All Machine Translations', click: () => { Swordfish.mainWindow.webContents.send('accept-all-mt'); } }
         ]);
         var template: MenuItem[] = [
             new MenuItem({ label: '&File', role: 'fileMenu', submenu: fileMenu }),

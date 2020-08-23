@@ -157,8 +157,35 @@ class Main {
         Main.electron.ipcRenderer.on('save-edit', (event: Electron.IpcRendererEvent, arg: any) => {
             this.saveEdit(arg);
         });
+        Main.electron.ipcRenderer.on('insert-tag', () => {
+            this.insertTag();
+        });
+        Main.electron.ipcRenderer.on('insert-next-tag', () => {
+            this.insertNextTag();
+        });
+        Main.electron.ipcRenderer.on('insert-remaining-tags', () => {
+            this.insertRemainingTags();
+        });
+        Main.electron.ipcRenderer.on('remove-tags', () => {
+            this.removeTags();
+        });
+        Main.electron.ipcRenderer.on('confirm-all', () => {
+            this.confirmAllTranslations();
+        });
+        Main.electron.ipcRenderer.on('unconfirm-all', () => {
+            this.unconfirmAllTranslations();
+        });
+        Main.electron.ipcRenderer.on('remove-all', () => {
+            this.removeAllTranslations();
+        });
         Main.electron.ipcRenderer.on('copy-source', () => {
             this.copySource();
+        });
+        Main.electron.ipcRenderer.on('copy-all-sources', () => {
+            this.copyAllSources();
+        });
+        Main.electron.ipcRenderer.on('pseudo-translate', () => {
+            this.pseudoTranslate();
         });
         Main.electron.ipcRenderer.on('insert tag', (event: Electron.IpcRendererEvent, arg: any) => {
             this.inserTag(arg);
@@ -177,6 +204,18 @@ class Main {
         });
         Main.electron.ipcRenderer.on('get-tm-matches', () => {
             this.getTmMatches();
+        });
+        Main.electron.ipcRenderer.on('apply-mt-all', () => {
+            this.applyMachineTranslationsAll();
+        });
+        Main.electron.ipcRenderer.on('accept-all-mt', () => {
+            this.acceptAllMachineTranslations();
+        });
+        Main.electron.ipcRenderer.on('apply-tm-all', () => {
+            this.applyTranslationMemoryAll();
+        });
+        Main.electron.ipcRenderer.on('accept-all-matches', () => {
+            this.acceptAllMatches();
         });
         Main.electron.ipcRenderer.on('set-project-memories', (event: Electron.IpcRendererEvent, arg: any) => {
             this.setProjectMemories(arg);
@@ -271,11 +310,47 @@ class Main {
         }
     }
 
+    insertTag(): void {
+        // TODO
+    }
+
+    insertNextTag(): void {
+        // TODO 
+    }
+
+    insertRemainingTags(): void {
+        // TODO
+    }
+
+    removeTags(): void {
+        // TODO
+    }
+
+    confirmAllTranslations(): void {
+        // TODO
+    }
+
+    unconfirmAllTranslations(): void {
+        // TODO
+    }
+
+    removeAllTranslations(): void {
+        // TODO
+    }
+
     copySource(): void {
         let selected = Main.tabHolder.getSelected();
         if (Main.translationViews.has(selected)) {
             Main.translationViews.get(selected).copySource();
         }
+    }
+
+    copyAllSources(): void {
+        // TODO
+    }
+
+    pseudoTranslate(): void {
+        // TODO
     }
 
     inserTag(arg: any): void {
@@ -348,6 +423,22 @@ class Main {
         }
     }
 
+    applyTranslationMemoryAll(): void {
+        // TODO
+    }
+
+    acceptAllMatches(): void {
+        // TODO
+    }
+
+    applyMachineTranslationsAll(): void {
+        // TODO
+    }
+
+    acceptAllMachineTranslations(): void {
+        // TODO
+    }
+    
     setProjectMemories(arg: any): void {
         let project: string = arg.project;
         if (Main.translationViews.has(project)) {
