@@ -453,6 +453,9 @@ class Swordfish {
         ipcMain.on('import-xliff-file', (event: IpcMainEvent, arg: any) => {
             Swordfish.importXLIFF(arg);
         });
+        ipcMain.on('files-dropped', (event: IpcMainEvent, arg: any) => {
+            Swordfish.filesDropped(arg)
+        });
     } // end constructor
 
     static createWindow(): void {
@@ -596,7 +599,7 @@ class Swordfish {
             new MenuItem({ type: 'separator' }),
             { label: 'Copy Source to Target', accelerator: 'CmdOrCtrl+P', click: () => { Swordfish.mainWindow.webContents.send('copy-source'); } },
             { label: 'Copy Sources to All Empty Targets', accelerator: 'CmdOrCtrl+Shift+P', click: () => { Swordfish.mainWindow.webContents.send('copy-all-sources'); } },
-            { label: 'Pseudo-translate Untranslated Segments',  click: () => { Swordfish.mainWindow.webContents.send('pseudo-translate'); } },
+            { label: 'Pseudo-translate Untranslated Segments', click: () => { Swordfish.mainWindow.webContents.send('pseudo-translate'); } },
             new MenuItem({ type: 'separator' }),
             { label: 'Get Translations from Memory', accelerator: 'CmdOrCtrl+M', click: () => { Swordfish.mainWindow.webContents.send('get-tm-matches'); } },
             { label: 'Accept Translation Memory Match', accelerator: 'CmdOrCtrl+Alt+M', click: () => { Swordfish.mainWindow.webContents.send('accept-tm-match'); } },
@@ -604,7 +607,7 @@ class Swordfish {
             { label: 'Accept All 100% Matches', click: () => { Swordfish.mainWindow.webContents.send('accept-all-matches'); } },
             new MenuItem({ type: 'separator' }),
             { label: 'Get Machine Translations', accelerator: 'CmdOrCtrl+L', click: () => { Swordfish.mainWindow.webContents.send('get-mt-matches'); } },
-            { label: 'Accept Machine Translation',accelerator: 'CmdOrCtrl+Alt+L',click: () => { Swordfish.mainWindow.webContents.send('accept-mt-match'); } },
+            { label: 'Accept Machine Translation', accelerator: 'CmdOrCtrl+Alt+L', click: () => { Swordfish.mainWindow.webContents.send('accept-mt-match'); } },
             { label: 'Apply Machine Translation to All Segments', click: () => { Swordfish.mainWindow.webContents.send('apply-mt-all'); } },
             { label: 'Accept All Machine Translations', click: () => { Swordfish.mainWindow.webContents.send('accept-all-mt'); } }
         ]);
@@ -723,6 +726,7 @@ class Swordfish {
 
     openFile(file: string): void {
         // TODO
+        console.log('Open file requested: ' + file);
     }
 
     static findText(): void {
@@ -2219,6 +2223,10 @@ class Swordfish {
                 Swordfish.showMessage({ type: 'error', message: reason });
             }
         );
+    }
+
+    static filesDropped(arg: any): void {
+        console.log(JSON.stringify(arg));
     }
 }
 

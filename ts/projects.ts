@@ -106,6 +106,10 @@ class ProjectsView {
         this.tableContainer = document.createElement('div');
         this.tableContainer.classList.add('divContainer');
         this.container.appendChild(this.tableContainer);
+        this.tableContainer.addEventListener('drop', (event: DragEvent) => { this.dropListener(event, this.tableContainer) });
+        this.tableContainer.addEventListener('dragover', (event: DragEvent) => { this.dragOverListener(event) });
+        this.tableContainer.addEventListener('dragenter', (event: DragEvent) => { this.dragEnterListener(event, this.tableContainer) });
+        this.tableContainer.addEventListener('dragleave', (event: DragEvent) => { this.dragLeaveListener(event, this.tableContainer) });
 
         let projectsTable = document.createElement('table');
         projectsTable.classList.add('fill_width');
@@ -161,6 +165,35 @@ class ProjectsView {
             }
         });
         observer.observe(targetNode, config);
+    }
+
+    dropListener(event: DragEvent, container: HTMLElement): void {
+        event.preventDefault();
+        event.stopPropagation();
+        let filesList: string[] = [];
+        for (const f of event.dataTransfer.files) {
+            filesList.push(f.path);
+        }
+        if (filesList.length > 0) {
+            this.electron.ipcRenderer.send('files-dropped', { files: filesList });
+        }
+        container.style.opacity = '1';
+        container.style.cursor = 'default';
+    }
+
+    dragEnterListener(event: DragEvent, container: HTMLElement): void {
+        container.style.opacity = '0.3';
+        container.style.cursor = 'grab';
+    }
+
+    dragLeaveListener(event: DragEvent, container: HTMLElement): void {
+        container.style.opacity = '1';
+        container.style.cursor = 'default';
+    }
+
+    dragOverListener(event: DragEvent): void {
+        event.preventDefault();
+        event.stopPropagation();
     }
 
     loadProjects(arg: any): void {
@@ -233,7 +266,7 @@ class ProjectsView {
         }
         for (let key of this.selected.keys()) {
             let project = this.selected.get(key);
-            this.electron.ipcRenderer.send('export-xliff', {projectId: key, description: project.description});
+            this.electron.ipcRenderer.send('export-xliff', { projectId: key, description: project.description });
         }
     }
 
@@ -340,9 +373,9 @@ class ProjectsView {
         let projectId = arg.project;
         let svg = arg.statistics.svg;
         let rows: HTMLCollectionOf<HTMLTableRowElement> = this.tbody.getElementsByTagName('tr');
-        for (let i=0 ; i<rows.length ; i++) {
+        for (let i = 0; i < rows.length; i++) {
             if (rows[i].id === projectId) {
-                let cells:HTMLCollectionOf<HTMLTableCellElement> = rows[i].getElementsByTagName('td');
+                let cells: HTMLCollectionOf<HTMLTableCellElement> = rows[i].getElementsByTagName('td');
                 cells[1].innerHTML = svg;
                 break;
             }
