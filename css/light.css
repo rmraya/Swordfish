@@ -1,6 +1,6 @@
 :root {
-	--normal-background: #f5f5f5;
-	--normal-color: #101010;
+	--normal-background: #ececec;
+	--normal-color: #373737;
 	--accent-color: #3465aa;
 	--accent-alternative: #0551bb;
 	--accent-contrast: #ffffff;
@@ -10,7 +10,7 @@
 	--tab-background: #dedede;
 	--tab-hover: #cdcdcd;
 	--input-background: #fefefe;
-	--input-color: #2e2e2e;
+	--input-color: #262626;
 	--focus-border: #f57c00;
 	--disabled-input: #999999;
 	--even-row-background: #ececec;

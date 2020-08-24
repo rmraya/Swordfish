@@ -412,8 +412,7 @@ class Preferences {
         this.themeColor.id = 'themeColor';
         this.themeColor.innerHTML = '<option value="system">System Default</option>' +
             '<option value="dark">Dark</option>' +
-            '<option value="light">Light</option>' +
-            '<option value="teal">Teal</option>'
+            '<option value="light">Light</option>'
         td.appendChild(this.themeColor);
     }
 

@@ -687,7 +687,6 @@ class Swordfish {
     static loadPreferences(): void {
         let dark: string = 'file://' + Swordfish.path.join(app.getAppPath(), 'css', 'dark.css');
         let light: string = 'file://' + Swordfish.path.join(app.getAppPath(), 'css', 'light.css');
-        let teal: string = 'file://' + Swordfish.path.join(app.getAppPath(), 'css', 'teal.css');
         let preferencesFile = Swordfish.path.join(app.getPath('appData'), app.name, 'preferences.json');
         if (existsSync(preferencesFile)) {
             try {
@@ -711,9 +710,6 @@ class Swordfish {
         }
         if (Swordfish.currentPreferences.theme === 'light') {
             Swordfish.currentCss = light;
-        }
-        if (Swordfish.currentPreferences.theme === 'teal') {
-            Swordfish.currentCss = teal;
         }
     }
 
