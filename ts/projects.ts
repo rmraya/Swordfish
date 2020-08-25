@@ -108,8 +108,8 @@ class ProjectsView {
         this.container.appendChild(this.tableContainer);
         this.tableContainer.addEventListener('drop', (event: DragEvent) => { this.dropListener(event, this.tableContainer) });
         this.tableContainer.addEventListener('dragover', (event: DragEvent) => { this.dragOverListener(event) });
-        this.tableContainer.addEventListener('dragenter', (event: DragEvent) => { this.dragEnterListener(event, this.tableContainer) });
-        this.tableContainer.addEventListener('dragleave', (event: DragEvent) => { this.dragLeaveListener(event, this.tableContainer) });
+        this.tableContainer.addEventListener('dragenter', () => { this.dragEnterListener(this.tableContainer) });
+        this.tableContainer.addEventListener('dragleave', () => { this.dragLeaveListener(this.tableContainer) });
 
         let projectsTable = document.createElement('table');
         projectsTable.classList.add('fill_width');
@@ -178,22 +178,20 @@ class ProjectsView {
             this.electron.ipcRenderer.send('files-dropped', { files: filesList });
         }
         container.style.opacity = '1';
-        container.style.cursor = 'default';
     }
 
-    dragEnterListener(event: DragEvent, container: HTMLElement): void {
+    dragEnterListener(container: HTMLElement): void {
         container.style.opacity = '0.3';
-        container.style.cursor = 'grab';
     }
 
-    dragLeaveListener(event: DragEvent, container: HTMLElement): void {
+    dragLeaveListener(container: HTMLElement): void {
         container.style.opacity = '1';
-        container.style.cursor = 'default';
     }
 
     dragOverListener(event: DragEvent): void {
         event.preventDefault();
         event.stopPropagation();
+        event.dataTransfer.dropEffect = 'link';
     }
 
     loadProjects(arg: any): void {
