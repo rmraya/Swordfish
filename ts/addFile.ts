@@ -2,6 +2,7 @@ class AddFile {
 
     electron = require('electron');
 
+    selectedFile: string;
     charsetOptions: string;
     typesOption: string;
 
@@ -42,10 +43,7 @@ class AddFile {
             }
         });
         document.addEventListener('keydown', (event: KeyboardEvent) => { KeyboardHandler.keyListener(event); });
-        document.getElementById('addFilesButton').addEventListener('click', () => {
-            this.electron.ipcRenderer.send('select-source-files');
-            document.getElementById('addFilesButton').blur();
-        });
+       
         this.electron.ipcRenderer.on('add-source-files', (event: Electron.IpcRendererEvent, arg: any) => {
             this.addFile(arg);
         });
@@ -107,7 +105,8 @@ class AddFile {
 
     addFile(arg: any): void {
         let file: any = arg.files[0];
-        (document.getElementById('nameInput') as HTMLInputElement).value = file.file;
+        this.selectedFile = file.file;
+        (document.getElementById('nameInput') as HTMLLabelElement).innerText = file.file;
         let typeSelect = document.getElementById('typeSelect') as HTMLSelectElement;
         if (file.type !== 'Unknown') {
             typeSelect.value = file.type;
@@ -123,12 +122,6 @@ class AddFile {
     }
 
     addProject(): void {
-        let name: string = (document.getElementById('nameInput') as HTMLInputElement).value;
-        if (name === '') {
-            this.electron.ipcRenderer.send('show-message', { type: 'warning', message: 'Select file' });
-            return;
-        }
-
         let subject: string = (document.getElementById('subjectInput') as HTMLInputElement).value;
         let client: string = (document.getElementById('clientInput') as HTMLInputElement).value;
         let srcLang = (document.getElementById('srcLangSelect') as HTMLSelectElement).value;
@@ -151,10 +144,9 @@ class AddFile {
             this.electron.ipcRenderer.send('show-message', { type: 'warning', message: 'Select character set' });
             return;
         }
-        let array: any[] = [{ file: name, type: type, encoding: charset }];
-
+        let array: any[] = [{ file: this.selectedFile, type: type, encoding: charset }];
         let params: any = {
-            description: name,
+            description: this.selectedFile,
             files: array,
             subject: subject,
             client: client,

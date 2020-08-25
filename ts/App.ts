@@ -20,7 +20,7 @@ SOFTWARE.
 import { Buffer } from "buffer";
 import { execFileSync, spawn, ChildProcessWithoutNullStreams } from "child_process";
 import { app, clipboard, BrowserWindow, dialog, ipcMain, Menu, MenuItem, shell, nativeTheme, Rectangle, IpcMainEvent, screen, Size } from "electron";
-import { existsSync, mkdirSync, readFile, readFileSync, writeFileSync } from "fs";
+import { existsSync, mkdirSync, readFile, readFileSync, writeFileSync, lstatSync } from "fs";
 import { ClientRequest, request, IncomingMessage } from "http";
 
 class Swordfish {
@@ -2226,7 +2226,33 @@ class Swordfish {
     }
 
     static filesDropped(arg: any): void {
-        console.log(JSON.stringify(arg));
+        let files: string[] = arg.files;
+        if (files.length === 1 && !(existsSync(files[0]) && lstatSync(files[0]).isDirectory())) {
+            // single file
+            this.addFileWindow = new BrowserWindow({
+                parent: this.mainWindow,
+                width: 900,
+                minimizable: false,
+                maximizable: false,
+                resizable: false,
+                useContentSize: true,
+                show: false,
+                icon: this.iconPath,
+                webPreferences: {
+                    nodeIntegration: true
+                }
+            });
+            this.addFileWindow.setMenu(null);
+            this.addFileWindow.loadURL('file://' + this.path.join(app.getAppPath(), 'html', 'addFile.html'));
+            this.addFileWindow.once('ready-to-show', (event: IpcMainEvent) => {
+                event.sender.send('get-height');
+                Swordfish.selectedFile = files[0];
+                Swordfish.addFileWindow.show();
+            });
+        } else {
+            // TODO multiple files/folders
+            console.log(JSON.stringify(arg));
+        }
     }
 }
 
