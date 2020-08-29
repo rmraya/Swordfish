@@ -34,14 +34,6 @@ class AddFile {
         this.electron.ipcRenderer.on('set-charsets', (event: Electron.IpcRendererEvent, arg: any) => {
             this.setCharsets(arg);
         });
-        document.addEventListener('keydown', (event: KeyboardEvent) => {
-            if (event.key === 'Escape') {
-                window.close();
-            }
-            if (event.key === 'Enter') {
-                this.addProject();
-            }
-        });
         document.addEventListener('keydown', (event: KeyboardEvent) => { KeyboardHandler.keyListener(event); });
        
         this.electron.ipcRenderer.on('add-source-files', (event: Electron.IpcRendererEvent, arg: any) => {
@@ -106,7 +98,7 @@ class AddFile {
     addFile(arg: any): void {
         let file: any = arg.files[0];
         this.selectedFile = file.file;
-        (document.getElementById('nameInput') as HTMLLabelElement).innerText = file.file;
+        (document.getElementById('nameSpan') as HTMLLabelElement).innerText = file.file;
         let typeSelect = document.getElementById('typeSelect') as HTMLSelectElement;
         if (file.type !== 'Unknown') {
             typeSelect.value = file.type;

@@ -551,8 +551,9 @@ svg {
 	color: var(--highlight-color);
 }
 
-.active {
-	background: var(--highlight-color);
+.active svg {
+	stroke: var(--focus-border) !important;
+	fill: var(--focus-border) !important;
 }
 
 .bordered {
@@ -586,7 +587,7 @@ span.stats {
 	padding-right: 4px;
 }
 
-svg.stats  {
+svg.stats {
 	margin-top: 4px;
 	cursor: default;
 }

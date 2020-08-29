@@ -57,11 +57,6 @@ class AddProject {
         this.electron.ipcRenderer.on('set-charsets', (event: Electron.IpcRendererEvent, arg: any) => {
             this.setCharsets(arg);
         });
-        document.addEventListener('keydown', (event: KeyboardEvent) => {
-            if (event.key === 'Escape') {
-                window.close();
-            }
-        });
         document.addEventListener('keydown', (event: KeyboardEvent) => { KeyboardHandler.keyListener(event); });
         document.getElementById('addFilesButton').addEventListener('click', () => {
             this.electron.ipcRenderer.send('select-source-files');

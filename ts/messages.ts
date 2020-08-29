@@ -21,11 +21,7 @@ class Messages {
         document.getElementById('closeButton').addEventListener('click', () => {
             window.close();
         });
-        document.addEventListener('keydown', (event: KeyboardEvent) => {
-            if (event.key === 'Escape' || event.key === 'Enter') {
-                window.close();
-            }
-        });
+        document.getElementById('closeButton').focus();
     }
 
     setMessage(arg: any): void {

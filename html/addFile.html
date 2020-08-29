@@ -8,81 +8,85 @@
 </head>
 
 <body id="body">
-    <table class="fill_width">
+    
+    <div class="row" style="margin-left: 10px; margin-bottom: 10px;">
+        <b><span id="nameSpan" class="fill_width"></b>
+    </div>
+
+    <table>
         <tr>
-            <td class="fill_width middle">
-                <label id="nameInput" class="fill_width">
+            <td style="width:50%; padding:0px;">
+                <table>
+                    <tr>
+                        <td class="middle noWrap">
+                            <label for="typeSelect">File Type</label>
+                        </td>
+                        <td class="fill_width middle">
+                            <select id="typeSelect" class="fill_width">
+
+                            </select>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="middle noWrap">
+                            <label for="srcLangSelect">Source Language</label>
+                        </td>
+                        <td class="fill_width middle">
+                            <select id="srcLangSelect" class="fill_width">
+
+                            </select>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="middle noWrap">
+                            <label for="tgtLangSelect">Target Language</label>
+                        </td>
+                        <td class="fill_width middle">
+                            <select id="tgtLangSelect" class="fill_width">
+
+                            </select>
+                        </td>
+                    </tr>
+                </table>
+            </td>
+            <td style="width:50%; padding:0px;">
+                <table>
+                    <tr>
+                        <td class="middle noWrap">
+                            <label for="charsetSelect">Character Set</label>
+                        </td>
+                        <td class="fill_width middle">
+                            <select id="charsetSelect" class="fill_width">
+
+                            </select>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="middle">
+                            <label for="subjectInput">Subject</label>
+                        </td>
+                        <td class="fill_width middle" style="padding-right: 10px;">
+                            <input list="subjects" id="subjectInput" class="middle fill_width">
+                            <datalist id="subjects">
+                                <option value="none">
+                            </datalist>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="middle">
+                            <label for="clientInput">Client</label>
+                        </td>
+                        <td class="fill_width middle" style="padding-right: 10px;">
+                            <input list="clients" id="clientInput" class="middle fill_width">
+                            <datalist id="clients">
+                                <option value="none">
+                            </datalist>
+                        </td>
+                    </tr>
+                </table>
             </td>
         </tr>
     </table>
-    <div class="row">
-        <table>
-            <tr>
-                <td class="middle noWrap">
-                    <label for="typeSelect">File Type</label>
-                </td>
-                <td class="fill_width middle">
-                    <select id="typeSelect" class="fill_width">
-
-                    </select>
-                </td>
-            </tr>
-            <tr>
-                <td class="middle noWrap">
-                    <label for="srcLangSelect">Source Language</label>
-                </td>
-                <td class="fill_width middle">
-                    <select id="srcLangSelect" class="fill_width">
-
-                    </select>
-                </td>
-            </tr>
-            <tr>
-                <td class="middle noWrap">
-                    <label for="tgtLangSelect">Target Language</label>
-                </td>
-                <td class="fill_width middle">
-                    <select id="tgtLangSelect" class="fill_width">
-
-                    </select>
-                </td>
-            </tr>
-        </table>
-        <table>
-            <tr>
-                <td class="middle noWrap">
-                    <label for="charsetSelect">Character Set</label>
-                </td>
-                <td class="fill_width middle">
-                    <select id="charsetSelect" class="fill_width">
-
-                    </select>
-                </td>
-            </tr>
-            <tr>
-                <td class="middle">
-                    <label for="subjectInput">Subject</label>
-                </td>
-                <td class="fill_width middle" style="padding-right: 10px;">
-                    <input list="subjects" id="subjectInput" class="middle fill_width">
-                    <datalist id="subjects">
-                        <option value="none">
-                    </datalist>
-                </td>
-            </tr>
-            <tr>
-                <td class="middle">
-                    <label for="clientInput">Client</label>
-                </td>
-                <td class="fill_width middle" style="padding-right: 10px;">
-                    <input list="clients" id="clientInput" class="middle fill_width">
-                    <datalist id="clients">
-                        <option value="none">
-                    </datalist>
-                </td>
-            </tr>
-        </table>
-    </div>
 
     <div class="buttonArea">
         <button id="addProjectButton">Translate File</button>

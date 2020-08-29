@@ -117,14 +117,6 @@ class Preferences {
         this.electron.ipcRenderer.on('set-preferences', (event: Electron.IpcRendererEvent, arg: any) => {
             this.setPreferences(arg);
         });
-        document.addEventListener('keydown', (event: KeyboardEvent) => {
-            if (event.key === 'Escape') {
-                window.close();
-            }
-            if (event.key === 'Enter') {
-                this.savePreferences();
-            }
-        });
         document.addEventListener('keydown', (event: KeyboardEvent) => { KeyboardHandler.keyListener(event); });
         document.getElementById('browseSRX').addEventListener('click', () => {
             this.electron.ipcRenderer.send('browse-srx');

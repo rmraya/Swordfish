@@ -16,14 +16,6 @@ class FindText {
         this.electron.ipcRenderer.on('set-project', (event: Electron.IpcRendererEvent, arg: any) => {
             this.projectId = arg;
         });
-        document.addEventListener('keydown', (event: KeyboardEvent) => {
-            if (event.key === 'Escape') {
-                window.close();
-            }
-            if (event.key === 'Enter') {
-                this.findText();
-            }
-        });
         document.addEventListener('keydown', (event: KeyboardEvent) => { KeyboardHandler.keyListener(event); });
         document.getElementById('findText').addEventListener('click', () => {
             this.findText();

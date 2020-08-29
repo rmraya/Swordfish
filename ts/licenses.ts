@@ -26,11 +26,6 @@ class Licenses {
         this.electron.ipcRenderer.on('set-theme', (event: Electron.IpcRendererEvent, arg: any) => {
             (document.getElementById('theme') as HTMLLinkElement).href = arg;
         });
-        document.addEventListener('keydown', (event: KeyboardEvent) => {
-            if (event.key === 'Escape') {
-                window.close();
-            }
-        });
         document.getElementById('Swordfish').addEventListener('click', () => {
             this.openLicense('Swordfish');
         });
@@ -64,11 +59,6 @@ class Licenses {
         this.electron.ipcRenderer.on('get-height', () => {
             let body: HTMLBodyElement = document.getElementById('body') as HTMLBodyElement;
             this.electron.ipcRenderer.send('licenses-height', { width: body.clientWidth, height: body.clientHeight });
-        });
-        document.addEventListener('keydown', (event: KeyboardEvent) => {
-            if (event.key === 'Escape') {
-                window.close();
-            }
         });
     }
 

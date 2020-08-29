@@ -30,14 +30,6 @@ class DefaultLanguages {
         this.electron.ipcRenderer.on('set-theme', (event: Electron.IpcRendererEvent, arg: any) => {
             (document.getElementById('theme') as HTMLLinkElement).href = arg;
         });
-        document.addEventListener('keydown', (event: KeyboardEvent) => {
-            if (event.key === 'Escape') {
-                window.close();
-            }
-            if (event.key === 'Enter') {
-                this.savePreferences();
-            }
-        });
         document.getElementById('save').addEventListener('click', () => {
             this.savePreferences();
         });
