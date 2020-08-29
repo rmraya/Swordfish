@@ -19,54 +19,60 @@
         </tr>
     </table>
 
-    <div class="row">
-        <table>
-            <tr style="height: 2.5em;">
-                <td class="middle noWrap">
-                    <label for="srcLangSelect">Source Language</label>
-                </td>
-                <td class="fill_width middle">
-                    <select id="srcLangSelect" class="fill_width">
-
-                    </select>
-                </td>
-            </tr>
-            <tr style="height: 2.5em;">
-                <td class="middle noWrap">
-                    <label for="tgtLangSelect">Target Language</label>
-                </td>
-                <td class="fill_width middle">
-                    <select id="tgtLangSelect" class="fill_width">
-
-                    </select>
-                </td>
-            </tr>
-        </table>
-        <table>
-            <tr style="height: 2.5em;">
-                <td class="middle">
-                    <label for="subjectInput">Subject</label>
-                </td>
-                <td class="fill_width middle">
-                    <input list="subjects" id="subjectInput" class="table_input middle" >
-                    <datalist id="subjects">
-                        <option value="none">
-                    </datalist>
-                </td>
-            </tr>
-            <tr style="height: 2.5em;">
-                <td class="middle">
-                    <label for="clientInput">Client</label>
-                </td>
-                <td class="fill_width middle">
-                    <input list="clients" id="clientInput" class="table_input middle" >
-                    <datalist id="clients">
-                        <option value="none">
-                    </datalist>
-                </td>
-            </tr>
-        </table>
-    </div>
+    <table>
+        <tr>
+            <td style="width:50%; padding: 0px;">
+                <table class="fill_width">
+                    <tr style="height: 2.5em;">
+                        <td class="middle noWrap">
+                            <label for="srcLangSelect">Source Language</label>
+                        </td>
+                        <td class="fill_width middle">
+                            <select id="srcLangSelect" class="fill_width">
+        
+                            </select>
+                        </td>
+                    </tr>
+                    <tr style="height: 2.5em;">
+                        <td class="middle noWrap">
+                            <label for="tgtLangSelect">Target Language</label>
+                        </td>
+                        <td class="fill_width middle">
+                            <select id="tgtLangSelect" class="fill_width">
+        
+                            </select>
+                        </td>
+                    </tr>
+                </table>
+            </td>
+            <td style="width:50%; padding: 0px;">
+                <table class="fill_width">
+                    <tr style="height: 2.5em;">
+                        <td class="middle">
+                            <label for="subjectInput">Subject</label>
+                        </td>
+                        <td class="fill_width middle">
+                            <input list="subjects" id="subjectInput" class="table_input middle" >
+                            <datalist id="subjects">
+                                <option value="none">
+                            </datalist>
+                        </td>
+                    </tr>
+                    <tr style="height: 2.5em;">
+                        <td class="middle">
+                            <label for="clientInput">Client</label>
+                        </td>
+                        <td class="fill_width middle">
+                            <input list="clients" id="clientInput" class="table_input middle" >
+                            <datalist id="clients">
+                                <option value="none">
+                            </datalist>
+                        </td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+    </table>
     <div class="bordered divContainer" style="height: 260px; width:calc(100% - 20px); margin-left: 10px;;" id="tablePanel">
         <table class="stripes">
             <thead>

@@ -46,7 +46,7 @@ class Swordfish {
 
     static appHome: string = Swordfish.path.join(app.getPath('appData'), app.name);
     static iconPath: string = Swordfish.path.join(app.getAppPath(), 'icons', 'icon.png');
-    verticalPadding: number = 46;
+    static verticalPadding: number = 46;
 
     static currentDefaults: Rectangle;
     static currentPreferences = {
@@ -243,9 +243,7 @@ class Swordfish {
             event.sender.send('set-theme', Swordfish.currentCss);
         });
         ipcMain.on('licenses-height', (event: IpcMainEvent, arg: any) => {
-            let rect: Rectangle = Swordfish.licensesWindow.getBounds();
-            rect.height = arg.height + this.verticalPadding;
-            Swordfish.licensesWindow.setBounds(rect);
+            Swordfish.setHeight(Swordfish.licensesWindow, arg);
         });
         ipcMain.on('save-preferences', (event: IpcMainEvent, arg: any) => {
             Swordfish.savePreferences(arg);
@@ -254,14 +252,10 @@ class Swordfish {
             Swordfish.savelanguages(arg);
         });
         ipcMain.on('add-project-height', (event: IpcMainEvent, arg: any) => {
-            let rect: Rectangle = Swordfish.addProjectWindow.getBounds();
-            rect.height = arg.height + this.verticalPadding;
-            Swordfish.addProjectWindow.setBounds(rect);
+            Swordfish.setHeight(Swordfish.addProjectWindow, arg);
         });
         ipcMain.on('add-file-height', (event: IpcMainEvent, arg: any) => {
-            let rect: Rectangle = Swordfish.addFileWindow.getBounds();
-            rect.height = arg.height + this.verticalPadding;
-            Swordfish.addFileWindow.setBounds(rect);
+            Swordfish.setHeight(Swordfish.addFileWindow, arg);
         });
         ipcMain.on('get-selected-file', (event: IpcMainEvent) => {
             Swordfish.setSelectedFile(event);
@@ -273,9 +267,7 @@ class Swordfish {
             this.selectSourceFiles(event);
         });
         ipcMain.on('about-height', (event: IpcMainEvent, arg: any) => {
-            let rect: Rectangle = Swordfish.aboutWindow.getBounds();
-            rect.height = arg.height + this.verticalPadding;
-            Swordfish.aboutWindow.setBounds(rect);
+            Swordfish.setHeight(Swordfish.aboutWindow, arg);
         });
         ipcMain.on('licenses-clicked', () => {
             Swordfish.showLicenses();
@@ -293,9 +285,7 @@ class Swordfish {
             Swordfish.showAddMemory();
         });
         ipcMain.on('add-memory-height', (event: IpcMainEvent, arg: any) => {
-            let rect: Rectangle = Swordfish.addMemoryWindow.getBounds();
-            rect.height = arg.height + this.verticalPadding;
-            Swordfish.addMemoryWindow.setBounds(rect);
+            Swordfish.setHeight(Swordfish.addMemoryWindow, arg);
         });
         ipcMain.on('add-memory', (event: IpcMainEvent, arg: any) => {
             this.addMemory(arg);
@@ -304,9 +294,7 @@ class Swordfish {
             Swordfish.showImportTMX(arg);
         });
         ipcMain.on('import-tmx-height', (event: IpcMainEvent, arg: any) => {
-            let rect: Rectangle = Swordfish.importTmxWindow.getBounds();
-            rect.height = arg.height + this.verticalPadding;
-            Swordfish.importTmxWindow.setBounds(rect);
+            Swordfish.setHeight(Swordfish.importTmxWindow, arg);
         });
         ipcMain.on('import-tmx-file', (event: IpcMainEvent, arg: any) => {
             Swordfish.importTmxFile(arg);
@@ -339,14 +327,10 @@ class Swordfish {
             event.sender.send('set-version', app.name + ' ' + app.getVersion());
         });
         ipcMain.on('settings-height', (event: IpcMainEvent, arg: any) => {
-            let rect: Rectangle = Swordfish.settingsWindow.getBounds();
-            rect.height = arg.height + this.verticalPadding;
-            Swordfish.settingsWindow.setBounds(rect);
+            Swordfish.setHeight(Swordfish.settingsWindow, arg);
         });
         ipcMain.on('languages-height', (event: IpcMainEvent, arg: any) => {
-            let rect: Rectangle = Swordfish.defaultLangsWindow.getBounds();
-            rect.height = arg.height + this.verticalPadding;
-            Swordfish.defaultLangsWindow.setBounds(rect);
+            Swordfish.setHeight(Swordfish.defaultLangsWindow, arg);
         });
         ipcMain.on('get-preferences', (event: IpcMainEvent, arg: any) => {
             event.sender.send('set-preferences', Swordfish.currentPreferences);
@@ -419,22 +403,16 @@ class Swordfish {
             Swordfish.getSpellCheckerLangs(event);
         });
         ipcMain.on('set-spellchecker-height', (event: IpcMainEvent, arg: any) => {
-            let rect: Rectangle = Swordfish.spellingLangsWindow.getBounds();
-            rect.height = arg.height + this.verticalPadding;
-            Swordfish.spellingLangsWindow.setBounds(rect);
+            Swordfish.setHeight(Swordfish.spellingLangsWindow, arg);
         });
         ipcMain.on('show-find-text', (event: IpcMainEvent, arg: any) => {
             Swordfish.showFindText(arg);
         });
         ipcMain.on('find-text-height', (event: IpcMainEvent, arg: any) => {
-            let rect: Rectangle = Swordfish.findTextWindow.getBounds();
-            rect.height = arg.height + this.verticalPadding;
-            Swordfish.findTextWindow.setBounds(rect);
+            Swordfish.setHeight(Swordfish.findTextWindow, arg);
         });
         ipcMain.on('messages-height', (event: IpcMainEvent, arg: any) => {
-            let rect: Rectangle = Swordfish.messagesWindow.getBounds();
-            rect.height = arg.height + this.verticalPadding;
-            Swordfish.messagesWindow.setBounds(rect);
+            Swordfish.setHeight(Swordfish.messagesWindow, arg);
         });
         ipcMain.on('export-xliff', (event: IpcMainEvent, arg: any) => {
             Swordfish.exportProject(arg);
@@ -443,9 +421,7 @@ class Swordfish {
             Swordfish.showImportXliff();
         });
         ipcMain.on('import-xliff-height', (event: IpcMainEvent, arg: any) => {
-            let rect: Rectangle = Swordfish.importXliffWindow.getBounds();
-            rect.height = arg.height + this.verticalPadding;
-            Swordfish.importXliffWindow.setBounds(rect);
+            Swordfish.setHeight(Swordfish.importXliffWindow, arg);
         });
         ipcMain.on('browse-xliff-import', (event: IpcMainEvent) => {
             Swordfish.browseXLIFF(event);
@@ -687,6 +663,13 @@ class Swordfish {
         writeFileSync(defaultsFile, JSON.stringify(Swordfish.mainWindow.getBounds()));
     }
 
+    static setHeight(window: BrowserWindow, arg: any) {
+        let rect: Rectangle = window.getBounds();
+        rect.height = arg.height + Swordfish.verticalPadding;
+        window.setBounds(rect);
+        window.show();
+    }
+
     static loadPreferences(): void {
         let dark: string = 'file://' + Swordfish.path.join(app.getAppPath(), 'css', 'dark.css');
         let light: string = 'file://' + Swordfish.path.join(app.getAppPath(), 'css', 'light.css');
@@ -751,8 +734,7 @@ class Swordfish {
         this.findTextWindow.loadURL('file://' + this.path.join(app.getAppPath(), 'html', 'findText.html'));
         this.findTextWindow.once('ready-to-show', (event: IpcMainEvent) => {
             event.sender.send('get-height');
-            event.sender.send('set-project', project)
-            this.findTextWindow.show();
+            event.sender.send('set-project', project);
         });
     }
 
@@ -786,7 +768,6 @@ class Swordfish {
         this.addProjectWindow.loadURL('file://' + this.path.join(app.getAppPath(), 'html', 'addProject.html'));
         this.addProjectWindow.once('ready-to-show', (event: IpcMainEvent) => {
             event.sender.send('get-height');
-            this.addProjectWindow.show();
         });
     }
 
@@ -955,7 +936,6 @@ class Swordfish {
                 this.addFileWindow.once('ready-to-show', (event: IpcMainEvent) => {
                     event.sender.send('get-height');
                     Swordfish.selectedFile = value.filePaths[0];
-                    Swordfish.addFileWindow.show();
                 });
             }
         }).catch((error) => {
@@ -1176,7 +1156,6 @@ class Swordfish {
         this.addMemoryWindow.loadURL('file://' + this.path.join(app.getAppPath(), 'html', 'addMemory.html'));
         this.addMemoryWindow.once('ready-to-show', (event: IpcMainEvent) => {
             event.sender.send('get-height');
-            this.addMemoryWindow.show();
         });
     }
 
@@ -1243,7 +1222,6 @@ class Swordfish {
         this.aboutWindow.loadURL('file://' + this.path.join(app.getAppPath(), 'html', 'about.html'));
         this.aboutWindow.once('ready-to-show', (event: IpcMainEvent) => {
             event.sender.send('get-height');
-            this.aboutWindow.show();
         });
     }
 
@@ -1302,7 +1280,7 @@ class Swordfish {
         });
         licenseWindow.setMenu(null);
         licenseWindow.loadURL(licenseFile);
-        licenseWindow.on('ready-to-show', () => {
+        licenseWindow.once('ready-to-show', () => {
             licenseWindow.show();
         });
         licenseWindow.webContents.on('did-finish-load', () => {
@@ -1334,7 +1312,6 @@ class Swordfish {
         this.settingsWindow.loadURL('file://' + this.path.join(app.getAppPath(), 'html', 'preferences.html'));
         this.settingsWindow.once('ready-to-show', (event: IpcMainEvent) => {
             event.sender.send('get-height');
-            this.settingsWindow.show();
         });
     }
 
@@ -1356,7 +1333,6 @@ class Swordfish {
         this.licensesWindow.loadURL('file://' + this.path.join(app.getAppPath(), 'html', 'licenses.html'));
         this.licensesWindow.once('ready-to-show', (event: IpcMainEvent) => {
             event.sender.send('get-height');
-            this.licensesWindow.show();
         });
     }
 
@@ -1541,7 +1517,6 @@ class Swordfish {
         this.defaultLangsWindow.loadURL('file://' + this.path.join(app.getAppPath(), 'html', 'defaultLangs.html'));
         this.defaultLangsWindow.once('ready-to-show', (event: IpcMainEvent) => {
             event.sender.send('get-height');
-            this.defaultLangsWindow.show();
         });
     }
 
@@ -1640,7 +1615,6 @@ class Swordfish {
         this.importTmxWindow.once('ready-to-show', (event: IpcMainEvent) => {
             event.sender.send('get-height');
             event.sender.send('set-memory', memory);
-            this.importTmxWindow.show();
         });
     }
 
@@ -2004,7 +1978,6 @@ class Swordfish {
         Swordfish.spellingLangsWindow.loadURL('file://' + this.path.join(app.getAppPath(), 'html', 'spellingLangs.html'));
         Swordfish.spellingLangsWindow.once('ready-to-show', (event: IpcMainEvent) => {
             event.sender.send('get-height');
-            Swordfish.spellingLangsWindow.show();
         });
     }
 
@@ -2063,8 +2036,6 @@ class Swordfish {
         Swordfish.messagesWindow.once('ready-to-show', (event: IpcMainEvent) => {
             event.sender.send('set-message', arg);
             event.sender.send('get-height');
-            Swordfish.messagesWindow.show();
-            Swordfish.messagesWindow.focus();
         });
     }
 
@@ -2157,7 +2128,6 @@ class Swordfish {
         this.importXliffWindow.loadURL('file://' + this.path.join(app.getAppPath(), 'html', 'importXliff.html'));
         this.importXliffWindow.once('ready-to-show', (event: IpcMainEvent) => {
             event.sender.send('get-height');
-            this.importXliffWindow.show();
         });
     }
 
@@ -2247,7 +2217,6 @@ class Swordfish {
             this.addFileWindow.once('ready-to-show', (event: IpcMainEvent) => {
                 event.sender.send('get-height');
                 Swordfish.selectedFile = files[0];
-                Swordfish.addFileWindow.show();
             });
         } else {
             // TODO multiple files/folders
