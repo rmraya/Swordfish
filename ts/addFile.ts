@@ -86,13 +86,13 @@ class AddFile {
     }
 
     setCharsets(arg: any): void {
+        this.electron.ipcRenderer.send('get-selected-file');
         this.charsetOptions = '<option value="none" class="error">Select Charset</option>';
         let length: number = arg.charsets.length;
         for (let i = 0; i < length; i++) {
             this.charsetOptions = this.charsetOptions + '<option value="' + arg.charsets[i].code + '">' + arg.charsets[i].description + '</option>';
         }
         document.getElementById('charsetSelect').innerHTML = this.charsetOptions;
-        this.electron.ipcRenderer.send('get-selected-file');
     }
 
     addFile(arg: any): void {

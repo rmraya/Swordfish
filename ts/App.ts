@@ -918,6 +918,7 @@ class Swordfish {
             ]
         }).then((value) => {
             if (!value.canceled) {
+                Swordfish.selectedFile = value.filePaths[0];
                 this.addFileWindow = new BrowserWindow({
                     parent: this.mainWindow,
                     width: 900,
@@ -935,7 +936,6 @@ class Swordfish {
                 this.addFileWindow.loadURL('file://' + this.path.join(app.getAppPath(), 'html', 'addFile.html'));
                 this.addFileWindow.once('ready-to-show', (event: IpcMainEvent) => {
                     event.sender.send('get-height');
-                    Swordfish.selectedFile = value.filePaths[0];
                 });
             }
         }).catch((error) => {
