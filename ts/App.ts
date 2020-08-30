@@ -789,7 +789,7 @@ class Swordfish {
                 defaultPath: parsed.defaultPath,
                 filters: parsed.filters,
                 properties: ['createDirectory', 'showOverwriteConfirmation']
-            }).then((value) => {
+            }).then((value: Electron.SaveDialogReturnValue) => {
                 if (!value.canceled) {
                     Swordfish.sendRequest('/projects/translations', { project: project.id, output: value.filePath },
                         (data: any) => {
@@ -799,11 +799,13 @@ class Swordfish {
                         }
                     );
                 }
-            }).catch((error) => {
+            }).catch((error: Error) => {
                 console.log(error);
             });
         } else {
-            dialog.showSaveDialog(Swordfish.mainWindow, { properties: ['createDirectory'] }).then((value) => {
+            dialog.showSaveDialog(Swordfish.mainWindow, {
+                properties: ['createDirectory']
+            }).then((value: Electron.SaveDialogReturnValue) => {
                 if (!value.canceled) {
                     Swordfish.sendRequest('/projects/translations', { project: project.id, output: value.filePath },
                         (data: any) => {
@@ -813,7 +815,7 @@ class Swordfish {
                         }
                     );
                 }
-            }).catch((error) => {
+            }).catch((error: Error) => {
                 console.log(error);
             });
         }
@@ -916,7 +918,7 @@ class Swordfish {
                 { name: 'XLIFF', extensions: ['xlf', 'xliff', 'mqxliff', 'txlf'] },
                 { name: 'XML Document', extensions: ['xml'] }
             ]
-        }).then((value) => {
+        }).then((value: Electron.OpenDialogReturnValue) => {
             if (!value.canceled) {
                 Swordfish.selectedFile = value.filePaths[0];
                 this.addFileWindow = new BrowserWindow({
@@ -938,7 +940,7 @@ class Swordfish {
                     event.sender.send('get-height');
                 });
             }
-        }).catch((error) => {
+        }).catch((error: Error) => {
             console.log(error);
         });
     }
@@ -1090,11 +1092,11 @@ class Swordfish {
                 { name: 'XLIFF', extensions: ['xlf', 'xliff', 'mqxliff', 'txlf'] },
                 { name: 'XML Document', extensions: ['xml'] }
             ]
-        }).then((value) => {
+        }).then((value: Electron.OpenDialogReturnValue) => {
             if (!value.canceled) {
                 Swordfish.getFileType(event, value.filePaths);
             }
-        }).catch((error) => {
+        }).catch((error: Error) => {
             console.log(error);
         });
     }
@@ -1472,11 +1474,11 @@ class Swordfish {
                 { name: 'SRX File', extensions: ['srx'] },
                 { name: 'Any File', extensions: ['*'] }
             ]
-        }).then((value) => {
+        }).then((value: Electron.OpenDialogReturnValue) => {
             if (!value.canceled) {
                 event.sender.send('set-srx', value.filePaths[0]);
             }
-        }).catch((error) => {
+        }).catch((error: Error) => {
             console.log(error);
         });
     }
@@ -1490,11 +1492,11 @@ class Swordfish {
                 { name: 'XML File', extensions: ['xml'] },
                 { name: 'Any File', extensions: ['*'] }
             ]
-        }).then((value) => {
+        }).then((value: Electron.OpenDialogReturnValue) => {
             if (!value.canceled) {
                 event.sender.send('set-catalog', value.filePaths[0]);
             }
-        }).catch((error) => {
+        }).catch((error: Error) => {
             console.log(error);
         });
     }
@@ -1690,7 +1692,7 @@ class Swordfish {
                 { name: 'TMX File', extensions: ['tmx'] },
                 { name: 'Any File', extensions: anyFile }
             ]
-        }).then((value) => {
+        }).then((value: Electron.OpenDialogReturnValue) => {
             if (!value.canceled) {
                 event.sender.send('set-tmx-file', value.filePaths[0]);
             }
@@ -1761,7 +1763,7 @@ class Swordfish {
                 defaultPath: memories[0].name + '.tmx',
                 filters: [{ name: 'TMX Files', extensions: ['tmx'] }, { name: 'Any File', extensions: ['*'] }],
                 properties: ['createDirectory', 'showOverwriteConfirmation']
-            }).then((value) => {
+            }).then((value: Electron.SaveDialogReturnValue) => {
                 if (!value.canceled) {
                     Swordfish.mainWindow.webContents.send('start-waiting');
                     Swordfish.mainWindow.webContents.send('set-status', 'Exporting memories');
@@ -1804,7 +1806,7 @@ class Swordfish {
                         }
                     );
                 }
-            }).catch((error) => {
+            }).catch((error: Error) => {
                 console.log(error);
             });
         } else {
@@ -2051,7 +2053,7 @@ class Swordfish {
             defaultPath: description + '.xlf',
             filters: [{ name: 'XLIFF Files', extensions: ['xlf'] }, { name: 'Any File', extensions: ['*'] }],
             properties: ['createDirectory', 'showOverwriteConfirmation']
-        }).then((value) => {
+        }).then((value: Electron.SaveDialogReturnValue) => {
             if (!value.canceled) {
                 Swordfish.sendRequest('/projects/export', { project: arg.projectId, output: value.filePath },
                     (data: any) => {
@@ -2061,7 +2063,7 @@ class Swordfish {
                     }
                 );
             }
-        }).catch((error) => {
+        }).catch((error: Error) => {
             console.log(error);
         });
     }
@@ -2139,11 +2141,11 @@ class Swordfish {
                 { name: 'XLIFF File', extensions: ['xlf'] },
                 { name: 'Any File', extensions: ['*'] }
             ]
-        }).then((value) => {
+        }).then((value: Electron.OpenDialogReturnValue) => {
             if (!value.canceled) {
                 event.sender.send('set-xliff', value.filePaths[0]);
             }
-        }).catch((error) => {
+        }).catch((error: Error) => {
             console.log(error);
         });
     }
