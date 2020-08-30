@@ -305,25 +305,25 @@ class Swordfish {
         ipcMain.on('export-memories', (event: IpcMainEvent, arg: any) => {
             this.exportMemories(arg);
         });
-        ipcMain.on('get-tmx-file', (event: IpcMainEvent, arg: any) => {
+        ipcMain.on('get-tmx-file', (event: IpcMainEvent) => {
             this.getTmxFile(event);
         });
-        ipcMain.on('get-clients', (event: IpcMainEvent, arg: any) => {
+        ipcMain.on('get-clients', (event: IpcMainEvent) => {
             this.getClients(event);
         });
-        ipcMain.on('get-project-names', (event: IpcMainEvent, arg: any) => {
+        ipcMain.on('get-project-names', (event: IpcMainEvent) => {
             this.getProjectNames(event);
         });
-        ipcMain.on('get-subjects', (event: IpcMainEvent, arg: any) => {
+        ipcMain.on('get-subjects', (event: IpcMainEvent) => {
             this.getSubjects(event);
         });
-        ipcMain.on('get-types', (event: IpcMainEvent, arg: any) => {
+        ipcMain.on('get-types', (event: IpcMainEvent) => {
             this.getTypes(event);
         });
-        ipcMain.on('get-charsets', (event: IpcMainEvent, arg: any) => {
+        ipcMain.on('get-charsets', (event: IpcMainEvent) => {
             this.getCharset(event);
         });
-        ipcMain.on('get-version', (event: IpcMainEvent, arg: any) => {
+        ipcMain.on('get-version', (event: IpcMainEvent) => {
             event.sender.send('set-version', app.name + ' ' + app.getVersion());
         });
         ipcMain.on('settings-height', (event: IpcMainEvent, arg: any) => {
@@ -332,16 +332,16 @@ class Swordfish {
         ipcMain.on('languages-height', (event: IpcMainEvent, arg: any) => {
             Swordfish.setHeight(Swordfish.defaultLangsWindow, arg);
         });
-        ipcMain.on('get-preferences', (event: IpcMainEvent, arg: any) => {
+        ipcMain.on('get-preferences', (event: IpcMainEvent) => {
             event.sender.send('set-preferences', Swordfish.currentPreferences);
         });
-        ipcMain.on('browse-srx', (event: IpcMainEvent, arg: any) => {
+        ipcMain.on('browse-srx', (event: IpcMainEvent) => {
             this.browseSRX(event);
         });
-        ipcMain.on('browse-catalog', (event: IpcMainEvent, arg: any) => {
+        ipcMain.on('browse-catalog', (event: IpcMainEvent) => {
             this.browseCatalog(event);
         });
-        ipcMain.on('get-mt-languages', (event: IpcMainEvent, arg: any) => {
+        ipcMain.on('get-mt-languages', (event: IpcMainEvent) => {
             this.getMtLanguages(event);
         });
         ipcMain.on('open-license', (event: IpcMainEvent, arg: any) => {
