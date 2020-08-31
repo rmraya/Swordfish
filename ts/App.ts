@@ -2022,11 +2022,12 @@ class Swordfish {
     static showMessage(arg: any): void {
         Swordfish.messagesWindow = new BrowserWindow({
             parent: this.mainWindow,
-            width: 400,
+            width: 600,
             useContentSize: true,
             minimizable: false,
             maximizable: false,
             resizable: false,
+            modal: true,
             show: false,
             icon: this.iconPath,
             webPreferences: {

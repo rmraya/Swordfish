@@ -294,6 +294,10 @@ button {
 	white-space: nowrap;
 }
 
+button:focus {
+	outline: none !important;
+}
+
 button:hover {
 	background: var(--accent-alternative);
 	border: 1px solid var(--accent-alternative);
