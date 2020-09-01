@@ -152,6 +152,8 @@ public class ProjectsHandler implements HttpHandler {
 				response = getProjectMemories(request);
 			} else if ("/projects/setMemory".equals(url)) {
 				response = setProjectMemory(request);
+			} else if("/projects/exportTmx".equals(url)) {
+				response = exportTMX(request);
 			} else {
 				response.put(Constants.REASON, "Unknown request");
 			}
@@ -324,6 +326,61 @@ public class ProjectsHandler implements HttpHandler {
 			thread.start();
 		} catch (Exception e) {
 			logger.log(Level.ERROR, "Error exporting translations", e);
+			result.put(Constants.REASON, e.getMessage());
+		}
+		return result;
+	}
+
+	private JSONObject exportTMX(String request) {
+		JSONObject result = new JSONObject();
+		JSONObject json = new JSONObject(request);
+		String project = json.getString("project");
+		String output = json.getString("output");
+		if (projectStores == null) {
+			projectStores = new Hashtable<>();
+			if (TmsServer.isDebug()) {
+				logger.log(Level.INFO, "Created store map");
+			}
+		}
+		shouldClose = false;
+		if (!projectStores.containsKey(project)) {
+			shouldClose = true;
+			try {
+				Project prj = projects.get(project);
+				XliffStore store = new XliffStore(prj.getXliff(), prj.getSourceLang().getCode(),
+						prj.getTargetLang().getCode());
+				projectStores.put(project, store);
+			} catch (SAXException | IOException | ParserConfigurationException | URISyntaxException | SQLException e) {
+				logger.log(Level.ERROR, "Error creating project store", e);
+				result.put(Constants.REASON, e.getMessage());
+				return result;
+			}
+		}
+		String id = "" + System.currentTimeMillis();
+		result.put("process", id);
+		if (processes == null) {
+			processes = new Hashtable<>();
+		}
+		processes.put(id, Constants.PROCESSING);
+		try {
+			Thread thread = new Thread() {
+				@Override
+				public void run() {
+					try {
+						projectStores.get(project).exportTMX(output);
+						if (shouldClose) {
+							closeProject(request);
+						}
+						processes.put(id, Constants.COMPLETED);
+					} catch (IOException | SAXException | ParserConfigurationException | SQLException e) {
+						logger.log(Level.ERROR, e);
+						processes.put(id, e.getMessage());
+					}
+				}
+			};
+			thread.start();
+		} catch (Exception e) {
+			logger.log(Level.ERROR, "Error exporting TMX", e);
 			result.put(Constants.REASON, e.getMessage());
 		}
 		return result;

@@ -47,6 +47,7 @@ import java.util.zip.DataFormatException;
 import javax.xml.parsers.ParserConfigurationException;
 
 import com.maxprograms.converters.Merge;
+import com.maxprograms.converters.TmxExporter;
 import com.maxprograms.stats.RepetitionAnalysis;
 import com.maxprograms.swordfish.Constants;
 import com.maxprograms.swordfish.MemoriesHandler;
@@ -610,8 +611,8 @@ public class XliffStore {
         result.put("translated", translated);
         result.put("confirmed", confirmed);
         result.put("percentage", percentage);
-        result.put("text", "Segments: " + segments +  "\u00A0\u00A0\u00A0Words: " + total + "\u00A0\u00A0\u00A0Translated: " + translated
-                + "\u00A0\u00A0\u00A0Confirmed: " + confirmed);
+        result.put("text", "Segments: " + segments + "\u00A0\u00A0\u00A0Words: " + total
+                + "\u00A0\u00A0\u00A0Translated: " + translated + "\u00A0\u00A0\u00A0Confirmed: " + confirmed);
         result.put("svg", XliffUtils.makeSVG(percentage));
         return result;
     }
@@ -1266,6 +1267,12 @@ public class XliffStore {
             throws SAXException, IOException, ParserConfigurationException, SQLException, URISyntaxException {
         updateXliff();
         Skeletons.embedSkeletons(xliffFile, output);
+    }
+
+    public void exportTMX(String output) throws SQLException, SAXException, IOException, ParserConfigurationException {
+        updateXliff();
+        getCatalogFile();
+        TmxExporter.export(xliffFile, output, catalog);
     }
 
     public void exportTranslations(String output)

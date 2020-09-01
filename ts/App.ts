@@ -417,6 +417,9 @@ class Swordfish {
         ipcMain.on('export-xliff', (event: IpcMainEvent, arg: any) => {
             Swordfish.exportProject(arg);
         });
+        ipcMain.on('export-tmx-file', (event: IpcMainEvent, arg: any) => {
+            Swordfish.exportProjectTMX(arg);
+        });
         ipcMain.on('import-xliff', () => {
             Swordfish.showImportXliff();
         });
@@ -2056,7 +2059,7 @@ class Swordfish {
             if (!value.canceled) {
                 Swordfish.sendRequest('/projects/export', { project: arg.projectId, output: value.filePath },
                     (data: any) => {
-                        Swordfish.exportXliffFile(data, value.filePath);
+                        Swordfish.exportProjectFile(data);
                     }, (reason: string) => {
                         Swordfish.showMessage({ type: 'error', message: reason });
                     }
@@ -2067,7 +2070,34 @@ class Swordfish {
         });
     }
 
-    static exportXliffFile(data: any, output: string): void {
+    static exportProjectTMX(arg: any): void {
+        let description = arg.description;
+        if (description.lastIndexOf('/') !== -1) {
+            description = description.substring(description.lastIndexOf('/'));
+        }
+        if (description.lastIndexOf('\\') !== -1) {
+            description = description.substring(description.lastIndexOf('\\'));
+        }
+        dialog.showSaveDialog(Swordfish.mainWindow, {
+            defaultPath: description + '.tmx',
+            filters: [{ name: 'TMX Files', extensions: ['tmx'] }, { name: 'Any File', extensions: ['*'] }],
+            properties: ['createDirectory', 'showOverwriteConfirmation']
+        }).then((value: Electron.SaveDialogReturnValue) => {
+            if (!value.canceled) {
+                Swordfish.sendRequest('/projects/exportTmx', { project: arg.projectId, output: value.filePath },
+                    (data: any) => {
+                        Swordfish.exportProjectFile(data);
+                    }, (reason: string) => {
+                        Swordfish.showMessage({ type: 'error', message: reason });
+                    }
+                );
+            }
+        }).catch((error: Error) => {
+            console.log(error);
+        });
+    }
+
+    static exportProjectFile(data: any): void {
         if (data.status !== Swordfish.SUCCESS) {
             Swordfish.showMessage({ type: 'error', message: data.reason });
         }
