@@ -502,6 +502,9 @@ class Swordfish {
             { label: 'Save Changes', accelerator: 'Alt+Enter', click: () => { Swordfish.mainWindow.webContents.send('save-edit', { confirm: false, next: 'none' }); } },
             { label: 'Discard Changes', accelerator: 'Esc', click: () => { Swordfish.mainWindow.webContents.send('cancel-edit'); } },
             new MenuItem({ type: 'separator' }),
+            { label: 'Split Segment', accelerator: 'CmdOrCtrl+H', click: () => { Swordfish.mainWindow.webContents.send('split-segment'); } },
+            { label: 'Merge With Next Segment', accelerator: 'CmdOrCtrl+J', click: () => { Swordfish.mainWindow.webContents.send('merge-next'); } },
+            new MenuItem({ type: 'separator' }),
             { label: 'Insert Tag', accelerator: 'CmdOrCtrl+T', click: () => { Swordfish.mainWindow.webContents.send('insert-tag'); } },
             new MenuItem({ label: 'Quick Tags', submenu: tagsMenu }),
             { label: 'Insert Next Tag', accelerator: 'CmdOrCtrl+Shift+T', click: () => { Swordfish.mainWindow.webContents.send('insert-next-tag'); } },
@@ -530,6 +533,7 @@ class Swordfish {
             { label: 'New Project', accelerator: 'CmdOrCtrl+N', click: () => { Swordfish.addProject(); } },
             { label: 'Translate Projects', accelerator: 'CmdOrCtrl+G', click: () => { Swordfish.translateProjects(); } },
             { label: 'Export Translations', accelerator: 'CmdOrCtrl+S', click: () => { Swordfish.mainWindow.webContents.send('export-translations'); } },
+            { label: 'Export Translations as TMX File', click: () => { Swordfish.mainWindow.webContents.send('export-translations-tmx'); } },
             new MenuItem({ type: 'separator' }),
             { label: 'Remove Projects', click: () => { Swordfish.mainWindow.webContents.send('remove-projects'); } },
             new MenuItem({ type: 'separator' }),
@@ -540,13 +544,15 @@ class Swordfish {
             { label: 'Add Memory', click: () => { Swordfish.showAddMemory(); } },
             { label: 'Remove Memory', click: () => { Swordfish.removeMemory(); } },
             new MenuItem({ type: 'separator' }),
-            { label: 'Import TMX File', click: () => { Swordfish.importTMX(); } },
-            { label: 'Export Memory as TMX File', click: () => { Swordfish.exportTMX(); } }
+            { label: 'Import TMX File', click: () => { Swordfish.mainWindow.webContents.send('import-tmx'); } },
+            { label: 'Export Memory as TMX File', click: () => { Swordfish.mainWindow.webContents.send('export-tmx');} }
         ]);
         var glossariesMenu: Menu = Menu.buildFromTemplate([
             { label: 'Add Glossary', click: () => { Swordfish.showAddGlossary(); } },
-            { label: 'Remove Glossary', click: () => { Swordfish.removeGlossary(); } }
-
+            { label: 'Remove Glossary', click: () => { Swordfish.removeGlossary(); } },
+            new MenuItem({ type: 'separator' }),
+            { label: 'Import Glossary', click: () => { Swordfish.mainWindow.webContents.send('import-glossary'); } },
+            { label: 'Export Glossary', click: () => { Swordfish.mainWindow.webContents.send('export-glossary');} }
         ]);
         var helpMenu: Menu = Menu.buildFromTemplate([
             { label: 'Swordfish User Guide', accelerator: 'F1', click: () => { this.showHelp(); } },
@@ -1620,10 +1626,6 @@ class Swordfish {
         });
     }
 
-    static importTMX(): void {
-        Swordfish.mainWindow.webContents.send('import-tmx');
-    }
-
     static importTmxFile(arg: any): void {
         Swordfish.importTmxWindow.close();
         Swordfish.mainWindow.focus();
@@ -1697,10 +1699,6 @@ class Swordfish {
                 event.sender.send('set-tmx-file', value.filePaths[0]);
             }
         });
-    }
-
-    static exportTMX(): void {
-        Swordfish.mainWindow.webContents.send('export-tmx');
     }
 
     static removeMemory(): void {

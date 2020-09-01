@@ -268,6 +268,10 @@ class ProjectsView {
         }
     }
 
+    exportTMX(): void {
+        // TODO
+    }
+
     displayProjects(projects: any[]) {
         this.selected.clear();
         this.tbody.innerHTML = '';
@@ -378,5 +382,13 @@ class ProjectsView {
                 break;
             }
         }
+    }
+
+    splitSegment(): void {
+        // TODO
+    }
+
+    mergeNext(): void {
+        // TODO
     }
 }

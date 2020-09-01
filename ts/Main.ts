@@ -103,6 +103,15 @@ class Main {
         Main.electron.ipcRenderer.on('export-project', (event: Electron.IpcRendererEvent, arg: any) => {
             this.projectsView.exportProject();
         });
+        Main.electron.ipcRenderer.on('export-translations-tmx', () => {
+            this.projectsView.exportTMX();
+        });
+        Main.electron.ipcRenderer.on('split-segment', () => {
+            this.projectsView.splitSegment();
+        });
+        Main.electron.ipcRenderer.on('merge-next', () => {
+            this.projectsView.mergeNext();
+        });
         Main.electron.ipcRenderer.on('view-memories', () => {
             Main.tabHolder.selectTab('memories');
         });
@@ -138,6 +147,12 @@ class Main {
         });
         Main.electron.ipcRenderer.on('export-tmx', () => {
             this.memoriesView.exportTMX();
+        });
+        Main.electron.ipcRenderer.on('import-glossary', () => {
+            this.glossariesView.importGlossary();
+        });
+        Main.electron.ipcRenderer.on('export-glossary', () => {
+            this.glossariesView.exportGlossary();
         });
         Main.electron.ipcRenderer.on('first-page', () => {
             this.firstPage();
@@ -438,7 +453,7 @@ class Main {
     acceptAllMachineTranslations(): void {
         // TODO
     }
-    
+
     setProjectMemories(arg: any): void {
         let project: string = arg.project;
         if (Main.translationViews.has(project)) {
