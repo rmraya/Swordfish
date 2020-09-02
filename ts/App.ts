@@ -552,14 +552,14 @@ class Swordfish {
             { label: 'Remove Memory', click: () => { Swordfish.removeMemory(); } },
             new MenuItem({ type: 'separator' }),
             { label: 'Import TMX File', click: () => { Swordfish.mainWindow.webContents.send('import-tmx'); } },
-            { label: 'Export Memory as TMX File', click: () => { Swordfish.mainWindow.webContents.send('export-tmx');} }
+            { label: 'Export Memory as TMX File', click: () => { Swordfish.mainWindow.webContents.send('export-tmx'); } }
         ]);
         var glossariesMenu: Menu = Menu.buildFromTemplate([
             { label: 'Add Glossary', click: () => { Swordfish.showAddGlossary(); } },
             { label: 'Remove Glossary', click: () => { Swordfish.removeGlossary(); } },
             new MenuItem({ type: 'separator' }),
             { label: 'Import Glossary', click: () => { Swordfish.mainWindow.webContents.send('import-glossary'); } },
-            { label: 'Export Glossary', click: () => { Swordfish.mainWindow.webContents.send('export-glossary');} }
+            { label: 'Export Glossary', click: () => { Swordfish.mainWindow.webContents.send('export-glossary'); } }
         ]);
         var helpMenu: Menu = Menu.buildFromTemplate([
             { label: 'Swordfish User Guide', accelerator: 'F1', click: () => { this.showHelp(); } },
@@ -570,11 +570,11 @@ class Swordfish {
             { label: 'Release History', click: () => { this.showReleaseHistory(); } },
             { label: 'Support Group', click: () => { this.showSupportGroup(); } }
         ]);
-        let nextUntranslatedKey = 'Ctrl+Alt+Down';
-        let nextUnconfirmedKey = 'Ctrl+Shift+Down';
-        if (process.platform === 'win32') { // TODO check on Linux
-            nextUntranslatedKey = 'Alt+Down';
-            nextUnconfirmedKey = 'Alt+Shift+Down';
+        let nextUntranslatedKey = 'Alt+Down';
+        let nextUnconfirmedKey = 'Alt+Shift+Down';
+        if (process.platform === 'darwin') {
+            nextUntranslatedKey = 'Ctrl+Alt+Down';
+            nextUnconfirmedKey = 'Ctrl+Shift+Down';
         }
         var tasksMenu: Menu = Menu.buildFromTemplate([
             { label: 'Confirm Translation', accelerator: 'CmdOrCtrl+E', click: () => { Swordfish.mainWindow.webContents.send('save-edit', { confirm: true, next: 'none' }); } },
@@ -2255,7 +2255,7 @@ class Swordfish {
         }
     }
 
-    static filterOptions(arg: any) : void {
+    static filterOptions(arg: any): void {
         Swordfish.mainWindow.webContents.send('set-filters', arg);
         Swordfish.filterSegmentsWindow.close();
     }
