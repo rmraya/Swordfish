@@ -38,6 +38,7 @@ import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.NavigableSet;
 import java.util.Set;
 import java.util.TreeSet;
@@ -341,8 +342,15 @@ public class InternalDatabase implements ITmEngine {
 									}
 									if (tgtFound) {
 										Element source = TMUtils.buildTuv(srcLang, srcSeg);
-										// TODO get properties and put them in a map
-										Match match = new Match(source, target, distance, dbname, null);
+										Map<String,String> propsMap = new Hashtable<>();
+										Element tu = getTu(tuid);
+										List<Element> props = tu.getChildren("prop");
+										Iterator<Element>pt = props.iterator();
+										while (pt.hasNext()) {
+											Element prop = pt.next();
+											propsMap.put(prop.getAttributeValue("type"), prop.getText());
+										}
+										Match match = new Match(source, target, distance, dbname, propsMap);
 										result.add(match);
 									}
 								}
