@@ -152,7 +152,7 @@ public class ProjectsHandler implements HttpHandler {
 				response = getProjectMemories(request);
 			} else if ("/projects/setMemory".equals(url)) {
 				response = setProjectMemory(request);
-			} else if("/projects/exportTmx".equals(url)) {
+			} else if ("/projects/exportTmx".equals(url)) {
 				response = exportTMX(request);
 			} else {
 				response.put(Constants.REASON, "Unknown request");
@@ -529,12 +529,6 @@ public class ProjectsHandler implements HttpHandler {
 				return result;
 			}
 		}
-		JSONArray files = json.getJSONArray("files");
-		List<String> filesList = new ArrayList<>();
-		for (int i = 0; i < files.length(); i++) {
-			filesList.add(files.getString(i));
-		}
-
 		XliffStore store = projectStores.get(project);
 		if (store == null) {
 			logger.log(Level.ERROR, "Store is null");
@@ -542,12 +536,15 @@ public class ProjectsHandler implements HttpHandler {
 			return result;
 		}
 		String filterText = json.getString("filterText");
+		String filterLanguage = json.getString("filterLanguage");
 		boolean caseSensitiveFilter = json.getBoolean("caseSensitiveFilter");
 		boolean regExp = json.getBoolean("regExp");
+		boolean showUntranslated = json.getBoolean("showUntranslated");
+		boolean showTranslated = json.getBoolean("showTranslated");
+		boolean showConfirmed = json.getBoolean("showConfirmed");
 		try {
-			List<JSONObject> list = store.getSegments(filesList, json.getInt("start"), json.getInt("count"), filterText,
-					json.getString("filterLanguage"), caseSensitiveFilter, json.getBoolean("filterUntranslated"),
-					regExp);
+			List<JSONObject> list = store.getSegments(json.getInt("start"), json.getInt("count"), filterText,
+					filterLanguage, caseSensitiveFilter, regExp, showUntranslated, showTranslated, showConfirmed);
 			JSONArray array = new JSONArray();
 			Iterator<JSONObject> it = list.iterator();
 			while (it.hasNext()) {

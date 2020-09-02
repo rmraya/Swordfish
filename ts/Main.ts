@@ -241,8 +241,11 @@ class Main {
         Main.electron.ipcRenderer.on('set-statistics', (event: Electron.IpcRendererEvent, arg: any) => {
             this.setStatistics(arg);
         });
-        Main.electron.ipcRenderer.on('find-text', () => {
-            this.findText();
+        Main.electron.ipcRenderer.on('filter-segments', () => {
+            this.filterSegments();
+        });
+        Main.electron.ipcRenderer.on('set-filters', (event: Electron.IpcRendererEvent, arg: any) => {
+            this.setFilters(arg);
         });
         let config: any = { attributes: true, childList: false, subtree: false };
         let observer = new MutationObserver((mutationsList) => {
@@ -476,10 +479,17 @@ class Main {
         this.projectsView.updateStatus(arg);
     }
 
-    findText(): void {
+    filterSegments(): void {
         let selected = Main.tabHolder.getSelected();
         if (Main.translationViews.has(selected)) {
-            Main.translationViews.get(selected).findText();
+            Main.translationViews.get(selected).filterSegments();
+        }
+    }
+
+    setFilters(args: any) {
+        let selected = Main.tabHolder.getSelected();
+        if (Main.translationViews.has(selected)) {
+            Main.translationViews.get(selected).setFilters(args);
         }
     }
 

@@ -269,7 +269,6 @@ class ProjectsView {
     }
 
     exportTMX(): void {
-        // TODO
         if (this.selected.size === 0) {
             this.electron.ipcRenderer.send('show-message', { type: 'warning', message: 'Select project' });
             return;

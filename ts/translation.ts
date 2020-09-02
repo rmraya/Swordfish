@@ -66,6 +66,15 @@ class TranslationView {
     currentId: any;
     currentTags: string[] = [];
 
+    filterButton: HTMLAnchorElement;
+    filterText: string = '';
+    filterLanguage: string = 'source';
+    caseSensitiveFilter: boolean = false;
+    regExp: boolean = false;
+    showUntranslated: boolean = true;
+    showTranslated: boolean = true;
+    showConfirmed: boolean = true;
+
     tmMatches: TmMatches;
     mtMatches: MtMatches;
 
@@ -183,24 +192,24 @@ class TranslationView {
         });
         topBar.appendChild(confirmNextUnconfirmed);
 
-        let findInPage = document.createElement('a');
-        findInPage.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 0 24 24" width="24"><circle cx="11" cy="11" r="6" fill="none" stroke-width="2"/><line x1="15" y1="15" x2="21" y2="21" stroke-width="2"/></svg>' +
-            '<span class="tooltiptext bottomTooltip">Find Text</span>';
-        findInPage.className = 'tooltip';
-        findInPage.style.marginLeft = '20px';
-        findInPage.addEventListener('click', () => {
-            this.electron.ipcRenderer.send('show-find-text');
+        this.filterButton = document.createElement('a');
+        this.filterButton.innerHTML = ' <svg version="1.1" viewBox="0 0 24 24" height="24" width="24"><path style="stroke-width:0.829702" d="M 18.091348,3.6666667 11.913044,14.119167 v 4.936666 l -0.826087,-0.5 V 14.119167 L 4.9086522,3.6666667 Z M 21,2 H 2 L 9.4347826,14.578333 V 19.5 L 13.565217,22 v -7.421667 z"/></svg>' +
+            '<span class="tooltiptext bottomTooltip">Filter Segments</span>';
+        this.filterButton.className = 'tooltip';
+        this.filterButton.style.marginLeft = '20px';
+        this.filterButton.addEventListener('click', () => {
+            this.filterSegments();
         });
-        topBar.appendChild(findInPage);
+        topBar.appendChild(this.filterButton);
 
-        let filterText = document.createElement('a');
-        filterText.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 0 24 24" width="24"><path d="M11 6c1.38 0 2.63.56 3.54 1.46L12 10h6V4l-2.05 2.05C14.68 4.78 12.93 4 11 4c-3.53 0-6.43 2.61-6.92 6H6.1c.46-2.28 2.48-4 4.9-4zm5.64 9.14c.66-.9 1.12-1.97 1.28-3.14H15.9c-.46 2.28-2.48 4-4.9 4-1.38 0-2.63-.56-3.54-1.46L10 12H4v6l2.05-2.05C7.32 17.22 9.07 18 11 18c1.55 0 2.98-.51 4.14-1.36L20 21.49 21.49 20l-4.85-4.86z"/></svg>' +
+        let replaceText = document.createElement('a');
+        replaceText.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 0 24 24" width="24"><path d="M11 6c1.38 0 2.63.56 3.54 1.46L12 10h6V4l-2.05 2.05C14.68 4.78 12.93 4 11 4c-3.53 0-6.43 2.61-6.92 6H6.1c.46-2.28 2.48-4 4.9-4zm5.64 9.14c.66-.9 1.12-1.97 1.28-3.14H15.9c-.46 2.28-2.48 4-4.9 4-1.38 0-2.63-.56-3.54-1.46L10 12H4v6l2.05-2.05C7.32 17.22 9.07 18 11 18c1.55 0 2.98-.51 4.14-1.36L20 21.49 21.49 20l-4.85-4.86z"/></svg>' +
             '<span class="tooltiptext bottomTooltip">Replace Text</span>';
-        filterText.className = 'tooltip';
-        filterText.addEventListener('click', () => {
+        replaceText.className = 'tooltip';
+        replaceText.addEventListener('click', () => {
             this.electron.ipcRenderer.send('show-filter');
         });
-        topBar.appendChild(filterText);
+        topBar.appendChild(replaceText);
 
         let statisticsButton = document.createElement('a');
         statisticsButton.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 0 24 24" width="24"><path d="M9 17H7v-7h2v7zm4 0h-2V7h2v10zm4 0h-2v-4h2v4zm2.5 2.1h-15V5h15v14.1zm0-16.1h-15c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h15c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2z"/></svg>' +
@@ -311,9 +320,18 @@ class TranslationView {
 
     getSegments(): void {
         this.container.classList.add('wait');
+
         let params: any = {
-            project: this.projectId, files: [], start: this.currentPage * this.rowsPage, count: this.rowsPage, filterText: '',
-            filterLanguage: '', caseSensitiveFilter: false, filterUntranslated: false, regExp: false
+            project: this.projectId,
+            start: this.currentPage * this.rowsPage,
+            count: this.rowsPage,
+            filterText: this.filterText,
+            filterLanguage: this.filterLanguage,
+            caseSensitiveFilter: this.caseSensitiveFilter,
+            regExp: this.regExp,
+            showUntranslated: this.showUntranslated,
+            showTranslated: this.showTranslated,
+            showConfirmed: this.showConfirmed
         };
         this.electron.ipcRenderer.send('get-segments', params);
     }
@@ -555,6 +573,10 @@ class TranslationView {
         this.tbody.innerHTML = '';
         this.tbody.parentElement.scrollTo({ top: 0, left: 0 });
         let length = arg.length;
+        if (length === 0 && this.filterButton.classList.contains('active')) {
+            this.electron.ipcRenderer.send('show-message', {type: 'warning', message:'Nothing to display, consider clearing current filter'})
+            return;
+        }
         for (let i = 0; i < length; i++) {
             let row: any = arg[i];
             let tr: HTMLTableRowElement = document.createElement('tr');
@@ -963,7 +985,35 @@ class TranslationView {
         this.electron.ipcRenderer.send('spell-language', this.tgtLang);
     }
 
-    findText(): void {
-        this.electron.ipcRenderer.send('show-find-text', this.projectId);
+    filterSegments(): void {
+        let params: any = {
+            projectId: this.projectId,
+            filterText: this.filterText,
+            filterLanguage: this.filterLanguage,
+            caseSensitiveFilter: this.caseSensitiveFilter,
+            regExp: this.regExp,
+            showUntranslated: this.showUntranslated,
+            showTranslated: this.showTranslated,
+            showConfirmed: this.showConfirmed
+        };
+        this.electron.ipcRenderer.send('show-filter-segments', params);
+    }
+
+    setFilters(args: any): void {
+        this.filterText = args.filterText;
+        this.filterLanguage = args.filterLanguage;
+        this.caseSensitiveFilter = args.caseSensitiveFilter;
+        this.regExp = args.regExp;
+        this.showUntranslated = args.showUntranslated;
+        this.showTranslated = args.showTranslated;
+        this.showConfirmed = args.showConfirmed;
+        this.saveEdit({ confirm: false, next: '' });
+        if (this.filterText === '') {
+            this.filterButton.classList.remove('active');
+        } else {
+            this.filterButton.classList.add('active');
+        }
+        this.currentPage = 0;
+        this.getSegments();
     }
 }

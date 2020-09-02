@@ -42,6 +42,7 @@ import java.util.Map;
 import java.util.Vector;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.regex.PatternSyntaxException;
 import java.util.zip.DataFormatException;
 
 import javax.xml.parsers.ParserConfigurationException;
@@ -361,56 +362,107 @@ public class XliffStore {
         }
     }
 
-    public synchronized List<JSONObject> getSegments(List<String> filesList, int start, int count, String filterText,
-            String filterLanguage, boolean caseSensitiveFilter, boolean filterUntranslated, boolean regExp)
+    public synchronized List<JSONObject> getSegments(int start, int count, String filterText, String filterLanguage,
+            boolean caseSensitiveFilter, boolean regExp, boolean showUntranslated, boolean showTranslated,
+            boolean showConfirmed)
             throws SQLException, SAXException, IOException, ParserConfigurationException, DataFormatException {
         List<JSONObject> result = new Vector<>();
-        if (filterText.isEmpty()) {
-            int index = start;
-            String query = "SELECT file, unitId, segId, child, source, target, tags, state, space, translate FROM segments WHERE type='S' ORDER BY file, child LIMIT "
-                    + count + " OFFSET " + start + " ";
-            try (ResultSet rs = stmt.executeQuery(query)) {
-                while (rs.next()) {
-                    String file = rs.getString(1);
-                    String unit = rs.getString(2);
-                    String segId = rs.getString(3);
-                    String src = rs.getNString(5);
-                    String tgt = rs.getNString(6);
-                    int tags = rs.getInt(7);
-                    String state = rs.getString(8);
-                    boolean preserve = "Y".equals(rs.getString(9));
-                    boolean translate = "Y".equals(rs.getString(10));
-
-                    JSONObject tagsData = new JSONObject();
-                    if (tags > 0) {
-                        tagsData = getUnitData(file, unit);
-                    }
-                    Element source = buildElement(src);
-
-                    Element target = new Element("target");
-                    if (tgt != null && !tgt.isBlank()) {
-                        target = buildElement(tgt);
-                    }
-
-                    tagsMap = new Hashtable<>();
-                    JSONObject row = new JSONObject();
-                    row.put("index", index++);
-                    row.put("file", file);
-                    row.put("unit", unit);
-                    row.put("segment", segId);
-                    row.put("state", state);
-                    row.put("translate", translate);
-                    row.put("preserve", preserve);
-                    tag = 1;
-                    row.put("source", addHtmlTags(source, filterText, caseSensitiveFilter, regExp, tagsData));
-                    tag = 1;
-                    row.put("target", addHtmlTags(target, filterText, caseSensitiveFilter, regExp, tagsData));
-                    row.put("match", getBestMatch(file, unit, segId));
-                    result.add(row);
+        int index = start;
+        String query = "SELECT file, unitId, segId, child, source, target, tags, state, space, translate FROM segments WHERE type='S' ORDER BY file, child LIMIT "
+                + count + " OFFSET " + start;
+        if (!filterText.isEmpty()) {
+            StringBuilder queryBuilder = new StringBuilder(
+                    "SELECT file, unitId, segId, child, source, target, tags, state, space, translate FROM segments WHERE type='S'");
+            if (regExp) {
+                try {
+                    Pattern.compile(filterText);
+                } catch (PatternSyntaxException e) {
+                    throw new IOException("Invalid regular expression");
                 }
+                queryBuilder.append(" AND REGEXP_LIKE(");
+                if ("source".equals(filterLanguage)) {
+                    queryBuilder.append("sourceText,'");
+                } else {
+                    queryBuilder.append("targetText,'");
+                }
+                queryBuilder.append(filterText);
+                if (caseSensitiveFilter) {
+                    queryBuilder.append("','c')");
+                } else {
+                    queryBuilder.append("','i')");
+                }
+            } else {
+                if (caseSensitiveFilter) {
+                    if ("source".equals(filterLanguage)) {
+                        queryBuilder.append(" AND sourceText LIKE '%");
+                    } else {
+                        queryBuilder.append(" AND targetText LIKE '%");
+                    }
+                } else {
+                    if ("source".equals(filterLanguage)) {
+                        queryBuilder.append(" AND sourceText ILIKE '%");
+                    } else {
+                        queryBuilder.append(" AND targetText ILIKE '%");
+                    }
+                }
+                queryBuilder.append(filterText);
+                queryBuilder.append("%'");
             }
-        } else {
-            // TODO filter segments
+            if (!showUntranslated) {
+                queryBuilder.append(" AND state <> 'initial'");
+            }
+            if (!showTranslated) {
+                queryBuilder.append(" AND state <> 'translated'");
+            }
+            if (!showConfirmed) {
+                queryBuilder.append(" AND state <> 'final'");
+            }
+            queryBuilder.append(" ORDER BY file, child LIMIT ");
+            queryBuilder.append(count);
+            queryBuilder.append(" OFFSET ");
+            queryBuilder.append(start);
+            query = queryBuilder.toString();
+            System.out.println(query);
+        }
+        try (ResultSet rs = stmt.executeQuery(query)) {
+            while (rs.next()) {
+                String file = rs.getString(1);
+                String unit = rs.getString(2);
+                String segId = rs.getString(3);
+                String src = rs.getNString(5);
+                String tgt = rs.getNString(6);
+                int tags = rs.getInt(7);
+                String state = rs.getString(8);
+                boolean preserve = "Y".equals(rs.getString(9));
+                boolean translate = "Y".equals(rs.getString(10));
+
+                JSONObject tagsData = new JSONObject();
+                if (tags > 0) {
+                    tagsData = getUnitData(file, unit);
+                }
+                Element source = buildElement(src);
+
+                Element target = new Element("target");
+                if (tgt != null && !tgt.isBlank()) {
+                    target = buildElement(tgt);
+                }
+
+                tagsMap = new Hashtable<>();
+                JSONObject row = new JSONObject();
+                row.put("index", index++);
+                row.put("file", file);
+                row.put("unit", unit);
+                row.put("segment", segId);
+                row.put("state", state);
+                row.put("translate", translate);
+                row.put("preserve", preserve);
+                tag = 1;
+                row.put("source", addHtmlTags(source, filterText, caseSensitiveFilter, regExp, tagsData));
+                tag = 1;
+                row.put("target", addHtmlTags(target, filterText, caseSensitiveFilter, regExp, tagsData));
+                row.put("match", getBestMatch(file, unit, segId));
+                result.add(row);
+            }
         }
         return result;
     }

@@ -197,8 +197,14 @@ public class MemoriesHandler implements HttpHandler {
 	}
 
 	private JSONObject concordanceSearch(String request) {
+		JSONObject result = new JSONObject();
+		JSONObject json = new JSONObject(request);
+		if (!json.has("memory")) {
+			result.put(Constants.REASON, "Missing 'memory' parameter");
+			return result;
+		}	
 		// TODO Auto-generated method stub
-		return new JSONObject();
+		return result;
 	}
 
 	private static JSONObject importTMX(String request) {
