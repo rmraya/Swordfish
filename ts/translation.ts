@@ -247,11 +247,7 @@ class TranslationView {
         requestTranslation.className = 'tooltip';
         requestTranslation.style.marginLeft = '4px';
         requestTranslation.addEventListener('click', () => {
-            if (this.memSelect.value === 'none') {
-                this.electron.ipcRenderer.send('show-message', { type: 'warning', message: 'Select memory' });
-                return;
-            }
-            this.electron.ipcRenderer.send('search-memory-all', { project: this.projectId, memory: this.memSelect.value });
+            this.applyTranslationMemoryAll();            
         });
         topBar.appendChild(requestTranslation);
 
@@ -1015,5 +1011,13 @@ class TranslationView {
         }
         this.currentPage = 0;
         this.getSegments();
+    }
+
+    applyTranslationMemoryAll(): void {
+        if (this.memSelect.value === 'none') {
+            this.electron.ipcRenderer.send('show-message', { type: 'warning', message: 'Select memory' });
+            return;
+        }
+        this.electron.ipcRenderer.send('search-memory-all', { project: this.projectId, memory: this.memSelect.value });
     }
 }

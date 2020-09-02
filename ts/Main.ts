@@ -442,7 +442,10 @@ class Main {
     }
 
     applyTranslationMemoryAll(): void {
-        // TODO
+        let selected = Main.tabHolder.getSelected();
+        if (Main.translationViews.has(selected)) {
+            Main.translationViews.get(selected).applyTranslationMemoryAll();
+        }
     }
 
     acceptAllMatches(): void {
