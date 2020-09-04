@@ -74,6 +74,16 @@ class ProjectsView {
         });
         topBar.appendChild(exportTranslations);
 
+        let statisticsButton = document.createElement('a');
+        statisticsButton.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 0 24 24" width="24"><path d="M9 17H7v-7h2v7zm4 0h-2V7h2v10zm4 0h-2v-4h2v4zm2.5 2.1h-15V5h15v14.1zm0-16.1h-15c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h15c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2z"/></svg>' +
+            '<span class="tooltiptext bottomTooltip">Project Statistics</span>';
+        statisticsButton.className = 'tooltip';
+        statisticsButton.style.marginLeft = '20px';
+        statisticsButton.addEventListener('click', () => {
+            this.generateStatistics()
+        });
+        topBar.appendChild(statisticsButton);
+
         let removeButton = document.createElement('a');
         removeButton.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 0 24 24" width="24"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM8 9h8v10H8V9zm7.5-5l-1-1h-5l-1 1H5v2h14V4h-3.5z"/></svg>' +
             '<span class="tooltiptext bottomTooltip">Remove Project</span>';
@@ -241,6 +251,20 @@ class ProjectsView {
         }
     }
 
+    generateStatistics(): void {
+        if (this.selected.size === 0) {
+            this.electron.ipcRenderer.send('show-message', { type: 'warning', message: 'Select project' });
+            return;
+        }
+        if (this.selected.size > 1) {
+            this.electron.ipcRenderer.send('show-message', { type: 'warning', message: 'Select one project' });
+            return;
+        }
+        for (let key of this.selected.keys()) {
+            this.electron.ipcRenderer.send('generate-statistics', { project: key });
+        }
+    }
+
     removeProjects(): void {
         if (this.selected.size === 0) {
             this.electron.ipcRenderer.send('show-message', { type: 'warning', message: 'Select project' });
@@ -393,13 +417,5 @@ class ProjectsView {
                 break;
             }
         }
-    }
-
-    splitSegment(): void {
-        // TODO
-    }
-
-    mergeNext(): void {
-        // TODO
     }
 }

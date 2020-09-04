@@ -247,7 +247,7 @@ class TranslationView {
         requestTranslation.className = 'tooltip';
         requestTranslation.style.marginLeft = '4px';
         requestTranslation.addEventListener('click', () => {
-            this.applyTranslationMemoryAll();            
+            this.applyTranslationMemoryAll();
         });
         topBar.appendChild(requestTranslation);
 
@@ -562,7 +562,7 @@ class TranslationView {
     }
 
     generateStatistics(): void {
-        // TODO
+        this.electron.ipcRenderer.send('generate-statistics', { project: this.projectId });
     }
 
     setSegments(arg: any[]): void {
@@ -570,7 +570,7 @@ class TranslationView {
         this.tbody.parentElement.scrollTo({ top: 0, left: 0 });
         let length = arg.length;
         if (length === 0 && this.filterButton.classList.contains('active')) {
-            this.electron.ipcRenderer.send('show-message', {type: 'warning', message:'Nothing to display, consider clearing current filter'})
+            this.electron.ipcRenderer.send('show-message', { type: 'warning', message: 'Nothing to display, consider clearing current filter' })
             return;
         }
         for (let i = 0; i < length; i++) {
@@ -1019,5 +1019,29 @@ class TranslationView {
             return;
         }
         this.electron.ipcRenderer.send('search-memory-all', { project: this.projectId, memory: this.memSelect.value });
+    }
+
+    removeAllTranslations(): void {
+        this.electron.ipcRenderer.send('remove-translations', { project: this.projectId });
+    }
+
+    unconfirmAllTranslations(): void {
+        this.electron.ipcRenderer.send('unconfirm-translations', { project: this.projectId });
+    }
+
+    pseudoTranslate(): void {
+        this.electron.ipcRenderer.send('pseudo-translate', { project: this.projectId });
+    }
+
+    copyAllSources(): void {
+        this.electron.ipcRenderer.send('copy-sources', { project: this.projectId });
+    }
+
+    confirmAllTranslations(): void {
+        this.electron.ipcRenderer.send('confirm-translations', { project: this.projectId });
+    }
+
+    acceptAll100Matches(): void{
+        this.electron.ipcRenderer.send('accept-100-matches', { project: this.projectId });
     }
 }

@@ -1,0 +1,159 @@
+<!--
+	====================================================================
+		$URL$
+	====================================================================
+
+		Copyright SCHEMA GmbH
+
+		The software, data and information contained herein are
+		proprietary to, and comprise valuable trade secrets of,
+		SCHEMA GmbH. They are given in confidence by
+		SCHEMA GmbH pursuant to a written license agreement,
+		and may be stored and used only in accordance with the
+		terms of such license.
+
+	====================================================================
+		  $Author$
+
+		project	 : ST4 DocuManager
+		contents : Doctype definition for TMS Ex- and Imports
+			$Date$
+		version  : 4.1.0.0
+		$Revision$
+	====================================================================
+-->
+
+<!-- ============================================================ -->
+<!-- copy from ST4.dtd, otherwise we cannot override entities -->
+<!-- ============================================================ -->
+
+<!ENTITY % para 'p|codeblock|procedural-instructions'>
+<!ENTITY % list '(ul|ol)'>
+<!ENTITY % inside-content
+           '(table-container
+            |image-container
+            |margin_text
+            |subheading
+            |%list;
+            |safety
+            |%para;
+            |modref
+            |textmodule)
+            ,page-break?
+            '>
+
+<!ENTITY % structure-fragment-ref-attributes 'ref CDATA #IMPLIED
+													id CDATA #IMPLIED
+													readonly		(true|false) #IMPLIED'>
+
+<!-- ============================================================ -->
+<!-- Override default entity definitions for TMS usage            -->
+<!-- ============================================================ -->
+
+<!-- title is optional, metalist for metadata -->
+<!ENTITY % textmodule-title-model
+		   '(title|readonly_title)'>
+<!ENTITY % textmodule-model 
+	       '%textmodule-title-model;?, metalist?, (readonly_content|(%inside-content;)*)'>
+<!ENTITY % node-model 
+	       '((title|readonly_title)?, (content|readonly_content|part|readonly_part)?, metalist?)'>
+<!ENTITY % meta-model '(#PCDATA|variableName|variantName|variableValue|content|base64)*'>
+
+<!ENTITY % linkedText	'link|dynamic_link'>
+
+<!-- ============================================================ -->
+<!-- ST4.dtd                                                      -->
+<!-- ============================================================ -->
+
+<!-- simple reference to original dtd -->
+<!ENTITY % ST4.dtd SYSTEM "ST4.dtd">
+%ST4.dtd;
+
+
+
+
+
+<!-- ============================================================ -->
+<!-- TMS                                                          -->
+<!-- ============================================================ -->
+
+<!-- element tmsnode for default translatable, element node for readonly export -->
+<!ELEMENT tms (tmsnode|node|rtf)*>
+<!ATTLIST tms
+		  guid				CDATA	#REQUIRED
+		  name				CDATA	#REQUIRED
+		  source-culture	NMTOKEN	#IMPLIED
+		  source			NMTOKEN	#REQUIRED
+		  target			NMTOKEN	#REQUIRED
+		  target-culture	NMTOKEN	#IMPLIED
+		  user				CDATA	#REQUIRED
+		  date				CDATA	#REQUIRED
+		  test				CDATA	#IMPLIED
+		  version			CDATA	#REQUIRED
+			export-version CDATA #IMPLIED
+			commit-date CDATA #IMPLIED
+			commit-version CDATA #IMPLIED
+			file-hash CDATA #IMPLIED>
+
+<!ELEMENT readonly_title (#PCDATA)>
+<!ELEMENT readonly_content ((%inside-content;)*)>
+<!ELEMENT readonly_part (%inside-structure-fragment;)>
+
+<!ELEMENT tmsnode (%node-model;)>
+<!ATTLIST tmsnode 
+		  id				CDATA	#REQUIRED
+          xmlns:st4			CDATA	#IMPLIED
+          xml:space (preserve)	"preserve">
+
+<!ELEMENT rtf EMPTY>
+<!ATTLIST rtf
+		  src				CDATA	#REQUIRED>
+
+<!-- ============================================================ -->
+<!-- variables for TMS                                            -->
+<!-- ============================================================ -->
+
+<!ELEMENT variableValue (#PCDATA)>
+<!ATTLIST variableValue
+		  x			CDATA	#REQUIRED
+		  y			CDATA	#REQUIRED
+		  variable	CDATA	#REQUIRED
+		  variant	CDATA	#REQUIRED
+		  empty		(true|false)	#IMPLIED>
+
+<!ELEMENT variableName (#PCDATA)>
+<!ATTLIST variableName
+		  x			CDATA	#REQUIRED
+		  y			CDATA	#REQUIRED
+		  empty		(true|false)	#IMPLIED>
+
+<!ELEMENT variantName (#PCDATA)>
+<!ATTLIST variantName
+		  x			CDATA	#REQUIRED
+		  y			CDATA	#REQUIRED
+		  empty		(true|false)	#IMPLIED>
+
+<!-- ============================================================ -->
+<!-- Dynamic see also links                                       -->
+<!-- ============================================================ -->
+
+<!ELEMENT dynamic_link (#PCDATA)>
+<!ATTLIST dynamic_link
+		linkid CDATA #IMPLIED
+		use	 (copy|grab) #IMPLIED
+		dynamic (true|false) "false">
+
+<!-- ============================================================ -->
+<!-- Metadata, removed attribute is only used by TMS              -->
+<!-- ============================================================ -->
+
+<!ATTLIST meta
+		  name			CDATA		#REQUIRED
+		  displayname   CDATA		#IMPLIED
+		  removed		CDATA		#IMPLIED
+		  readonly		(true|false) #IMPLIED
+		  xml:space		(preserve)	#IMPLIED>
+
+<!ELEMENT base64 (#PCDATA)>
+<!ATTLIST base64
+		  xml:space			(preserve)  #IMPLIED>

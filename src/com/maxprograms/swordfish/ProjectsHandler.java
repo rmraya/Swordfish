@@ -154,6 +154,20 @@ public class ProjectsHandler implements HttpHandler {
 				response = setProjectMemory(request);
 			} else if ("/projects/exportTmx".equals(url)) {
 				response = exportTMX(request);
+			} else if ("/projects/removeTranslations".equals(url)) {
+				response = removeTranslations(request);
+			} else if ("/projects/unconfirmTranslations".equals(url)) {
+				response = unconfirmTranslations(request);
+			} else if ("/projects/pseudoTranslate".equals(url)) {
+				response = pseudoTranslate(request);
+			} else if ("/projects/copyAllSources".equals(url)) {
+				response = copyAllSources(request);
+			} else if ("/projects/confirmAllTranslations".equals(url)) {
+				response = confirmAllTranslations(request);
+			} else if ("/projects/acceptAll100Matches".equals(url)) {
+				response = acceptAll100Matches(request);
+			} else if ("/projects/generateStatistics".equals(url)) {
+				response = generateStatistics(request);
 			} else {
 				response.put(Constants.REASON, "Unknown request");
 			}
@@ -1001,6 +1015,153 @@ public class ProjectsHandler implements HttpHandler {
 		} catch (IOException e) {
 			logger.log(Level.ERROR, e);
 			result.put(Constants.STATUS, Constants.ERROR);
+			result.put(Constants.REASON, e.getMessage());
+		}
+		return result;
+	}
+
+	private JSONObject removeTranslations(String request) {
+		JSONObject result = new JSONObject();
+		try {
+			JSONObject json = new JSONObject(request);
+			String project = json.getString("project");
+			if (projectStores.containsKey(project)) {
+				projectStores.get(project).removeTranslations();
+				JSONObject status = projectStores.get(project).getTranslationStatus();
+				result.put("statistics", status);
+				updateProjectStatus(project, status.getInt("percentage"));
+			}
+		} catch (SQLException | JSONException | SAXException | IOException | ParserConfigurationException e) {
+			logger.log(Level.ERROR, e);
+			result.put(Constants.REASON, e.getMessage());
+		}
+		return result;
+	}
+
+	private JSONObject unconfirmTranslations(String request) {
+		JSONObject result = new JSONObject();
+		try {
+			JSONObject json = new JSONObject(request);
+			String project = json.getString("project");
+			if (projectStores.containsKey(project)) {
+				projectStores.get(project).unconfirmTranslations();
+				JSONObject status = projectStores.get(project).getTranslationStatus();
+				result.put("statistics", status);
+				updateProjectStatus(project, status.getInt("percentage"));
+			}
+		} catch (SQLException | JSONException | IOException e) {
+			logger.log(Level.ERROR, e);
+			result.put(Constants.REASON, e.getMessage());
+		}
+		return result;
+	}
+
+	private JSONObject pseudoTranslate(String request) {
+		JSONObject result = new JSONObject();
+		try {
+			JSONObject json = new JSONObject(request);
+			String project = json.getString("project");
+			if (projectStores.containsKey(project)) {
+				projectStores.get(project).pseudoTranslate();
+				JSONObject status = projectStores.get(project).getTranslationStatus();
+				result.put("statistics", status);
+				updateProjectStatus(project, status.getInt("percentage"));
+			}
+		} catch (SQLException | JSONException | SAXException | IOException | ParserConfigurationException e) {
+			logger.log(Level.ERROR, e);
+			result.put(Constants.REASON, e.getMessage());
+		}
+		return result;
+	}
+
+	private JSONObject copyAllSources(String request) {
+		JSONObject result = new JSONObject();
+		try {
+			JSONObject json = new JSONObject(request);
+			String project = json.getString("project");
+			if (projectStores.containsKey(project)) {
+				projectStores.get(project).copyAllSources();
+				JSONObject status = projectStores.get(project).getTranslationStatus();
+				result.put("statistics", status);
+				updateProjectStatus(project, status.getInt("percentage"));
+			}
+		} catch (SQLException | JSONException | SAXException | IOException | ParserConfigurationException e) {
+			logger.log(Level.ERROR, e);
+			result.put(Constants.REASON, e.getMessage());
+		}
+		return result;
+	}
+
+	private JSONObject confirmAllTranslations(String request) {
+		JSONObject result = new JSONObject();
+		try {
+			JSONObject json = new JSONObject(request);
+			String project = json.getString("project");
+			if (projectStores.containsKey(project)) {
+				projectStores.get(project).confirmAllTranslations();
+				JSONObject status = projectStores.get(project).getTranslationStatus();
+				result.put("statistics", status);
+				updateProjectStatus(project, status.getInt("percentage"));
+			}
+		} catch (SQLException | JSONException | IOException e) {
+			logger.log(Level.ERROR, e);
+			result.put(Constants.REASON, e.getMessage());
+		}
+		return result;
+	}
+
+	private JSONObject acceptAll100Matches(String request) {
+		JSONObject result = new JSONObject();
+		try {
+			JSONObject json = new JSONObject(request);
+			String project = json.getString("project");
+			if (projectStores.containsKey(project)) {
+				projectStores.get(project).acceptAll100Matches();
+				JSONObject status = projectStores.get(project).getTranslationStatus();
+				result.put("statistics", status);
+				updateProjectStatus(project, status.getInt("percentage"));
+			}
+		} catch (SQLException | JSONException | SAXException | IOException | ParserConfigurationException e) {
+			logger.log(Level.ERROR, e);
+			result.put(Constants.REASON, e.getMessage());
+		}
+		return result;
+	}
+
+	private JSONObject generateStatistics(String request) {
+		JSONObject result = new JSONObject();
+		try {
+			JSONObject json = new JSONObject(request);
+			String project = json.getString("project");
+			if (projectStores == null) {
+				projectStores = new Hashtable<>();
+				if (TmsServer.isDebug()) {
+					logger.log(Level.INFO, "Created store map");
+				}
+			}
+			shouldClose = false;
+			if (!projectStores.containsKey(project)) {
+				shouldClose = true;
+				try {
+					Project prj = projects.get(project);
+					XliffStore store = new XliffStore(prj.getXliff(), prj.getSourceLang().getCode(),
+							prj.getTargetLang().getCode());
+					projectStores.put(project, store);
+				} catch (SAXException | IOException | ParserConfigurationException | URISyntaxException
+						| SQLException e) {
+					logger.log(Level.ERROR, "Error creating project store", e);
+					result.put(Constants.REASON, e.getMessage());
+					return result;
+				}
+			}
+			String analysis = projectStores.get(project).generateStatistics();
+			result.put("analysis", analysis);
+			if (shouldClose) {
+				closeProject(request);
+			}
+		} catch (SQLException | JSONException | SAXException | IOException | ParserConfigurationException
+				| URISyntaxException e) {
+			logger.log(Level.ERROR, e);
 			result.put(Constants.REASON, e.getMessage());
 		}
 		return result;

@@ -1,0 +1,475 @@
+<!--
+	====================================================================
+		$URL$
+	====================================================================
+
+		Copyright SCHEMA GmbH
+
+		The software, data and information contained herein are
+		proprietary to, and comprise valuable trade secrets of,
+		SCHEMA GmbH. They are given in confidence by
+		SCHEMA GmbH pursuant to a written license agreement,
+		and may be stored and used only in accordance with the
+		terms of such license.
+
+	====================================================================
+		  $Author$
+
+		project  : ST4 DocuManager
+		contents : DTD for editing nodes
+		notes    :
+		version  : 6.0.0.0
+		$Revision$
+ 			$Date$
+	====================================================================
+-->
+
+<!-- ================================================= -->
+<!-- Character Entities. Not required with use of      -->
+<!-- unicode, but for XML-Editors more easy to use.    -->
+<!-- ================================================= -->
+
+<!ENTITY lt    "&#38;#60;"> <!-- < -->
+<!ENTITY gt    "&#38;#62;"> <!-- > -->
+<!ENTITY amp   "&#38;#38;"> <!-- & -->
+<!ENTITY apos  "&#39;"> <!-- ' -->
+<!ENTITY quot  "&#34;"> <!-- " -->
+<!ENTITY nbsp  "&#xA0;"> <!--   --> <!-- (non breakable space) -->
+
+<!-- ================================================= -->
+<!-- Speciality: Comment as inline/paragraph in one    -->
+<!-- Note: Comments won't be stored in ST4 node        -->
+<!--       content, only visible in editor+production  -->
+<!-- ================================================= -->
+
+<!ELEMENT comment (#PCDATA| br | tab)*>
+
+<!ENTITY % comment-attributes '
+	old-location	CDATA #IMPLIED
+	old-start	CDATA #IMPLIED
+		  id			CDATA #IMPLIED
+		  creator		CDATA #IMPLIED
+		  creation-date	CDATA #IMPLIED
+		  color		CDATA #IMPLIED
+		  state		CDATA #IMPLIED
+		  type		CDATA #IMPLIED'>
+
+<!ATTLIST comment
+		  %comment-attributes;>
+
+<!ELEMENT comment-start EMPTY>
+<!ENTITY % comment-start-attributes '
+		  id CDATA #REQUIRED'>
+<!ATTLIST comment-start
+		  %comment-start-attributes;>
+
+<!ELEMENT comment-thread (comment, replies)>
+<!ELEMENT replies (comment | comment-thread)+>
+
+<!-- ================================================= -->
+<!-- Fonts: Inline Character Formatting                -->
+<!-- ================================================= -->
+
+<!ENTITY % font 'i|b|code|sup|sub|emphasis|comment|comment-start|comment-thread'>
+<!ELEMENT i        (#PCDATA| br | comment | comment-start | comment-thread | indexentry)*> <!-- italic -->
+<!ELEMENT b        (#PCDATA| br | comment | comment-start | comment-thread | indexentry)*> <!-- emphasized -->
+<!ELEMENT code     (#PCDATA| br | comment | comment-start | comment-thread | indexentry | tab)*> <!-- fixed-width-font -->
+<!ELEMENT sup      (#PCDATA| br | comment | comment-start | comment-thread | indexentry)*> <!-- superscript -->
+<!ELEMENT sub      (#PCDATA| br | comment | comment-start | comment-thread | indexentry)*> <!-- subscript -->
+
+<!ELEMENT emphasis (#PCDATA| br | comment | comment-start | comment-thread | indexentry)*>
+<!ENTITY % emphasis-attributes '
+		  type	CDATA #REQUIRED '>
+<!ATTLIST emphasis
+	%emphasis-attributes;>
+
+<!ELEMENT A        (#PCDATA| br | indexentry)*> <!-- Hyperlink -->
+<!ATTLIST A
+		  HREF   CDATA #REQUIRED>
+
+<!-- ================================================= -->
+<!-- Empty Formatting Elements                         -->
+<!-- ================================================= -->
+
+<!ELEMENT br   	EMPTY>
+<!-- line break -->
+<!ELEMENT tab   EMPTY>
+<!-- tabulator -->
+
+<!-- ================================================= -->
+<!-- ST4DM: Text variables                             -->
+<!-- ================================================= -->
+
+<!ELEMENT variable   (#PCDATA)>
+<!ATTLIST variable
+		linkid	  CDATA #REQUIRED
+		name      CDATA #REQUIRED
+		variant   CDATA #IMPLIED >
+
+<!-- ================================================= -->
+<!-- Outline Paragraph Elements inside Node element    -->
+<!-- ================================================= -->
+
+<!ENTITY % para 'p|codeblock|procedural-instructions|comment|comment-thread'>
+<!ENTITY % linkedText	'link'> <!-- entity for TMS overrides -->
+<!ENTITY % formatedText '#PCDATA|%font;|indexentry '>
+<!ENTITY % featuredText '%formatedText;|img|IMGx| %linkedText; |lexiconlink | A | br | variable | meta-ref'>
+<!ENTITY % structure-fragment-ref-attributes 'ref CDATA #IMPLIED'>
+
+<!ELEMENT subheading   (%featuredText;|embedded_safety)*>
+<!ATTLIST subheading
+          type    CDATA #IMPLIED>
+
+<!ENTITY % p-type-attributes 
+	       'p_table_l | p_table_lb | p_table_r | p_table_rb | p_table_c | p_table_cb'>
+
+<!ELEMENT p (%featuredText;|embedded_safety)*>
+<!ATTLIST p
+		  type (%p-type-attributes;) #IMPLIED>
+
+<!ELEMENT codeblock (%featuredText;|tab|embedded_safety)*>
+
+<!ELEMENT title (#PCDATA)>
+
+<!ELEMENT margin_text (%featuredText;|embedded_safety)*>
+<!ATTLIST margin_text
+          type     CDATA  #IMPLIED>
+
+<!-- ================================================= -->
+<!-- Lists                                             -->
+<!-- ================================================= -->
+
+<!ENTITY % list '(ul|ol)'>
+
+<!ENTITY % list-model 
+	'((image-container|safety)*, li, page-break?)+'>
+
+<!ELEMENT ul %list-model;>
+<!ATTLIST ul
+          type (dash | disc) "disc">
+
+<!ELEMENT ol %list-model;>
+<!ATTLIST ol
+          type (i | I | A | 1) "1">              
+
+<!ELEMENT li (p|ul)*>
+<!ATTLIST li %structure-fragment-ref-attributes; >
+
+<!-- ================================================= -->
+<!-- Safety warnings and signals (ST4DM 2.0)           -->
+<!-- ================================================= -->
+
+<!ELEMENT embedded_safety (#PCDATA)>
+<!ENTITY % embedded_safety-attributes '
+		  severity (danger|warning|caution|notice) #REQUIRED'>
+<!ATTLIST embedded_safety 
+				%embedded_safety-attributes;>
+
+
+<!ELEMENT safetyicon EMPTY>
+<!ENTITY % safetyicon-attributes '
+		  name CDATA #REQUIRED'>
+<!ATTLIST safetyicon
+		  %safetyicon-attributes;>
+
+
+<!-- aka safety_title, aka subheading-->
+<!ELEMENT cause (%featuredText;)*>
+<!ELEMENT consequence (%featuredText;)*>
+
+<!ENTITY % safety-content '
+			safetyicon*, cause*, consequence*, measures?'>
+<!ELEMENT safety (%safety-content;)>
+<!ENTITY % safety-attributes '
+		  type CDATA #IMPLIED
+		  severity CDATA #IMPLIED
+		  %structure-fragment-ref-attributes;'>
+<!ATTLIST safety
+		  %safety-attributes;>
+
+<!-- =================================================== -->
+<!-- Procedural Instructions: inside signals             -->
+<!-- =================================================== -->
+
+<!ELEMENT measures				(safety_conditions?, safety_instructions, safety_results? )>
+<!ELEMENT safety_conditions		(safety_condition+)>
+<!ELEMENT safety_intermediateresult (%featuredText;)*>
+<!ATTLIST safety_intermediateresult %structure-fragment-ref-attributes;>
+<!ELEMENT safety_instructions	((safety_instruction,safety_intermediateresult*)+)>
+<!ELEMENT safety_results		(safety_result+)>
+<!ELEMENT safety_condition		(%featuredText;)*>
+<!ATTLIST safety_condition		%structure-fragment-ref-attributes;>
+<!ELEMENT safety_instruction	(%featuredText;)*>
+<!ATTLIST safety_instruction	%structure-fragment-ref-attributes;>
+<!ELEMENT safety_result			(%featuredText;)*>
+<!ATTLIST safety_result			%structure-fragment-ref-attributes;>
+
+<!-- =================================================== -->
+<!-- Procedural Instructions: outside signals            -->
+<!-- =================================================== -->
+
+<!ENTITY % conditions-model 	    '((image-container|safety)*,condition, page-break?)+'>
+<!ENTITY % instructions-model 	    '((image-container|safety)*,(instruction, page-break?, (image-container|safety)*, (intermediateresult, page-break?, (image-container|safety)*)*)+)'>
+<!ENTITY % results-model 			'((image-container|safety)*,result, page-break?)+'>
+
+<!ELEMENT procedural-instructions   (conditions?, instructions, results? )>
+<!ELEMENT conditions				%conditions-model;>
+<!ELEMENT intermediateresult		(%featuredText;|embedded_safety)*>
+<!ATTLIST intermediateresult 		%structure-fragment-ref-attributes;>
+<!ELEMENT instructions				%instructions-model;>
+<!ELEMENT results					%results-model;>
+<!ELEMENT condition					(%featuredText;|embedded_safety)*>
+<!ATTLIST condition					%structure-fragment-ref-attributes;>
+<!ELEMENT instruction				(%featuredText;|embedded_safety)*>
+<!ATTLIST instruction				%structure-fragment-ref-attributes;>
+<!ELEMENT result					(%featuredText;|embedded_safety)*>
+<!ATTLIST result					%structure-fragment-ref-attributes;>
+
+<!-- ================================================= -->
+<!-- Images / Graphics                                 -->
+<!-- ================================================= -->
+
+<!ELEMENT image-container ((img|IMGx)?, image-title?, table-container?)>
+<!ATTLIST image-container
+		  %structure-fragment-ref-attributes;
+          type	(img_original
+          		|img_fixed_column
+		   		|img_fixed_textarea
+				|img_margin
+				|img_50
+				|img_80) 
+				"img_original">
+		
+<!ELEMENT image-title   (%featuredText;|embedded_safety)*>
+
+<!-- import image, used to import new graphics to ST4 (for Editor, RTF-Checkout and DocumentImport) -->          
+<!ELEMENT IMGx EMPTY>
+<!ENTITY % IMGx-attributes '
+          HEIGHT   CDATA #IMPLIED
+          WIDTH    CDATA #IMPLIED'>
+<!ATTLIST IMGx
+          SRC      CDATA #IMPLIED
+          %IMGx-attributes; >
+          
+<!ELEMENT img EMPTY>
+<!ENTITY % img-attributes '
+          height   CDATA #IMPLIED
+          width    CDATA #IMPLIED'>
+<!ATTLIST img
+          src      CDATA #IMPLIED
+          %img-attributes; >	
+
+<!-- ================================================= -->
+<!-- Tables                                            -->
+<!-- ================================================= -->
+
+<!ELEMENT table-container (table-title?, table?)>
+<!ATTLIST table-container
+		%structure-fragment-ref-attributes;
+		type (framed
+			|header
+			|noframe
+			|legend)
+			"header">
+
+<!ENTITY % inside-table "thead?, tbody">
+<!ELEMENT table (%inside-table;) >
+
+<!-- fixed = size of textcolumn - width in hsdl-percent -->
+<!-- scaled = absolute width - width is sum of hsdl-cm values -->
+<!ATTLIST table
+          type	(fixed|scaled) "fixed"
+          hsdl-percent    CDATA #IMPLIED
+          percentage      CDATA #IMPLIED
+          hsdl-cm         CDATA #IMPLIED
+          frame		      CDATA #IMPLIED>
+
+<!ELEMENT table-title (%featuredText;|embedded_safety)*>
+<!ELEMENT thead (tr)+>
+<!ELEMENT tbody (tr)+>
+<!ELEMENT tr (th | td)+>
+
+<!-- The following attributes are included inside this DTD -->
+<!-- in anticipation of future extensions. Concurrent      -->
+<!-- capabilities of all tools involved, do *not* support  -->
+<!-- any features related to these attributes.             -->
+<!--                                                       -->
+<!-- - bgcolor                                             -->
+<!-- - border-left                                         -->
+<!-- - border-right                                        -->
+<!-- - border-top                                          -->
+<!-- - border-bottom                                       -->
+<!ATTLIST tr
+          bgcolor       CDATA #IMPLIED
+          border-top    CDATA #IMPLIED
+          border-bottom CDATA #IMPLIED>
+<!ENTITY % td-attributes 	    
+         'colspan       CDATA #IMPLIED
+          rowspan       CDATA #IMPLIED
+          bgcolor       CDATA #IMPLIED
+          border-left   CDATA #IMPLIED
+          border-right  CDATA #IMPLIED
+          border-top    CDATA #IMPLIED
+          border-bottom CDATA #IMPLIED'>
+<!ELEMENT th (%para; | %list;)*>
+<!ATTLIST th %td-attributes;>
+<!ELEMENT td (%para; | %list;)*>
+<!ATTLIST td %td-attributes;>
+
+
+<!ENTITY % inside-content
+           '(table-container
+            |image-container
+            |margin_text
+            |subheading
+            |%list;
+            |safety
+            |%para;
+            |modref
+            |textmodule)
+            ,page-break?
+            '>
+
+<!-- ============================================================ -->
+<!-- Manual Page Break                                            -->
+<!-- ============================================================ -->
+
+<!ELEMENT page-break EMPTY>
+
+<!-- ============================================================ -->
+<!-- Fragments: textmodule references                             -->
+<!-- ============================================================ -->
+            
+<!ELEMENT modref EMPTY>
+<!ATTLIST modref
+		  src	CDATA	#REQUIRED>
+
+<!-- ============================================================ -->
+<!-- metadata references		                             -->
+<!-- ============================================================ -->
+            
+<!ELEMENT meta-ref (#PCDATA) >
+<!ENTITY % meta-ref-attributes '
+		  type	(dynamic|static|ontology|language) "dynamic"
+		  name 	CDATA	#REQUIRED
+		  linkid  CDATA   #IMPLIED '>
+
+<!ATTLIST meta-ref
+	%meta-ref-attributes;>
+
+<!-- ============================================================ -->
+<!-- Metadata, needs to be exported explicitly                   -->
+<!-- ============================================================ -->
+
+<!ELEMENT metalist (meta*)>
+<!ENTITY % meta-model '(#PCDATA)'>
+<!ELEMENT meta %meta-model;>
+<!ATTLIST meta
+		  name			CDATA		 #REQUIRED
+		  displayname   CDATA		 #IMPLIED
+		  readonly		(true|false) #IMPLIED
+		  xml:space		(preserve)	 #IMPLIED>
+
+
+<!-- ============================================================ -->
+<!-- Node structure model                                         -->
+<!-- ============================================================ -->
+
+<!ENTITY % node-attributes '
+		  id				CDATA	#IMPLIED
+          xml:lang			NMTOKEN #IMPLIED
+          readonly			(true|false) #IMPLIED
+          trans-irrelevant	(true|false) #IMPLIED
+		  aspect-name		CDATA	#IMPLIED
+          new-version-limit CDATA	#IMPLIED
+          xmlns:st4			CDATA	#IMPLIED
+          xml:space			(preserve)  #IMPLIED'>
+
+<!ENTITY % node-model 
+	       'title, metalist?, (%inside-content;)*, (node|page-break-node)*'>
+<!ELEMENT node (%node-model;)>
+<!ATTLIST node
+          class	            CDATA   #IMPLIED
+		  %node-attributes;>
+<!ELEMENT page-break-node EMPTY>
+<!ATTLIST page-break-node
+		  %node-attributes;>
+
+
+<!ELEMENT singlenode (title, metalist?, (%inside-content;)*)>
+<!ATTLIST singlenode 
+		  %node-attributes;>
+
+
+<!ENTITY % textmodule-title-model
+		   'title'>
+<!ENTITY % textmodule-model 
+	       '%textmodule-title-model;, metalist?, (%inside-content;)*'>
+<!ELEMENT textmodule (%textmodule-model;)>
+<!ATTLIST textmodule
+		  %node-attributes;
+		  linkid	CDATA	#IMPLIED>
+
+<!ENTITY % inside-structure-fragment
+		'(table-container
+		|image-container
+		|li
+		|condition
+		|instruction
+		|intermediateresult
+		|result
+		|safety
+		|safety_condition
+		|safety_instruction
+		|safety_intermediateresult
+		|safety_result)?'>
+		
+<!ENTITY % structure-fragment-title-model
+		'title'>
+<!ENTITY % structure-fragment-model 
+		'%structure-fragment-title-model;, metalist?, %inside-structure-fragment;'>
+<!ELEMENT structure-fragment (%structure-fragment-model;)>
+
+<!ENTITY % structure-fragment-attributes '
+		%node-attributes;
+		fragment-element CDATA #REQUIRED
+		linkid	CDATA	#IMPLIED'>
+
+<!ATTLIST structure-fragment
+		%structure-fragment-attributes;>
+ 
+<!-- for validation of xml fragments -->
+<!ELEMENT node-content ((content|part)?)>
+<!ELEMENT content ((%inside-content;)*)>
+<!ELEMENT part (%inside-structure-fragment;)>
+
+<!-- ============================================================ -->
+<!-- Other                                                        -->
+<!-- ============================================================ -->
+
+<!-- See Also -->
+<!ENTITY % link-model '(#PCDATA)'>
+<!ELEMENT link %link-model;>
+<!ATTLIST link
+		xmlns:st4 CDATA #IMPLIED
+		linkid CDATA #IMPLIED
+		use	 (copy|grab) #IMPLIED
+		dynamic (true|false) "false">
+
+<!-- Glossary -->
+<!ELEMENT lexiconlink (#PCDATA)>
+<!ATTLIST lexiconlink
+		linkid CDATA #IMPLIED>
+
+<!-- Index -->
+<!ENTITY % inside-index 'EMPTY'>
+<!ELEMENT indexentry %inside-index;>
+<!ATTLIST indexentry
+		key      CDATA #IMPLIED
+		key-sort CDATA #IMPLIED
+		parent   CDATA #IMPLIED
+		parent-sort	CDATA #IMPLIED>
+
+<!-- ============================================================ -->
+<!-- EOF														  -->
+<!-- ============================================================ -->

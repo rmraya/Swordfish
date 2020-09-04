@@ -438,6 +438,27 @@ class Swordfish {
         ipcMain.on('files-dropped', (event: IpcMainEvent, arg: any) => {
             Swordfish.filesDropped(arg)
         });
+        ipcMain.on('remove-translations', (event: IpcMainEvent, arg: any) => {
+            Swordfish.removeTranslations(arg)
+        });
+        ipcMain.on('unconfirm-translations', (event: IpcMainEvent, arg: any) => {
+            Swordfish.unconfirmTranslations(arg);
+        });
+        ipcMain.on('pseudo-translate', (event: IpcMainEvent, arg: any) => {
+            Swordfish.pseudoTranslate(arg);
+        });
+        ipcMain.on('copy-sources', (event: IpcMainEvent, arg: any) => {
+            Swordfish.copyAllSources(arg);
+        });
+        ipcMain.on('confirm-translations', (event: IpcMainEvent, arg: any) => {
+            Swordfish.confirmAllTranslations(arg);
+        });
+        ipcMain.on('accept-100-matches', (event: IpcMainEvent, arg: any) => {
+            Swordfish.acceptAll100Matches(arg);
+        });
+        ipcMain.on('generate-statistics', (event: IpcMainEvent, arg: any) => {
+            Swordfish.generateStatistics(arg);
+        });
     } // end constructor
 
     static createWindow(): void {
@@ -2258,6 +2279,207 @@ class Swordfish {
     static filterOptions(arg: any): void {
         Swordfish.mainWindow.webContents.send('set-filters', arg);
         Swordfish.filterSegmentsWindow.close();
+    }
+
+    static removeTranslations(arg: any): void {
+        dialog.showMessageBox(Swordfish.mainWindow, {
+            type: 'question',
+            message: 'Remove all translations?',
+            buttons: ['Yes', 'No']
+        }).then((selection: Electron.MessageBoxReturnValue) => {
+            if (selection.response === 0) {
+                Swordfish.mainWindow.webContents.send('start-waiting');
+                Swordfish.mainWindow.webContents.send('set-status', 'Removing translations');
+                Swordfish.sendRequest('/projects/removeTranslations', arg,
+                    (data: any) => {
+                        Swordfish.mainWindow.webContents.send('end-waiting');
+                        Swordfish.mainWindow.webContents.send('set-status', '');
+                        if (data.status !== Swordfish.SUCCESS) {
+                            Swordfish.showMessage({ type: 'error', message: data.reason });
+                            return;
+                        }
+                        Swordfish.mainWindow.webContents.send('reload-page', { project: arg.project });
+                        Swordfish.mainWindow.webContents.send('set-statistics', { project: arg.project, statistics: data.statistics });
+                    },
+                    (reason: string) => {
+                        Swordfish.mainWindow.webContents.send('end-waiting');
+                        Swordfish.mainWindow.webContents.send('set-status', '');
+                        Swordfish.showMessage({ type: 'error', message: reason });
+                    }
+                );
+            }
+        });
+    }
+
+    static unconfirmTranslations(arg: any): void {
+        dialog.showMessageBox(Swordfish.mainWindow, {
+            type: 'question',
+            message: 'Unconfirm all translations?',
+            buttons: ['Yes', 'No']
+        }).then((selection: Electron.MessageBoxReturnValue) => {
+            if (selection.response === 0) {
+                Swordfish.mainWindow.webContents.send('start-waiting');
+                Swordfish.mainWindow.webContents.send('set-status', 'Updating status');
+                Swordfish.sendRequest('/projects/unconfirmTranslations', arg,
+                    (data: any) => {
+                        Swordfish.mainWindow.webContents.send('end-waiting');
+                        Swordfish.mainWindow.webContents.send('set-status', '');
+                        if (data.status !== Swordfish.SUCCESS) {
+                            Swordfish.showMessage({ type: 'error', message: data.reason });
+                            return;
+                        }
+                        Swordfish.mainWindow.webContents.send('reload-page', { project: arg.project });
+                        Swordfish.mainWindow.webContents.send('set-statistics', { project: arg.project, statistics: data.statistics });
+                    },
+                    (reason: string) => {
+                        Swordfish.mainWindow.webContents.send('end-waiting');
+                        Swordfish.mainWindow.webContents.send('set-status', '');
+                        Swordfish.showMessage({ type: 'error', message: reason });
+                    }
+                );
+            }
+        });
+    }
+
+    static pseudoTranslate(arg: any): void {
+        dialog.showMessageBox(Swordfish.mainWindow, {
+            type: 'question',
+            message: 'Pseudo-translate untranslated segments?',
+            buttons: ['Yes', 'No']
+        }).then((selection: Electron.MessageBoxReturnValue) => {
+            if (selection.response === 0) {
+                Swordfish.mainWindow.webContents.send('start-waiting');
+                Swordfish.mainWindow.webContents.send('set-status', 'Pseudo-translating');
+                Swordfish.sendRequest('/projects/pseudoTranslate', arg,
+                    (data: any) => {
+                        Swordfish.mainWindow.webContents.send('end-waiting');
+                        Swordfish.mainWindow.webContents.send('set-status', '');
+                        if (data.status !== Swordfish.SUCCESS) {
+                            Swordfish.showMessage({ type: 'error', message: data.reason });
+                            return;
+                        }
+                        Swordfish.mainWindow.webContents.send('reload-page', { project: arg.project });
+                        Swordfish.mainWindow.webContents.send('set-statistics', { project: arg.project, statistics: data.statistics });
+                    },
+                    (reason: string) => {
+                        Swordfish.mainWindow.webContents.send('end-waiting');
+                        Swordfish.mainWindow.webContents.send('set-status', '');
+                        Swordfish.showMessage({ type: 'error', message: reason });
+                    }
+                );
+            }
+        });
+    }
+
+    static copyAllSources(arg: any): void {
+        dialog.showMessageBox(Swordfish.mainWindow, {
+            type: 'question',
+            message: 'Copy source to all empty targets?',
+            buttons: ['Yes', 'No']
+        }).then((selection: Electron.MessageBoxReturnValue) => {
+            if (selection.response === 0) {
+                Swordfish.mainWindow.webContents.send('start-waiting');
+                Swordfish.mainWindow.webContents.send('set-status', 'Copying sources');
+                Swordfish.sendRequest('/projects/copyAllSources', arg,
+                    (data: any) => {
+                        Swordfish.mainWindow.webContents.send('end-waiting');
+                        Swordfish.mainWindow.webContents.send('set-status', '');
+                        if (data.status !== Swordfish.SUCCESS) {
+                            Swordfish.showMessage({ type: 'error', message: data.reason });
+                            return;
+                        }
+                        Swordfish.mainWindow.webContents.send('reload-page', { project: arg.project });
+                        Swordfish.mainWindow.webContents.send('set-statistics', { project: arg.project, statistics: data.statistics });
+                    },
+                    (reason: string) => {
+                        Swordfish.mainWindow.webContents.send('end-waiting');
+                        Swordfish.mainWindow.webContents.send('set-status', '');
+                        Swordfish.showMessage({ type: 'error', message: reason });
+                    }
+                );
+            }
+        });
+    }
+
+    static confirmAllTranslations(arg: any): void {
+        dialog.showMessageBox(Swordfish.mainWindow, {
+            type: 'question',
+            message: 'Confirm all translations?',
+            buttons: ['Yes', 'No']
+        }).then((selection: Electron.MessageBoxReturnValue) => {
+            if (selection.response === 0) {
+                Swordfish.mainWindow.webContents.send('start-waiting');
+                Swordfish.mainWindow.webContents.send('set-status', 'Updating status');
+                Swordfish.sendRequest('/projects/confirmAllTranslations', arg,
+                    (data: any) => {
+                        Swordfish.mainWindow.webContents.send('end-waiting');
+                        Swordfish.mainWindow.webContents.send('set-status', '');
+                        if (data.status !== Swordfish.SUCCESS) {
+                            Swordfish.showMessage({ type: 'error', message: data.reason });
+                            return;
+                        }
+                        Swordfish.mainWindow.webContents.send('reload-page', { project: arg.project });
+                        Swordfish.mainWindow.webContents.send('set-statistics', { project: arg.project, statistics: data.statistics });
+                    },
+                    (reason: string) => {
+                        Swordfish.mainWindow.webContents.send('end-waiting');
+                        Swordfish.mainWindow.webContents.send('set-status', '');
+                        Swordfish.showMessage({ type: 'error', message: reason });
+                    }
+                );
+            }
+        });
+    }
+
+    static acceptAll100Matches(arg: any): void {
+        dialog.showMessageBox(Swordfish.mainWindow, {
+            type: 'question',
+            message: 'Accept all 100% matches?',
+            buttons: ['Yes', 'No']
+        }).then((selection: Electron.MessageBoxReturnValue) => {
+            if (selection.response === 0) {
+                Swordfish.mainWindow.webContents.send('start-waiting');
+                Swordfish.mainWindow.webContents.send('set-status', 'Accepting matches');
+                Swordfish.sendRequest('/projects/acceptAll100Matches', arg,
+                    (data: any) => {
+                        Swordfish.mainWindow.webContents.send('end-waiting');
+                        Swordfish.mainWindow.webContents.send('set-status', '');
+                        if (data.status !== Swordfish.SUCCESS) {
+                            Swordfish.showMessage({ type: 'error', message: data.reason });
+                            return;
+                        }
+                        Swordfish.mainWindow.webContents.send('reload-page', { project: arg.project });
+                        Swordfish.mainWindow.webContents.send('set-statistics', { project: arg.project, statistics: data.statistics });
+                    },
+                    (reason: string) => {
+                        Swordfish.mainWindow.webContents.send('end-waiting');
+                        Swordfish.mainWindow.webContents.send('set-status', '');
+                        Swordfish.showMessage({ type: 'error', message: reason });
+                    }
+                );
+            }
+        });
+    }
+
+    static generateStatistics(arg: any) {
+        Swordfish.mainWindow.webContents.send('start-waiting');
+        Swordfish.mainWindow.webContents.send('set-status', 'Generating statistics');
+        Swordfish.sendRequest('/projects/generateStatistics', arg,
+            (data: any) => {
+                Swordfish.mainWindow.webContents.send('end-waiting');
+                Swordfish.mainWindow.webContents.send('set-status', '');
+                if (data.status !== Swordfish.SUCCESS) {
+                    Swordfish.showMessage({ type: 'error', message: data.reason });
+                    return;
+                }
+                shell.openExternal('file://' + data.analysis);
+            },
+            (reason: string) => {
+                Swordfish.mainWindow.webContents.send('end-waiting');
+                Swordfish.mainWindow.webContents.send('set-status', '');
+                Swordfish.showMessage({ type: 'error', message: reason });
+            }
+        );
     }
 }
 

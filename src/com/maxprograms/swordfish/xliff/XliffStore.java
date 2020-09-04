@@ -1546,4 +1546,157 @@ public class XliffStore {
         }
         return catalog;
     }
+
+    public void removeTranslations() throws SQLException, SAXException, IOException, ParserConfigurationException {
+        String sql = "SELECT file, unitId, segId, source FROM segments WHERE type='S' AND translate='Y' and targetText<>'' ";
+        try (ResultSet rs = stmt.executeQuery(sql)) {
+            while (rs.next()) {
+                String file = rs.getString(1);
+                String unit = rs.getString(2);
+                String segment = rs.getString(3);
+                String src = rs.getNString(4);
+
+                Element source = buildElement(src);
+                Element target = new Element("target");
+                target.setAttribute("xml:lang", tgtLang);
+                if (source.hasAttribute("xml:space")) {
+                    target.setAttribute("xml:space", source.getAttributeValue("xml:space"));
+                }
+                String pureTarget = "";
+
+                updateTarget(file, unit, segment, target, pureTarget, false);
+            }
+        }
+    }
+
+    public void unconfirmTranslations() throws SQLException {
+        stmt.execute("UPDATE segments SET state='initial' WHERE type='S' AND targetText='' AND translate='Y' ");
+        stmt.execute("UPDATE segments SET state='translated' WHERE type='S' AND targetText <> '' AND translate='Y' ");
+        conn.commit();
+    }
+
+    public void pseudoTranslate() throws SQLException, SAXException, IOException, ParserConfigurationException {
+        String sql = "SELECT file, unitId, segId, source FROM segments WHERE type='S' AND (state='initial' OR targetText='') AND translate='Y' ";
+        try (ResultSet rs = stmt.executeQuery(sql)) {
+            while (rs.next()) {
+                String file = rs.getString(1);
+                String unit = rs.getString(2);
+                String segment = rs.getString(3);
+                String src = rs.getNString(4);
+
+                Element source = buildElement(src);
+                Element target = pseudoTranslate(source);
+                String pureTarget = pureText(target);
+
+                updateTarget(file, unit, segment, target, pureTarget, false);
+            }
+        }
+    }
+
+    private Element pseudoTranslate(Element source) {
+        Element target = new Element("target");
+        target.setAttribute("xml:lang", tgtLang);
+        if (source.hasAttribute("xml:space")) {
+            target.setAttribute("xml:space", source.getAttributeValue("xml:space"));
+        }
+        List<XMLNode> content = source.getContent();
+        Iterator<XMLNode> it = content.iterator();
+        while (it.hasNext()) {
+            XMLNode node = it.next();
+            if (node.getNodeType() == XMLNode.TEXT_NODE) {
+                TextNode t = (TextNode) node;
+                target.addContent(pseudoTranslate(t.getText()));
+            }
+            if (node.getNodeType() == XMLNode.ELEMENT_NODE) {
+                Element e = (Element) node;
+                if ("g".equals(e.getName())) {
+                    e.setText(pseudoTranslate(e.getText()));
+                }
+                target.addContent(e);
+            }
+        }
+        return target;
+    }
+
+    private String pseudoTranslate(String text) {
+        String result = text.replace('a', '\u00E3');
+        result = result.replace('e', '\u00E8');
+        result = result.replace('i', '\u00EE');
+        result = result.replace('o', '\u00F4');
+        result = result.replace('A', '\u00C4');
+        result = result.replace('E', '\u00CB');
+        result = result.replace('I', '\u00CF');
+        result = result.replace('O', '\u00D5');
+        result = result.replace('U', '\u00D9');
+        return result;
+    }
+
+    public void copyAllSources() throws SQLException, SAXException, IOException, ParserConfigurationException {
+        String sql = "SELECT file, unitId, segId, source FROM segments WHERE type='S' AND (state='initial' OR targetText='') AND translate='Y' ";
+        try (ResultSet rs = stmt.executeQuery(sql)) {
+            while (rs.next()) {
+                String file = rs.getString(1);
+                String unit = rs.getString(2);
+                String segment = rs.getString(3);
+                String src = rs.getNString(4);
+
+                Element source = buildElement(src);
+                Element target = new Element("target");
+                target.setAttribute("xml:lang", tgtLang);
+                if (source.hasAttribute("xml:space")) {
+                    target.setAttribute("xml:space", source.getAttributeValue("xml:space"));
+                }
+                target.setContent(source.getContent());
+                String pureTarget = pureText(target);
+
+                updateTarget(file, unit, segment, target, pureTarget, false);
+            }
+        }
+    }
+
+    public void confirmAllTranslations() throws SQLException {
+        stmt.execute("UPDATE segments SET state='final' WHERE type='S' AND targetText<>'' AND translate='Y' ");
+        conn.commit();
+    }
+
+    public void acceptAll100Matches() throws SQLException, SAXException, IOException, ParserConfigurationException {
+
+        PreparedStatement perfectMatches = conn.prepareStatement(
+                "SELECT target FROM matches WHERE file=? AND unitId=? AND segId=? AND type='tm' AND similarity=100 LIMIT 1");
+        String sql = "SELECT file, unitId, segId, source FROM segments WHERE type='S' AND (state='initial' OR targetText='') AND translate='Y' ";
+        try (ResultSet rs = stmt.executeQuery(sql)) {
+            while (rs.next()) {
+                String file = rs.getString(1);
+                String unit = rs.getString(2);
+                String segment = rs.getString(3);
+                String src = rs.getNString(4);
+
+                perfectMatches.setString(1, file);
+                perfectMatches.setString(2, unit);
+                perfectMatches.setString(3, segment);
+                try (ResultSet rs2 = perfectMatches.executeQuery()) {
+                    while (rs2.next()) {
+                        Element source = buildElement(src);
+                        String tgt = rs2.getNString(1);
+                        Element target = buildElement(tgt);
+                        target.setAttribute("xml:lang", tgtLang);
+                        if (source.hasAttribute("xml:space")) {
+                            target.setAttribute("xml:space", source.getAttributeValue("xml:space"));
+                        }
+                        String pureTarget = pureText(target);
+                        updateTarget(file, unit, segment, target, pureTarget, false);
+                    }
+                }
+            }
+        }
+    }
+
+    public String generateStatistics()
+            throws SQLException, SAXException, IOException, ParserConfigurationException, URISyntaxException {
+        getCatalog();
+        updateXliff();
+        RepetitionAnalysis instance = new RepetitionAnalysis();
+        instance.analyse(xliffFile, catalog);
+        return new File(xliffFile).getAbsolutePath() + ".log.html";
+    }
 }

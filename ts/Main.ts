@@ -107,10 +107,10 @@ class Main {
             this.projectsView.exportTMX();
         });
         Main.electron.ipcRenderer.on('split-segment', () => {
-            this.projectsView.splitSegment();
+            this.splitSegment();
         });
         Main.electron.ipcRenderer.on('merge-next', () => {
-            this.projectsView.mergeNext();
+            this.mergeNext();
         });
         Main.electron.ipcRenderer.on('view-memories', () => {
             Main.tabHolder.selectTab('memories');
@@ -230,7 +230,7 @@ class Main {
             this.applyTranslationMemoryAll();
         });
         Main.electron.ipcRenderer.on('accept-all-matches', () => {
-            this.acceptAllMatches();
+            this.acceptAll100Matches();
         });
         Main.electron.ipcRenderer.on('set-project-memories', (event: Electron.IpcRendererEvent, arg: any) => {
             this.setProjectMemories(arg);
@@ -345,15 +345,24 @@ class Main {
     }
 
     confirmAllTranslations(): void {
-        // TODO
+        let selected = Main.tabHolder.getSelected();
+        if (Main.translationViews.has(selected)) {
+            Main.translationViews.get(selected).confirmAllTranslations();
+        }
     }
 
     unconfirmAllTranslations(): void {
-        // TODO
+        let selected = Main.tabHolder.getSelected();
+        if (Main.translationViews.has(selected)) {
+            Main.translationViews.get(selected).unconfirmAllTranslations();
+        }
     }
 
     removeAllTranslations(): void {
-        // TODO
+        let selected = Main.tabHolder.getSelected();
+        if (Main.translationViews.has(selected)) {
+            Main.translationViews.get(selected).removeAllTranslations();
+        }
     }
 
     copySource(): void {
@@ -364,11 +373,17 @@ class Main {
     }
 
     copyAllSources(): void {
-        // TODO
+        let selected = Main.tabHolder.getSelected();
+        if (Main.translationViews.has(selected)) {
+            Main.translationViews.get(selected).copyAllSources();
+        }
     }
 
     pseudoTranslate(): void {
-        // TODO
+        let selected = Main.tabHolder.getSelected();
+        if (Main.translationViews.has(selected)) {
+            Main.translationViews.get(selected).pseudoTranslate();
+        }
     }
 
     inserTag(arg: any): void {
@@ -448,8 +463,11 @@ class Main {
         }
     }
 
-    acceptAllMatches(): void {
-        // TODO
+    acceptAll100Matches(): void {
+        let selected = Main.tabHolder.getSelected();
+        if (Main.translationViews.has(selected)) {
+            Main.translationViews.get(selected).acceptAll100Matches();
+        }
     }
 
     applyMachineTranslationsAll(): void {
@@ -457,6 +475,14 @@ class Main {
     }
 
     acceptAllMachineTranslations(): void {
+        // TODO
+    }
+
+    splitSegment(): void {
+        // TODO
+    }
+
+    mergeNext(): void {
         // TODO
     }
 
