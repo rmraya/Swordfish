@@ -172,9 +172,6 @@ class Main {
         Main.electron.ipcRenderer.on('save-edit', (event: Electron.IpcRendererEvent, arg: any) => {
             this.saveEdit(arg);
         });
-        Main.electron.ipcRenderer.on('insert-tag', () => {
-            this.insertTag();
-        });
         Main.electron.ipcRenderer.on('insert-next-tag', () => {
             this.insertNextTag();
         });
@@ -202,8 +199,8 @@ class Main {
         Main.electron.ipcRenderer.on('pseudo-translate', () => {
             this.pseudoTranslate();
         });
-        Main.electron.ipcRenderer.on('insert tag', (event: Electron.IpcRendererEvent, arg: any) => {
-            this.inserTag(arg);
+        Main.electron.ipcRenderer.on('insert-tag', (event: Electron.IpcRendererEvent, arg: any) => {
+            this.insertTag(arg);
         });
         Main.electron.ipcRenderer.on('auto-propagate', (event: Electron.IpcRendererEvent, arg: any) => {
             this.autoPropagate(arg);
@@ -328,8 +325,11 @@ class Main {
         }
     }
 
-    insertTag(): void {
-        // TODO
+    insertTag(arg: any): void {
+        let selected = Main.tabHolder.getSelected();
+        if (Main.translationViews.has(selected)) {
+            Main.translationViews.get(selected).insertTag(arg);
+        }
     }
 
     insertNextTag(): void {
@@ -383,13 +383,6 @@ class Main {
         let selected = Main.tabHolder.getSelected();
         if (Main.translationViews.has(selected)) {
             Main.translationViews.get(selected).pseudoTranslate();
-        }
-    }
-
-    inserTag(arg: any): void {
-        let selected = Main.tabHolder.getSelected();
-        if (Main.translationViews.has(selected)) {
-            Main.translationViews.get(selected).inserTag(arg);
         }
     }
 

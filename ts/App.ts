@@ -41,6 +41,7 @@ class Swordfish {
     static spellingLangsWindow: BrowserWindow;
     static filterSegmentsWindow: BrowserWindow;
     static messagesWindow: BrowserWindow;
+    static tagsWindow: BrowserWindow;
 
     javapath: string = Swordfish.path.join(app.getAppPath(), 'bin', 'java');
 
@@ -257,6 +258,12 @@ class Swordfish {
         ipcMain.on('add-file-height', (event: IpcMainEvent, arg: any) => {
             Swordfish.setHeight(Swordfish.addFileWindow, arg);
         });
+        ipcMain.on('tags-height', (event: IpcMainEvent, arg: any) => {
+            Swordfish.setHeight(Swordfish.tagsWindow, arg);
+        });
+        ipcMain.on('close-tags', () => {
+            Swordfish.closeTagsWindow();
+        });
         ipcMain.on('get-selected-file', (event: IpcMainEvent) => {
             Swordfish.setSelectedFile(event);
         });
@@ -459,6 +466,12 @@ class Swordfish {
         ipcMain.on('generate-statistics', (event: IpcMainEvent, arg: any) => {
             Swordfish.generateStatistics(arg);
         });
+        ipcMain.on('show-tag-window', (event: IpcMainEvent, arg: any) => {
+            Swordfish.showTagsWindow(arg);
+        });
+        ipcMain.on('forward-tag', (event: IpcMainEvent, arg: any) => {
+            Swordfish.mainWindow.webContents.send('insert-tag', arg);
+        });
     } // end constructor
 
     static createWindow(): void {
@@ -507,16 +520,16 @@ class Swordfish {
             { label: 'Open...', accelerator: 'CmdOrCtrl+O', click: () => { Swordfish.addFile(); } }
         ]);
         var tagsMenu: Menu = Menu.buildFromTemplate([
-            { label: 'Insert Tag "1"', accelerator: 'CmdOrCtrl+1', click: () => { Swordfish.mainWindow.webContents.send('insert tag', { tag: 1 }); } },
-            { label: 'Insert Tag "2"', accelerator: 'CmdOrCtrl+2', click: () => { Swordfish.mainWindow.webContents.send('insert tag', { tag: 2 }); } },
-            { label: 'Insert Tag "3"', accelerator: 'CmdOrCtrl+3', click: () => { Swordfish.mainWindow.webContents.send('insert tag', { tag: 3 }); } },
-            { label: 'Insert Tag "4"', accelerator: 'CmdOrCtrl+4', click: () => { Swordfish.mainWindow.webContents.send('insert tag', { tag: 4 }); } },
-            { label: 'Insert Tag "5"', accelerator: 'CmdOrCtrl+5', click: () => { Swordfish.mainWindow.webContents.send('insert tag', { tag: 5 }); } },
-            { label: 'Insert Tag "6"', accelerator: 'CmdOrCtrl+6', click: () => { Swordfish.mainWindow.webContents.send('insert tag', { tag: 6 }); } },
-            { label: 'Insert Tag "7"', accelerator: 'CmdOrCtrl+7', click: () => { Swordfish.mainWindow.webContents.send('insert tag', { tag: 7 }); } },
-            { label: 'Insert Tag "8"', accelerator: 'CmdOrCtrl+8', click: () => { Swordfish.mainWindow.webContents.send('insert tag', { tag: 8 }); } },
-            { label: 'Insert Tag "8"', accelerator: 'CmdOrCtrl+9', click: () => { Swordfish.mainWindow.webContents.send('insert tag', { tag: 9 }); } },
-            { label: 'Insert Tag "10"', accelerator: 'CmdOrCtrl+0', click: () => { Swordfish.mainWindow.webContents.send('insert tag', { tag: 10 }); } }
+            { label: 'Insert Tag "1"', accelerator: 'CmdOrCtrl+1', click: () => { Swordfish.mainWindow.webContents.send('insert-tag', { tag: 1 }); } },
+            { label: 'Insert Tag "2"', accelerator: 'CmdOrCtrl+2', click: () => { Swordfish.mainWindow.webContents.send('insert-tag', { tag: 2 }); } },
+            { label: 'Insert Tag "3"', accelerator: 'CmdOrCtrl+3', click: () => { Swordfish.mainWindow.webContents.send('insert-tag', { tag: 3 }); } },
+            { label: 'Insert Tag "4"', accelerator: 'CmdOrCtrl+4', click: () => { Swordfish.mainWindow.webContents.send('insert-tag', { tag: 4 }); } },
+            { label: 'Insert Tag "5"', accelerator: 'CmdOrCtrl+5', click: () => { Swordfish.mainWindow.webContents.send('insert-tag', { tag: 5 }); } },
+            { label: 'Insert Tag "6"', accelerator: 'CmdOrCtrl+6', click: () => { Swordfish.mainWindow.webContents.send('insert-tag', { tag: 6 }); } },
+            { label: 'Insert Tag "7"', accelerator: 'CmdOrCtrl+7', click: () => { Swordfish.mainWindow.webContents.send('insert-tag', { tag: 7 }); } },
+            { label: 'Insert Tag "8"', accelerator: 'CmdOrCtrl+8', click: () => { Swordfish.mainWindow.webContents.send('insert-tag', { tag: 8 }); } },
+            { label: 'Insert Tag "8"', accelerator: 'CmdOrCtrl+9', click: () => { Swordfish.mainWindow.webContents.send('insert-tag', { tag: 9 }); } },
+            { label: 'Insert Tag "10"', accelerator: 'CmdOrCtrl+0', click: () => { Swordfish.mainWindow.webContents.send('insert-tag', { tag: 10 }); } }
         ]);
         var editMenu: Menu = Menu.buildFromTemplate([
             { label: 'Undo', accelerator: 'CmdOrCtrl+Z', click: () => { Swordfish.mainWindow.webContents.undo(); } },
@@ -534,7 +547,7 @@ class Swordfish {
             new MenuItem({ type: 'separator' }),
             { label: 'Replace Text', accelerator: 'CmdOrCtrl+Alt+F', click: () => { this.replaceText(); } },
             new MenuItem({ type: 'separator' }),
-            { label: 'Insert Tag', accelerator: 'CmdOrCtrl+T', click: () => { Swordfish.mainWindow.webContents.send('insert-tag'); } },
+            { label: 'Insert Tag', accelerator: 'CmdOrCtrl+T', click: () => { Swordfish.mainWindow.webContents.send('insert-tag', {}); } },
             new MenuItem({ label: 'Quick Tags', submenu: tagsMenu }),
             { label: 'Insert Next Tag', accelerator: 'CmdOrCtrl+Shift+T', click: () => { Swordfish.mainWindow.webContents.send('insert-next-tag'); } },
             { label: 'Insert Remaining Tags', accelerator: 'CmdOrCtrl+Alt+T', click: () => { Swordfish.mainWindow.webContents.send('insert-remaining-tags'); } },
@@ -2480,6 +2493,33 @@ class Swordfish {
                 Swordfish.showMessage({ type: 'error', message: reason });
             }
         );
+    }
+
+    static showTagsWindow(arg: any): void {
+        this.tagsWindow = new BrowserWindow({
+            parent: this.mainWindow,
+            width: 200,
+            useContentSize: true,
+            minimizable: false,
+            maximizable: false,
+            resizable: false,
+            show: false,
+            icon: this.iconPath,
+            webPreferences: {
+                nodeIntegration: true
+            }
+        });
+        this.tagsWindow.setMenu(null);
+        this.tagsWindow.loadURL('file://' + this.path.join(app.getAppPath(), 'html', 'tags.html'));
+        this.tagsWindow.once('ready-to-show', (event: IpcMainEvent) => {
+            event.sender.send('get-height');
+        });
+    }
+
+    static closeTagsWindow(): void {
+        if (this.tagsWindow && this.tagsWindow.isVisible()) {
+            this.tagsWindow.close();
+        }
     }
 }
 

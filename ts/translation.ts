@@ -871,10 +871,14 @@ class TranslationView {
         }
     }
 
-    inserTag(arg: any): void {
-        let tag: number = arg.tag;
-        if (this.currentTags.length >= tag) {
-            this.electron.ipcRenderer.send('paste-tag', this.currentTags[tag - 1]);
+    insertTag(arg: any): void {
+        if (arg.tag) {
+            let tag: number = arg.tag;
+            if (this.currentTags.length >= tag) {
+                this.electron.ipcRenderer.send('paste-tag', this.currentTags[tag - 1]);
+            }
+        } else {
+            this.electron.ipcRenderer.send('show-tag-window', { tags: [1, 2, 3, 4, 5] }); // TODO set real tags
         }
     }
 
@@ -1041,7 +1045,7 @@ class TranslationView {
         this.electron.ipcRenderer.send('confirm-translations', { project: this.projectId });
     }
 
-    acceptAll100Matches(): void{
+    acceptAll100Matches(): void {
         this.electron.ipcRenderer.send('accept-100-matches', { project: this.projectId });
     }
 }
