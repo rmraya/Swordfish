@@ -25,7 +25,6 @@ class Tags {
         let code: string = event.code;
         console.log(code);
         if (code === 'Escape') {
-            // TODO
             this.electron.ipcRenderer.send('close-tags');
         }
         if (code === 'Enter' || code === 'NumpadEnter') {

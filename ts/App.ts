@@ -466,8 +466,8 @@ class Swordfish {
         ipcMain.on('generate-statistics', (event: IpcMainEvent, arg: any) => {
             Swordfish.generateStatistics(arg);
         });
-        ipcMain.on('show-tag-window', (event: IpcMainEvent, arg: any) => {
-            Swordfish.showTagsWindow(arg);
+        ipcMain.on('show-tag-window', () => {
+            Swordfish.showTagsWindow();
         });
         ipcMain.on('forward-tag', (event: IpcMainEvent, arg: any) => {
             Swordfish.mainWindow.webContents.send('insert-tag', arg);
@@ -2495,7 +2495,7 @@ class Swordfish {
         );
     }
 
-    static showTagsWindow(arg: any): void {
+    static showTagsWindow(): void {
         this.tagsWindow = new BrowserWindow({
             parent: this.mainWindow,
             width: 200,

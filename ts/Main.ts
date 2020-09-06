@@ -333,15 +333,24 @@ class Main {
     }
 
     insertNextTag(): void {
-        // TODO 
+        let selected = Main.tabHolder.getSelected();
+        if (Main.translationViews.has(selected)) {
+            Main.translationViews.get(selected).insertNextTag();
+        }
     }
 
     insertRemainingTags(): void {
-        // TODO
+        let selected = Main.tabHolder.getSelected();
+        if (Main.translationViews.has(selected)) {
+            Main.translationViews.get(selected).insertRemainingTags();
+        }
     }
 
     removeTags(): void {
-        // TODO
+        let selected = Main.tabHolder.getSelected();
+        if (Main.translationViews.has(selected)) {
+            Main.translationViews.get(selected).removeTags();
+        }
     }
 
     confirmAllTranslations(): void {

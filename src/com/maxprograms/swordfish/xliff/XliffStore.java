@@ -1108,6 +1108,8 @@ public class XliffStore {
                         StringBuilder sb = new StringBuilder();
                         sb.append("<img data-ref='");
                         sb.append(id);
+                        sb.append("' data-id='");
+                        sb.append(tag);
                         sb.append("' src='");
                         sb.append(TmsServer.getWorkFolder().toURI().toURL().toString());
                         sb.append("images/");
@@ -1125,6 +1127,8 @@ public class XliffStore {
                         StringBuilder sb = new StringBuilder();
                         sb.append("<img data-ref='/");
                         sb.append(e.getAttributeValue("id"));
+                        sb.append("' data-id='");
+                        sb.append(tag);
                         sb.append("' src='");
                         sb.append(TmsServer.getWorkFolder().toURI().toURL().toString());
                         sb.append("images/");
@@ -1143,6 +1147,8 @@ public class XliffStore {
                         StringBuilder sb = new StringBuilder();
                         sb.append("<img data-ref='");
                         sb.append(id);
+                        sb.append("' data-id='");
+                        sb.append(tag);
                         sb.append("' src='");
                         sb.append(TmsServer.getWorkFolder().toURI().toURL().toString());
                         sb.append("images/");
@@ -1162,6 +1168,8 @@ public class XliffStore {
                         StringBuilder sb = new StringBuilder();
                         sb.append("<img data-ref='/");
                         sb.append(e.getAttributeValue("id"));
+                        sb.append("' data-id='");
+                        sb.append(tag);
                         sb.append("' src='");
                         sb.append(TmsServer.getWorkFolder().toURI().toURL().toString());
                         sb.append("images/");
@@ -1179,6 +1187,8 @@ public class XliffStore {
                         StringBuilder sb = new StringBuilder();
                         sb.append("<img data-ref='");
                         sb.append(hex);
+                        sb.append("' data-id='");
+                        sb.append(tag);
                         sb.append("' src='");
                         sb.append(TmsServer.getWorkFolder().toURI().toURL().toString());
                         sb.append("images/");
@@ -1196,6 +1206,8 @@ public class XliffStore {
                         StringBuilder sb = new StringBuilder();
                         sb.append("<img data-ref='");
                         sb.append(dataRef);
+                        sb.append("' data-id='");
+                        sb.append(tag);
                         sb.append("' src='");
                         sb.append(TmsServer.getWorkFolder().toURI().toURL().toString());
                         sb.append("images/");

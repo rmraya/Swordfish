@@ -64,7 +64,7 @@ class TranslationView {
     currentTranslate: HTMLTableCellElement;
     currentContent: string;
     currentId: any;
-    currentTags: string[] = [];
+    sourceTags: Map<String, String>;
 
     filterButton: HTMLAnchorElement;
     filterText: string = '';
@@ -86,6 +86,8 @@ class TranslationView {
         this.projectId = projectId;
         this.srcLang = sourceLang;
         this.tgtLang = targetLang;
+
+        this.sourceTags = new Map<String, String>();
 
         let topBar: HTMLDivElement = document.createElement('div');
         topBar.className = 'toolbar';
@@ -812,7 +814,7 @@ class TranslationView {
             unit: this.currentRow.getAttribute('data-unit')
         };
         let source: HTMLTableCellElement = this.currentRow.getElementsByClassName('source')[0] as HTMLTableCellElement;
-        this.harvestTags(source.innerHTML);
+        this.sourceTags = this.getTags(source);
 
         this.currentCell = this.currentRow.getElementsByClassName('target')[0] as HTMLTableCellElement;
         this.currentState = this.currentRow.getElementsByClassName('state')[0] as HTMLTableCellElement;
@@ -848,19 +850,15 @@ class TranslationView {
         }
     }
 
-    harvestTags(source: string): void {
-        var index: number = source.indexOf('<img ');
-        var tagNumber: number = 1;
-        this.currentTags = [];
-        while (index >= 0) {
-            let start: string = source.slice(0, index);
-            let rest: string = source.slice(index + 1);
-            let end: number = rest.indexOf('>');
-            let tag: string = '<' + rest.slice(0, end) + '/>';
-            this.currentTags.push(tag);
-            source = start + '[[' + tagNumber++ + ']]' + rest.slice(end + 1);
-            index = source.indexOf('<img ');
+    getTags(element: HTMLTableCellElement): Map<String, String> {
+        let map = new Map<String, String>();
+        let children: HTMLCollectionOf<HTMLImageElement> = element.getElementsByTagName('img');
+        let length: number = children.length;
+        for (let i = 0; i < length; i++) {
+            let child: HTMLElement = children[i];
+            map.set(child.getAttribute('data-id'), child.outerHTML);
         }
+        return map;
     }
 
     copySource(): void {
@@ -873,12 +871,17 @@ class TranslationView {
 
     insertTag(arg: any): void {
         if (arg.tag) {
-            let tag: number = arg.tag;
-            if (this.currentTags.length >= tag) {
-                this.electron.ipcRenderer.send('paste-tag', this.currentTags[tag - 1]);
+            let tag: string = '' + arg.tag;
+            if (this.sourceTags.has(tag)) {
+                let target: HTMLTableCellElement = this.currentRow.getElementsByClassName('target')[0] as HTMLTableCellElement;
+                let targetTags = this.getTags(target);
+                if (targetTags.has(tag)) {
+                    this.removeTag(tag);
+                }
+                this.electron.ipcRenderer.send('paste-tag', this.sourceTags.get(tag));
             }
         } else {
-            this.electron.ipcRenderer.send('show-tag-window', { tags: [1, 2, 3, 4, 5] }); // TODO set real tags
+            this.electron.ipcRenderer.send('show-tag-window');
         }
     }
 
@@ -1047,5 +1050,55 @@ class TranslationView {
 
     acceptAll100Matches(): void {
         this.electron.ipcRenderer.send('accept-100-matches', { project: this.projectId });
+    }
+
+    insertNextTag(): void {
+        let target: HTMLTableCellElement = this.currentRow.getElementsByClassName('target')[0] as HTMLTableCellElement;
+        let targetTags = this.getTags(target);
+        let length = this.sourceTags.size + 1;
+        for (let i = 1; i < length; i++) {
+            if (!targetTags.has('' + i)) {
+                this.insertTag({ tag: i });
+                return;
+            }
+        }
+    }
+
+    insertRemainingTags(): void {
+        let target: HTMLTableCellElement = this.currentRow.getElementsByClassName('target')[0] as HTMLTableCellElement;
+        let targetTags = this.getTags(target);
+        let length = this.sourceTags.size + 1;
+        let tags: string = '';
+        for (let i = 1; i < length; i++) {
+            if (!targetTags.has('' + i)) {
+                tags = tags + this.sourceTags.get('' + i);
+            }
+        }
+        if (tags !== '') {
+            this.electron.ipcRenderer.send('paste-tag', tags);
+        }
+    }
+
+    removeTags(): void {
+        let target: HTMLTableCellElement = this.currentRow.getElementsByClassName('target')[0] as HTMLTableCellElement;
+        let targetTags = this.getTags(target);
+        for (let key of this.sourceTags.keys()) {
+            if (targetTags.has(key)) {
+                this.removeTag(key.valueOf());
+            }
+        }
+    }
+
+    removeTag(tag: string): void {
+        let target: HTMLTableCellElement = this.currentRow.getElementsByClassName('target')[0] as HTMLTableCellElement;
+        let children: HTMLCollectionOf<HTMLImageElement> = target.getElementsByTagName('img');
+        let length: number = children.length;
+        for (let i = 0; i < length; i++) {
+            let child: HTMLElement = children[i];
+            if (tag === child.getAttribute('data-id')) {
+                target.removeChild(child);
+                return;
+            }
+        }
     }
 }
