@@ -209,7 +209,7 @@ class TranslationView {
             '<span class="tooltiptext bottomTooltip">Replace Text</span>';
         replaceText.className = 'tooltip';
         replaceText.addEventListener('click', () => {
-            this.electron.ipcRenderer.send('show-filter');
+            this.replaceText();
         });
         topBar.appendChild(replaceText);
 
@@ -1100,5 +1100,9 @@ class TranslationView {
                 return;
             }
         }
+    }
+
+    replaceText() : void {
+        this.electron.ipcRenderer.send('show-replaceText', { project: this.projectId });
     }
 }

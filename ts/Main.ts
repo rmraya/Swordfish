@@ -244,6 +244,9 @@ class Main {
         Main.electron.ipcRenderer.on('set-filters', (event: Electron.IpcRendererEvent, arg: any) => {
             this.setFilters(arg);
         });
+        Main.electron.ipcRenderer.on('replace-text', () => {
+            this.replaceText();
+        });
         let config: any = { attributes: true, childList: false, subtree: false };
         let observer = new MutationObserver((mutationsList) => {
             for (let mutation of mutationsList) {
@@ -531,6 +534,13 @@ class Main {
             return;
         }
         this.projectsView.exportTranslations();
+    }
+
+    replaceText() : void {
+        let selected = Main.tabHolder.getSelected();
+        if (Main.translationViews.has(selected)) {
+            Main.translationViews.get(selected).replaceText();
+        }
     }
 }
 

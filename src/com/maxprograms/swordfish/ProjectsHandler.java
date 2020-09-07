@@ -168,6 +168,8 @@ public class ProjectsHandler implements HttpHandler {
 				response = acceptAll100Matches(request);
 			} else if ("/projects/generateStatistics".equals(url)) {
 				response = generateStatistics(request);
+			} else if ("/projects/replaceText".equals(url)) {
+				response = replaceText(request);
 			} else {
 				response.put(Constants.REASON, "Unknown request");
 			}
@@ -1161,6 +1163,21 @@ public class ProjectsHandler implements HttpHandler {
 			}
 		} catch (SQLException | JSONException | SAXException | IOException | ParserConfigurationException
 				| URISyntaxException e) {
+			logger.log(Level.ERROR, e);
+			result.put(Constants.REASON, e.getMessage());
+		}
+		return result;
+	}
+
+	private JSONObject replaceText(String request) {
+		JSONObject result = new JSONObject();
+		try {
+			JSONObject json = new JSONObject(request);
+			String project = json.getString("project");
+			if (projectStores.containsKey(project)) {
+				projectStores.get(project).replaceText(json);
+			}
+		} catch (SQLException | JSONException | SAXException | IOException | ParserConfigurationException e) {
 			logger.log(Level.ERROR, e);
 			result.put(Constants.REASON, e.getMessage());
 		}

@@ -42,6 +42,7 @@ class Swordfish {
     static filterSegmentsWindow: BrowserWindow;
     static messagesWindow: BrowserWindow;
     static tagsWindow: BrowserWindow;
+    static replaceTextWindow: BrowserWindow;
 
     javapath: string = Swordfish.path.join(app.getAppPath(), 'bin', 'java');
 
@@ -261,6 +262,9 @@ class Swordfish {
         ipcMain.on('tags-height', (event: IpcMainEvent, arg: any) => {
             Swordfish.setHeight(Swordfish.tagsWindow, arg);
         });
+        ipcMain.on('replaceText-height', (event: IpcMainEvent, arg: any) => {
+            Swordfish.setHeight(Swordfish.replaceTextWindow, arg);
+        });
         ipcMain.on('close-tags', () => {
             Swordfish.closeTagsWindow();
         });
@@ -472,6 +476,12 @@ class Swordfish {
         ipcMain.on('forward-tag', (event: IpcMainEvent, arg: any) => {
             Swordfish.mainWindow.webContents.send('insert-tag', arg);
         });
+        ipcMain.on('show-replaceText', (event: IpcMainEvent, arg: any) => {
+            Swordfish.showReplaceText(arg);
+        });
+        ipcMain.on('search-replace', (event: IpcMainEvent, arg: any) => {
+            Swordfish.replaceText(arg);
+        });
     } // end constructor
 
     static createWindow(): void {
@@ -545,7 +555,7 @@ class Swordfish {
             { label: 'Split Segment', accelerator: 'CmdOrCtrl+H', click: () => { Swordfish.mainWindow.webContents.send('split-segment'); } },
             { label: 'Merge With Next Segment', accelerator: 'CmdOrCtrl+J', click: () => { Swordfish.mainWindow.webContents.send('merge-next'); } },
             new MenuItem({ type: 'separator' }),
-            { label: 'Replace Text', accelerator: 'CmdOrCtrl+Alt+F', click: () => { this.replaceText(); } },
+            { label: 'Replace Text', accelerator: 'CmdOrCtrl+Alt+F', click: () => { Swordfish.mainWindow.webContents.send('replace-text'); } },
             new MenuItem({ type: 'separator' }),
             { label: 'Insert Tag', accelerator: 'CmdOrCtrl+T', click: () => { Swordfish.mainWindow.webContents.send('insert-tag', {}); } },
             new MenuItem({ label: 'Quick Tags', submenu: tagsMenu }),
@@ -779,10 +789,6 @@ class Swordfish {
             event.sender.send('get-height');
             event.sender.send('set-params', project);
         });
-    }
-
-    static replaceText(): void {
-        // TODO
     }
 
     static viewProjects(): void {
@@ -2520,6 +2526,50 @@ class Swordfish {
         if (this.tagsWindow && this.tagsWindow.isVisible()) {
             this.tagsWindow.close();
         }
+    }
+
+    static showReplaceText(arg: any): void {
+        this.replaceTextWindow = new BrowserWindow({
+            parent: this.mainWindow,
+            width: 450,
+            useContentSize: true,
+            minimizable: false,
+            maximizable: false,
+            resizable: false,
+            show: false,
+            icon: this.iconPath,
+            webPreferences: {
+                nodeIntegration: true
+            }
+        });
+        this.replaceTextWindow.setMenu(null);
+        this.replaceTextWindow.loadURL('file://' + this.path.join(app.getAppPath(), 'html', 'replaceText.html'));
+        this.replaceTextWindow.once('ready-to-show', (event: IpcMainEvent) => {
+            event.sender.send('get-height');
+            event.sender.send('set-project', arg);
+        });
+    }
+
+    static replaceText(arg: any): void {
+        Swordfish.mainWindow.webContents.send('start-waiting');
+        Swordfish.mainWindow.webContents.send('set-status', 'Replacing text');
+        Swordfish.sendRequest('/projects/replaceText', arg,
+            (data: any) => {
+                Swordfish.mainWindow.webContents.send('end-waiting');
+                Swordfish.mainWindow.webContents.send('set-status', '');
+                if (data.status !== Swordfish.SUCCESS) {
+                    Swordfish.showMessage({ type: 'error', message: data.reason });
+                    return;
+                }
+                Swordfish.replaceTextWindow.close();
+                Swordfish.mainWindow.webContents.send('reload-page', { project: arg.project });
+            },
+            (reason: string) => {
+                Swordfish.mainWindow.webContents.send('end-waiting');
+                Swordfish.mainWindow.webContents.send('set-status', '');
+                Swordfish.showMessage({ type: 'error', message: reason });
+            }
+        );
     }
 }
 

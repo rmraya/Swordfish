@@ -1672,7 +1672,6 @@ public class XliffStore {
     }
 
     public void acceptAll100Matches() throws SQLException, SAXException, IOException, ParserConfigurationException {
-
         PreparedStatement perfectMatches = conn.prepareStatement(
                 "SELECT target FROM matches WHERE file=? AND unitId=? AND segId=? AND type='tm' AND similarity=100 LIMIT 1");
         String sql = "SELECT file, unitId, segId, source FROM segments WHERE type='S' AND (state='initial' OR targetText='') AND translate='Y' ";
@@ -1710,5 +1709,66 @@ public class XliffStore {
         RepetitionAnalysis instance = new RepetitionAnalysis();
         instance.analyse(xliffFile, catalog);
         return new File(xliffFile).getAbsolutePath() + ".log.html";
+    }
+
+    public void replaceText(JSONObject json)
+            throws SQLException, SAXException, IOException, ParserConfigurationException {
+        String searchText = json.getString("searchText");
+        String replaceText = json.getString("replaceText");
+        boolean isRegExp = json.getBoolean("regExp");
+        boolean caseSensitive = json.getBoolean("caseSensitive");
+        StringBuilder queryBuilder = new StringBuilder();
+        queryBuilder.append("SELECT file, unitId, segId, target FROM segments WHERE type='S' AND ");
+        if (isRegExp) {
+            try {
+                Pattern.compile(searchText);
+            } catch (PatternSyntaxException e) {
+                throw new IOException("Invalid regular expression");
+            }
+            queryBuilder.append("REGEXP_LIKE(targetText, '");
+            queryBuilder.append(searchText);
+            queryBuilder.append(caseSensitive ? "', 'c')" : "', 'i')");
+        } else {
+            queryBuilder.append(caseSensitive ? "targetText LIKE '%" : "targetText ILIKE '%");
+            queryBuilder.append(searchText);
+            queryBuilder.append("%'");
+        }
+        queryBuilder.append(" AND translate='Y'");
+        try (ResultSet rs = stmt.executeQuery(queryBuilder.toString())) {
+            while (rs.next()) {
+                String file = rs.getString(1);
+                String unit = rs.getString(2);
+                String segment = rs.getString(3);
+                String tgt = rs.getNString(4);
+
+                Element target = buildElement(tgt);
+                target = replaceText(target, searchText, replaceText, isRegExp);
+                String pureTarget = pureText(target);
+                updateTarget(file, unit, segment, target, pureTarget, false);
+            }
+        }
+    }
+
+    private Element replaceText(Element target, String searchText, String replaceText, boolean isRegExp) {
+        List<XMLNode> newContent = new Vector<>();
+        List<XMLNode> content = target.getContent();
+        Iterator<XMLNode> it = content.iterator();
+        while (it.hasNext()) {
+            XMLNode node = it.next();
+            if (node.getNodeType() == XMLNode.TEXT_NODE) {
+                String text = ((TextNode) node).getText();
+                text = isRegExp ? text.replaceAll(searchText, replaceText) : text.replace(searchText, replaceText);
+                newContent.add(new TextNode(text));
+            }
+            if (node.getNodeType() == XMLNode.ELEMENT_NODE) {
+                Element e = (Element) node;
+                if ("mrk".equals(e.getName()) || "g".equals(e.getName())) {
+                    e = replaceText(e, searchText, replaceText, isRegExp);
+                }
+                newContent.add(e);
+            }
+        }
+        target.setContent(newContent);
+        return target;
     }
 }

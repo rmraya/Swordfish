@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Replace Text</title>
+    <link id="theme" rel="stylesheet" type="text/css" href="../css/light.css">
+    <link rel="stylesheet" type="text/css" href="../css/fonts.css">
+</head>
+
+<body id="body">
+
+    <table class="table_width">
+        <tr>
+            <td class="middle noWrap"><label for="searchText">Text to Search</label></td>
+            <td class="middle fill_width"><input type="text" id="searchText" class="table_input"></td>
+        </tr>
+        <tr>
+            <td class="middle noWrap"><label for="replaceText">Replace with</label></td>
+            <td class="middle fill_width"><input type="text" id="replaceText" class="table_input"></td>
+        </tr>
+        <tr>
+            <td class="noWrap"><label class="middle">Options</label></td>
+            <td>
+                <input type="checkbox" id="caseSensitive" class="middle">
+                <label for="caseSensitive" class="middle noWrap">Case Sensitive Search</label><br>
+                <input type="checkbox" id="regularExpression" class="middle">
+                <label for="regularExpression" class="middle noWrap">Regular Expression</label>
+            </td>
+        </tr>
+    </table>
+
+    <div class="buttonArea">
+        <button id="replace">Replace Text</button>
+    </div>
+    <script src="../js/keyboardHandler.js"></script>
+    <script src="../js/replaceText.js"></script>
+</body>
+
+</html>
