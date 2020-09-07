@@ -1176,6 +1176,9 @@ public class ProjectsHandler implements HttpHandler {
 			String project = json.getString("project");
 			if (projectStores.containsKey(project)) {
 				projectStores.get(project).replaceText(json);
+				JSONObject status = projectStores.get(project).getTranslationStatus();
+				result.put("statistics", status);
+				updateProjectStatus(project, status.getInt("percentage"));
 			}
 		} catch (SQLException | JSONException | SAXException | IOException | ParserConfigurationException e) {
 			logger.log(Level.ERROR, e);

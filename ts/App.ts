@@ -2563,6 +2563,7 @@ class Swordfish {
                 }
                 Swordfish.replaceTextWindow.close();
                 Swordfish.mainWindow.webContents.send('reload-page', { project: arg.project });
+                Swordfish.mainWindow.webContents.send('set-statistics', { project: arg.project, statistics: data.statistics });
             },
             (reason: string) => {
                 Swordfish.mainWindow.webContents.send('end-waiting');
