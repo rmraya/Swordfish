@@ -796,7 +796,7 @@ class Swordfish {
     }
 
     static savePreferences(arg: any): void {
-        Swordfish.settingsWindow.close();
+        Swordfish.destroyWindow(Swordfish.settingsWindow);
         Swordfish.mainWindow.focus();
         writeFileSync(Swordfish.path.join(app.getPath('appData'), app.name, 'preferences.json'), JSON.stringify(arg));
         Swordfish.loadPreferences();
@@ -1046,10 +1046,10 @@ class Swordfish {
 
     createProject(arg: any): void {
         if (Swordfish.addProjectWindow) {
-            Swordfish.addProjectWindow.close();
+            Swordfish.destroyWindow(Swordfish.addProjectWindow);
         }
         if (Swordfish.addFileWindow) {
-            Swordfish.addFileWindow.close();
+            Swordfish.destroyWindow(Swordfish.addFileWindow);
         }
         Swordfish.mainWindow.focus();
         Swordfish.mainWindow.webContents.send('start-waiting');
@@ -1611,7 +1611,7 @@ class Swordfish {
     }
 
     static savelanguages(arg: any) {
-        this.defaultLangsWindow.close();
+        Swordfish.destroyWindow(this.defaultLangsWindow);
         this.currentPreferences.srcLang = arg.srcLang;
         this.currentPreferences.tgtLang = arg.tgtLang;
         writeFileSync(Swordfish.path.join(app.getPath('appData'), app.name, 'preferences.json'), JSON.stringify(this.currentPreferences));
@@ -1677,7 +1677,7 @@ class Swordfish {
                     Swordfish.showMessage({ type: 'error', message: data.reason });
                     return;
                 }
-                Swordfish.addMemoryWindow.close();
+                Swordfish.destroyWindow(Swordfish.addMemoryWindow);
                 Swordfish.mainWindow.webContents.send('request-memories');
             },
             (reason: string) => {
@@ -1709,7 +1709,7 @@ class Swordfish {
     }
 
     static importTmxFile(arg: any): void {
-        Swordfish.importTmxWindow.close();
+        Swordfish.destroyWindow(Swordfish.importTmxWindow);
         Swordfish.mainWindow.focus();
         Swordfish.mainWindow.webContents.send('start-waiting');
         Swordfish.mainWindow.webContents.send('set-status', 'Importing TMX');
@@ -2259,7 +2259,7 @@ class Swordfish {
     }
 
     static importXLIFF(arg: any): void {
-        Swordfish.importXliffWindow.close();
+        Swordfish.destroyWindow(Swordfish.importXliffWindow);
         Swordfish.mainWindow.focus();
         Swordfish.mainWindow.webContents.send('start-waiting');
         Swordfish.mainWindow.webContents.send('set-status', 'Importing XLIFF');
@@ -2336,7 +2336,7 @@ class Swordfish {
 
     static filterOptions(arg: any): void {
         Swordfish.mainWindow.webContents.send('set-filters', arg);
-        Swordfish.filterSegmentsWindow.close();
+        Swordfish.destroyWindow(Swordfish.filterSegmentsWindow);
     }
 
     static removeTranslations(arg: any): void {
@@ -2563,7 +2563,7 @@ class Swordfish {
 
     static closeTagsWindow(): void {
         if (this.tagsWindow && this.tagsWindow.isVisible()) {
-            this.tagsWindow.close();
+            Swordfish.destroyWindow(Swordfish.tagsWindow);
         }
     }
 
@@ -2600,7 +2600,7 @@ class Swordfish {
                     Swordfish.showMessage({ type: 'error', message: data.reason });
                     return;
                 }
-                Swordfish.replaceTextWindow.close();
+                Swordfish.destroyWindow(Swordfish.replaceTextWindow);
                 Swordfish.mainWindow.webContents.send('reload-page', { project: arg.project });
                 Swordfish.mainWindow.webContents.send('set-statistics', { project: arg.project, statistics: data.statistics });
             },
