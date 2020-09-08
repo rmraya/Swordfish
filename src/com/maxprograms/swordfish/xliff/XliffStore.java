@@ -1803,4 +1803,35 @@ public class XliffStore {
             }
         }
     }
+
+	public void acceptAllMT() throws SQLException, SAXException, IOException, ParserConfigurationException {
+        PreparedStatement mtMatches = conn.prepareStatement(
+            "SELECT target FROM matches WHERE file=? AND unitId=? AND segId=? AND type='mt' LIMIT 1");
+    String sql = "SELECT file, unitId, segId, source FROM segments WHERE type='S' AND (state='initial' OR targetText='') AND translate='Y' ";
+    try (ResultSet rs = stmt.executeQuery(sql)) {
+        while (rs.next()) {
+            String file = rs.getString(1);
+            String unit = rs.getString(2);
+            String segment = rs.getString(3);
+            String src = rs.getNString(4);
+
+            mtMatches.setString(1, file);
+            mtMatches.setString(2, unit);
+            mtMatches.setString(3, segment);
+            try (ResultSet rs2 = mtMatches.executeQuery()) {
+                while (rs2.next()) {
+                    Element source = buildElement(src);
+                    String tgt = rs2.getNString(1);
+                    Element target = buildElement(tgt);
+                    target.setAttribute("xml:lang", tgtLang);
+                    if (source.hasAttribute("xml:space")) {
+                        target.setAttribute("xml:space", source.getAttributeValue("xml:space"));
+                    }
+                    String pureTarget = pureText(target);
+                    updateTarget(file, unit, segment, target, pureTarget, false);
+                }
+            }
+        }
+    }
+	}
 }

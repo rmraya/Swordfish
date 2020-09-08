@@ -483,7 +483,10 @@ class Main {
     }
 
     acceptAllMachineTranslations(): void {
-        // TODO
+        let selected = Main.tabHolder.getSelected();
+        if (Main.translationViews.has(selected)) {
+            Main.translationViews.get(selected).acceptAllMachineTranslations();
+        }
     }
 
     splitSegment(): void {

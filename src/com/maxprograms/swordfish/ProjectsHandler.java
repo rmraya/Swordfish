@@ -172,6 +172,8 @@ public class ProjectsHandler implements HttpHandler {
 				response = replaceText(request);
 			} else if ("/projects/applyMtAll".equals(url)) {
 				response = applyMtAll(request);
+			} else if ("/projects/acceptAllMT".equals(url)) {
+				response = acceptAllMT(request);
 			} else {
 				response.put(Constants.REASON, "Unknown request");
 			}
@@ -1226,6 +1228,24 @@ public class ProjectsHandler implements HttpHandler {
 			};
 			thread.start();
 		} catch (IOException | JSONException e) {
+			logger.log(Level.ERROR, e);
+			result.put(Constants.REASON, e.getMessage());
+		}
+		return result;
+	}
+
+	public JSONObject acceptAllMT(String request) {
+		JSONObject result = new JSONObject();
+		try {
+			JSONObject json = new JSONObject(request);
+			String project = json.getString("project");
+			if (projectStores.containsKey(project)) {
+				projectStores.get(project).acceptAllMT();
+				JSONObject status = projectStores.get(project).getTranslationStatus();
+				result.put("statistics", status);
+				updateProjectStatus(project, status.getInt("percentage"));
+			}
+		} catch (SQLException | JSONException | SAXException | IOException | ParserConfigurationException e) {
 			logger.log(Level.ERROR, e);
 			result.put(Constants.REASON, e.getMessage());
 		}

@@ -419,6 +419,9 @@ class Swordfish {
         ipcMain.on('apply-mt-all', (event: IpcMainEvent, arg: any) => {
             Swordfish.applyMachineTranslationsAll(arg);
         });
+        ipcMain.on('accept-mt-all', (event: IpcMainEvent, arg: any) => {
+            Swordfish.acceptAllMachineTranslations(arg);
+        });
         ipcMain.on('search-memory', () => {
             Swordfish.mainWindow.webContents.send('get-tm-matches');
         });
@@ -2675,6 +2678,35 @@ class Swordfish {
                 console.log(e);
             }
         }
+    }
+    static acceptAllMachineTranslations(arg: any) {
+        dialog.showMessageBox(Swordfish.mainWindow, {
+            type: 'question',
+            message: 'Accept all machine translations?',
+            buttons: ['Yes', 'No']
+        }).then((selection: Electron.MessageBoxReturnValue) => {
+            if (selection.response === 0) {
+                Swordfish.mainWindow.webContents.send('start-waiting');
+                Swordfish.mainWindow.webContents.send('set-status', 'Accepting matches');
+                Swordfish.sendRequest('/projects/acceptAllMT', arg,
+                    (data: any) => {
+                        Swordfish.mainWindow.webContents.send('end-waiting');
+                        Swordfish.mainWindow.webContents.send('set-status', '');
+                        if (data.status !== Swordfish.SUCCESS) {
+                            Swordfish.showMessage({ type: 'error', message: data.reason });
+                            return;
+                        }
+                        Swordfish.mainWindow.webContents.send('reload-page', { project: arg.project });
+                        Swordfish.mainWindow.webContents.send('set-statistics', { project: arg.project, statistics: data.statistics });
+                    },
+                    (reason: string) => {
+                        Swordfish.mainWindow.webContents.send('end-waiting');
+                        Swordfish.mainWindow.webContents.send('set-status', '');
+                        Swordfish.showMessage({ type: 'error', message: reason });
+                    }
+                );
+            }
+        });
     }
 }
 

@@ -1110,4 +1110,8 @@ class TranslationView {
     applyMachineTranslationsAll(): void {
         this.electron.ipcRenderer.send('apply-mt-all', { project: this.projectId });
     }
+
+    acceptAllMachineTranslations(): void {
+        this.electron.ipcRenderer.send('accept-mt-all', { project: this.projectId });
+    }
 }
