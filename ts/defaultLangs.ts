@@ -37,6 +37,12 @@ class DefaultLanguages {
             let body: HTMLBodyElement = document.getElementById('body') as HTMLBodyElement;
             this.electron.ipcRenderer.send('languages-height', { width: body.clientWidth, height: body.clientHeight });
         });
+        document.addEventListener('keydown', (event: KeyboardEvent) => {
+            if (event.code === 'Escape') {
+                this.electron.ipcRenderer.send('close-defaultLangs');
+            }
+        });
+        (document.getElementById('srcLangSelect') as HTMLSelectElement).focus();
     }
 
     setLanguages(arg: any): void {

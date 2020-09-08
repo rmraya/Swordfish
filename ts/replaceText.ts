@@ -34,7 +34,12 @@ class ReplaceText {
         });
         document.addEventListener('keydown', (event: KeyboardEvent) => { KeyboardHandler.keyListener(event); });
         document.addEventListener('keydown', (event: KeyboardEvent) => {
-            KeyboardHandler.enterHandler(event, document.getElementById('replace') as HTMLButtonElement);
+            if (event.code === 'Enter') {
+                this.replaceText();
+            }
+            if (event.code === 'Escape') {
+                this.electron.ipcRenderer.send('close-replaceText');
+            }
         });
         this.electron.ipcRenderer.on('set-project', (event: Electron.IpcRendererEvent, arg: any) => {
             this.project = arg.project;

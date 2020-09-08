@@ -59,7 +59,12 @@ class AddProject {
         });
         document.addEventListener('keydown', (event: KeyboardEvent) => { KeyboardHandler.keyListener(event); });
         document.addEventListener('keydown', (event: KeyboardEvent) => {
-            KeyboardHandler.enterHandler(event, document.getElementById('addProjectButton') as HTMLButtonElement);
+            if (event.code === 'Enter') {
+                this.addProject();
+            }
+            if (event.code === 'Escape') {
+                this.electron.ipcRenderer.send('close-addProject');
+            }
         });
         document.getElementById('addFilesButton').addEventListener('click', () => {
             this.electron.ipcRenderer.send('select-source-files');
@@ -74,6 +79,7 @@ class AddProject {
         document.getElementById('addProjectButton').addEventListener('click', () => {
             this.addProject();
         });
+        (document.getElementById('nameInput') as HTMLInputElement).focus();
     }
 
     addProject(): void {

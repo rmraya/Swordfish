@@ -40,7 +40,12 @@ class AddMemory {
         });
         document.addEventListener('keydown', (event: KeyboardEvent) => { KeyboardHandler.keyListener(event); });
         document.addEventListener('keydown', (event: KeyboardEvent) => {
-            KeyboardHandler.enterHandler(event, document.getElementById('addMemoryButton') as HTMLButtonElement);
+            if (event.code === 'Enter') {
+                this.addMemory();
+            }
+            if (event.code === 'Escape') {
+                this.electron.ipcRenderer.send('close-addMemory');
+            }
         });
         this.electron.ipcRenderer.on('get-height', () => {
             let body: HTMLBodyElement = document.getElementById('body') as HTMLBodyElement;
@@ -49,6 +54,7 @@ class AddMemory {
         document.getElementById('addMemoryButton').addEventListener('click', () => {
             this.addMemory();
         });
+        (document.getElementById('nameInput') as HTMLInputElement).focus();
     }
 
     addMemory(): void {

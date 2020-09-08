@@ -34,6 +34,11 @@ class SpellcheckerLanguages {
             let body: HTMLBodyElement = document.getElementById('body') as HTMLBodyElement;
             this.electron.ipcRenderer.send('set-spellchecker-height', { width: body.clientWidth, height: 400 });
         });
+        document.addEventListener('keydown', (event: KeyboardEvent) => {
+            if (event.code === 'Escape') {
+                this.electron.ipcRenderer.send('close-spellingLangs');
+            }
+        });
     }
 
     setLanguages(languages: any[]): void {

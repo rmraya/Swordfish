@@ -259,14 +259,23 @@ class Swordfish {
         ipcMain.on('add-project-height', (event: IpcMainEvent, arg: any) => {
             Swordfish.setHeight(Swordfish.addProjectWindow, arg);
         });
+        ipcMain.on('close-addProject', () => {
+            Swordfish.destroyWindow(Swordfish.addProjectWindow);
+        });
         ipcMain.on('add-file-height', (event: IpcMainEvent, arg: any) => {
             Swordfish.setHeight(Swordfish.addFileWindow, arg);
+        });
+        ipcMain.on('close-addFile', () => {
+            Swordfish.destroyWindow(Swordfish.addFileWindow);
         });
         ipcMain.on('tags-height', (event: IpcMainEvent, arg: any) => {
             Swordfish.setHeight(Swordfish.tagsWindow, arg);
         });
         ipcMain.on('replaceText-height', (event: IpcMainEvent, arg: any) => {
             Swordfish.setHeight(Swordfish.replaceTextWindow, arg);
+        });
+        ipcMain.on('close-replaceText', () => {
+            Swordfish.destroyWindow(Swordfish.replaceTextWindow);
         });
         ipcMain.on('close-tags', () => {
             Swordfish.closeTagsWindow();
@@ -304,6 +313,9 @@ class Swordfish {
         ipcMain.on('add-memory-height', (event: IpcMainEvent, arg: any) => {
             Swordfish.setHeight(Swordfish.addMemoryWindow, arg);
         });
+        ipcMain.on('close-addMemory', () => {
+            Swordfish.destroyWindow(Swordfish.addMemoryWindow);
+        });
         ipcMain.on('add-memory', (event: IpcMainEvent, arg: any) => {
             this.addMemory(arg);
         });
@@ -312,6 +324,9 @@ class Swordfish {
         });
         ipcMain.on('import-tmx-height', (event: IpcMainEvent, arg: any) => {
             Swordfish.setHeight(Swordfish.importTmxWindow, arg);
+        });
+        ipcMain.on('close-importTmx', () => {
+            Swordfish.destroyWindow(Swordfish.importTmxWindow);
         });
         ipcMain.on('import-tmx-file', (event: IpcMainEvent, arg: any) => {
             Swordfish.importTmxFile(arg);
@@ -346,8 +361,14 @@ class Swordfish {
         ipcMain.on('settings-height', (event: IpcMainEvent, arg: any) => {
             Swordfish.setHeight(Swordfish.settingsWindow, arg);
         });
+        ipcMain.on('close-preferences', () => {
+            Swordfish.destroyWindow(Swordfish.settingsWindow);
+        });
         ipcMain.on('languages-height', (event: IpcMainEvent, arg: any) => {
             Swordfish.setHeight(Swordfish.defaultLangsWindow, arg);
+        });
+        ipcMain.on('close-defaultLangs', () => {
+            Swordfish.destroyWindow(Swordfish.defaultLangsWindow);
         });
         ipcMain.on('get-preferences', (event: IpcMainEvent) => {
             event.sender.send('set-preferences', Swordfish.currentPreferences);
@@ -425,6 +446,9 @@ class Swordfish {
         ipcMain.on('set-spellchecker-height', (event: IpcMainEvent, arg: any) => {
             Swordfish.setHeight(Swordfish.spellingLangsWindow, arg);
         });
+        ipcMain.on('close-spellingLangs', () => {
+            Swordfish.destroyWindow(Swordfish.spellingLangsWindow);
+        });
         ipcMain.on('show-filter-segments', (event: IpcMainEvent, arg: any) => {
             Swordfish.showFilterSegments(arg);
         });
@@ -451,6 +475,9 @@ class Swordfish {
         });
         ipcMain.on('import-xliff-height', (event: IpcMainEvent, arg: any) => {
             Swordfish.setHeight(Swordfish.importXliffWindow, arg);
+        });
+        ipcMain.on('close-importXliff', () => {
+            Swordfish.destroyWindow(Swordfish.importXliffWindow);
         });
         ipcMain.on('browse-xliff-import', (event: IpcMainEvent) => {
             Swordfish.browseXLIFF(event);

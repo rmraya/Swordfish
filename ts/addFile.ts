@@ -36,7 +36,12 @@ class AddFile {
         });
         document.addEventListener('keydown', (event: KeyboardEvent) => { KeyboardHandler.keyListener(event); });
         document.addEventListener('keydown', (event: KeyboardEvent) => {
-            KeyboardHandler.enterHandler(event, document.getElementById('addProjectButton') as HTMLButtonElement);
+            if (event.code === 'Enter') {
+                this.addProject();
+            }
+            if (event.code === 'Escape') {
+                this.electron.ipcRenderer.send('close-addFile');
+            }
         });
         this.electron.ipcRenderer.on('add-source-files', (event: Electron.IpcRendererEvent, arg: any) => {
             this.addFile(arg);

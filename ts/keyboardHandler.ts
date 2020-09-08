@@ -87,17 +87,4 @@ class KeyboardHandler {
             }
         }
     }
-
-    static enterHandler(event: KeyboardEvent, button: HTMLButtonElement): void {
-        if (event.code === 'Enter' || event.code === 'NumpadEnter') {
-            button.click();
-        }
-    }
-
-    static escapeHandler(event: KeyboardEvent, button: HTMLButtonElement): void {
-        if (event.code === 'Escape' ) {
-            button.click();
-        }
-    }
-
 }

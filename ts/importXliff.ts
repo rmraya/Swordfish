@@ -36,7 +36,12 @@ class ImportXLIFF {
         });
         document.addEventListener('keydown', (event: KeyboardEvent) => { KeyboardHandler.keyListener(event); });
         document.addEventListener('keydown', (event: KeyboardEvent) => {
-            KeyboardHandler.enterHandler(event, document.getElementById('importXliff') as HTMLButtonElement);
+            if (event.code === 'Escape') {
+                this.electron.ipcRenderer.send('close-importXliff');
+            }
+            if (event.code === 'Enter') {
+                this.importXLIFF();
+            }
         });
         this.electron.ipcRenderer.on('get-height', () => {
             let body: HTMLBodyElement = document.getElementById('body') as HTMLBodyElement;
@@ -52,6 +57,7 @@ class ImportXLIFF {
         document.getElementById('importXliff').addEventListener('click', () => {
             this.importXLIFF();
         });
+        (document.getElementById('projectInput') as HTMLInputElement).focus();
     }
 
     setClients(clients: string[]): void {

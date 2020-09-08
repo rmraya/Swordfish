@@ -137,6 +137,11 @@ class Preferences {
         this.electron.ipcRenderer.on('set-catalog', (event, arg) => {
             this.defaultCatalog.value = arg;
         });
+        document.addEventListener('keydown', (event: KeyboardEvent) => {
+            if (event.code === 'Escape') {
+                this.electron.ipcRenderer.send('close-preferences');
+            }
+        });
     }
 
     setPreferences(arg: any): void {

@@ -37,10 +37,12 @@ class FilterSegments {
         });
         document.addEventListener('keydown', (event: KeyboardEvent) => { KeyboardHandler.keyListener(event); });
         document.addEventListener('keydown', (event: KeyboardEvent) => {
-            KeyboardHandler.enterHandler(event, document.getElementById('filterSegments') as HTMLButtonElement);
-        });
-        document.addEventListener('keydown', (event: KeyboardEvent) => {
-            KeyboardHandler.escapeHandler(event, document.getElementById('clearFilter') as HTMLButtonElement);
+            if (event.code === 'Enter') {
+                this.filterSegments();
+            }
+            if (event.code === 'Escape') {
+                this.clearFilter();
+            }
         });
         (document.getElementById('filterSegments') as HTMLButtonElement).addEventListener('click', () => {
             this.filterSegments();

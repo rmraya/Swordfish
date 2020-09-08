@@ -41,11 +41,10 @@ class Messages {
             this.electron.ipcRenderer.send('close-messages');
         });
         document.addEventListener('keydown', (event: KeyboardEvent) => {
-            if (event.code === 'Escape') {
+            if (event.code === 'Escape' || event.code === 'Enter') {
                 this.electron.ipcRenderer.send('close-messages');
             }
         });
-        document.getElementById('closeButton').focus();
     }
 
     setMessage(arg: any): void {

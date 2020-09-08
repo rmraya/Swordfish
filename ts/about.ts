@@ -40,9 +40,9 @@ class About {
             this.electron.ipcRenderer.send('about-height', { width: body.clientWidth, height: (body.clientHeight + 20) });
         });
         document.addEventListener('keydown', (event: KeyboardEvent) => {
-            KeyboardHandler.enterHandler(event, document.getElementById('licensesButton') as HTMLButtonElement);
-        });
-        document.addEventListener('keydown', (event: KeyboardEvent) => {
+            if (event.code === 'Enter') {
+                this.electron.ipcRenderer.send('licenses-clicked'); 
+            }
             if (event.code === 'Escape') {
                 this.electron.ipcRenderer.send('close-about');
             }

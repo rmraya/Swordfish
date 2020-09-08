@@ -42,7 +42,12 @@ class ImportTMX {
         });
         document.addEventListener('keydown', (event: KeyboardEvent) => { KeyboardHandler.keyListener(event); });
         document.addEventListener('keydown', (event: KeyboardEvent) => {
-            KeyboardHandler.enterHandler(event, document.getElementById('importTmx') as HTMLButtonElement);
+            if (event.code === 'Escape') {
+                this.electron.ipcRenderer.send('close-importTmx');
+            }
+            if (event.code === 'Enter') {
+                this.importTMX();
+            }
         });
         this.electron.ipcRenderer.on('get-height', () => {
             let body: HTMLBodyElement = document.getElementById('body') as HTMLBodyElement;
@@ -61,6 +66,7 @@ class ImportTMX {
         document.getElementById('importTmx').addEventListener('click', () => {
             this.importTMX();
         });
+        (document.getElementById('tmx') as HTMLInputElement).focus();
     }
 
     setProjectNames(projects: string[]): void {
