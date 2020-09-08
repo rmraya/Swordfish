@@ -58,6 +58,9 @@ class AddProject {
             this.setCharsets(arg);
         });
         document.addEventListener('keydown', (event: KeyboardEvent) => { KeyboardHandler.keyListener(event); });
+        document.addEventListener('keydown', (event: KeyboardEvent) => {
+            KeyboardHandler.enterHandler(event, document.getElementById('addProjectButton') as HTMLButtonElement);
+        });
         document.getElementById('addFilesButton').addEventListener('click', () => {
             this.electron.ipcRenderer.send('select-source-files');
             document.getElementById('addFilesButton').blur();

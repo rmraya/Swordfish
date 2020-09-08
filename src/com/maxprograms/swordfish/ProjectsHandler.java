@@ -170,6 +170,8 @@ public class ProjectsHandler implements HttpHandler {
 				response = generateStatistics(request);
 			} else if ("/projects/replaceText".equals(url)) {
 				response = replaceText(request);
+			} else if ("/projects/applyMtAll".equals(url)) {
+				response = applyMtAll(request);
 			} else {
 				response.put(Constants.REASON, "Unknown request");
 			}
@@ -1181,6 +1183,49 @@ public class ProjectsHandler implements HttpHandler {
 				updateProjectStatus(project, status.getInt("percentage"));
 			}
 		} catch (SQLException | JSONException | SAXException | IOException | ParserConfigurationException e) {
+			logger.log(Level.ERROR, e);
+			result.put(Constants.REASON, e.getMessage());
+		}
+		return result;
+	}
+
+	private JSONObject applyMtAll(String request) {
+		JSONObject result = new JSONObject();
+		try {
+			MT translator = new MT();
+			if (!translator.hasEngines()) {
+				result.put(Constants.REASON, "MT engines not enabled");
+				return result;
+			}
+			String id = "" + System.currentTimeMillis();
+			result.put("process", id);
+			if (processes == null) {
+				processes = new Hashtable<>();
+			}
+			processes.put(id, Constants.PROCESSING);
+			Thread thread = new Thread() {
+				@Override
+				public void run() {
+					try {
+						JSONObject json = new JSONObject(request);
+						String project = json.getString("project");
+						if (projectStores.containsKey(project)) {
+							projectStores.get(project).applyMtAll(json, translator);
+						}
+						processes.put(id, Constants.COMPLETED);
+					} catch (InterruptedException e) {
+						logger.log(Level.WARNING, "MT interrupted", e);
+						processes.put(id, e.getMessage());
+						Thread.currentThread().interrupt();
+					} catch (IOException | SQLException | JSONException | SAXException
+							| ParserConfigurationException e) {
+						logger.log(Level.WARNING, e.getMessage(), e);
+						processes.put(id, e.getMessage());
+					}
+				}
+			};
+			thread.start();
+		} catch (IOException | JSONException e) {
 			logger.log(Level.ERROR, e);
 			result.put(Constants.REASON, e.getMessage());
 		}

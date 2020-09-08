@@ -389,6 +389,9 @@ class Swordfish {
         ipcMain.on('get-mt-matches', () => {
             Swordfish.mainWindow.webContents.send('get-mt-matches');
         });
+        ipcMain.on('apply-mt-all', (event: IpcMainEvent, arg: any) => {
+            Swordfish.applyMachineTranslationsAll(arg);
+        });
         ipcMain.on('search-memory', () => {
             Swordfish.mainWindow.webContents.send('get-tm-matches');
         });
@@ -2571,6 +2574,61 @@ class Swordfish {
                 Swordfish.showMessage({ type: 'error', message: reason });
             }
         );
+    }
+
+    static applyMachineTranslationsAll(arg: any): void {
+        dialog.showMessageBox(Swordfish.mainWindow, {
+            type: 'question',
+            message: 'Aply Machine Translation to all segments?',
+            buttons: ['Yes', 'No']
+        }).then((selection: Electron.MessageBoxReturnValue) => {
+            if (selection.response === 0) {
+                Swordfish.mainWindow.webContents.send('start-waiting');
+                Swordfish.mainWindow.webContents.send('set-status', 'Applying MT');
+                Swordfish.sendRequest('/projects/applyMtAll', arg,
+                    (data: any) => {
+                        if (data.status !== Swordfish.SUCCESS) {
+                            Swordfish.mainWindow.webContents.send('end-waiting');
+                            Swordfish.mainWindow.webContents.send('set-status', '');
+                            Swordfish.showMessage({ type: 'error', message: data.reason });
+                        }
+                        Swordfish.currentStatus = data;
+                        let processId: string = data.process;
+                        var intervalObject = setInterval(() => {
+                            if (Swordfish.currentStatus.progress) {
+                                if (Swordfish.currentStatus.progress === Swordfish.COMPLETED) {
+                                    Swordfish.mainWindow.webContents.send('end-waiting');
+                                    Swordfish.mainWindow.webContents.send('set-status', '');
+                                    clearInterval(intervalObject);
+                                    Swordfish.mainWindow.webContents.send('reload-page', { project: arg.project });
+                                    return;
+                                } else if (Swordfish.currentStatus.progress === Swordfish.PROCESSING) {
+                                    // it's OK, keep waiting
+                                } else if (Swordfish.currentStatus.progress === Swordfish.ERROR) {
+                                    Swordfish.mainWindow.webContents.send('end-waiting');
+                                    Swordfish.mainWindow.webContents.send('set-status', '');
+                                    clearInterval(intervalObject);
+                                    Swordfish.showMessage({ type: 'error', message: Swordfish.currentStatus.reason });
+                                    return;
+                                } else {
+                                    Swordfish.mainWindow.webContents.send('end-waiting');
+                                    Swordfish.mainWindow.webContents.send('set-status', '');
+                                    clearInterval(intervalObject);
+                                    Swordfish.showMessage({ type: 'error', message: 'Unknown error applying MT' });
+                                    return;
+                                }
+                            }
+                            Swordfish.getProjectsProgress(processId);
+                        }, 500);
+                    },
+                    (reason: string) => {
+                        Swordfish.mainWindow.webContents.send('end-waiting');
+                        Swordfish.mainWindow.webContents.send('set-status', '');
+                        Swordfish.showMessage({ type: 'error', message: reason });
+                    }
+                );
+            }
+        });
     }
 }
 

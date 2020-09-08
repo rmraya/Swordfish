@@ -67,6 +67,7 @@ import com.maxprograms.xml.XMLNode;
 import com.maxprograms.xml.XMLOutputter;
 
 import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 import org.xml.sax.SAXException;
 
@@ -1770,5 +1771,36 @@ public class XliffStore {
         }
         target.setContent(newContent);
         return target;
+    }
+
+    public void applyMtAll(JSONObject json, MT translator) throws SQLException, JSONException, SAXException,
+            IOException, ParserConfigurationException, InterruptedException {
+        String sql = "SELECT file, unitId, segId, source, sourceText FROM segments WHERE type='S' AND (state='initial' OR targetText='') AND translate='Y' ";
+        try (ResultSet rs = stmt.executeQuery(sql)) {
+            while (rs.next()) {
+                String file = rs.getString(1);
+                String unit = rs.getString(2);
+                String segment = rs.getString(3);
+                String src = rs.getNString(4);
+                String sourceText = rs.getNString(5);
+
+                Element source = buildElement(src);
+                source.setContent(new Vector<>());
+                source.addContent(sourceText);
+
+                JSONObject tagsData = new JSONObject();
+                List<JSONObject> translations = translator.translate(sourceText);
+                Iterator<JSONObject> it = translations.iterator();
+                while (it.hasNext()) {
+                    JSONObject translation = it.next();
+                    String origin = translation.getString("key");
+                    source.setAttribute("xml:lang", translation.getString("srcLang"));
+                    Element target = buildElement("<target>" + translation.getString("target") + "</target>");
+                    target.setAttribute("xml:lang", translation.getString("tgtLang"));
+                    insertMatch(file, unit, segment, origin, Constants.MT, 0, source, target, tagsData);
+                }
+                conn.commit();
+            }
+        }
     }
 }

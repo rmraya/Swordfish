@@ -35,7 +35,9 @@ class AddFile {
             this.setCharsets(arg);
         });
         document.addEventListener('keydown', (event: KeyboardEvent) => { KeyboardHandler.keyListener(event); });
-       
+        document.addEventListener('keydown', (event: KeyboardEvent) => {
+            KeyboardHandler.enterHandler(event, document.getElementById('addProjectButton') as HTMLButtonElement);
+        });
         this.electron.ipcRenderer.on('add-source-files', (event: Electron.IpcRendererEvent, arg: any) => {
             this.addFile(arg);
         });

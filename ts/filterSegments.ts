@@ -36,12 +36,19 @@ class FilterSegments {
             this.setParams(arg);
         });
         document.addEventListener('keydown', (event: KeyboardEvent) => { KeyboardHandler.keyListener(event); });
-        document.getElementById('filterSegments').addEventListener('click', () => {
+        document.addEventListener('keydown', (event: KeyboardEvent) => {
+            KeyboardHandler.enterHandler(event, document.getElementById('filterSegments') as HTMLButtonElement);
+        });
+        document.addEventListener('keydown', (event: KeyboardEvent) => {
+            KeyboardHandler.escapeHandler(event, document.getElementById('clearFilter') as HTMLButtonElement);
+        });
+        (document.getElementById('filterSegments') as HTMLButtonElement).addEventListener('click', () => {
             this.filterSegments();
         });
         document.getElementById('clearFilter').addEventListener('click', () => {
             this.clearFilter();
         });
+        (document.getElementById('filterText') as HTMLInputElement).focus();
     }
 
     filterSegments(): void {

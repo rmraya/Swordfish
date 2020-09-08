@@ -39,6 +39,9 @@ class AddMemory {
             this.setSubjects(arg);
         });
         document.addEventListener('keydown', (event: KeyboardEvent) => { KeyboardHandler.keyListener(event); });
+        document.addEventListener('keydown', (event: KeyboardEvent) => {
+            KeyboardHandler.enterHandler(event, document.getElementById('addMemoryButton') as HTMLButtonElement);
+        });
         this.electron.ipcRenderer.on('get-height', () => {
             let body: HTMLBodyElement = document.getElementById('body') as HTMLBodyElement;
             this.electron.ipcRenderer.send('add-memory-height', { width: body.clientWidth, height: body.clientHeight });

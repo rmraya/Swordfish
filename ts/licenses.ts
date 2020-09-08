@@ -60,6 +60,11 @@ class Licenses {
             let body: HTMLBodyElement = document.getElementById('body') as HTMLBodyElement;
             this.electron.ipcRenderer.send('licenses-height', { width: body.clientWidth, height: body.clientHeight });
         });
+        document.addEventListener('keydown', (event: KeyboardEvent) => {
+            if (event.code === 'Escape') {
+                window.close();
+            }
+        });
     }
 
     openLicense(type: string) {

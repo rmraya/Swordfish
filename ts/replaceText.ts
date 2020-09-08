@@ -33,6 +33,9 @@ class ReplaceText {
             this.electron.ipcRenderer.send('replaceText-height', { width: body.clientWidth, height: body.clientHeight });
         });
         document.addEventListener('keydown', (event: KeyboardEvent) => { KeyboardHandler.keyListener(event); });
+        document.addEventListener('keydown', (event: KeyboardEvent) => {
+            KeyboardHandler.enterHandler(event, document.getElementById('replace') as HTMLButtonElement);
+        });
         this.electron.ipcRenderer.on('set-project', (event: Electron.IpcRendererEvent, arg: any) => {
             this.project = arg.project;
         });

@@ -40,6 +40,11 @@ class Messages {
         document.getElementById('closeButton').addEventListener('click', () => {
             window.close();
         });
+        document.addEventListener('keydown', (event: KeyboardEvent) => {
+            if (event.code === 'Escape' || event.code === 'Enter') {
+                window.close();
+            }
+        });
         document.getElementById('closeButton').focus();
     }
 

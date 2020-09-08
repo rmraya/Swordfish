@@ -41,6 +41,9 @@ class ImportTMX {
             this.setSubjects(arg);
         });
         document.addEventListener('keydown', (event: KeyboardEvent) => { KeyboardHandler.keyListener(event); });
+        document.addEventListener('keydown', (event: KeyboardEvent) => {
+            KeyboardHandler.enterHandler(event, document.getElementById('importTmx') as HTMLButtonElement);
+        });
         this.electron.ipcRenderer.on('get-height', () => {
             let body: HTMLBodyElement = document.getElementById('body') as HTMLBodyElement;
             this.electron.ipcRenderer.send('import-tmx-height', { width: body.clientWidth, height: body.clientHeight });

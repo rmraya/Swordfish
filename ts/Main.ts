@@ -476,7 +476,10 @@ class Main {
     }
 
     applyMachineTranslationsAll(): void {
-        // TODO
+        let selected = Main.tabHolder.getSelected();
+        if (Main.translationViews.has(selected)) {
+            Main.translationViews.get(selected).applyMachineTranslationsAll();
+        }
     }
 
     acceptAllMachineTranslations(): void {

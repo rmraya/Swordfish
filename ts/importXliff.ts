@@ -35,6 +35,9 @@ class ImportXLIFF {
             this.setSubjects(arg);
         });
         document.addEventListener('keydown', (event: KeyboardEvent) => { KeyboardHandler.keyListener(event); });
+        document.addEventListener('keydown', (event: KeyboardEvent) => {
+            KeyboardHandler.enterHandler(event, document.getElementById('importXliff') as HTMLButtonElement);
+        });
         this.electron.ipcRenderer.on('get-height', () => {
             let body: HTMLBodyElement = document.getElementById('body') as HTMLBodyElement;
             this.electron.ipcRenderer.send('import-xliff-height', { width: body.clientWidth, height: body.clientHeight });

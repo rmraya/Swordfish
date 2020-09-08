@@ -572,7 +572,8 @@ class TranslationView {
         this.tbody.parentElement.scrollTo({ top: 0, left: 0 });
         let length = arg.length;
         if (length === 0 && this.filterButton.classList.contains('active')) {
-            this.electron.ipcRenderer.send('show-message', { type: 'warning', message: 'Nothing to display, consider clearing current filter' })
+            this.electron.ipcRenderer.send('show-message', { type: 'warning', message: 'Nothing to display, consider clearing current filter' });
+            this.container.classList.remove('wait');
             return;
         }
         for (let i = 0; i < length; i++) {
@@ -1104,5 +1105,9 @@ class TranslationView {
 
     replaceText() : void {
         this.electron.ipcRenderer.send('show-replaceText', { project: this.projectId });
+    }
+
+    applyMachineTranslationsAll(): void {
+        this.electron.ipcRenderer.send('apply-mt-all', { project: this.projectId });
     }
 }

@@ -39,6 +39,14 @@ class About {
             let body: HTMLBodyElement = document.getElementById('body') as HTMLBodyElement;
             this.electron.ipcRenderer.send('about-height', { width: body.clientWidth, height: (body.clientHeight + 20) });
         });
+        document.addEventListener('keydown', (event: KeyboardEvent) => {
+            KeyboardHandler.enterHandler(event, document.getElementById('licensesButton') as HTMLButtonElement);
+        });
+        document.addEventListener('keydown', (event: KeyboardEvent) => {
+            if (event.code === 'Escape') {
+                window.close();
+            }
+        });
     }
 
 }
