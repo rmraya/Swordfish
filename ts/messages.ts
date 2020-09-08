@@ -38,11 +38,11 @@ class Messages {
             this.setMessage(arg);
         });
         document.getElementById('closeButton').addEventListener('click', () => {
-            window.close();
+            this.electron.ipcRenderer.send('close-messages');
         });
         document.addEventListener('keydown', (event: KeyboardEvent) => {
-            if (event.code === 'Escape' || event.code === 'Enter') {
-                window.close();
+            if (event.code === 'Escape') {
+                this.electron.ipcRenderer.send('close-messages');
             }
         });
         document.getElementById('closeButton').focus();

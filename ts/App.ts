@@ -247,6 +247,9 @@ class Swordfish {
         ipcMain.on('licenses-height', (event: IpcMainEvent, arg: any) => {
             Swordfish.setHeight(Swordfish.licensesWindow, arg);
         });
+        ipcMain.on('close-licenses', () => {
+            Swordfish.destroyWindow(Swordfish.licensesWindow);
+        });
         ipcMain.on('save-preferences', (event: IpcMainEvent, arg: any) => {
             Swordfish.savePreferences(arg);
         });
@@ -279,6 +282,9 @@ class Swordfish {
         });
         ipcMain.on('about-height', (event: IpcMainEvent, arg: any) => {
             Swordfish.setHeight(Swordfish.aboutWindow, arg);
+        });
+        ipcMain.on('close-about', () => {
+            Swordfish.destroyWindow(Swordfish.aboutWindow);
         });
         ipcMain.on('licenses-clicked', () => {
             Swordfish.showLicenses();
@@ -430,6 +436,9 @@ class Swordfish {
         });
         ipcMain.on('messages-height', (event: IpcMainEvent, arg: any) => {
             Swordfish.setHeight(Swordfish.messagesWindow, arg);
+        });
+        ipcMain.on('close-messages', () => {
+            Swordfish.destroyWindow(Swordfish.messagesWindow);
         });
         ipcMain.on('export-xliff', (event: IpcMainEvent, arg: any) => {
             Swordfish.exportProject(arg);
@@ -2629,6 +2638,16 @@ class Swordfish {
                 );
             }
         });
+    }
+
+    static destroyWindow(window: BrowserWindow): void {
+        if (window && window.isClosable()) {
+            try {
+                window.destroy();
+            } catch (e) {
+                console.log(e);
+            }
+        }
     }
 }
 

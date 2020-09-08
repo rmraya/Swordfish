@@ -44,7 +44,7 @@ class About {
         });
         document.addEventListener('keydown', (event: KeyboardEvent) => {
             if (event.code === 'Escape') {
-                window.close();
+                this.electron.ipcRenderer.send('close-about');
             }
         });
     }
