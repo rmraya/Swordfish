@@ -174,6 +174,10 @@ public class ProjectsHandler implements HttpHandler {
 				response = applyMtAll(request);
 			} else if ("/projects/acceptAllMT".equals(url)) {
 				response = acceptAllMT(request);
+			} else if ("/projects/removeMatches".equals(url)) {
+				response = removeMatches(request);
+			} else if ("/projects/removeMT".equals(url)) {
+				response = removeMT(request);
 			} else {
 				response.put(Constants.REASON, "Unknown request");
 			}
@@ -1038,6 +1042,36 @@ public class ProjectsHandler implements HttpHandler {
 				updateProjectStatus(project, status.getInt("percentage"));
 			}
 		} catch (SQLException | JSONException | SAXException | IOException | ParserConfigurationException e) {
+			logger.log(Level.ERROR, e);
+			result.put(Constants.REASON, e.getMessage());
+		}
+		return result;
+	}
+
+	private JSONObject removeMatches(String request) {
+		JSONObject result = new JSONObject();
+		try {
+			JSONObject json = new JSONObject(request);
+			String project = json.getString("project");
+			if (projectStores.containsKey(project)) {
+				projectStores.get(project).removeMatches();
+			}
+		} catch (SQLException | JSONException e) {
+			logger.log(Level.ERROR, e);
+			result.put(Constants.REASON, e.getMessage());
+		}
+		return result;
+	}
+
+	private JSONObject removeMT(String request) {
+		JSONObject result = new JSONObject();
+		try {
+			JSONObject json = new JSONObject(request);
+			String project = json.getString("project");
+			if (projectStores.containsKey(project)) {
+				projectStores.get(project).removeMT();
+			}
+		} catch (SQLException | JSONException e) {
 			logger.log(Level.ERROR, e);
 			result.put(Constants.REASON, e.getMessage());
 		}

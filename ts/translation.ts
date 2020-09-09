@@ -643,6 +643,8 @@ class TranslationView {
             td.innerHTML = row.target;
             tr.appendChild(td);
         }
+        this.tmMatches.clear();
+        this.mtMatches.clear();
         this.container.classList.remove('wait');
     }
 
@@ -1031,6 +1033,14 @@ class TranslationView {
 
     removeAllTranslations(): void {
         this.electron.ipcRenderer.send('remove-translations', { project: this.projectId });
+    }
+
+    removeAllMatches(): void{
+        this.electron.ipcRenderer.send('remove-matches', { project: this.projectId });
+    }
+
+    removeAllMachineTranslations(): void {
+        this.electron.ipcRenderer.send('remove-machine-translations', { project: this.projectId });
     }
 
     unconfirmAllTranslations(): void {

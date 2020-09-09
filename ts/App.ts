@@ -489,10 +489,16 @@ class Swordfish {
             Swordfish.importXLIFF(arg);
         });
         ipcMain.on('files-dropped', (event: IpcMainEvent, arg: any) => {
-            Swordfish.filesDropped(arg)
+            Swordfish.filesDropped(arg);
         });
         ipcMain.on('remove-translations', (event: IpcMainEvent, arg: any) => {
-            Swordfish.removeTranslations(arg)
+            Swordfish.removeTranslations(arg);
+        });
+        ipcMain.on('remove-matches', (event: IpcMainEvent, arg: any) => {
+            Swordfish.removeMatches(arg);
+        });
+        ipcMain.on('remove-machine-translations', (event: IpcMainEvent, arg: any) => {
+            Swordfish.removeMachineTranslations(arg);
         });
         ipcMain.on('unconfirm-translations', (event: IpcMainEvent, arg: any) => {
             Swordfish.unconfirmTranslations(arg);
@@ -680,11 +686,13 @@ class Swordfish {
             { label: 'Accept Translation Memory Match', accelerator: 'CmdOrCtrl+Alt+M', click: () => { Swordfish.mainWindow.webContents.send('accept-tm-match'); } },
             { label: 'Apply Translation Memory to All Segments', click: () => { Swordfish.mainWindow.webContents.send('apply-tm-all'); } },
             { label: 'Accept All 100% Matches', click: () => { Swordfish.mainWindow.webContents.send('accept-all-matches'); } },
+            { label: 'Remove All Translation Memory Matches', click: () => { Swordfish.mainWindow.webContents.send('remove-matches'); } },
             new MenuItem({ type: 'separator' }),
             { label: 'Get Machine Translations', accelerator: 'CmdOrCtrl+L', click: () => { Swordfish.mainWindow.webContents.send('get-mt-matches'); } },
             { label: 'Accept Machine Translation', accelerator: 'CmdOrCtrl+Alt+L', click: () => { Swordfish.mainWindow.webContents.send('accept-mt-match'); } },
             { label: 'Apply Machine Translation to All Segments', click: () => { Swordfish.mainWindow.webContents.send('apply-mt-all'); } },
-            { label: 'Accept All Machine Translations', click: () => { Swordfish.mainWindow.webContents.send('accept-all-mt'); } }
+            { label: 'Accept All Machine Translations', click: () => { Swordfish.mainWindow.webContents.send('accept-all-mt'); } },
+            { label: 'Remove All Machine Translations', click: () => { Swordfish.mainWindow.webContents.send('remove-mt-all'); } }
         ]);
         var template: MenuItem[] = [
             new MenuItem({ label: '&File', role: 'fileMenu', submenu: fileMenu }),
@@ -2361,6 +2369,64 @@ class Swordfish {
                         }
                         Swordfish.mainWindow.webContents.send('reload-page', { project: arg.project });
                         Swordfish.mainWindow.webContents.send('set-statistics', { project: arg.project, statistics: data.statistics });
+                    },
+                    (reason: string) => {
+                        Swordfish.mainWindow.webContents.send('end-waiting');
+                        Swordfish.mainWindow.webContents.send('set-status', '');
+                        Swordfish.showMessage({ type: 'error', message: reason });
+                    }
+                );
+            }
+        });
+    }
+
+    static removeMatches(arg: any): void {
+        dialog.showMessageBox(Swordfish.mainWindow, {
+            type: 'question',
+            message: 'Remove all translation memory matches?',
+            buttons: ['Yes', 'No']
+        }).then((selection: Electron.MessageBoxReturnValue) => {
+            if (selection.response === 0) {
+                Swordfish.mainWindow.webContents.send('start-waiting');
+                Swordfish.mainWindow.webContents.send('set-status', 'Removing matches');
+                Swordfish.sendRequest('/projects/removeMatches', arg,
+                    (data: any) => {
+                        Swordfish.mainWindow.webContents.send('end-waiting');
+                        Swordfish.mainWindow.webContents.send('set-status', '');
+                        if (data.status !== Swordfish.SUCCESS) {
+                            Swordfish.showMessage({ type: 'error', message: data.reason });
+                            return;
+                        }
+                        Swordfish.mainWindow.webContents.send('reload-page', { project: arg.project });
+                    },
+                    (reason: string) => {
+                        Swordfish.mainWindow.webContents.send('end-waiting');
+                        Swordfish.mainWindow.webContents.send('set-status', '');
+                        Swordfish.showMessage({ type: 'error', message: reason });
+                    }
+                );
+            }
+        });
+    }
+
+    static removeMachineTranslations(arg: any): void {
+        dialog.showMessageBox(Swordfish.mainWindow, {
+            type: 'question',
+            message: 'Remove all machine translations?',
+            buttons: ['Yes', 'No']
+        }).then((selection: Electron.MessageBoxReturnValue) => {
+            if (selection.response === 0) {
+                Swordfish.mainWindow.webContents.send('start-waiting');
+                Swordfish.mainWindow.webContents.send('set-status', 'Removing translations');
+                Swordfish.sendRequest('/projects/removeMT', arg,
+                    (data: any) => {
+                        Swordfish.mainWindow.webContents.send('end-waiting');
+                        Swordfish.mainWindow.webContents.send('set-status', '');
+                        if (data.status !== Swordfish.SUCCESS) {
+                            Swordfish.showMessage({ type: 'error', message: data.reason });
+                            return;
+                        }
+                        Swordfish.mainWindow.webContents.send('reload-page', { project: arg.project });
                     },
                     (reason: string) => {
                         Swordfish.mainWindow.webContents.send('end-waiting');

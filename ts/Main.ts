@@ -190,6 +190,9 @@ class Main {
         Main.electron.ipcRenderer.on('remove-all', () => {
             this.removeAllTranslations();
         });
+        Main.electron.ipcRenderer.on('remove-matches', () => {
+            this.removeAllMatches();
+        });
         Main.electron.ipcRenderer.on('copy-source', () => {
             this.copySource();
         });
@@ -222,6 +225,9 @@ class Main {
         });
         Main.electron.ipcRenderer.on('accept-all-mt', () => {
             this.acceptAllMachineTranslations();
+        });
+        Main.electron.ipcRenderer.on('remove-mt-all', ()=>{
+            this.removeAllMachineTranslations();
         });
         Main.electron.ipcRenderer.on('apply-tm-all', () => {
             this.applyTranslationMemoryAll();
@@ -377,6 +383,13 @@ class Main {
         }
     }
 
+    removeAllMatches(): void {
+        let selected = Main.tabHolder.getSelected();
+        if (Main.translationViews.has(selected)) {
+            Main.translationViews.get(selected).removeAllMatches();
+        }
+    }
+
     copySource(): void {
         let selected = Main.tabHolder.getSelected();
         if (Main.translationViews.has(selected)) {
@@ -486,6 +499,13 @@ class Main {
         let selected = Main.tabHolder.getSelected();
         if (Main.translationViews.has(selected)) {
             Main.translationViews.get(selected).acceptAllMachineTranslations();
+        }
+    }
+
+    removeAllMachineTranslations(): void {
+        let selected = Main.tabHolder.getSelected();
+        if (Main.translationViews.has(selected)) {
+            Main.translationViews.get(selected).removeAllMachineTranslations();
         }
     }
 

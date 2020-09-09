@@ -1833,4 +1833,14 @@ public class XliffStore {
             }
         }
     }
+
+	public void removeMatches() throws SQLException {
+        stmt.execute("DELETE FROM matches WHERE type='tm' ");
+        conn.commit();       
+    }
+    
+    public void removeMT() throws SQLException {
+        stmt.execute("DELETE FROM matches WHERE type='mt' ");
+        conn.commit();       
+	}
 }
