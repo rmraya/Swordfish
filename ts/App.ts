@@ -19,7 +19,7 @@ SOFTWARE.
 
 import { Buffer } from "buffer";
 import { execFileSync, spawn, ChildProcessWithoutNullStreams } from "child_process";
-import { app, clipboard, BrowserWindow, dialog, ipcMain, Menu, MenuItem, shell, nativeTheme, Rectangle, IpcMainEvent, screen, Size } from "electron";
+import { app, clipboard, BrowserWindow, dialog, ipcMain, Menu, MenuItem, shell, nativeTheme, Rectangle, IpcMainEvent, screen, Size, systemPreferences } from "electron";
 import { existsSync, mkdirSync, readFile, readFileSync, writeFileSync, lstatSync } from "fs";
 import { ClientRequest, request, IncomingMessage } from "http";
 
@@ -43,6 +43,7 @@ class Swordfish {
     static messagesWindow: BrowserWindow;
     static tagsWindow: BrowserWindow;
     static replaceTextWindow: BrowserWindow;
+    static addGlossaryWindow: BrowserWindow;
 
     javapath: string = Swordfish.path.join(app.getAppPath(), 'bin', 'java');
 
@@ -299,7 +300,7 @@ class Swordfish {
             Swordfish.showLicenses();
         });
         ipcMain.on('create-project', (event: IpcMainEvent, arg: any) => {
-            this.createProject(arg);
+            Swordfish.createProject(arg);
         });
         ipcMain.on('remove-projects', (event: IpcMainEvent, arg: any) => {
             Swordfish.removeProjects(arg);
@@ -317,8 +318,24 @@ class Swordfish {
             Swordfish.destroyWindow(Swordfish.addMemoryWindow);
         });
         ipcMain.on('add-memory', (event: IpcMainEvent, arg: any) => {
-            this.addMemory(arg);
+            Swordfish.addMemory(arg);
         });
+        ipcMain.on('show-add-glossary', () => {
+            Swordfish.showAddGlossary();
+        });
+        ipcMain.on('add-glossary-height',(event: IpcMainEvent, arg: any) => {
+            Swordfish.setHeight(Swordfish.addGlossaryWindow, arg);
+        });
+        ipcMain.on('add-glossary', (event: IpcMainEvent, arg: any) => {
+            Swordfish.addGlossary(arg);
+        });
+        ipcMain.on('get-glossaries', (event: IpcMainEvent, arg: any) => {
+            Swordfish.getGlossaries(event);
+        });
+        ipcMain.on('remove-glossaries', (event: IpcMainEvent, arg: any) => {
+            Swordfish.removeGlossaries(arg);
+        });
+
         ipcMain.on('show-import-tmx', (event: IpcMainEvent, arg: any) => {
             Swordfish.showImportTMX(arg);
         });
@@ -332,10 +349,10 @@ class Swordfish {
             Swordfish.importTmxFile(arg);
         });
         ipcMain.on('remove-memories', (event: IpcMainEvent, arg: any) => {
-            this.removeMemories(arg);
+            Swordfish.removeMemories(arg);
         });
         ipcMain.on('export-memories', (event: IpcMainEvent, arg: any) => {
-            this.exportMemories(arg);
+            Swordfish.exportMemories(arg);
         });
         ipcMain.on('get-tmx-file', (event: IpcMainEvent) => {
             this.getTmxFile(event);
@@ -1055,7 +1072,7 @@ class Swordfish {
         Swordfish.mainWindow.webContents.send('translate-projects');
     }
 
-    createProject(arg: any): void {
+    static createProject(arg: any): void {
         if (Swordfish.addProjectWindow) {
             Swordfish.destroyWindow(Swordfish.addProjectWindow);
         }
@@ -1146,6 +1163,27 @@ class Swordfish {
                 Swordfish.mainWindow.webContents.send('end-waiting');
                 if (data.status === Swordfish.SUCCESS) {
                     event.sender.send('set-memories', data.memories);
+                } else {
+                    dialog.showMessageBox({ type: 'error', message: data.reason });
+                }
+            },
+            (reason: string) => {
+                Swordfish.mainWindow.webContents.send('set-status', '');
+                dialog.showMessageBox({ type: 'error', message: reason });
+
+            }
+        );
+    }
+
+    static getGlossaries(event: IpcMainEvent): void {
+        Swordfish.mainWindow.webContents.send('start-waiting');
+        Swordfish.mainWindow.webContents.send('set-status', 'Loading glossaries');
+        Swordfish.sendRequest('/glossaries/list', {},
+            (data: any) => {
+                Swordfish.mainWindow.webContents.send('set-status', '');
+                Swordfish.mainWindow.webContents.send('end-waiting');
+                if (data.status === Swordfish.SUCCESS) {
+                    event.sender.send('set-glossaries', data.glossaries);
                 } else {
                     dialog.showMessageBox({ type: 'error', message: data.reason });
                 }
@@ -1681,7 +1719,7 @@ class Swordfish {
         });
     }
 
-    addMemory(arg: any): void {
+    static addMemory(arg: any): void {
         Swordfish.sendRequest('/memories/create', arg,
             (data: any) => {
                 if (data.status !== Swordfish.SUCCESS) {
@@ -1690,6 +1728,22 @@ class Swordfish {
                 }
                 Swordfish.destroyWindow(Swordfish.addMemoryWindow);
                 Swordfish.mainWindow.webContents.send('request-memories');
+            },
+            (reason: string) => {
+                Swordfish.showMessage({ type: 'error', message: reason });
+            }
+        );
+    }
+
+    static addGlossary(arg: any): void {
+        Swordfish.sendRequest('/glossaries/create', arg,
+            (data: any) => {
+                if (data.status !== Swordfish.SUCCESS) {
+                    Swordfish.showMessage({ type: 'error', message: data.reason });
+                    return;
+                }
+                Swordfish.destroyWindow(Swordfish.addGlossaryWindow);
+                Swordfish.mainWindow.webContents.send('request-glossaries');
             },
             (reason: string) => {
                 Swordfish.showMessage({ type: 'error', message: reason });
@@ -1776,6 +1830,17 @@ class Swordfish {
         );
     }
 
+    static getGlossariesProgress(process: string): void {
+        this.sendRequest('/glossaries/status', { process: process },
+            (data: any) => {
+                Swordfish.currentStatus = data;
+            },
+            (reason: string) => {
+                Swordfish.showMessage({ type: 'error', message: reason });
+            }
+        );
+    }
+
     getTmxFile(event: IpcMainEvent): void {
         let anyFile: string[] = [];
         if (process.platform === 'linux') {
@@ -1798,7 +1863,7 @@ class Swordfish {
         Swordfish.mainWindow.webContents.send('remove-memory');
     }
 
-    removeMemories(arg: string[]) {
+    static removeMemories(arg: string[]) {
         dialog.showMessageBox(Swordfish.mainWindow, { type: "question", message: "Delete selected memories?", buttons: ["Yes", "No"], defaultId: 1 }
         ).then((result: any) => {
             if (result.response === 0) {
@@ -1848,7 +1913,57 @@ class Swordfish {
         });
     }
 
-    exportMemories(memories: any[]): void {
+    static removeGlossaries(arg: string[]) {
+        dialog.showMessageBox(Swordfish.mainWindow, { type: "question", message: "Delete selected glossaries?", buttons: ["Yes", "No"], defaultId: 1 }
+        ).then((result: any) => {
+            if (result.response === 0) {
+                Swordfish.mainWindow.webContents.send('start-waiting');
+                Swordfish.mainWindow.webContents.send('set-status', 'Removing glossaries');
+                Swordfish.sendRequest('/glossaries/delete', { glossaries: arg },
+                    (data: any) => {
+                        if (data.status !== Swordfish.SUCCESS) {
+                            Swordfish.mainWindow.webContents.send('end-waiting');
+                            Swordfish.mainWindow.webContents.send('set-status', '');
+                            Swordfish.showMessage({ type: 'error', message: data.reason });
+                        }
+                        Swordfish.currentStatus = data;
+                        let processId: string = data.process;
+                        var intervalObject = setInterval(() => {
+                            if (Swordfish.currentStatus.result) {
+                                if (Swordfish.currentStatus.result === Swordfish.COMPLETED) {
+                                    Swordfish.mainWindow.webContents.send('end-waiting');
+                                    Swordfish.mainWindow.webContents.send('set-status', '');
+                                    clearInterval(intervalObject);
+                                    Swordfish.mainWindow.webContents.send('request-glossaries');
+                                    return;
+                                } else if (Swordfish.currentStatus.result === Swordfish.PROCESSING) {
+                                    // it's OK, keep waiting
+                                } else if (Swordfish.currentStatus.result === Swordfish.ERROR) {
+                                    Swordfish.mainWindow.webContents.send('end-waiting');
+                                    Swordfish.mainWindow.webContents.send('set-status', '');
+                                    clearInterval(intervalObject);
+                                    Swordfish.showMessage({ type: 'error', message: Swordfish.currentStatus.reason });
+                                    return;
+                                } else {
+                                    Swordfish.mainWindow.webContents.send('end-waiting');
+                                    Swordfish.mainWindow.webContents.send('set-status', '');
+                                    clearInterval(intervalObject);
+                                    Swordfish.showMessage({ type: 'error', message: 'Unknown error removing glossaries' });
+                                    return;
+                                }
+                            }
+                            Swordfish.getGlossariesProgress(processId);
+                        }, 500);
+                    },
+                    (reason: string) => {
+                        Swordfish.showMessage({ type: 'error', message: reason });
+                    }
+                );
+            }
+        });
+    }
+
+    static exportMemories(memories: any[]): void {
         if (memories.length === 1) {
             dialog.showSaveDialog(Swordfish.mainWindow, {
                 defaultPath: memories[0].name + '.tmx',
@@ -2224,7 +2339,24 @@ class Swordfish {
     }
 
     static showAddGlossary(): void {
-        // TODO
+        this.addGlossaryWindow = new BrowserWindow({
+            parent: this.mainWindow,
+            width: 450,
+            minimizable: false,
+            maximizable: false,
+            resizable: false,
+            useContentSize: true,
+            show: false,
+            icon: this.iconPath,
+            webPreferences: {
+                nodeIntegration: true
+            }
+        });
+        this.addGlossaryWindow.setMenu(null);
+        this.addGlossaryWindow.loadURL('file://' + this.path.join(app.getAppPath(), 'html', 'addGlossary.html'));
+        this.addGlossaryWindow.once('ready-to-show', (event: IpcMainEvent) => {
+            event.sender.send('get-height');
+        });
     }
 
     static removeGlossary(): void {

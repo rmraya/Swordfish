@@ -121,6 +121,9 @@ class Main {
         Main.electron.ipcRenderer.on('view-glossaries', () => {
             Main.tabHolder.selectTab('glossaries');
         });
+        Main.electron.ipcRenderer.on('request-glossaries', () => {
+            this.glossariesView.loadGlossaries();
+        });
         Main.electron.ipcRenderer.on('close-tab', () => {
             this.closeTab();
         });

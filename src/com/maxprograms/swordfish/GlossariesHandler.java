@@ -18,17 +18,422 @@ SOFTWARE.
 *****************************************************************************/
 package com.maxprograms.swordfish;
 
+import java.io.BufferedReader;
+import java.io.ByteArrayInputStream;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.FileReader;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.lang.System.Logger;
+import java.lang.System.Logger.Level;
+import java.net.URI;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.sql.SQLException;
+import java.util.Collections;
+import java.util.Iterator;
+import java.util.Set;
+import java.util.TreeSet;
+import java.util.Vector;
+import java.util.concurrent.ConcurrentHashMap;
 
+import javax.xml.parsers.ParserConfigurationException;
+
+import com.maxprograms.swordfish.models.Memory;
+import com.maxprograms.swordfish.tm.ITmEngine;
+import com.maxprograms.swordfish.tm.InternalDatabase;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+import org.xml.sax.SAXException;
+
 public class GlossariesHandler implements HttpHandler {
+
+	private static Logger logger = System.getLogger(GlossariesHandler.class.getName());
+
+	private static ConcurrentHashMap<String, Memory> glossaries;
+	private static ConcurrentHashMap<String, ITmEngine> openEngines;
+	private static ConcurrentHashMap<String, String[]> openTasks;
+	private static boolean firstRun = true;
 
 	@Override
 	public void handle(HttpExchange exchange) throws IOException {
-		// TODO Auto-generated method stub
+		try {
+			String request;
+			URI uri = exchange.getRequestURI();
+			try (InputStream is = exchange.getRequestBody()) {
+				request = TmsServer.readRequestBody(is);
+			}
+			JSONObject response = processRequest(uri.toString(), request);
+			byte[] bytes = response.toString().getBytes(StandardCharsets.UTF_8);
+			exchange.sendResponseHeaders(200, bytes.length);
+			exchange.getResponseHeaders().add("content-type", "application/json; charset=utf-8");
+			try (ByteArrayInputStream stream = new ByteArrayInputStream(bytes)) {
+				try (OutputStream os = exchange.getResponseBody()) {
+					byte[] array = new byte[2048];
+					int read;
+					while ((read = stream.read(array)) != -1) {
+						os.write(array, 0, read);
+					}
+				}
+			}
+		} catch (IOException e) {
+			logger.log(Level.ERROR, "Error processing glossary " + exchange.getRequestURI().toString(), e);
+		}
 
+	}
+
+	private JSONObject processRequest(String url, String request) {
+		if (TmsServer.isDebug()) {
+			logger.log(Level.INFO, url);
+		}
+		JSONObject response = new JSONObject();
+		try {
+			if ("/glossaries/create".equals(url)) {
+				response = createGlossary(request);
+			} else if ("/glossaries/list".equals(url)) {
+				response = listGlossaries(request);
+			} else if ("/glossaries/delete".equals(url)) {
+				response = deleteGlossary(request);
+			} else if ("/glossaries/exportTMX".equals(url)) {
+				response = exportTMX(request);
+			} else if ("/glossaries/importTMX".equals(url)) {
+				response = importTMX(request);
+			} else if ("/glossaries/status".equals(url)) {
+				response = getProcessStatus(request);
+			} else {
+				response.put(Constants.REASON, "Unknown request");
+			}
+
+			if (!response.has(Constants.REASON)) {
+				response.put(Constants.STATUS, Constants.SUCCESS);
+			} else {
+				response.put(Constants.STATUS, Constants.ERROR);
+			}
+		} catch (Exception j) {
+			logger.log(Level.ERROR, j.getMessage(), j);
+			response.put(Constants.STATUS, Constants.ERROR);
+			response.put(Constants.REASON, j.getMessage());
+		}
+		return response;
+	}
+
+	private static JSONObject getProcessStatus(String request) {
+		JSONObject result = new JSONObject();
+		JSONObject json = new JSONObject(request);
+		if (!json.has("process")) {
+			result.put(Constants.REASON, "Missing 'process' parameter");
+			return result;
+		}
+		String process = json.getString("process");
+		if (openTasks == null) {
+			openTasks = new ConcurrentHashMap<>();
+		}
+		if (openTasks.containsKey(process)) {
+			String[] status = openTasks.get(process);
+			result.put("result", status[0]);
+			if (Constants.COMPLETED.equals(status[0]) && status.length > 1) {
+				result.put("data", new JSONObject(status[1]));
+			}
+			if (Constants.ERROR.equals(status[0])) {
+				result.put(Constants.REASON, status[1]);
+			}
+		} else {
+			result.put("result", Constants.ERROR);
+			result.put(Constants.REASON, "No such process: " + process);
+		}
+		return result;
+	}
+
+	private static JSONObject createGlossary(String request) throws IOException, SQLException {
+		JSONObject result = new JSONObject();
+		JSONObject json = new JSONObject(request);
+		if (!json.has("id")) {
+			json.put("id", "" + System.currentTimeMillis());
+		}
+		if (!json.has("creationDate")) {
+			json.put("creationDate", System.currentTimeMillis());
+		}
+		Memory mem = new Memory(json);
+		InternalDatabase engine = new InternalDatabase(mem.getId(), getWorkFolder());
+		engine.close();
+		if (glossaries == null) {
+			loadGlossariesList();
+		}
+		glossaries.put(mem.getId(), mem);
+		ServicesHandler.addClient(json.getString("client"));
+		ServicesHandler.addSubject(json.getString("subject"));
+		ServicesHandler.addProject(json.getString("project"));
+		saveGlossariesList();
+		return result;
+	}
+
+	private static void loadGlossariesList() throws IOException {
+		glossaries = new ConcurrentHashMap<>();
+		File home = new File(getWorkFolder());
+		File list = new File(home, "glossaries.json");
+		if (!list.exists()) {
+			return;
+		}
+		StringBuffer buffer = new StringBuffer();
+		try (FileReader input = new FileReader(list)) {
+			try (BufferedReader reader = new BufferedReader(input)) {
+				String line;
+				while ((line = reader.readLine()) != null) {
+					buffer.append(line);
+				}
+			}
+		}
+		JSONObject json = new JSONObject(buffer.toString());
+		Set<String> keys = json.keySet();
+		Iterator<String> it = keys.iterator();
+		while (it.hasNext()) {
+			String key = it.next();
+			JSONObject obj = json.getJSONObject(key);
+			glossaries.put(key, new Memory(obj));
+		}
+		if (firstRun) {
+			firstRun = false;
+			new Thread(() -> {
+				try {
+					File[] filesList = home.listFiles();
+					for (int i = 0; i < filesList.length; i++) {
+						if (filesList[i].isDirectory() && !glossaries.containsKey(filesList[i].getName())) {
+							TmsServer.deleteFolder(filesList[i].getAbsolutePath());
+						}
+					}
+				} catch (IOException e) {
+					logger.log(Level.WARNING, "Error deleting folder", e);
+				}
+			}).start();
+		}
+	}
+
+	private static void saveGlossariesList() throws IOException {
+		JSONObject json = new JSONObject();
+		Set<String> keys = glossaries.keySet();
+		Iterator<String> it = keys.iterator();
+		while (it.hasNext()) {
+			String key = it.next();
+			Memory m = glossaries.get(key);
+			json.put(key, m.toJSON());
+		}
+		File home = new File(getWorkFolder());
+		File list = new File(home, "glossaries.json");
+		try (FileOutputStream out = new FileOutputStream(list)) {
+			out.write(json.toString(2).getBytes(StandardCharsets.UTF_8));
+		}
+	}
+
+	private static JSONObject listGlossaries(String request) throws IOException {
+		JSONObject result = new JSONObject();
+		JSONArray array = new JSONArray();
+		result.put("glossaries", array);
+		if (glossaries == null) {
+			loadGlossariesList();
+		}
+		Vector<Memory> vector = new Vector<>();
+		vector.addAll(glossaries.values());
+		Collections.sort(vector);
+		Iterator<Memory> it = vector.iterator();
+		while (it.hasNext()) {
+			Memory m = it.next();
+			array.put(m.toJSON());
+		}
+		return result;
+	}
+
+	private static JSONObject deleteGlossary(String request) {
+		JSONObject result = new JSONObject();
+		final JSONObject json = new JSONObject(request);
+
+		if (json.has("glossaries")) {
+			final String process = "" + System.currentTimeMillis();
+			result.put("process", process);
+			if (openTasks == null) {
+				openTasks = new ConcurrentHashMap<>();
+			}
+			openTasks.put(process, new String[] { Constants.PROCESSING });
+			new Thread(() -> {
+				try {
+					JSONArray array = json.getJSONArray("glossaries");
+					for (int i = 0; i < array.length(); i++) {
+						Memory mem = glossaries.get(array.getString(i));
+						if (openEngines != null && openEngines.contains(mem.getId())) {
+							ITmEngine engine = openEngines.get(mem.getId());
+							engine.close();
+							openEngines.remove(mem.getId());
+						}
+						try {
+							File wfolder = new File(getWorkFolder(), mem.getId());
+							TmsServer.deleteFolder(wfolder.getAbsolutePath());
+						} catch (IOException ioe) {
+							logger.log(Level.WARNING, "Folder '" + mem.getId() + "' will be deleted on next start");
+						}
+						glossaries.remove(mem.getId());
+					}
+					saveGlossariesList();
+					openTasks.put(process, new String[] { Constants.COMPLETED });
+				} catch (IOException | SQLException e) {
+					logger.log(Level.ERROR, e.getMessage(), e);
+					openTasks.put(process, new String[] { Constants.ERROR, e.getMessage() });
+				}
+			}).start();
+		} else {
+			result.put(Constants.REASON, "Missing 'glossaries' parameter");
+		}
+		return result;
+	}
+
+	private static JSONObject exportTMX(String request) {
+		JSONObject result = new JSONObject();
+		final JSONObject json = new JSONObject(request);
+		if (!json.has("glossary")) {
+			result.put(Constants.REASON, "Missing 'glossary' parameter");
+			return result;
+		}
+		if (!json.has("tmx")) {
+			result.put(Constants.REASON, "Missing 'tmx' parameter");
+			return result;
+		}
+		if (!json.has("srcLang")) {
+			json.put("srcLang", "*all*");
+		}
+		final String process = "" + System.currentTimeMillis();
+		if (openTasks == null) {
+			openTasks = new ConcurrentHashMap<>();
+		}
+		openTasks.put(process, new String[] { Constants.PROCESSING });
+		new Thread(() -> {
+			try {
+				if (glossaries == null) {
+					loadGlossariesList();
+				}
+				Memory mem = glossaries.get(json.getString("glossary"));
+				if (openEngines == null) {
+					openEngines = new ConcurrentHashMap<>();
+				}
+				boolean needsClosing = false;
+				if (!openEngines.containsKey(mem.getId())) {
+					needsClosing = true;
+					openGlossary(mem.getId());
+				}
+				ITmEngine engine = openEngines.get(mem.getId());
+				File tmx = new File(json.getString("tmx"));
+				Set<String> langSet = Collections.synchronizedSortedSet(new TreeSet<>());
+				if (json.has("languages")) {
+					JSONArray langs = json.getJSONArray("languages");
+					for (int i = 0; i < langs.length(); i++) {
+						langSet.add(langs.getString(i));
+					}
+				}
+				engine.exportMemory(tmx.getAbsolutePath(), langSet, json.getString("srcLang"));
+				if (needsClosing) {
+					closeGlossary(mem.getId());
+				}
+				openTasks.put(process, new String[] { Constants.COMPLETED });
+			} catch (IOException | JSONException | SAXException | ParserConfigurationException | SQLException e) {
+				logger.log(Level.ERROR, e.getMessage(), e);
+				openTasks.put(process, new String[] { Constants.ERROR, e.getMessage() });
+			}
+		}).start();
+		result.put("process", process);
+		return result;
+	}
+
+	private static void openGlossary(String id) throws IOException, SQLException {
+		if (glossaries == null) {
+			loadGlossariesList();
+		}
+		if (openEngines == null) {
+			openEngines = new ConcurrentHashMap<>();
+		}
+		if (openEngines.contains(id)) {
+			return;
+		}
+		openEngines.put(id, new InternalDatabase(id, getWorkFolder()));
+	}
+
+	public static void closeGlossary(String id) throws IOException, SQLException {
+		if (openEngines == null) {
+			openEngines = new ConcurrentHashMap<>();
+			logger.log(Level.WARNING, "Closing glossary when 'openEngine' is null");
+		}
+		if (!openEngines.contains(id)) {
+			return;
+		}
+		openEngines.get(id).close();
+	}
+
+	private static JSONObject importTMX(String request) {
+		JSONObject result = new JSONObject();
+		JSONObject json = new JSONObject(request);
+		if (!json.has("glossary")) {
+			result.put(Constants.REASON, "Missing 'glossary' parameter");
+			return result;
+		}
+		String id = json.getString("glossary");
+
+		if (!json.has("tmx")) {
+			result.put(Constants.REASON, "Missing 'tmx' parameter");
+			return result;
+		}
+		File tmx = new File(json.getString("tmx"));
+		if (!tmx.exists()) {
+			result.put(Constants.REASON, "TMX file does not exist");
+			return result;
+		}
+
+		final String process = "" + System.currentTimeMillis();
+		if (openTasks == null) {
+			openTasks = new ConcurrentHashMap<>();
+		}
+		openTasks.put(process, new String[] { Constants.PROCESSING });
+		new Thread(() -> {
+			try {
+				if (openEngines == null) {
+					openEngines = new ConcurrentHashMap<>();
+				}
+				boolean wasOpen = openEngines.containsKey(id);
+				if (!wasOpen) {
+					openGlossary(id);
+				}
+				ITmEngine engine = openEngines.get(id);
+				String project = json.has("project") ? json.getString("project") : "";
+				String client = json.has("client") ? json.getString("client") : "";
+				String subject = json.has("subject") ? json.getString("subject") : "";
+				try {
+					int imported = engine.storeTMX(tmx.getAbsolutePath(), project, client, subject);
+					logger.log(Level.INFO, "Imported " + imported);
+					openTasks.put(process, new String[] { Constants.COMPLETED });
+				} catch (Exception e) {
+					openTasks.put(process, new String[] { Constants.ERROR, e.getMessage() });
+					logger.log(Level.ERROR, e.getMessage(), e);
+				}
+				if (!wasOpen) {
+					closeGlossary(id);
+				}
+			} catch (IOException | SQLException e) {
+				logger.log(Level.ERROR, e.getMessage(), e);
+				openTasks.put(process, new String[] { Constants.ERROR, e.getMessage() });
+			}
+		}).start();
+		result.put("process", process);
+		return result;
+	}
+
+	public static String getWorkFolder() throws IOException {
+		File home = TmsServer.getWorkFolder();
+		File workFolder = new File(home, "glossaries");
+		if (!workFolder.exists()) {
+			Files.createDirectories(workFolder.toPath());
+		}
+		return workFolder.getAbsolutePath();
 	}
 
 }

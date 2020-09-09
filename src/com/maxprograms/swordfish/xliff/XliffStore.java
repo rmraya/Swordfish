@@ -255,8 +255,8 @@ public class XliffStore {
                 }
                 insertUnit.execute();
             }
-            // Element glossary = e.getChild("gls:glossary");
-
+            Element glossary = e.getChild("gls:glossary");
+            List<Element> entries = glossary.getChildren("gls:glossEntry");
             // TODO store terms
         }
         if ("segment".equals(e.getName())) {
