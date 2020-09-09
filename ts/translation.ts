@@ -916,16 +916,23 @@ class TranslationView {
     setMatches(matches: any[]): void {
         this.tmMatches.clear();
         this.mtMatches.clear();
-        let lengtyh = matches.length;
-        for (let i = 0; i < lengtyh; i++) {
+        let length = matches.length;
+        let max: number = 0;
+        for (let i = 0; i < length; i++) {
             let match = matches[i];
             match.project = this.projectId;
             if (match.type === 'tm') {
                 this.tmMatches.add(match);
+                if (match.similarity > max) {
+                    max = match.similarity;
+                }
             }
             if (match.type === 'mt') {
                 this.mtMatches.add(match);
             }
+        }
+        if (max > 0) {
+            (this.currentRow.getElementsByClassName('match')[0] as HTMLTableCellElement).innerHTML = max + '%';
         }
     }
 
@@ -1035,7 +1042,7 @@ class TranslationView {
         this.electron.ipcRenderer.send('remove-translations', { project: this.projectId });
     }
 
-    removeAllMatches(): void{
+    removeAllMatches(): void {
         this.electron.ipcRenderer.send('remove-matches', { project: this.projectId });
     }
 
@@ -1113,7 +1120,7 @@ class TranslationView {
         }
     }
 
-    replaceText() : void {
+    replaceText(): void {
         this.electron.ipcRenderer.send('show-replaceText', { project: this.projectId });
     }
 
