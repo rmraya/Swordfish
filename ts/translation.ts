@@ -134,6 +134,9 @@ class TranslationView {
         this.electron.ipcRenderer.on('request-memories', () => {
             this.electron.ipcRenderer.send('get-project-memories', { project: this.projectId });
         });
+        this.electron.ipcRenderer.on('request-glossaries', () => {
+            this.electron.ipcRenderer.send('get-project-glossaries', { project: this.projectId });
+        });
         this.setSpellChecker();
     }
 
@@ -265,6 +268,9 @@ class TranslationView {
         this.glossSelect.style.marginTop = '4px';
         this.glossSelect.style.marginRight = '10px';
         this.glossSelect.style.minWidth = '180px';
+        this.glossSelect.addEventListener('change', () => {
+            this.electron.ipcRenderer.send('set-project-glossary', { project: this.projectId, glossary: this.glossSelect.value });
+        });
         topBar.appendChild(this.glossSelect);
     }
 
@@ -1130,5 +1136,25 @@ class TranslationView {
 
     acceptAllMachineTranslations(): void {
         this.electron.ipcRenderer.send('accept-mt-all', { project: this.projectId });
+    }
+
+    setProjectGlossaries(arg: any): void {
+        let glossaries: any[] = arg.glossaries;
+        if (glossaries.length === 0) {
+            this.glossSelect.innerHTML = '<option value="none" class="error">-- No Glossary --</option>';
+            return;
+        }
+        let array: string[] = [];
+        let options = '<option value="none" class="error">-- Select Glossary --</option>';
+        let length = glossaries.length;
+        for (let i = 0; i < length; i++) {
+            let mem: string[] = glossaries[i];
+            array.push(mem[0]);
+            options = options + '<option value="' + mem[0] + '">' + mem[1] + '</option>';
+        }
+        this.glossSelect.innerHTML = options;
+        if (array.includes(arg.default)) {
+            this.glossSelect.value = arg.default;
+        }       
     }
 }

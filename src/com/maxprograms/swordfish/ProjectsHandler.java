@@ -178,6 +178,10 @@ public class ProjectsHandler implements HttpHandler {
 				response = removeMatches(request);
 			} else if ("/projects/removeMT".equals(url)) {
 				response = removeMT(request);
+			} else if ("/projects/setGlossary".equals(url)) {
+				response = setProjectGlossary(request);
+			} else if ("/projects/projectGlossaries".equals(url)) {
+				response = getProjectGlossaries(request);
 			} else {
 				response.put(Constants.REASON, "Unknown request");
 			}
@@ -949,6 +953,19 @@ public class ProjectsHandler implements HttpHandler {
 		return result;
 	}
 
+	private JSONObject getProjectGlossaries(String request) {
+		JSONObject result = new JSONObject();
+		JSONObject json = new JSONObject(request);
+		try {
+			result.put("glossaries", GlossariesHandler.getGlossaries());
+			result.put("default", projects.get(json.getString("project")).getGlossary());
+		} catch (IOException e) {
+			logger.log(Level.ERROR, e);
+			result.put(Constants.REASON, e.getMessage());
+		}
+		return result;
+	}
+
 	private JSONObject setProjectMemory(String request) {
 		JSONObject result = new JSONObject();
 		try {
@@ -961,6 +978,29 @@ public class ProjectsHandler implements HttpHandler {
 				JSONObject obj = list.getJSONObject(i);
 				if (project.equals(obj.getString("id"))) {
 					obj.put("memory", memory);
+					break;
+				}
+			}
+			saveProjectsList();
+		} catch (IOException e) {
+			logger.log(Level.ERROR, e);
+			result.put(Constants.REASON, e.getMessage());
+		}
+		return result;
+	}
+
+	private JSONObject setProjectGlossary(String request) {
+		JSONObject result = new JSONObject();
+		try {
+			JSONObject json = new JSONObject(request);
+			String project = json.getString("project");
+			String glossary = json.getString("glossary");
+			projects.get(project).setMemory(glossary);
+			JSONArray list = projectsList.getJSONArray("projects");
+			for (int i = 0; i < list.length(); i++) {
+				JSONObject obj = list.getJSONObject(i);
+				if (project.equals(obj.getString("id"))) {
+					obj.put("glossary", glossary);
 					break;
 				}
 			}

@@ -241,6 +241,9 @@ class Main {
         Main.electron.ipcRenderer.on('set-project-memories', (event: Electron.IpcRendererEvent, arg: any) => {
             this.setProjectMemories(arg);
         });
+        Main.electron.ipcRenderer.on('set-project-glossaries', (event: Electron.IpcRendererEvent, arg: any) => {
+            this.setProjectGlossaries(arg);
+        });
         Main.electron.ipcRenderer.on('reload-page', (event: Electron.IpcRendererEvent, arg: any) => {
             this.reloadPage(arg);
         });
@@ -524,6 +527,13 @@ class Main {
         let project: string = arg.project;
         if (Main.translationViews.has(project)) {
             Main.translationViews.get(project).setProjectMemories(arg);
+        }
+    }
+
+    setProjectGlossaries(arg: any): void {
+        let project: string = arg.project;
+        if (Main.translationViews.has(project)) {
+            Main.translationViews.get(project).setProjectGlossaries(arg);
         }
     }
 

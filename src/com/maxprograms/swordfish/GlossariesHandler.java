@@ -427,6 +427,25 @@ public class GlossariesHandler implements HttpHandler {
 		return result;
 	}
 
+	public static JSONArray getGlossaries() throws IOException {
+		JSONArray result = new JSONArray();
+		if (glossaries == null) {
+			loadGlossariesList();
+		}
+		Vector<Memory> vector = new Vector<>();
+		vector.addAll(glossaries.values());
+		Collections.sort(vector);
+		Iterator<Memory> it = vector.iterator();
+		while (it.hasNext()) {
+			Memory m = it.next();
+			JSONArray array = new JSONArray();
+			array.put(m.getId());
+			array.put(m.getName());
+			result.put(array);
+		}
+		return result;
+	}
+
 	public static String getWorkFolder() throws IOException {
 		File home = TmsServer.getWorkFolder();
 		File workFolder = new File(home, "glossaries");

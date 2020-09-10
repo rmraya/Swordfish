@@ -454,6 +454,12 @@ class Swordfish {
         ipcMain.on('set-project-memory', (event: IpcMainEvent, arg: any) => {
             Swordfish.setProjectMemory(arg);
         });
+        ipcMain.on('get-project-glossaries', (event: IpcMainEvent, arg: any) => {
+            Swordfish.getProjectGlossaries(arg);
+        });
+        ipcMain.on('set-project-glossary', (event: IpcMainEvent, arg: any) => {
+            Swordfish.setProjectGlossary(arg);
+        });
         ipcMain.on('spell-language', (event: IpcMainEvent, arg: any) => {
             Swordfish.setSpellcheckerLanguage(arg);
         });
@@ -2154,8 +2160,38 @@ class Swordfish {
         );
     }
 
+    static getProjectGlossaries(arg: any): void {
+        Swordfish.sendRequest('/projects/projectGlossaries', arg,
+            (data: any) => {
+                if (data.status !== Swordfish.SUCCESS) {
+                    Swordfish.showMessage({ type: 'error', message: data.reason });
+                    return;
+                }
+                data.project = arg.project;
+                Swordfish.mainWindow.webContents.send('set-project-glossaries', data);
+            },
+            (reason: string) => {
+                Swordfish.showMessage({ type: 'error', message: reason });
+            }
+        );
+    }
+
     static setProjectMemory(arg: any): void {
         Swordfish.sendRequest('/projects/setMemory', arg,
+            (data: any) => {
+                if (data.status !== Swordfish.SUCCESS) {
+                    Swordfish.showMessage({ type: 'error', message: data.reason });
+                    return;
+                }
+            },
+            (reason: string) => {
+                Swordfish.showMessage({ type: 'error', message: reason });
+            }
+        );
+    }
+
+    static setProjectGlossary(arg: any): void {
+        Swordfish.sendRequest('/projects/setGlossary', arg,
             (data: any) => {
                 if (data.status !== Swordfish.SUCCESS) {
                     Swordfish.showMessage({ type: 'error', message: data.reason });
