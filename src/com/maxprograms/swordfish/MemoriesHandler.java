@@ -33,17 +33,29 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.sql.SQLException;
 import java.util.Collections;
+import java.util.Hashtable;
 import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.Vector;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import java.util.regex.PatternSyntaxException;
 
 import javax.xml.parsers.ParserConfigurationException;
 
+import com.maxprograms.languages.Language;
+import com.maxprograms.languages.LanguageUtils;
 import com.maxprograms.swordfish.models.Memory;
 import com.maxprograms.swordfish.tm.ITmEngine;
 import com.maxprograms.swordfish.tm.InternalDatabase;
+import com.maxprograms.swordfish.xliff.XliffUtils;
+import com.maxprograms.xml.Element;
+import com.maxprograms.xml.TextNode;
+import com.maxprograms.xml.XMLNode;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 
@@ -199,11 +211,47 @@ public class MemoriesHandler implements HttpHandler {
 	private JSONObject concordanceSearch(String request) {
 		JSONObject result = new JSONObject();
 		JSONObject json = new JSONObject(request);
-		if (!json.has("memory")) {
-			result.put(Constants.REASON, "Missing 'memory' parameter");
+		if (!json.has("memories")) {
+			result.put(Constants.REASON, "Missing 'memories' parameter");
 			return result;
-		}	
-		// TODO Auto-generated method stub
+		}
+		String searchStr = json.getString("searchStr");
+		String srcLang = json.getString("srcLang");
+		boolean isRegexp = json.getBoolean("regExp");
+		boolean caseSensitive = json.getBoolean("caseSensitive");
+		int limit = json.getInt("limit");
+		JSONArray memories = json.getJSONArray("memories");
+		try {
+			if (isRegexp) {
+				try {
+					Pattern.compile(searchStr);
+				} catch (PatternSyntaxException e) {
+					throw new IOException("Invalid regular expression");
+				}
+			}
+			List<Element> matches = new Vector<>();
+			for (int i = 0; i < memories.length(); i++) {
+				String memory = memories.getString(i);
+				if (openEngines == null) {
+					openEngines = new ConcurrentHashMap<>();
+				}
+				boolean wasOpen = openEngines.containsKey(memory);
+				if (!wasOpen) {
+					openMemory(memory);
+				}
+				matches.addAll(
+						openEngines.get(memory).concordanceSearch(searchStr, srcLang, limit, isRegexp, caseSensitive));
+				if (!wasOpen) {
+					closeMemory(memory);
+				}
+			}
+			result.put("count", matches.size());
+			result.put("html", generateHTML(matches, searchStr, isRegexp, caseSensitive));
+		} catch (IOException | SAXException | ParserConfigurationException | SQLException e) {
+			logger.log(Level.ERROR, e);
+			result.put("result", Constants.ERROR);
+			result.put(Constants.REASON, e.getMessage());
+		}
 		return result;
 	}
 
@@ -532,5 +580,136 @@ public class MemoriesHandler implements HttpHandler {
 			loadMemoriesList();
 		}
 		return memories.get(memory).getName();
+	}
+
+	private String generateHTML(List<Element> matches, String searchStr, boolean isRegexp, boolean caseSensitive)
+			throws IOException {
+		StringBuilder builder = new StringBuilder();
+		builder.append("<table class='stripes'><tr>");
+		List<Language> languages = getLanguages(matches);
+		Iterator<Language> st = languages.iterator();
+		while (st.hasNext()) {
+			builder.append("<th>");
+			builder.append(st.next().getDescription());
+			builder.append("</th>");
+		}
+		builder.append("</tr>");
+		for (int i = 0; i < matches.size(); i++) {
+			builder.append("<tr>");
+			builder.append(parseTU(matches.get(i), languages, searchStr, isRegexp, caseSensitive));
+			builder.append("</tr>");
+		}
+		builder.append("</table>");
+		return builder.toString();
+	}
+
+	private String parseTU(Element element, List<Language> languages, String searchStr, boolean isRegexp,
+			boolean caseSensitive) {
+		StringBuilder builder = new StringBuilder();
+		Map<String, Element> map = new Hashtable<>();
+		List<Element> tuvs = element.getChildren("tuv");
+		Iterator<Element> it = tuvs.iterator();
+		while (it.hasNext()) {
+			Element tuv = it.next();
+			map.put(tuv.getAttributeValue("xml:lang"), tuv);
+		}
+		for (int i = 0; i < languages.size(); i++) {
+			Language lang = languages.get(i);
+			builder.append("<td ");
+			if (lang.isBiDi()) {
+				builder.append("dir='rtl'");
+			}
+			builder.append(" lang='");
+			builder.append(lang.getCode());
+			builder.append("'>");
+			if (map.containsKey(lang.getCode())) {
+				Element seg = map.get(lang.getCode()).getChild("seg");
+				builder.append(highlight(pureText(seg), searchStr, isRegexp, caseSensitive));
+			} else {
+				builder.append("&nbsp;");
+			}
+			builder.append("</td>");
+		}
+		return builder.toString();
+	}
+
+	private String highlight(String pureText, String searchStr, boolean regExp, boolean caseSensitive) {
+		StringBuilder text = new StringBuilder();
+		if (regExp) {
+			Pattern pattern = Pattern.compile(searchStr);
+			String s = pureText;
+			Matcher matcher = pattern.matcher(s);
+			if (matcher.find()) {
+				StringBuilder sb = new StringBuilder();
+				do {
+					int start = matcher.start();
+					int end = matcher.end();
+					sb.append(XliffUtils.cleanString(s.substring(0, start)));
+					sb.append("<span class='highlighted'>");
+					sb.append(XliffUtils.cleanString(s.substring(start, end)));
+					sb.append("</span>");
+					s = s.substring(end);
+					matcher = pattern.matcher(s);
+				} while (matcher.find());
+				sb.append(XliffUtils.cleanString(s));
+				text.append(sb.toString());
+			} else {
+				text.append(XliffUtils.cleanString(s));
+			}
+		} else {
+			String s = XliffUtils.cleanString(pureText);
+			String t = XliffUtils.cleanString(searchStr);
+			if (caseSensitive) {
+				if (s.indexOf(t) != -1) {
+					text.append(XliffUtils.highlight(s, t, caseSensitive));
+				} else {
+					text.append(s);
+				}
+			} else {
+				if (s.toLowerCase().indexOf(t.toLowerCase()) != -1) {
+					text.append(XliffUtils.highlight(s, t, caseSensitive));
+				} else {
+					text.append(s);
+				}
+			}
+		}
+		return text.toString();
+	}
+
+	private List<Language> getLanguages(List<Element> matches) throws IOException {
+		Set<Language> set = new TreeSet<>();
+		Iterator<Element> it = matches.iterator();
+		while (it.hasNext()) {
+			Element tu = it.next();
+			List<Element> tuvs = tu.getChildren("tuv");
+			Iterator<Element> tv = tuvs.iterator();
+			while (tv.hasNext()) {
+				Element tuv = tv.next();
+				set.add(LanguageUtils.getLanguage(tuv.getAttributeValue("xml:lang")));
+			}
+		}
+		List<Language> result = new Vector<>();
+		result.addAll(set);
+		return result;
+	}
+
+	private String pureText(Element e) {
+		StringBuilder string = new StringBuilder();
+		List<XMLNode> content = e.getContent();
+		Iterator<XMLNode> it = content.iterator();
+		while (it.hasNext()) {
+			XMLNode n = it.next();
+			if (n.getNodeType() == XMLNode.TEXT_NODE) {
+				TextNode t = (TextNode) n;
+				string.append(t.getText());
+			}
+			if (n.getNodeType() == XMLNode.ELEMENT_NODE) {
+				Element el = (Element) n;
+				if ("hi".equals(el.getName()) || "sub".equals(el.getName())) {
+					string.append(pureText(el));
+				}
+			}
+		}
+		return string.toString();
 	}
 }

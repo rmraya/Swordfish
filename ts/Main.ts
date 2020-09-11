@@ -154,6 +154,12 @@ class Main {
         Main.electron.ipcRenderer.on('import-glossary', () => {
             this.glossariesView.importGlossary();
         });
+        Main.electron.ipcRenderer.on('remove-glossary', () => {
+            this.glossariesView.removeGlossary();
+        });
+        Main.electron.ipcRenderer.on('concordance-requested', () => {
+            this.concordanceSearch();
+        });
         Main.electron.ipcRenderer.on('export-glossary', () => {
             this.glossariesView.exportGlossary();
         });
@@ -229,7 +235,7 @@ class Main {
         Main.electron.ipcRenderer.on('accept-all-mt', () => {
             this.acceptAllMachineTranslations();
         });
-        Main.electron.ipcRenderer.on('remove-mt-all', ()=>{
+        Main.electron.ipcRenderer.on('remove-mt-all', () => {
             this.removeAllMachineTranslations();
         });
         Main.electron.ipcRenderer.on('apply-tm-all', () => {
@@ -575,11 +581,20 @@ class Main {
         this.projectsView.exportTranslations();
     }
 
-    replaceText() : void {
+    replaceText(): void {
         let selected = Main.tabHolder.getSelected();
         if (Main.translationViews.has(selected)) {
             Main.translationViews.get(selected).replaceText();
         }
+    }
+
+    concordanceSearch(): void {
+        let selected = Main.tabHolder.getSelected();
+        if (Main.translationViews.has(selected)) {
+            Main.translationViews.get(selected).concordanceSearch();
+        } else if (selected === 'memories') {
+            this.memoriesView.concordanceSearch();
+        } 
     }
 }
 

@@ -57,7 +57,7 @@ public class XliffUtils {
         // empty for security
     }
 
-    protected static String highlight(String string, String target, boolean caseSensitive) {
+    public static String highlight(String string, String target, boolean caseSensitive) {
         String result = string;
         int start = -1;
         String replacement = "<span " + STYLE + ">" + target + "</span>";

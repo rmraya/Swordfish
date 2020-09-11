@@ -72,6 +72,16 @@ class MemoriesView {
         });
         topBar.appendChild(exportButton);
 
+        let concordanceButton = document.createElement('a');
+        concordanceButton.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 0 24 24" width="24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>' +
+            '<span class="tooltiptext bottomTooltip">Concordance Search</span>';
+        concordanceButton.className = 'tooltip';
+        concordanceButton.style.marginLeft = '20px';
+        concordanceButton.addEventListener('click', () => {
+            this.concordanceSearch();
+        });
+        topBar.appendChild(concordanceButton);
+
         this.tableContainer = document.createElement('div');
         this.tableContainer.classList.add('divContainer');
         this.container.appendChild(this.tableContainer);
@@ -225,6 +235,7 @@ class MemoriesView {
             td.innerText = p.creationString;
             tr.append(td);
         }
+        this.selected.clear();
     }
 
     clicked(event: MouseEvent, memory: any): void {
@@ -243,5 +254,17 @@ class MemoriesView {
             this.selected.delete(memory.id);
             tr.classList.remove('selected');
         }
+    }
+
+    concordanceSearch(): void {
+        if (this.selected.size === 0) {
+            this.electron.ipcRenderer.send('show-message', { type: 'warning', message: 'Select memory' });
+            return;
+        }
+        let memories: any[] = [];
+        for (let key of this.selected.keys()) {
+            memories.push(key);
+        }
+        this.electron.ipcRenderer.send('concordance-search', { memories: memories });
     }
 }

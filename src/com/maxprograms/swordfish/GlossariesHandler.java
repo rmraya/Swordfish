@@ -329,7 +329,7 @@ public class GlossariesHandler implements HttpHandler {
 					openGlossary(mem.getId());
 				}
 				ITmEngine engine = openEngines.get(mem.getId());
-				File tmx = new File(json.getString("tmx"));
+				File tmx = new File(json.getString("file"));
 				Set<String> langSet = Collections.synchronizedSortedSet(new TreeSet<>());
 				if (json.has("languages")) {
 					JSONArray langs = json.getJSONArray("languages");
@@ -415,6 +415,7 @@ public class GlossariesHandler implements HttpHandler {
 					Tbx2Tmx.convert(tmxFile, tempFile.getAbsolutePath());
 					tmxFile = tempFile.getAbsolutePath();
 				}
+				System.out.println("Importing " + tmxFile);
 				ITmEngine engine = openEngines.get(id);
 				String project = json.has("project") ? json.getString("project") : "";
 				String client = json.has("client") ? json.getString("client") : "";
@@ -493,6 +494,6 @@ public class GlossariesHandler implements HttpHandler {
 		} else {
 			string = new String(array);
 		}
-		return string.indexOf("<tmx ") != -1;
+		return string.indexOf("<tmx ") == -1;
 	}
 }

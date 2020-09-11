@@ -53,7 +53,7 @@ class GlossariesView {
 
         let importButton = document.createElement('a');
         importButton.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" enable-background="new 0 0 24 24" height="24" viewBox="0 0 24 24" width="24"><path d="M19,9h-2v6.59L5.41,4L4,5.41L15.59,17H9v2h10V9z"/></svg>' +
-            '<span class="tooltiptext bottomTooltip">Import Glossary</span>';
+            '<span class="tooltiptext bottomTooltip">Import Glossary File</span>';
         importButton.className = 'tooltip';
         importButton.addEventListener('click', () => {
             this.importGlossary();
@@ -154,7 +154,16 @@ class GlossariesView {
     }
 
     exportGlossary(): void {
-        // TODO
+        if (this.selected.size === 0) {
+            this.electron.ipcRenderer.send('show-message', { type: 'warning', message: 'Select glossary' });
+            return;
+        }
+        let glossaries: any[] = [];
+        for (let key of this.selected.keys()) {
+            let mem = { glossary: key, name: this.selected.get(key).name }
+            glossaries.push(mem);
+        }
+        this.electron.ipcRenderer.send('export-glossaries', glossaries);
     }
 
     loadGlossaries(): void {
@@ -212,6 +221,7 @@ class GlossariesView {
             td.innerText = p.creationString;
             tr.append(td);
         }
+        this.selected.clear();
     }
 
     clicked(event: MouseEvent, glossary: any): void {
