@@ -70,9 +70,6 @@ class AddProject {
             this.electron.ipcRenderer.send('select-source-files');
             document.getElementById('addFilesButton').blur();
         });
-        document.getElementById('addFolderButton').addEventListener('click', () => {
-            this.addFolder();
-        });
         document.getElementById('deleteFilesButton').addEventListener('click', () => {
             this.deleteFiles();
         });
@@ -225,10 +222,6 @@ class AddProject {
                 tableBody.appendChild(tr);
             }
         }
-    }
-
-    addFolder(): void {
-        // TODO
     }
 
     deleteFiles(): void {

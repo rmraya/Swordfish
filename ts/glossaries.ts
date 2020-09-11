@@ -51,6 +51,25 @@ class GlossariesView {
         });
         topBar.appendChild(removeButton);
 
+        let importButton = document.createElement('a');
+        importButton.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" enable-background="new 0 0 24 24" height="24" viewBox="0 0 24 24" width="24"><path d="M19,9h-2v6.59L5.41,4L4,5.41L15.59,17H9v2h10V9z"/></svg>' +
+            '<span class="tooltiptext bottomTooltip">Import Glossary</span>';
+        importButton.className = 'tooltip';
+        importButton.addEventListener('click', () => {
+            this.importGlossary();
+        });
+        importButton.style.marginLeft = '20px';
+        topBar.appendChild(importButton);
+
+        let exportButton = document.createElement('a');
+        exportButton.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" enable-background="new 0 0 24 24" height="24" viewBox="0 0 24 24" width="24"><path d="M9,5v2h6.59L4,18.59L5.41,20L17,8.41V15h2V5H9z"/></svg>' +
+            '<span class="tooltiptext bottomTooltip">Export Glossary</span>';
+        exportButton.className = 'tooltip';
+        exportButton.addEventListener('click', () => {
+            this.exportGlossary();
+        });
+        topBar.appendChild(exportButton);
+
         this.tableContainer = document.createElement('div');
         this.tableContainer.classList.add('divContainer');
         this.container.appendChild(this.tableContainer);
@@ -121,7 +140,17 @@ class GlossariesView {
     }
 
     importGlossary(): void {
-        // TODO
+        if (this.selected.size === 0) {
+            this.electron.ipcRenderer.send('show-message', { type: 'warning', message: 'Select glossary' });
+            return;
+        }
+        if (this.selected.size > 1) {
+            this.electron.ipcRenderer.send('show-message', { type: 'warning', message: 'Select one glossary' });
+            return;
+        }
+        for (let key of this.selected.keys()) {
+            this.electron.ipcRenderer.send('show-import-glossary', key);
+        }
     }
 
     exportGlossary(): void {

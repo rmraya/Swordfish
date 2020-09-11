@@ -44,6 +44,7 @@ class Swordfish {
     static tagsWindow: BrowserWindow;
     static replaceTextWindow: BrowserWindow;
     static addGlossaryWindow: BrowserWindow;
+    static importGlossaryWindow: BrowserWindow;
 
     javapath: string = Swordfish.path.join(app.getAppPath(), 'bin', 'java');
 
@@ -323,7 +324,7 @@ class Swordfish {
         ipcMain.on('show-add-glossary', () => {
             Swordfish.showAddGlossary();
         });
-        ipcMain.on('add-glossary-height',(event: IpcMainEvent, arg: any) => {
+        ipcMain.on('add-glossary-height', (event: IpcMainEvent, arg: any) => {
             Swordfish.setHeight(Swordfish.addGlossaryWindow, arg);
         });
         ipcMain.on('add-glossary', (event: IpcMainEvent, arg: any) => {
@@ -335,9 +336,23 @@ class Swordfish {
         ipcMain.on('remove-glossaries', (event: IpcMainEvent, arg: any) => {
             Swordfish.removeGlossaries(arg);
         });
-
         ipcMain.on('show-import-tmx', (event: IpcMainEvent, arg: any) => {
             Swordfish.showImportTMX(arg);
+        });
+        ipcMain.on('show-import-glossary', (event: IpcMainEvent, arg: any) => {
+            Swordfish.showImportGlossary(arg);
+        });
+        ipcMain.on('import-glossary-height', (event: IpcMainEvent, arg: any) => {
+            Swordfish.setHeight(Swordfish.importGlossaryWindow, arg);
+        });
+        ipcMain.on('get-glossary-file', (event: IpcMainEvent, arg: any) => {
+            Swordfish.getGlossaryFile(event);
+        });
+        ipcMain.on('import-glossary-file', (event: IpcMainEvent, arg: any) => {
+            Swordfish.importGlossaryFile(arg);
+        });
+        ipcMain.on('close-importGlossary', () => {
+            Swordfish.destroyWindow(Swordfish.importGlossaryWindow);
         });
         ipcMain.on('import-tmx-height', (event: IpcMainEvent, arg: any) => {
             Swordfish.setHeight(Swordfish.importTmxWindow, arg);
@@ -1779,6 +1794,28 @@ class Swordfish {
         });
     }
 
+    static showImportGlossary(glossary: string): void {
+        this.importGlossaryWindow = new BrowserWindow({
+            parent: this.mainWindow,
+            width: 600,
+            useContentSize: true,
+            minimizable: false,
+            maximizable: false,
+            resizable: false,
+            show: false,
+            icon: this.iconPath,
+            webPreferences: {
+                nodeIntegration: true
+            }
+        });
+        this.importGlossaryWindow.setMenu(null);
+        this.importGlossaryWindow.loadURL('file://' + this.path.join(app.getAppPath(), 'html', 'importGlossary.html'));
+        this.importGlossaryWindow.once('ready-to-show', (event: IpcMainEvent) => {
+            event.sender.send('get-height');
+            event.sender.send('set-glossary', glossary);
+        });
+    }
+
     static importTmxFile(arg: any): void {
         Swordfish.destroyWindow(Swordfish.importTmxWindow);
         Swordfish.mainWindow.focus();
@@ -1861,6 +1898,24 @@ class Swordfish {
         }).then((value: Electron.OpenDialogReturnValue) => {
             if (!value.canceled) {
                 event.sender.send('set-tmx-file', value.filePaths[0]);
+            }
+        });
+    }
+
+    static getGlossaryFile(event: IpcMainEvent): void {
+        let anyFile: string[] = [];
+        if (process.platform === 'linux') {
+            anyFile = ['*'];
+        }
+        dialog.showOpenDialog({
+            properties: ['openFile'],
+            filters: [
+                { name: 'TMX/TBX File', extensions: ['tmx', 'tbx'] },
+                { name: 'Any File', extensions: anyFile }
+            ]
+        }).then((value: Electron.OpenDialogReturnValue) => {
+            if (!value.canceled) {
+                event.sender.send('set-glossary-file', value.filePaths[0]);
             }
         });
     }
@@ -2913,6 +2968,7 @@ class Swordfish {
             }
         }
     }
+
     static acceptAllMachineTranslations(arg: any) {
         dialog.showMessageBox(Swordfish.mainWindow, {
             type: 'question',
@@ -2941,6 +2997,52 @@ class Swordfish {
                 );
             }
         });
+    }
+
+    static importGlossaryFile(arg: any): void {
+        Swordfish.destroyWindow(Swordfish.importGlossaryWindow);
+        Swordfish.mainWindow.focus();
+        Swordfish.mainWindow.webContents.send('start-waiting');
+        Swordfish.mainWindow.webContents.send('set-status', 'Importing glossary');
+        Swordfish.sendRequest('/glossaries/import', arg,
+            (data: any) => {
+                if (data.status !== Swordfish.SUCCESS) {
+                    Swordfish.mainWindow.webContents.send('end-waiting');
+                    Swordfish.mainWindow.webContents.send('set-status', '');
+                    Swordfish.showMessage({ type: 'error', message: data.reason });
+                }
+                Swordfish.currentStatus = data;
+                let processId: string = data.process;
+                var intervalObject = setInterval(() => {
+                    if (Swordfish.currentStatus.result) {
+                        if (Swordfish.currentStatus.result === Swordfish.COMPLETED) {
+                            Swordfish.mainWindow.webContents.send('end-waiting');
+                            Swordfish.mainWindow.webContents.send('set-status', '');
+                            clearInterval(intervalObject);
+                            return;
+                        } else if (Swordfish.currentStatus.result === Swordfish.PROCESSING) {
+                            // it's OK, keep waiting
+                        } else if (Swordfish.currentStatus.result === Swordfish.ERROR) {
+                            Swordfish.mainWindow.webContents.send('end-waiting');
+                            Swordfish.mainWindow.webContents.send('set-status', '');
+                            clearInterval(intervalObject);
+                            Swordfish.showMessage({ type: 'error', message: Swordfish.currentStatus.reason });
+                            return;
+                        } else {
+                            Swordfish.mainWindow.webContents.send('end-waiting');
+                            Swordfish.mainWindow.webContents.send('set-status', '');
+                            clearInterval(intervalObject);
+                            Swordfish.showMessage({ type: 'error', message: 'Unknown error importing glossary' });
+                            return;
+                        }
+                    }
+                    Swordfish.getGlossariesProgress(processId);
+                }, 500);
+            },
+            (reason: string) => {
+                Swordfish.showMessage({ type: 'error', message: reason });
+            }
+        );
     }
 }
 

@@ -31,14 +31,6 @@ public class Tbx2Tmx {
     private Element currentSeg;
     private boolean inTUV;
 
-    public static void main(String[] args) {
-        try {
-            tmx2tbx("/Users/rmraya/Desktop/James_Termbase Cleaned.tbx", "/Users/rmraya/Desktop/James_Termbase Cleaned.tmx");
-        } catch (SAXException | IOException | ParserConfigurationException | URISyntaxException e) {
-            e.printStackTrace();
-        }
-    }
-
     private Tbx2Tmx() {
         tmx = new Document(null, "tmx", "-//LISA OSCAR:1998//DTD for Translation Memory eXchange//EN", "tmx14.dtd");
         tmxRoot = tmx.getRootElement();
@@ -56,7 +48,7 @@ public class Tbx2Tmx {
         tmxRoot.addContent(body);
     }
 
-    public static void tmx2tbx(String source, String output)
+    public static void convert(String source, String output)
             throws SAXException, IOException, ParserConfigurationException, URISyntaxException {
         SAXBuilder builder = new SAXBuilder();
         builder.setEntityResolver(new Catalog(TmsServer.getCatalogFile()));

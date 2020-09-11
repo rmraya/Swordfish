@@ -21,6 +21,7 @@ package com.maxprograms.swordfish;
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
@@ -29,6 +30,8 @@ import java.io.OutputStream;
 import java.lang.System.Logger;
 import java.lang.System.Logger.Level;
 import java.net.URI;
+import java.net.URISyntaxException;
+import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.sql.SQLException;
@@ -41,7 +44,9 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import javax.xml.parsers.ParserConfigurationException;
 
+import com.maxprograms.converters.EncodingResolver;
 import com.maxprograms.swordfish.models.Memory;
+import com.maxprograms.swordfish.tbx.Tbx2Tmx;
 import com.maxprograms.swordfish.tm.ITmEngine;
 import com.maxprograms.swordfish.tm.InternalDatabase;
 import com.sun.net.httpserver.HttpExchange;
@@ -100,10 +105,10 @@ public class GlossariesHandler implements HttpHandler {
 				response = listGlossaries(request);
 			} else if ("/glossaries/delete".equals(url)) {
 				response = deleteGlossary(request);
-			} else if ("/glossaries/exportTMX".equals(url)) {
-				response = exportTMX(request);
-			} else if ("/glossaries/importTMX".equals(url)) {
-				response = importTMX(request);
+			} else if ("/glossaries/export".equals(url)) {
+				response = exportGlossary(request);
+			} else if ("/glossaries/import".equals(url)) {
+				response = importGlossary(request);
 			} else if ("/glossaries/status".equals(url)) {
 				response = getProcessStatus(request);
 			} else {
@@ -290,15 +295,15 @@ public class GlossariesHandler implements HttpHandler {
 		return result;
 	}
 
-	private static JSONObject exportTMX(String request) {
+	private static JSONObject exportGlossary(String request) {
 		JSONObject result = new JSONObject();
 		final JSONObject json = new JSONObject(request);
 		if (!json.has("glossary")) {
 			result.put(Constants.REASON, "Missing 'glossary' parameter");
 			return result;
 		}
-		if (!json.has("tmx")) {
-			result.put(Constants.REASON, "Missing 'tmx' parameter");
+		if (!json.has("file")) {
+			result.put(Constants.REASON, "Missing 'file' parameter");
 			return result;
 		}
 		if (!json.has("srcLang")) {
@@ -370,7 +375,7 @@ public class GlossariesHandler implements HttpHandler {
 		openEngines.get(id).close();
 	}
 
-	private static JSONObject importTMX(String request) {
+	private JSONObject importGlossary(String request) {
 		JSONObject result = new JSONObject();
 		JSONObject json = new JSONObject(request);
 		if (!json.has("glossary")) {
@@ -379,13 +384,13 @@ public class GlossariesHandler implements HttpHandler {
 		}
 		String id = json.getString("glossary");
 
-		if (!json.has("tmx")) {
-			result.put(Constants.REASON, "Missing 'tmx' parameter");
+		if (!json.has("file")) {
+			result.put(Constants.REASON, "Missing 'file' parameter");
 			return result;
 		}
-		File tmx = new File(json.getString("tmx"));
-		if (!tmx.exists()) {
-			result.put(Constants.REASON, "TMX file does not exist");
+		File glossFile = new File(json.getString("file"));
+		if (!glossFile.exists()) {
+			result.put(Constants.REASON, "Glossary file does not exist");
 			return result;
 		}
 
@@ -403,12 +408,19 @@ public class GlossariesHandler implements HttpHandler {
 				if (!wasOpen) {
 					openGlossary(id);
 				}
+				File tempFile = null;
+				String tmxFile = glossFile.getAbsolutePath();
+				if (isTBX(glossFile)) {
+					tempFile = File.createTempFile("gloss", ".tmx");
+					Tbx2Tmx.convert(tmxFile, tempFile.getAbsolutePath());
+					tmxFile = tempFile.getAbsolutePath();
+				}
 				ITmEngine engine = openEngines.get(id);
 				String project = json.has("project") ? json.getString("project") : "";
 				String client = json.has("client") ? json.getString("client") : "";
 				String subject = json.has("subject") ? json.getString("subject") : "";
 				try {
-					int imported = engine.storeTMX(tmx.getAbsolutePath(), project, client, subject);
+					int imported = engine.storeTMX(tmxFile, project, client, subject);
 					logger.log(Level.INFO, "Imported " + imported);
 					openTasks.put(process, new String[] { Constants.COMPLETED });
 				} catch (Exception e) {
@@ -418,7 +430,10 @@ public class GlossariesHandler implements HttpHandler {
 				if (!wasOpen) {
 					closeGlossary(id);
 				}
-			} catch (IOException | SQLException e) {
+				if (tempFile != null) {
+					Files.delete(tempFile.toPath());
+				}
+			} catch (IOException | SQLException | SAXException | ParserConfigurationException | URISyntaxException e) {
 				logger.log(Level.ERROR, e.getMessage(), e);
 				openTasks.put(process, new String[] { Constants.ERROR, e.getMessage() });
 			}
@@ -455,4 +470,29 @@ public class GlossariesHandler implements HttpHandler {
 		return workFolder.getAbsolutePath();
 	}
 
+	private boolean isTBX(File file) throws IOException {
+		byte[] array = new byte[40960];
+		try (FileInputStream input = new FileInputStream(file)) {
+			if (input.read(array) == -1) {
+				throw new IOException("Premature end of file");
+			}
+		}
+		String string = "";
+		Charset bom = EncodingResolver.getBOM(file.getAbsolutePath());
+		if (bom != null) {
+			byte[] efbbbf = { -17, -69, -65 }; // UTF-8
+			String utf8 = new String(efbbbf);
+			string = new String(array, bom);
+			if (string.startsWith("\uFFFE")) {
+				string = string.substring("\uFFFE".length());
+			} else if (string.startsWith("\uFEFF")) {
+				string = string.substring("\uFEFF".length());
+			} else if (string.startsWith(utf8)) {
+				string = string.substring(utf8.length());
+			}
+		} else {
+			string = new String(array);
+		}
+		return string.indexOf("<tmx ") != -1;
+	}
 }

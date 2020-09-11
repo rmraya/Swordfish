@@ -690,7 +690,7 @@ class TranslationView {
             return;
         }
         if (this.currentCell) {
-            this.saveEdit({ confirm: false });
+            this.saveEdit({ confirm: false, fromClick: true });
         }
         this.selectRow(event.currentTarget as HTMLTableRowElement, element.classList.contains('target'));
     }
@@ -733,6 +733,11 @@ class TranslationView {
             this.currentCell.contentEditable = 'false';
             let translation = this.currentCell.innerHTML;
             this.currentCell = undefined;
+
+            if (arg.fromClick && this.currentContent === translation) {
+                // clicked a different cell without making changes
+                return;
+            }
 
             if (confirm) {
                 this.currentState.classList.remove('initial');
@@ -1155,6 +1160,6 @@ class TranslationView {
         this.glossSelect.innerHTML = options;
         if (array.includes(arg.default)) {
             this.glossSelect.value = arg.default;
-        }       
+        }
     }
 }

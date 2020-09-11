@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <title>Import Glossary File</title>
+    <link id="theme" rel="stylesheet" type="text/css" href="../css/light.css">
+    <link rel="stylesheet" type="text/css" href="../css/fonts.css">
+</head>
+
+<body id="body">
+    <table class="fill_width">
+        <tr>
+            <td class="middle">
+                <label for="file" class="noWrap">Glossary File</label>
+            </td>
+            <td class="fill_width middle">
+                <input id="file" class="fill_width middle">
+            </td>
+            <td class="middle"><button id="browse">Browse...</button></td>
+        </tr>
+        <tr>
+            <td class="middle">
+                <label for="projectInput">Project</label>
+            </td>
+            <td class="fill_width middle" colspan="2">
+                <input list="projects" id="projectInput" class="table_input middle">
+                <datalist id="projects">
+                    
+                </datalist>
+            </td>
+        </tr>
+        <tr>
+            <td class="middle">
+                <label for="subjectInput">Subject</label>
+            </td>
+            <td class="fill_width middle" colspan="2">
+                <input list="subjects" id="subjectInput" class="table_input middle">
+                <datalist id="subjects">
+                    
+                </datalist>
+            </td>
+        </tr>
+        <tr>
+            <td class="middle">
+                <label for="clientInput">Client</label>
+            </td>
+            <td class="fill_width middle" colspan="2">
+                <input list="clients" id="clientInput" class="table_input middle">
+                <datalist id="clients">
+                    
+                </datalist>
+            </td>
+        </tr>
+
+    </table>
+    <div class="buttonArea">
+        <button id="importGlossary">Import Glossary File</button>
+    </div>
+
+    <script src="../js/keyboardHandler.js"></script>
+    <script src="../js/importGlossary.js"></script>
+</body>
+
+</html>
