@@ -47,6 +47,7 @@ class Swordfish {
     static importGlossaryWindow: BrowserWindow;
     static concordanceSearchWindow: BrowserWindow;
     static htmlViewerWindow: BrowserWindow;
+    static termSearchWindow: BrowserWindow;
 
     javapath: string = Swordfish.path.join(app.getAppPath(), 'bin', 'java');
 
@@ -395,6 +396,18 @@ class Swordfish {
         ipcMain.on('get-clients', (event: IpcMainEvent) => {
             this.getClients(event);
         });
+        ipcMain.on('show-term-search',(event: IpcMainEvent, arg: any) => {
+            Swordfish.showTermSearch(arg);
+        });
+        ipcMain.on('close-termSearch', ()=>{
+            Swordfish.destroyWindow(Swordfish.termSearchWindow);
+        });
+        ipcMain.on('term-search-height', (event: IpcMainEvent, arg: any) => {
+            Swordfish.setHeight(Swordfish.termSearchWindow, arg);
+        });
+        ipcMain.on('get-terms',(event: IpcMainEvent, arg: any) => {
+            Swordfish.termSearch(arg);
+        });
         ipcMain.on('get-project-names', (event: IpcMainEvent) => {
             this.getProjectNames(event);
         });
@@ -709,6 +722,8 @@ class Swordfish {
         var glossariesMenu: Menu = Menu.buildFromTemplate([
             { label: 'Add Glossary', click: () => { Swordfish.showAddGlossary(); } },
             { label: 'Remove Glossary', click: () => { Swordfish.removeGlossary(); } },
+            new MenuItem({ type: 'separator' }),
+            { label: 'Search Term in Glossary', accelerator: 'CmdOrCtrl+D', click: () => { Swordfish.mainWindow.webContents.send('term-search-requested'); } },
             new MenuItem({ type: 'separator' }),
             { label: 'Import Glossary', click: () => { Swordfish.mainWindow.webContents.send('import-glossary'); } },
             { label: 'Export Glossary', click: () => { Swordfish.mainWindow.webContents.send('export-glossary'); } }
@@ -3168,6 +3183,7 @@ class Swordfish {
             (data: any) => {
                 if (data.status !== Swordfish.SUCCESS) {
                     Swordfish.showMessage({ type: 'error', message: data.reason });
+                    return;
                 }
                 if (data.count === 0) {
                     Swordfish.showMessage({ type: 'info', message: 'Text not found' });
@@ -3201,6 +3217,69 @@ class Swordfish {
                 Swordfish.showMessage({ type: 'error', message: reason });
             }
         );
+    }
+
+    static showTermSearch(arg: any): any {
+        this.termSearchWindow = new BrowserWindow({
+            parent: this.mainWindow,
+            width: 500,
+            minimizable: false,
+            maximizable: false,
+            resizable: false,
+            useContentSize: true,
+            show: false,
+            icon: this.iconPath,
+            webPreferences: {
+                nodeIntegration: true
+            }
+        });
+        this.termSearchWindow.setMenu(null);
+        this.termSearchWindow.loadURL('file://' + this.path.join(app.getAppPath(), 'html', 'termSearch.html'));
+        this.termSearchWindow.once('ready-to-show', (event: IpcMainEvent) => {
+            event.sender.send('get-height');
+            event.sender.send('set-glossary', arg.glossary);
+        });
+    }
+
+    static termSearch(arg: any): void {
+        Swordfish.sendRequest('/glossaries/search', arg,
+        (data: any) => {
+            if (data.status !== Swordfish.SUCCESS) {
+                Swordfish.showMessage({ type: 'error', message: data.reason });
+                return;
+            }
+            if (data.count === 0) {
+                Swordfish.showMessage({ type: 'info', message: 'Term not found' });
+                return;
+            }
+            let size: Rectangle = Swordfish.mainWindow.getBounds();
+            this.htmlViewerWindow = new BrowserWindow({
+                parent: this.mainWindow,
+                width: size.width * 0.6,
+                height: size.height * 0.4,
+                minimizable: false,
+                maximizable: false,
+                resizable: true,
+                useContentSize: true,
+                show: false,
+                icon: this.iconPath,
+                webPreferences: {
+                    nodeIntegration: true
+                }
+            });
+            this.htmlViewerWindow.setMenu(null);
+            this.htmlViewerWindow.loadURL('file://' + this.path.join(app.getAppPath(), 'html', 'htmlViewer.html'));
+            this.htmlViewerWindow.once('ready-to-show', (event: IpcMainEvent) => {
+                event.sender.send('get-height');
+                event.sender.send('set-title', 'Term Search');
+                event.sender.send('set-content', data.html);
+                this.htmlViewerWindow.show();
+            });
+        },
+        (reason: string) => {
+            Swordfish.showMessage({ type: 'error', message: reason });
+        }
+    );
     }
 }
 

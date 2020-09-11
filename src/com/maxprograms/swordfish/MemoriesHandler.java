@@ -676,7 +676,7 @@ public class MemoriesHandler implements HttpHandler {
 		return text.toString();
 	}
 
-	private List<Language> getLanguages(List<Element> matches) throws IOException {
+	protected static List<Language> getLanguages(List<Element> matches) throws IOException {
 		Set<Language> set = new TreeSet<>();
 		Iterator<Element> it = matches.iterator();
 		while (it.hasNext()) {
@@ -693,7 +693,7 @@ public class MemoriesHandler implements HttpHandler {
 		return result;
 	}
 
-	private String pureText(Element e) {
+	protected static String pureText(Element e) {
 		StringBuilder string = new StringBuilder();
 		List<XMLNode> content = e.getContent();
 		Iterator<XMLNode> it = content.iterator();

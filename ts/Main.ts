@@ -160,6 +160,9 @@ class Main {
         Main.electron.ipcRenderer.on('concordance-requested', () => {
             this.concordanceSearch();
         });
+        Main.electron.ipcRenderer.on('term-search-requested', () => {
+            this.searchTerm();
+        });
         Main.electron.ipcRenderer.on('export-glossary', () => {
             this.glossariesView.exportGlossary();
         });
@@ -592,9 +595,20 @@ class Main {
         let selected = Main.tabHolder.getSelected();
         if (Main.translationViews.has(selected)) {
             Main.translationViews.get(selected).concordanceSearch();
-        } else if (selected === 'memories') {
+        }
+        if (selected === 'memories') {
             this.memoriesView.concordanceSearch();
-        } 
+        }
+    }
+
+    searchTerm(): void {
+        let selected = Main.tabHolder.getSelected();
+        if (Main.translationViews.has(selected)) {
+            Main.translationViews.get(selected).searchTerm();
+        }
+        if (selected === 'glossaries') {
+            this.glossariesView.searchTerm();
+        }
     }
 }
 

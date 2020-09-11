@@ -226,8 +226,9 @@ class TranslationView {
         });
         topBar.appendChild(statisticsButton);
 
+
         let concordanceButton = document.createElement('a');
-        concordanceButton.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 0 24 24" width="24"><path d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zM6 4h7l5 5v8.58l-1.84-1.84c1.28-1.94 1.07-4.57-.64-6.28C14.55 8.49 13.28 8 12 8c-1.28 0-2.55.49-3.53 1.46-1.95 1.95-1.95 5.11 0 7.05.97.97 2.25 1.46 3.53 1.46.96 0 1.92-.28 2.75-.83L17.6 20H6V4zm8.11 11.1c-.56.56-1.31.88-2.11.88s-1.55-.31-2.11-.88c-.56-.56-.88-1.31-.88-2.11s.31-1.55.88-2.11c.56-.57 1.31-.88 2.11-.88s1.55.31 2.11.88c.56.56.88 1.31.88 2.11s-.31 1.55-.88 2.11z"/></svg>' +
+        concordanceButton.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path d="M21.172 24l-7.387-7.387c-1.388.874-3.024 1.387-4.785 1.387-4.971 0-9-4.029-9-9s4.029-9 9-9 9 4.029 9 9c0 1.761-.514 3.398-1.387 4.785l7.387 7.387-2.828 2.828zm-12.172-8c3.859 0 7-3.14 7-7s-3.141-7-7-7-7 3.14-7 7 3.141 7 7 7z"/></svg>' +
             '<span class="tooltiptext bottomTooltip">Concordance Search</span>';
         concordanceButton.className = 'tooltip';
         concordanceButton.style.marginLeft = '20px';
@@ -235,6 +236,15 @@ class TranslationView {
             this.concordanceSearch();
         });
         topBar.appendChild(concordanceButton);
+
+        let termSearchButton = document.createElement('a');
+        termSearchButton.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path d="M13 8h-8v-1h8v1zm0 2h-8v-1h8v1zm-3 2h-5v-1h5v1zm11.172 12l-7.387-7.387c-1.388.874-3.024 1.387-4.785 1.387-4.971 0-9-4.029-9-9s4.029-9 9-9 9 4.029 9 9c0 1.761-.514 3.398-1.387 4.785l7.387 7.387-2.828 2.828zm-12.172-8c3.859 0 7-3.14 7-7s-3.141-7-7-7-7 3.14-7 7 3.141 7 7 7z"/></svg>' +
+            '<span class="tooltiptext bottomTooltip">Search Term in Glossary</span>';
+            termSearchButton.className = 'tooltip';
+            termSearchButton.addEventListener('click', () => {
+            this.searchTerm();
+        });
+        topBar.appendChild(termSearchButton);
 
         let filler: HTMLSpanElement = document.createElement('span');
         filler.innerHTML = '&nbsp;';
@@ -1179,5 +1189,13 @@ class TranslationView {
             return;
         }
         this.electron.ipcRenderer.send('concordance-search', { memories: [this.memSelect.value] });
+    }
+
+    searchTerm(): void {
+        if (this.glossSelect.value === 'none') {
+            this.electron.ipcRenderer.send('show-message', { type: 'warning', message: 'Select glossary' });
+            return;
+        }
+        this.electron.ipcRenderer.send('show-term-search', { glossary: this.glossSelect.value });
     }
 }

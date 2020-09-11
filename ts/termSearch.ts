@@ -17,11 +17,11 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 *****************************************************************************/
 
-class ConcordanceSearch {
+class TermSearch {
 
     electron = require('electron');
 
-    memories: string[];
+    glossary: string;
 
     constructor() {
         this.electron.ipcRenderer.send('get-theme');
@@ -34,7 +34,7 @@ class ConcordanceSearch {
                 this.search();
             }
             if (event.code === 'Escape') {
-                this.electron.ipcRenderer.send('close-concordanceSearch');
+                this.electron.ipcRenderer.send('close-termSearch');
             }
         });
         this.electron.ipcRenderer.send('get-languages');
@@ -44,14 +44,14 @@ class ConcordanceSearch {
         document.getElementById('searchButton').addEventListener('click', () => {
             this.search()
         });
-        this.electron.ipcRenderer.on('set-memories', (event: Electron.IpcRendererEvent, arg: any) => {
-            this.memories = arg;
+        this.electron.ipcRenderer.on('set-glossary', (event: Electron.IpcRendererEvent, arg: any) => {
+            this.glossary = arg;
         });
         this.electron.ipcRenderer.on('get-height', () => {
             let body: HTMLBodyElement = document.getElementById('body') as HTMLBodyElement;
-            this.electron.ipcRenderer.send('concordance-search-height', { width: body.clientWidth, height: body.clientHeight });
+            this.electron.ipcRenderer.send('term-search-height', { width: body.clientWidth, height: body.clientHeight });
         });
-        (document.getElementById('maxEntries') as HTMLSelectElement).value = '20';
+        (document.getElementById('similarity') as HTMLSelectElement).value = '70';
         (document.getElementById('searchText') as HTMLInputElement).focus();
     }
 
@@ -70,7 +70,7 @@ class ConcordanceSearch {
         let searchInput: HTMLInputElement = document.getElementById('searchText') as HTMLInputElement;
         let searchText: string = searchInput.value;
         if (searchText === '') {
-            this.electron.ipcRenderer.send('show-message', { type: 'warning', message: 'Enter text to search' });
+            this.electron.ipcRenderer.send('show-message', { type: 'warning', message: 'Enter term to search' });
             return;
         }
         let languagesSelect: HTMLSelectElement = document.getElementById('languagesSelect') as HTMLSelectElement;
@@ -79,18 +79,16 @@ class ConcordanceSearch {
             this.electron.ipcRenderer.send('show-message', { type: 'warning', message: 'Select language' });
             return;
         }
-        let regExp: HTMLInputElement = document.getElementById('regularExpression') as HTMLInputElement;
         let caseSensitive: HTMLInputElement = document.getElementById('caseSensitive') as HTMLInputElement;
-        let count: string = (document.getElementById('maxEntries') as HTMLSelectElement).value;
-        this.electron.ipcRenderer.send('get-concordance', {
+        let similarity: string = (document.getElementById('similarity') as HTMLSelectElement).value;
+        this.electron.ipcRenderer.send('get-terms', {
             searchStr: searchText,
             srcLang: lang,
-            limit: Number.parseInt(count),
-            regExp: regExp.checked,
+            similarity: Number.parseInt(similarity),
             caseSensitive: caseSensitive.checked,
-            memories: this.memories
+            glossary: this.glossary
         });
     }
 }
 
-new ConcordanceSearch();
+new TermSearch();

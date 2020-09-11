@@ -70,6 +70,16 @@ class GlossariesView {
         });
         topBar.appendChild(exportButton);
 
+        let termSearchButton = document.createElement('a');
+        termSearchButton.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path d="M13 8h-8v-1h8v1zm0 2h-8v-1h8v1zm-3 2h-5v-1h5v1zm11.172 12l-7.387-7.387c-1.388.874-3.024 1.387-4.785 1.387-4.971 0-9-4.029-9-9s4.029-9 9-9 9 4.029 9 9c0 1.761-.514 3.398-1.387 4.785l7.387 7.387-2.828 2.828zm-12.172-8c3.859 0 7-3.14 7-7s-3.141-7-7-7-7 3.14-7 7 3.141 7 7 7z"/></svg>' +
+            '<span class="tooltiptext bottomTooltip">Search Term in Glossary</span>';
+        termSearchButton.className = 'tooltip';
+        termSearchButton.style.marginLeft = '20px';
+        termSearchButton.addEventListener('click', () => {
+            this.searchTerm();
+        });
+        topBar.appendChild(termSearchButton);
+
         this.tableContainer = document.createElement('div');
         this.tableContainer.classList.add('divContainer');
         this.container.appendChild(this.tableContainer);
@@ -239,6 +249,20 @@ class GlossariesView {
         } else {
             this.selected.delete(glossary.id);
             tr.classList.remove('selected');
+        }
+    }
+
+    searchTerm(): void {
+        if (this.selected.size === 0) {
+            this.electron.ipcRenderer.send('show-message', { type: 'warning', message: 'Select glossary' });
+            return;
+        }
+        if (this.selected.size > 1) {
+            this.electron.ipcRenderer.send('show-message', { type: 'warning', message: 'Select one glossary' });
+            return;
+        }
+        for (let key of this.selected.keys()) {
+            this.electron.ipcRenderer.send('show-term-search', { glossary: key });
         }
     }
 }

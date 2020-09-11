@@ -36,7 +36,10 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.sql.SQLException;
 import java.util.Collections;
+import java.util.Hashtable;
 import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.Vector;
@@ -45,10 +48,12 @@ import java.util.concurrent.ConcurrentHashMap;
 import javax.xml.parsers.ParserConfigurationException;
 
 import com.maxprograms.converters.EncodingResolver;
+import com.maxprograms.languages.Language;
 import com.maxprograms.swordfish.models.Memory;
 import com.maxprograms.swordfish.tbx.Tbx2Tmx;
 import com.maxprograms.swordfish.tm.ITmEngine;
 import com.maxprograms.swordfish.tm.InternalDatabase;
+import com.maxprograms.xml.Element;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 
@@ -111,6 +116,8 @@ public class GlossariesHandler implements HttpHandler {
 				response = importGlossary(request);
 			} else if ("/glossaries/status".equals(url)) {
 				response = getProcessStatus(request);
+			} else if ("/glossaries/search".equals(url)) {
+				response = searchTerm(request);
 			} else {
 				response.put(Constants.REASON, "Unknown request");
 			}
@@ -495,5 +502,89 @@ public class GlossariesHandler implements HttpHandler {
 			string = new String(array);
 		}
 		return string.indexOf("<tmx ") == -1;
+	}
+
+	private JSONObject searchTerm(String request) {
+		JSONObject result = new JSONObject();
+		JSONObject json = new JSONObject(request);
+		if (!json.has("glossary")) {
+			result.put(Constants.REASON, "Missing 'glossary' parameter");
+			return result;
+		}
+		String searchStr = json.getString("searchStr");
+		String srcLang = json.getString("srcLang");
+		int similarity = json.getInt("similarity");
+		boolean caseSensitive = json.getBoolean("caseSensitive");
+		String glossary = json.getString("glossary");
+		try {
+			List<Element> matches = new Vector<>();
+			if (openEngines == null) {
+				openEngines = new ConcurrentHashMap<>();
+			}
+			boolean wasOpen = openEngines.containsKey(glossary);
+			if (!wasOpen) {
+				openGlossary(glossary);
+			}
+			matches.addAll(openEngines.get(glossary).searchAll(searchStr, srcLang, similarity, caseSensitive));
+			if (!wasOpen) {
+				closeGlossary(glossary);
+			}
+			result.put("count", matches.size());
+			result.put("html", generateHTML(matches));
+		} catch (IOException | SAXException | ParserConfigurationException | SQLException e) {
+			logger.log(Level.ERROR, e);
+			result.put("result", Constants.ERROR);
+			result.put(Constants.REASON, e.getMessage());
+		}
+		return result;
+	}
+
+	private String generateHTML(List<Element> matches) throws IOException {
+		StringBuilder builder = new StringBuilder();
+		builder.append("<table class='stripes'><tr>");
+		List<Language> languages = MemoriesHandler.getLanguages(matches);
+		Iterator<Language> st = languages.iterator();
+		while (st.hasNext()) {
+			builder.append("<th>");
+			builder.append(st.next().getDescription());
+			builder.append("</th>");
+		}
+		builder.append("</tr>");
+		for (int i = 0; i < matches.size(); i++) {
+			builder.append("<tr>");
+			builder.append(parseTU(matches.get(i), languages));
+			builder.append("</tr>");
+		}
+		builder.append("</table>");
+		return builder.toString();
+	}
+
+	private Object parseTU(Element element, List<Language> languages) {
+		StringBuilder builder = new StringBuilder();
+		Map<String, Element> map = new Hashtable<>();
+		List<Element> tuvs = element.getChildren("tuv");
+		Iterator<Element> it = tuvs.iterator();
+		while (it.hasNext()) {
+			Element tuv = it.next();
+			map.put(tuv.getAttributeValue("xml:lang"), tuv);
+		}
+		for (int i = 0; i < languages.size(); i++) {
+			Language lang = languages.get(i);
+			builder.append("<td ");
+			if (lang.isBiDi()) {
+				builder.append("dir='rtl'");
+			}
+			builder.append(" lang='");
+			builder.append(lang.getCode());
+			builder.append("'>");
+			if (map.containsKey(lang.getCode())) {
+				Element seg = map.get(lang.getCode()).getChild("seg");
+				builder.append(MemoriesHandler.pureText(seg));
+			} else {
+				builder.append("&nbsp;");
+			}
+			builder.append("</td>");
+		}
+		return builder.toString();
 	}
 }

@@ -55,6 +55,9 @@ public interface ITmEngine {
 	public abstract List<Match> searchTranslation(String searchStr, String srcLang, String tgtLang, int similarity,
 			boolean caseSensitive) throws IOException, SAXException, ParserConfigurationException, SQLException;
 
+	public abstract List<Element> searchAll(String searchStr, String srcLang, int similarity, boolean caseSensitive)
+			throws IOException, SAXException, ParserConfigurationException, SQLException;
+
 	public abstract List<Element> concordanceSearch(String searchStr, String srcLang, int limit, boolean isRegexp,
 			boolean caseSensitive) throws IOException, SAXException, ParserConfigurationException, SQLException;
 

@@ -319,8 +319,8 @@ public class InternalDatabase implements ITmEngine {
 						stmt.setString(2, tuid);
 						try (ResultSet rs = stmt.executeQuery()) {
 							while (rs.next()) {
-								String pure = rs.getString(1);
-								String srcSeg = rs.getString(2);
+								String pure = rs.getNString(1);
+								String srcSeg = rs.getNString(2);
 								int distance;
 								if (caseSensitive) {
 									distance = MatchQuality.similarity(searchStr, pure);
@@ -342,10 +342,10 @@ public class InternalDatabase implements ITmEngine {
 									}
 									if (tgtFound) {
 										Element source = TMUtils.buildTuv(srcLang, srcSeg);
-										Map<String,String> propsMap = new Hashtable<>();
+										Map<String, String> propsMap = new Hashtable<>();
 										Element tu = getTu(tuid);
 										List<Element> props = tu.getChildren("prop");
-										Iterator<Element>pt = props.iterator();
+										Iterator<Element> pt = props.iterator();
 										while (pt.hasNext()) {
 											Element prop = pt.next();
 											propsMap.put(prop.getAttributeValue("type"), prop.getText());
@@ -636,4 +636,72 @@ public class InternalDatabase implements ITmEngine {
 	public void deleteDatabase() throws IOException, SQLException {
 		TmsServer.deleteFolder(new File(MemoriesHandler.getWorkFolder(), dbname).getAbsolutePath());
 	}
+
+	@Override
+	public List<Element> searchAll(String searchStr, String srcLang, int similarity, boolean caseSensitive)
+			throws IOException, SAXException, ParserConfigurationException, SQLException {
+		List<Element> result = new Vector<>();
+
+		int[] ngrams = null;
+		ngrams = NGrams.getNGrams(searchStr);
+		int size = ngrams.length;
+		if (size == 0) {
+			return result;
+		}
+		int min = size * similarity / 100;
+		int max = size * (200 - similarity) / 100;
+
+		int minLength = searchStr.length() * similarity / 100;
+		int maxLength = searchStr.length() * (200 - similarity) / 100;
+
+		Hashtable<String, Integer> candidates = new Hashtable<>();
+
+		try (PreparedStatement stmt = conn.prepareStatement(
+				"SELECT puretext FROM tuv WHERE lang=? AND tuid=? AND textlength>=? AND textlength<=?")) {
+			stmt.setString(1, srcLang);
+			stmt.setInt(3, minLength);
+			stmt.setInt(4, maxLength);
+
+			NavigableSet<Fun.Tuple2<Integer, String>> index = fuzzyIndex.getIndex(srcLang);
+			for (int i = 0; i < ngrams.length; i++) {
+				Iterable<String> keys = Fun.filter(index, ngrams[i]);
+				Iterator<String> it = keys.iterator();
+				while (it.hasNext()) {
+					String tuid = it.next();
+					if (candidates.containsKey(tuid)) {
+						int count = candidates.get(tuid);
+						candidates.put(tuid, count + 1);
+					} else {
+						candidates.put(tuid, 1);
+					}
+				}
+			}
+			Enumeration<String> tuids = candidates.keys();
+			while (tuids.hasMoreElements()) {
+				String tuid = tuids.nextElement();
+				int count = candidates.get(tuid);
+				if (count >= min && count <= max) {
+					stmt.setString(2, tuid);
+					try (ResultSet rs = stmt.executeQuery()) {
+						while (rs.next()) {
+							String pure = rs.getNString(1);
+							System.out.println(pure);
+							int distance;
+							if (caseSensitive) {
+								distance = MatchQuality.similarity(searchStr, pure);
+							} else {
+								distance = MatchQuality.similarity(searchStr.toLowerCase(), pure.toLowerCase());
+							}
+							if (distance >= similarity) {
+								Element tu = getTu(tuid);
+								result.add(tu);
+							}
+						}
+					}
+				}
+			}
+		}
+		return result;
+	}
+
 }
