@@ -142,22 +142,22 @@ class AddFile {
     addProject(): void {
         let subject: string = (document.getElementById('subjectInput') as HTMLInputElement).value;
         let client: string = (document.getElementById('clientInput') as HTMLInputElement).value;
-        let srcLang = (document.getElementById('srcLangSelect') as HTMLSelectElement).value;
+        let srcLang: string = (document.getElementById('srcLangSelect') as HTMLSelectElement).value;
         if (srcLang === 'none') {
             this.electron.ipcRenderer.send('show-message', { type: 'warning', message: 'Select source language' });
             return;
         }
-        let tgtLang = (document.getElementById('tgtLangSelect') as HTMLSelectElement).value;
+        let tgtLang: string = (document.getElementById('tgtLangSelect') as HTMLSelectElement).value;
         if (tgtLang === 'none') {
             this.electron.ipcRenderer.send('show-message', { type: 'warning', message: 'Select target language' });
             return;
         }
-        let type = (document.getElementById('typeSelect') as HTMLSelectElement).value;
+        let type: string = (document.getElementById('typeSelect') as HTMLSelectElement).value;
         if (type === 'none') {
             this.electron.ipcRenderer.send('show-message', { type: 'warning', message: 'Select file type' });
             return;
         }
-        let charset = (document.getElementById('charsetSelect') as HTMLSelectElement).value;
+        let charset: string = (document.getElementById('charsetSelect') as HTMLSelectElement).value;
         if (charset === 'none') {
             this.electron.ipcRenderer.send('show-message', { type: 'warning', message: 'Select character set' });
             return;

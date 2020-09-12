@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <title>Add Term to Glossary</title>
+    <link id="theme" rel="stylesheet" type="text/css" href="../css/light.css">
+    <link rel="stylesheet" type="text/css" href="../css/fonts.css">
+</head>
+
+<body id="body">
+
+
+    <table style="margin: 0px;">
+        <tr>
+            <td style="width:45%; padding:0px;">
+                <table>
+                    <tr>
+                        <td class="middle noWrap">
+                            <label for="source">Source Term</label>
+                        </td>
+                        <td class="fill_width middle">
+                           <input id="source" class="fill_width"/>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="middle noWrap">
+                            <label for="target">Target Term</label>
+                        </td>
+                        <td class="fill_width middle">
+                           <input id="target" class="fill_width"/>
+                        </td>
+                    </tr>
+                </table>
+            </td>
+            <td style="width:55%; padding:0px;">
+                <table>
+                    <tr>
+                        <td class="middle noWrap">
+                            <label for="srcLangSelect">Source Language</label>
+                        </td>
+                        <td class="fill_width middle">
+                            <select id="srcLangSelect" class="fill_width">
+
+                            </select>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="middle noWrap">
+                            <label for="tgtLangSelect">Target Language</label>
+                        </td>
+                        <td class="fill_width middle">
+                            <select id="tgtLangSelect" class="fill_width">
+
+                            </select>
+                        </td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+    </table>
+
+    <div class="buttonArea">
+        <button id="addTermButton">Add Term</button>
+    </div>
+
+    <script src="../js/keyboardHandler.js"></script>
+    <script src="../js/addTerm.js"></script>
+</body>
+
+</html>

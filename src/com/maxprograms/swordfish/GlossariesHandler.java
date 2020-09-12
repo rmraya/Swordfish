@@ -118,6 +118,8 @@ public class GlossariesHandler implements HttpHandler {
 				response = getProcessStatus(request);
 			} else if ("/glossaries/search".equals(url)) {
 				response = searchTerm(request);
+			} else if ("/glossaries/addTerm".equals(url)) {
+				response = addTerm(request);
 			} else {
 				response.put(Constants.REASON, "Unknown request");
 			}
@@ -502,6 +504,47 @@ public class GlossariesHandler implements HttpHandler {
 			string = new String(array);
 		}
 		return string.indexOf("<tmx ") == -1;
+	}
+
+	private JSONObject addTerm(String request) {
+		JSONObject result = new JSONObject();
+		JSONObject json = new JSONObject(request);
+		if (!json.has("glossary")) {
+			result.put(Constants.REASON, "Missing 'glossary' parameter");
+			return result;
+		}
+		try {
+			String glossary = json.getString("glossary");
+			if (openEngines == null) {
+				openEngines = new ConcurrentHashMap<>();
+			}
+			boolean wasOpen = openEngines.containsKey(glossary);
+			if (!wasOpen) {
+				openGlossary(glossary);
+			}
+			Element tu = new Element("tu");
+			Element srcTuv = new Element("tuv");
+			srcTuv.setAttribute("xml:lang", json.getString("srcLang"));
+			tu.addContent(srcTuv);
+			Element srcSeg = new Element("seg");
+			srcSeg.setText(json.getString("sourceTerm"));
+			srcTuv.addContent(srcSeg);
+			Element tgtTuv = new Element("tuv");
+			tgtTuv.setAttribute("xml:lang", json.getString("tgtLang"));
+			tu.addContent(tgtTuv);
+			Element tgtSeg = new Element("seg");
+			tgtSeg.setText(json.getString("targetTerm"));
+			tgtTuv.addContent(tgtSeg);
+			openEngines.get(glossary).storeTu(tu);
+			if (!wasOpen) {
+				closeGlossary(glossary);
+			}
+		} catch (IOException | SQLException e) {
+			logger.log(Level.ERROR, e);
+			result.put("result", Constants.ERROR);
+			result.put(Constants.REASON, e.getMessage());
+		}
+		return result;
 	}
 
 	private JSONObject searchTerm(String request) {

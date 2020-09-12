@@ -77,6 +77,7 @@ class TranslationView {
 
     tmMatches: TmMatches;
     mtMatches: MtMatches;
+    termsPanel: TermsPanel;
 
     memSelect: HTMLSelectElement;
     glossSelect: HTMLSelectElement;
@@ -237,11 +238,21 @@ class TranslationView {
         });
         topBar.appendChild(concordanceButton);
 
+        let addTermButton = document.createElement('a');
+        addTermButton.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 0 24 24" width="24"><path d="M14 10H2v2h12v-2zm0-4H2v2h12V6zm4 8v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zM2 16h8v-2H2v2z"/></svg>' +
+            '<span class="tooltiptext bottomTooltip">Add Term to Glossary</span>';
+        addTermButton.className = 'tooltip';
+        addTermButton.style.marginLeft = '20px';
+        addTermButton.addEventListener('click', () => {
+            this.addTerm();
+        });
+        topBar.appendChild(addTermButton);
+
         let termSearchButton = document.createElement('a');
         termSearchButton.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path d="M13 8h-8v-1h8v1zm0 2h-8v-1h8v1zm-3 2h-5v-1h5v1zm11.172 12l-7.387-7.387c-1.388.874-3.024 1.387-4.785 1.387-4.971 0-9-4.029-9-9s4.029-9 9-9 9 4.029 9 9c0 1.761-.514 3.398-1.387 4.785l7.387 7.387-2.828 2.828zm-12.172-8c3.859 0 7-3.14 7-7s-3.141-7-7-7-7 3.14-7 7 3.141 7 7 7z"/></svg>' +
             '<span class="tooltiptext bottomTooltip">Search Term in Glossary</span>';
-            termSearchButton.className = 'tooltip';
-            termSearchButton.addEventListener('click', () => {
+        termSearchButton.className = 'tooltip';
+        termSearchButton.addEventListener('click', () => {
             this.searchTerm();
         });
         topBar.appendChild(termSearchButton);
@@ -587,6 +598,19 @@ class TranslationView {
         termsTitle.classList.add('titlepanel');
         termsTitle.innerText = 'Terms';
         this.termsArea.appendChild(termsTitle);
+        let termsContainer: HTMLDivElement = document.createElement('div');
+        termsContainer.classList.add('fill_width');
+        this.termsArea.appendChild(termsContainer);
+        this.termsPanel = new TermsPanel(termsContainer, this.projectId);
+
+        observer = new MutationObserver((mutationsList) => {
+            for (let mutation of mutationsList) {
+                if (mutation.type === 'attributes') {
+                    termsContainer.style.height = (this.termsArea.clientHeight - termsTitle.clientHeight) + 'px';
+                }
+            }
+        });
+        observer.observe(this.termsArea, config);
     }
 
     generateStatistics(): void {
@@ -671,6 +695,7 @@ class TranslationView {
         }
         this.tmMatches.clear();
         this.mtMatches.clear();
+        this.termsPanel.clear();
         this.container.classList.remove('wait');
     }
 
@@ -859,8 +884,15 @@ class TranslationView {
 
         this.tmMatches.clear();
         this.mtMatches.clear();
+        this.termsPanel.clear();
 
         this.electron.ipcRenderer.send('get-matches', {
+            project: this.projectId,
+            file: this.currentId.file,
+            unit: this.currentId.unit,
+            segment: this.currentId.id
+        });
+        this.electron.ipcRenderer.send('get-unit-terms', {
             project: this.projectId,
             file: this.currentId.file,
             unit: this.currentId.unit,
@@ -965,6 +997,10 @@ class TranslationView {
         if (max > 0) {
             (this.currentRow.getElementsByClassName('match')[0] as HTMLTableCellElement).innerHTML = max + '%';
         }
+    }
+
+    setTerms(terms: any[]): void {
+        this.termsPanel.setTerms(terms);
     }
 
     setTarget(arg: any): void {
@@ -1197,5 +1233,13 @@ class TranslationView {
             return;
         }
         this.electron.ipcRenderer.send('show-term-search', { glossary: this.glossSelect.value });
+    }
+
+    addTerm(): void {
+        if (this.glossSelect.value === 'none') {
+            this.electron.ipcRenderer.send('show-message', { type: 'warning', message: 'Select glossary' });
+            return;
+        }
+        this.electron.ipcRenderer.send('show-add-term', { glossary: this.glossSelect.value, srcLang: this.srcLang, tgtLang: this.tgtLang });
     }
 }

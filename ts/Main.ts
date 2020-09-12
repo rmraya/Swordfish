@@ -163,6 +163,9 @@ class Main {
         Main.electron.ipcRenderer.on('term-search-requested', () => {
             this.searchTerm();
         });
+        Main.electron.ipcRenderer.on('add-term-requested', () => {
+            this.addTerm();
+        });
         Main.electron.ipcRenderer.on('export-glossary', () => {
             this.glossariesView.exportGlossary();
         });
@@ -222,6 +225,9 @@ class Main {
         });
         Main.electron.ipcRenderer.on('set-matches', (event: Electron.IpcRendererEvent, arg: any) => {
             this.setMatches(arg);
+        });
+        Main.electron.ipcRenderer.on('set-terms', (event: Electron.IpcRendererEvent, arg: any) => {
+            this.setTerms(arg);
         });
         Main.electron.ipcRenderer.on('set-target', (event: Electron.IpcRendererEvent, arg: any) => {
             this.setTarget(arg);
@@ -434,9 +440,14 @@ class Main {
     }
 
     setMatches(arg: any): void {
-        let selected = Main.tabHolder.getSelected();
-        if (Main.translationViews.has(selected)) {
-            Main.translationViews.get(selected).setMatches(arg.matches);
+        if (Main.translationViews.has(arg.project)) {
+            Main.translationViews.get(arg.project).setMatches(arg.matches);
+        }
+    }
+
+    setTerms(arg: any): void {
+        if (Main.translationViews.has(arg.project)) {
+            Main.translationViews.get(arg.project).setTerms(arg.terms);
         }
     }
 
@@ -595,8 +606,7 @@ class Main {
         let selected = Main.tabHolder.getSelected();
         if (Main.translationViews.has(selected)) {
             Main.translationViews.get(selected).concordanceSearch();
-        }
-        if (selected === 'memories') {
+        } else {
             this.memoriesView.concordanceSearch();
         }
     }
@@ -605,9 +615,17 @@ class Main {
         let selected = Main.tabHolder.getSelected();
         if (Main.translationViews.has(selected)) {
             Main.translationViews.get(selected).searchTerm();
-        }
-        if (selected === 'glossaries') {
+        } else {
             this.glossariesView.searchTerm();
+        }
+    }
+
+    addTerm(): void {
+        let selected = Main.tabHolder.getSelected();
+        if (Main.translationViews.has(selected)) {
+            Main.translationViews.get(selected).addTerm();
+        } else {
+            this.glossariesView.addTerm();
         }
     }
 }

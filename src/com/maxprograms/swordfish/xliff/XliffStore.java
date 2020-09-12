@@ -92,6 +92,7 @@ public class XliffStore {
     private PreparedStatement getMatches;
     private PreparedStatement bestMatch;
     private PreparedStatement insertTerm;
+    private PreparedStatement getTerms;
     private PreparedStatement getUnitData;
     private PreparedStatement getSource;
     private PreparedStatement getTarget;
@@ -163,6 +164,10 @@ public class XliffStore {
                 "SELECT file, unitId, segId, matchId, origin, type, similarity, source, target, data, compressed FROM matches WHERE file=? AND unitId=? AND segId=? ORDER BY similarity DESC");
         bestMatch = conn.prepareStatement(
                 "SELECT type, similarity FROM matches WHERE file=? AND unitId=? AND segId=? ORDER BY similarity DESC LIMIT 1");
+        insertTerm = conn.prepareStatement(
+                "INSERT INTO terms (file, unitId, segId, termid, origin, source, target) VALUES(?,?,?,?,?,?,?)");
+        getTerms = conn.prepareStatement(
+                "SELECT termid, origin, source, target FROM terms WHERE file=? AND unitId=? AND segId=? ORDER BY source");
         stmt = conn.createStatement();
         if (needsLoading) {
             document = builder.build(xliffFile);
@@ -515,6 +520,8 @@ public class XliffStore {
         updateMatch.close();
         getMatches.close();
         bestMatch.close();
+        insertTerm.close();
+        getTerms.close();
         stmt.close();
         conn.commit();
         conn.close();
@@ -1834,13 +1841,31 @@ public class XliffStore {
         }
     }
 
-	public void removeMatches() throws SQLException {
+    public void removeMatches() throws SQLException {
         stmt.execute("DELETE FROM matches WHERE type='tm' ");
-        conn.commit();       
+        conn.commit();
     }
-    
+
     public void removeMT() throws SQLException {
         stmt.execute("DELETE FROM matches WHERE type='mt' ");
-        conn.commit();       
-	}
+        conn.commit();
+    }
+
+    public JSONArray getTerms(JSONObject json) throws JSONException, SQLException {
+        JSONArray result = new JSONArray();
+        getTerms.setString(1, json.getString("file"));
+        getTerms.setString(2, json.getString("unit"));
+        getTerms.setString(3, json.getString("segment"));
+        try (ResultSet rs = getTerms.executeQuery()) {
+            while (rs.next()) {
+                JSONObject obj = new JSONObject();
+                obj.put("termId", rs.getString(1));
+                obj.put("origin", rs.getString(2));
+                obj.put("source", rs.getNString(3));
+                obj.put("target", rs.getNString(4));
+                result.put(obj);
+            }
+        }
+        return result;
+    }
 }

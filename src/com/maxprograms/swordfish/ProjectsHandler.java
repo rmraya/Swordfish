@@ -182,6 +182,8 @@ public class ProjectsHandler implements HttpHandler {
 				response = setProjectGlossary(request);
 			} else if ("/projects/projectGlossaries".equals(url)) {
 				response = getProjectGlossaries(request);
+			} else if ("/projects/terms".equals(url)) {
+				response = getTerms(request);
 			} else {
 				response.put(Constants.REASON, "Unknown request");
 			}
@@ -1320,6 +1322,21 @@ public class ProjectsHandler implements HttpHandler {
 				updateProjectStatus(project, status.getInt("percentage"));
 			}
 		} catch (SQLException | JSONException | SAXException | IOException | ParserConfigurationException e) {
+			logger.log(Level.ERROR, e);
+			result.put(Constants.REASON, e.getMessage());
+		}
+		return result;
+	}
+
+	public JSONObject getTerms(String request) {
+		JSONObject result = new JSONObject();
+		try {
+			JSONObject json = new JSONObject(request);
+			String project = json.getString("project");
+			if (projectStores.containsKey(project)) {
+				result.put("terms", projectStores.get(project).getTerms(json));
+			}
+		} catch (SQLException | JSONException e) {
 			logger.log(Level.ERROR, e);
 			result.put(Constants.REASON, e.getMessage());
 		}
