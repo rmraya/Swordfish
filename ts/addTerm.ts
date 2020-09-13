@@ -51,6 +51,7 @@ class AddTerm {
         document.getElementById('addTermButton').addEventListener('click', () => {
             this.addTerm();
         });
+        (document.getElementById('source') as HTMLInputElement).focus();
     }
 
     addTerm(): void {

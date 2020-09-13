@@ -81,7 +81,7 @@ class TermSearch {
         }
         let caseSensitive: HTMLInputElement = document.getElementById('caseSensitive') as HTMLInputElement;
         let similarity: string = (document.getElementById('similarity') as HTMLSelectElement).value;
-        this.electron.ipcRenderer.send('get-terms', {
+        this.electron.ipcRenderer.send('search-terms', {
             searchStr: searchText,
             srcLang: lang,
             similarity: Number.parseInt(similarity),

@@ -297,12 +297,21 @@ class TranslationView {
         this.glossSelect = document.createElement('select');
         this.glossSelect.id = 'glossSelect' + this.projectId;
         this.glossSelect.style.marginTop = '4px';
-        this.glossSelect.style.marginRight = '10px';
         this.glossSelect.style.minWidth = '180px';
         this.glossSelect.addEventListener('change', () => {
             this.electron.ipcRenderer.send('set-project-glossary', { project: this.projectId, glossary: this.glossSelect.value });
         });
         topBar.appendChild(this.glossSelect);
+
+        let requestTerms = document.createElement('a');
+        requestTerms.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" enable-background="new 0 0 24 24" height="24" viewBox="0 0 24 24" width="24"><path d="M14.17,5L19,9.83V19H5V5L14.17,5L14.17,5 M14.17,3H5C3.9,3,3,3.9,3,5v14c0,1.1,0.9,2,2,2h14c1.1,0,2-0.9,2-2V9.83 c0-0.53-0.21-1.04-0.59-1.41l-4.83-4.83C15.21,3.21,14.7,3,14.17,3L14.17,3z M7,15h10v2H7V15z M7,11h10v2H7V11z M7,7h7v2H7V7z"/></svg>' +
+            '<span class="tooltiptext bottomRightTooltip">Get Terms for All Segments</span>';
+        requestTerms.className = 'tooltip';
+        requestTerms.style.marginRight = '10px';
+        requestTerms.addEventListener('click', () => {
+            this.applyTerminologyAll();
+        });
+        topBar.appendChild(requestTerms);
     }
 
     close(): void {
@@ -892,7 +901,7 @@ class TranslationView {
             unit: this.currentId.unit,
             segment: this.currentId.id
         });
-        this.electron.ipcRenderer.send('get-unit-terms', {
+        this.electron.ipcRenderer.send('get-terms', {
             project: this.projectId,
             file: this.currentId.file,
             unit: this.currentId.unit,
@@ -1241,5 +1250,31 @@ class TranslationView {
             return;
         }
         this.electron.ipcRenderer.send('show-add-term', { glossary: this.glossSelect.value, srcLang: this.srcLang, tgtLang: this.tgtLang });
+    }
+
+    applyTerminologyAll(): void {
+        if (this.glossSelect.value === 'none') {
+            this.electron.ipcRenderer.send('show-message', { type: 'warning', message: 'Select glossary' });
+            return;
+        }
+        this.electron.ipcRenderer.send('get-project-terms', { project: this.projectId, glossary: this.glossSelect.value });
+    }
+
+    applyTerminology(): void {
+        if (this.glossSelect.value === 'none') {
+            this.electron.ipcRenderer.send('show-message', { type: 'warning', message: 'Select glossary' });
+            return;
+        }
+        if (!this.currentCell) {
+            this.electron.ipcRenderer.send('show-message', { type: 'warning', message: 'Select segment' });
+            return;
+        }
+        this.electron.ipcRenderer.send('get-segment-terms', {
+            project: this.projectId,
+            file: this.currentId.file,
+            unit: this.currentId.unit,
+            segment: this.currentId.id,
+            glossary: this.glossSelect.value
+        });
     }
 }

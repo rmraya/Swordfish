@@ -685,7 +685,6 @@ public class InternalDatabase implements ITmEngine {
 					try (ResultSet rs = stmt.executeQuery()) {
 						while (rs.next()) {
 							String pure = rs.getNString(1);
-							System.out.println(pure);
 							int distance;
 							if (caseSensitive) {
 								distance = MatchQuality.similarity(searchStr, pure);

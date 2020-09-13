@@ -51,12 +51,14 @@ import com.maxprograms.converters.Merge;
 import com.maxprograms.converters.TmxExporter;
 import com.maxprograms.stats.RepetitionAnalysis;
 import com.maxprograms.swordfish.Constants;
+import com.maxprograms.swordfish.GlossariesHandler;
 import com.maxprograms.swordfish.MemoriesHandler;
 import com.maxprograms.swordfish.TmsServer;
 import com.maxprograms.swordfish.mt.MT;
 import com.maxprograms.swordfish.tm.ITmEngine;
 import com.maxprograms.swordfish.tm.Match;
 import com.maxprograms.swordfish.tm.MatchQuality;
+import com.maxprograms.swordfish.tm.NGrams;
 import com.maxprograms.xml.Catalog;
 import com.maxprograms.xml.Document;
 import com.maxprograms.xml.Element;
@@ -1868,4 +1870,75 @@ public class XliffStore {
         }
         return result;
     }
+
+    public JSONArray getSegmentTerms(JSONObject json)
+            throws SQLException, IOException, SAXException, ParserConfigurationException {
+        JSONArray result = new JSONArray();
+
+        boolean fuzzyTermSearches = true;
+        boolean caseSensitive = true;
+        int maxTermLength = 5;
+
+        String sourceText = "";
+        getSource.setString(1, json.getString("file"));
+        getSource.setString(2, json.getString("unit"));
+        getSource.setString(3, json.getString("segment"));
+        try (ResultSet rs = getSource.executeQuery()) {
+            while (rs.next()) {
+                sourceText = rs.getNString(2);
+            }
+        }
+        List<String> words = NGrams.buildWordList(sourceText, NGrams.TERM_SEPARATORS);
+
+        String glossary = json.getString("glossary");
+        boolean closeGlossary = false;
+        if (!GlossariesHandler.isOpen(glossary)) {
+            GlossariesHandler.openGlossary(glossary);
+            closeGlossary = true;
+        }
+        ITmEngine engine = GlossariesHandler.getEngine(glossary);
+        Map<String, String> visited = new Hashtable<>();
+        for (int i = 0; i < words.size(); i++) {
+            String term = "";
+            for (int length = 0; length < maxTermLength; length++) {
+                if (i + length < words.size()) {
+                    term = term + " " + words.get(i + length);
+                    if (!visited.containsKey(term.trim())) {
+                        visited.put(term.trim(), "");
+                        int similarity = fuzzyTermSearches ? 70 : 100;
+                        List<Element> res = engine.searchAll(term.trim(), srcLang, similarity, caseSensitive ); 
+                        for (int j = 0; j < res.size(); j++) {
+                            JSONArray array = parseMatches(res);
+                            for (int h = 0; h < array.length(); h++) {
+                                result.put(array.get(h));
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        if (closeGlossary) {
+            GlossariesHandler.closeGlossary(glossary);
+        }
+        return result;
+    }
+
+    private JSONArray parseMatches(List<Element> matches) throws IOException {
+        JSONArray result = new JSONArray();
+        for (int i = 0; i < matches.size(); i++) {
+            JSONObject obj = new JSONObject();
+            Element element = matches.get(i);
+            List<Element> tuvs = element.getChildren("tuv");
+            Iterator<Element> it = tuvs.iterator();
+            while (it.hasNext()) {
+                Element tuv = it.next();
+                obj.put(tuv.getAttributeValue("xml:lang"), MemoriesHandler.pureText(tuv.getChild("seg")));
+            }
+            if (obj.has(tgtLang)) {
+                result.put(obj);
+            }
+        }
+        return result;
+    }
+
 }

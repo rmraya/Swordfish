@@ -421,7 +421,7 @@ class Swordfish {
         ipcMain.on('term-search-height', (event: IpcMainEvent, arg: any) => {
             Swordfish.setHeight(Swordfish.termSearchWindow, arg);
         });
-        ipcMain.on('get-terms', (event: IpcMainEvent, arg: any) => {
+        ipcMain.on('search-terms', (event: IpcMainEvent, arg: any) => {
             Swordfish.termSearch(arg);
         });
         ipcMain.on('get-project-names', (event: IpcMainEvent) => {
@@ -488,8 +488,14 @@ class Swordfish {
         ipcMain.on('get-matches', (event: IpcMainEvent, arg: any) => {
             Swordfish.getMatches(arg);
         });
-        ipcMain.on('get-unit-terms', (event: IpcMainEvent, arg: any) => {
+        ipcMain.on('get-terms', (event: IpcMainEvent, arg: any) => {
             Swordfish.getTerms(arg);
+        });
+        ipcMain.on('get-segment-terms', (event: IpcMainEvent, arg: any) => {
+            Swordfish.getSegmentTerms(arg);
+        });
+        ipcMain.on('get-project-terms', (event: IpcMainEvent, arg: any) => {
+            Swordfish.getProjectTerms(arg);
         });
         ipcMain.on('machine-translate', (event: IpcMainEvent, arg: any) => {
             Swordfish.machineTranslate(arg);
@@ -787,7 +793,10 @@ class Swordfish {
             { label: 'Accept Machine Translation', accelerator: 'CmdOrCtrl+Alt+L', click: () => { Swordfish.mainWindow.webContents.send('accept-mt-match'); } },
             { label: 'Apply Machine Translation to All Segments', click: () => { Swordfish.mainWindow.webContents.send('apply-mt-all'); } },
             { label: 'Accept All Machine Translations', click: () => { Swordfish.mainWindow.webContents.send('accept-all-mt'); } },
-            { label: 'Remove All Machine Translations', click: () => { Swordfish.mainWindow.webContents.send('remove-mt-all'); } }
+            { label: 'Remove All Machine Translations', click: () => { Swordfish.mainWindow.webContents.send('remove-mt-all'); } },
+            new MenuItem({ type: 'separator' }),
+            { label: 'Get Glossary Terms', accelerator: 'CmdOrCtrl+K', click: () => { Swordfish.mainWindow.webContents.send('apply-terminology'); } },
+            { label: 'Get Terms for All Segments', click: () => { Swordfish.mainWindow.webContents.send('apply-terminology-all'); } }
         ]);
         var template: MenuItem[] = [
             new MenuItem({ label: '&File', role: 'fileMenu', submenu: fileMenu }),
@@ -3355,6 +3364,26 @@ class Swordfish {
             }
         );
     }
+
+    static getSegmentTerms(arg: any) {
+        Swordfish.sendRequest('/projects/getSegmentTerms', arg,
+            (data: any) => {
+                if (data.status !== Swordfish.SUCCESS) {
+                    Swordfish.showMessage({ type: 'error', message: data.reason });
+                    return;
+                }
+                console.log(JSON.stringify(data));
+            },
+            (reason: string) => {
+                Swordfish.showMessage({ type: 'error', message: reason });
+            }
+        );
+    }
+
+    static getProjectTerms(arg: any) {
+        //TODO
+    }
+
 }
 
 new Swordfish();

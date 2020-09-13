@@ -184,7 +184,9 @@ public class ProjectsHandler implements HttpHandler {
 				response = getProjectGlossaries(request);
 			} else if ("/projects/terms".equals(url)) {
 				response = getTerms(request);
-			} else {
+			} else if ("/projects/getSegmentTerms".equals(url)) {
+				response = getSegmentTerms(request);
+			} else {				
 				response.put(Constants.REASON, "Unknown request");
 			}
 
@@ -1310,7 +1312,7 @@ public class ProjectsHandler implements HttpHandler {
 		return result;
 	}
 
-	public JSONObject acceptAllMT(String request) {
+	private JSONObject acceptAllMT(String request) {
 		JSONObject result = new JSONObject();
 		try {
 			JSONObject json = new JSONObject(request);
@@ -1328,7 +1330,7 @@ public class ProjectsHandler implements HttpHandler {
 		return result;
 	}
 
-	public JSONObject getTerms(String request) {
+	private JSONObject getTerms(String request) {
 		JSONObject result = new JSONObject();
 		try {
 			JSONObject json = new JSONObject(request);
@@ -1337,6 +1339,21 @@ public class ProjectsHandler implements HttpHandler {
 				result.put("terms", projectStores.get(project).getTerms(json));
 			}
 		} catch (SQLException | JSONException e) {
+			logger.log(Level.ERROR, e);
+			result.put(Constants.REASON, e.getMessage());
+		}
+		return result;
+	}
+
+	private JSONObject getSegmentTerms(String request) {
+		JSONObject result = new JSONObject();
+		JSONObject json = new JSONObject(request);
+		try {
+			String project = json.getString("project");
+			if (projectStores.containsKey(project)) {
+				result.put("terms", projectStores.get(project).getSegmentTerms(json));
+			}
+		} catch (SQLException | JSONException | IOException | SAXException | ParserConfigurationException e) {
 			logger.log(Level.ERROR, e);
 			result.put(Constants.REASON, e.getMessage());
 		}

@@ -158,15 +158,16 @@ public class MemoriesHandler implements HttpHandler {
 				if (openEngines == null) {
 					openEngines = new ConcurrentHashMap<>();
 				}
-				boolean wasOpen = openEngines.containsKey(mem.getId());
-				if (!wasOpen) {
+				boolean needsClosing = false;
+				if (!openEngines.containsKey(mem.getId())) {
 					openMemory(mem.getId());
+					needsClosing = true;
 				}
 				ITmEngine engine = openEngines.get(mem.getId());
 				JSONArray array = new JSONArray();
 				Set<String> langs = engine.getAllLanguages();
 				array.put(langs);
-				if (!wasOpen) {
+				if (needsClosing) {
 					closeMemory(mem.getId());
 				}
 				JSONObject obj = new JSONObject();
@@ -235,13 +236,14 @@ public class MemoriesHandler implements HttpHandler {
 				if (openEngines == null) {
 					openEngines = new ConcurrentHashMap<>();
 				}
-				boolean wasOpen = openEngines.containsKey(memory);
-				if (!wasOpen) {
+				boolean needsClosing = false;
+				if (!openEngines.containsKey(memory)) {
 					openMemory(memory);
+					needsClosing = true;
 				}
 				matches.addAll(
 						openEngines.get(memory).concordanceSearch(searchStr, srcLang, limit, isRegexp, caseSensitive));
-				if (!wasOpen) {
+				if (needsClosing) {
 					closeMemory(memory);
 				}
 			}
@@ -284,9 +286,10 @@ public class MemoriesHandler implements HttpHandler {
 				if (openEngines == null) {
 					openEngines = new ConcurrentHashMap<>();
 				}
-				boolean wasOpen = openEngines.containsKey(id);
-				if (!wasOpen) {
+				boolean needsClosing = false;
+				if (!openEngines.containsKey(id)) {
 					openMemory(id);
+					needsClosing = true;
 				}
 				ITmEngine engine = openEngines.get(id);
 				String project = json.has("project") ? json.getString("project") : "";
@@ -300,7 +303,7 @@ public class MemoriesHandler implements HttpHandler {
 					openTasks.put(process, new String[] { Constants.ERROR, e.getMessage() });
 					logger.log(Level.ERROR, e.getMessage(), e);
 				}
-				if (!wasOpen) {
+				if (needsClosing) {
 					closeMemory(id);
 				}
 			} catch (IOException | SQLException e) {
@@ -558,6 +561,7 @@ public class MemoriesHandler implements HttpHandler {
 			return;
 		}
 		openEngines.get(id).close();
+		openEngines.remove(id);
 	}
 
 	public static ITmEngine open(String memory) throws IOException, SQLException {
@@ -676,7 +680,7 @@ public class MemoriesHandler implements HttpHandler {
 		return text.toString();
 	}
 
-	protected static List<Language> getLanguages(List<Element> matches) throws IOException {
+	public static List<Language> getLanguages(List<Element> matches) throws IOException {
 		Set<Language> set = new TreeSet<>();
 		Iterator<Element> it = matches.iterator();
 		while (it.hasNext()) {
@@ -693,7 +697,7 @@ public class MemoriesHandler implements HttpHandler {
 		return result;
 	}
 
-	protected static String pureText(Element e) {
+	public static String pureText(Element e) {
 		StringBuilder string = new StringBuilder();
 		List<XMLNode> content = e.getContent();
 		Iterator<XMLNode> it = content.iterator();

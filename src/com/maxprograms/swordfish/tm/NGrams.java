@@ -35,7 +35,7 @@ public class NGrams {
 
 	public static int[] getNGrams(String source) {
 		String src = source.toLowerCase();
-		List<String> words = buildWordList(src);
+		List<String> words = buildWordList(src, SEPARATORS);
 		Map<String, String> table = new Hashtable<>();
 
 		Iterator<String> it = words.iterator();
@@ -68,13 +68,12 @@ public class NGrams {
 		return result;
 	}
 
-	private static List<String> buildWordList(String src) {
+	public static List<String> buildWordList(String src, String separator) {
 		List<String> result = new Vector<>();
-		StringTokenizer tokenizer = new StringTokenizer(src, SEPARATORS);
+		StringTokenizer tokenizer = new StringTokenizer(src, separator);
 		while (tokenizer.hasMoreElements()) {
 			result.add(tokenizer.nextToken());
 		}
 		return result;
 	}
-
 }

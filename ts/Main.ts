@@ -163,6 +163,12 @@ class Main {
         Main.electron.ipcRenderer.on('term-search-requested', () => {
             this.searchTerm();
         });
+        Main.electron.ipcRenderer.on('apply-terminology', (event: Electron.IpcRendererEvent, arg: any) => {
+            this.applyTerminology();
+        });
+        Main.electron.ipcRenderer.on('apply-terminology-all', (event: Electron.IpcRendererEvent, arg: any) => {
+            this.applyTerminologyAll();
+        });
         Main.electron.ipcRenderer.on('add-term-requested', () => {
             this.addTerm();
         });
@@ -537,10 +543,12 @@ class Main {
 
     splitSegment(): void {
         // TODO
+        Main.electron.ipcRenderer.send('show-message', { type: 'info', message: 'Not implemented yet' });
     }
 
     mergeNext(): void {
         // TODO
+        Main.electron.ipcRenderer.send('show-message', { type: 'info', message: 'Not implemented yet' });
     }
 
     setProjectMemories(arg: any): void {
@@ -626,6 +634,20 @@ class Main {
             Main.translationViews.get(selected).addTerm();
         } else {
             this.glossariesView.addTerm();
+        }
+    }
+
+    applyTerminology(): void{
+        let selected = Main.tabHolder.getSelected();
+        if (Main.translationViews.has(selected)) {
+            Main.translationViews.get(selected).applyTerminology();
+        }
+    }
+
+    applyTerminologyAll(): void{
+        let selected = Main.tabHolder.getSelected();
+        if (Main.translationViews.has(selected)) {
+            Main.translationViews.get(selected).applyTerminologyAll();
         }
     }
 }
