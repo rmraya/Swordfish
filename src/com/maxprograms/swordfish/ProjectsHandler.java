@@ -850,8 +850,8 @@ public class ProjectsHandler implements HttpHandler {
 		String project = json.getString("project");
 		try {
 			result.put("propagated", projectStores.get(project).saveSegment(json));
-			result.put("statistics", projectStores.get(project).getTranslationStatus());
 			JSONObject status = projectStores.get(project).getTranslationStatus();
+			result.put("statistics", status);
 			updateProjectStatus(project, status.getInt("percentage"));
 		} catch (IOException | SQLException | SAXException | ParserConfigurationException | DataFormatException e) {
 			logger.log(Level.ERROR, e);
@@ -1364,7 +1364,7 @@ public class ProjectsHandler implements HttpHandler {
 
 	private JSONObject getProjectTerms(String request) {
 		JSONObject result = new JSONObject();
-		final JSONObject json = new JSONObject(request);					
+		final JSONObject json = new JSONObject(request);
 		String id = "" + System.currentTimeMillis();
 		result.put("process", id);
 		if (processes == null) {
@@ -1381,7 +1381,8 @@ public class ProjectsHandler implements HttpHandler {
 							projectStores.get(project).getProjectTerms(json);
 						}
 						processes.put(id, Constants.COMPLETED);
-					} catch (SQLException | JSONException | IOException | SAXException | ParserConfigurationException e) {
+					} catch (SQLException | JSONException | IOException | SAXException
+							| ParserConfigurationException e) {
 						logger.log(Level.ERROR, e);
 						result.put(Constants.REASON, e.getMessage());
 					}
@@ -1391,6 +1392,6 @@ public class ProjectsHandler implements HttpHandler {
 		} catch (JSONException e) {
 			result.put(Constants.REASON, e.getMessage());
 		}
-		return result;	
+		return result;
 	}
 }

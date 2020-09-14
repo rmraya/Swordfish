@@ -498,7 +498,7 @@ public class XliffStore {
         return result;
     }
 
-    private int getBestMatch(String file, String unit, String segment) throws SQLException {
+    private synchronized int getBestMatch(String file, String unit, String segment) throws SQLException {
         String type = "";
         int similarity = 0;
         bestMatch.setString(1, file);
@@ -651,7 +651,8 @@ public class XliffStore {
                         key.append(unit);
                         key.append('-');
                         key.append(segment);
-                        ITmEngine engine = MemoriesHandler.open(memory);
+                        MemoriesHandler.openMemory(memory);
+                        ITmEngine engine = MemoriesHandler.getEngine(memory);
                         engine.storeTu(XliffUtils.toTu(key.toString(), source, target, tags));
                         MemoriesHandler.closeMemory(memory);
                     } catch (IOException | SQLException e) {
@@ -664,7 +665,7 @@ public class XliffStore {
         return result;
     }
 
-    public JSONObject getTranslationStatus() throws SQLException {
+    public synchronized JSONObject getTranslationStatus() throws SQLException {
         JSONObject result = new JSONObject();
         int total = 0;
         int translated = 0;
@@ -705,7 +706,7 @@ public class XliffStore {
         return result;
     }
 
-    private void updateTarget(String file, String unit, String segment, Element target, String pureTarget,
+    private synchronized void updateTarget(String file, String unit, String segment, Element target, String pureTarget,
             boolean confirm) throws SQLException {
         String state = pureTarget.isBlank() ? Constants.INITIAL : Constants.TRANSLATED;
         if (confirm) {
@@ -1575,8 +1576,8 @@ public class XliffStore {
             }
         }
         Element original = buildElement(src);
-
-        ITmEngine engine = MemoriesHandler.open(memory);
+        MemoriesHandler.openMemory(memory);
+        ITmEngine engine = MemoriesHandler.getEngine(memory);
         List<Match> matches = engine.searchTranslation(pure, srcLang, tgtLang, 60, false);
         Iterator<Match> it = matches.iterator();
         while (it.hasNext()) {
@@ -1599,7 +1600,8 @@ public class XliffStore {
 
     public void tmTranslateAll(String memory)
             throws IOException, SQLException, SAXException, ParserConfigurationException {
-        ITmEngine engine = MemoriesHandler.open(memory);
+        MemoriesHandler.openMemory(memory);
+        ITmEngine engine = MemoriesHandler.getEngine(memory);
         String sql = "SELECT file, unitId, segId, source, sourceText FROM segments WHERE state <> 'final'";
         try (ResultSet rs = stmt.executeQuery(sql)) {
             while (rs.next()) {

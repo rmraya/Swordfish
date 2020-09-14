@@ -69,6 +69,7 @@ public class MemoriesHandler implements HttpHandler {
 
 	private static ConcurrentHashMap<String, Memory> memories;
 	private static ConcurrentHashMap<String, ITmEngine> openEngines;
+	private static ConcurrentHashMap<String, Integer> useCount;
 	private static ConcurrentHashMap<String, String[]> openTasks;
 	private static boolean firstRun = true;
 
@@ -157,6 +158,7 @@ public class MemoriesHandler implements HttpHandler {
 				Memory mem = memories.get(json.getString("memory"));
 				if (openEngines == null) {
 					openEngines = new ConcurrentHashMap<>();
+					useCount = new ConcurrentHashMap<>();
 				}
 				boolean needsClosing = false;
 				if (!openEngines.containsKey(mem.getId())) {
@@ -235,6 +237,7 @@ public class MemoriesHandler implements HttpHandler {
 				String memory = memories.getString(i);
 				if (openEngines == null) {
 					openEngines = new ConcurrentHashMap<>();
+					useCount = new ConcurrentHashMap<>();
 				}
 				boolean needsClosing = false;
 				if (!openEngines.containsKey(memory)) {
@@ -285,6 +288,7 @@ public class MemoriesHandler implements HttpHandler {
 			try {
 				if (openEngines == null) {
 					openEngines = new ConcurrentHashMap<>();
+					useCount = new ConcurrentHashMap<>();
 				}
 				boolean needsClosing = false;
 				if (!openEngines.containsKey(id)) {
@@ -342,6 +346,7 @@ public class MemoriesHandler implements HttpHandler {
 				Memory mem = memories.get(json.getString("memory"));
 				if (openEngines == null) {
 					openEngines = new ConcurrentHashMap<>();
+					useCount = new ConcurrentHashMap<>();
 				}
 				boolean needsClosing = false;
 				if (!openEngines.containsKey(mem.getId())) {
@@ -539,41 +544,52 @@ public class MemoriesHandler implements HttpHandler {
 		return workFolder.getAbsolutePath();
 	}
 
-	private static void openMemory(String id) throws IOException, SQLException {
+	public static void openMemory(String id) throws IOException, SQLException {
 		if (memories == null) {
 			loadMemoriesList();
 		}
 		if (openEngines == null) {
 			openEngines = new ConcurrentHashMap<>();
+			useCount = new ConcurrentHashMap<>();
 		}
 		if (openEngines.contains(id)) {
+			int count = useCount.get(id);
+			useCount.put(id, count + 1);
 			return;
 		}
 		openEngines.put(id, new InternalDatabase(id, getWorkFolder()));
+		useCount.put(id, 0);
 	}
 
 	public static void closeMemory(String id) throws IOException, SQLException {
 		if (openEngines == null) {
 			openEngines = new ConcurrentHashMap<>();
+			useCount = new ConcurrentHashMap<>();
 			logger.log(Level.WARNING, "Closing memory when 'openEngine' is null");
 		}
 		if (!openEngines.contains(id)) {
+			logger.log(Level.WARNING, "Memory already closed");
 			return;
 		}
-		openEngines.get(id).close();
-		openEngines.remove(id);
+		int count = useCount.get(id);
+		useCount.put(id, count - 1);
+		if (count == 1) {
+			openEngines.get(id).close();
+			openEngines.remove(id);
+			useCount.remove(id);
+		}
 	}
 
-	public static ITmEngine open(String memory) throws IOException, SQLException {
+	public static ITmEngine getEngine(String memory) throws IOException, SQLException {
 		if (memories == null) {
 			loadMemoriesList();
 		}
 		Memory mem = memories.get(memory);
 		if (openEngines == null) {
 			openEngines = new ConcurrentHashMap<>();
+			useCount = new ConcurrentHashMap<>();
 		}
-		boolean wasOpen = openEngines.containsKey(mem.getId());
-		if (!wasOpen) {
+		if (!openEngines.containsKey(mem.getId())) {
 			openMemory(mem.getId());
 		}
 		return openEngines.get(mem.getId());
