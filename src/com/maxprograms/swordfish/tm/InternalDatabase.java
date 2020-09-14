@@ -123,7 +123,7 @@ public class InternalDatabase implements ITmEngine {
 	}
 
 	@Override
-	public void close() throws SQLException {
+	public synchronized void close() throws SQLException {
 		storeTUV.close();
 		deleteTUV.close();
 		searchTUV.close();
