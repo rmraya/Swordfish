@@ -63,7 +63,7 @@ class TranslationView {
     currentState: HTMLTableCellElement;
     currentTranslate: HTMLTableCellElement;
     currentContent: string;
-    currentId: any;
+    currentId: any = {};
     sourceTags: Map<String, String>;
 
     filterButton: HTMLAnchorElement;
@@ -876,11 +876,13 @@ class TranslationView {
         }
         this.currentRow = row;
         this.currentRow.classList.add('currentRow');
-        this.currentId = {
-            id: this.currentRow.getAttribute('data-id'),
-            file: this.currentRow.getAttribute('data-file'),
-            unit: this.currentRow.getAttribute('data-unit')
-        };
+        let id = this.currentRow.getAttribute('data-id');
+        let file = this.currentRow.getAttribute('data-file');
+        let unit = this.currentRow.getAttribute('data-unit');
+
+        let sameRow: boolean = (id === this.currentId.id && file === this.currentId.file && unit === this.currentId.unit);
+
+        this.currentId = { id: id, file: file, unit: unit };
         let source: HTMLTableCellElement = this.currentRow.getElementsByClassName('source')[0] as HTMLTableCellElement;
         this.sourceTags = this.getTags(source);
 
@@ -891,22 +893,24 @@ class TranslationView {
         this.currentCell.contentEditable = 'true';
         this.currentCell.classList.add('editing');
 
-        this.tmMatches.clear();
-        this.mtMatches.clear();
-        this.termsPanel.clear();
+        if (!sameRow) {
+            this.tmMatches.clear();
+            this.mtMatches.clear();
+            this.termsPanel.clear();
 
-        this.electron.ipcRenderer.send('get-matches', {
-            project: this.projectId,
-            file: this.currentId.file,
-            unit: this.currentId.unit,
-            segment: this.currentId.id
-        });
-        this.electron.ipcRenderer.send('get-terms', {
-            project: this.projectId,
-            file: this.currentId.file,
-            unit: this.currentId.unit,
-            segment: this.currentId.id
-        });
+            this.electron.ipcRenderer.send('get-matches', {
+                project: this.projectId,
+                file: this.currentId.file,
+                unit: this.currentId.unit,
+                segment: this.currentId.id
+            });
+            this.electron.ipcRenderer.send('get-terms', {
+                project: this.projectId,
+                file: this.currentId.file,
+                unit: this.currentId.unit,
+                segment: this.currentId.id
+            });
+        }
         if (focus) {
             this.currentCell.focus();
         }
@@ -1276,5 +1280,17 @@ class TranslationView {
             segment: this.currentId.id,
             glossary: this.glossSelect.value
         });
+    }
+  
+    insertTerm(arg: any): void {
+        let term: string = '';
+        if (arg.term) {
+            term = this.termsPanel.getTerm(arg.term);
+        } else {
+            term = this.termsPanel.getSelected();
+        }
+        if (term !== '') {
+            this.electron.ipcRenderer.send('paste-text', term);
+        }
     }
 }

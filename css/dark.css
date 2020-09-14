@@ -14,10 +14,10 @@
 	--focus-border: #f57c00;
 	--disabled-input: #555555;
 	--even-row-background: #2a2a2a;
-	--odd-row-background: #323538;
-	--selected-row: #626568;
-	--highlight-row: #616161;
-	--highlight-color: #ecf01b;
+	--odd-row-background: #383838;
+	--selected-row: #1a237e;
+	--highlight-row: #37474f;
+	--highlight-color: #dfe0e1;
 	--error-color: #960303;
 	--difference-color: #101010;
 	--difference-background: #bbdefb;

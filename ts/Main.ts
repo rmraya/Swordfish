@@ -226,6 +226,9 @@ class Main {
         Main.electron.ipcRenderer.on('insert-tag', (event: Electron.IpcRendererEvent, arg: any) => {
             this.insertTag(arg);
         });
+        Main.electron.ipcRenderer.on('insert-tem', (event: Electron.IpcRendererEvent, arg: any) => {
+            this.insertTerm(arg);
+        });
         Main.electron.ipcRenderer.on('auto-propagate', (event: Electron.IpcRendererEvent, arg: any) => {
             this.autoPropagate(arg);
         });
@@ -365,6 +368,13 @@ class Main {
         let selected = Main.tabHolder.getSelected();
         if (Main.translationViews.has(selected)) {
             Main.translationViews.get(selected).insertTag(arg);
+        }
+    }
+
+    insertTerm(arg: any): void {
+        let selected = Main.tabHolder.getSelected();
+        if (Main.translationViews.has(selected)) {
+            Main.translationViews.get(selected).insertTerm(arg);
         }
     }
 

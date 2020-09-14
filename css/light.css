@@ -13,11 +13,11 @@
 	--input-color: #262626;
 	--focus-border: #f57c00;
 	--disabled-input: #999999;
-	--even-row-background: #ececec;
+	--even-row-background: #d2d3d4;
 	--odd-row-background: #fcfcfc;
-	--selected-row: #b0bec5;
+	--selected-row: #90caf9;
 	--highlight-row: #bbdefb;
-	--highlight-color: #ecf01b;
+	--highlight-color: #dfe0e1;
 	--error-color: #960303;
 	--difference-color: #101010;
 	--difference-background: #bbdefb;
