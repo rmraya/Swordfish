@@ -79,6 +79,7 @@ public class XliffStore {
     Logger logger = System.getLogger(XliffStore.class.getName());
 
     private static final int THRESHOLD = 60;
+    private static int MAXTERMLENGTH = 5;
 
     private String xliffFile;
     private SAXBuilder builder;
@@ -100,12 +101,16 @@ public class XliffStore {
     private PreparedStatement getTarget;
     private PreparedStatement updateTarget;
     private PreparedStatement unitMatches;
+    private PreparedStatement unitTerms;
+    private PreparedStatement checkTerm;
 
     private Statement stmt;
     private boolean preserve;
 
     private static String catalog;
     private static boolean acceptUnconfirmed;
+    private static boolean fuzzyTermSearches;
+    private static boolean caseSensitiveSearches;
 
     private int index;
     private int nextId;
@@ -138,7 +143,7 @@ public class XliffStore {
         if (!database.exists()) {
             database.mkdirs();
         }
-        getCatalogFile();
+        getPreferences();
         builder = new SAXBuilder();
         builder.setEntityResolver(new Catalog(catalog));
 
@@ -170,6 +175,8 @@ public class XliffStore {
                 "INSERT INTO terms (file, unitId, segId, termid, origin, source, target) VALUES(?,?,?,?,?,?,?)");
         getTerms = conn.prepareStatement(
                 "SELECT termid, origin, source, target FROM terms WHERE file=? AND unitId=? AND segId=? ORDER BY source");
+        checkTerm = conn
+                .prepareStatement("SELECT target FROM terms WHERE file=? AND unitId=? AND segId=? AND termid=?");
         stmt = conn.createStatement();
         if (needsLoading) {
             document = builder.build(xliffFile);
@@ -263,8 +270,24 @@ public class XliffStore {
                 insertUnit.execute();
             }
             Element glossary = e.getChild("gls:glossary");
-            List<Element> entries = glossary.getChildren("gls:glossEntry");
-            // TODO store terms
+            if (glossary != null) {
+                List<Element> entries = glossary.getChildren("gls:glossEntry");
+                Iterator<Element> it = entries.iterator();
+                while (it.hasNext()) {
+                    Element glossEntry = it.next();
+                    if (glossEntry.hasAttribute("ref")) {
+                        String segId = glossEntry.getAttributeValue("ref");
+                        Element term = glossEntry.getChild("gls:term");
+                        String source = term.getText();
+                        String origin = term.getAttributeValue("source");
+                        Element translation = glossEntry.getChild("gls:translation");
+                        if (translation != null) {
+                            String target = translation.getText();
+                            saveTerm(currentFile, currentUnit, segId, origin, source, target);
+                        }
+                    }
+                }
+            }
         }
         if ("segment".equals(e.getName())) {
             String id = e.getAttributeValue("id");
@@ -341,7 +364,7 @@ public class XliffStore {
                 tagsData.put(d.getAttributeValue("id"), d.getText());
             }
         }
-        String segment = match.getAttributeValue("ref"); // TODO check if it points to a fragment
+        String segment = match.getAttributeValue("ref");
         String type = match.getAttributeValue("type", Constants.TM);
         String origin = match.getAttributeValue("origin");
         int similarity = Math.round(Float.parseFloat(match.getAttributeValue("similarity", "0.0")));
@@ -524,6 +547,7 @@ public class XliffStore {
         bestMatch.close();
         insertTerm.close();
         getTerms.close();
+        checkTerm.close();
         stmt.close();
         conn.commit();
         conn.close();
@@ -540,7 +564,7 @@ public class XliffStore {
         return tgtLang;
     }
 
-    private static void getCatalogFile() throws IOException {
+    private static void getPreferences() throws IOException {
         File preferences = new File(TmsServer.getWorkFolder(), "preferences.json");
         StringBuilder builder = new StringBuilder();
         try (FileReader reader = new FileReader(preferences)) {
@@ -553,6 +577,8 @@ public class XliffStore {
         }
         JSONObject json = new JSONObject(builder.toString());
         acceptUnconfirmed = json.getBoolean("acceptUnconfirmed");
+        caseSensitiveSearches = json.getBoolean("caseSensitiveSearches");
+        fuzzyTermSearches = json.getBoolean("fuzzyTermSearches");
         catalog = json.getString("catalog");
     }
 
@@ -1345,14 +1371,14 @@ public class XliffStore {
 
     public void exportTMX(String output) throws SQLException, SAXException, IOException, ParserConfigurationException {
         updateXliff();
-        getCatalogFile();
+        getPreferences();
         TmxExporter.export(xliffFile, output, catalog);
     }
 
     public void exportTranslations(String output)
             throws SAXException, IOException, ParserConfigurationException, SQLException {
         updateXliff();
-        getCatalogFile();
+        getPreferences();
         List<String> result = Merge.merge(xliffFile, output, catalog, acceptUnconfirmed);
         if (!"0".equals(result.get(0))) {
             throw new IOException(result.get(1));
@@ -1362,9 +1388,13 @@ public class XliffStore {
     public void updateXliff() throws SQLException, SAXException, IOException, ParserConfigurationException {
         document = builder.build(xliffFile);
         document.getRootElement().setAttribute("xmlns:mtc", "urn:oasis:names:tc:xliff:matches:2.0");
+        document.getRootElement().setAttribute("xmlns:gls", "urn:oasis:names:tc:xliff:glossary:2.0");
         unitMatches = conn.prepareStatement(
                 "SELECT file, unitId, segId, matchId, origin, type, similarity, source, target, data, compressed FROM matches WHERE file=? AND unitId=? ORDER BY segId, similarity DESC");
+        unitTerms = conn.prepareStatement(
+                "SELECT file, unitId, segId, termId, origin, source, target FROM terms WHERE file=? AND unitId=? ORDER BY segId");
         recurseUpdating(document.getRootElement());
+        unitTerms.close();
         unitMatches.close();
         saveXliff();
     }
@@ -1379,6 +1409,10 @@ public class XliffStore {
             tagCount = 0;
             currentUnit = e.getAttributeValue("id");
             translate = e.getAttributeValue("translate", "yes").equals("yes");
+            Element glossary = getUnitTerms(currentFile, currentUnit);
+            if (glossary != null) {
+                insertGlossary(e, glossary);
+            }
             Element matches = getUnitMatches(currentFile, currentUnit);
             if (matches != null) {
                 insertMatches(e, matches);
@@ -1422,6 +1456,14 @@ public class XliffStore {
         unit.getContent().add(0, matches);
     }
 
+    private void insertGlossary(Element unit, Element terms) {
+        Element old = unit.getChild("gls:glossary");
+        if (old != null) {
+            unit.removeChild(old);
+        }
+        unit.getContent().add(0, terms);
+    }
+
     private Element getUnitMatches(String file, String unit)
             throws SQLException, SAXException, IOException, ParserConfigurationException {
         Element matches = new Element("mtc:matches");
@@ -1441,6 +1483,31 @@ public class XliffStore {
             }
         }
         return matches.getChildren().isEmpty() ? null : matches;
+    }
+
+    private Element getUnitTerms(String file, String unit)
+            throws SQLException, SAXException, IOException, ParserConfigurationException {
+        Element glossary = new Element("gls:glossary");
+        unitTerms.setString(1, file);
+        unitTerms.setString(2, unit);
+        try (ResultSet rs = unitTerms.executeQuery()) {
+            while (rs.next()) {
+                Element entry = new Element("gls:glossEntry");
+                entry.setAttribute("ref", rs.getString(3));
+                entry.setAttribute("id", rs.getString(4));
+                glossary.addContent(entry);
+
+                Element term = new Element("gls:term");
+                term.setAttribute("source", rs.getString(5));
+                term.setText(rs.getNString(6));
+                entry.addContent(term);
+
+                Element translation = new Element("gls:translation");
+                translation.setText(rs.getNString(7));
+                entry.addContent(translation);
+            }
+        }
+        return glossary.getChildren().isEmpty() ? null : glossary;
     }
 
     public JSONArray machineTranslate(JSONObject json, MT translator)
@@ -1565,7 +1632,7 @@ public class XliffStore {
 
     public static String getCatalog() throws IOException {
         if (catalog == null) {
-            getCatalogFile();
+            getPreferences();
         }
         return catalog;
     }
@@ -1875,9 +1942,8 @@ public class XliffStore {
             throws SQLException, IOException, SAXException, ParserConfigurationException {
         JSONArray result = new JSONArray();
 
-        boolean fuzzyTermSearches = true;
-        boolean caseSensitive = true;
-        int maxTermLength = 5;
+        getPreferences();
+        int similarity = fuzzyTermSearches ? 70 : 100;
 
         String sourceText = "";
         getSource.setString(1, json.getString("file"));
@@ -1896,21 +1962,25 @@ public class XliffStore {
             GlossariesHandler.openGlossary(glossary);
             closeGlossary = true;
         }
+        String glossaryName = GlossariesHandler.getGlossaryName(glossary);
         ITmEngine engine = GlossariesHandler.getEngine(glossary);
         Map<String, String> visited = new Hashtable<>();
         for (int i = 0; i < words.size(); i++) {
             String term = "";
-            for (int length = 0; length < maxTermLength; length++) {
+            for (int length = 0; length < MAXTERMLENGTH; length++) {
                 if (i + length < words.size()) {
                     term = term + " " + words.get(i + length);
                     if (!visited.containsKey(term.trim())) {
                         visited.put(term.trim(), "");
-                        int similarity = fuzzyTermSearches ? 70 : 100;
-                        List<Element> res = engine.searchAll(term.trim(), srcLang, similarity, caseSensitive ); 
+                        List<Element> res = engine.searchAll(term.trim(), srcLang, similarity, caseSensitiveSearches);
                         for (int j = 0; j < res.size(); j++) {
                             JSONArray array = parseMatches(res);
                             for (int h = 0; h < array.length(); h++) {
-                                result.put(array.get(h));
+                                JSONObject match = array.getJSONObject(h);
+                                match.put("origin", glossaryName);
+                                result.put(match);
+                                saveTerm(json.getString("file"), json.getString("unit"), json.getString("segment"),
+                                        glossaryName, match.getString("source"), match.getString("target"));
                             }
                         }
                     }
@@ -1923,18 +1993,100 @@ public class XliffStore {
         return result;
     }
 
+    public void getProjectTerms(JSONObject json)
+            throws IOException, SQLException, SAXException, ParserConfigurationException {
+        getPreferences();
+        int similarity = fuzzyTermSearches ? 70 : 100;
+        String glossary = json.getString("glossary");
+        boolean closeGlossary = false;
+        if (!GlossariesHandler.isOpen(glossary)) {
+            GlossariesHandler.openGlossary(glossary);
+            closeGlossary = true;
+        }
+        String glossaryName = GlossariesHandler.getGlossaryName(glossary);
+        ITmEngine engine = GlossariesHandler.getEngine(glossary);
+        try (PreparedStatement segIterator = conn.prepareStatement(
+                "SELECT file, unitId, segId, sourceText FROM segments WHERE type='S' AND translate='Y' ")) {
+            try (ResultSet set = segIterator.executeQuery()) {
+                while (set.next()) {
+                    String file = set.getString(1);
+                    String unit = set.getString(2);
+                    String segment = set.getString(3);
+                    String sourceText = set.getNString(4);
+
+                    List<String> words = NGrams.buildWordList(sourceText, NGrams.TERM_SEPARATORS);
+
+                    Map<String, String> visited = new Hashtable<>();
+                    for (int i = 0; i < words.size(); i++) {
+                        String term = "";
+                        for (int length = 0; length < MAXTERMLENGTH; length++) {
+                            if (i + length < words.size()) {
+                                term = term + " " + words.get(i + length);
+                                if (!visited.containsKey(term.trim())) {
+                                    visited.put(term.trim(), "");
+                                    List<Element> res = engine.searchAll(term.trim(), srcLang, similarity,
+                                            caseSensitiveSearches);
+                                    for (int j = 0; j < res.size(); j++) {
+                                        JSONArray array = parseMatches(res);
+                                        for (int h = 0; h < array.length(); h++) {
+                                            JSONObject match = array.getJSONObject(h);
+                                            match.put("origin", glossaryName);
+                                            saveTerm(file, unit, segment, glossaryName, match.getString("source"),
+                                                    match.getString("target"));
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        if (closeGlossary) {
+            GlossariesHandler.closeGlossary(glossary);
+        }
+    }
+
+    private void saveTerm(String file, String unit, String segment, String origin, String source, String target)
+            throws SQLException {
+        boolean found = false;
+        checkTerm.setString(1, file);
+        checkTerm.setString(2, unit);
+        checkTerm.setString(3, segment);
+        checkTerm.setString(4, "" + (source + origin).hashCode());
+        try (ResultSet rs = checkTerm.executeQuery()) {
+            while (rs.next()) {
+                found = true;
+            }
+        }
+        if (!found) {
+            insertTerm.setString(1, file);
+            insertTerm.setString(2, unit);
+            insertTerm.setString(3, segment);
+            insertTerm.setString(4, "" + (source + origin).hashCode());
+            insertTerm.setString(5, origin);
+            insertTerm.setNString(6, source);
+            insertTerm.setNString(7, target);
+            insertTerm.execute();
+            conn.commit();
+        }
+    }
+
     private JSONArray parseMatches(List<Element> matches) throws IOException {
         JSONArray result = new JSONArray();
         for (int i = 0; i < matches.size(); i++) {
-            JSONObject obj = new JSONObject();
+            Map<String, String> map = new Hashtable<>();
             Element element = matches.get(i);
             List<Element> tuvs = element.getChildren("tuv");
             Iterator<Element> it = tuvs.iterator();
             while (it.hasNext()) {
                 Element tuv = it.next();
-                obj.put(tuv.getAttributeValue("xml:lang"), MemoriesHandler.pureText(tuv.getChild("seg")));
+                map.put(tuv.getAttributeValue("xml:lang"), MemoriesHandler.pureText(tuv.getChild("seg")));
             }
-            if (obj.has(tgtLang)) {
+            if (map.containsKey(tgtLang)) {
+                JSONObject obj = new JSONObject();
+                obj.put("source", map.get(srcLang));
+                obj.put("target", map.get(tgtLang));
                 result.put(obj);
             }
         }

@@ -41,6 +41,9 @@ class DefaultLanguages {
             if (event.code === 'Escape') {
                 this.electron.ipcRenderer.send('close-defaultLangs');
             }
+            if (event.code === 'Enter') {
+                this.savePreferences();
+            }
         });
         (document.getElementById('srcLangSelect') as HTMLSelectElement).focus();
     }

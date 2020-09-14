@@ -658,4 +658,11 @@ public class GlossariesHandler implements HttpHandler {
 		}
 		return builder.toString();
 	}
+
+	public static String getGlossaryName(String id) throws IOException {
+		if (glossaries == null) {
+			loadGlossariesList();
+		}
+		return glossaries.get(id).getName();
+	}
 }

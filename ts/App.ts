@@ -65,6 +65,8 @@ class Swordfish {
         srx: Swordfish.path.join(app.getAppPath(), 'srx', 'default.srx'),
         paragraphSegmentation: false,
         acceptUnconfirmed: false,
+        fuzzyTermSearches: false,
+        caseSensitiveSearches: false,
         google: {
             enabled: false,
             apiKey: '',
@@ -176,11 +178,6 @@ class Swordfish {
         var ck: Buffer = execFileSync(this.javapath, ['--module-path', 'lib', '-m', 'openxliff/com.maxprograms.server.CheckURL', 'http://localhost:8070/TMSServer'], { cwd: app.getAppPath() });
         console.log(ck.toString());
 
-        app.on('open-file', (event, filePath) => {
-            event.preventDefault();
-            this.openFile(filePath);
-        });
-
         this.loadDefaults();
         Swordfish.loadPreferences();
 
@@ -213,12 +210,6 @@ class Swordfish {
             app.quit();
         });
 
-        if (process.platform === 'darwin') {
-            app.on('open-file', (event, path) => {
-                event.preventDefault();
-                this.openFile(path);
-            });
-        }
         nativeTheme.on('updated', () => {
             if (Swordfish.currentPreferences.theme === 'system') {
                 if (nativeTheme.shouldUseDarkColors) {
@@ -626,6 +617,9 @@ class Swordfish {
         ipcMain.on('search-replace', (event: IpcMainEvent, arg: any) => {
             Swordfish.replaceText(arg);
         });
+        ipcMain.on('request-apply-terminology', () => {
+            Swordfish.mainWindow.webContents.send('apply-terminology');
+        });
     } // end constructor
 
     static createWindow(): void {
@@ -916,11 +910,6 @@ class Swordfish {
         writeFileSync(Swordfish.path.join(app.getPath('appData'), app.name, 'preferences.json'), JSON.stringify(arg));
         Swordfish.loadPreferences();
         Swordfish.setTheme();
-    }
-
-    openFile(file: string): void {
-        // TODO
-        console.log('Open file requested: ' + file);
     }
 
     static showFilterSegments(project: string): void {
@@ -3372,7 +3361,9 @@ class Swordfish {
                     Swordfish.showMessage({ type: 'error', message: data.reason });
                     return;
                 }
-                console.log(JSON.stringify(data));
+                if (data.terms.length > 0) {
+                    Swordfish.mainWindow.webContents.send('set-terms', { project: arg.project, terms: data.terms });
+                }
             },
             (reason: string) => {
                 Swordfish.showMessage({ type: 'error', message: reason });
@@ -3381,7 +3372,56 @@ class Swordfish {
     }
 
     static getProjectTerms(arg: any) {
-        //TODO
+        dialog.showMessageBox(Swordfish.mainWindow, {
+            type: 'question',
+            message: 'Get terms for all segments?',
+            buttons: ['Yes', 'No']
+        }).then((selection: Electron.MessageBoxReturnValue) => {
+            if (selection.response === 0) {
+                Swordfish.mainWindow.focus();
+                Swordfish.mainWindow.webContents.send('start-waiting');
+                Swordfish.mainWindow.webContents.send('set-status', 'Getting terms');
+                Swordfish.sendRequest('/projects/getProjectTerms', arg,
+                    (data: any) => {
+                        if (data.status !== Swordfish.SUCCESS) {
+                            Swordfish.mainWindow.webContents.send('end-waiting');
+                            Swordfish.mainWindow.webContents.send('set-status', '');
+                            Swordfish.showMessage({ type: 'error', message: data.reason });
+                        }
+                        Swordfish.currentStatus = data;
+                        let processId: string = data.process;
+                        var intervalObject = setInterval(() => {
+                            if (Swordfish.currentStatus.progress) {
+                                if (Swordfish.currentStatus.progress === Swordfish.COMPLETED) {
+                                    Swordfish.mainWindow.webContents.send('end-waiting');
+                                    Swordfish.mainWindow.webContents.send('set-status', '');
+                                    clearInterval(intervalObject);
+                                    return;
+                                } else if (Swordfish.currentStatus.progress === Swordfish.PROCESSING) {
+                                    // it's OK, keep waiting
+                                } else if (Swordfish.currentStatus.progress === Swordfish.ERROR) {
+                                    Swordfish.mainWindow.webContents.send('end-waiting');
+                                    Swordfish.mainWindow.webContents.send('set-status', '');
+                                    clearInterval(intervalObject);
+                                    Swordfish.showMessage({ type: 'error', message: Swordfish.currentStatus.reason });
+                                    return;
+                                } else {
+                                    Swordfish.mainWindow.webContents.send('end-waiting');
+                                    Swordfish.mainWindow.webContents.send('set-status', '');
+                                    clearInterval(intervalObject);
+                                    Swordfish.showMessage({ type: 'error', message: 'Unknown error getting terms' });
+                                    return;
+                                }
+                            }
+                            Swordfish.getProjectsProgress(processId);
+                        }, 500);
+                    },
+                    (reason: string) => {
+                        Swordfish.showMessage({ type: 'error', message: reason });
+                    }
+                );
+            }
+        });
     }
 
 }

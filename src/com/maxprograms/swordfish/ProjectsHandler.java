@@ -186,7 +186,9 @@ public class ProjectsHandler implements HttpHandler {
 				response = getTerms(request);
 			} else if ("/projects/getSegmentTerms".equals(url)) {
 				response = getSegmentTerms(request);
-			} else {				
+			} else if ("/projects/getProjectTerms".equals(url)) {
+				response = getProjectTerms(request);
+			} else {
 				response.put(Constants.REASON, "Unknown request");
 			}
 
@@ -1358,5 +1360,37 @@ public class ProjectsHandler implements HttpHandler {
 			result.put(Constants.REASON, e.getMessage());
 		}
 		return result;
+	}
+
+	private JSONObject getProjectTerms(String request) {
+		JSONObject result = new JSONObject();
+		final JSONObject json = new JSONObject(request);					
+		String id = "" + System.currentTimeMillis();
+		result.put("process", id);
+		if (processes == null) {
+			processes = new Hashtable<>();
+		}
+		processes.put(id, Constants.PROCESSING);
+		try {
+			Thread thread = new Thread() {
+				@Override
+				public void run() {
+					try {
+						String project = json.getString("project");
+						if (projectStores.containsKey(project)) {
+							projectStores.get(project).getProjectTerms(json);
+						}
+						processes.put(id, Constants.COMPLETED);
+					} catch (SQLException | JSONException | IOException | SAXException | ParserConfigurationException e) {
+						logger.log(Level.ERROR, e);
+						result.put(Constants.REASON, e.getMessage());
+					}
+				}
+			};
+			thread.start();
+		} catch (JSONException e) {
+			result.put(Constants.REASON, e.getMessage());
+		}
+		return result;	
 	}
 }

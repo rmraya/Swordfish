@@ -55,9 +55,9 @@ class TermsPanel {
         let getTerms = document.createElement('a');
         getTerms.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 0 24 24" width="24"><path d="M17.01 14h-.8l-.27-.27c.98-1.14 1.57-2.61 1.57-4.23 0-3.59-2.91-6.5-6.5-6.5s-6.5 3-6.5 6.5H2l3.84 4 4.16-4H6.51C6.51 7 8.53 5 11.01 5s4.5 2.01 4.5 4.5c0 2.48-2.02 4.5-4.5 4.5-.65 0-1.26-.14-1.82-.38L7.71 15.1c.97.57 2.09.9 3.3.9 1.61 0 3.08-.59 4.22-1.57l.27.27v.79l5.01 4.99L22 19l-4.99-5z"/></svg>' +
             '<span class="tooltiptext topTooltip">Get Glossary Terms</span>';
-            getTerms.className = 'tooltip';
-        insertTerm.addEventListener('click', () => {
-            this.getTerms();
+        getTerms.className = 'tooltip';
+        getTerms.addEventListener('click', () => {
+            this.electron.ipcRenderer.send('request-apply-terminology');
         });
         toolbar.appendChild(getTerms);
 
@@ -73,18 +73,34 @@ class TermsPanel {
     }
 
     clear(): void {
+       this.table.innerHTML = '<tr/>';
+    }
+
+    insertTerm(): void {
         // TODO
     }
 
-    insertTerm(): void  {
-        // TODO
-    }
+    setTerms(terms: any[]): void {
+        this.table.innerHTML = '';
+        let length: number = terms.length;
+        for (let i: number = 0; i < length; i++) {
+            let term: any = terms[i];
+            let row: HTMLTableRowElement = document.createElement('tr');
+            this.table.appendChild(row);
 
-    getTerms(): void {
-        // TODO
-    }
+            let td: HTMLTableCellElement = document.createElement('td');
+            td.classList.add('center');
+            td.classList.add('middle');
+            td.innerText = '' + (i+1);
+            row.appendChild(td);
 
-    setTerms(terms:any[]): void {
-        // TODO
+            let source: HTMLTableCellElement = document.createElement('td');
+            source.innerText = term.source;
+            row.appendChild(source);
+
+            let target: HTMLTableCellElement = document.createElement('td');
+            target.innerText = term.target;
+            row.appendChild(target);
+        }
     }
 }

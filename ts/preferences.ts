@@ -31,6 +31,8 @@ class Preferences {
     defaultCatalog: HTMLInputElement;
     paragraphSegmentation: HTMLInputElement;
     acceptUnconfirmed: HTMLInputElement;
+    fuzzyTermSearches: HTMLInputElement;
+    caseSensitiveSearches: HTMLInputElement;
 
     enableGoogle: HTMLInputElement;
     googleKey: HTMLInputElement;
@@ -152,6 +154,8 @@ class Preferences {
         this.defaultCatalog.value = arg.catalog;
         this.acceptUnconfirmed.checked = arg.acceptUnconfirmed;
         this.paragraphSegmentation.checked = arg.paragraphSegmentation;
+        this.fuzzyTermSearches.checked = arg.fuzzyTermSearches;
+        this.caseSensitiveSearches.checked = arg.caseSensitiveSearches;
 
         this.enableGoogle.checked = arg.google.enabled;
         this.googleKey.value = arg.google.apiKey;
@@ -294,6 +298,8 @@ class Preferences {
             srx: this.defaultSRX.value,
             paragraphSegmentation: this.paragraphSegmentation.checked,
             acceptUnconfirmed: this.acceptUnconfirmed.checked,
+            fuzzyTermSearches: this.fuzzyTermSearches.checked,
+            caseSensitiveSearches: this.caseSensitiveSearches.checked,
             google: {
                 enabled: this.enableGoogle.checked,
                 apiKey: this.googleKey.value,
@@ -609,6 +615,38 @@ class Preferences {
         unconfirmedLabel.setAttribute('for', 'acceptUnconfirmed');
         unconfirmedLabel.style.marginTop = '4px';
         row2.appendChild(unconfirmedLabel);
+
+        let row3: HTMLDivElement = document.createElement('div');
+        row3.classList.add('row');
+        row3.classList.add('middle');
+        container.appendChild(row3);
+
+        this.fuzzyTermSearches = document.createElement('input');
+        this.fuzzyTermSearches.type = 'checkbox';
+        this.fuzzyTermSearches.id= 'fuzzyTermSearches';
+        row3.appendChild(this.fuzzyTermSearches);
+
+        let fuzzyTermsLabel: HTMLLabelElement = document.createElement('label');
+        fuzzyTermsLabel.innerText = 'Fuzzy Term Searches';
+        fuzzyTermsLabel.setAttribute('for', 'fuzzyTermSearches');
+        fuzzyTermsLabel.style.marginTop = '4px';
+        row3.appendChild(fuzzyTermsLabel);
+
+        let row4: HTMLDivElement = document.createElement('div');
+        row4.classList.add('row');
+        row4.classList.add('middle');
+        container.appendChild(row4);
+
+        this.caseSensitiveSearches = document.createElement('input');
+        this.caseSensitiveSearches.type= 'checkbox';
+        this.caseSensitiveSearches.id = 'caseSensitiveSearches';
+        row4.appendChild(this.caseSensitiveSearches);
+
+        let caseSensitiveLabel: HTMLLabelElement = document.createElement('label');
+        caseSensitiveLabel.innerText = 'Case Sensitive Term Searches';
+        caseSensitiveLabel.setAttribute('for', 'caseSensitiveSearches');
+        caseSensitiveLabel.style.marginTop = '4px';
+        row4.appendChild(caseSensitiveLabel);
     }
 
     populateMtTab(container: HTMLDivElement): void {
