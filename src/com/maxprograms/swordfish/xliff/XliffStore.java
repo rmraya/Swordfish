@@ -2095,4 +2095,54 @@ public class XliffStore {
         return result;
     }
 
+    public void lockSegment(JSONObject json) throws SQLException {
+        String sql = "SELECT translate FROM segments WHERE file=? AND unitId=? AND segId=?";
+        String translate = "";
+        try (PreparedStatement st = conn.prepareStatement(sql)) {
+            st.setString(1, json.getString("file"));
+            st.setString(2, json.getString("unit"));
+            st.setString(3, json.getString("segment"));
+            try (ResultSet rs = st.executeQuery()) {
+                while (rs.next()) {
+                    translate = rs.getString(1);
+                }
+            }
+        }
+        sql = "UPDATE segments SET translate=? WHERE file=? AND unitId=? AND segId=?";
+        try (PreparedStatement st = conn.prepareStatement(sql)) {
+            st.setString(1, translate.equals("Y") ? "N" : "Y");
+            st.setString(2, json.getString("file"));
+            st.setString(3, json.getString("unit"));
+            st.setString(4, json.getString("segment"));
+            st.executeUpdate();
+            conn.commit();
+        }
+    }
+
+    public void unlockAll() throws SQLException {
+        stmt.executeUpdate("UPDATE segments SET translate='Y' WHERE type='S' AND translate='N' ");
+        conn.commit();
+    }
+
+    public void lockDuplicates() throws SQLException, SAXException, IOException, ParserConfigurationException {
+        String sql = "UPDATE segments SET translate='N' WHERE file=? AND unitId=? AND segId=?";
+        try (PreparedStatement lockStmt = conn.prepareStatement(sql)) {
+            Element currentSource = new Element("source");
+            sql = "SELECT file, unitId, segId, source FROM segments WHERE type='S' ORDER BY source, file, unitId, segId";
+            try (ResultSet rs = stmt.executeQuery(sql)) {
+                while (rs.next()) {
+                    Element source = buildElement(rs.getNString(4));
+                    if (source.equals(currentSource)) {
+                        lockStmt.setString(1, rs.getString(1));
+                        lockStmt.setString(2, rs.getString(2));
+                        lockStmt.setString(3, rs.getString(3));
+                        lockStmt.executeUpdate();
+                        conn.commit();
+                    } else {
+                        currentSource = source;
+                    }
+                }
+            }
+        }
+    }
 }

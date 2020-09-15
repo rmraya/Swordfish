@@ -188,6 +188,12 @@ public class ProjectsHandler implements HttpHandler {
 				response = getSegmentTerms(request);
 			} else if ("/projects/getProjectTerms".equals(url)) {
 				response = getProjectTerms(request);
+			} else if ("/projects/lockSegment".equals(url)) {
+				response = lockSegment(request);
+			} else if ("/projects/lockDuplicates".equals(url)) {
+				response = lockDuplicates(request);
+			} else if ("/projects/unlockAll".equals(url)) {
+				response = unlockAll(request);
 			} else {
 				response.put(Constants.REASON, "Unknown request");
 			}
@@ -1390,6 +1396,51 @@ public class ProjectsHandler implements HttpHandler {
 			};
 			thread.start();
 		} catch (JSONException e) {
+			result.put(Constants.REASON, e.getMessage());
+		}
+		return result;
+	}
+
+	private JSONObject lockSegment(String request) {
+		JSONObject result = new JSONObject();
+		JSONObject json = new JSONObject(request);
+		try {
+			String project = json.getString("project");
+			if (projectStores.containsKey(project)) {
+				projectStores.get(project).lockSegment(json);
+			}
+		} catch (SQLException | JSONException e) {
+			logger.log(Level.ERROR, e);
+			result.put(Constants.REASON, e.getMessage());
+		}
+		return result;
+	}
+
+	private JSONObject lockDuplicates(String request) {
+		JSONObject result = new JSONObject();
+		JSONObject json = new JSONObject(request);
+		try {
+			String project = json.getString("project");
+			if (projectStores.containsKey(project)) {
+				projectStores.get(project).lockDuplicates();
+			}
+		} catch (SQLException | JSONException | SAXException | IOException | ParserConfigurationException e) {
+			logger.log(Level.ERROR, e);
+			result.put(Constants.REASON, e.getMessage());
+		}
+		return result;
+	}
+
+	private JSONObject unlockAll(String request) {
+		JSONObject result = new JSONObject();
+		JSONObject json = new JSONObject(request);
+		try {
+			String project = json.getString("project");
+			if (projectStores.containsKey(project)) {
+				projectStores.get(project).unlockAll();
+			}
+		} catch (SQLException | JSONException e) {
+			logger.log(Level.ERROR, e);
 			result.put(Constants.REASON, e.getMessage());
 		}
 		return result;

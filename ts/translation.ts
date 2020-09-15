@@ -705,6 +705,7 @@ class TranslationView {
         this.tmMatches.clear();
         this.mtMatches.clear();
         this.termsPanel.clear();
+        this.currentRow = undefined;
         this.container.classList.remove('wait');
     }
 
@@ -870,6 +871,60 @@ class TranslationView {
         }
     }
 
+    nextUntranslated(): void {
+        if (this.currentCell) {
+            this.saveEdit({ confirm: false, next: 'untranslated' });
+            return;
+        }
+        let found: boolean = false;
+        let rows: HTMLCollection = this.tbody.rows;
+        let length: number = rows.length;
+        let start: number = 0;
+        if (this.currentRow) {
+            start = this.currentRow.rowIndex;
+        }
+        for (let i: number = start; i < length; i++) {
+            let row: HTMLTableRowElement = (rows[i] as HTMLTableRowElement);
+            let cell: HTMLTableCellElement = row.getElementsByClassName('state')[0] as HTMLTableCellElement;
+            if (cell.classList.contains('initial')) {
+                found = true;
+                this.selectRow(row, true);
+                row.scrollTo({ top: 40, left: 0, behavior: 'smooth' });
+                break;
+            }
+        }
+        if (!found) {
+            this.electron.ipcRenderer.send('show-message', { type: 'warning', message: 'No more untranslated segments on this page' });
+        }
+    }
+
+    nextUnconfirmed(): void {
+        if (this.currentCell) {
+            this.saveEdit({ confirm: false, next: 'unconfirmed' });
+            return;
+        }
+        let found: boolean = false;
+        let rows: HTMLCollection = this.tbody.rows;
+        let length: number = rows.length;
+        let start: number = 0;
+        if (this.currentRow) {
+            start = this.currentRow.rowIndex;
+        }
+        for (let i: number = start; i < length; i++) {
+            let row: HTMLTableRowElement = (rows[i] as HTMLTableRowElement);
+            let cell: HTMLTableCellElement = row.getElementsByClassName('state')[0] as HTMLTableCellElement;
+            if (cell.classList.contains('translated')) {
+                found = true;
+                this.selectRow(row, true);
+                row.scrollTo({ top: 40, left: 0, behavior: 'smooth' });
+                break;
+            }
+        }
+        if (!found) {
+            this.electron.ipcRenderer.send('show-message', { type: 'warning', message: 'No more unconfirmed segments on this page' });
+        }
+    }
+
     selectRow(row: HTMLTableRowElement, focus: boolean) {
         if (this.currentRow) {
             this.currentRow.classList.remove('currentRow');
@@ -890,8 +945,12 @@ class TranslationView {
         this.currentState = this.currentRow.getElementsByClassName('state')[0] as HTMLTableCellElement;
         this.currentTranslate = this.currentRow.getElementsByClassName('translate')[0] as HTMLTableCellElement;
         this.currentContent = this.currentCell.innerHTML;
-        this.currentCell.contentEditable = 'true';
-        this.currentCell.classList.add('editing');
+        if (this.currentTranslate.innerHTML.indexOf('path') === -1) { // SVG_BLANK doesn't have 'path'
+            this.currentCell.contentEditable = 'true';
+            this.currentCell.classList.add('editing');
+        } else {
+            console.log(this.currentTranslate.innerHTML);
+        }
 
         if (!sameRow) {
             this.tmMatches.clear();
@@ -1281,7 +1340,7 @@ class TranslationView {
             glossary: this.glossSelect.value
         });
     }
-  
+
     insertTerm(arg: any): void {
         let term: string = '';
         if (arg.term) {
@@ -1292,5 +1351,18 @@ class TranslationView {
         if (term !== '') {
             this.electron.ipcRenderer.send('paste-text', term);
         }
+    }
+
+    toggleLock(): void {
+        if (this.currentRow) {
+            this.electron.ipcRenderer.send('lock-segment', {
+                project: this.projectId,
+                file: this.currentId.file,
+                unit: this.currentId.unit,
+                segment: this.currentId.id
+            });
+            return;
+        }
+        this.electron.ipcRenderer.send('show-message', { type: 'warning', message: 'Select segment' });
     }
 }

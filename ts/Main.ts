@@ -187,6 +187,12 @@ class Main {
         Main.electron.ipcRenderer.on('last-page', () => {
             this.lastPage();
         });
+        Main.electron.ipcRenderer.on('next-untranslated', () => {
+            this.nextUntranslated();
+        });
+        Main.electron.ipcRenderer.on('next-unconfirmed', () => {
+            this.nextUnconfirmed();
+        });
         Main.electron.ipcRenderer.on('cancel-edit', () => {
             this.cancelEdit();
         });
@@ -261,6 +267,15 @@ class Main {
         });
         Main.electron.ipcRenderer.on('accept-all-matches', () => {
             this.acceptAll100Matches();
+        });
+        Main.electron.ipcRenderer.on('toggle-lock', () => {
+            this.toggleLock();
+        });
+        Main.electron.ipcRenderer.on('lock-repeated', () => {
+            this.lockRepeated();
+        });
+        Main.electron.ipcRenderer.on('unlock-segments', () => {
+            this.unlockSegments();
         });
         Main.electron.ipcRenderer.on('set-project-memories', (event: Electron.IpcRendererEvent, arg: any) => {
             this.setProjectMemories(arg);
@@ -361,6 +376,20 @@ class Main {
         let selected = Main.tabHolder.getSelected();
         if (Main.translationViews.has(selected)) {
             Main.translationViews.get(selected).saveEdit(arg);
+        }
+    }
+
+    nextUntranslated(): void {
+        let selected = Main.tabHolder.getSelected();
+        if (Main.translationViews.has(selected)) {
+            Main.translationViews.get(selected).nextUntranslated();
+        }
+    }
+
+    nextUnconfirmed(): void {
+        let selected = Main.tabHolder.getSelected();
+        if (Main.translationViews.has(selected)) {
+            Main.translationViews.get(selected).nextUnconfirmed();
         }
     }
 
@@ -647,17 +676,38 @@ class Main {
         }
     }
 
-    applyTerminology(): void{
+    applyTerminology(): void {
         let selected = Main.tabHolder.getSelected();
         if (Main.translationViews.has(selected)) {
             Main.translationViews.get(selected).applyTerminology();
         }
     }
 
-    applyTerminologyAll(): void{
+    applyTerminologyAll(): void {
         let selected = Main.tabHolder.getSelected();
         if (Main.translationViews.has(selected)) {
             Main.translationViews.get(selected).applyTerminologyAll();
+        }
+    }
+
+    toggleLock(): void {
+        let selected = Main.tabHolder.getSelected();
+        if (Main.translationViews.has(selected)) {
+            Main.translationViews.get(selected).toggleLock();
+        }
+    }
+
+    lockRepeated(): void {
+        let selected = Main.tabHolder.getSelected();
+        if (Main.translationViews.has(selected)) {
+            Main.electron.ipcRenderer.send('lock-duplicates', { project: selected });
+        }
+    }
+
+    unlockSegments(): void {
+        let selected = Main.tabHolder.getSelected();
+        if (Main.translationViews.has(selected)) {
+            Main.electron.ipcRenderer.send('unlock-all', { project: selected });
         }
     }
 }

@@ -624,6 +624,15 @@ class Swordfish {
         ipcMain.on('request-apply-terminology', () => {
             Swordfish.mainWindow.webContents.send('apply-terminology');
         });
+        ipcMain.on('lock-segment', (event: IpcMainEvent, arg: any) => {
+            Swordfish.lockSegment(arg);
+        });
+        ipcMain.on('lock-duplicates', (event: IpcMainEvent, arg: any) => {
+            Swordfish.lockDuplicates(arg);
+        });
+        ipcMain.on('unlock-all', (event: IpcMainEvent, arg: any) => {
+            Swordfish.unlockAll(arg);
+        });
     } // end constructor
 
     static createWindow(): void {
@@ -686,13 +695,16 @@ class Swordfish {
         var editMenu: Menu = Menu.buildFromTemplate([
             { label: 'Undo', accelerator: 'CmdOrCtrl+Z', click: () => { Swordfish.mainWindow.webContents.undo(); } },
             new MenuItem({ type: 'separator' }),
-            { label: 'Cut', accelerator: 'CmdOrCtrl+X', click: () => { Swordfish.mainWindow.webContents.cut() } },
-            { label: 'Copy', accelerator: 'CmdOrCtrl+C', click: () => { Swordfish.mainWindow.webContents.copy() } },
-            { label: 'Paste', accelerator: 'CmdOrCtrl+V', click: () => { Swordfish.mainWindow.webContents.paste() } },
-            { label: 'Select All', accelerator: 'CmdOrCtrl+A', click: () => { Swordfish.mainWindow.webContents.selectAll() } },
+            { label: 'Cut', accelerator: 'CmdOrCtrl+X', click: () => { Swordfish.mainWindow.webContents.cut(); } },
+            { label: 'Copy', accelerator: 'CmdOrCtrl+C', click: () => { Swordfish.mainWindow.webContents.copy(); } },
+            { label: 'Paste', accelerator: 'CmdOrCtrl+V', click: () => { Swordfish.mainWindow.webContents.paste(); } },
+            { label: 'Select All', accelerator: 'CmdOrCtrl+A', click: () => { Swordfish.mainWindow.webContents.selectAll(); } },
             new MenuItem({ type: 'separator' }),
-            { label: 'Save Changes', accelerator: 'Alt+Enter', click: () => { Swordfish.mainWindow.webContents.send('save-edit', { confirm: false, next: 'none' }); } },
-            { label: 'Discard Changes', accelerator: 'Esc', click: () => { Swordfish.mainWindow.webContents.send('cancel-edit'); } },
+            { label: 'Edit Next Untranslated Segment', accelerator: 'CmdOrCtrl+U', click: () => { Swordfish.mainWindow.webContents.send('next-untranslated'); } },
+            { label: 'Edit Next Unconfirmed Segment', accelerator: 'CmdOrCtrl+Shift+U', click: () => { Swordfish.mainWindow.webContents.send('next-unconfirmed'); } },
+            new MenuItem({ type: 'separator' }),
+            { label: 'Save Segment Changes', accelerator: 'Alt+Enter', click: () => { Swordfish.mainWindow.webContents.send('save-edit', { confirm: false, next: 'none' }); } },
+            { label: 'Discard Segment Changes', accelerator: 'Esc', click: () => { Swordfish.mainWindow.webContents.send('cancel-edit'); } },
             new MenuItem({ type: 'separator' }),
             { label: 'Split Segment', accelerator: 'CmdOrCtrl+H', click: () => { Swordfish.mainWindow.webContents.send('split-segment'); } },
             { label: 'Merge With Next Segment', accelerator: 'CmdOrCtrl+J', click: () => { Swordfish.mainWindow.webContents.send('merge-next'); } },
@@ -788,6 +800,10 @@ class Swordfish {
             { label: 'Confirm All Translations', click: () => { Swordfish.mainWindow.webContents.send('confirm-all'); } },
             { label: 'Unconfirm All Translations', click: () => { Swordfish.mainWindow.webContents.send('unconfirm-all'); } },
             { label: 'Remove All Translations', click: () => { Swordfish.mainWindow.webContents.send('remove-all'); } },
+            new MenuItem({ type: 'separator' }),
+            { label: 'Lock/Unlock Segment', accelerator:'F4', click: () => { Swordfish.mainWindow.webContents.send('toggle-lock'); } },
+            { label: 'Lock Repeated Segments',  click: () => { Swordfish.mainWindow.webContents.send('lock-repeated'); } },
+            { label: 'Unlock All Segments',  click: () => { Swordfish.mainWindow.webContents.send('unlock-segments'); } },
             new MenuItem({ type: 'separator' }),
             { label: 'Copy Source to Target', accelerator: 'CmdOrCtrl+P', click: () => { Swordfish.mainWindow.webContents.send('copy-source'); } },
             { label: 'Copy Sources to All Empty Targets', accelerator: 'CmdOrCtrl+Shift+P', click: () => { Swordfish.mainWindow.webContents.send('copy-all-sources'); } },
@@ -3442,6 +3458,53 @@ class Swordfish {
         });
     }
 
+    static lockSegment(arg: any) {
+        Swordfish.destroyWindow(this.addTermWindow);
+        Swordfish.sendRequest('/projects/lockSegment', arg,
+            (data: any) => {
+                if (data.status !== Swordfish.SUCCESS) {
+                    Swordfish.showMessage({ type: 'error', message: data.reason });
+                    return;
+                }
+                Swordfish.mainWindow.webContents.send('reload-page', { project: arg.project });
+            },
+            (reason: string) => {
+                Swordfish.showMessage({ type: 'error', message: reason });
+            }
+        );
+    }
+
+    static lockDuplicates(arg: any) {
+        Swordfish.destroyWindow(this.addTermWindow);
+        Swordfish.sendRequest('/projects/lockDuplicates', arg,
+            (data: any) => {
+                if (data.status !== Swordfish.SUCCESS) {
+                    Swordfish.showMessage({ type: 'error', message: data.reason });
+                    return;
+                }
+                Swordfish.mainWindow.webContents.send('reload-page', { project: arg.project });
+            },
+            (reason: string) => {
+                Swordfish.showMessage({ type: 'error', message: reason });
+            }
+        );
+    }
+
+    static unlockAll(arg: any) {
+        Swordfish.destroyWindow(this.addTermWindow);
+        Swordfish.sendRequest('/projects/unlockAll', arg,
+            (data: any) => {
+                if (data.status !== Swordfish.SUCCESS) {
+                    Swordfish.showMessage({ type: 'error', message: data.reason });
+                    return;
+                }
+                Swordfish.mainWindow.webContents.send('reload-page', { project: arg.project });
+            },
+            (reason: string) => {
+                Swordfish.showMessage({ type: 'error', message: reason });
+            }
+        );
+    }
 }
 
 new Swordfish();
