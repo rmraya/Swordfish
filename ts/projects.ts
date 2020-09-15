@@ -315,7 +315,6 @@ class ProjectsView {
             let p = projects[i];
             let tr = document.createElement('tr');
             tr.id = p.id;
-            tr.className = 'discover';
             tr.addEventListener('click', (event: MouseEvent) => {
                 this.clicked(event, p);
             });

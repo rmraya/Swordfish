@@ -191,7 +191,6 @@ class MemoriesView {
             let p = memories[i];
             let tr: HTMLTableRowElement = document.createElement('tr');
             tr.id = p.id;
-            tr.classList.add('discover');
             tr.addEventListener('click', (event: MouseEvent) => {
                 this.clicked(event, p);
             });

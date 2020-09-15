@@ -196,7 +196,6 @@ class GlossariesView {
             let p = glossaries[i];
             let tr: HTMLTableRowElement = document.createElement('tr');
             tr.id = p.id;
-            tr.classList.add('discover');
             tr.addEventListener('click', (event: MouseEvent) => {
                 this.clicked(event, p);
             });
