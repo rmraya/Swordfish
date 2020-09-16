@@ -3459,7 +3459,6 @@ class Swordfish {
     }
 
     static lockSegment(arg: any) {
-        Swordfish.destroyWindow(this.addTermWindow);
         Swordfish.sendRequest('/projects/lockSegment', arg,
             (data: any) => {
                 if (data.status !== Swordfish.SUCCESS) {
@@ -3475,7 +3474,6 @@ class Swordfish {
     }
 
     static lockDuplicates(arg: any) {
-        Swordfish.destroyWindow(this.addTermWindow);
         Swordfish.sendRequest('/projects/lockDuplicates', arg,
             (data: any) => {
                 if (data.status !== Swordfish.SUCCESS) {
@@ -3491,7 +3489,6 @@ class Swordfish {
     }
 
     static unlockAll(arg: any) {
-        Swordfish.destroyWindow(this.addTermWindow);
         Swordfish.sendRequest('/projects/unlockAll', arg,
             (data: any) => {
                 if (data.status !== Swordfish.SUCCESS) {
