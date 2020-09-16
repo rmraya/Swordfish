@@ -1183,10 +1183,10 @@ class Swordfish {
     }
 
     static createProject(arg: any): void {
-        if (Swordfish.addProjectWindow) {
+        if (arg.from === 'addProject') {
             Swordfish.destroyWindow(Swordfish.addProjectWindow);
         }
-        if (Swordfish.addFileWindow) {
+        if (arg.from === 'addFile') {
             Swordfish.destroyWindow(Swordfish.addFileWindow);
         }
         Swordfish.mainWindow.focus();
@@ -3140,9 +3140,10 @@ class Swordfish {
     }
 
     static destroyWindow(window: BrowserWindow): void {
-        if (window && window.isClosable()) {
+        if (window) {
             try {
                 window.destroy();
+                window = undefined;
             } catch (e) {
                 console.log(e);
             }

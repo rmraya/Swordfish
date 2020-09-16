@@ -169,7 +169,8 @@ class AddFile {
             subject: subject,
             client: client,
             srcLang: srcLang,
-            tgtLang: tgtLang
+            tgtLang: tgtLang,
+            from: 'addFile'
         }
         this.electron.ipcRenderer.send('create-project', params);
     }

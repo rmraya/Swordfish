@@ -127,7 +127,8 @@ class AddProject {
             subject: subject,
             client: client,
             srcLang: srcLang,
-            tgtLang: tgtLang
+            tgtLang: tgtLang,
+            from: 'addProject'
         }
         this.electron.ipcRenderer.send('create-project', params);
     }
