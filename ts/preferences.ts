@@ -26,6 +26,7 @@ class Preferences {
     srcLangSelect: HTMLSelectElement;
     tgtLangSelect: HTMLSelectElement;
     themeColor: HTMLSelectElement;
+    zoomFactor: HTMLSelectElement;
 
     defaultSRX: HTMLInputElement;
     defaultCatalog: HTMLInputElement;
@@ -150,6 +151,7 @@ class Preferences {
         this.themeColor.value = arg.theme;
         this.srcLangSelect.value = arg.srcLang;
         this.tgtLangSelect.value = arg.tgtLang;
+        this.zoomFactor.value = arg.zoomFactor;
         this.defaultSRX.value = arg.srx;
         this.defaultCatalog.value = arg.catalog;
         this.acceptUnconfirmed.checked = arg.acceptUnconfirmed;
@@ -294,6 +296,7 @@ class Preferences {
             srcLang: this.srcLangSelect.value,
             tgtLang: this.tgtLangSelect.value,
             theme: this.themeColor.value,
+            zoomFactor: this.zoomFactor.value,
             catalog: this.defaultCatalog.value,
             srx: this.defaultSRX.value,
             paragraphSegmentation: this.paragraphSegmentation.checked,
@@ -417,6 +420,33 @@ class Preferences {
             '<option value="dark">Dark</option>' +
             '<option value="light">Light</option>'
         td.appendChild(this.themeColor);
+
+        tr = document.createElement('tr');
+        langsTable.appendChild(tr);
+
+        td = document.createElement('td');
+        td.classList.add('middle');
+        td.classList.add('noWrap');
+        tr.appendChild(td);
+
+        let zoomLabel: HTMLLabelElement = document.createElement('label');
+        zoomLabel.setAttribute('for', 'zoomFactor');
+        zoomLabel.innerText = 'Text Size';
+        td.appendChild(zoomLabel);
+
+        td = document.createElement('td');
+        td.classList.add('middle');
+        tr.appendChild(td);
+
+        this.zoomFactor = document.createElement('select');
+        this.zoomFactor.id = 'zoomFactor';
+        this.zoomFactor.innerHTML =
+            '<option value="0.8">Small</option>' +
+            '<option value="1.0">Medium</option>' +
+            '<option value="1.2">Large</option>' +
+            '<option value="1.4">Very Large</option>' +
+            '<option value="1.8">Extra Large</option>'
+        td.appendChild(this.zoomFactor);
     }
 
     populateSpellcheckTab(container: HTMLDivElement): void {
@@ -623,7 +653,7 @@ class Preferences {
 
         this.fuzzyTermSearches = document.createElement('input');
         this.fuzzyTermSearches.type = 'checkbox';
-        this.fuzzyTermSearches.id= 'fuzzyTermSearches';
+        this.fuzzyTermSearches.id = 'fuzzyTermSearches';
         row3.appendChild(this.fuzzyTermSearches);
 
         let fuzzyTermsLabel: HTMLLabelElement = document.createElement('label');
@@ -638,7 +668,7 @@ class Preferences {
         container.appendChild(row4);
 
         this.caseSensitiveSearches = document.createElement('input');
-        this.caseSensitiveSearches.type= 'checkbox';
+        this.caseSensitiveSearches.type = 'checkbox';
         this.caseSensitiveSearches.id = 'caseSensitiveSearches';
         row4.appendChild(this.caseSensitiveSearches);
 

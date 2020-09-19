@@ -137,7 +137,21 @@ class TranslationView {
         this.electron.ipcRenderer.on('request-glossaries', () => {
             this.electron.ipcRenderer.send('get-project-glossaries', { project: this.projectId });
         });
+        this.electron.ipcRenderer.send('get-zoom');
+        this.electron.ipcRenderer.on('set-zoom', (event: Electron.IpcRendererEvent, arg: any) => {
+            this.setzoom(arg.zoom);
+        });
         this.setSpellChecker();
+    }
+
+    setzoom(zoom: string): void {
+        let style: HTMLStyleElement = document.getElementById('zoom') as HTMLStyleElement;
+        if (!style) {
+            style = document.createElement('style');
+            style.id = 'zoom';
+            document.head.appendChild(style);
+        }
+        style.innerHTML = '.zoomable td { font-size: ' + zoom + 'em; } .zoom { font-size: ' + zoom + 'em; }';
     }
 
     buildTopBar(topBar: HTMLDivElement): void {
@@ -387,6 +401,7 @@ class TranslationView {
 
         let table: HTMLTableElement = document.createElement('table');
         table.classList.add('stripes');
+        table.classList.add('zoomable');
         table.style.width = 'calc(100% - 2px)';
         tableContainer.appendChild(table);
 

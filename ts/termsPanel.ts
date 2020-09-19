@@ -39,6 +39,7 @@ class TermsPanel {
 
         this.table = document.createElement('table');
         this.table.classList.add('stripes');
+        this.table.classList.add('zoomable');
         tableHolder.appendChild(this.table);
 
         let toolbar: HTMLDivElement = document.createElement('div');

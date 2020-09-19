@@ -99,6 +99,7 @@ class TmMatches {
         let table = document.createElement('table');
         table.classList.add('fill_width');
         table.classList.add('stripes');
+        table.classList.add('zoomable');
         div.appendChild(table);
 
         let tr = document.createElement('tr');

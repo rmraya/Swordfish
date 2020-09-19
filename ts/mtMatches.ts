@@ -88,6 +88,7 @@ class MtMatches {
         let div: HTMLDivElement = tab.getContainer();
         div.classList.add('fill_width');
         div.classList.add('preserve');
+        div.classList.add('zoom');
         div.innerHTML = match.target;
 
         this.tabHolder.addTab(tab);

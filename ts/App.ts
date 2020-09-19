@@ -59,6 +59,7 @@ class Swordfish {
     static currentDefaults: Rectangle;
     static currentPreferences = {
         theme: 'system',
+        zoomFactor: '1.0',
         srcLang: 'none',
         tgtLang: 'none',
         catalog: Swordfish.path.join(app.getAppPath(), 'catalog', 'catalog.xml'),
@@ -633,6 +634,9 @@ class Swordfish {
         ipcMain.on('unlock-all', (event: IpcMainEvent, arg: any) => {
             Swordfish.unlockAll(arg);
         });
+        ipcMain.on('get-zoom', () => {
+            Swordfish.mainWindow.webContents.send('set-zoom', {zoom: Swordfish.currentPreferences.zoomFactor});
+        });
     } // end constructor
 
     static createWindow(): void {
@@ -936,6 +940,9 @@ class Swordfish {
         if (Swordfish.currentPreferences.theme === 'light') {
             Swordfish.currentCss = light;
         }
+        if (!Swordfish.currentPreferences.zoomFactor) {
+            Swordfish.currentPreferences.zoomFactor = '1.0';
+        }
     }
 
     static savePreferences(arg: any): void {
@@ -944,6 +951,7 @@ class Swordfish {
         writeFileSync(Swordfish.path.join(app.getPath('appData'), app.name, 'preferences.json'), JSON.stringify(arg));
         Swordfish.loadPreferences();
         Swordfish.setTheme();
+        Swordfish.mainWindow.webContents.send('set-zoom', {zoom: Swordfish.currentPreferences.zoomFactor});
     }
 
     static showFilterSegments(project: string): void {
