@@ -89,7 +89,6 @@ class TranslationView {
         this.tgtLang = targetLang;
 
         this.sourceTags = new Map<String, String>();
-
         let topBar: HTMLDivElement = document.createElement('div');
         topBar.className = 'toolbar';
         div.appendChild(topBar);
@@ -628,7 +627,7 @@ class TranslationView {
 
     setSegments(arg: any[]): void {
         this.tbody.innerHTML = '';
-        this.tbody.parentElement.scrollTo({ top: 0, left: 0 });
+        this.tbody.parentElement.scrollTo({ top: 0, left: 0, behavior: 'smooth' });
         let length = arg.length;
         if (length === 0 && this.filterButton.classList.contains('active')) {
             this.electron.ipcRenderer.send('show-message', { type: 'warning', message: 'Nothing to display, consider clearing current filter' });
@@ -842,7 +841,6 @@ class TranslationView {
                     if (cell.classList.contains('initial')) {
                         found = true;
                         this.selectRow(row, true);
-                        row.scrollTo({ top: 40, left: 0, behavior: 'smooth' });
                         break;
                     }
                 }
@@ -860,7 +858,6 @@ class TranslationView {
                     if (cell.classList.contains('translated')) {
                         found = true;
                         this.selectRow(row, true);
-                        row.scrollTo({ top: 40, left: 0, behavior: 'smooth' });
                         break;
                     }
                 }
@@ -889,7 +886,6 @@ class TranslationView {
             if (cell.classList.contains('initial')) {
                 found = true;
                 this.selectRow(row, true);
-                row.scrollTo({ top: 40, left: 0, behavior: 'smooth' });
                 break;
             }
         }
@@ -916,13 +912,21 @@ class TranslationView {
             if (cell.classList.contains('translated')) {
                 found = true;
                 this.selectRow(row, true);
-                row.scrollTo({ top: 40, left: 0, behavior: 'smooth' });
                 break;
             }
         }
         if (!found) {
             this.electron.ipcRenderer.send('show-message', { type: 'warning', message: 'No more unconfirmed segments on this page' });
         }
+    }
+
+    centerRow(row: HTMLTableRowElement): void {
+        setTimeout(() => {
+            row.scrollIntoView({
+                behavior: 'smooth',
+                block: 'center'
+            });
+        }, 100);
     }
 
     selectRow(row: HTMLTableRowElement, focus: boolean) {
@@ -970,6 +974,7 @@ class TranslationView {
                 segment: this.currentId.id
             });
         }
+        this.centerRow(this.currentRow);
         if (focus) {
             this.currentCell.focus();
         }

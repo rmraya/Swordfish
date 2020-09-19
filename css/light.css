@@ -1,5 +1,6 @@
 :root {
-	--normal-background: #ececec;
+	--normal-background: #d0d0d0;
+	--editing-background: #ffffff;
 	--normal-color: #373737;
 	--accent-color: #3465aa;
 	--accent-alternative: #0551bb;
@@ -14,7 +15,7 @@
 	--focus-border: #f57c00;
 	--disabled-input: #999999;
 	--even-row-background: #d2d3d4;
-	--odd-row-background: #fcfcfc;
+	--odd-row-background: #ececec;
 	--selected-row: #90caf9;
 	--highlight-row: #bbdefb;
 	--highlight-color: #dfe0e1;
@@ -22,7 +23,7 @@
 	--difference-color: #101010;
 	--difference-background: #bbdefb;
 	--stats-text: #101010;
-	--stats-fill: #64b5f6 ;
+	--stats-fill: #64b5f6;
 }
 
 body {
@@ -124,7 +125,7 @@ td.list {
 }
 
 td.editing {
-	background-color: var(--normal-background) !important;
+	background-color: var(--editing-background) !important;
 }
 
 td.fixed {
@@ -176,8 +177,9 @@ th {
 }
 
 .currentRow {
-	border-top: 1px solid var(--focus-border);
-	border-bottom: 1px solid var(--focus-border);
+	border-top: 2px solid var(--focus-border) !important;
+	border-bottom: 2px solid var(--focus-border) !important;
+	background-color: var(--editing-background) !important;
 }
 
 .fixed {
