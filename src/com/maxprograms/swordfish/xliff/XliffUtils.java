@@ -82,6 +82,32 @@ public class XliffUtils {
         return result;
     }
 
+    public static String highlightSpaces(String text) {
+        String start = "";
+        for (int i = 0; i < text.length(); i++) {
+            char c = text.charAt(i);
+            if (!Character.isWhitespace(c)) {
+                break;
+            }
+            start = start + c;
+        }
+        if (!start.isEmpty()) {
+            text = "<span class='space'>" + start + "</span>" + text.substring(start.length());
+        }
+        String end = "";
+        for (int i = text.length() - 1; i > 1; i--) {
+            char c = text.charAt(i);
+            if (!Character.isWhitespace(c)) {
+                break;
+            }
+            end = end + c;
+        }
+        if (!end.isEmpty()) {
+            text = text.substring(0, text.length() - end.length()) + "<span class='space'>" + end + "</span>";
+        }
+        return text;
+    }
+
     public static void checkSVG(int tag) throws IOException {
         if (tag <= maxTag) {
             return;
@@ -357,4 +383,15 @@ public class XliffUtils {
                 + "' height='22' class='statsFiller'/><text x='50%' y='55%' class='statsText'>" + percentage
                 + "%</text></svg>";
     }
+
+	public static String clearSpan(String text) {
+        int index = text.indexOf("<span");
+        while (index != -1) {
+            String start = text.substring(0, index);
+            int end = text.indexOf('>', index+1);
+            text = start + text.substring(end+1);
+            index = text.indexOf("<span");
+        }
+		return text.replace("</span>", "");
+	}
 }

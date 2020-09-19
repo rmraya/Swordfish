@@ -1,5 +1,5 @@
 :root {
-	--normal-background: #d0d0d0;
+	--normal-background: #c0c0c0;
 	--editing-background: #ffffff;
 	--normal-color: #373737;
 	--accent-color: #3465aa;
@@ -24,6 +24,7 @@
 	--difference-background: #bbdefb;
 	--stats-text: #101010;
 	--stats-fill: #64b5f6;
+	--space-color: #7abff7;
 }
 
 body {
@@ -613,4 +614,9 @@ svg.stats {
 	dominant-baseline: middle;
 	text-anchor: middle;
 	fill: var(--stats-text);
+}
+
+.space {
+	background: var(--space-color);
+	font-weight:700;
 }

@@ -24,6 +24,7 @@
 	--difference-background: #bbdefb;
 	--stats-text: #fefefe;
 	--stats-fill: #0d47a1;
+	--space-color: #7abff7;
 }
 
 body {
@@ -612,4 +613,9 @@ svg.stats {
 	dominant-baseline: middle;
 	text-anchor: middle;
 	fill: var(--stats-text);
+}
+
+.space {
+	background: var(--space-color);
+	font-weight:700;
 }

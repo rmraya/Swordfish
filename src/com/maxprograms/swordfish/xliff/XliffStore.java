@@ -488,9 +488,9 @@ public class XliffStore {
                 row.put("translate", translate);
                 row.put("preserve", preserve);
                 tag = 1;
-                row.put("source", addHtmlTags(source, filterText, caseSensitiveFilter, regExp, tagsData));
+                row.put("source", addHtmlTags(source, filterText, caseSensitiveFilter, regExp, tagsData, preserve));
                 tag = 1;
-                row.put("target", addHtmlTags(target, filterText, caseSensitiveFilter, regExp, tagsData));
+                row.put("target", addHtmlTags(target, filterText, caseSensitiveFilter, regExp, tagsData, preserve));
                 row.put("match", getBestMatch(file, unit, segId));
                 result.add(row);
             }
@@ -605,6 +605,8 @@ public class XliffStore {
         Element source = buildElement(src);
 
         Map<String, String> tags = getTags(source);
+
+        translation = XliffUtils.clearSpan(translation);
 
         List<String[]> list = XliffUtils.harvestTags(translation);
         if (!list.isEmpty()) {
@@ -745,7 +747,7 @@ public class XliffStore {
                     if (similarity == 100 && Constants.INITIAL.equals(state)) {
                         tagsMap = new Hashtable<>();
                         tag = 1;
-                        addHtmlTags(candidate, "", false, false, tagsData);
+                        addHtmlTags(candidate, "", false, false, tagsData, true);
 
                         JSONObject row = new JSONObject();
                         row.put("file", file);
@@ -753,7 +755,7 @@ public class XliffStore {
                         row.put("segment", segment);
                         row.put("match", 100);
                         tag = 1;
-                        String translation = addHtmlTags(target, "", false, false, tagsData);
+                        String translation = addHtmlTags(target, "", false, false, tagsData, true);
                         row.put("target", translation);
                         result.put(row);
 
@@ -1077,7 +1079,7 @@ public class XliffStore {
     }
 
     private String addHtmlTags(Element seg, String filterText, boolean caseSensitive, boolean regExp,
-            JSONObject originalData) throws IOException {
+            JSONObject originalData, boolean preserve) throws IOException {
         if (seg == null) {
             return "";
         }
@@ -1157,7 +1159,7 @@ public class XliffStore {
                         tagsMap.put("pc" + id, sb.toString());
                     }
                     text.append(tagsMap.get("pc" + id));
-                    text.append(addHtmlTags(e, filterText, caseSensitive, regExp, originalData));
+                    text.append(addHtmlTags(e, filterText, caseSensitive, regExp, originalData, preserve));
                     if (!tagsMap.containsKey("/pc" + id)) {
                         XliffUtils.checkSVG(tag);
                         String tail = "</pc>";
@@ -1262,7 +1264,7 @@ public class XliffStore {
                 }
             }
         }
-        return text.toString();
+        return preserve ? XliffUtils.highlightSpaces(text.toString()) : text.toString().trim();
     }
 
     private String replace(String source, String target, String replacement) {
@@ -1357,7 +1359,7 @@ public class XliffStore {
 
                 String tgt = rs.getNString(9);
                 Element target = buildElement(tgt);
-                match.put("target", addHtmlTags(target, "", false, false, originalData));
+                match.put("target", addHtmlTags(target, "", false, false, originalData, true));
                 result.put(match);
             }
         }
