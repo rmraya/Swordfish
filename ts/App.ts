@@ -746,6 +746,8 @@ class Swordfish {
             new MenuItem({ type: 'separator' }),
             { label: 'Remove Projects', click: () => { Swordfish.mainWindow.webContents.send('remove-projects'); } },
             new MenuItem({ type: 'separator' }),
+            { label: 'Project Statistics', click: () => { Swordfish.mainWindow.webContents.send('request-statistics'); } },
+            new MenuItem({ type: 'separator' }),
             { label: 'Import XLIFF File as Project', click: () => { Swordfish.showImportXliff(); } },
             { label: 'Export Project as XLIFF File', click: () => { Swordfish.mainWindow.webContents.send('export-project'); } }
         ]);

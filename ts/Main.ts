@@ -286,6 +286,9 @@ class Main {
         Main.electron.ipcRenderer.on('reload-page', (event: Electron.IpcRendererEvent, arg: any) => {
             this.reloadPage(arg);
         });
+        Main.electron.ipcRenderer.on('request-statistics', () => {
+            this.requestStatistics();
+        });
         Main.electron.ipcRenderer.on('set-statistics', (event: Electron.IpcRendererEvent, arg: any) => {
             this.setStatistics(arg);
         });
@@ -673,6 +676,15 @@ class Main {
             Main.translationViews.get(selected).addTerm();
         } else {
             this.glossariesView.addTerm();
+        }
+    }
+
+    requestStatistics(): void {
+        let selected = Main.tabHolder.getSelected();
+        if (Main.translationViews.has(selected)) {
+            Main.translationViews.get(selected).generateStatistics();
+        } else {
+            this.projectsView.generateStatistics();
         }
     }
 
