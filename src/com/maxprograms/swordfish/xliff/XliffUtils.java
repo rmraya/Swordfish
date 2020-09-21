@@ -95,7 +95,7 @@ public class XliffUtils {
             text = "<span class='space'>" + start + "</span>" + text.substring(start.length());
         }
         String end = "";
-        for (int i = text.length() - 1; i > 1; i--) {
+        for (int i = text.length() - 1; i >= 0; i--) {
             char c = text.charAt(i);
             if (!Character.isWhitespace(c)) {
                 break;
@@ -384,14 +384,14 @@ public class XliffUtils {
                 + "%</text></svg>";
     }
 
-	public static String clearSpan(String text) {
+    public static String clearSpan(String text) {
         int index = text.indexOf("<span");
         while (index != -1) {
             String start = text.substring(0, index);
-            int end = text.indexOf('>', index+1);
-            text = start + text.substring(end+1);
+            int end = text.indexOf('>', index + 1);
+            text = start + text.substring(end + 1);
             index = text.indexOf("<span");
         }
-		return text.replace("</span>", "");
-	}
+        return text.replace("</span>", "");
+    }
 }

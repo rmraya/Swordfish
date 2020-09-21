@@ -301,6 +301,12 @@ class Main {
         Main.electron.ipcRenderer.on('replace-text', () => {
             this.replaceText();
         });
+        Main.electron.ipcRenderer.on('tags-analysis', () => {
+            this.tagsAnalysis();
+        });
+        Main.electron.ipcRenderer.on('spaces-analysis', () => {
+            this.spacesAnalysis();
+        });        
         let config: any = { attributes: true, childList: false, subtree: false };
         let observer = new MutationObserver((mutationsList) => {
             for (let mutation of mutationsList) {
@@ -720,6 +726,20 @@ class Main {
         let selected = Main.tabHolder.getSelected();
         if (Main.translationViews.has(selected)) {
             Main.electron.ipcRenderer.send('unlock-all', { project: selected });
+        }
+    }
+
+    tagsAnalysis(): void {
+        let selected = Main.tabHolder.getSelected();
+        if (Main.translationViews.has(selected)) {
+            Main.electron.ipcRenderer.send('analyze-tags', { project: selected });
+        }
+    }
+
+    spacesAnalysis(): void {
+        let selected = Main.tabHolder.getSelected();
+        if (Main.translationViews.has(selected)) {
+            Main.electron.ipcRenderer.send('analyze-spaces', { project: selected });
         }
     }
 }

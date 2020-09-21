@@ -2147,4 +2147,71 @@ public class XliffStore {
             }
         }
     }
+
+    public JSONObject analyzeSpaces() throws SQLException {
+        JSONObject result = new JSONObject();
+        JSONArray errors = new JSONArray();
+        int index = 0;
+        String sql = "SELECT file, unitId, segId, child, sourceText, targetText, state, translate FROM segments WHERE type='S' ORDER BY file, child ";
+        try (ResultSet rs = stmt.executeQuery(sql)) {
+            while (rs.next()) {
+                index++;
+                boolean translate = rs.getString(8).equals("Y");
+                if (!translate) {
+                    continue;
+                }
+                boolean isFinal = rs.getString(7).equals("final");
+                if (!isFinal) {
+                    continue;
+                }
+                String sourceText = rs.getNString(5);
+                String targetText = rs.getNString(6);
+                int[] sourceSpaces = countSpaces(sourceText);
+                int[] targetSpaces = countSpaces(targetText);
+                boolean initial = sourceSpaces[0] != targetSpaces[0];
+                boolean trailing = sourceSpaces[1] != targetSpaces[1];
+                if (initial || trailing) {
+                    JSONObject error = new JSONObject();
+                    error.put("file", rs.getString(1));
+                    error.put("unit", rs.getString(2));
+                    error.put("segment", rs.getString(3));
+                    String type = "";
+                    if (initial) {
+                        type = "Initial";
+                    }
+                    if (trailing) {
+                        type = "Trailing";
+                    }
+                    if (initial && trailing) {
+                        type = "Initial - Trailing";
+                    }
+                    error.put("type", type);
+                    error.put("index", index);
+                    errors.put(error);
+                }
+            }
+        }
+        result.put("errors", errors);
+        return result;
+    }
+
+    private int[] countSpaces(String text) {
+        int start = 0;
+        for (int i = 0; i < text.length(); i++) {
+            char c = text.charAt(i);
+            if (!Character.isWhitespace(c)) {
+                break;
+            }
+            start++;
+        }
+        int end = 0;
+        for (int i = text.length() - 1; i >= 0; i--) {
+            char c = text.charAt(i);
+            if (!Character.isWhitespace(c)) {
+                break;
+            }
+            end++;
+        }
+        return new int[] { start, end };
+    }
 }

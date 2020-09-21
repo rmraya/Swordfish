@@ -46,7 +46,6 @@ class Swordfish {
     static addGlossaryWindow: BrowserWindow;
     static importGlossaryWindow: BrowserWindow;
     static concordanceSearchWindow: BrowserWindow;
-    static htmlViewerWindow: BrowserWindow;
     static termSearchWindow: BrowserWindow;
     static addTermWindow: BrowserWindow;
 
@@ -398,8 +397,8 @@ class Swordfish {
         ipcMain.on('get-concordance', (event: IpcMainEvent, arg: any) => {
             Swordfish.concordanceSearch(arg);
         });
-        ipcMain.on('close-htmlViewer', () => {
-            Swordfish.destroyWindow(Swordfish.htmlViewerWindow);
+        ipcMain.on('close-htmlViewer', (event: IpcMainEvent, arg: any) => {
+            Swordfish.destroyWindow(BrowserWindow.fromId(arg.id));
         });
         ipcMain.on('get-clients', (event: IpcMainEvent) => {
             this.getClients(event);
@@ -635,7 +634,13 @@ class Swordfish {
             Swordfish.unlockAll(arg);
         });
         ipcMain.on('get-zoom', () => {
-            Swordfish.mainWindow.webContents.send('set-zoom', {zoom: Swordfish.currentPreferences.zoomFactor});
+            Swordfish.mainWindow.webContents.send('set-zoom', { zoom: Swordfish.currentPreferences.zoomFactor });
+        });
+        ipcMain.on('analyze-spaces', (event: IpcMainEvent, arg: any) => {
+            Swordfish.analyzeSpaces(arg);
+        });
+        ipcMain.on('analyze-tags', (event: IpcMainEvent, arg: any) => {
+            Swordfish.analyzeTags(arg);
         });
     } // end constructor
 
@@ -807,9 +812,9 @@ class Swordfish {
             { label: 'Unconfirm All Translations', click: () => { Swordfish.mainWindow.webContents.send('unconfirm-all'); } },
             { label: 'Remove All Translations', click: () => { Swordfish.mainWindow.webContents.send('remove-all'); } },
             new MenuItem({ type: 'separator' }),
-            { label: 'Lock/Unlock Segment', accelerator:'F4', click: () => { Swordfish.mainWindow.webContents.send('toggle-lock'); } },
-            { label: 'Lock Repeated Segments',  click: () => { Swordfish.mainWindow.webContents.send('lock-repeated'); } },
-            { label: 'Unlock All Segments',  click: () => { Swordfish.mainWindow.webContents.send('unlock-segments'); } },
+            { label: 'Lock/Unlock Segment', accelerator: 'F4', click: () => { Swordfish.mainWindow.webContents.send('toggle-lock'); } },
+            { label: 'Lock Repeated Segments', click: () => { Swordfish.mainWindow.webContents.send('lock-repeated'); } },
+            { label: 'Unlock All Segments', click: () => { Swordfish.mainWindow.webContents.send('unlock-segments'); } },
             new MenuItem({ type: 'separator' }),
             { label: 'Copy Source to Target', accelerator: 'CmdOrCtrl+P', click: () => { Swordfish.mainWindow.webContents.send('copy-source'); } },
             { label: 'Copy Sources to All Empty Targets', accelerator: 'CmdOrCtrl+Shift+P', click: () => { Swordfish.mainWindow.webContents.send('copy-all-sources'); } },
@@ -828,9 +833,13 @@ class Swordfish {
             { label: 'Remove All Machine Translations', click: () => { Swordfish.mainWindow.webContents.send('remove-mt-all'); } },
             new MenuItem({ type: 'separator' }),
             { label: 'Get Glossary Terms', accelerator: 'CmdOrCtrl+K', click: () => { Swordfish.mainWindow.webContents.send('apply-terminology'); } },
-            { label: 'Insert Selected Term', accelerator: 'CmdOrCtrl+Alt+K', click: () => { Swordfish.mainWindow.webContents.send('insert-tem', { selected: true}); } },
+            { label: 'Insert Selected Term', accelerator: 'CmdOrCtrl+Alt+K', click: () => { Swordfish.mainWindow.webContents.send('insert-tem', { selected: true }); } },
             new MenuItem({ label: 'Insert Term...', submenu: termsMenu }),
             { label: 'Get Terms for All Segments', click: () => { Swordfish.mainWindow.webContents.send('apply-terminology-all'); } }
+        ]);
+        var qaMenu: Menu = Menu.buildFromTemplate([
+            { label: 'Check Inline Tags', click: () => { Swordfish.mainWindow.webContents.send('tags-analysis'); } },
+            { label: 'Check Initial/Trailing Spaces', click: () => { Swordfish.mainWindow.webContents.send('spaces-analysis'); } }
         ]);
         var template: MenuItem[] = [
             new MenuItem({ label: '&File', role: 'fileMenu', submenu: fileMenu }),
@@ -840,6 +849,7 @@ class Swordfish {
             new MenuItem({ label: '&Memories', submenu: memoriesMenu }),
             new MenuItem({ label: '&Glossaries', submenu: glossariesMenu }),
             new MenuItem({ label: '&Tasks', submenu: tasksMenu }),
+            new MenuItem({ label: '&QA', submenu: qaMenu }),
             new MenuItem({ label: '&Help', role: 'help', submenu: helpMenu })
         ];
         if (process.platform === 'darwin') {
@@ -872,14 +882,14 @@ class Swordfish {
         if (process.platform === 'win32') {
             template[0].submenu.append(new MenuItem({ type: 'separator' }));
             template[0].submenu.append(new MenuItem({ label: 'Exit', accelerator: 'Alt+F4', role: 'quit', click: () => { app.quit(); } }));
-            template[8].submenu.append(new MenuItem({ type: 'separator' }));
-            template[8].submenu.append(new MenuItem({ label: 'About...', click: () => { this.showAbout(); } }));
+            template[9].submenu.append(new MenuItem({ type: 'separator' }));
+            template[9].submenu.append(new MenuItem({ label: 'About...', click: () => { this.showAbout(); } }));
         }
         if (process.platform === 'linux') {
             template[0].submenu.append(new MenuItem({ type: 'separator' }));
             template[0].submenu.append(new MenuItem({ label: 'Quit', accelerator: 'Ctrl+Q', role: 'quit', click: () => { app.quit(); } }));
-            template[8].submenu.append(new MenuItem({ type: 'separator' }));
-            template[8].submenu.append(new MenuItem({ label: 'About...', click: () => { this.showAbout(); } }));
+            template[9].submenu.append(new MenuItem({ type: 'separator' }));
+            template[9].submenu.append(new MenuItem({ label: 'About...', click: () => { this.showAbout(); } }));
         }
         Menu.setApplicationMenu(Menu.buildFromTemplate(template));
     }
@@ -953,7 +963,7 @@ class Swordfish {
         writeFileSync(Swordfish.path.join(app.getPath('appData'), app.name, 'preferences.json'), JSON.stringify(arg));
         Swordfish.loadPreferences();
         Swordfish.setTheme();
-        Swordfish.mainWindow.webContents.send('set-zoom', {zoom: Swordfish.currentPreferences.zoomFactor});
+        Swordfish.mainWindow.webContents.send('set-zoom', { zoom: Swordfish.currentPreferences.zoomFactor });
     }
 
     static showFilterSegments(project: string): void {
@@ -3270,7 +3280,7 @@ class Swordfish {
                     return;
                 }
                 let size: Rectangle = Swordfish.mainWindow.getBounds();
-                this.htmlViewerWindow = new BrowserWindow({
+                let htmlViewerWindow: BrowserWindow = new BrowserWindow({
                     parent: this.mainWindow,
                     width: size.width * 0.6,
                     height: size.height * 0.4,
@@ -3284,13 +3294,14 @@ class Swordfish {
                         nodeIntegration: true
                     }
                 });
-                this.htmlViewerWindow.setMenu(null);
-                this.htmlViewerWindow.loadURL('file://' + this.path.join(app.getAppPath(), 'html', 'htmlViewer.html'));
-                this.htmlViewerWindow.once('ready-to-show', (event: IpcMainEvent) => {
+                htmlViewerWindow.setMenu(null);
+                htmlViewerWindow.loadURL('file://' + this.path.join(app.getAppPath(), 'html', 'htmlViewer.html'));
+                htmlViewerWindow.once('ready-to-show', (event: IpcMainEvent) => {
                     event.sender.send('get-height');
                     event.sender.send('set-title', 'Concordance Search');
                     event.sender.send('set-content', data.html);
-                    this.htmlViewerWindow.show();
+                    event.sender.send('set-id', { id: htmlViewerWindow.id });
+                    htmlViewerWindow.show();
                 });
             },
             (reason: string) => {
@@ -3333,7 +3344,7 @@ class Swordfish {
                     return;
                 }
                 let size: Rectangle = Swordfish.mainWindow.getBounds();
-                this.htmlViewerWindow = new BrowserWindow({
+                let htmlViewerWindow: BrowserWindow = new BrowserWindow({
                     parent: this.mainWindow,
                     width: size.width * 0.6,
                     height: size.height * 0.4,
@@ -3347,13 +3358,14 @@ class Swordfish {
                         nodeIntegration: true
                     }
                 });
-                this.htmlViewerWindow.setMenu(null);
-                this.htmlViewerWindow.loadURL('file://' + this.path.join(app.getAppPath(), 'html', 'htmlViewer.html'));
-                this.htmlViewerWindow.once('ready-to-show', (event: IpcMainEvent) => {
+                htmlViewerWindow.setMenu(null);
+                htmlViewerWindow.loadURL('file://' + this.path.join(app.getAppPath(), 'html', 'htmlViewer.html'));
+                htmlViewerWindow.once('ready-to-show', (event: IpcMainEvent) => {
                     event.sender.send('get-height');
                     event.sender.send('set-title', 'Term Search');
                     event.sender.send('set-content', data.html);
-                    this.htmlViewerWindow.show();
+                    event.sender.send('set-id', { id: htmlViewerWindow.id });
+                    htmlViewerWindow.show();
                 });
             },
             (reason: string) => {
@@ -3512,6 +3524,59 @@ class Swordfish {
                 Swordfish.showMessage({ type: 'error', message: reason });
             }
         );
+    }
+
+    static analyzeSpaces(arg: any): void {
+        Swordfish.sendRequest('/projects/analyzeSpaces', arg,
+            (data: any) => {
+                if (data.status !== Swordfish.SUCCESS) {
+                    Swordfish.showMessage({ type: 'error', message: data.reason });
+                    return;
+                }
+                if (data.errors.length === 0) {
+                    Swordfish.showMessage({ type: 'info', message: 'There are no errors in initial/trailing spaces' });
+                    return;
+                }
+                console.log(JSON.stringify(data));
+                let table: string = '<div class="divContainer"><table class="stripes fill_width">';
+                let length = data.errors.length;
+                for (let i=0 ;i<length ; i++) {
+                    let line: any = data.errors[i];
+                    table = table + '<tr><td class="center initial">' + line.index + '</td><td class="center fill_width">' + line.type + '</td></tr>';
+                }
+                table = table + '</table></div>';
+                let htmlViewerWindow: BrowserWindow = new BrowserWindow({
+                    parent: this.mainWindow,
+                    width: 250,
+                    height: 450,
+                    minimizable: false,
+                    maximizable: false,
+                    resizable: true,
+                    useContentSize: true,
+                    show: false,
+                    icon: this.iconPath,
+                    webPreferences: {
+                        nodeIntegration: true
+                    }
+                });
+                htmlViewerWindow.setMenu(null);
+                htmlViewerWindow.loadURL('file://' + this.path.join(app.getAppPath(), 'html', 'htmlViewer.html'));
+                htmlViewerWindow.once('ready-to-show', (event: IpcMainEvent) => {
+                    event.sender.send('get-height');
+                    event.sender.send('set-title', 'Space Analysis');
+                    event.sender.send('set-content', table);
+                    event.sender.send('set-id', { id: htmlViewerWindow.id });
+                    htmlViewerWindow.show();
+                });
+            },
+            (reason: string) => {
+                Swordfish.showMessage({ type: 'error', message: reason });
+            }
+        );
+    }
+
+    static analyzeTags(arg: any): void {
+        // TODO
     }
 }
 

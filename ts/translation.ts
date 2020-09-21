@@ -270,6 +270,25 @@ class TranslationView {
         });
         topBar.appendChild(termSearchButton);
 
+        let tagsAnalysisButton = document.createElement('a');
+        tagsAnalysisButton.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 0 24 24" width="24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V5h14v14zm-7-2h2V7h-4v2h2z"/></svg>' +
+            '<span class="tooltiptext bottomTooltip">Check Inline Tags</span>';
+        tagsAnalysisButton.className = 'tooltip';
+        tagsAnalysisButton.style.marginLeft = '20px';
+        tagsAnalysisButton.addEventListener('click', () => {
+            Main.electron.ipcRenderer.send('analyze-tags', { project: this.projectId });
+        });
+        topBar.appendChild(tagsAnalysisButton);
+
+        let spaceAnalysisButton = document.createElement('a');
+        spaceAnalysisButton.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 0 24 24" width="24"><path d="M3 21h18v-2H3v2zM3 8v8l4-4-4-4zm8 9h10v-2H11v2zM3 3v2h18V3H3zm8 6h10V7H11v2zm0 4h10v-2H11v2z"/></svg>' +
+            '<span class="tooltiptext bottomTooltip">Check Initial/Trailing Spaces</span>';
+        spaceAnalysisButton.className = 'tooltip';
+        spaceAnalysisButton.addEventListener('click', () => {
+            Main.electron.ipcRenderer.send('analyze-spaces', { project: this.projectId });
+        });
+        topBar.appendChild(spaceAnalysisButton);
+
         let filler: HTMLSpanElement = document.createElement('span');
         filler.innerHTML = '&nbsp;';
         filler.className = 'fill_width';
@@ -370,7 +389,7 @@ class TranslationView {
             this.maxPage++;
         }
 
-        this.pagesSpan.innerText = '' + this.maxPage;
+        this.pagesSpan.innerText = 'of ' + this.maxPage;
         this.pageInput.value = '1';
         this.getSegments();
     }
@@ -486,13 +505,8 @@ class TranslationView {
         pageDiv.appendChild(this.pageInput);
         pageDiv.insertAdjacentHTML('beforeend', '<span class="tooltiptext topTooltip">Enter page number and press ENTER</span>');
 
-        let ofSpan: HTMLSpanElement = document.createElement('span');
-        ofSpan.innerText = 'of'
-        ofSpan.style.marginLeft = '10px';
-        ofSpan.style.marginTop = '4px';
-        this.statusArea.appendChild(ofSpan);
-
         this.pagesSpan = document.createElement('span');
+        this.pagesSpan.classList.add('noWrap');
         this.pagesSpan.innerText = 'of'
         this.pagesSpan.style.marginLeft = '10px';
         this.pagesSpan.style.marginTop = '4px';
@@ -662,7 +676,7 @@ class TranslationView {
             td.classList.add('middle');
             td.classList.add('center');
             td.classList.add('initial');
-            td.innerText = row.index;
+            td.innerText = row.index + 1;
             tr.appendChild(td);
 
             td = document.createElement('td');

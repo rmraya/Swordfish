@@ -194,6 +194,8 @@ public class ProjectsHandler implements HttpHandler {
 				response = lockDuplicates(request);
 			} else if ("/projects/unlockAll".equals(url)) {
 				response = unlockAll(request);
+			} else if ("/projects/analyzeSpaces". equals(url)) {
+				response = analyzeSpaces(request);
 			} else {
 				response.put(Constants.REASON, "Unknown request");
 			}
@@ -1438,6 +1440,21 @@ public class ProjectsHandler implements HttpHandler {
 			String project = json.getString("project");
 			if (projectStores.containsKey(project)) {
 				projectStores.get(project).unlockAll();
+			}
+		} catch (SQLException | JSONException e) {
+			logger.log(Level.ERROR, e);
+			result.put(Constants.REASON, e.getMessage());
+		}
+		return result;
+	}
+
+	private JSONObject analyzeSpaces(String request) {
+		JSONObject result = new JSONObject();
+		JSONObject json = new JSONObject(request);
+		try {
+			String project = json.getString("project");
+			if (projectStores.containsKey(project)) {
+				result = projectStores.get(project).analyzeSpaces();
 			}
 		} catch (SQLException | JSONException e) {
 			logger.log(Level.ERROR, e);
