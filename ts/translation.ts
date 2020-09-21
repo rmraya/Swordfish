@@ -815,8 +815,10 @@ class TranslationView {
             this.currentCell.classList.remove('editing');
             this.currentCell.contentEditable = 'false';
             let translation = this.currentCell.innerHTML;
+            this.currentCell.innerHTML = this.highlightSpaces(translation);
             this.currentCell = undefined;
-
+            this.currentRow.classList.remove('currentRow');
+            
             if (arg.fromClick && this.currentContent === translation) {
                 // clicked a different cell without making changes
                 return;
@@ -1398,5 +1400,35 @@ class TranslationView {
             return;
         }
         this.electron.ipcRenderer.send('show-message', { type: 'warning', message: 'Select segment' });
+    }
+
+    highlightSpaces(text: string): string {
+        let start: string = '';
+        for (let i = 0; i < text.length; i++) {
+            let c = text.charAt(i);
+            if (!this.isWhiteSpace(c)) {
+                break;
+            }
+            start = start + c;
+        }
+        if (start !== '') {
+            text = "<span class='space'>" + start + "</span>" + text.substring(start.length);
+        }
+        let end: string = '';
+        for (let i = text.length - 1; i >= 0; i--) {
+            let c = text.charAt(i);
+            if (!this.isWhiteSpace(c)) {
+                break;
+            }
+            end = end + c;
+        }
+        if (end !== '') {
+            text = text.substring(0, text.length - end.length) + "<span class='space'>" + end + "</span>";
+        }
+        return text;
+    }
+
+    isWhiteSpace(c: string): boolean {
+        return (c === ' ' || c === '\n' || c === '\t' || c === '\u00A0');
     }
 }

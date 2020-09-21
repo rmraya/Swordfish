@@ -3537,7 +3537,6 @@ class Swordfish {
                     Swordfish.showMessage({ type: 'info', message: 'There are no errors in initial/trailing spaces' });
                     return;
                 }
-                console.log(JSON.stringify(data));
                 let table: string = '<div class="divContainer"><table class="stripes fill_width">';
                 let length = data.errors.length;
                 for (let i=0 ;i<length ; i++) {
@@ -3548,7 +3547,7 @@ class Swordfish {
                 let htmlViewerWindow: BrowserWindow = new BrowserWindow({
                     parent: this.mainWindow,
                     width: 250,
-                    height: 450,
+                    height: 350,
                     minimizable: false,
                     maximizable: false,
                     resizable: true,
