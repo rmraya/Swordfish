@@ -1,21 +1,24 @@
 :root {
-	--normal-background: #323538;
-	--editing-background: #050505;
+
+	--editing-background: #000000;
+
+	--normal-background: #212121;
+	--tabHolder-background: #616161;
+	--tab-background: #424242;
+	--even-row-background: #424242;
+	--odd-row-background: #313131;
+
 	--normal-color: #dfe0e1;
 	--accent-color: #3465aa;
 	--accent-alternative: #0551bb;
 	--accent-contrast: #ffffff;
 	--tooltip-background: #0d47a1;
-	--tooltip-color: #fefefe;
-	--tabHolder-background: #141414;
-	--tab-background: #454545;
+	--tooltip-color: #fefefe;	
 	--tab-hover: #2f363d;
-	--input-background: #696c6e;
+	--input-background: #424242;
 	--input-color: #e3e3e4;
 	--focus-border: #f57c00;
 	--disabled-input: #555555;
-	--even-row-background: #2a2a2a;
-	--odd-row-background: #383838;
 	--selected-row: #1a237e;
 	--highlight-row: #37474f;
 	--highlight-color: #dfe0e1;
@@ -24,7 +27,7 @@
 	--difference-background: #bbdefb;
 	--stats-text: #fefefe;
 	--stats-fill: #0d47a1;
-	--space-color: #7abff7;
+	--space-color: #448aff;
 }
 
 body {
@@ -126,7 +129,7 @@ td.list {
 }
 
 td.editing {
-	background-color: var(--normal-background) !important;
+	background-color: var(--editing-background) !important;
 }
 
 td.fixed {
@@ -180,6 +183,7 @@ th {
 .currentRow {
 	border-top: 1px solid var(--focus-border);
 	border-bottom: 1px solid var(--focus-border);
+	background: var(--editing-background) !important;
 }
 
 .fixed {
@@ -617,5 +621,6 @@ svg.stats {
 
 .space {
 	background: var(--space-color);
+	border-radius: 2px;
 	font-weight:700;
 }

@@ -1,21 +1,24 @@
 :root {
-	--normal-background: #ececec;
-	--editing-background: #ffffff;
+
+	--editing-background: #ffffff; 
+
+	--normal-background: #fafafa;
+	--tabHolder-background: #bdbdbd;
+	--tab-background: #eeeeee;
+	--even-row-background: #eceff1;
+	--odd-row-background: #cfd8dc;
+
 	--normal-color: #373737;
 	--accent-color: #3465aa;
 	--accent-alternative: #0551bb;
 	--accent-contrast: #ffffff;
 	--tooltip-background: #0d47a1;
 	--tooltip-color: #fefefe;
-	--tabHolder-background: #9a9a9a;
-	--tab-background: #e3e3e3;
 	--tab-hover: #cdcdcd;
 	--input-background: #fefefe;
 	--input-color: #262626;
 	--focus-border: #f57c00;
 	--disabled-input: #999999;
-	--even-row-background: #d2d3d4;
-	--odd-row-background: #f4f5f5;
 	--selected-row: #90caf9;
 	--highlight-row: #bbdefb;
 	--highlight-color: #dfe0e1;
@@ -618,5 +621,6 @@ svg.stats {
 
 .space {
 	background: var(--space-color);
+	border-radius: 2px;
 	font-weight: 700;
 }
