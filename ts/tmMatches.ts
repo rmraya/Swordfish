@@ -137,4 +137,12 @@ class TmMatches {
         let match: any = this.matches.get(selected);
         this.electron.ipcRenderer.send('accept-match', match);
     }
+
+    nextMatch(): void {
+        this.tabHolder.selectNext();
+    }
+
+    previousMatch(): void {
+        this.tabHolder.selectPrevious();
+    }
 }

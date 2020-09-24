@@ -1431,4 +1431,20 @@ class TranslationView {
     isWhiteSpace(c: string): boolean {
         return (c === ' ' || c === '\n' || c === '\t' || c === '\u00A0');
     }
+
+    nextMatch(): void {
+        this.tmMatches.nextMatch();
+    }
+
+    previousMatch(): void {
+        this.tmMatches.previousMatch();
+    }
+
+    nextMT(): void {
+        this.mtMatches.nextMatch();
+    }
+
+    previousMT(): void {
+        this.mtMatches.previousMatch();
+    }
 }

@@ -740,6 +740,12 @@ class Swordfish {
             { label: 'Next Page', accelerator: 'CmdOrCtrl+End', click: () => { Swordfish.mainWindow.webContents.send('next-page'); } },
             { label: 'Last Page', accelerator: 'CmdOrCtrl+Shift+End', click: () => { Swordfish.mainWindow.webContents.send('last-page'); } },
             new MenuItem({ type: 'separator' }),
+            { label: 'Next Translation Memory Match', accelerator: 'CmdOrCtrl+Alt+Right', click: () => { Swordfish.mainWindow.webContents.send('next-match'); } },
+            { label: 'Previous Translation Memory Match', accelerator: 'CmdOrCtrl+Alt+Left', click: () => { Swordfish.mainWindow.webContents.send('previous-match'); } },
+            new MenuItem({ type: 'separator' }),
+            { label: 'Next Machine Translation', accelerator: 'Ctrl+Alt+Right', click: () => { Swordfish.mainWindow.webContents.send('next-mt'); } },
+            { label: 'Previous Machine Translation', accelerator: 'Ctrl+Alt+Left', click: () => { Swordfish.mainWindow.webContents.send('previous-mt'); } },
+            new MenuItem({ type: 'separator' }),
             new MenuItem({ label: 'Toggle Full Screen', role: 'togglefullscreen' }),
             new MenuItem({ label: 'Toggle Development Tools', accelerator: 'F12', role: 'toggleDevTools' }),
         ]);

@@ -182,4 +182,26 @@ class TabHolder {
     size(): number {
         return this.tabsList.length;
     }
+
+    selectNext(): void {
+        if (this.tabsList.length < 2) {
+            return;
+        }
+        for (let i = 0; i < this.tabsList.length - 1; i++) {
+            if (this.tabsList[i] === this.selectedTab) {
+                this.selectTab(this.tabsList[i + 1]);
+            }
+        }
+    }
+
+    selectPrevious(): void {
+        if (this.tabsList.length < 2) {
+            return;
+        }
+        for (let i = 1; i < this.tabsList.length; i++) {
+            if (this.tabsList[i] === this.selectedTab) {
+                this.selectTab(this.tabsList[i - 1]);
+            }
+        }
+    }
 }

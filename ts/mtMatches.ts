@@ -94,7 +94,6 @@ class MtMatches {
         this.tabHolder.addTab(tab);
     }
 
-
     acceptTranslation(): void {
         if (this.tabHolder.size() === 0) {
             return;
@@ -102,6 +101,14 @@ class MtMatches {
         let selected: string = this.tabHolder.getSelected();
         let match: any = this.matches.get(selected);
         this.electron.ipcRenderer.send('accept-match', match);
+    }
+
+    nextMatch(): void {
+        this.tabHolder.selectNext();
+    }
+
+    previousMatch(): void {
+        this.tabHolder.selectPrevious();
     }
 }
 

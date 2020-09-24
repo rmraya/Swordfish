@@ -307,6 +307,18 @@ class Main {
         Main.electron.ipcRenderer.on('spaces-analysis', () => {
             this.spacesAnalysis();
         });        
+        Main.electron.ipcRenderer.on('next-match',()=>{
+            this.nextMatch();
+        });
+        Main.electron.ipcRenderer.on('previous-match',()=>{
+            this.previousMatch();
+        });
+        Main.electron.ipcRenderer.on('next-mt',()=>{
+            this.nextMT();
+        });
+        Main.electron.ipcRenderer.on('previous-mt',()=>{
+            this.previousMT();
+        });
         let config: any = { attributes: true, childList: false, subtree: false };
         let observer = new MutationObserver((mutationsList) => {
             for (let mutation of mutationsList) {
@@ -740,6 +752,34 @@ class Main {
         let selected = Main.tabHolder.getSelected();
         if (Main.translationViews.has(selected)) {
             Main.electron.ipcRenderer.send('analyze-spaces', { project: selected });
+        }
+    }
+
+    nextMatch(): void {
+        let selected = Main.tabHolder.getSelected();
+        if (Main.translationViews.has(selected)) {
+            Main.translationViews.get(selected).nextMatch();
+        }
+    }
+
+    previousMatch(): void {
+        let selected = Main.tabHolder.getSelected();
+        if (Main.translationViews.has(selected)) {
+            Main.translationViews.get(selected).previousMatch();
+        }
+    }
+
+    nextMT(): void {
+        let selected = Main.tabHolder.getSelected();
+        if (Main.translationViews.has(selected)) {
+            Main.translationViews.get(selected).nextMT();
+        }
+    }
+
+    previousMT(): void {
+        let selected = Main.tabHolder.getSelected();
+        if (Main.translationViews.has(selected)) {
+            Main.translationViews.get(selected).previousMT();
         }
     }
 }

@@ -23,8 +23,8 @@
 	--highlight-row: #bbdefb;
 	--highlight-color: #dfe0e1;
 	--error-color: #960303;
-	--difference-color: #101010;
-	--difference-background: #bbdefb;
+	--difference-color: #373737;
+	--difference-background: #b4d7fe;
 	--stats-text: #101010;
 	--stats-fill: #64b5f6;
 	--space-color: #7abff7;
@@ -203,6 +203,7 @@ th {
 	background-color: var(--difference-background);
 	padding-left: 2px;
 	padding-right: 2px;
+	border-radius: 2px;
 }
 
 .right {
