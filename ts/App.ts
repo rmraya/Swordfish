@@ -726,6 +726,12 @@ class Swordfish {
             { label: 'Insert Remaining Tags', accelerator: 'CmdOrCtrl+Alt+T', click: () => { Swordfish.mainWindow.webContents.send('insert-remaining-tags'); } },
             { label: 'Remove All Tags', accelerator: 'CmdOrCtrl+Shift+R', click: () => { Swordfish.mainWindow.webContents.send('remove-tags'); } },
         ]);
+        let nextMT: string = 'Alt+Right';
+        let previousMT: string = 'Alt+Left';
+        if (process.platform === 'darwin') {
+            nextMT = 'Ctrl+Alt+Right';
+            previousMT = 'Ctrl+Alt+Left';
+        }
         var viewMenu: Menu = Menu.buildFromTemplate([
             { label: 'Projects', accelerator: 'CmdOrCtrl+Alt+1', click: () => { Swordfish.viewProjects(); } },
             { label: 'Memories', accelerator: 'CmdOrCtrl+Alt+2', click: () => { Swordfish.viewMemories(); } },
@@ -743,8 +749,8 @@ class Swordfish {
             { label: 'Next Translation Memory Match', accelerator: 'CmdOrCtrl+Alt+Right', click: () => { Swordfish.mainWindow.webContents.send('next-match'); } },
             { label: 'Previous Translation Memory Match', accelerator: 'CmdOrCtrl+Alt+Left', click: () => { Swordfish.mainWindow.webContents.send('previous-match'); } },
             new MenuItem({ type: 'separator' }),
-            { label: 'Next Machine Translation', accelerator: 'Ctrl+Alt+Right', click: () => { Swordfish.mainWindow.webContents.send('next-mt'); } },
-            { label: 'Previous Machine Translation', accelerator: 'Ctrl+Alt+Left', click: () => { Swordfish.mainWindow.webContents.send('previous-mt'); } },
+            { label: 'Next Machine Translation', accelerator: nextMT, click: () => { Swordfish.mainWindow.webContents.send('next-mt'); } },
+            { label: 'Previous Machine Translation', accelerator: previousMT, click: () => { Swordfish.mainWindow.webContents.send('previous-mt'); } },
             new MenuItem({ type: 'separator' }),
             new MenuItem({ label: 'Toggle Full Screen', role: 'togglefullscreen' }),
             new MenuItem({ label: 'Toggle Development Tools', accelerator: 'F12', role: 'toggleDevTools' }),
@@ -3545,7 +3551,7 @@ class Swordfish {
                 }
                 let table: string = '<div class="divContainer"><table class="stripes fill_width">';
                 let length = data.errors.length;
-                for (let i=0 ;i<length ; i++) {
+                for (let i = 0; i < length; i++) {
                     let line: any = data.errors[i];
                     table = table + '<tr><td class="center initial">' + line.index + '</td><td class="center fill_width">' + line.type + '</td></tr>';
                 }
@@ -3593,7 +3599,7 @@ class Swordfish {
                 }
                 let table: string = '<div class="divContainer"><table class="stripes fill_width">';
                 let length = data.errors.length;
-                for (let i=0 ;i<length ; i++) {
+                for (let i = 0; i < length; i++) {
                     let line: any = data.errors[i];
                     table = table + '<tr><td class="center initial">' + line.index + '</td><td class="center fill_width">' + line.type + '</td></tr>';
                 }
