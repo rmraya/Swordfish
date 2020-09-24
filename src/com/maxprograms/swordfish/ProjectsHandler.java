@@ -1458,7 +1458,7 @@ public class ProjectsHandler implements HttpHandler {
 			if (projectStores.containsKey(project)) {
 				result = projectStores.get(project).analyzeSpaces();
 			}
-		} catch (SQLException | JSONException e) {
+		} catch (SQLException | JSONException | IOException e) {
 			logger.log(Level.ERROR, e);
 			result.put(Constants.REASON, e.getMessage());
 		}

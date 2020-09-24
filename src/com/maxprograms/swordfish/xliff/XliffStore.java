@@ -304,7 +304,7 @@ public class XliffStore {
                     target.setAttribute("xml:space", "preserve");
                 }
             }
-            state = e.getAttributeValue("state", pureText(target).isEmpty() ? "initial" : "translated");
+            state = e.getAttributeValue("state", pureText(target).isEmpty() ? Constants.INITIAL : Constants.TRANSLATED);
             preserve = preserve || sourcePreserve
                     || "preserve".equals(target.getAttributeValue("xml:space", "default"));
 
@@ -2148,7 +2148,8 @@ public class XliffStore {
         }
     }
 
-    public JSONObject analyzeSpaces() throws SQLException {
+    public JSONObject analyzeSpaces() throws SQLException, IOException {
+        getPreferences();
         JSONObject result = new JSONObject();
         JSONArray errors = new JSONArray();
         int index = 0;
@@ -2160,8 +2161,11 @@ public class XliffStore {
                 if (!translate) {
                     continue;
                 }
-                boolean isFinal = rs.getString(7).equals("final");
-                if (!isFinal) {
+                String state = rs.getString(7);
+                if (Constants.INITIAL.equals(state)) {
+                    continue;
+                }
+                if (Constants.TRANSLATED.equals(state) && !acceptUnconfirmed) {
                     continue;
                 }
                 String sourceText = rs.getNString(5);
@@ -2216,6 +2220,7 @@ public class XliffStore {
     }
 
     public JSONObject analyzeTags() throws SQLException, SAXException, IOException, ParserConfigurationException {
+        getPreferences();
         JSONObject result = new JSONObject();
         JSONArray errors = new JSONArray();
         int index = 0;
@@ -2227,8 +2232,11 @@ public class XliffStore {
                 if (!translate) {
                     continue;
                 }
-                boolean isFinal = rs.getString(7).equals("final");
-                if (!isFinal) {
+                String state = rs.getString(7);
+                if (Constants.INITIAL.equals(state)) {
+                    continue;
+                }
+                if (Constants.TRANSLATED.equals(state) && !acceptUnconfirmed) {
                     continue;
                 }
                 String sourceText = rs.getNString(5);
