@@ -414,7 +414,7 @@ label {
 }
 
 .toolbar a:hover {
-	background-color: var(--input-background);
+	background-color: var(--tab-hover);
 	text-decoration: none !important;
 }
 

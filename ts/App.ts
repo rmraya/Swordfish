@@ -721,7 +721,7 @@ class Swordfish {
             { label: 'Replace Text', accelerator: 'CmdOrCtrl+Alt+F', click: () => { Swordfish.mainWindow.webContents.send('replace-text'); } },
             new MenuItem({ type: 'separator' }),
             { label: 'Insert Tag', accelerator: 'CmdOrCtrl+T', click: () => { Swordfish.mainWindow.webContents.send('insert-tag', {}); } },
-            new MenuItem({ label: 'Quick Tags', submenu: tagsMenu }),
+            new MenuItem({ label: 'Insert Tags...', submenu: tagsMenu }),
             { label: 'Insert Next Tag', accelerator: 'CmdOrCtrl+Shift+T', click: () => { Swordfish.mainWindow.webContents.send('insert-next-tag'); } },
             { label: 'Insert Remaining Tags', accelerator: 'CmdOrCtrl+Alt+T', click: () => { Swordfish.mainWindow.webContents.send('insert-remaining-tags'); } },
             { label: 'Remove All Tags', accelerator: 'CmdOrCtrl+Shift+R', click: () => { Swordfish.mainWindow.webContents.send('remove-tags'); } },
@@ -3575,7 +3575,51 @@ class Swordfish {
     }
 
     static analyzeTags(arg: any): void {
-        // TODO
+        Swordfish.sendRequest('/projects/analyzeTags', arg,
+            (data: any) => {
+                if (data.status !== Swordfish.SUCCESS) {
+                    Swordfish.showMessage({ type: 'error', message: data.reason });
+                    return;
+                }
+                if (data.errors.length === 0) {
+                    Swordfish.showMessage({ type: 'info', message: 'There are no tag errors' });
+                    return;
+                }
+                let table: string = '<div class="divContainer"><table class="stripes fill_width">';
+                let length = data.errors.length;
+                for (let i=0 ;i<length ; i++) {
+                    let line: any = data.errors[i];
+                    table = table + '<tr><td class="center initial">' + line.index + '</td><td class="center fill_width">' + line.type + '</td></tr>';
+                }
+                table = table + '</table></div>';
+                let htmlViewerWindow: BrowserWindow = new BrowserWindow({
+                    parent: this.mainWindow,
+                    width: 250,
+                    height: 350,
+                    minimizable: false,
+                    maximizable: false,
+                    resizable: true,
+                    useContentSize: true,
+                    show: false,
+                    icon: this.iconPath,
+                    webPreferences: {
+                        nodeIntegration: true
+                    }
+                });
+                htmlViewerWindow.setMenu(null);
+                htmlViewerWindow.loadURL('file://' + this.path.join(app.getAppPath(), 'html', 'htmlViewer.html'));
+                htmlViewerWindow.once('ready-to-show', (event: IpcMainEvent) => {
+                    event.sender.send('get-height');
+                    event.sender.send('set-title', 'Tags Analysis');
+                    event.sender.send('set-content', table);
+                    event.sender.send('set-id', { id: htmlViewerWindow.id });
+                    htmlViewerWindow.show();
+                });
+            },
+            (reason: string) => {
+                Swordfish.showMessage({ type: 'error', message: reason });
+            }
+        );
     }
 }
 

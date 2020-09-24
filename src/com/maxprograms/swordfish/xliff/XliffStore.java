@@ -2214,4 +2214,84 @@ public class XliffStore {
         }
         return new int[] { start, end };
     }
+
+    public JSONObject analyzeTags() throws SQLException, SAXException, IOException, ParserConfigurationException {
+        JSONObject result = new JSONObject();
+        JSONArray errors = new JSONArray();
+        int index = 0;
+        String sql = "SELECT file, unitId, segId, child, source, target, state, translate FROM segments WHERE type='S' ORDER BY file, child ";
+        try (ResultSet rs = stmt.executeQuery(sql)) {
+            while (rs.next()) {
+                index++;
+                boolean translate = rs.getString(8).equals("Y");
+                if (!translate) {
+                    continue;
+                }
+                boolean isFinal = rs.getString(7).equals("final");
+                if (!isFinal) {
+                    continue;
+                }
+                String sourceText = rs.getNString(5);
+                Element source = buildElement(sourceText);
+                String targetText = rs.getNString(6);
+                Element target = buildElement(targetText);
+
+                List<String> sourceTags = tagsList(source);
+                List<String> targetTags = tagsList(target);
+                if (sourceTags.size() > targetTags.size()) {
+                    JSONObject error = new JSONObject();
+                    error.put("file", rs.getString(1));
+                    error.put("unit", rs.getString(2));
+                    error.put("segment", rs.getString(3));
+                    error.put("type", "Missing Tags");
+                    error.put("index", index);
+                    errors.put(error);
+                }
+                if (sourceTags.size() < targetTags.size()) {
+                    JSONObject error = new JSONObject();
+                    error.put("file", rs.getString(1));
+                    error.put("unit", rs.getString(2));
+                    error.put("segment", rs.getString(3));
+                    error.put("type", "Extra Tags");
+                    error.put("index", index);
+                    errors.put(error);
+                }
+                if (sourceTags.size() == targetTags.size()) {
+                    for (int i = 0; i < sourceTags.size(); i++) {
+                        if (!sourceTags.get(i).equals(targetTags.get(i))) {
+                            JSONObject error = new JSONObject();
+                            error.put("file", rs.getString(1));
+                            error.put("unit", rs.getString(2));
+                            error.put("segment", rs.getString(3));
+                            error.put("type", "Tags in wrong order");
+                            error.put("index", index);
+                            errors.put(error);
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+        result.put("errors", errors);
+        return result;
+    }
+
+    private List<String> tagsList(Element root) {
+        List<String> result = new Vector<>();
+        List<XMLNode> content = root.getContent();
+        Iterator<XMLNode> it = content.iterator();
+        while (it.hasNext()) {
+            XMLNode node = it.next();
+            if (node.getNodeType() == XMLNode.ELEMENT_NODE) {
+                Element e = (Element) node;
+                if ("mrk".equals(e.getName()) || "pc".equals(e.getName())) {
+                    result.add(XliffUtils.getHeader(e));
+                    result.add(XliffUtils.getTail(e));
+                } else {
+                    result.add(e.toString());
+                }
+            }
+        }
+        return result;
+    }
 }
