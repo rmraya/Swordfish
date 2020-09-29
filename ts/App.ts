@@ -971,7 +971,6 @@ class Swordfish {
 
     static savePreferences(arg: any): void {
         Swordfish.destroyWindow(Swordfish.settingsWindow);
-        Swordfish.mainWindow.focus();
         writeFileSync(Swordfish.path.join(app.getPath('appData'), app.name, 'preferences.json'), JSON.stringify(arg));
         Swordfish.loadPreferences();
         Swordfish.setTheme();
@@ -1222,7 +1221,6 @@ class Swordfish {
         if (arg.from === 'addFile') {
             Swordfish.destroyWindow(Swordfish.addFileWindow);
         }
-        Swordfish.mainWindow.focus();
         Swordfish.mainWindow.webContents.send('start-waiting');
         Swordfish.mainWindow.webContents.send('set-status', 'Creating project');
         Swordfish.sendRequest('/projects/create', arg,
@@ -1865,7 +1863,6 @@ class Swordfish {
 
     static addMemory(arg: any): void {
         Swordfish.destroyWindow(Swordfish.addMemoryWindow);
-        Swordfish.mainWindow.focus();
         Swordfish.mainWindow.webContents.send('start-waiting');
         Swordfish.mainWindow.webContents.send('set-status', 'Creating memory');
         Swordfish.sendRequest('/memories/create', arg,
@@ -1888,7 +1885,6 @@ class Swordfish {
 
     static addGlossary(arg: any): void {
         Swordfish.destroyWindow(Swordfish.addGlossaryWindow);
-        Swordfish.mainWindow.focus();
         Swordfish.mainWindow.webContents.send('start-waiting');
         Swordfish.mainWindow.webContents.send('set-status', 'Creating glossary');
         Swordfish.sendRequest('/glossaries/create', arg,
@@ -1955,7 +1951,6 @@ class Swordfish {
 
     static importTmxFile(arg: any): void {
         Swordfish.destroyWindow(Swordfish.importTmxWindow);
-        Swordfish.mainWindow.focus();
         Swordfish.mainWindow.webContents.send('start-waiting');
         Swordfish.mainWindow.webContents.send('set-status', 'Importing TMX');
         Swordfish.sendRequest('/memories/import', arg,
@@ -2708,7 +2703,6 @@ class Swordfish {
 
     static importXLIFF(arg: any): void {
         Swordfish.destroyWindow(Swordfish.importXliffWindow);
-        Swordfish.mainWindow.focus();
         Swordfish.mainWindow.webContents.send('start-waiting');
         Swordfish.mainWindow.webContents.send('set-status', 'Importing XLIFF');
         Swordfish.sendRequest('/projects/import', arg,
@@ -3176,8 +3170,10 @@ class Swordfish {
     static destroyWindow(window: BrowserWindow): void {
         if (window) {
             try {
+                let parent: BrowserWindow = window.getParentWindow();
                 window.destroy();
                 window = undefined;
+                parent.focus();
             } catch (e) {
                 console.log(e);
             }
@@ -3216,7 +3212,6 @@ class Swordfish {
 
     static importGlossaryFile(arg: any): void {
         Swordfish.destroyWindow(Swordfish.importGlossaryWindow);
-        Swordfish.mainWindow.focus();
         Swordfish.mainWindow.webContents.send('start-waiting');
         Swordfish.mainWindow.webContents.send('set-status', 'Importing glossary');
         Swordfish.sendRequest('/glossaries/import', arg,
@@ -3449,7 +3444,6 @@ class Swordfish {
             buttons: ['Yes', 'No']
         }).then((selection: Electron.MessageBoxReturnValue) => {
             if (selection.response === 0) {
-                Swordfish.mainWindow.focus();
                 Swordfish.mainWindow.webContents.send('start-waiting');
                 Swordfish.mainWindow.webContents.send('set-status', 'Getting terms');
                 Swordfish.sendRequest('/projects/getProjectTerms', arg,
