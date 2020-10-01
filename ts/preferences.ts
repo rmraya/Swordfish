@@ -431,7 +431,7 @@ class Preferences {
 
         let zoomLabel: HTMLLabelElement = document.createElement('label');
         zoomLabel.setAttribute('for', 'zoomFactor');
-        zoomLabel.innerText = 'Text Size';
+        zoomLabel.innerText = 'Font Size';
         td.appendChild(zoomLabel);
 
         td = document.createElement('td');
