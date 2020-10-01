@@ -17,17 +17,17 @@ Swordfish is available in two modes:
 - Personal Use of Source Code
 - Yearly Subscriptions
 
-### Open Source
+### Personal Use of Source Code
 
 Source code of Swordfish is free for personal use. Anyone can download the source code, compile, modify and use it at no cost in compliance with the accompanying license terms.
 
-You can subscribe to [Maxprograms Support](https://groups.io/g/maxprograms/) at Groups.io and request peer assistance for the open source version there.
+You can subscribe to [Maxprograms Support](https://groups.io/g/maxprograms/) at Groups.io and request peer assistance for the source code version there.
 
 ### Subscriptions
 
 This project covers Swordfish IV and is in early development stage. Subscriptions are not available for purchase yet.
 
-Free installers for **Swordfish IV Preview 1** are available at [https://www.maxprograms.com/downloads/preview.html](https://www.maxprograms.com/downloads/preview.html).
+Free installers for **Swordfish IV Preview 3** are available at [https://www.maxprograms.com/downloads/preview.html](https://www.maxprograms.com/downloads/preview.html).
 
 
 ## Related Projects
@@ -38,7 +38,7 @@ Free installers for **Swordfish IV Preview 1** are available at [https://www.max
 
 - JDK 11 or newer is required for compiling and building. Get it from [AdoptOpenJDK](https://adoptopenjdk.net/).
 - Apache Ant 1.10.7 or newer. Get it from [https://ant.apache.org/](https://ant.apache.org/)
-- Node.js 12.14.0 LTS or newer. Get it from [https://nodejs.org/](https://nodejs.org/)
+- Node.js 12.16.0 LTS or newer. Get it from [https://nodejs.org/](https://nodejs.org/)
 
 ## Building
 
