@@ -156,22 +156,12 @@ public class MemoriesHandler implements HttpHandler {
 					loadMemoriesList();
 				}
 				Memory mem = memories.get(json.getString("memory"));
-				if (openEngines == null) {
-					openEngines = new ConcurrentHashMap<>();
-					useCount = new ConcurrentHashMap<>();
-				}
-				boolean needsClosing = false;
-				if (!openEngines.containsKey(mem.getId())) {
-					openMemory(mem.getId());
-					needsClosing = true;
-				}
+				openMemory(mem.getId());
 				ITmEngine engine = openEngines.get(mem.getId());
 				JSONArray array = new JSONArray();
 				Set<String> langs = engine.getAllLanguages();
 				array.put(langs);
-				if (needsClosing) {
-					closeMemory(mem.getId());
-				}
+				closeMemory(mem.getId());
 				JSONObject obj = new JSONObject();
 				obj.put("languages", array);
 				openTasks.put(process, new String[] { Constants.COMPLETED, obj.toString() });
@@ -235,20 +225,10 @@ public class MemoriesHandler implements HttpHandler {
 			List<Element> matches = new Vector<>();
 			for (int i = 0; i < memories.length(); i++) {
 				String memory = memories.getString(i);
-				if (openEngines == null) {
-					openEngines = new ConcurrentHashMap<>();
-					useCount = new ConcurrentHashMap<>();
-				}
-				boolean needsClosing = false;
-				if (!openEngines.containsKey(memory)) {
-					openMemory(memory);
-					needsClosing = true;
-				}
+				openMemory(memory);
 				matches.addAll(
 						openEngines.get(memory).concordanceSearch(searchStr, srcLang, limit, isRegexp, caseSensitive));
-				if (needsClosing) {
-					closeMemory(memory);
-				}
+				closeMemory(memory);
 			}
 			result.put("count", matches.size());
 			result.put("html", generateHTML(matches, searchStr, isRegexp, caseSensitive));
@@ -286,15 +266,7 @@ public class MemoriesHandler implements HttpHandler {
 		openTasks.put(process, new String[] { Constants.PROCESSING });
 		new Thread(() -> {
 			try {
-				if (openEngines == null) {
-					openEngines = new ConcurrentHashMap<>();
-					useCount = new ConcurrentHashMap<>();
-				}
-				boolean needsClosing = false;
-				if (!openEngines.containsKey(id)) {
-					openMemory(id);
-					needsClosing = true;
-				}
+				openMemory(id);
 				ITmEngine engine = openEngines.get(id);
 				String project = json.has("project") ? json.getString("project") : "";
 				String client = json.has("client") ? json.getString("client") : "";
@@ -307,9 +279,7 @@ public class MemoriesHandler implements HttpHandler {
 					openTasks.put(process, new String[] { Constants.ERROR, e.getMessage() });
 					logger.log(Level.ERROR, e.getMessage(), e);
 				}
-				if (needsClosing) {
-					closeMemory(id);
-				}
+				closeMemory(id);
 			} catch (IOException | SQLException e) {
 				logger.log(Level.ERROR, e.getMessage(), e);
 				openTasks.put(process, new String[] { Constants.ERROR, e.getMessage() });
@@ -344,15 +314,7 @@ public class MemoriesHandler implements HttpHandler {
 					loadMemoriesList();
 				}
 				Memory mem = memories.get(json.getString("memory"));
-				if (openEngines == null) {
-					openEngines = new ConcurrentHashMap<>();
-					useCount = new ConcurrentHashMap<>();
-				}
-				boolean needsClosing = false;
-				if (!openEngines.containsKey(mem.getId())) {
-					needsClosing = true;
-					openMemory(mem.getId());
-				}
+				openMemory(mem.getId());
 				ITmEngine engine = openEngines.get(mem.getId());
 				File tmx = new File(json.getString("tmx"));
 				Set<String> langSet = Collections.synchronizedSortedSet(new TreeSet<>());
@@ -363,9 +325,7 @@ public class MemoriesHandler implements HttpHandler {
 					}
 				}
 				engine.exportMemory(tmx.getAbsolutePath(), langSet, json.getString("srcLang"));
-				if (needsClosing) {
-					closeMemory(mem.getId());
-				}
+				closeMemory(mem.getId());
 				openTasks.put(process, new String[] { Constants.COMPLETED });
 			} catch (IOException | SAXException | ParserConfigurationException | SQLException e) {
 				logger.log(Level.ERROR, e.getMessage(), e);
@@ -392,10 +352,11 @@ public class MemoriesHandler implements HttpHandler {
 					JSONArray array = json.getJSONArray("memories");
 					for (int i = 0; i < array.length(); i++) {
 						Memory mem = memories.get(array.getString(i));
-						if (openEngines != null && openEngines.contains(mem.getId())) {
+						if (openEngines != null && openEngines.containsKey(mem.getId())) {
 							ITmEngine engine = openEngines.get(mem.getId());
 							engine.close();
 							openEngines.remove(mem.getId());
+							useCount.remove(mem.getId());
 						}
 						try {
 							File wfolder = new File(getWorkFolder(), mem.getId());
@@ -544,7 +505,7 @@ public class MemoriesHandler implements HttpHandler {
 		return workFolder.getAbsolutePath();
 	}
 
-	public static void openMemory(String id) throws IOException, SQLException {
+	public static synchronized void openMemory(String id) throws IOException, SQLException {
 		if (memories == null) {
 			loadMemoriesList();
 		}
@@ -552,24 +513,21 @@ public class MemoriesHandler implements HttpHandler {
 			openEngines = new ConcurrentHashMap<>();
 			useCount = new ConcurrentHashMap<>();
 		}
-		if (openEngines.contains(id)) {
-			int count = useCount.get(id);
-			useCount.put(id, count + 1);
+		if (openEngines.containsKey(id)) {
+			int count = useCount.get(id) + 1;
+			useCount.put(id, count);
 			return;
 		}
 		openEngines.put(id, new InternalDatabase(id, getWorkFolder()));
-		useCount.put(id, 0);
+		useCount.put(id, 1);
 	}
 
-	public static void closeMemory(String id) throws IOException, SQLException {
+	public static synchronized void closeMemory(String id) throws IOException, SQLException {
 		if (openEngines == null) {
-			openEngines = new ConcurrentHashMap<>();
-			useCount = new ConcurrentHashMap<>();
-			logger.log(Level.WARNING, "Closing memory when 'openEngine' is null");
+			throw new IOException("No memories open");
 		}
-		if (!openEngines.contains(id)) {
-			logger.log(Level.WARNING, "Memory already closed");
-			return;
+		if (!openEngines.containsKey(id)) {
+			throw new IOException("Memory already closed");
 		}
 		int count = useCount.get(id);
 		useCount.put(id, count - 1);
@@ -586,11 +544,10 @@ public class MemoriesHandler implements HttpHandler {
 		}
 		Memory mem = memories.get(memory);
 		if (openEngines == null) {
-			openEngines = new ConcurrentHashMap<>();
-			useCount = new ConcurrentHashMap<>();
+			throw new IOException("No open memories");
 		}
 		if (!openEngines.containsKey(mem.getId())) {
-			openMemory(mem.getId());
+			throw new IOException("Memory is not open");
 		}
 		return openEngines.get(mem.getId());
 	}

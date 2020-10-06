@@ -71,7 +71,7 @@ public class ProjectsHandler implements HttpHandler {
 
 	private static Logger logger = System.getLogger(ProjectsHandler.class.getName());
 	private static Hashtable<String, Project> projects;
-	private static Map<String, String> processes;
+	private static Map<String, JSONObject> processes;
 	private static boolean firstRun = true;
 	protected JSONObject projectsList;
 
@@ -194,7 +194,7 @@ public class ProjectsHandler implements HttpHandler {
 				response = lockDuplicates(request);
 			} else if ("/projects/unlockAll".equals(url)) {
 				response = unlockAll(request);
-			} else if ("/projects/analyzeSpaces". equals(url)) {
+			} else if ("/projects/analyzeSpaces".equals(url)) {
 				response = analyzeSpaces(request);
 			} else if ("/projects/analyzeTags".equals(url)) {
 				response = analyzeTags(request);
@@ -245,21 +245,14 @@ public class ProjectsHandler implements HttpHandler {
 
 	private JSONObject getProcessStatus(String request) {
 		JSONObject json = new JSONObject(request);
-		JSONObject result = new JSONObject();
 		if (processes == null) {
 			processes = new Hashtable<>();
 		}
-		String status = processes.get(json.getString("process"));
-		if (status == null) {
-			result.put("progress", Constants.ERROR);
+		JSONObject result = processes.get(json.getString("process"));
+		if (result == null) {
+			result = new JSONObject();
+			result.put(Constants.PROGRESS, Constants.ERROR);
 			result.put(Constants.REASON, "Null process");
-		} else if (Constants.COMPLETED.equals(status)) {
-			result.put("progress", Constants.COMPLETED);
-		} else if (Constants.PROCESSING.equals(status)) {
-			result.put("progress", Constants.PROCESSING);
-		} else {
-			result.put("progress", Constants.ERROR);
-			result.put(Constants.REASON, status);
 		}
 		return result;
 	}
@@ -294,7 +287,9 @@ public class ProjectsHandler implements HttpHandler {
 		if (processes == null) {
 			processes = new Hashtable<>();
 		}
-		processes.put(id, Constants.PROCESSING);
+		JSONObject obj = new JSONObject();
+		obj.put(Constants.PROGRESS, Constants.PROCESSING);
+		processes.put(id, obj);
 		try {
 			Thread thread = new Thread() {
 				@Override
@@ -304,10 +299,13 @@ public class ProjectsHandler implements HttpHandler {
 						if (shouldClose) {
 							closeProject(request);
 						}
-						processes.put(id, Constants.COMPLETED);
+						obj.put(Constants.PROGRESS, Constants.COMPLETED);
+						processes.put(id, obj);
 					} catch (IOException | SAXException | ParserConfigurationException | SQLException e) {
 						logger.log(Level.ERROR, e);
-						processes.put(id, e.getMessage());
+						obj.put(Constants.PROGRESS, Constants.ERROR);
+						obj.put(Constants.REASON, e.getMessage());
+						processes.put(id, obj);
 					}
 				}
 			};
@@ -349,7 +347,9 @@ public class ProjectsHandler implements HttpHandler {
 		if (processes == null) {
 			processes = new Hashtable<>();
 		}
-		processes.put(id, Constants.PROCESSING);
+		JSONObject obj = new JSONObject();
+		obj.put(Constants.PROGRESS, Constants.PROCESSING);
+		processes.put(id, obj);
 		try {
 			Thread thread = new Thread() {
 				@Override
@@ -359,11 +359,14 @@ public class ProjectsHandler implements HttpHandler {
 						if (shouldClose) {
 							closeProject(request);
 						}
-						processes.put(id, Constants.COMPLETED);
+						obj.put(Constants.PROGRESS, Constants.COMPLETED);
+						processes.put(id, obj);
 					} catch (IOException | SAXException | ParserConfigurationException | SQLException
 							| URISyntaxException e) {
 						logger.log(Level.ERROR, e);
-						processes.put(id, e.getMessage());
+						obj.put(Constants.PROGRESS, Constants.ERROR);
+						obj.put(Constants.REASON, e.getMessage());
+						processes.put(id, obj);
 					}
 				}
 			};
@@ -405,7 +408,9 @@ public class ProjectsHandler implements HttpHandler {
 		if (processes == null) {
 			processes = new Hashtable<>();
 		}
-		processes.put(id, Constants.PROCESSING);
+		JSONObject obj = new JSONObject();
+		obj.put(Constants.PROGRESS, Constants.PROCESSING);
+		processes.put(id, obj);
 		try {
 			Thread thread = new Thread() {
 				@Override
@@ -415,10 +420,13 @@ public class ProjectsHandler implements HttpHandler {
 						if (shouldClose) {
 							closeProject(request);
 						}
-						processes.put(id, Constants.COMPLETED);
+						obj.put(Constants.PROGRESS, Constants.COMPLETED);
+						processes.put(id, obj);
 					} catch (IOException | SAXException | ParserConfigurationException | SQLException e) {
 						logger.log(Level.ERROR, e);
-						processes.put(id, e.getMessage());
+						obj.put(Constants.PROGRESS, Constants.ERROR);
+						obj.put(Constants.REASON, e.getMessage());
+						processes.put(id, obj);
 					}
 				}
 			};
@@ -681,7 +689,9 @@ public class ProjectsHandler implements HttpHandler {
 		if (processes == null) {
 			processes = new Hashtable<>();
 		}
-		processes.put(id, Constants.PROCESSING);
+		JSONObject obj = new JSONObject();
+		obj.put(Constants.PROGRESS, Constants.PROCESSING);
+		processes.put(id, obj);
 		try {
 			loadPreferences();
 			String description = json.getString("description");
@@ -691,9 +701,13 @@ public class ProjectsHandler implements HttpHandler {
 			}
 			Language sourceLang = LanguageUtils.getLanguage(json.getString("srcLang"));
 			Language targetLang = LanguageUtils.getLanguage(json.getString("tgtLang"));
+			String memory = json.getString("memory");
+			boolean applyTM = json.getBoolean("applyTM");
+			String glossary = json.getString("glossary");
+			boolean searchTerms = json.getBoolean("searchTerms");
 
 			Project p = new Project(id, description, Project.NEW, sourceLang, targetLang, json.getString("client"),
-					json.getString("subject"), LocalDate.now());
+					json.getString("subject"), memory, glossary, LocalDate.now());
 
 			File projectFolder = new File(getWorkFolder(), id);
 			Files.createDirectories(projectFolder.toPath());
@@ -761,7 +775,6 @@ public class ProjectsHandler implements HttpHandler {
 								throw new IOException(res.get(1));
 							}
 							xliffs.add(xliff.getAbsolutePath());
-
 						}
 						if (xliffs.size() > 1) {
 							File main = new File(projectFolder, p.getId() + ".xlf");
@@ -784,10 +797,24 @@ public class ProjectsHandler implements HttpHandler {
 						projects.put(id, p);
 						projectsList.getJSONArray("projects").put(p.toJSON());
 						saveProjectsList();
-						processes.put(id, Constants.COMPLETED);
-					} catch (IOException | SAXException | ParserConfigurationException e) {
+						if (applyTM) {
+							XliffStore store = new XliffStore(p.getXliff(), p.getSourceLang().getCode(),
+									p.getTargetLang().getCode());
+							store.tmTranslateAll(memory);
+						}
+						if (searchTerms) {
+							XliffStore store = new XliffStore(p.getXliff(), p.getSourceLang().getCode(),
+									p.getTargetLang().getCode());
+							store.getProjectTerms(glossary);
+						}
+						obj.put(Constants.PROGRESS, Constants.COMPLETED);
+						processes.put(id, obj);
+					} catch (IOException | SAXException | ParserConfigurationException | SQLException
+							| URISyntaxException e) {
 						logger.log(Level.ERROR, e.getMessage(), e);
-						processes.put(id, e.getMessage());
+						obj.put(Constants.PROGRESS, Constants.ERROR);
+						obj.put(Constants.REASON, e.getMessage());
+						processes.put(id, obj);
 					}
 				}
 			};
@@ -946,10 +973,22 @@ public class ProjectsHandler implements HttpHandler {
 			JSONObject json = new JSONObject(request);
 			String project = json.getString("project");
 			String memory = json.getString("memory");
+			if (projectStores == null) {
+				projectStores = new Hashtable<>();
+				if (projects == null) {
+					loadProjectsList();
+				}
+				Project prj = projects.get(project);
+				XliffStore store = new XliffStore(prj.getXliff(), prj.getSourceLang().getCode(),
+						prj.getTargetLang().getCode());
+				projectStores.put(project, store);
+			}
 			if (projectStores.containsKey(project)) {
 				projectStores.get(project).tmTranslateAll(memory);
 			}
-		} catch (IOException | SQLException | JSONException | SAXException | ParserConfigurationException e) {
+		} catch (IOException | SQLException | JSONException | SAXException | ParserConfigurationException
+				| URISyntaxException e) {
+			e.printStackTrace();
 			logger.log(Level.ERROR, e);
 			result.put(Constants.REASON, e.getMessage());
 		}
@@ -1036,7 +1075,9 @@ public class ProjectsHandler implements HttpHandler {
 		if (processes == null) {
 			processes = new Hashtable<>();
 		}
-		processes.put(id, Constants.PROCESSING);
+		JSONObject obj = new JSONObject();
+		obj.put(Constants.PROGRESS, Constants.PROCESSING);
+		processes.put(id, obj);
 		try {
 			String description = json.getString("project");
 			File xliffFile = new File(json.getString("xliff"));
@@ -1051,7 +1092,8 @@ public class ProjectsHandler implements HttpHandler {
 						Project p = new Project(id, description, Project.NEW,
 								LanguageUtils.getLanguage(details.getString("sourceLang")),
 								LanguageUtils.getLanguage(details.getString("targetLang")), json.getString("client"),
-								json.getString("subject"), LocalDate.now());
+								json.getString("subject"), json.getString("memory"), json.getString("glossary"),
+								LocalDate.now());
 						p.setFiles(details.getJSONArray("files"));
 						File projectFolder = new File(getWorkFolder(), id);
 						Files.createDirectories(projectFolder.toPath());
@@ -1069,11 +1111,14 @@ public class ProjectsHandler implements HttpHandler {
 						projects.put(id, p);
 						projectsList.getJSONArray("projects").put(p.toJSON());
 						saveProjectsList();
-						processes.put(id, Constants.COMPLETED);
+						obj.put(Constants.PROGRESS, Constants.COMPLETED);
+						processes.put(id, obj);
 					} catch (IOException | SAXException | ParserConfigurationException | URISyntaxException
 							| SQLException e) {
 						logger.log(Level.WARNING, e.getMessage(), e);
-						processes.put(id, e.getMessage());
+						obj.put(Constants.PROGRESS, Constants.ERROR);
+						obj.put(Constants.REASON, e.getMessage());
+						processes.put(id, obj);
 					}
 				}
 			};
@@ -1294,7 +1339,9 @@ public class ProjectsHandler implements HttpHandler {
 			if (processes == null) {
 				processes = new Hashtable<>();
 			}
-			processes.put(id, Constants.PROCESSING);
+			JSONObject obj = new JSONObject();
+			obj.put(Constants.PROGRESS, Constants.PROCESSING);
+			processes.put(id, obj);
 			Thread thread = new Thread() {
 				@Override
 				public void run() {
@@ -1304,15 +1351,20 @@ public class ProjectsHandler implements HttpHandler {
 						if (projectStores.containsKey(project)) {
 							projectStores.get(project).applyMtAll(json, translator);
 						}
-						processes.put(id, Constants.COMPLETED);
+						obj.put(Constants.PROGRESS, Constants.COMPLETED);
+						processes.put(id, obj);
 					} catch (InterruptedException e) {
 						logger.log(Level.WARNING, "MT interrupted", e);
-						processes.put(id, e.getMessage());
+						obj.put(Constants.PROGRESS, Constants.ERROR);
+						obj.put(Constants.REASON, e.getMessage());
+						processes.put(id, obj);
 						Thread.currentThread().interrupt();
 					} catch (IOException | SQLException | JSONException | SAXException
 							| ParserConfigurationException e) {
 						logger.log(Level.WARNING, e.getMessage(), e);
-						processes.put(id, e.getMessage());
+						obj.put(Constants.PROGRESS, Constants.ERROR);
+						obj.put(Constants.REASON, e.getMessage());
+						processes.put(id, obj);
 					}
 				}
 			};
@@ -1380,19 +1432,32 @@ public class ProjectsHandler implements HttpHandler {
 		if (processes == null) {
 			processes = new Hashtable<>();
 		}
-		processes.put(id, Constants.PROCESSING);
+		JSONObject obj = new JSONObject();
+		obj.put(Constants.PROGRESS, Constants.PROCESSING);
+		processes.put(id, obj);
 		try {
 			Thread thread = new Thread() {
 				@Override
 				public void run() {
 					try {
 						String project = json.getString("project");
-						if (projectStores.containsKey(project)) {
-							projectStores.get(project).getProjectTerms(json);
+						if (projectStores == null) {
+							projectStores = new Hashtable<>();
+							if (projects == null) {
+								loadProjectsList();
+							}
+							Project prj = projects.get(project);
+							XliffStore store = new XliffStore(prj.getXliff(), prj.getSourceLang().getCode(),
+									prj.getTargetLang().getCode());
+							projectStores.put(project, store);
 						}
-						processes.put(id, Constants.COMPLETED);
-					} catch (SQLException | JSONException | IOException | SAXException
-							| ParserConfigurationException e) {
+						if (projectStores.containsKey(project)) {
+							projectStores.get(project).getProjectTerms(json.getString("glossary"));
+						}
+						obj.put(Constants.PROGRESS, Constants.COMPLETED);
+						processes.put(id, obj);
+					} catch (SQLException | JSONException | IOException | SAXException | ParserConfigurationException
+							| URISyntaxException e) {
 						logger.log(Level.ERROR, e);
 						result.put(Constants.REASON, e.getMessage());
 					}

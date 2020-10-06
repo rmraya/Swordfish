@@ -27,7 +27,6 @@ import java.util.List;
 
 import com.maxprograms.languages.Language;
 import com.maxprograms.languages.LanguageUtils;
-import com.maxprograms.swordfish.Constants;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -52,7 +51,7 @@ public class Project implements Serializable, Comparable<Project> {
 	private String xliff;
 
 	public Project(String id, String description, int status, Language sourceLang, Language targetLang, String client,
-			String subject, LocalDate creationDate) {
+			String subject, String memory, String glossary, LocalDate creationDate) {
 		this.id = id;
 		this.description = description;
 		this.status = status;
@@ -61,8 +60,8 @@ public class Project implements Serializable, Comparable<Project> {
 		this.client = client;
 		this.subject = subject;
 		this.creationDate = creationDate;
-		this.memory = Constants.NONE;
-		this.glossary = Constants.NONE;
+		this.memory = memory;
+		this.glossary = glossary;
 	}
 
 	public String getXliff() {

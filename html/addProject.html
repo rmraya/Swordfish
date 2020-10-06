@@ -27,7 +27,7 @@
                         <td class="middle noWrap">
                             <label for="srcLangSelect">Source Language</label>
                         </td>
-                        <td class="fill_width middle">
+                        <td class="fill_width middle form_height">
                             <select id="srcLangSelect" class="fill_width">
         
                             </select>
@@ -37,10 +37,22 @@
                         <td class="middle noWrap">
                             <label for="tgtLangSelect">Target Language</label>
                         </td>
-                        <td class="fill_width middle">
+                        <td class="fill_width middle form_height">
                             <select id="tgtLangSelect" class="fill_width">
         
                             </select>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class=" noWrap">
+                            <label for="memorySelect">Default Memory</label>
+                        </td>
+                        <td class="fill_width ">
+                            <select id="memorySelect" class="fill_width">
+
+                            </select>
+                            <input type="checkbox" id="applyTM" class="middle">
+                            <label for="applyTM" class="middle">Apply Translation Memory</label>
                         </td>
                     </tr>
                 </table>
@@ -51,7 +63,7 @@
                         <td class="middle">
                             <label for="subjectInput">Subject</label>
                         </td>
-                        <td class="fill_width middle">
+                        <td class="fill_width middle form_height">
                             <input list="subjects" id="subjectInput" class="table_input middle" >
                             <datalist id="subjects">
                                 <option value="none">
@@ -62,11 +74,23 @@
                         <td class="middle">
                             <label for="clientInput">Client</label>
                         </td>
-                        <td class="fill_width middle">
+                        <td class="fill_width middle form_height">
                             <input list="clients" id="clientInput" class="table_input middle" >
                             <datalist id="clients">
                                 <option value="none">
                             </datalist>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class=" noWrap">
+                            <label for="glossarySelect">Default Glossary</label>
+                        </td>
+                        <td class="fill_width" style="padding-right: 8px;">
+                            <select id="glossarySelect" class="fill_width"  >
+
+                            </select>
+                            <input type="checkbox" id="searchTerms" class="middle">
+                            <label for="searchTerms" class="middle">Search Terms</label>
                         </td>
                     </tr>
                 </table>

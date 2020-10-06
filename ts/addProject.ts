@@ -25,7 +25,13 @@ class AddProject {
     charsetOptions: string;
     typesOption: string;
 
+    memSelect: HTMLSelectElement;
+    glossSelect: HTMLSelectElement;
+
     constructor() {
+        this.memSelect = document.getElementById('memorySelect') as HTMLSelectElement;
+        this.glossSelect = document.getElementById('glossarySelect') as HTMLSelectElement;
+
         this.addedFiles = new Map<number, any>();
         this.electron.ipcRenderer.send('get-theme');
         this.electron.ipcRenderer.on('set-theme', (event: Electron.IpcRendererEvent, arg: any) => {
@@ -56,6 +62,14 @@ class AddProject {
         }); this.electron.ipcRenderer.send('get-charsets');
         this.electron.ipcRenderer.on('set-charsets', (event: Electron.IpcRendererEvent, arg: any) => {
             this.setCharsets(arg);
+        });
+        this.electron.ipcRenderer.send('get-memories');
+        this.electron.ipcRenderer.on('set-memories', (event: Electron.IpcRendererEvent, arg: any) => {
+            this.setMemories(arg);
+        });
+        this.electron.ipcRenderer.send('get-glossaries');
+        this.electron.ipcRenderer.on('set-glossaries', (event: Electron.IpcRendererEvent, arg: any) => {
+            this.setGlossaries(arg);
         });
         document.addEventListener('keydown', (event: KeyboardEvent) => { KeyboardHandler.keyListener(event); });
         document.addEventListener('keydown', (event: KeyboardEvent) => {
@@ -115,6 +129,18 @@ class AddProject {
             this.electron.ipcRenderer.send('show-message', { type: 'warning', message: 'Select target language' });
             return;
         }
+        let memory: string = this.memSelect.value;
+        let applyTM: boolean = (document.getElementById('applyTM') as HTMLInputElement).checked;
+        if (applyTM && memory === 'none') {
+            this.electron.ipcRenderer.send('show-message', { type: 'warning', message: 'Select memory' });
+            return;
+        }
+        let glossary: string = this.glossSelect.value;
+        let searchTerms: boolean = (document.getElementById('searchTerms') as HTMLInputElement).checked;
+        if (searchTerms && glossary === 'none') {
+            this.electron.ipcRenderer.send('show-message', { type: 'warning', message: 'Select glossary' });
+            return;
+        }
 
         let array: any[] = [];
         this.addedFiles.forEach((a) => {
@@ -128,6 +154,10 @@ class AddProject {
             client: client,
             srcLang: srcLang,
             tgtLang: tgtLang,
+            memory: memory,
+            applyTM: applyTM,
+            glossary: glossary, 
+            searchTerms: searchTerms,
             from: 'addProject'
         }
         this.electron.ipcRenderer.send('create-project', params);
@@ -265,6 +295,32 @@ class AddProject {
         for (let i = 0; i < length; i++) {
             this.charsetOptions = this.charsetOptions + '<option value="' + arg.charsets[i].code + '">' + arg.charsets[i].description + '</option>';
         }
+    }
+
+    setMemories(memories: any[]): void {
+        if (memories.length === 0) {
+            this.memSelect.innerHTML = '<option value="none" class="error">-- No Memory --</option>';
+            return;
+        }
+        let options = '<option value="none" class="error">-- Select Memory --</option>';
+        let length = memories.length;
+        for (let i = 0; i < length; i++) {
+            options = options + '<option value="' + memories[i].id + '">' + memories[i].name + '</option>';
+        }
+        this.memSelect.innerHTML = options;
+    }
+
+    setGlossaries(glossaries: any[]): void {
+        if (glossaries.length === 0) {
+            this.glossSelect.innerHTML = '<option value="none" class="error">-- No Glossary --</option>';
+            return;
+        }
+        let options = '<option value="none" class="error">-- Select Glossary --</option>';
+        let length = glossaries.length;
+        for (let i = 0; i < length; i++) {
+            options = options + '<option value="' + glossaries[i].id + '">' + glossaries[i].name + '</option>';
+        }
+        this.glossSelect.innerHTML = options;
     }
 }
 

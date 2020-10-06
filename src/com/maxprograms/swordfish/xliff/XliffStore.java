@@ -1578,6 +1578,7 @@ public class XliffStore {
             }
         }
         Element original = buildElement(src);
+        String memoryName = MemoriesHandler.getName(memory);
         MemoriesHandler.openMemory(memory);
         ITmEngine engine = MemoriesHandler.getEngine(memory);
         List<Match> matches = engine.searchTranslation(pure, srcLang, tgtLang, 60, false);
@@ -1592,8 +1593,7 @@ public class XliffStore {
             JSONObject obj = new JSONObject();
             obj.put("dataRef", tags);
             int similarity = m.getSimilarity() - tagDifferences(original, source);
-            insertMatch(file, unit, segment, MemoriesHandler.getName(memory), Constants.TM, similarity, source, target,
-                    obj);
+            insertMatch(file, unit, segment, memoryName, Constants.TM, similarity, source, target, obj);
             conn.commit();
         }
         MemoriesHandler.closeMemory(memory);
@@ -1602,6 +1602,7 @@ public class XliffStore {
 
     public void tmTranslateAll(String memory)
             throws IOException, SQLException, SAXException, ParserConfigurationException {
+        String memoryName = MemoriesHandler.getName(memory);
         MemoriesHandler.openMemory(memory);
         ITmEngine engine = MemoriesHandler.getEngine(memory);
         String sql = "SELECT file, unitId, segId, source, sourceText FROM segments WHERE state <> 'final'";
@@ -1625,8 +1626,7 @@ public class XliffStore {
                     JSONObject obj = new JSONObject();
                     obj.put("dataRef", tags);
                     int similarity = m.getSimilarity() - tagDifferences(original, source);
-                    insertMatch(file, unit, segment, MemoriesHandler.getName(memory), Constants.TM, similarity, source,
-                            target, obj);
+                    insertMatch(file, unit, segment, memoryName, Constants.TM, similarity, source, target, obj);
                     conn.commit();
                 }
             }
@@ -1961,11 +1961,7 @@ public class XliffStore {
         List<String> words = NGrams.buildWordList(sourceText, NGrams.TERM_SEPARATORS);
 
         String glossary = json.getString("glossary");
-        boolean closeGlossary = false;
-        if (!GlossariesHandler.isOpen(glossary)) {
-            GlossariesHandler.openGlossary(glossary);
-            closeGlossary = true;
-        }
+        GlossariesHandler.openGlossary(glossary);
         String glossaryName = GlossariesHandler.getGlossaryName(glossary);
         ITmEngine engine = GlossariesHandler.getEngine(glossary);
         Map<String, String> visited = new Hashtable<>();
@@ -1991,22 +1987,15 @@ public class XliffStore {
                 }
             }
         }
-        if (closeGlossary) {
-            GlossariesHandler.closeGlossary(glossary);
-        }
+        GlossariesHandler.closeGlossary(glossary);
         return result;
     }
 
-    public void getProjectTerms(JSONObject json)
+    public void getProjectTerms(String glossary)
             throws IOException, SQLException, SAXException, ParserConfigurationException {
         getPreferences();
         int similarity = fuzzyTermSearches ? 70 : 100;
-        String glossary = json.getString("glossary");
-        boolean closeGlossary = false;
-        if (!GlossariesHandler.isOpen(glossary)) {
-            GlossariesHandler.openGlossary(glossary);
-            closeGlossary = true;
-        }
+        GlossariesHandler.openGlossary(glossary);
         String glossaryName = GlossariesHandler.getGlossaryName(glossary);
         ITmEngine engine = GlossariesHandler.getEngine(glossary);
         try (PreparedStatement segIterator = conn.prepareStatement(
@@ -2046,9 +2035,7 @@ public class XliffStore {
                 }
             }
         }
-        if (closeGlossary) {
-            GlossariesHandler.closeGlossary(glossary);
-        }
+        GlossariesHandler.closeGlossary(glossary);
     }
 
     private void saveTerm(String file, String unit, String segment, String origin, String source, String target)

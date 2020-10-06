@@ -21,11 +21,11 @@ package com.maxprograms.swordfish.tm;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.NavigableSet;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.mapdb.DB;
 import org.mapdb.DBMaker;
@@ -39,8 +39,8 @@ public class FuzzyIndex {
 
 	public FuzzyIndex(File folder) {
 		this.folder = folder;
-		databases = new Hashtable<>();
-		maps = new Hashtable<>();
+		databases = new ConcurrentHashMap<>();
+		maps = new ConcurrentHashMap<>();
 	}
 	
 	NavigableSet<Fun.Tuple2<Integer,String>> getIndex(String lang) throws IOException {

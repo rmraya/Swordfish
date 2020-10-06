@@ -1,13 +1,10 @@
 :root {
-
-	--editing-background: #ffffff; 
-
+	--editing-background: #ffffff;
 	--normal-background: #fafafa;
 	--tabHolder-background: #bdbdbd;
 	--tab-background: #eeeeee;
 	--even-row-background: #eceff1;
 	--odd-row-background: #cfd8dc;
-
 	--normal-color: #373737;
 	--accent-color: #3465aa;
 	--accent-alternative: #0551bb;
@@ -329,6 +326,10 @@ label {
 
 .fill_width {
 	width: 100%;
+}
+
+.form_height {
+	height: 2rem;
 }
 
 .noWrap {
