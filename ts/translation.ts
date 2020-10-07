@@ -64,7 +64,7 @@ class TranslationView {
     currentTranslate: HTMLTableCellElement;
     currentContent: string;
     currentId: any = {};
-    sourceTags: Map<String, String>;
+    sourceTags: Map<string, string>;
 
     filterButton: HTMLAnchorElement;
     filterText: string = '';
@@ -88,7 +88,7 @@ class TranslationView {
         this.srcLang = sourceLang;
         this.tgtLang = targetLang;
 
-        this.sourceTags = new Map<String, String>();
+        this.sourceTags = new Map<string, string>();
         let topBar: HTMLDivElement = document.createElement('div');
         topBar.className = 'toolbar';
         div.appendChild(topBar);
@@ -1024,8 +1024,8 @@ class TranslationView {
         }
     }
 
-    getTags(element: HTMLTableCellElement): Map<String, String> {
-        let map = new Map<String, String>();
+    getTags(element: HTMLTableCellElement): Map<string, string> {
+        let map = new Map<string, string>();
         let children: HTMLCollectionOf<HTMLImageElement> = element.getElementsByTagName('img');
         let length: number = children.length;
         for (let i = 0; i < length; i++) {

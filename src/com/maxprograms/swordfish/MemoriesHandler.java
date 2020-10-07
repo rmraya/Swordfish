@@ -213,7 +213,7 @@ public class MemoriesHandler implements HttpHandler {
 		boolean isRegexp = json.getBoolean("regExp");
 		boolean caseSensitive = json.getBoolean("caseSensitive");
 		int limit = json.getInt("limit");
-		JSONArray memories = json.getJSONArray("memories");
+		JSONArray mems = json.getJSONArray("memories");
 		try {
 			if (isRegexp) {
 				try {
@@ -223,8 +223,8 @@ public class MemoriesHandler implements HttpHandler {
 				}
 			}
 			List<Element> matches = new Vector<>();
-			for (int i = 0; i < memories.length(); i++) {
-				String memory = memories.getString(i);
+			for (int i = 0; i < mems.length(); i++) {
+				String memory = mems.getString(i);
 				openMemory(memory);
 				matches.addAll(
 						openEngines.get(memory).concordanceSearch(searchStr, srcLang, limit, isRegexp, caseSensitive));
@@ -538,7 +538,7 @@ public class MemoriesHandler implements HttpHandler {
 		}
 	}
 
-	public static ITmEngine getEngine(String memory) throws IOException, SQLException {
+	public static ITmEngine getEngine(String memory) throws IOException {
 		if (memories == null) {
 			loadMemoriesList();
 		}

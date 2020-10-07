@@ -40,6 +40,10 @@ import org.xml.sax.SAXException;
 
 public class Skeletons {
 
+    private Skeletons() {
+        // private for security
+    }
+
     public static void embedSkeletons(String xliffFile, String outputFile)
             throws SAXException, IOException, ParserConfigurationException, URISyntaxException {
         SAXBuilder builder = new SAXBuilder();

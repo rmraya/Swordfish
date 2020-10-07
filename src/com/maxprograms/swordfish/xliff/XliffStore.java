@@ -70,7 +70,6 @@ import com.maxprograms.xml.XMLOutputter;
 import com.maxprograms.xml.XMLUtils;
 
 import org.json.JSONArray;
-import org.json.JSONException;
 import org.json.JSONObject;
 import org.xml.sax.SAXException;
 
@@ -79,7 +78,7 @@ public class XliffStore {
     Logger logger = System.getLogger(XliffStore.class.getName());
 
     private static final int THRESHOLD = 60;
-    private static int MAXTERMLENGTH = 5;
+    private static final int MAXTERMLENGTH = 5;
 
     private String xliffFile;
     private SAXBuilder builder;
@@ -202,12 +201,12 @@ public class XliffStore {
                 + "segId VARCHAR(256) NOT NULL, termid varchar(256),  "
                 + "origin VARCHAR(256), source VARCHAR(6000) NOT NULL, target VARCHAR(6000) NOT NULL, "
                 + "PRIMARY KEY(file, unitId, segId, termid) );";
-        try (Statement stmt = conn.createStatement()) {
-            stmt.execute(files);
-            stmt.execute(units);
-            stmt.execute(segments);
-            stmt.execute(matches);
-            stmt.execute(terms);
+        try (Statement create = conn.createStatement()) {
+            create.execute(files);
+            create.execute(units);
+            create.execute(segments);
+            create.execute(matches);
+            create.execute(terms);
             conn.commit();
         }
     }
@@ -1488,8 +1487,7 @@ public class XliffStore {
         return matches.getChildren().isEmpty() ? null : matches;
     }
 
-    private Element getUnitTerms(String file, String unit)
-            throws SQLException, SAXException, IOException, ParserConfigurationException {
+    private Element getUnitTerms(String file, String unit) throws SQLException {
         Element glossary = new Element("gls:glossary");
         unitTerms.setString(1, file);
         unitTerms.setString(2, unit);
@@ -1754,30 +1752,31 @@ public class XliffStore {
     }
 
     public void acceptAll100Matches() throws SQLException, SAXException, IOException, ParserConfigurationException {
-        PreparedStatement perfectMatches = conn.prepareStatement(
-                "SELECT target FROM matches WHERE file=? AND unitId=? AND segId=? AND type='tm' AND similarity=100 LIMIT 1");
         String sql = "SELECT file, unitId, segId, source FROM segments WHERE type='S' AND (state='initial' OR targetText='') AND translate='Y' ";
         try (ResultSet rs = stmt.executeQuery(sql)) {
-            while (rs.next()) {
-                String file = rs.getString(1);
-                String unit = rs.getString(2);
-                String segment = rs.getString(3);
-                String src = rs.getNString(4);
+            try (PreparedStatement perfectMatches = conn.prepareStatement(
+                    "SELECT target FROM matches WHERE file=? AND unitId=? AND segId=? AND type='tm' AND similarity=100 LIMIT 1")) {
+                while (rs.next()) {
+                    String file = rs.getString(1);
+                    String unit = rs.getString(2);
+                    String segment = rs.getString(3);
+                    String src = rs.getNString(4);
 
-                perfectMatches.setString(1, file);
-                perfectMatches.setString(2, unit);
-                perfectMatches.setString(3, segment);
-                try (ResultSet rs2 = perfectMatches.executeQuery()) {
-                    while (rs2.next()) {
-                        Element source = buildElement(src);
-                        String tgt = rs2.getNString(1);
-                        Element target = buildElement(tgt);
-                        target.setAttribute("xml:lang", tgtLang);
-                        if (source.hasAttribute("xml:space")) {
-                            target.setAttribute("xml:space", source.getAttributeValue("xml:space"));
+                    perfectMatches.setString(1, file);
+                    perfectMatches.setString(2, unit);
+                    perfectMatches.setString(3, segment);
+                    try (ResultSet rs2 = perfectMatches.executeQuery()) {
+                        while (rs2.next()) {
+                            Element source = buildElement(src);
+                            String tgt = rs2.getNString(1);
+                            Element target = buildElement(tgt);
+                            target.setAttribute("xml:lang", tgtLang);
+                            if (source.hasAttribute("xml:space")) {
+                                target.setAttribute("xml:space", source.getAttributeValue("xml:space"));
+                            }
+                            String pureTarget = pureText(target);
+                            updateTarget(file, unit, segment, target, pureTarget, false);
                         }
-                        String pureTarget = pureText(target);
-                        updateTarget(file, unit, segment, target, pureTarget, false);
                     }
                 }
             }
@@ -1854,8 +1853,8 @@ public class XliffStore {
         return target;
     }
 
-    public void applyMtAll(JSONObject json, MT translator) throws SQLException, JSONException, SAXException,
-            IOException, ParserConfigurationException, InterruptedException {
+    public void applyMtAll(JSONObject json, MT translator)
+            throws SQLException, SAXException, IOException, ParserConfigurationException, InterruptedException {
         String sql = "SELECT file, unitId, segId, sourceText FROM segments WHERE type='S' AND (state='initial' OR targetText='') AND translate='Y' ";
         try (ResultSet rs = stmt.executeQuery(sql)) {
             while (rs.next()) {
@@ -1884,30 +1883,31 @@ public class XliffStore {
     }
 
     public void acceptAllMT() throws SQLException, SAXException, IOException, ParserConfigurationException {
-        PreparedStatement mtMatches = conn.prepareStatement(
-                "SELECT target FROM matches WHERE file=? AND unitId=? AND segId=? AND type='mt' LIMIT 1");
         String sql = "SELECT file, unitId, segId, source FROM segments WHERE type='S' AND (state='initial' OR targetText='') AND translate='Y' ";
         try (ResultSet rs = stmt.executeQuery(sql)) {
-            while (rs.next()) {
-                String file = rs.getString(1);
-                String unit = rs.getString(2);
-                String segment = rs.getString(3);
-                String src = rs.getNString(4);
+            try (PreparedStatement mtMatches = conn.prepareStatement(
+                    "SELECT target FROM matches WHERE file=? AND unitId=? AND segId=? AND type='mt' LIMIT 1")) {
+                while (rs.next()) {
+                    String file = rs.getString(1);
+                    String unit = rs.getString(2);
+                    String segment = rs.getString(3);
+                    String src = rs.getNString(4);
 
-                mtMatches.setString(1, file);
-                mtMatches.setString(2, unit);
-                mtMatches.setString(3, segment);
-                try (ResultSet rs2 = mtMatches.executeQuery()) {
-                    while (rs2.next()) {
-                        Element source = buildElement(src);
-                        String tgt = rs2.getNString(1);
-                        Element target = buildElement(tgt);
-                        target.setAttribute("xml:lang", tgtLang);
-                        if (source.hasAttribute("xml:space")) {
-                            target.setAttribute("xml:space", source.getAttributeValue("xml:space"));
+                    mtMatches.setString(1, file);
+                    mtMatches.setString(2, unit);
+                    mtMatches.setString(3, segment);
+                    try (ResultSet rs2 = mtMatches.executeQuery()) {
+                        while (rs2.next()) {
+                            Element source = buildElement(src);
+                            String tgt = rs2.getNString(1);
+                            Element target = buildElement(tgt);
+                            target.setAttribute("xml:lang", tgtLang);
+                            if (source.hasAttribute("xml:space")) {
+                                target.setAttribute("xml:space", source.getAttributeValue("xml:space"));
+                            }
+                            String pureTarget = pureText(target);
+                            updateTarget(file, unit, segment, target, pureTarget, false);
                         }
-                        String pureTarget = pureText(target);
-                        updateTarget(file, unit, segment, target, pureTarget, false);
                     }
                 }
             }
@@ -1924,7 +1924,7 @@ public class XliffStore {
         conn.commit();
     }
 
-    public JSONArray getTerms(JSONObject json) throws JSONException, SQLException {
+    public JSONArray getTerms(JSONObject json) throws SQLException {
         JSONArray result = new JSONArray();
         getTerms.setString(1, json.getString("file"));
         getTerms.setString(2, json.getString("unit"));
@@ -2063,7 +2063,7 @@ public class XliffStore {
         }
     }
 
-    private JSONArray parseMatches(List<Element> matches) throws IOException {
+    private JSONArray parseMatches(List<Element> matches) {
         JSONArray result = new JSONArray();
         for (int i = 0; i < matches.size(); i++) {
             Map<String, String> map = new Hashtable<>();

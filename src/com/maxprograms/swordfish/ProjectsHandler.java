@@ -988,7 +988,6 @@ public class ProjectsHandler implements HttpHandler {
 			}
 		} catch (IOException | SQLException | JSONException | SAXException | ParserConfigurationException
 				| URISyntaxException e) {
-			e.printStackTrace();
 			logger.log(Level.ERROR, e);
 			result.put(Constants.REASON, e.getMessage());
 		}

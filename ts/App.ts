@@ -19,7 +19,7 @@ SOFTWARE.
 
 import { Buffer } from "buffer";
 import { execFileSync, spawn, ChildProcessWithoutNullStreams } from "child_process";
-import { app, clipboard, BrowserWindow, dialog, ipcMain, Menu, MenuItem, shell, nativeTheme, Rectangle, IpcMainEvent, screen, Size, systemPreferences } from "electron";
+import { app, clipboard, BrowserWindow, dialog, ipcMain, Menu, MenuItem, shell, nativeTheme, Rectangle, IpcMainEvent, screen, Size } from "electron";
 import { existsSync, mkdirSync, readFile, readFileSync, writeFileSync, lstatSync } from "fs";
 import { ClientRequest, request, IncomingMessage } from "http";
 
@@ -671,7 +671,7 @@ class Swordfish {
             for (const suggestion of params.dictionarySuggestions) {
                 menu.append(new MenuItem({
                     label: suggestion,
-                    click: () => this.mainWindow.webContents.replaceMisspelling(suggestion)
+                    click: () => { this.mainWindow.webContents.replaceMisspelling(suggestion); }
                 }));
             }
             // Allow users to add the misspelled word to the dictionary
@@ -680,7 +680,7 @@ class Swordfish {
                 menu.append(
                     new MenuItem({
                         label: 'Add to dictionary',
-                        click: () => this.mainWindow.webContents.session.addWordToSpellCheckerDictionary(params.misspelledWord)
+                        click: () => { this.mainWindow.webContents.session.addWordToSpellCheckerDictionary(params.misspelledWord); }
                     })
                 );
             }

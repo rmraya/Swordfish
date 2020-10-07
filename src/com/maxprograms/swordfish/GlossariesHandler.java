@@ -108,7 +108,7 @@ public class GlossariesHandler implements HttpHandler {
 			if ("/glossaries/create".equals(url)) {
 				response = createGlossary(request);
 			} else if ("/glossaries/list".equals(url)) {
-				response = listGlossaries(request);
+				response = listGlossaries();
 			} else if ("/glossaries/delete".equals(url)) {
 				response = deleteGlossary(request);
 			} else if ("/glossaries/export".equals(url)) {
@@ -245,7 +245,7 @@ public class GlossariesHandler implements HttpHandler {
 		}
 	}
 
-	private static JSONObject listGlossaries(String request) throws IOException {
+	private static JSONObject listGlossaries() throws IOException {
 		JSONObject result = new JSONObject();
 		JSONArray array = new JSONArray();
 		result.put("glossaries", array);
@@ -370,7 +370,7 @@ public class GlossariesHandler implements HttpHandler {
 		useCount.put(id, 1);
 	}
 
-	public static ITmEngine getEngine(String id) throws SQLException, IOException {
+	public static ITmEngine getEngine(String id) throws IOException {
 		if (glossaries == null) {
 			loadGlossariesList();
 		}

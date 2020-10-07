@@ -28,6 +28,10 @@ import java.util.Vector;
 
 public class NGrams {
 
+	private NGrams() {
+		// private for security
+	}
+
 	private static final int NGRAMSIZE = 3;
 	public static final String SEPARATORS = " \r\n\f\t\u2028\u2029,.;\":<>¿?¡!()[]{}=+-/*\u00AB\u00BB\u201C\u201D\u201E\uFF00";
 	// allow hyphen in terms
