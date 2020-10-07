@@ -4,7 +4,7 @@
 
 An advanced CAT (Computer Aided Translation) tool based on XLIFF Standard that supports MS Office, DITA, HTML and other document formats.
 
-Swordfish uses TM (translation Memory) and MT (Machine Translation). Supports segment filtering, terminology, customization and more.
+Swordfish uses TM (Translation Memory) and MT (Machine Translation). Supports segment filtering, terminology, customization and more.
 
 #### Swordfish IV Running on macOS
 
