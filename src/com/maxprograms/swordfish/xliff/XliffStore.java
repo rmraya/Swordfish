@@ -364,6 +364,9 @@ public class XliffStore {
             }
         }
         String segment = match.getAttributeValue("ref");
+        if (segment.startsWith("#")) {
+            segment = segment.substring(1);
+        }
         String type = match.getAttributeValue("type", Constants.TM);
         String origin = match.getAttributeValue("origin");
         int similarity = Math.round(Float.parseFloat(match.getAttributeValue("similarity", "0.0")));
