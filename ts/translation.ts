@@ -496,7 +496,7 @@ class TranslationView {
         this.pageInput.style.width = '50px';
         this.pageInput.value = '0';
         this.pageInput.addEventListener('change', () => {
-            let page = Number.parseInt(this.pageInput.value);
+            let page = Number.parseInt(this.pageInput.value, 10);
             if (page >= 0 && page <= this.maxPage) {
                 this.currentPage = page;
                 this.getSegments();
@@ -552,7 +552,7 @@ class TranslationView {
         rowsInput.style.width = '50px';
         rowsInput.value = '' + this.rowsPage;
         rowsInput.addEventListener('change', () => {
-            this.rowsPage = Number.parseInt(rowsInput.value);
+            this.rowsPage = Number.parseInt(rowsInput.value, 10);
             this.maxPage = Math.ceil(this.segmentsCount / this.rowsPage);
             if (this.maxPage * this.rowsPage < this.segmentsCount) {
                 this.maxPage++;

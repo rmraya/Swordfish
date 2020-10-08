@@ -49,7 +49,7 @@ class Tags {
         if (code === 'Enter' || code === 'NumpadEnter') {
             let value: string = this.tagInput.value;
             if (value.length > 0) {
-                this.electron.ipcRenderer.send('forward-tag', { tag: Number.parseInt(value) });
+                this.electron.ipcRenderer.send('forward-tag', { tag: Number.parseInt(value, 10) });
                 this.tagInput.value = '';
             }
         }

@@ -85,7 +85,7 @@ class ConcordanceSearch {
         this.electron.ipcRenderer.send('get-concordance', {
             searchStr: searchText,
             srcLang: lang,
-            limit: Number.parseInt(count),
+            limit: Number.parseInt(count, 10),
             regExp: regExp.checked,
             caseSensitive: caseSensitive.checked,
             memories: this.memories

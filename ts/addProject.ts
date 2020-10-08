@@ -263,7 +263,7 @@ class AddProject {
             let check = (checked.item(i) as HTMLInputElement);
             if (check.checked) {
                 let data: string = check.getAttribute('data');
-                this.addedFiles.delete(Number.parseInt(data));
+                this.addedFiles.delete(Number.parseInt(data, 10));
                 tableBody.removeChild(document.getElementById(data));
             }
         }

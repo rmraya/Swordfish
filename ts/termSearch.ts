@@ -84,7 +84,7 @@ class TermSearch {
         this.electron.ipcRenderer.send('search-terms', {
             searchStr: searchText,
             srcLang: lang,
-            similarity: Number.parseInt(similarity),
+            similarity: Number.parseInt(similarity, 10),
             caseSensitive: caseSensitive.checked,
             glossary: this.glossary
         });
