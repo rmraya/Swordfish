@@ -55,7 +55,7 @@ class AddFile {
         this.electron.ipcRenderer.send('get-types');
         this.electron.ipcRenderer.on('set-types', (event: Electron.IpcRendererEvent, arg: any) => {
             this.setTypes(arg);
-        }); 
+        });
         this.electron.ipcRenderer.on('set-charsets', (event: Electron.IpcRendererEvent, arg: any) => {
             this.setCharsets(arg);
         });
@@ -87,7 +87,7 @@ class AddFile {
     setClients(clients: string[]): void {
         let options: string = '';
         let length: number = clients.length;
-        for (let i=0 ; i<length ; i++) {
+        for (let i = 0; i < length; i++) {
             options = options + '<option value="' + clients[i] + '">' + clients[i] + '</option>';
         }
         document.getElementById('clients').innerHTML = options;
@@ -96,8 +96,8 @@ class AddFile {
     setSubjects(subjects: string[]): void {
         let options: string = '';
         let length: number = subjects.length;
-        for (let i=0 ; i<length ; i++) {
-            options = options + '<option value="' + subjects[i] + '">'+ subjects[i] + '</option>';
+        for (let i = 0; i < length; i++) {
+            options = options + '<option value="' + subjects[i] + '">' + subjects[i] + '</option>';
         }
         document.getElementById('subjects').innerHTML = options;
     }
@@ -200,7 +200,7 @@ class AddFile {
             tgtLang: tgtLang,
             memory: memory,
             applyTM: applyTM,
-            glossary: glossary, 
+            glossary: glossary,
             searchTerms: searchTerms,
             from: 'addFile'
         }

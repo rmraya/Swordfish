@@ -818,7 +818,7 @@ class TranslationView {
             this.currentCell.innerHTML = this.highlightSpaces(translation);
             this.currentCell = undefined;
             this.currentRow.classList.remove('currentRow');
-            
+
             if (arg.fromClick && this.currentContent === translation) {
                 // clicked a different cell without making changes
                 return;

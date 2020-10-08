@@ -156,7 +156,7 @@ class AddProject {
             tgtLang: tgtLang,
             memory: memory,
             applyTM: applyTM,
-            glossary: glossary, 
+            glossary: glossary,
             searchTerms: searchTerms,
             from: 'addProject'
         }

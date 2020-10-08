@@ -306,17 +306,17 @@ class Main {
         });
         Main.electron.ipcRenderer.on('spaces-analysis', () => {
             this.spacesAnalysis();
-        });        
-        Main.electron.ipcRenderer.on('next-match',()=>{
+        });
+        Main.electron.ipcRenderer.on('next-match', () => {
             this.nextMatch();
         });
-        Main.electron.ipcRenderer.on('previous-match',()=>{
+        Main.electron.ipcRenderer.on('previous-match', () => {
             this.previousMatch();
         });
-        Main.electron.ipcRenderer.on('next-mt',()=>{
+        Main.electron.ipcRenderer.on('next-mt', () => {
             this.nextMT();
         });
-        Main.electron.ipcRenderer.on('previous-mt',()=>{
+        Main.electron.ipcRenderer.on('previous-mt', () => {
             this.previousMT();
         });
         let config: any = { attributes: true, childList: false, subtree: false };
