@@ -433,7 +433,7 @@ svg {
 	flex-flow: row;
 	color: var(--normal-color);
 	background: var(--tabHolder-background);
-	padding: 2px 0px 0px 8px;
+	padding: 2px 0 0 8px;
 }
 
 .tab {
