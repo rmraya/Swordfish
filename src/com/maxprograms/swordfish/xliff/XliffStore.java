@@ -814,7 +814,7 @@ public class XliffStore {
                 if (!added.contains(dataRef) && tagsData.has(dataRef)) {
                     Element d = new Element("data");
                     d.setAttribute("id", dataRef);
-                    d.setText(tagsData.getString("dataRef"));
+                    d.setText(tagsData.getString(dataRef));
                     originalData.addContent(d);
                     added.add(dataRef);
                 } else {
@@ -832,7 +832,7 @@ public class XliffStore {
                 if (!added.contains(dataRef) && tagsData.has(dataRef)) {
                     Element d = new Element("data");
                     d.setAttribute("id", dataRef);
-                    d.setText(tagsData.getString("dataRef"));
+                    d.setText(tagsData.getString(dataRef));
                     originalData.addContent(d);
                     added.add(dataRef);
                 } else {
