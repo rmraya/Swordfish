@@ -117,7 +117,7 @@ public class ProjectsHandler implements HttpHandler {
 			if ("/projects/create".equals(url)) {
 				response = createProject(request);
 			} else if ("/projects/list".equals(url)) {
-				response = listProjects(request);
+				response = listProjects();
 			} else if ("/projects/get".equals(url)) {
 				response = getProject(request);
 			} else if ("/projects/delete".equals(url)) {
@@ -472,7 +472,7 @@ public class ProjectsHandler implements HttpHandler {
 		}
 	}
 
-	private JSONObject listProjects(String request) {
+	private JSONObject listProjects() {
 		JSONObject result = new JSONObject();
 		if (projectsList == null) {
 			try {

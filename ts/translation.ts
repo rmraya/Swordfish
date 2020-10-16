@@ -834,7 +834,6 @@ class TranslationView {
         let next: string = arg.next;
         if (this.currentCell) {
 
-            let selection: Selection = window.getSelection();
             this.currentCell.classList.remove('editing');
             this.currentRow.classList.remove('currentRow');
             let translation = this.currentCell.innerHTML;
