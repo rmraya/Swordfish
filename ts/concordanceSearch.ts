@@ -47,9 +47,8 @@ class ConcordanceSearch {
         this.electron.ipcRenderer.on('set-memories', (event: Electron.IpcRendererEvent, arg: any) => {
             this.memories = arg;
         });
-        this.electron.ipcRenderer.send('get-selection');
         this.electron.ipcRenderer.on('set-selected-text', (event: Electron.IpcRendererEvent, arg: any) => {
-            (document.getElementById('searchText') as HTMLInputElement).value = arg.selected;
+            this.setParams(arg);
         });
         this.electron.ipcRenderer.on('get-height', () => {
             let body: HTMLBodyElement = document.getElementById('body') as HTMLBodyElement;
@@ -68,6 +67,14 @@ class ConcordanceSearch {
         }
         document.getElementById('languagesSelect').innerHTML = languageOptions;
         (document.getElementById('languagesSelect') as HTMLSelectElement).value = arg.srcLang;
+        this.electron.ipcRenderer.send('get-selection');
+    }
+
+    setParams(arg: any): void {
+        (document.getElementById('searchText') as HTMLInputElement).value = arg.selected;
+        if (arg.lang !== '') {
+            (document.getElementById('languagesSelect') as HTMLSelectElement).value = arg.lang;
+        }
     }
 
     search(): void {

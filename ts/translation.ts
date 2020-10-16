@@ -800,14 +800,12 @@ class TranslationView {
     }
 
     getMachineTranslations() {
-        if (this.currentCell) {
-            this.electron.ipcRenderer.send('machine-translate', {
-                project: this.projectId,
-                file: this.currentId.file,
-                unit: this.currentId.unit,
-                segment: this.currentId.id
-            });
-        }
+        this.electron.ipcRenderer.send('machine-translate', {
+            project: this.projectId,
+            file: this.currentId.file,
+            unit: this.currentId.unit,
+            segment: this.currentId.id
+        });
     }
 
     getTmMatches() {
@@ -815,152 +813,145 @@ class TranslationView {
             this.electron.ipcRenderer.send('show-message', { type: 'warning', message: 'Select memory' });
             return;
         }
-        if (this.currentCell) {
-            this.electron.ipcRenderer.send('tm-translate', {
-                project: this.projectId,
-                file: this.currentId.file,
-                unit: this.currentId.unit,
-                segment: this.currentId.id,
-                memory: this.memSelect.value
-            });
-        } else {
-            this.electron.ipcRenderer.send('show-message', { type: 'warning', message: 'Select segment' });
-            return;
-        }
+        this.electron.ipcRenderer.send('tm-translate', {
+            project: this.projectId,
+            file: this.currentId.file,
+            unit: this.currentId.unit,
+            segment: this.currentId.id,
+            memory: this.memSelect.value
+        });
     }
 
     saveEdit(arg: any): void {
         let confirm: boolean = arg.confirm;
         let next: string = arg.next;
-        if (this.currentCell) {
+        this.currentCell.classList.remove('editing');
+        this.currentRow.classList.remove('currentRow');
+        let translation = this.currentCell.innerHTML;
+        this.currentCell.innerHTML = this.highlightSpaces(translation);
 
-            this.currentCell.classList.remove('editing');
-            this.currentRow.classList.remove('currentRow');
-            let translation = this.currentCell.innerHTML;
-            this.currentCell.innerHTML = this.highlightSpaces(translation);
-
-            if (confirm) {
-                this.currentState.classList.remove('initial');
-                this.currentState.classList.remove('translated');
-                this.currentState.classList.add('final');
-                this.currentState.innerHTML = TranslationView.SVG_FINAL;
+        let isConfirmed: boolean = this.currentState.classList.contains('final');
+        if (!confirm && isConfirmed && this.currentContent === translation) {
+            confirm = true;
+        }
+        if (arg.unconfirm) {
+            confirm = false;
+            this.currentState.classList.remove('final');
+            if (translation === '') {
+                this.currentState.classList.add('initial');
+                this.currentState.innerHTML = TranslationView.SVG_BLANK;
             } else {
-                if (this.currentState.classList.contains('final') && (this.currentContent !== translation || arg.unconfirm)) {
-                    this.currentState.classList.remove('final');
-                    if (translation === '') {
-                        this.currentState.classList.add('initial');
-                        this.currentState.innerHTML = TranslationView.SVG_BLANK;
-                    } else {
-                        this.currentState.classList.add('translated');
-                        this.currentState.innerHTML = TranslationView.SVG_TRANSLATED;
-                    }
+                this.currentState.classList.add('translated');
+                this.currentState.innerHTML = TranslationView.SVG_TRANSLATED;
+            }
+        }
+        if (confirm) {
+            this.currentState.classList.remove('initial');
+            this.currentState.classList.remove('translated');
+            this.currentState.classList.add('final');
+            this.currentState.innerHTML = TranslationView.SVG_FINAL;
+        } else {
+            if (translation === '') {
+                if (this.currentState.classList.contains('translated')) {
+                    this.currentState.classList.remove('translated');
+                    this.currentState.classList.add('initial');
+                    this.currentState.innerHTML = TranslationView.SVG_BLANK;
                 }
-                if (translation === '') {
-                    if (this.currentState.classList.contains('translated')) {
-                        this.currentState.classList.remove('translated');
-                        this.currentState.classList.add('initial');
-                        this.currentState.innerHTML = TranslationView.SVG_BLANK;
-                    }
-                } else {
-                    if (this.currentState.classList.contains('initial')) {
-                        this.currentState.classList.remove('initial');
-                        this.currentState.classList.add('translated');
-                        this.currentState.innerHTML = TranslationView.SVG_TRANSLATED;
-                    }
+            } else {
+                if (this.currentState.classList.contains('initial')) {
+                    this.currentState.classList.remove('initial');
+                    this.currentState.classList.add('translated');
+                    this.currentState.innerHTML = TranslationView.SVG_TRANSLATED;
                 }
             }
-            this.electron.ipcRenderer.send('save-translation', {
-                project: this.projectId,
-                file: this.currentId.file,
-                unit: this.currentId.unit,
-                segment: this.currentId.id, translation: translation,
-                confirm: confirm,
-                memory: this.memSelect.value
-            });
-            let rows: HTMLCollection = this.tbody.rows;
-            if (next === 'none') {
-                this.selectRow(this.currentRow, true);
+        }
+        this.electron.ipcRenderer.send('save-translation', {
+            project: this.projectId,
+            file: this.currentId.file,
+            unit: this.currentId.unit,
+            segment: this.currentId.id, translation: translation,
+            confirm: confirm,
+            memory: this.memSelect.value
+        });
+        let rows: HTMLCollection = this.tbody.rows;
+        if (next === 'none') {
+            this.selectRow(this.currentRow, true);
+        }
+        if (next === 'clicked') {
+            let index = arg.segment - 1;
+            let row: HTMLTableRowElement = (rows[index] as HTMLTableRowElement);
+            this.selectRow(row, true);
+        }
+        if (next === 'number') {
+            let index = arg.segment - 1;
+            if (index < 0) {
+                index = 0;
             }
-            if (next === 'clicked') {
-                let index = arg.segment - 1;
-                let row: HTMLTableRowElement = (rows[index] as HTMLTableRowElement);
-                this.selectRow(row, true);
+            if (index >= rows.length) {
+                index = rows.length - 1;
             }
-            if (next === 'number') {
-                let index = arg.segment - 1;
-                if (index < 0) {
-                    index = 0;
-                }
-                if (index >= rows.length) {
-                    index = rows.length - 1;
-                }
-                let row: HTMLTableRowElement = (rows[index] as HTMLTableRowElement);
-                this.selectRow(row, true);
-                this.electron.ipcRenderer.send('close-go-to');
+            let row: HTMLTableRowElement = (rows[index] as HTMLTableRowElement);
+            this.selectRow(row, true);
+            this.electron.ipcRenderer.send('close-go-to');
+        }
+        if (next === 'next') {
+            let index = this.currentRow.rowIndex;
+            if (index >= rows.length) {
+                index = rows.length - 1;
             }
-            if (next === 'next') {
-                let index = this.currentRow.rowIndex;
-                if (index >= rows.length) {
-                    index = rows.length - 1;
-                }
-                let row: HTMLTableRowElement = (rows[index] as HTMLTableRowElement);
-                this.selectRow(row, true);
+            let row: HTMLTableRowElement = (rows[index] as HTMLTableRowElement);
+            this.selectRow(row, true);
+        }
+        if (next === 'previous') {
+            let index = this.currentRow.rowIndex - 2;
+            if (index < 0) {
+                index = 0;
             }
-            if (next === 'previous') {
-                let index = this.currentRow.rowIndex - 2;
-                if (index < 0) {
-                    index = 0;
-                }
-                let row: HTMLTableRowElement = (rows[index] as HTMLTableRowElement);
-                this.selectRow(row, true);
-            }
-            if (next === 'untranslated') {
-                let found: boolean = false;
-                let length: number = rows.length;
-                for (let i: number = this.currentRow.rowIndex; i < length; i++) {
-                    let row: HTMLTableRowElement = (rows[i] as HTMLTableRowElement);
-                    let cell: HTMLTableCellElement = row.getElementsByClassName('state')[0] as HTMLTableCellElement;
-                    if (cell.classList.contains('initial')) {
-                        found = true;
-                        this.selectRow(row, true);
-                        break;
-                    }
-                }
-                if (!found) {
-                    this.electron.ipcRenderer.send('show-message', { type: 'warning', message: 'No more untranslated segments on this page' });
+            let row: HTMLTableRowElement = (rows[index] as HTMLTableRowElement);
+            this.selectRow(row, true);
+        }
+        if (next === 'untranslated') {
+            let found: boolean = false;
+            let length: number = rows.length;
+            for (let i: number = this.currentRow.rowIndex; i < length; i++) {
+                let row: HTMLTableRowElement = (rows[i] as HTMLTableRowElement);
+                let cell: HTMLTableCellElement = row.getElementsByClassName('state')[0] as HTMLTableCellElement;
+                if (cell.classList.contains('initial')) {
+                    found = true;
+                    this.selectRow(row, true);
+                    break;
                 }
             }
-            if (next === 'unconfirmed') {
-                let found: boolean = false;
-                let length: number = rows.length;
-                for (let i: number = this.currentRow.rowIndex; i < length; i++) {
-                    let row: HTMLTableRowElement = (rows[i] as HTMLTableRowElement);
-                    let cell: HTMLTableCellElement = row.getElementsByClassName('state')[0] as HTMLTableCellElement;
-                    if (cell.classList.contains('translated')) {
-                        found = true;
-                        this.selectRow(row, true);
-                        break;
-                    }
+            if (!found) {
+                this.electron.ipcRenderer.send('show-message', { type: 'warning', message: 'No more untranslated segments on this page' });
+            }
+        }
+        if (next === 'unconfirmed') {
+            let found: boolean = false;
+            let length: number = rows.length;
+            for (let i: number = this.currentRow.rowIndex; i < length; i++) {
+                let row: HTMLTableRowElement = (rows[i] as HTMLTableRowElement);
+                let cell: HTMLTableCellElement = row.getElementsByClassName('state')[0] as HTMLTableCellElement;
+                if (cell.classList.contains('translated')) {
+                    found = true;
+                    this.selectRow(row, true);
+                    break;
                 }
-                if (!found) {
-                    this.electron.ipcRenderer.send('show-message', { type: 'warning', message: 'No more unconfirmed segments on this page' });
-                }
+            }
+            if (!found) {
+                this.electron.ipcRenderer.send('show-message', { type: 'warning', message: 'No more unconfirmed segments on this page' });
             }
         }
     }
 
     nextUntranslated(): void {
-        if (this.currentCell) {
-            this.saveEdit({ confirm: false, next: 'untranslated' });
-            return;
-        }
+        this.saveEdit({ confirm: false, next: 'untranslated' });
+        return;
     }
 
     nextUnconfirmed(): void {
-        if (this.currentCell) {
-            this.saveEdit({ confirm: false, next: 'unconfirmed' });
-            return;
-        }
+        this.saveEdit({ confirm: false, next: 'unconfirmed' });
+        return;
     }
 
     centerRow(row: HTMLTableRowElement): void {
@@ -1024,9 +1015,7 @@ class TranslationView {
     }
 
     cancelEdit(): void {
-        if (this.currentCell) {
-            this.currentCell.innerHTML = this.currentContent;
-        }
+        this.currentCell.innerHTML = this.currentContent;
     }
 
     getTags(element: HTMLTableCellElement): Map<string, string> {
@@ -1041,10 +1030,8 @@ class TranslationView {
     }
 
     copySource(): void {
-        if (this.currentCell) {
-            let source: HTMLTableCellElement = this.currentRow.getElementsByClassName('source')[0] as HTMLTableCellElement;
-            this.currentCell.innerHTML = source.innerHTML;
-        }
+        let source: HTMLTableCellElement = this.currentRow.getElementsByClassName('source')[0] as HTMLTableCellElement;
+        this.currentCell.innerHTML = source.innerHTML;
     }
 
     insertTag(arg: any): void {
@@ -1462,5 +1449,13 @@ class TranslationView {
 
     openSegment(arg: any): void {
         this.saveEdit({ next: 'number', confirm: false, segment: arg.segment });
+    }
+
+    getSrcLang(): string {
+        return this.srcLang;
+    }
+
+    getTgtLang(): string {
+        return this.tgtLang;
     }
 }

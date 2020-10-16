@@ -47,6 +47,9 @@ class TermSearch {
         this.electron.ipcRenderer.on('set-glossary', (event: Electron.IpcRendererEvent, arg: any) => {
             this.glossary = arg;
         });
+        this.electron.ipcRenderer.on('set-selected-text', (event: Electron.IpcRendererEvent, arg: any) => {
+            this.setParams(arg);
+        });
         this.electron.ipcRenderer.on('get-height', () => {
             let body: HTMLBodyElement = document.getElementById('body') as HTMLBodyElement;
             this.electron.ipcRenderer.send('term-search-height', { width: body.clientWidth, height: body.clientHeight });
@@ -64,6 +67,14 @@ class TermSearch {
         }
         document.getElementById('languagesSelect').innerHTML = languageOptions;
         (document.getElementById('languagesSelect') as HTMLSelectElement).value = arg.srcLang;
+        this.electron.ipcRenderer.send('get-selection');
+    }
+
+    setParams(arg: any): void {
+        (document.getElementById('searchText') as HTMLInputElement).value = arg.selected;
+        if (arg.lang !== '') {
+            (document.getElementById('languagesSelect') as HTMLSelectElement).value = arg.lang;
+        }
     }
 
     search(): void {

@@ -642,7 +642,7 @@ public class XliffStore {
         if (confirm && !pureTarget.isBlank()) {
             result = propagate(source, target, pureTarget);
         }
-        if (!memory.equals(Constants.NONE)) {
+        if (!memory.equals(Constants.NONE) && !pureTarget.isBlank()) {
             Thread thread = new Thread() {
                 @Override
                 public void run() {

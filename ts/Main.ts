@@ -830,9 +830,17 @@ class Main {
         let selected = Main.tabHolder.getSelected();
         if (Main.translationViews.has(selected)) {
             let selection: Selection = document.getSelection();
-            var selectedText = selection.toString();
+            let selectedText = selection.toString();
             if (selectedText.length > 0) {
-                Main.electron.ipcRenderer.send('selected-text', { selected: selectedText });
+                let element: Element = selection.anchorNode.parentElement;
+                let lang: string = '';
+                if (element.classList.contains('source')) {
+                    lang = Main.translationViews.get(selected).getSrcLang();
+                }
+                if (element.classList.contains('target')) {
+                    lang = Main.translationViews.get(selected).getTgtLang();
+                }
+                Main.electron.ipcRenderer.send('selected-text', { selected: selectedText, lang: lang });
             }
         }
     }
