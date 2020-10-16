@@ -120,6 +120,7 @@ class Swordfish {
     static PROCESSING: string = 'Processing';
 
     static spellCheckerLanguages: string[];
+    static selectionRequest: IpcMainEvent;
 
     ls: ChildProcessWithoutNullStreams;
 
@@ -276,7 +277,6 @@ class Swordfish {
             Swordfish.destroyWindow(Swordfish.goToWindow);
         });
         ipcMain.on('go-to-segment', (event: IpcMainEvent, arg: any) => {
-            console.log(JSON.stringify(arg));
             Swordfish.mainWindow.webContents.send('open-segment', arg);
         });
         ipcMain.on('replaceText-height', (event: IpcMainEvent, arg: any) => {
@@ -407,6 +407,13 @@ class Swordfish {
         });
         ipcMain.on('get-concordance', (event: IpcMainEvent, arg: any) => {
             Swordfish.concordanceSearch(arg);
+        });
+        ipcMain.on('get-selection', (event: IpcMainEvent) => {
+            Swordfish.selectionRequest = event;
+            Swordfish.mainWindow.webContents.send('get-selected-text');
+        });
+        ipcMain.on('selected-text', (event: IpcMainEvent, arg: any) => {
+            Swordfish.selectionRequest.sender.send('set-selected-text', arg);
         });
         ipcMain.on('close-htmlViewer', (event: IpcMainEvent, arg: any) => {
             Swordfish.destroyWindow(BrowserWindow.fromId(arg.id));
@@ -834,7 +841,7 @@ class Swordfish {
         ]);
         var tasksMenu: Menu = Menu.buildFromTemplate([
             { label: 'Confirm Translation', accelerator: 'CmdOrCtrl+E', click: () => { Swordfish.mainWindow.webContents.send('save-edit', { confirm: true, next: 'none' }); } },
-            { label: 'Unconfirm Translation', accelerator: 'CmdOrCtrl+Shift+E', click: () => { Swordfish.mainWindow.webContents.send('save-edit', { confirm: false, next: 'none' }); } },
+            { label: 'Unconfirm Translation', accelerator: 'CmdOrCtrl+Shift+E', click: () => { Swordfish.mainWindow.webContents.send('save-edit', { confirm: false, next: 'none', unconfirm: true }); } },
             { label: 'Confirm and go to Next Untranslated', accelerator: nextUntranslatedKey, click: () => { Swordfish.mainWindow.webContents.send('save-edit', { confirm: true, next: 'untranslated' }); } },
             { label: 'Confirm and go to Next Unconfirmed', accelerator: nextUnconfirmedKey, click: () => { Swordfish.mainWindow.webContents.send('save-edit', { confirm: true, next: 'unconfirmed' }); } },
             new MenuItem({ type: 'separator' }),

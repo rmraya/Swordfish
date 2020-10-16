@@ -47,6 +47,10 @@ class ConcordanceSearch {
         this.electron.ipcRenderer.on('set-memories', (event: Electron.IpcRendererEvent, arg: any) => {
             this.memories = arg;
         });
+        this.electron.ipcRenderer.send('get-selection');
+        this.electron.ipcRenderer.on('set-selected-text', (event: Electron.IpcRendererEvent, arg: any) => {
+            (document.getElementById('searchText') as HTMLInputElement).value = arg.selected;
+        });
         this.electron.ipcRenderer.on('get-height', () => {
             let body: HTMLBodyElement = document.getElementById('body') as HTMLBodyElement;
             this.electron.ipcRenderer.send('concordance-search-height', { width: body.clientWidth, height: body.clientHeight });

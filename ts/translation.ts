@@ -577,6 +577,16 @@ class TranslationView {
         rowDiv.appendChild(rowsInput);
         rowDiv.insertAdjacentHTML('beforeend', '<span class="tooltiptext topTooltip">Enter number of rows/page and press ENTER</span>');
 
+        let goToLink: HTMLAnchorElement = document.createElement('a');
+        goToLink.style.marginLeft = '10px';
+        goToLink.classList.add('tooltip');
+        goToLink.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 0 24 24" width="24"><path d="M17.27 6.73l-4.24 10.13-1.32-3.42-.32-.83-.82-.32-3.43-1.33 10.13-4.23M21 3L3 10.53v.98l6.84 2.65L12.48 21h.98L21 3z"/></svg>' +
+            '<span class="tooltiptext topTooltip">Go To Segment...</span>';
+        goToLink.addEventListener('click', () => {
+            this.electron.ipcRenderer.send('show-go-to-window');
+        });
+        this.statusArea.appendChild(goToLink);
+
         let filler: HTMLSpanElement = document.createElement('span');
         filler.innerHTML = '&nbsp;';
         filler.className = 'fill_width';
@@ -836,7 +846,7 @@ class TranslationView {
                 this.currentState.classList.add('final');
                 this.currentState.innerHTML = TranslationView.SVG_FINAL;
             } else {
-                if (this.currentState.classList.contains('final') && this.currentContent !== translation) {
+                if (this.currentState.classList.contains('final') && (this.currentContent !== translation || arg.unconfirm)) {
                     this.currentState.classList.remove('final');
                     if (translation === '') {
                         this.currentState.classList.add('initial');
@@ -945,27 +955,6 @@ class TranslationView {
             this.saveEdit({ confirm: false, next: 'untranslated' });
             return;
         }
-        /*
-        let found: boolean = false;
-        let rows: HTMLCollection = this.tbody.rows;
-        let length: number = rows.length;
-        let start: number = 0;
-        if (this.currentRow) {
-            start = this.currentRow.rowIndex;
-        }
-        for (let i: number = start; i < length; i++) {
-            let row: HTMLTableRowElement = (rows[i] as HTMLTableRowElement);
-            let cell: HTMLTableCellElement = row.getElementsByClassName('state')[0] as HTMLTableCellElement;
-            if (cell.classList.contains('initial')) {
-                found = true;
-                this.selectRow(row, true);
-                break;
-            }
-        }
-        if (!found) {
-            this.electron.ipcRenderer.send('show-message', { type: 'warning', message: 'No more untranslated segments on this page' });
-        }
-        */
     }
 
     nextUnconfirmed(): void {
@@ -973,27 +962,6 @@ class TranslationView {
             this.saveEdit({ confirm: false, next: 'unconfirmed' });
             return;
         }
-        /*
-        let found: boolean = false;
-        let rows: HTMLCollection = this.tbody.rows;
-        let length: number = rows.length;
-        let start: number = 0;
-        if (this.currentRow) {
-            start = this.currentRow.rowIndex;
-        }
-        for (let i: number = start; i < length; i++) {
-            let row: HTMLTableRowElement = (rows[i] as HTMLTableRowElement);
-            let cell: HTMLTableCellElement = row.getElementsByClassName('state')[0] as HTMLTableCellElement;
-            if (cell.classList.contains('translated')) {
-                found = true;
-                this.selectRow(row, true);
-                break;
-            }
-        }
-        if (!found) {
-            this.electron.ipcRenderer.send('show-message', { type: 'warning', message: 'No more unconfirmed segments on this page' });
-        }
-        */
     }
 
     centerRow(row: HTMLTableRowElement): void {

@@ -160,6 +160,9 @@ class Main {
         Main.electron.ipcRenderer.on('concordance-requested', () => {
             this.concordanceSearch();
         });
+        Main.electron.ipcRenderer.on('get-selected-text', () => {
+            this.getSelectedText();
+        });
         Main.electron.ipcRenderer.on('term-search-requested', () => {
             this.searchTerm();
         });
@@ -184,7 +187,7 @@ class Main {
         Main.electron.ipcRenderer.on('next-segment', () => {
             this.nextSegment();
         });
-        Main.electron.ipcRenderer.on('go-to', () =>{
+        Main.electron.ipcRenderer.on('go-to', () => {
             this.goToSegment();
         });
         Main.electron.ipcRenderer.on('open-segment', (event: Electron.IpcRendererEvent, arg: any) => {
@@ -820,6 +823,17 @@ class Main {
         let selected = Main.tabHolder.getSelected();
         if (Main.translationViews.has(selected)) {
             Main.translationViews.get(selected).openSegment(arg);
+        }
+    }
+
+    getSelectedText(): void {
+        let selected = Main.tabHolder.getSelected();
+        if (Main.translationViews.has(selected)) {
+            let selection: Selection = document.getSelection();
+            var selectedText = selection.toString();
+            if (selectedText.length > 0) {
+                Main.electron.ipcRenderer.send('selected-text', { selected: selectedText });
+            }
         }
     }
 }
