@@ -56,7 +56,7 @@ class FilterSegments {
     filterSegments(): void {
         let filterText: string = (document.getElementById('filterText') as HTMLInputElement).value;
         if (filterText === '') {
-            this.electron.ipcRenderer.send('show-message', { type: 'warning', message: 'Enter text to search' });
+            this.electron.ipcRenderer.send('show-message', { type: 'warning', message: 'Enter text to search', parent: 'filterSegments' });
             return;
         }
         let filterLanguage: string = 'source';
@@ -67,7 +67,7 @@ class FilterSegments {
         let showTranslated: boolean = (document.getElementById('showTranslated') as HTMLInputElement).checked;
         let showConfirmed: boolean = (document.getElementById('showConfirmed') as HTMLInputElement).checked;
         if (!(showUntranslated || showTranslated || showConfirmed)) {
-            this.electron.ipcRenderer.send('show-message', { type: 'warning', message: 'Select segments to display' });
+            this.electron.ipcRenderer.send('show-message', { type: 'warning', message: 'Select segments to display', parent: 'filterSegments' });
             return;
         }
         let params: any = {

@@ -81,12 +81,12 @@ class ImportXLIFF {
     importXLIFF(): void {
         let project: string = (document.getElementById('projectInput') as HTMLInputElement).value;
         if (project === '') {
-            this.electron.ipcRenderer.send('show-message', { type: 'warning', message: 'Enter project name' });
+            this.electron.ipcRenderer.send('show-message', { type: 'warning', message: 'Enter project name', parent: 'importXliff' });
             return;
         }
         let xliff: string = (document.getElementById('xliff') as HTMLInputElement).value;
         if (xliff === '') {
-            this.electron.ipcRenderer.send('show-message', { type: 'warning', message: 'Select XLIFF file' });
+            this.electron.ipcRenderer.send('show-message', { type: 'warning', message: 'Select XLIFF file', parent: 'importXliff' });
             return;
         }
         let params = {

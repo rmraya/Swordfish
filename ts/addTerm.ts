@@ -56,23 +56,23 @@ class AddTerm {
 
     addTerm(): void {
         let sourceTerm: string = (document.getElementById('source') as HTMLInputElement).value;
-        if (sourceTerm === '' ) {
-            this.electron.ipcRenderer.send('show-message', { type: 'warning', message: 'Enter source term' });
+        if (sourceTerm === '') {
+            this.electron.ipcRenderer.send('show-message', { type: 'warning', message: 'Enter source term', parent: 'addTerm' });
             return;
         }
         let targetTerm: string = (document.getElementById('target') as HTMLInputElement).value;
-        if (targetTerm === '' ) {
-            this.electron.ipcRenderer.send('show-message', { type: 'warning', message: 'Enter target term' });
+        if (targetTerm === '') {
+            this.electron.ipcRenderer.send('show-message', { type: 'warning', message: 'Enter target term', parent: 'addTerm' });
             return;
         }
         let srcLang: string = (document.getElementById('srcLangSelect') as HTMLSelectElement).value;
         if (srcLang === 'none') {
-            this.electron.ipcRenderer.send('show-message', { type: 'warning', message: 'Select source language' });
+            this.electron.ipcRenderer.send('show-message', { type: 'warning', message: 'Select source language', parent: 'addTerm' });
             return;
         }
         let tgtLang: string = (document.getElementById('tgtLangSelect') as HTMLSelectElement).value;
         if (tgtLang === 'none') {
-            this.electron.ipcRenderer.send('show-message', { type: 'warning', message: 'Select target language' });
+            this.electron.ipcRenderer.send('show-message', { type: 'warning', message: 'Select target language', parent: 'addTerm' });
             return;
         }
         this.electron.ipcRenderer.send('add-to-glossary', {

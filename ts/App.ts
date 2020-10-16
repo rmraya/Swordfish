@@ -273,7 +273,7 @@ class Swordfish {
         ipcMain.on('go-to-height', (event: IpcMainEvent, arg: any) => {
             Swordfish.setHeight(Swordfish.goToWindow, arg);
         });
-        ipcMain.on('close-go-to', ()=>{
+        ipcMain.on('close-go-to', () => {
             Swordfish.destroyWindow(Swordfish.goToWindow);
         });
         ipcMain.on('go-to-segment', (event: IpcMainEvent, arg: any) => {
@@ -2551,8 +2551,42 @@ class Swordfish {
     }
 
     static showMessage(arg: any): void {
+        let parent: BrowserWindow = Swordfish.mainWindow;
+        if (arg.parent) {
+            switch (arg.parent) {
+                case 'goTo': parent = Swordfish.goToWindow;
+                    break;
+                case 'addFile': parent = Swordfish.addFileWindow;
+                    break;
+                case 'addGlossary': parent = Swordfish.addGlossaryWindow;
+                    break;
+                case 'addMemory': parent = Swordfish.addMemoryWindow;
+                    break;
+                case 'addProject': parent = Swordfish.addProjectWindow;
+                    break;
+                case 'addTerm': parent = Swordfish.addTermWindow;
+                    break;
+                case 'concordanceSearch': parent = Swordfish.concordanceSearchWindow;
+                    break;
+                case 'filterSegments': parent = Swordfish.filterSegmentsWindow;
+                    break;
+                case 'importGlossary': parent = Swordfish.importGlossaryWindow;
+                    break;
+                case 'importTmx': parent = Swordfish.importTmxWindow;
+                    break;
+                case 'importXliff': parent = Swordfish.importXliffWindow;
+                    break;
+                case 'preferences': parent = Swordfish.settingsWindow;
+                    break;
+                case 'replaceText': parent = Swordfish.replaceTextWindow;
+                    break;
+                case 'termSearch': parent = Swordfish.termSearchWindow;
+                    break;
+                default: parent = Swordfish.mainWindow;
+            }
+        }
         Swordfish.messagesWindow = new BrowserWindow({
-            parent: this.mainWindow,
+            parent: parent,
             width: 600,
             useContentSize: true,
             minimizable: false,

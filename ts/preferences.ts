@@ -248,47 +248,47 @@ class Preferences {
 
     savePreferences(): void {
         if (this.enableGoogle.checked && this.googleKey.value === '') {
-            this.electron.ipcRenderer.send('show-message', { type: 'warning', message: 'Enter Google API key' });
+            this.electron.ipcRenderer.send('show-message', { type: 'warning', message: 'Enter Google API key', parent: 'preferences' });
             return;
         }
         if (this.enableGoogle.checked && (this.googleSrcLang.value === 'none' || this.tgtLangSelect.value === 'none')) {
-            this.electron.ipcRenderer.send('show-message', { type: 'warning', message: 'Select Google languages' });
+            this.electron.ipcRenderer.send('show-message', { type: 'warning', message: 'Select Google languages', parent: 'preferences' });
             return;
         }
 
         if (this.enableAzure.checked && this.azureKey.value === '') {
-            this.electron.ipcRenderer.send('show-message', { type: 'warning', message: 'Enter Azure API key' });
+            this.electron.ipcRenderer.send('show-message', { type: 'warning', message: 'Enter Azure API key', parent: 'preferences' });
             return;
         }
         if (this.enableAzure.checked && (this.azureSrcLang.value === 'none' || this.azureTgtLang.value === 'none')) {
-            this.electron.ipcRenderer.send('show-message', { type: 'warning', message: 'Select Azure languages' });
+            this.electron.ipcRenderer.send('show-message', { type: 'warning', message: 'Select Azure languages', parent: 'preferences' });
             return;
         }
 
         if (this.enableYandex.checked && this.yandexKey.value === '') {
-            this.electron.ipcRenderer.send('show-message', { type: 'warning', message: 'Enter Yandex API key' });
+            this.electron.ipcRenderer.send('show-message', { type: 'warning', message: 'Enter Yandex API key', parent: 'preferences' });
             return;
         }
         if (this.enableYandex.checked && (this.yandexSrcLang.value === 'none' || this.yandexTgtLang.value === 'none')) {
-            this.electron.ipcRenderer.send('show-message', { type: 'warning', message: 'Select Yandex languages' });
+            this.electron.ipcRenderer.send('show-message', { type: 'warning', message: 'Select Yandex languages', parent: 'preferences' });
             return;
         }
 
         if (this.enableDeepL.checked && this.deeplKey.value === '') {
-            this.electron.ipcRenderer.send('show-message', { type: 'warning', message: 'Enter DeepL API key' });
+            this.electron.ipcRenderer.send('show-message', { type: 'warning', message: 'Enter DeepL API key', parent: 'preferences' });
             return;
         }
         if (this.enableDeepL.checked && (this.deeplSrcLang.value === 'none' || this.deeplTgtLang.value === 'none')) {
-            this.electron.ipcRenderer.send('show-message', { type: 'warning', message: 'Select DeepL languages' });
+            this.electron.ipcRenderer.send('show-message', { type: 'warning', message: 'Select DeepL languages', parent: 'preferences' });
             return;
         }
 
         if (this.enableMyMemory.checked && this.myMemoryKey.value === '') {
-            this.electron.ipcRenderer.send('show-message', { type: 'warning', message: 'Enter MyMemory API key' });
+            this.electron.ipcRenderer.send('show-message', { type: 'warning', message: 'Enter MyMemory API key', parent: 'preferences' });
             return;
         }
         if (this.enableMyMemory.checked && (this.myMemorySrcLang.value === 'none' || this.myMemoryTgtLang.value === 'none')) {
-            this.electron.ipcRenderer.send('show-message', { type: 'warning', message: 'Select MyMemory languages' });
+            this.electron.ipcRenderer.send('show-message', { type: 'warning', message: 'Select MyMemory languages', parent: 'preferences' });
             return;
         }
 

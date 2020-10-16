@@ -54,7 +54,7 @@ class ReplaceText {
         let searchInput: HTMLInputElement = document.getElementById('searchText') as HTMLInputElement;
         let searchText: string = searchInput.value;
         if (searchText === '') {
-            this.electron.ipcRenderer.send('show-message', { type: 'warning', message: 'Enter text to search' });
+            this.electron.ipcRenderer.send('show-message', { type: 'warning', message: 'Enter text to search', parent: 'replaceText' });
             return;
         }
         let replaceInput: HTMLInputElement = document.getElementById('replaceText') as HTMLInputElement;

@@ -16,6 +16,9 @@ class GoTo {
             let body: HTMLBodyElement = document.getElementById('body') as HTMLBodyElement;
             this.electron.ipcRenderer.send('go-to-height', { width: body.clientWidth, height: body.clientHeight });
         });
+        document.getElementById('goToButton').addEventListener('click', () => {
+            this.goToSegment();
+        });
         document.getElementById('segInput').focus();
     }
 
@@ -26,16 +29,22 @@ class GoTo {
             this.electron.ipcRenderer.send('close-go-to');
         }
         if (code === 'Enter' || code === 'NumpadEnter') {
-            let value: string = this.segInput.value;
-            if (value.length > 0) {
-                this.electron.ipcRenderer.send('go-to-segment', { segment: Number.parseInt(value, 10) });
-                this.segInput.value = '';
-            }
+            this.goToSegment();
         }
         if (!(code.startsWith('Digit') || code.startsWith('Numpad') || code === 'Delete' || code === 'Backspace')) {
             event.preventDefault();
             event.stopPropagation();
         }
+    }
+
+    goToSegment(): void {
+        let value: string = this.segInput.value;
+        if (value.length > 0) {
+            this.electron.ipcRenderer.send('go-to-segment', { segment: Number.parseInt(value, 10) });
+            return;
+        }
+        this.electron.ipcRenderer.send('show-message', { type: 'warning', message: 'Enter segment number', parent: 'goTo' });
+        document.getElementById('segInput').focus();
     }
 }
 

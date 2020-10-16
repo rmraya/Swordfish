@@ -74,13 +74,13 @@ class ConcordanceSearch {
         let searchInput: HTMLInputElement = document.getElementById('searchText') as HTMLInputElement;
         let searchText: string = searchInput.value;
         if (searchText === '') {
-            this.electron.ipcRenderer.send('show-message', { type: 'warning', message: 'Enter text to search' });
+            this.electron.ipcRenderer.send('show-message', { type: 'warning', message: 'Enter text to search', parent: 'concordanceSearch' });
             return;
         }
         let languagesSelect: HTMLSelectElement = document.getElementById('languagesSelect') as HTMLSelectElement;
         let lang: string = languagesSelect.value;
         if (lang === 'none') {
-            this.electron.ipcRenderer.send('show-message', { type: 'warning', message: 'Select language' });
+            this.electron.ipcRenderer.send('show-message', { type: 'warning', message: 'Select language', parent: 'concordanceSearch' });
             return;
         }
         let regExp: HTMLInputElement = document.getElementById('regularExpression') as HTMLInputElement;

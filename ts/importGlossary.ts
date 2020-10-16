@@ -99,7 +99,7 @@ class ImportGlossary {
     importGlossary(): void {
         let file: string = (document.getElementById('file') as HTMLInputElement).value;
         if (file === '') {
-            this.electron.ipcRenderer.send('show-message', { type: 'warning', message: 'Select glossary file' });
+            this.electron.ipcRenderer.send('show-message', { type: 'warning', message: 'Select glossary file', parent: 'importGlossary' });
             return;
         }
         let params = {

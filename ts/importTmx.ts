@@ -99,7 +99,7 @@ class ImportTMX {
     importTMX(): void {
         let tmx: string = (document.getElementById('tmx') as HTMLInputElement).value;
         if (tmx === '') {
-            this.electron.ipcRenderer.send('show-message', { type: 'warning', message: 'Select TMX file' });
+            this.electron.ipcRenderer.send('show-message', { type: 'warning', message: 'Select TMX file', parent: 'importTmx' });
             return;
         }
         let params = {

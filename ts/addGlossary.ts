@@ -60,7 +60,7 @@ class AddGlossary {
     addGlossary(): void {
         let name: string = (document.getElementById('nameInput') as HTMLInputElement).value;
         if (name === '') {
-            this.electron.ipcRenderer.send('show-message', { type: 'warning', message: 'Enter name' });
+            this.electron.ipcRenderer.send('show-message', { type: 'warning', message: 'Enter name', parent: 'addGlossary' });
             return;
         }
         let params: any = {
