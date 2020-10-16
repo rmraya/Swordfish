@@ -127,6 +127,7 @@ td.list {
 
 td.editing {
 	background-color: var(--editing-background) !important;
+	outline: none !important;
 }
 
 td.fixed {

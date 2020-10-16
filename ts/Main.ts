@@ -178,6 +178,18 @@ class Main {
         Main.electron.ipcRenderer.on('first-page', () => {
             this.firstPage();
         });
+        Main.electron.ipcRenderer.on('previous-segment', () => {
+            this.previousSegment();
+        });
+        Main.electron.ipcRenderer.on('next-segment', () => {
+            this.nextSegment();
+        });
+        Main.electron.ipcRenderer.on('go-to', () =>{
+            this.goToSegment();
+        });
+        Main.electron.ipcRenderer.on('open-segment', (event: Electron.IpcRendererEvent, arg: any) => {
+            this.openSegment(arg);
+        });
         Main.electron.ipcRenderer.on('previous-page', () => {
             this.previousPage();
         });
@@ -780,6 +792,34 @@ class Main {
         let selected = Main.tabHolder.getSelected();
         if (Main.translationViews.has(selected)) {
             Main.translationViews.get(selected).previousMT();
+        }
+    }
+
+    previousSegment(): void {
+        let selected = Main.tabHolder.getSelected();
+        if (Main.translationViews.has(selected)) {
+            Main.translationViews.get(selected).gotoPrevious();
+        }
+    }
+
+    nextSegment(): void {
+        let selected = Main.tabHolder.getSelected();
+        if (Main.translationViews.has(selected)) {
+            Main.translationViews.get(selected).gotoNext();
+        }
+    }
+
+    goToSegment(): void {
+        let selected = Main.tabHolder.getSelected();
+        if (Main.translationViews.has(selected)) {
+            Main.electron.ipcRenderer.send('show-go-to-window');
+        }
+    }
+
+    openSegment(arg: any): void {
+        let selected = Main.tabHolder.getSelected();
+        if (Main.translationViews.has(selected)) {
+            Main.translationViews.get(selected).openSegment(arg);
         }
     }
 }

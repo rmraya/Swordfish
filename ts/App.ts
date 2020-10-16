@@ -48,6 +48,7 @@ class Swordfish {
     static concordanceSearchWindow: BrowserWindow;
     static termSearchWindow: BrowserWindow;
     static addTermWindow: BrowserWindow;
+    static goToWindow: BrowserWindow;
 
     javapath: string = Swordfish.path.join(app.getAppPath(), 'bin', 'java');
 
@@ -267,6 +268,16 @@ class Swordfish {
         });
         ipcMain.on('tags-height', (event: IpcMainEvent, arg: any) => {
             Swordfish.setHeight(Swordfish.tagsWindow, arg);
+        });
+        ipcMain.on('go-to-height', (event: IpcMainEvent, arg: any) => {
+            Swordfish.setHeight(Swordfish.goToWindow, arg);
+        });
+        ipcMain.on('close-go-to', ()=>{
+            Swordfish.destroyWindow(Swordfish.goToWindow);
+        });
+        ipcMain.on('go-to-segment', (event: IpcMainEvent, arg: any) => {
+            console.log(JSON.stringify(arg));
+            Swordfish.mainWindow.webContents.send('open-segment', arg);
         });
         ipcMain.on('replaceText-height', (event: IpcMainEvent, arg: any) => {
             Swordfish.setHeight(Swordfish.replaceTextWindow, arg);
@@ -612,6 +623,9 @@ class Swordfish {
         ipcMain.on('show-tag-window', () => {
             Swordfish.showTagsWindow();
         });
+        ipcMain.on('show-go-to-window', () => {
+            Swordfish.showGoToWindow();
+        });
         ipcMain.on('forward-tag', (event: IpcMainEvent, arg: any) => {
             Swordfish.mainWindow.webContents.send('insert-tag', arg);
         });
@@ -709,6 +723,10 @@ class Swordfish {
             { label: 'Paste', accelerator: 'CmdOrCtrl+V', click: () => { Swordfish.mainWindow.webContents.paste(); } },
             { label: 'Select All', accelerator: 'CmdOrCtrl+A', click: () => { Swordfish.mainWindow.webContents.selectAll(); } },
             new MenuItem({ type: 'separator' }),
+            { label: 'Edit previous Segment', accelerator: 'PageUp', click: () => { Swordfish.mainWindow.webContents.send('previous-segment'); } },
+            { label: 'Edit Next Segment', accelerator: 'PageDown', click: () => { Swordfish.mainWindow.webContents.send('next-segment'); } },
+            { label: 'Go To Segment...', accelerator: 'CmdOrCtrl+G', click: () => { Swordfish.mainWindow.webContents.send('go-to'); } },
+            new MenuItem({ type: 'separator' }),
             { label: 'Edit Next Untranslated Segment', accelerator: 'F5', click: () => { Swordfish.mainWindow.webContents.send('next-untranslated'); } },
             { label: 'Edit Next Unconfirmed Segment', accelerator: 'F6', click: () => { Swordfish.mainWindow.webContents.send('next-unconfirmed'); } },
             new MenuItem({ type: 'separator' }),
@@ -757,7 +775,7 @@ class Swordfish {
         ]);
         var projectsMenu: Menu = Menu.buildFromTemplate([
             { label: 'New Project', accelerator: 'CmdOrCtrl+N', click: () => { Swordfish.addProject(); } },
-            { label: 'Translate Projects', accelerator: 'CmdOrCtrl+G', click: () => { Swordfish.translateProjects(); } },
+            { label: 'Translate Projects', click: () => { Swordfish.translateProjects(); } },
             { label: 'Export Translations', accelerator: 'CmdOrCtrl+S', click: () => { Swordfish.mainWindow.webContents.send('export-translations'); } },
             { label: 'Export Translations as TMX File', click: () => { Swordfish.mainWindow.webContents.send('export-translations-tmx'); } },
             new MenuItem({ type: 'separator' }),
@@ -3057,6 +3075,27 @@ class Swordfish {
         this.tagsWindow.setMenu(null);
         this.tagsWindow.loadURL('file://' + this.path.join(app.getAppPath(), 'html', 'tags.html'));
         this.tagsWindow.once('ready-to-show', (event: IpcMainEvent) => {
+            event.sender.send('get-height');
+        });
+    }
+
+    static showGoToWindow(): void {
+        this.goToWindow = new BrowserWindow({
+            parent: this.mainWindow,
+            width: 260,
+            useContentSize: true,
+            minimizable: false,
+            maximizable: false,
+            resizable: false,
+            show: false,
+            icon: this.iconPath,
+            webPreferences: {
+                nodeIntegration: true
+            }
+        });
+        this.goToWindow.setMenu(null);
+        this.goToWindow.loadURL('file://' + this.path.join(app.getAppPath(), 'html', 'goTo.html'));
+        this.goToWindow.once('ready-to-show', (event: IpcMainEvent) => {
             event.sender.send('get-height');
         });
     }

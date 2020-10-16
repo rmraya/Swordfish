@@ -109,6 +109,19 @@ class TranslationView {
 
         this.rightPanel = verticalPanels.rightPanel();
 
+        this.container.addEventListener('keydown', (event: KeyboardEvent) => {
+            if (event.key === 'PageDown') {
+                event.preventDefault();
+                event.cancelBubble = true;
+                this.gotoNext();
+            }
+            if (event.key === 'PageUp') {
+                event.preventDefault();
+                event.cancelBubble = true;
+                this.gotoPrevious();
+            }
+        });
+
         this.buildTranslationArea();
         this.buildRightSide();
 
@@ -735,6 +748,9 @@ class TranslationView {
         this.termsPanel.clear();
         this.currentRow = undefined;
         this.container.classList.remove('wait');
+
+        let rows: HTMLCollection = this.tbody.rows;
+        this.selectRow((rows[0] as HTMLTableRowElement), true);
     }
 
     firstPage(): void {
@@ -766,16 +782,11 @@ class TranslationView {
     }
 
     rowClickListener(event: MouseEvent): void {
-        var element: HTMLElement = event.target as HTMLElement;
-        var type: string = element.tagName;
-        if (type === 'TD' && element.contentEditable === 'true') {
-            // already editing clicked cell
+        let clickedRow: HTMLTableRowElement = event.currentTarget as HTMLTableRowElement;
+        if (clickedRow === this.currentRow) {
             return;
         }
-        if (this.currentCell) {
-            this.saveEdit({ confirm: false, fromClick: true });
-        }
-        this.selectRow(event.currentTarget as HTMLTableRowElement, element.classList.contains('target'));
+        this.saveEdit({ confirm: false, next: 'clicked', segment: clickedRow.rowIndex });
     }
 
     getMachineTranslations() {
@@ -812,17 +823,12 @@ class TranslationView {
         let confirm: boolean = arg.confirm;
         let next: string = arg.next;
         if (this.currentCell) {
+
+            let selection: Selection = window.getSelection();
             this.currentCell.classList.remove('editing');
-            this.currentCell.contentEditable = 'false';
+            this.currentRow.classList.remove('currentRow');
             let translation = this.currentCell.innerHTML;
             this.currentCell.innerHTML = this.highlightSpaces(translation);
-            this.currentCell = undefined;
-            this.currentRow.classList.remove('currentRow');
-
-            if (arg.fromClick && this.currentContent === translation) {
-                // clicked a different cell without making changes
-                return;
-            }
 
             if (confirm) {
                 this.currentState.classList.remove('initial');
@@ -830,7 +836,7 @@ class TranslationView {
                 this.currentState.classList.add('final');
                 this.currentState.innerHTML = TranslationView.SVG_FINAL;
             } else {
-                if (this.currentState.classList.contains('final')) {
+                if (this.currentState.classList.contains('final') && this.currentContent !== translation) {
                     this.currentState.classList.remove('final');
                     if (translation === '') {
                         this.currentState.classList.add('initial');
@@ -862,9 +868,45 @@ class TranslationView {
                 confirm: confirm,
                 memory: this.memSelect.value
             });
+            let rows: HTMLCollection = this.tbody.rows;
+            if (next === 'none') {
+                this.selectRow(this.currentRow, true);
+            }
+            if (next === 'clicked') {
+                let index = arg.segment - 1;
+                let row: HTMLTableRowElement = (rows[index] as HTMLTableRowElement);
+                this.selectRow(row, true);
+            }
+            if (next === 'number') {
+                let index = arg.segment - 1;
+                if (index < 0) {
+                    index = 0;
+                }
+                if (index >= rows.length) {
+                    index = rows.length - 1;
+                }
+                let row: HTMLTableRowElement = (rows[index] as HTMLTableRowElement);
+                this.selectRow(row, true);
+                this.electron.ipcRenderer.send('close-go-to');
+            }
+            if (next === 'next') {
+                let index = this.currentRow.rowIndex;
+                if (index >= rows.length) {
+                    index = rows.length - 1;
+                }
+                let row: HTMLTableRowElement = (rows[index] as HTMLTableRowElement);
+                this.selectRow(row, true);
+            }
+            if (next === 'previous') {
+                let index = this.currentRow.rowIndex - 2;
+                if (index < 0) {
+                    index = 0;
+                }
+                let row: HTMLTableRowElement = (rows[index] as HTMLTableRowElement);
+                this.selectRow(row, true);
+            }
             if (next === 'untranslated') {
                 let found: boolean = false;
-                let rows: HTMLCollection = this.tbody.rows;
                 let length: number = rows.length;
                 for (let i: number = this.currentRow.rowIndex; i < length; i++) {
                     let row: HTMLTableRowElement = (rows[i] as HTMLTableRowElement);
@@ -881,7 +923,6 @@ class TranslationView {
             }
             if (next === 'unconfirmed') {
                 let found: boolean = false;
-                let rows: HTMLCollection = this.tbody.rows;
                 let length: number = rows.length;
                 for (let i: number = this.currentRow.rowIndex; i < length; i++) {
                     let row: HTMLTableRowElement = (rows[i] as HTMLTableRowElement);
@@ -904,6 +945,7 @@ class TranslationView {
             this.saveEdit({ confirm: false, next: 'untranslated' });
             return;
         }
+        /*
         let found: boolean = false;
         let rows: HTMLCollection = this.tbody.rows;
         let length: number = rows.length;
@@ -923,6 +965,7 @@ class TranslationView {
         if (!found) {
             this.electron.ipcRenderer.send('show-message', { type: 'warning', message: 'No more untranslated segments on this page' });
         }
+        */
     }
 
     nextUnconfirmed(): void {
@@ -930,6 +973,7 @@ class TranslationView {
             this.saveEdit({ confirm: false, next: 'unconfirmed' });
             return;
         }
+        /*
         let found: boolean = false;
         let rows: HTMLCollection = this.tbody.rows;
         let length: number = rows.length;
@@ -949,6 +993,7 @@ class TranslationView {
         if (!found) {
             this.electron.ipcRenderer.send('show-message', { type: 'warning', message: 'No more unconfirmed segments on this page' });
         }
+        */
     }
 
     centerRow(row: HTMLTableRowElement): void {
@@ -1014,13 +1059,6 @@ class TranslationView {
     cancelEdit(): void {
         if (this.currentCell) {
             this.currentCell.innerHTML = this.currentContent;
-            this.currentCell.classList.remove('editing');
-            this.currentCell.contentEditable = 'false';
-            this.currentCell = undefined;
-        }
-        if (this.currentRow) {
-            this.currentRow.classList.remove('currentRow');
-            this.currentRow = undefined;
         }
     }
 
@@ -1037,8 +1075,7 @@ class TranslationView {
 
     copySource(): void {
         if (this.currentCell) {
-            let row = this.currentCell.parentElement;
-            let source: HTMLTableCellElement = row.getElementsByClassName('source')[0] as HTMLTableCellElement;
+            let source: HTMLTableCellElement = this.currentRow.getElementsByClassName('source')[0] as HTMLTableCellElement;
             this.currentCell.innerHTML = source.innerHTML;
         }
     }
@@ -1195,7 +1232,7 @@ class TranslationView {
         this.showUntranslated = args.showUntranslated;
         this.showTranslated = args.showTranslated;
         this.showConfirmed = args.showConfirmed;
-        this.saveEdit({ confirm: false, next: '' });
+        this.saveEdit({ confirm: false, next: 'none' });
         if (this.filterText === '') {
             this.filterButton.classList.remove('active');
         } else {
@@ -1446,5 +1483,17 @@ class TranslationView {
 
     previousMT(): void {
         this.mtMatches.previousMatch();
+    }
+
+    gotoNext(): void {
+        this.saveEdit({ next: 'next', confirm: false });
+    }
+
+    gotoPrevious(): void {
+        this.saveEdit({ next: 'previous', confirm: false });
+    }
+
+    openSegment(arg: any): void {
+        this.saveEdit({ next: 'number', confirm: false, segment: arg.segment });
     }
 }
