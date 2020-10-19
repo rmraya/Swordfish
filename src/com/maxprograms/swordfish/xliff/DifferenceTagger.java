@@ -143,20 +143,20 @@ public class DifferenceTagger {
 		StringTokenizer tokenizer = new StringTokenizer(src, NGrams.TERM_SEPARATORS, true);
 		while (tokenizer.hasMoreElements()) {
 			String tk = tokenizer.nextToken();
-			String word = "";
+			StringBuilder word = new StringBuilder();
 			for (int i = 0; i < tk.length(); i++) {
 				if (isAsian(tk.charAt(i))) {
-					if (!word.equals("")) {
-						result.add(word);
-						word = "";
+					if (word.length() != 0) {
+						result.add(word.toString());
+						word.setLength(0);
 					}
 					result.add(tk.charAt(i) + "");
 				} else {
-					word += tk.charAt(i);
+					word.append(tk.charAt(i));
 				}
 			}
-			if (!word.equals("")) {
-				result.add(word);
+			if (word.length() != 0) {
+				result.add(word.toString());
 			}
 		}
 		return result;

@@ -594,9 +594,11 @@ public class ProjectsHandler implements HttpHandler {
 		boolean showUntranslated = json.getBoolean("showUntranslated");
 		boolean showTranslated = json.getBoolean("showTranslated");
 		boolean showConfirmed = json.getBoolean("showConfirmed");
+		String sortOption = json.getString("sortOption");
+		boolean sortDesc = json.getBoolean("sortDesc");
 		try {
 			List<JSONObject> list = store.getSegments(json.getInt("start"), json.getInt("count"), filterText,
-					filterLanguage, caseSensitiveFilter, regExp, showUntranslated, showTranslated, showConfirmed);
+					filterLanguage, caseSensitiveFilter, regExp, showUntranslated, showTranslated, showConfirmed, sortOption, sortDesc);
 			JSONArray array = new JSONArray();
 			Iterator<JSONObject> it = list.iterator();
 			while (it.hasNext()) {

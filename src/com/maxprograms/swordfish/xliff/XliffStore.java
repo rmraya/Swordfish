@@ -369,7 +369,7 @@ public class XliffStore {
         }
         String type = match.getAttributeValue("type", Constants.TM);
         String origin = match.getAttributeValue("origin");
-        int similarity = Math.round(Float.parseFloat(match.getAttributeValue("similarity", "0.0")));
+        int similarity = Math.round(Float.parseFloat(match.getAttributeValue("matchQuality", "0.0")));
 
         insertMatch(file, unit, segment, origin, type, similarity, source, target, tagsData);
     }
@@ -398,15 +398,14 @@ public class XliffStore {
 
     public synchronized List<JSONObject> getSegments(int start, int count, String filterText, String filterLanguage,
             boolean caseSensitiveFilter, boolean regExp, boolean showUntranslated, boolean showTranslated,
-            boolean showConfirmed)
+            boolean showConfirmed, String sortOption, boolean sortDesc)
             throws SQLException, SAXException, IOException, ParserConfigurationException, DataFormatException {
         List<JSONObject> result = new Vector<>();
         int index = start;
-        String query = "SELECT file, unitId, segId, child, source, target, tags, state, space, translate FROM segments WHERE type='S' ORDER BY file, child LIMIT "
-                + count + " OFFSET " + start;
+        StringBuilder queryBuilder = new StringBuilder();
+        queryBuilder.append(
+                "SELECT file, unitId, segId, child, source, target, tags, state, space, translate FROM segments WHERE type='S'");
         if (!filterText.isEmpty()) {
-            StringBuilder queryBuilder = new StringBuilder(
-                    "SELECT file, unitId, segId, child, source, target, tags, state, space, translate FROM segments WHERE type='S'");
             if (regExp) {
                 try {
                     Pattern.compile(filterText);
@@ -451,13 +450,27 @@ public class XliffStore {
             if (!showConfirmed) {
                 queryBuilder.append(" AND state <> 'final'");
             }
-            queryBuilder.append(" ORDER BY file, child LIMIT ");
-            queryBuilder.append(count);
-            queryBuilder.append(" OFFSET ");
-            queryBuilder.append(start);
-            query = queryBuilder.toString();
         }
-        try (ResultSet rs = stmt.executeQuery(query)) {
+        if (sortOption.equals("none")) {
+            queryBuilder.append(" ORDER BY file, child ");
+        }
+        if (sortOption.equals("source")) {
+            queryBuilder.append(" ORDER BY sourceText");
+        }
+        if (sortOption.equals("target")) {
+            queryBuilder.append(" ORDER BY targetText");
+        }
+        if (sortOption.equals("status")) {
+            queryBuilder.append(" ORDER BY state");
+        }
+        if (sortDesc) {
+            queryBuilder.append(" DESC ");
+        }
+        queryBuilder.append(" LIMIT ");
+        queryBuilder.append(count);
+        queryBuilder.append(" OFFSET ");
+        queryBuilder.append(start);
+        try (ResultSet rs = stmt.executeQuery(queryBuilder.toString())) {
             while (rs.next()) {
                 String file = rs.getString(1);
                 String unit = rs.getString(2);
@@ -1481,7 +1494,7 @@ public class XliffStore {
                 match.setAttribute("id", rs.getString(4));
                 match.setAttribute("origin", rs.getString(5));
                 match.setAttribute("type", rs.getString(6));
-                match.setAttribute("similarity", "" + rs.getInt(7));
+                match.setAttribute("matchQuality", "" + rs.getInt(7));
                 match.addContent(buildElement(rs.getNString(8)));
                 match.addContent(buildElement(rs.getNString(9)));
                 matches.addContent(match);
@@ -1969,13 +1982,15 @@ public class XliffStore {
         ITmEngine engine = GlossariesHandler.getEngine(glossary);
         Map<String, String> visited = new Hashtable<>();
         for (int i = 0; i < words.size(); i++) {
-            String term = "";
+            StringBuilder termBuilder = new StringBuilder();
             for (int length = 0; length < MAXTERMLENGTH; length++) {
                 if (i + length < words.size()) {
-                    term = term + " " + words.get(i + length);
-                    if (!visited.containsKey(term.trim())) {
-                        visited.put(term.trim(), "");
-                        List<Element> res = engine.searchAll(term.trim(), srcLang, similarity, caseSensitiveSearches);
+                    termBuilder.append(' ');
+                    termBuilder.append(words.get(i + length));
+                    String term = termBuilder.toString().trim();
+                    if (!visited.containsKey(term)) {
+                        visited.put(term, "");
+                        List<Element> res = engine.searchAll(term, srcLang, similarity, caseSensitiveSearches);
                         for (int j = 0; j < res.size(); j++) {
                             JSONArray array = parseMatches(res);
                             for (int h = 0; h < array.length(); h++) {
@@ -2014,13 +2029,15 @@ public class XliffStore {
 
                     Map<String, String> visited = new Hashtable<>();
                     for (int i = 0; i < words.size(); i++) {
-                        String term = "";
+                        StringBuilder termBuilder = new StringBuilder();
                         for (int length = 0; length < MAXTERMLENGTH; length++) {
                             if (i + length < words.size()) {
-                                term = term + " " + words.get(i + length);
-                                if (!visited.containsKey(term.trim())) {
-                                    visited.put(term.trim(), "");
-                                    List<Element> res = engine.searchAll(term.trim(), srcLang, similarity,
+                                termBuilder.append(' ');
+                                termBuilder.append(words.get(i + length));
+                                String term = termBuilder.toString().trim();
+                                if (!visited.containsKey(term)) {
+                                    visited.put(term, "");
+                                    List<Element> res = engine.searchAll(term, srcLang, similarity,
                                             caseSensitiveSearches);
                                     for (int j = 0; j < res.size(); j++) {
                                         JSONArray array = parseMatches(res);
@@ -2148,14 +2165,9 @@ public class XliffStore {
             while (rs.next()) {
                 index++;
                 boolean translate = rs.getString(8).equals("Y");
-                if (!translate) {
-                    continue;
-                }
                 String state = rs.getString(7);
-                if (Constants.INITIAL.equals(state)) {
-                    continue;
-                }
-                if (Constants.TRANSLATED.equals(state) && !acceptUnconfirmed) {
+                if (!translate || Constants.INITIAL.equals(state)
+                        || (Constants.TRANSLATED.equals(state) && !acceptUnconfirmed)) {
                     continue;
                 }
                 String sourceText = rs.getNString(5);
@@ -2219,14 +2231,9 @@ public class XliffStore {
             while (rs.next()) {
                 index++;
                 boolean translate = rs.getString(8).equals("Y");
-                if (!translate) {
-                    continue;
-                }
                 String state = rs.getString(7);
-                if (Constants.INITIAL.equals(state)) {
-                    continue;
-                }
-                if (Constants.TRANSLATED.equals(state) && !acceptUnconfirmed) {
+                if (!translate || Constants.INITIAL.equals(state)
+                        || (Constants.TRANSLATED.equals(state) && !acceptUnconfirmed)) {
                     continue;
                 }
                 String sourceText = rs.getNString(5);

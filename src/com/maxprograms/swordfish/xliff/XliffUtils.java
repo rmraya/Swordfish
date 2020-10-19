@@ -83,29 +83,37 @@ public class XliffUtils {
     }
 
     public static String highlightSpaces(String text) {
-        String start = "";
+        StringBuilder start = new StringBuilder();
         for (int i = 0; i < text.length(); i++) {
             char c = text.charAt(i);
-            if (!Character.isWhitespace(c)) {
+            if (!isSpace(c)) {
                 break;
             }
-            start = start + c;
+            start.append(c);
         }
-        if (!start.isEmpty()) {
-            text = "<span class='space'>" + start + "</span>" + text.substring(start.length());
+        if (start.length() > 0) {
+            text = "<span class='space'>" + start.toString() + "</span>" + text.substring(start.length());
         }
-        String end = "";
+        StringBuilder end = new StringBuilder();
         for (int i = text.length() - 1; i >= 0; i--) {
             char c = text.charAt(i);
-            if (!Character.isWhitespace(c)) {
+            if (!isSpace(c)) {
                 break;
             }
-            end = end + c;
+            end.append(c);
         }
-        if (!end.isEmpty()) {
-            text = text.substring(0, text.length() - end.length()) + "<span class='space'>" + end + "</span>";
+        if (end.length() > 0) {
+            text = text.substring(0, text.length() - end.length()) + "<span class='space'>" + end.toString()
+                    + "</span>";
         }
         return text;
+    }
+
+    public static boolean isSpace(char c) {
+        if (c == '\u00A0') {
+            return true;
+        }
+        return Character.isWhitespace(c);
     }
 
     public static void checkSVG(int tag) throws IOException {

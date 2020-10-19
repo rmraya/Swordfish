@@ -307,6 +307,12 @@ class Main {
         Main.electron.ipcRenderer.on('set-statistics', (event: Electron.IpcRendererEvent, arg: any) => {
             this.setStatistics(arg);
         });
+        Main.electron.ipcRenderer.on('sort-segments', () => {
+            this.sortSegments();
+        });
+        Main.electron.ipcRenderer.on('set-sorting', (event: Electron.IpcRendererEvent, arg: any) => {
+            this.setSorting(arg);
+        });
         Main.electron.ipcRenderer.on('filter-segments', () => {
             this.filterSegments();
         });
@@ -366,7 +372,7 @@ class Main {
             return;
         }
         let tab = new Tab(arg.id, arg.description, true);
-        let view: TranslationView = new TranslationView(tab.getContainer(), arg.id, arg.srcLang, arg.tgtLang);
+        let view: TranslationView = new TranslationView(tab, arg.id, arg.srcLang, arg.tgtLang);
         Main.tabHolder.addTab(tab);
         Main.tabHolder.selectTab(arg.id);
         tab.getLabel().addEventListener('click', () => {
@@ -655,10 +661,24 @@ class Main {
         this.projectsView.updateStatus(arg);
     }
 
+    sortSegments(): void {
+        let selected = Main.tabHolder.getSelected();
+        if (Main.translationViews.has(selected)) {
+            Main.translationViews.get(selected).sortSegments();
+        }
+    }
+
     filterSegments(): void {
         let selected = Main.tabHolder.getSelected();
         if (Main.translationViews.has(selected)) {
             Main.translationViews.get(selected).filterSegments();
+        }
+    }
+
+    setSorting(args: any) {
+        let selected = Main.tabHolder.getSelected();
+        if (Main.translationViews.has(selected)) {
+            Main.translationViews.get(selected).setSorting(args);
         }
     }
 

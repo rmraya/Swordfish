@@ -36,7 +36,7 @@ class MtMatches {
         tabContainer.classList.add('fill_width');
         this.container.appendChild(tabContainer);
 
-        this.tabHolder = new TabHolder(tabContainer, 'tm' + this.projectId);
+        this.tabHolder = new TabHolder(tabContainer, 'mt' + this.projectId);
 
         let toolbar: HTMLDivElement = document.createElement('div');
         toolbar.classList.add('toolbar');
@@ -86,8 +86,8 @@ class MtMatches {
         let tab = new Tab(match.matchId, match.origin, false);
 
         let div: HTMLDivElement = tab.getContainer();
-        div.classList.add('fill_width');
-        div.classList.add('preserve');
+        div.classList.add('divContainer');
+        div.classList.add('machineContainer');
         div.classList.add('zoom');
         div.innerHTML = match.target;
 

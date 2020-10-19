@@ -28,7 +28,6 @@ public class MatchQuality {
     }
 
     private static String lcs(String x, String y) {
-        String result = "";
         int m = x.length();
         int n = y.length();
         int max = 0;
@@ -54,13 +53,13 @@ public class MatchQuality {
         }
 
         // recover the LCS
+        StringBuilder result = new StringBuilder();
         while (max > 0) {
-            result = x.charAt(mx - 1) + result;
+            result.insert(0, x.charAt(mx - 1));
             max--;
             mx--;
         }
-
-        return result;
+        return result.toString();
     }
 
     public static int similarity(String x, String y) {

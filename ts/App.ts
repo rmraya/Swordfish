@@ -49,6 +49,7 @@ class Swordfish {
     static termSearchWindow: BrowserWindow;
     static addTermWindow: BrowserWindow;
     static goToWindow: BrowserWindow;
+    static sortSegmentsWindow: BrowserWindow;
 
     javapath: string = Swordfish.path.join(app.getAppPath(), 'bin', 'java');
 
@@ -561,6 +562,15 @@ class Swordfish {
         ipcMain.on('close-spellingLangs', () => {
             Swordfish.destroyWindow(Swordfish.spellingLangsWindow);
         });
+        ipcMain.on('show-sort-segments', (event: IpcMainEvent, arg: any) => {
+            Swordfish.showSortSegments(arg);
+        });
+        ipcMain.on('sort-segments-height', (event: IpcMainEvent, arg: any) => {
+            Swordfish.setHeight(Swordfish.sortSegmentsWindow, arg);
+        });
+        ipcMain.on('sort-options', (event: IpcMainEvent, arg: any) => {
+            Swordfish.sortOptions(arg);
+        });
         ipcMain.on('show-filter-segments', (event: IpcMainEvent, arg: any) => {
             Swordfish.showFilterSegments(arg);
         });
@@ -762,6 +772,7 @@ class Swordfish {
             { label: 'Memories', accelerator: 'CmdOrCtrl+Alt+2', click: () => { Swordfish.viewMemories(); } },
             { label: 'Glossaries', accelerator: 'CmdOrCtrl+Alt+3', click: () => { Swordfish.viewGlossaries(); } },
             new MenuItem({ type: 'separator' }),
+            { label: 'Sort Segments', accelerator: 'F3', click: () => { Swordfish.mainWindow.webContents.send('sort-segments'); } },
             { label: 'Filter Segments', accelerator: 'CmdOrCtrl+F', click: () => { Swordfish.mainWindow.webContents.send('filter-segments'); } },
             new MenuItem({ type: 'separator' }),
             { label: 'Close Selected Tab', accelerator: 'CmdOrCtrl+W', click: () => { Swordfish.closeSelectedTab(); } },
@@ -1002,7 +1013,29 @@ class Swordfish {
         Swordfish.mainWindow.webContents.send('set-zoom', { zoom: Swordfish.currentPreferences.zoomFactor });
     }
 
-    static showFilterSegments(project: string): void {
+    static showSortSegments(params: any): void {
+        this.sortSegmentsWindow = new BrowserWindow({
+            parent: this.mainWindow,
+            width: 400,
+            minimizable: false,
+            maximizable: false,
+            resizable: false,
+            useContentSize: true,
+            show: false,
+            icon: this.iconPath,
+            webPreferences: {
+                nodeIntegration: true
+            }
+        });
+        this.sortSegmentsWindow.setMenu(null);
+        this.sortSegmentsWindow.loadURL('file://' + this.path.join(app.getAppPath(), 'html', 'sortSegments.html'));
+        this.sortSegmentsWindow.once('ready-to-show', (event: IpcMainEvent) => {
+            event.sender.send('get-height');
+            event.sender.send('set-params', params);
+        });
+    }
+
+    static showFilterSegments(params: any): void {
         this.filterSegmentsWindow = new BrowserWindow({
             parent: this.mainWindow,
             width: 500,
@@ -1020,7 +1053,7 @@ class Swordfish {
         this.filterSegmentsWindow.loadURL('file://' + this.path.join(app.getAppPath(), 'html', 'filterSegments.html'));
         this.filterSegmentsWindow.once('ready-to-show', (event: IpcMainEvent) => {
             event.sender.send('get-height');
-            event.sender.send('set-params', project);
+            event.sender.send('set-params', params);
         });
     }
 
@@ -2835,6 +2868,11 @@ class Swordfish {
         }
     }
 
+    static sortOptions(arg: any): void {
+        Swordfish.mainWindow.webContents.send('set-sorting', arg);
+        Swordfish.destroyWindow(Swordfish.sortSegmentsWindow);
+    }
+    
     static filterOptions(arg: any): void {
         Swordfish.mainWindow.webContents.send('set-filters', arg);
         Swordfish.destroyWindow(Swordfish.filterSegmentsWindow);

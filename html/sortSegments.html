@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Sort Segments</title>
+    <link id="theme" rel="stylesheet" type="text/css" href="../css/light.css">
+    <link rel="stylesheet" type="text/css" href="../css/fonts.css">
+</head>
+
+<body id="body">
+    <table>
+        <tr>
+            <td class="middle">
+                <input type="radio" id="language" name="sortType" style="margin-top: 4px;" checked>
+            </td>
+            <td class="middle noWrap fill_width">
+                <label for="language">Sort on Column Text Content</label>
+            </td>
+        </tr>
+        <tr>
+            <td class="middle">&nbsp;</td>
+            <td class="middle noWrap fill_width">
+                <table>
+                    <tr>
+                        <td class="middle">
+                            <input type="radio" id="source" name="lang" style="margin-top: 4px;" checked>
+                        </td>
+                        <td class="middle noWrap">
+                            <label for="source">Source Column</label>
+                        </td>
+                        <td class="middle">
+                            <input type="radio" id="target" name="lang" style="margin-left:10px;margin-top: 4px;">
+                        </td>
+                        <td class="middle noWrap">
+                            <label for="target">Target Column</label>
+                        </td>
+                        <td class="middle fill_width">&nbsp;</td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+        <tr>
+            <td class="middle">
+                <input type="radio" id="status" name="sortType" style="margin-top: 4px;">
+            </td>
+            <td class="middle noWrap fill_width">
+                <label for="status">Sort on Segment Status</label>
+            </td>
+        </tr>
+    </table>
+    <table>
+        <tr>
+            <td class="middle"><input type="checkbox" id="descending"></td>
+            <td class="middle noWrap fill_width"><label for="descending" checked style="margin-top: 2px;">Sort
+                    Descending</label></td>
+        </tr>
+    </table>
+
+    <div class="buttonArea">
+        <button id="clearSort">Clear Sorting</button>
+        <button id="sort">Sort Segments</button>
+    </div>
+    <script src="../js/sortSegments.js"></script>
+</body>
+
+</html>

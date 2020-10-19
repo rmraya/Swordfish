@@ -71,7 +71,7 @@ class TmMatches {
         this.electron.ipcRenderer.on('accept-tm-match', () => {
             this.acceptTranslation();
         });
-        
+
         let config: any = { attributes: true, childList: false, subtree: false };
         let observer = new MutationObserver((mutationsList) => {
             for (let mutation of mutationsList) {
@@ -93,30 +93,35 @@ class TmMatches {
         this.matches.set(match.matchId, match);
         let tab = new Tab(match.matchId, match.similarity + '%', false);
 
-        let div: HTMLDivElement = tab.getContainer();
-        div.classList.add('fill_width');
+        let height: number = this.container.clientHeight - 65; // tabHolder.labels + toolbar
+        let width: number = this.container.clientWidth;
+        tab.getContainer().style.height = height + 'px';
 
-        let table = document.createElement('table');
-        table.classList.add('fill_width');
-        table.classList.add('stripes');
-        table.classList.add('zoomable');
-        div.appendChild(table);
+        let matchDiv = document.createElement('div');
+        matchDiv.style.display = 'flex';
+        matchDiv.style.flexDirection = 'column';
+        matchDiv.style.height = height + 'px';
+        tab.getContainer().appendChild(matchDiv);
 
-        let tr = document.createElement('tr');
-        table.appendChild(tr);
+        let sourceDiv: HTMLDivElement = document.createElement('div');
+        sourceDiv.classList.add('divContainer');
+        sourceDiv.classList.add('sourceContainer');
+        sourceDiv.classList.add('zoom');
+        sourceDiv.innerHTML = match.source;
+        let sourceHeight: number = height / 2;
+        sourceDiv.style.height = sourceHeight + 'px';
+        sourceDiv.style.width = width + 'px';
+        matchDiv.appendChild(sourceDiv);
 
-        let td = document.createElement('td');
-        td.classList.add('preserve');
-        td.innerHTML = match.source;
-        tr.appendChild(td);
+        let targetDiv: HTMLDivElement = document.createElement('div');
+        targetDiv.classList.add('divContainer');
+        targetDiv.classList.add('targetContainer');
+        targetDiv.classList.add('zoom');
+        targetDiv.style.height = (height - sourceHeight) + 'px';
+        targetDiv.style.width = width + 'px';
+        targetDiv.innerHTML = match.target;
 
-        tr = document.createElement('tr');
-        table.appendChild(tr);
-
-        td = document.createElement('td');
-        td.classList.add('preserve');
-        td.innerHTML = match.target;
-        tr.appendChild(td);
+        matchDiv.appendChild(targetDiv);
 
         this.tabHolder.addTab(tab);
 
@@ -127,6 +132,24 @@ class TmMatches {
         tab.getLabel().addEventListener('click', () => {
             this.origin.innerText = match.origin;
         });
+
+        let config: any = { attributes: true, childList: false, subtree: false };
+        let observer = new MutationObserver((mutationsList) => {
+            for (let mutation of mutationsList) {
+                if (mutation.type === 'attributes') {
+                    let height = this.container.clientHeight - 65; // tabHolder.labels + toolbar
+                    let width: number = this.container.clientWidth;
+                    tab.getContainer().style.height = height + 'px';
+                    matchDiv.style.height = height + 'px';
+                    let sourceHeight: number = height / 2;
+                    sourceDiv.style.height = sourceHeight + 'px';
+                    sourceDiv.style.width = width + 'px';
+                    targetDiv.style.height = (height - sourceHeight) + 'px';
+                    targetDiv.style.width = width + 'px';
+                }
+            }
+        });
+        observer.observe(this.container, config);
     }
 
     acceptTranslation(): void {

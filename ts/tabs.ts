@@ -80,12 +80,22 @@ class Tab {
     canClose(): boolean {
         return this.closeable;
     }
+
+    setSelected(selected: boolean): void {
+        if (selected) {
+            this.labelDiv.classList.add('selectedTab');
+            this.container.classList.remove('hidden');
+        } else {
+            this.labelDiv.classList.remove('selectedTab');
+            this.container.classList.add('hidden');
+        }
+    }
 }
 
 class TabHolder {
 
     labels: Map<string, HTMLDivElement>;
-    tabs: Map<string, HTMLDivElement>;
+    tabs: Map<string, Tab>;
     closeable: Map<string, boolean>;
     tabsHolder: HTMLDivElement;
     contentHolder: HTMLDivElement;
@@ -95,7 +105,7 @@ class TabHolder {
 
     constructor(parent: HTMLDivElement, id: string) {
         this.labels = new Map<string, HTMLDivElement>();
-        this.tabs = new Map<string, HTMLDivElement>();
+        this.tabs = new Map<string, Tab>();
         this.closeable = new Map<string, boolean>();
 
         this.tabsHolder = document.createElement('div');
@@ -113,7 +123,7 @@ class TabHolder {
         });
         this.labels.clear();
         this.tabs.forEach((value, key) => {
-            this.contentHolder.removeChild(value);
+            this.contentHolder.removeChild(value.getContainer());
         });
         this.tabs.clear();
         this.tabsList = [];
@@ -125,7 +135,7 @@ class TabHolder {
         this.tabsHolder.appendChild(tab.getLabel());
         this.labels.set(tab.getId(), tab.getLabel());
         this.contentHolder.appendChild(tab.getContainer());
-        this.tabs.set(tab.getId(), tab.getContainer());
+        this.tabs.set(tab.getId(), tab);
         this.tabsList.push(tab.getId());
         this.closeable.set(tab.getId(), tab.canClose());
         if (this.tabsList.length === 1) {
@@ -133,46 +143,35 @@ class TabHolder {
         }
     }
 
-    selectTab(tab: string): void {
-        this.labels.forEach((value, key) => {
-            if (value.classList.contains('selectedTab')) {
-                value.classList.remove('selectedTab');
-            }
-        });
-        this.labels.get(tab).classList.add('selectedTab');
-        this.labels.get(tab).blur();
-
+    selectTab(tabId: string): void {
         this.tabs.forEach((value, key) => {
-            if (!value.classList.contains('hidden')) {
-                value.classList.add('hidden');
-            }
+            value.setSelected(tabId === key);
         });
-        this.tabs.get(tab).classList.remove('hidden');
-        this.selectedTab = tab;
+        this.selectedTab = tabId;
     }
 
     getSelected(): string {
         return this.selectedTab;
     }
 
-    canClose(tab: string): boolean {
-        return this.closeable.get(tab);
+    canClose(tabId: string): boolean {
+        return this.closeable.get(tabId);
     }
 
-    closeTab(tab: string): void {
-        this.tabsHolder.removeChild(this.labels.get(tab));
-        this.labels.delete(tab);
-        this.contentHolder.removeChild(this.tabs.get(tab));
-        this.tabs.delete(tab);
-        this.closeable.delete(tab);
-        this.tabsList.splice(this.tabsList.indexOf("tab"), 1);
-        if (tab === this.selectedTab && this.tabsList.length > 1) {
+    closeTab(tabId: string): void {
+        if (tabId === this.selectedTab && this.tabsList.length > 1) {
             this.selectTab(this.tabsList[0]);
         }
+        this.tabsHolder.removeChild(this.labels.get(tabId));
+        this.labels.delete(tabId);
+        this.contentHolder.removeChild(this.tabs.get(tabId).getContainer());
+        this.tabs.delete(tabId);
+        this.closeable.delete(tabId);
+        this.tabsList.splice(this.tabsList.indexOf(tabId), 1);
     }
 
-    has(tab: string): boolean {
-        return this.labels.has(tab);
+    has(tabId: string): boolean {
+        return this.labels.has(tabId);
     }
 
     getTabsHolder(): HTMLDivElement {
