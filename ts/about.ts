@@ -31,22 +31,20 @@ class About {
         this.electron.ipcRenderer.on('set-version', (event: Electron.IpcRendererEvent, arg: any) => {
             document.getElementById('version').innerHTML = arg;
         });
-        document.getElementById('licensesButton').addEventListener('click', () => { 
-            this.electron.ipcRenderer.send('licenses-clicked'); 
+        document.getElementById('licensesButton').addEventListener('click', () => {
+            this.electron.ipcRenderer.send('licenses-clicked');
             document.getElementById('licensesButton').blur();
         });
-        this.electron.ipcRenderer.on('get-height', () => {
-            let body: HTMLBodyElement = document.getElementById('body') as HTMLBodyElement;
-            this.electron.ipcRenderer.send('about-height', { width: body.clientWidth, height: (body.clientHeight + 20) });
-        });
         document.addEventListener('keydown', (event: KeyboardEvent) => {
-            if (event.code === 'Enter') {
-                this.electron.ipcRenderer.send('licenses-clicked'); 
+            if (event.code === 'Enter' || event.code === 'NumpadEnter') {
+                this.electron.ipcRenderer.send('licenses-clicked');
             }
             if (event.code === 'Escape') {
                 this.electron.ipcRenderer.send('close-about');
             }
         });
+        let body: HTMLBodyElement = document.getElementById('body') as HTMLBodyElement;
+        this.electron.ipcRenderer.send('about-height', { width: body.clientWidth, height: (body.clientHeight + 20) });
     }
 
 }

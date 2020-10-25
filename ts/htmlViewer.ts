@@ -34,6 +34,7 @@ class HtmlViewer {
                 this.electron.ipcRenderer.send('close-htmlViewer', { id: this.id });
             }
         });
+        this.electron.ipcRenderer.send('get-html-content');
         this.electron.ipcRenderer.on('set-content', (event: Electron.IpcRendererEvent, arg: any) => {
             let container: HTMLDivElement = document.getElementById('content') as HTMLDivElement;
             container.innerHTML = arg;
@@ -41,11 +42,13 @@ class HtmlViewer {
             container.style.width = body.clientWidth + 'px';
             container.style.height = body.clientHeight + 'px';
         });
+        this.electron.ipcRenderer.send('get-html-title');
         this.electron.ipcRenderer.on('set-title', (event: Electron.IpcRendererEvent, arg: any) => {
             document.getElementById('title').innerText = arg;
         });
+        this.electron.ipcRenderer.send('get-html-id');
         this.electron.ipcRenderer.on('set-id', (event: Electron.IpcRendererEvent, arg: any) => {
-            this.id = arg.id;
+            this.id = arg;
         });
         window.addEventListener('resize', () => {
             let body: HTMLBodyElement = document.getElementById('body') as HTMLBodyElement;

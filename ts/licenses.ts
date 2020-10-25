@@ -56,15 +56,13 @@ class Licenses {
         document.getElementById('DTDParser').addEventListener('click', () => {
             this.openLicense('DTDParser');
         });
-        this.electron.ipcRenderer.on('get-height', () => {
-            let body: HTMLBodyElement = document.getElementById('body') as HTMLBodyElement;
-            this.electron.ipcRenderer.send('licenses-height', { width: body.clientWidth, height: body.clientHeight });
-        });
         document.addEventListener('keydown', (event: KeyboardEvent) => {
             if (event.code === 'Escape') {
                 this.electron.ipcRenderer.send('close-licenses');
             }
         });
+        let body: HTMLBodyElement = document.getElementById('body') as HTMLBodyElement;
+        this.electron.ipcRenderer.send('licenses-height', { width: body.clientWidth, height: body.clientHeight });
     }
 
     openLicense(type: string) {

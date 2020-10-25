@@ -186,10 +186,9 @@ class TabHolder {
         if (this.tabsList.length < 2) {
             return;
         }
-        for (let i = 0; i < this.tabsList.length - 1; i++) {
-            if (this.tabsList[i] === this.selectedTab) {
-                this.selectTab(this.tabsList[i + 1]);
-            }
+        let index = this.tabsList.indexOf(this.selectedTab);
+        if (index < this.tabsList.length - 1) {
+            this.selectTab(this.tabsList[index + 1]);
         }
     }
 
@@ -197,10 +196,9 @@ class TabHolder {
         if (this.tabsList.length < 2) {
             return;
         }
-        for (let i = 1; i < this.tabsList.length; i++) {
-            if (this.tabsList[i] === this.selectedTab) {
-                this.selectTab(this.tabsList[i - 1]);
-            }
+        let index = this.tabsList.indexOf(this.selectedTab);
+        if (index > 0) {
+            this.selectTab(this.tabsList[index - 1]);
         }
     }
 }

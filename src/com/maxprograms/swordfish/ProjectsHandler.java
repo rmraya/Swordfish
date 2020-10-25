@@ -144,6 +144,12 @@ public class ProjectsHandler implements HttpHandler {
 				response = getMatches(request);
 			} else if ("/projects/machineTranslate".equals(url)) {
 				response = machineTranslate(request);
+			} else if ("/projects/assembleMatches".equals(url)) {
+				response = assembleMatches(request);
+			} else if ("/projects/applyAmAll".equals(url)) {
+				response = assembleMatchesAll(request);
+			} else if("/projects/removeAssembledMatches".equals(url)) {
+				response = removeAssembledMatches(request);
 			} else if ("/projects/tmTranslate".equals(url)) {
 				response = tmTranslate(request);
 			} else if ("/projects/tmTranslateAll".equals(url)) {
@@ -504,7 +510,7 @@ public class ProjectsHandler implements HttpHandler {
 			}
 		}
 		StringBuffer buffer = new StringBuffer();
-		try (FileReader input = new FileReader(list)) {
+		try (FileReader input = new FileReader(list, StandardCharsets.UTF_8)) {
 			try (BufferedReader reader = new BufferedReader(input)) {
 				String line;
 				while ((line = reader.readLine()) != null) {
@@ -598,7 +604,8 @@ public class ProjectsHandler implements HttpHandler {
 		boolean sortDesc = json.getBoolean("sortDesc");
 		try {
 			List<JSONObject> list = store.getSegments(json.getInt("start"), json.getInt("count"), filterText,
-					filterLanguage, caseSensitiveFilter, regExp, showUntranslated, showTranslated, showConfirmed, sortOption, sortDesc);
+					filterLanguage, caseSensitiveFilter, regExp, showUntranslated, showTranslated, showConfirmed,
+					sortOption, sortDesc);
 			JSONArray array = new JSONArray();
 			Iterator<JSONObject> it = list.iterator();
 			while (it.hasNext()) {
@@ -833,7 +840,7 @@ public class ProjectsHandler implements HttpHandler {
 	private void loadPreferences() throws IOException {
 		File preferences = new File(TmsServer.getWorkFolder(), "preferences.json");
 		StringBuilder builder = new StringBuilder();
-		try (FileReader reader = new FileReader(preferences)) {
+		try (FileReader reader = new FileReader(preferences, StandardCharsets.UTF_8)) {
 			try (BufferedReader buffer = new BufferedReader(reader)) {
 				String line = "";
 				while ((line = buffer.readLine()) != null) {
@@ -963,6 +970,73 @@ public class ProjectsHandler implements HttpHandler {
 				result.put("matches", projectStores.get(project).tmTranslate(json));
 			}
 		} catch (IOException | SQLException | JSONException | SAXException | ParserConfigurationException e) {
+			logger.log(Level.ERROR, e);
+			result.put(Constants.REASON, e.getMessage());
+		}
+		return result;
+	}
+
+	private JSONObject assembleMatches(String request) {
+		JSONObject result = new JSONObject();
+		try {
+			JSONObject json = new JSONObject(request);
+			String project = json.getString("project");
+			if (projectStores.containsKey(project)) {
+				projectStores.get(project).assembleMatches(json);
+				result.put("matches", projectStores.get(project).getTaggedtMatches(json));
+			}
+		} catch (IOException | SQLException | JSONException | SAXException | ParserConfigurationException
+				| DataFormatException e) {
+			logger.log(Level.ERROR, e);
+			result.put(Constants.REASON, e.getMessage());
+		}
+		return result;
+	}
+
+	private JSONObject assembleMatchesAll(String request) {
+		JSONObject result = new JSONObject();
+		try {
+			JSONObject json = new JSONObject(request);
+			String project = json.getString("project");
+			if (projectStores == null) {
+				projectStores = new Hashtable<>();
+				if (projects == null) {
+					loadProjectsList();
+				}
+				Project prj = projects.get(project);
+				XliffStore store = new XliffStore(prj.getXliff(), prj.getSourceLang().getCode(),
+						prj.getTargetLang().getCode());
+				projectStores.put(project, store);
+			}
+
+			String id = "" + System.currentTimeMillis();
+			result.put("process", id);
+			if (processes == null) {
+				processes = new Hashtable<>();
+			}
+			JSONObject obj = new JSONObject();
+			obj.put(Constants.PROGRESS, Constants.PROCESSING);
+			processes.put(id, obj);
+			Thread thread = new Thread() {
+				@Override
+				public void run() {
+					try {
+						if (projectStores.containsKey(project)) {
+							projectStores.get(project).assembleMatchesAll(json);
+						}
+						obj.put(Constants.PROGRESS, Constants.COMPLETED);
+						processes.put(id, obj);
+					} catch (IOException | SQLException | JSONException | SAXException
+							| ParserConfigurationException e) {
+						logger.log(Level.WARNING, e.getMessage(), e);
+						obj.put(Constants.PROGRESS, Constants.ERROR);
+						obj.put(Constants.REASON, e.getMessage());
+						processes.put(id, obj);
+					}
+				}
+			};
+			thread.start();
+		} catch (IOException | SAXException | ParserConfigurationException | URISyntaxException | SQLException e) {
 			logger.log(Level.ERROR, e);
 			result.put(Constants.REASON, e.getMessage());
 		}
@@ -1150,13 +1224,28 @@ public class ProjectsHandler implements HttpHandler {
 		return result;
 	}
 
+	private JSONObject removeAssembledMatches(String request) {
+		JSONObject result = new JSONObject();
+		try {
+			JSONObject json = new JSONObject(request);
+			String project = json.getString("project");
+			if (projectStores.containsKey(project)) {
+				projectStores.get(project).removeMatches("am");
+			}
+		} catch (SQLException | JSONException e) {
+			logger.log(Level.ERROR, e);
+			result.put(Constants.REASON, e.getMessage());
+		}
+		return result;
+	}
+
 	private JSONObject removeMatches(String request) {
 		JSONObject result = new JSONObject();
 		try {
 			JSONObject json = new JSONObject(request);
 			String project = json.getString("project");
 			if (projectStores.containsKey(project)) {
-				projectStores.get(project).removeMatches();
+				projectStores.get(project).removeMatches("tm");
 			}
 		} catch (SQLException | JSONException e) {
 			logger.log(Level.ERROR, e);
@@ -1171,7 +1260,7 @@ public class ProjectsHandler implements HttpHandler {
 			JSONObject json = new JSONObject(request);
 			String project = json.getString("project");
 			if (projectStores.containsKey(project)) {
-				projectStores.get(project).removeMT();
+				projectStores.get(project).removeMatches("mt");
 			}
 		} catch (SQLException | JSONException e) {
 			logger.log(Level.ERROR, e);

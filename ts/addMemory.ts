@@ -40,21 +40,19 @@ class AddMemory {
         });
         document.addEventListener('keydown', (event: KeyboardEvent) => { KeyboardHandler.keyListener(event); });
         document.addEventListener('keydown', (event: KeyboardEvent) => {
-            if (event.code === 'Enter') {
+            if (event.code === 'Enter' || event.code === 'NumpadEnter') {
                 this.addMemory();
             }
             if (event.code === 'Escape') {
                 this.electron.ipcRenderer.send('close-addMemory');
             }
         });
-        this.electron.ipcRenderer.on('get-height', () => {
-            let body: HTMLBodyElement = document.getElementById('body') as HTMLBodyElement;
-            this.electron.ipcRenderer.send('add-memory-height', { width: body.clientWidth, height: body.clientHeight });
-        });
         document.getElementById('addMemoryButton').addEventListener('click', () => {
             this.addMemory();
         });
         (document.getElementById('nameInput') as HTMLInputElement).focus();
+        let body: HTMLBodyElement = document.getElementById('body') as HTMLBodyElement;
+        this.electron.ipcRenderer.send('add-memory-height', { width: body.clientWidth, height: body.clientHeight });
     }
 
     addMemory(): void {

@@ -70,7 +70,7 @@ public class MemoriesHandler implements HttpHandler {
 	private static ConcurrentHashMap<String, Memory> memories;
 	private static ConcurrentHashMap<String, ITmEngine> openEngines;
 	private static ConcurrentHashMap<String, Integer> useCount;
-	private static ConcurrentHashMap<String, String[]> openTasks;
+	private static Map<String, JSONObject> openTasks;
 	private static boolean firstRun = true;
 
 	@Override
@@ -149,7 +149,9 @@ public class MemoriesHandler implements HttpHandler {
 		if (openTasks == null) {
 			openTasks = new ConcurrentHashMap<>();
 		}
-		openTasks.put(process, new String[] { Constants.PROCESSING });
+		JSONObject obj = new JSONObject();
+		obj.put(Constants.PROGRESS, Constants.PROCESSING);
+		openTasks.put(process, obj);
 		new Thread(() -> {
 			try {
 				if (memories == null) {
@@ -162,12 +164,15 @@ public class MemoriesHandler implements HttpHandler {
 				Set<String> langs = engine.getAllLanguages();
 				array.put(langs);
 				closeMemory(mem.getId());
-				JSONObject obj = new JSONObject();
-				obj.put("languages", array);
-				openTasks.put(process, new String[] { Constants.COMPLETED, obj.toString() });
+				JSONObject completed = new JSONObject();
+				completed.put("languages", array);
+				completed.put(Constants.PROGRESS, Constants.COMPLETED);
+				openTasks.put(process, completed);
 			} catch (IOException | SQLException e) {
 				logger.log(Level.ERROR, e.getMessage(), e);
-				openTasks.put(process, new String[] { Constants.ERROR, e.getMessage() });
+				JSONObject error = new JSONObject();
+				error.put(Constants.REASON, e.getMessage());
+				openTasks.put(process, error);
 			}
 		}).start();
 		result.put("process", process);
@@ -175,30 +180,22 @@ public class MemoriesHandler implements HttpHandler {
 	}
 
 	private static JSONObject getProcessStatus(String request) {
-		JSONObject result = new JSONObject();
 		JSONObject json = new JSONObject(request);
 		if (!json.has("process")) {
-			result.put(Constants.REASON, "Missing 'process' parameter");
-			return result;
+			JSONObject error = new JSONObject();
+			error.put(Constants.REASON, "Missing 'process' parameter");
+			return error;
 		}
 		String process = json.getString("process");
 		if (openTasks == null) {
 			openTasks = new ConcurrentHashMap<>();
 		}
 		if (openTasks.containsKey(process)) {
-			String[] status = openTasks.get(process);
-			result.put("result", status[0]);
-			if (Constants.COMPLETED.equals(status[0]) && status.length > 1) {
-				result.put("data", new JSONObject(status[1]));
-			}
-			if (Constants.ERROR.equals(status[0])) {
-				result.put(Constants.REASON, status[1]);
-			}
-		} else {
-			result.put("result", Constants.ERROR);
-			result.put(Constants.REASON, "No such process: " + process);
+			return openTasks.get(process);
 		}
-		return result;
+		JSONObject error = new JSONObject();
+		error.put(Constants.REASON, "No such process: " + process);
+		return error;
 	}
 
 	private JSONObject concordanceSearch(String request) {
@@ -234,7 +231,6 @@ public class MemoriesHandler implements HttpHandler {
 			result.put("html", generateHTML(matches, searchStr, isRegexp, caseSensitive));
 		} catch (IOException | SAXException | ParserConfigurationException | SQLException e) {
 			logger.log(Level.ERROR, e);
-			result.put("result", Constants.ERROR);
 			result.put(Constants.REASON, e.getMessage());
 		}
 		return result;
@@ -263,7 +259,9 @@ public class MemoriesHandler implements HttpHandler {
 		if (openTasks == null) {
 			openTasks = new ConcurrentHashMap<>();
 		}
-		openTasks.put(process, new String[] { Constants.PROCESSING });
+		JSONObject obj = new JSONObject();
+		obj.put(Constants.PROGRESS, Constants.PROCESSING);
+		openTasks.put(process, obj);
 		new Thread(() -> {
 			try {
 				openMemory(id);
@@ -274,15 +272,22 @@ public class MemoriesHandler implements HttpHandler {
 				try {
 					int imported = engine.storeTMX(tmx.getAbsolutePath(), project, client, subject);
 					logger.log(Level.INFO, "Imported " + imported);
-					openTasks.put(process, new String[] { Constants.COMPLETED });
+					JSONObject completed = new JSONObject();
+					completed.put("imported", imported);
+					completed.put(Constants.PROGRESS, Constants.COMPLETED);
+					openTasks.put(process, completed);
 				} catch (Exception e) {
-					openTasks.put(process, new String[] { Constants.ERROR, e.getMessage() });
+					JSONObject error = new JSONObject();
+					error.put(Constants.REASON, e.getMessage());
+					openTasks.put(process, error);
 					logger.log(Level.ERROR, e.getMessage(), e);
 				}
 				closeMemory(id);
 			} catch (IOException | SQLException e) {
 				logger.log(Level.ERROR, e.getMessage(), e);
-				openTasks.put(process, new String[] { Constants.ERROR, e.getMessage() });
+				JSONObject error = new JSONObject();
+				error.put(Constants.REASON, e.getMessage());
+				openTasks.put(process, error);
 			}
 		}).start();
 		result.put("process", process);
@@ -307,7 +312,9 @@ public class MemoriesHandler implements HttpHandler {
 		if (openTasks == null) {
 			openTasks = new ConcurrentHashMap<>();
 		}
-		openTasks.put(process, new String[] { Constants.PROCESSING });
+		JSONObject obj = new JSONObject();
+		obj.put(Constants.PROGRESS, Constants.PROCESSING);
+		openTasks.put(process, obj);
 		new Thread(() -> {
 			try {
 				if (memories == null) {
@@ -326,10 +333,14 @@ public class MemoriesHandler implements HttpHandler {
 				}
 				engine.exportMemory(tmx.getAbsolutePath(), langSet, json.getString("srcLang"));
 				closeMemory(mem.getId());
-				openTasks.put(process, new String[] { Constants.COMPLETED });
+				JSONObject completed = new JSONObject();
+				completed.put(Constants.PROGRESS, Constants.COMPLETED);
+				openTasks.put(process, completed);
 			} catch (IOException | SAXException | ParserConfigurationException | SQLException e) {
 				logger.log(Level.ERROR, e.getMessage(), e);
-				openTasks.put(process, new String[] { Constants.ERROR, e.getMessage() });
+				JSONObject error = new JSONObject();
+				error.put(Constants.REASON, e.getMessage());
+				openTasks.put(process, error);
 			}
 		}).start();
 		result.put("process", process);
@@ -346,7 +357,9 @@ public class MemoriesHandler implements HttpHandler {
 			if (openTasks == null) {
 				openTasks = new ConcurrentHashMap<>();
 			}
-			openTasks.put(process, new String[] { Constants.PROCESSING });
+			JSONObject obj = new JSONObject();
+			obj.put(Constants.PROGRESS, Constants.PROCESSING);
+			openTasks.put(process, obj);
 			new Thread(() -> {
 				try {
 					JSONArray array = json.getJSONArray("memories");
@@ -367,10 +380,14 @@ public class MemoriesHandler implements HttpHandler {
 						memories.remove(mem.getId());
 					}
 					saveMemoriesList();
-					openTasks.put(process, new String[] { Constants.COMPLETED });
+					JSONObject completed = new JSONObject();
+					completed.put(Constants.PROGRESS, Constants.COMPLETED);
+					openTasks.put(process, completed);
 				} catch (IOException | SQLException e) {
 					logger.log(Level.ERROR, e.getMessage(), e);
-					openTasks.put(process, new String[] { Constants.ERROR, e.getMessage() });
+					JSONObject error = new JSONObject();
+					error.put(Constants.REASON, e.getMessage());
+					openTasks.put(process, error);
 				}
 			}).start();
 		} else {
@@ -447,7 +464,7 @@ public class MemoriesHandler implements HttpHandler {
 			return;
 		}
 		StringBuffer buffer = new StringBuffer();
-		try (FileReader input = new FileReader(list)) {
+		try (FileReader input = new FileReader(list, StandardCharsets.UTF_8)) {
 			try (BufferedReader reader = new BufferedReader(input)) {
 				String line;
 				while ((line = reader.readLine()) != null) {

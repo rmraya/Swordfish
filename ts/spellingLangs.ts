@@ -30,21 +30,19 @@ class SpellcheckerLanguages {
         this.electron.ipcRenderer.on('set-spellchecker-langs', (event: Electron.IpcRendererEvent, arg: any) => {
             this.setLanguages(arg.languages);
         });
-        this.electron.ipcRenderer.on('get-height', () => {
-            let body: HTMLBodyElement = document.getElementById('body') as HTMLBodyElement;
-            this.electron.ipcRenderer.send('set-spellchecker-height', { width: body.clientWidth, height: 400 });
-        });
         document.addEventListener('keydown', (event: KeyboardEvent) => {
             if (event.code === 'Escape') {
                 this.electron.ipcRenderer.send('close-spellingLangs');
             }
         });
+        let body: HTMLBodyElement = document.getElementById('body') as HTMLBodyElement;
+        this.electron.ipcRenderer.send('set-spellchecker-height', { width: body.clientWidth, height: 400 });
     }
 
     setLanguages(languages: any[]): void {
         let langsTable: HTMLTableElement = document.getElementById('langsTable') as HTMLTableElement;
         let length = languages.length;
-        for (let i=0 ; i<length ; i++) {
+        for (let i = 0; i < length; i++) {
             let lang: string[] = languages[i];
             let tr: HTMLTableRowElement = document.createElement('tr');
             langsTable.appendChild(tr);

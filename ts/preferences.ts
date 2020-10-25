@@ -145,6 +145,8 @@ class Preferences {
                 this.electron.ipcRenderer.send('close-preferences');
             }
         });
+        let body: HTMLBodyElement = document.getElementById('body') as HTMLBodyElement;
+        this.electron.ipcRenderer.send('settings-height', { width: body.clientWidth, height: body.clientHeight });
     }
 
     setPreferences(arg: any): void {

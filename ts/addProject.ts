@@ -52,10 +52,6 @@ class AddProject {
         this.electron.ipcRenderer.on('add-source-files', (event: Electron.IpcRendererEvent, arg: any) => {
             this.addFiles(arg);
         });
-        this.electron.ipcRenderer.on('get-height', () => {
-            let body: HTMLBodyElement = document.getElementById('body') as HTMLBodyElement;
-            this.electron.ipcRenderer.send('add-project-height', { width: body.clientWidth, height: body.clientHeight });
-        });
         this.electron.ipcRenderer.send('get-types');
         this.electron.ipcRenderer.on('set-types', (event: Electron.IpcRendererEvent, arg: any) => {
             this.setTypes(arg);
@@ -73,7 +69,7 @@ class AddProject {
         });
         document.addEventListener('keydown', (event: KeyboardEvent) => { KeyboardHandler.keyListener(event); });
         document.addEventListener('keydown', (event: KeyboardEvent) => {
-            if (event.code === 'Enter') {
+            if (event.code === 'Enter' || event.code === 'NumpadEnter') {
                 this.addProject();
             }
             if (event.code === 'Escape') {
@@ -91,6 +87,8 @@ class AddProject {
             this.addProject();
         });
         (document.getElementById('nameInput') as HTMLInputElement).focus();
+        let body: HTMLBodyElement = document.getElementById('body') as HTMLBodyElement;
+        this.electron.ipcRenderer.send('add-project-height', { width: body.clientWidth, height: body.clientHeight });
     }
 
     addProject(): void {

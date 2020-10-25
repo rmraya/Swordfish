@@ -45,14 +45,11 @@ class ImportGlossary {
             if (event.code === 'Escape') {
                 this.electron.ipcRenderer.send('close-importGlossary');
             }
-            if (event.code === 'Enter') {
+            if (event.code === 'Enter' || event.code === 'NumpadEnter') {
                 this.importGlossary();
             }
         });
-        this.electron.ipcRenderer.on('get-height', () => {
-            let body: HTMLBodyElement = document.getElementById('body') as HTMLBodyElement;
-            this.electron.ipcRenderer.send('import-glossary-height', { width: body.clientWidth, height: body.clientHeight });
-        });
+        this.electron.ipcRenderer.send('get-glossary-param');
         this.electron.ipcRenderer.on('set-glossary', (event: Electron.IpcRendererEvent, arg: any) => {
             this.glossary = arg;
         });
@@ -67,6 +64,8 @@ class ImportGlossary {
             this.importGlossary();
         });
         (document.getElementById('file') as HTMLInputElement).focus();
+        let body: HTMLBodyElement = document.getElementById('body') as HTMLBodyElement;
+            this.electron.ipcRenderer.send('import-glossary-height', { width: body.clientWidth, height: body.clientHeight });
     }
 
     setProjectNames(projects: string[]): void {

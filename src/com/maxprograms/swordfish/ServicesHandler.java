@@ -242,7 +242,7 @@ public class ServicesHandler implements HttpHandler {
             return clients;
         }
         StringBuffer buffer = new StringBuffer();
-        try (FileReader input = new FileReader(clientsFile)) {
+        try (FileReader input = new FileReader(clientsFile, StandardCharsets.UTF_8)) {
             try (BufferedReader reader = new BufferedReader(input)) {
                 String line;
                 while ((line = reader.readLine()) != null) {
@@ -265,7 +265,7 @@ public class ServicesHandler implements HttpHandler {
             return subjects;
         }
         StringBuffer buffer = new StringBuffer();
-        try (FileReader input = new FileReader(subjectsFile)) {
+        try (FileReader input = new FileReader(subjectsFile, StandardCharsets.UTF_8)) {
             try (BufferedReader reader = new BufferedReader(input)) {
                 String line;
                 while ((line = reader.readLine()) != null) {
@@ -291,7 +291,7 @@ public class ServicesHandler implements HttpHandler {
             return projects;
         }
         StringBuffer buffer = new StringBuffer();
-        try (FileReader input = new FileReader(projectsFile)) {
+        try (FileReader input = new FileReader(projectsFile, StandardCharsets.UTF_8)) {
             try (BufferedReader reader = new BufferedReader(input)) {
                 String line;
                 while ((line = reader.readLine()) != null) {

@@ -12,14 +12,13 @@ class GoTo {
         this.segInput.addEventListener('keydown', (event: KeyboardEvent) => {
             this.parseKey(event);
         });
-        this.electron.ipcRenderer.on('get-height', () => {
-            let body: HTMLBodyElement = document.getElementById('body') as HTMLBodyElement;
-            this.electron.ipcRenderer.send('go-to-height', { width: body.clientWidth, height: body.clientHeight });
-        });
         document.getElementById('goToButton').addEventListener('click', () => {
             this.goToSegment();
         });
         document.getElementById('segInput').focus();
+
+        let body: HTMLBodyElement = document.getElementById('body') as HTMLBodyElement;
+        this.electron.ipcRenderer.send('go-to-height', { width: body.clientWidth, height: body.clientHeight });
     }
 
     parseKey(event: KeyboardEvent): void {

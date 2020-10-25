@@ -260,7 +260,7 @@ class MemoriesView {
             this.electron.ipcRenderer.send('show-message', { type: 'warning', message: 'Select memory' });
             return;
         }
-        let memories: any[] = [];
+        let memories: string[] = [];
         for (let key of this.selected.keys()) {
             memories.push(key);
         }

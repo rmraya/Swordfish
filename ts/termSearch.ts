@@ -30,7 +30,7 @@ class TermSearch {
         });
         document.addEventListener('keydown', (event: KeyboardEvent) => { KeyboardHandler.keyListener(event); });
         document.addEventListener('keydown', (event: KeyboardEvent) => {
-            if (event.code === 'Enter') {
+            if (event.code === 'Enter' || event.code === 'NumpadEnter') {
                 this.search();
             }
             if (event.code === 'Escape') {
@@ -44,18 +44,17 @@ class TermSearch {
         document.getElementById('searchButton').addEventListener('click', () => {
             this.search()
         });
+        this.electron.ipcRenderer.send('get-glossary-param');
         this.electron.ipcRenderer.on('set-glossary', (event: Electron.IpcRendererEvent, arg: any) => {
             this.glossary = arg;
         });
         this.electron.ipcRenderer.on('set-selected-text', (event: Electron.IpcRendererEvent, arg: any) => {
             this.setParams(arg);
         });
-        this.electron.ipcRenderer.on('get-height', () => {
-            let body: HTMLBodyElement = document.getElementById('body') as HTMLBodyElement;
-            this.electron.ipcRenderer.send('term-search-height', { width: body.clientWidth, height: body.clientHeight });
-        });
         (document.getElementById('similarity') as HTMLSelectElement).value = '70';
         (document.getElementById('searchText') as HTMLInputElement).focus();
+        let body: HTMLBodyElement = document.getElementById('body') as HTMLBodyElement;
+        this.electron.ipcRenderer.send('term-search-height', { width: body.clientWidth, height: body.clientHeight });
     }
 
     setLanguages(arg: any): void {

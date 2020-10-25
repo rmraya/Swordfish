@@ -26,16 +26,13 @@ class SortSegments {
         this.electron.ipcRenderer.on('set-theme', (event: Electron.IpcRendererEvent, arg: any) => {
             (document.getElementById('theme') as HTMLLinkElement).href = arg;
         });
-        this.electron.ipcRenderer.on('get-height', () => {
-            let body: HTMLBodyElement = document.getElementById('body') as HTMLBodyElement;
-            this.electron.ipcRenderer.send('sort-segments-height', { width: body.clientWidth, height: body.clientHeight });
-        });
+        this.electron.ipcRenderer.send('get-sort-params');
         this.electron.ipcRenderer.on('set-params', (event: Electron.IpcRendererEvent, arg: any) => {
             this.setParams(arg);
         });
         document.addEventListener('keydown', (event: KeyboardEvent) => { KeyboardHandler.keyListener(event); });
         document.addEventListener('keydown', (event: KeyboardEvent) => {
-            if (event.code === 'Enter') {
+            if (event.code === 'Enter' || event.code === 'NumpadEnter') {
                 this.sortSegments();
             }
             if (event.code === 'Escape') {
@@ -56,6 +53,8 @@ class SortSegments {
             (document.getElementById('source') as HTMLInputElement).disabled = true;
             (document.getElementById('target') as HTMLInputElement).disabled = true;
         });
+        let body: HTMLBodyElement = document.getElementById('body') as HTMLBodyElement;
+        this.electron.ipcRenderer.send('sort-segments-height', { width: body.clientWidth, height: body.clientHeight });
     }
 
     setParams(arg: any): void {

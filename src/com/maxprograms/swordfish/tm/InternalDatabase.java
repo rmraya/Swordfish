@@ -360,6 +360,7 @@ public class InternalDatabase implements ITmEngine {
 				}
 			}
 		}
+		Collections.sort(result);
 		return result;
 	}
 

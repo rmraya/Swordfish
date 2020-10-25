@@ -23,6 +23,7 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 
 import com.maxprograms.mt.AzureTranslator;
@@ -107,7 +108,7 @@ public class MT {
     private void loadDefaults() throws IOException {
         File preferences = new File(TmsServer.getWorkFolder(), "preferences.json");
         StringBuilder builder = new StringBuilder();
-        try (FileReader reader = new FileReader(preferences)) {
+        try (FileReader reader = new FileReader(preferences, StandardCharsets.UTF_8)) {
             try (BufferedReader buffer = new BufferedReader(reader)) {
                 String line = "";
                 while ((line = buffer.readLine()) != null) {

@@ -124,6 +124,114 @@ class TranslationView {
                 event.cancelBubble = true;
                 this.gotoPrevious();
             }
+            if (event.key === 'b' || event.key === 'B') {
+                event.preventDefault();
+                event.cancelBubble = true;
+                this.addTerm();
+            }
+
+            // Insert tags with numeric keypad
+            if (event.code === 'Numpad1' && (event.ctrlKey || event.metaKey) && !event.altKey) {
+                event.preventDefault();
+                event.cancelBubble = true;
+                this.insertTag({ tag: 1 });
+            }
+            if (event.code === 'Numpad2' && (event.ctrlKey || event.metaKey) && !event.altKey) {
+                event.preventDefault();
+                event.cancelBubble = true;
+                this.insertTag({ tag: 2 });
+            }
+            if (event.code === 'Numpad3' && (event.ctrlKey || event.metaKey) && !event.altKey) {
+                event.preventDefault();
+                event.cancelBubble = true;
+                this.insertTag({ tag: 3 });
+            }
+            if (event.code === 'Numpad4' && (event.ctrlKey || event.metaKey) && !event.altKey) {
+                event.preventDefault();
+                event.cancelBubble = true;
+                this.insertTag({ tag: 4 });
+            }
+            if (event.code === 'Numpad5' && (event.ctrlKey || event.metaKey) && !event.altKey) {
+                event.preventDefault();
+                event.cancelBubble = true;
+                this.insertTag({ tag: 5 });
+            }
+            if (event.code === 'Numpad6' && (event.ctrlKey || event.metaKey) && !event.altKey) {
+                event.preventDefault();
+                event.cancelBubble = true;
+                this.insertTag({ tag: 6 });
+            }
+            if (event.code === 'Numpad7' && (event.ctrlKey || event.metaKey) && !event.altKey) {
+                event.preventDefault();
+                event.cancelBubble = true;
+                this.insertTag({ tag: 7 });
+            }
+            if (event.code === 'Numpad8' && (event.ctrlKey || event.metaKey) && !event.altKey) {
+                event.preventDefault();
+                event.cancelBubble = true;
+                this.insertTag({ tag: 8 });
+            }
+            if (event.code === 'Numpad9' && (event.ctrlKey || event.metaKey) && !event.altKey) {
+                event.preventDefault();
+                event.cancelBubble = true;
+                this.insertTag({ tag: 9 });
+            }
+            if (event.code === 'Numpad0' && (event.ctrlKey || event.metaKey) && !event.altKey) {
+                event.preventDefault();
+                event.cancelBubble = true;
+                this.insertTag({ tag: 10 });
+            }
+            // Insert terms with numeric keypad
+            if (event.code === 'Numpad1' && (event.ctrlKey || event.metaKey) && event.altKey) {
+                event.preventDefault();
+                event.cancelBubble = true;
+                this.insertTerm({ term: 1 });
+            }
+            if (event.code === 'Numpad2' && (event.ctrlKey || event.metaKey) && event.altKey) {
+                event.preventDefault();
+                event.cancelBubble = true;
+                this.insertTerm({ term: 2 });
+            }
+            if (event.code === 'Numpad3' && (event.ctrlKey || event.metaKey) && event.altKey) {
+                event.preventDefault();
+                event.cancelBubble = true;
+                this.insertTerm({ term: 3 });
+            }
+            if (event.code === 'Numpad4' && (event.ctrlKey || event.metaKey) && event.altKey) {
+                event.preventDefault();
+                event.cancelBubble = true;
+                this.insertTerm({ term: 4 });
+            }
+            if (event.code === 'Numpad5' && (event.ctrlKey || event.metaKey) && event.altKey) {
+                event.preventDefault();
+                event.cancelBubble = true;
+                this.insertTerm({ term: 5 });
+            }
+            if (event.code === 'Numpad6' && (event.ctrlKey || event.metaKey) && event.altKey) {
+                event.preventDefault();
+                event.cancelBubble = true;
+                this.insertTerm({ term: 6 });
+            }
+            if (event.code === 'Numpad7' && (event.ctrlKey || event.metaKey) && event.altKey) {
+                event.preventDefault();
+                event.cancelBubble = true;
+                this.insertTerm({ term: 7 });
+            }
+            if (event.code === 'Numpad8' && (event.ctrlKey || event.metaKey) && event.altKey) {
+                event.preventDefault();
+                event.cancelBubble = true;
+                this.insertTerm({ term: 8 });
+            }
+            if (event.code === 'Numpad9' && (event.ctrlKey || event.metaKey) && event.altKey) {
+                event.preventDefault();
+                event.cancelBubble = true;
+                this.insertTerm({ term: 9 });
+            }
+            if (event.code === 'Numpad0' && (event.ctrlKey || event.metaKey) && event.altKey) {
+                event.preventDefault();
+                event.cancelBubble = true;
+                this.insertTerm({ term: 10 });
+            }
         });
 
         this.buildTranslationArea();
@@ -825,6 +933,25 @@ class TranslationView {
         });
     }
 
+    getAssembledMatches() {
+        if (this.memSelect.value === 'none') {
+            this.electron.ipcRenderer.send('show-message', { type: 'warning', message: 'Select memory' });
+            return;
+        }
+        if (this.glossSelect.value === 'none') {
+            this.electron.ipcRenderer.send('show-message', { type: 'warning', message: 'Select glossary' });
+            return;
+        }
+        this.electron.ipcRenderer.send('assemble-matches', {
+            project: this.projectId,
+            file: this.currentId.file,
+            unit: this.currentId.unit,
+            segment: this.currentId.id,
+            memory: this.memSelect.value,
+            glossary: this.glossSelect.value
+        });
+    }
+
     getTmMatches() {
         if (this.memSelect.value === 'none') {
             this.electron.ipcRenderer.send('show-message', { type: 'warning', message: 'Select memory' });
@@ -1134,7 +1261,7 @@ class TranslationView {
                     max = match.similarity;
                 }
             }
-            if (match.type === 'mt') {
+            if (match.type === 'mt' || match.type === 'am') {
                 this.mtMatches.add(match);
             }
         }
@@ -1272,7 +1399,7 @@ class TranslationView {
     }
 
     removeAllMatches(): void {
-        this.electron.ipcRenderer.send('remove-matches', { project: this.projectId });
+        this.electron.ipcRenderer.send('remove-all-matches', { project: this.projectId });
     }
 
     removeAllMachineTranslations(): void {
@@ -1355,6 +1482,26 @@ class TranslationView {
 
     applyMachineTranslationsAll(): void {
         this.electron.ipcRenderer.send('apply-mt-all', { project: this.projectId });
+    }
+
+    assembleMatchesAll(): void {
+        if (this.memSelect.value === 'none') {
+            this.electron.ipcRenderer.send('show-message', { type: 'warning', message: 'Select memory' });
+            return;
+        }
+        if (this.glossSelect.value === 'none') {
+            this.electron.ipcRenderer.send('show-message', { type: 'warning', message: 'Select glossary' });
+            return;
+        }
+        this.electron.ipcRenderer.send('assemble-matches-all', {
+            project: this.projectId,
+            memory: this.memSelect.value,
+            glossary: this.glossSelect.value
+        });
+    }
+
+    removeAssembleMatches(): void {
+        this.electron.ipcRenderer.send('remove-assembled-matches', { project: this.projectId });
     }
 
     acceptAllMachineTranslations(): void {
@@ -1520,5 +1667,13 @@ class TranslationView {
 
     getTgtLang(): string {
         return this.tgtLang;
+    }
+
+    selectNextTerm(): void {
+        this.termsPanel.selectNextTerm();
+    }
+
+    selectPreviousTerm(): void {
+        this.termsPanel.selectPreviousTerm();
     }
 }

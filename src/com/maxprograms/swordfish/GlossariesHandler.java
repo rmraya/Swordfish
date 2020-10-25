@@ -69,7 +69,7 @@ public class GlossariesHandler implements HttpHandler {
 	private static ConcurrentHashMap<String, Memory> glossaries;
 	private static ConcurrentHashMap<String, ITmEngine> openEngines;
 	private static ConcurrentHashMap<String, Integer> useCount;
-	private static ConcurrentHashMap<String, String[]> openTasks;
+	private static Map<String, JSONObject> openTasks;
 	private static boolean firstRun = true;
 
 	@Override
@@ -139,30 +139,22 @@ public class GlossariesHandler implements HttpHandler {
 	}
 
 	private static JSONObject getProcessStatus(String request) {
-		JSONObject result = new JSONObject();
 		JSONObject json = new JSONObject(request);
 		if (!json.has("process")) {
-			result.put(Constants.REASON, "Missing 'process' parameter");
-			return result;
+			JSONObject error = new JSONObject();
+			error.put(Constants.REASON, "Missing 'process' parameter");
+			return error;
 		}
 		String process = json.getString("process");
 		if (openTasks == null) {
 			openTasks = new ConcurrentHashMap<>();
 		}
 		if (openTasks.containsKey(process)) {
-			String[] status = openTasks.get(process);
-			result.put("result", status[0]);
-			if (Constants.COMPLETED.equals(status[0]) && status.length > 1) {
-				result.put("data", new JSONObject(status[1]));
-			}
-			if (Constants.ERROR.equals(status[0])) {
-				result.put(Constants.REASON, status[1]);
-			}
-		} else {
-			result.put("result", Constants.ERROR);
-			result.put(Constants.REASON, "No such process: " + process);
+			return openTasks.get(process);
 		}
-		return result;
+		JSONObject error = new JSONObject();
+		error.put(Constants.REASON, "No such process: " + process);
+		return error;
 	}
 
 	private static JSONObject createGlossary(String request) throws IOException, SQLException {
@@ -196,7 +188,7 @@ public class GlossariesHandler implements HttpHandler {
 			return;
 		}
 		StringBuffer buffer = new StringBuffer();
-		try (FileReader input = new FileReader(list)) {
+		try (FileReader input = new FileReader(list, StandardCharsets.UTF_8)) {
 			try (BufferedReader reader = new BufferedReader(input)) {
 				String line;
 				while ((line = reader.readLine()) != null) {
@@ -273,7 +265,9 @@ public class GlossariesHandler implements HttpHandler {
 			if (openTasks == null) {
 				openTasks = new ConcurrentHashMap<>();
 			}
-			openTasks.put(process, new String[] { Constants.PROCESSING });
+			JSONObject obj = new JSONObject();
+			obj.put(Constants.PROGRESS, Constants.PROCESSING);
+			openTasks.put(process, obj);
 			new Thread(() -> {
 				try {
 					JSONArray array = json.getJSONArray("glossaries");
@@ -294,10 +288,14 @@ public class GlossariesHandler implements HttpHandler {
 						glossaries.remove(mem.getId());
 					}
 					saveGlossariesList();
-					openTasks.put(process, new String[] { Constants.COMPLETED });
+					JSONObject completed = new JSONObject();
+					completed.put(Constants.PROGRESS, Constants.COMPLETED);
+					openTasks.put(process, completed);
 				} catch (IOException | SQLException e) {
 					logger.log(Level.ERROR, e.getMessage(), e);
-					openTasks.put(process, new String[] { Constants.ERROR, e.getMessage() });
+					JSONObject error = new JSONObject();
+					error.put(Constants.REASON, e.getMessage());
+					openTasks.put(process, error);
 				}
 			}).start();
 		} else {
@@ -324,7 +322,9 @@ public class GlossariesHandler implements HttpHandler {
 		if (openTasks == null) {
 			openTasks = new ConcurrentHashMap<>();
 		}
-		openTasks.put(process, new String[] { Constants.PROCESSING });
+		JSONObject obj = new JSONObject();
+		obj.put(Constants.PROGRESS, Constants.PROCESSING);
+		openTasks.put(process, obj);
 		new Thread(() -> {
 			try {
 				if (glossaries == null) {
@@ -343,10 +343,14 @@ public class GlossariesHandler implements HttpHandler {
 				}
 				engine.exportMemory(tmx.getAbsolutePath(), langSet, json.getString("srcLang"));
 				closeGlossary(mem.getId());
-				openTasks.put(process, new String[] { Constants.COMPLETED });
+				JSONObject completed = new JSONObject();
+					completed.put(Constants.PROGRESS, Constants.COMPLETED);
+					openTasks.put(process, completed);
 			} catch (IOException | JSONException | SAXException | ParserConfigurationException | SQLException e) {
 				logger.log(Level.ERROR, e.getMessage(), e);
-				openTasks.put(process, new String[] { Constants.ERROR, e.getMessage() });
+				JSONObject error = new JSONObject();
+				error.put(Constants.REASON, e.getMessage());
+				openTasks.put(process, error);
 			}
 		}).start();
 		result.put("process", process);
@@ -382,7 +386,7 @@ public class GlossariesHandler implements HttpHandler {
 		}
 		return openEngines.get(id);
 	}
-	
+
 	public static synchronized void closeGlossary(String id) throws IOException, SQLException {
 		if (openEngines == null) {
 			throw new IOException("No glossaries open");
@@ -422,7 +426,9 @@ public class GlossariesHandler implements HttpHandler {
 		if (openTasks == null) {
 			openTasks = new ConcurrentHashMap<>();
 		}
-		openTasks.put(process, new String[] { Constants.PROCESSING });
+		JSONObject obj = new JSONObject();
+		obj.put(Constants.PROGRESS, Constants.PROCESSING);
+		openTasks.put(process, obj);
 		new Thread(() -> {
 			try {
 				openGlossary(id);
@@ -440,9 +446,14 @@ public class GlossariesHandler implements HttpHandler {
 				try {
 					int imported = engine.storeTMX(tmxFile, project, client, subject);
 					logger.log(Level.INFO, "Imported " + imported);
-					openTasks.put(process, new String[] { Constants.COMPLETED });
+					JSONObject completed = new JSONObject();
+					completed.put("imported", imported);
+					completed.put(Constants.PROGRESS, Constants.COMPLETED);
+					openTasks.put(process, completed);
 				} catch (Exception e) {
-					openTasks.put(process, new String[] { Constants.ERROR, e.getMessage() });
+					JSONObject error = new JSONObject();
+					error.put(Constants.REASON, e.getMessage());
+					openTasks.put(process, error);
 					logger.log(Level.ERROR, e.getMessage(), e);
 				}
 				closeGlossary(id);
@@ -451,7 +462,9 @@ public class GlossariesHandler implements HttpHandler {
 				}
 			} catch (IOException | SQLException | SAXException | ParserConfigurationException | URISyntaxException e) {
 				logger.log(Level.ERROR, e.getMessage(), e);
-				openTasks.put(process, new String[] { Constants.ERROR, e.getMessage() });
+				JSONObject error = new JSONObject();
+				error.put(Constants.REASON, e.getMessage());
+				openTasks.put(process, error);
 			}
 		}).start();
 		result.put("process", process);

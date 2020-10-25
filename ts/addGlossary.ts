@@ -40,21 +40,19 @@ class AddGlossary {
         });
         document.addEventListener('keydown', (event: KeyboardEvent) => { KeyboardHandler.keyListener(event); });
         document.addEventListener('keydown', (event: KeyboardEvent) => {
-            if (event.code === 'Enter') {
+            if (event.code === 'Enter' || event.code === 'NumpadEnter') {
                 this.addGlossary();
             }
             if (event.code === 'Escape') {
                 this.electron.ipcRenderer.send('close-addGlossary');
             }
         });
-        this.electron.ipcRenderer.on('get-height', () => {
-            let body: HTMLBodyElement = document.getElementById('body') as HTMLBodyElement;
-            this.electron.ipcRenderer.send('add-glossary-height', { width: body.clientWidth, height: body.clientHeight });
-        });
         document.getElementById('addGlossaryButton').addEventListener('click', () => {
             this.addGlossary();
         });
         (document.getElementById('nameInput') as HTMLInputElement).focus();
+        let body: HTMLBodyElement = document.getElementById('body') as HTMLBodyElement;
+        this.electron.ipcRenderer.send('add-glossary-height', { width: body.clientWidth, height: body.clientHeight });
     }
 
     addGlossary(): void {

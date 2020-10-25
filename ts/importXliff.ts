@@ -39,13 +39,9 @@ class ImportXLIFF {
             if (event.code === 'Escape') {
                 this.electron.ipcRenderer.send('close-importXliff');
             }
-            if (event.code === 'Enter') {
+            if (event.code === 'Enter' || event.code === 'NumpadEnter') {
                 this.importXLIFF();
             }
-        });
-        this.electron.ipcRenderer.on('get-height', () => {
-            let body: HTMLBodyElement = document.getElementById('body') as HTMLBodyElement;
-            this.electron.ipcRenderer.send('import-xliff-height', { width: body.clientWidth, height: body.clientHeight });
         });
         document.getElementById('browse').addEventListener('click', () => {
             this.electron.ipcRenderer.send('browse-xliff-import');
@@ -58,6 +54,8 @@ class ImportXLIFF {
             this.importXLIFF();
         });
         (document.getElementById('projectInput') as HTMLInputElement).focus();
+        let body: HTMLBodyElement = document.getElementById('body') as HTMLBodyElement;
+        this.electron.ipcRenderer.send('import-xliff-height', { width: body.clientWidth, height: body.clientHeight });
     }
 
     setClients(clients: string[]): void {

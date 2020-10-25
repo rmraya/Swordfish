@@ -30,28 +30,30 @@ class AddTerm {
         });
         document.addEventListener('keydown', (event: KeyboardEvent) => { KeyboardHandler.keyListener(event); });
         document.addEventListener('keydown', (event: KeyboardEvent) => {
-            if (event.code === 'Enter') {
+            if (event.code === 'Enter' || event.code === 'NumpadEnter') {
                 this.addTerm();
             }
             if (event.code === 'Escape') {
                 this.electron.ipcRenderer.send('close-addTerm');
             }
         });
-        this.electron.ipcRenderer.on('get-height', () => {
-            let body: HTMLBodyElement = document.getElementById('body') as HTMLBodyElement;
-            this.electron.ipcRenderer.send('add-term-height', { width: body.clientWidth, height: body.clientHeight });
-        });
         this.electron.ipcRenderer.send('get-languages');
         this.electron.ipcRenderer.on('set-languages', (event: Electron.IpcRendererEvent, arg: any) => {
             this.setLanguages(arg);
         });
+        this.electron.ipcRenderer.send('get-glossary-param');
         this.electron.ipcRenderer.on('set-glossary', (event: Electron.IpcRendererEvent, arg: any) => {
             this.glossary = arg.glossary;
+        });
+        this.electron.ipcRenderer.on('set-selected-text', (event: Electron.IpcRendererEvent, arg: any) => {
+            this.setParams(arg);
         });
         document.getElementById('addTermButton').addEventListener('click', () => {
             this.addTerm();
         });
         (document.getElementById('source') as HTMLInputElement).focus();
+        let body: HTMLBodyElement = document.getElementById('body') as HTMLBodyElement;
+        this.electron.ipcRenderer.send('add-term-height', { width: body.clientWidth, height: body.clientHeight });
     }
 
     addTerm(): void {
@@ -95,6 +97,17 @@ class AddTerm {
         (document.getElementById('srcLangSelect') as HTMLSelectElement).value = arg.srcLang;
         document.getElementById('tgtLangSelect').innerHTML = languageOptions;
         (document.getElementById('tgtLangSelect') as HTMLSelectElement).value = arg.tgtLang;
+        this.electron.ipcRenderer.send('get-selection');
+    }
+
+    setParams(arg: any): void {
+        if (arg.lang === arg.srcLang) {
+            (document.getElementById('source') as HTMLInputElement).value = arg.selected;
+            (document.getElementById('target') as HTMLInputElement).focus();
+        } else {
+            (document.getElementById('target') as HTMLInputElement).value = arg.selected;
+            (document.getElementById('source') as HTMLInputElement).focus();
+        }
     }
 }
 

@@ -40,6 +40,7 @@ import com.maxprograms.xml.Attribute;
 import com.maxprograms.xml.Document;
 import com.maxprograms.xml.Element;
 import com.maxprograms.xml.SAXBuilder;
+import com.maxprograms.xml.TextNode;
 import com.maxprograms.xml.XMLNode;
 
 import org.json.JSONArray;
@@ -401,5 +402,25 @@ public class XliffUtils {
             index = text.indexOf("<span");
         }
         return text.replace("</span>", "");
+    }
+
+    public static String pureText(Element e) {
+        StringBuilder string = new StringBuilder();
+        List<XMLNode> content = e.getContent();
+        Iterator<XMLNode> it = content.iterator();
+        while (it.hasNext()) {
+            XMLNode n = it.next();
+            if (n.getNodeType() == XMLNode.TEXT_NODE) {
+                TextNode t = (TextNode) n;
+                string.append(t.getText());
+            }
+            if (n.getNodeType() == XMLNode.ELEMENT_NODE) {
+                Element el = (Element) n;
+                if ("mrk".equals(el.getName()) || "pc".equals(el.getName())) {
+                    string.append(pureText(el));
+                }
+            }
+        }
+        return string.toString();
     }
 }

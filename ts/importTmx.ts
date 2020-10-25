@@ -45,14 +45,11 @@ class ImportTMX {
             if (event.code === 'Escape') {
                 this.electron.ipcRenderer.send('close-importTmx');
             }
-            if (event.code === 'Enter') {
+            if (event.code === 'Enter' || event.code === 'NumpadEnter') {
                 this.importTMX();
             }
         });
-        this.electron.ipcRenderer.on('get-height', () => {
-            let body: HTMLBodyElement = document.getElementById('body') as HTMLBodyElement;
-            this.electron.ipcRenderer.send('import-tmx-height', { width: body.clientWidth, height: body.clientHeight });
-        });
+        this.electron.ipcRenderer.send('get-memory-param');
         this.electron.ipcRenderer.on('set-memory', (event: Electron.IpcRendererEvent, arg: any) => {
             this.memory = arg;
         });
@@ -67,6 +64,8 @@ class ImportTMX {
             this.importTMX();
         });
         (document.getElementById('tmx') as HTMLInputElement).focus();
+        let body: HTMLBodyElement = document.getElementById('body') as HTMLBodyElement;
+        this.electron.ipcRenderer.send('import-tmx-height', { width: body.clientWidth, height: body.clientHeight });
     }
 
     setProjectNames(projects: string[]): void {

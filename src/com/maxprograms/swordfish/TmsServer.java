@@ -150,7 +150,7 @@ public class TmsServer implements HttpHandler {
 			String message = e.getMessage();
 			t.sendResponseHeaders(500, message.length());
 			try (OutputStream os = t.getResponseBody()) {
-				os.write(message.getBytes());
+				os.write(message.getBytes(StandardCharsets.UTF_8));
 			}
 		}
 	}
@@ -201,7 +201,7 @@ public class TmsServer implements HttpHandler {
 	public static String getCatalogFile() throws IOException {
         File preferences = new File(getWorkFolder(), "preferences.json");
         StringBuilder builder = new StringBuilder();
-        try (FileReader reader = new FileReader(preferences)) {
+        try (FileReader reader = new FileReader(preferences, StandardCharsets.UTF_8)) {
             try (BufferedReader buffer = new BufferedReader(reader)) {
                 String line = "";
                 while ((line = buffer.readLine()) != null) {

@@ -250,6 +250,12 @@ class Main {
         Main.electron.ipcRenderer.on('insert-tem', (event: Electron.IpcRendererEvent, arg: any) => {
             this.insertTerm(arg);
         });
+        Main.electron.ipcRenderer.on('select-previous-term', () => {
+            this.selectPreviousTerm();
+        });
+        Main.electron.ipcRenderer.on('select-next-term', () => {
+            this.selectNextTerm();
+        });
         Main.electron.ipcRenderer.on('auto-propagate', (event: Electron.IpcRendererEvent, arg: any) => {
             this.autoPropagate(arg);
         });
@@ -264,6 +270,15 @@ class Main {
         });
         Main.electron.ipcRenderer.on('get-mt-matches', () => {
             this.getMachineTranslations();
+        });
+        Main.electron.ipcRenderer.on('get-am-matches', () => {
+            this.getAssembledMatches();
+        });
+        Main.electron.ipcRenderer.on('apply-am-all', () => {
+            this.assembleMatchesAll();
+        });
+        Main.electron.ipcRenderer.on('remove-am-all', () => {
+            this.removeAssembleMatches();
         });
         Main.electron.ipcRenderer.on('get-tm-matches', () => {
             this.getTmMatches();
@@ -580,6 +595,27 @@ class Main {
         }
     }
 
+    getAssembledMatches(): void {
+        let selected = Main.tabHolder.getSelected();
+        if (Main.translationViews.has(selected)) {
+            Main.translationViews.get(selected).getAssembledMatches();
+        }
+    }
+
+    assembleMatchesAll(): void {
+        let selected = Main.tabHolder.getSelected();
+        if (Main.translationViews.has(selected)) {
+            Main.translationViews.get(selected).assembleMatchesAll();
+        }
+    }
+
+    removeAssembleMatches(): void {
+        let selected = Main.tabHolder.getSelected();
+        if (Main.translationViews.has(selected)) {
+            Main.translationViews.get(selected).removeAssembleMatches();
+        }
+    }
+
     getTmMatches(): void {
         let selected = Main.tabHolder.getSelected();
         if (Main.translationViews.has(selected)) {
@@ -860,8 +896,27 @@ class Main {
                 if (element.classList.contains('target')) {
                     lang = Main.translationViews.get(selected).getTgtLang();
                 }
-                Main.electron.ipcRenderer.send('selected-text', { selected: selectedText, lang: lang });
+                Main.electron.ipcRenderer.send('selected-text', {
+                    selected: selectedText,
+                    lang: lang,
+                    srcLang: Main.translationViews.get(selected).getSrcLang(),
+                    tgtLang: Main.translationViews.get(selected).getTgtLang()
+                });
             }
+        }
+    }
+
+    selectNextTerm(): void {
+        let selected = Main.tabHolder.getSelected();
+        if (Main.translationViews.has(selected)) {
+            Main.translationViews.get(selected).selectNextTerm();
+        }
+    }
+
+    selectPreviousTerm(): void {
+        let selected = Main.tabHolder.getSelected();
+        if (Main.translationViews.has(selected)) {
+            Main.translationViews.get(selected).selectPreviousTerm();
         }
     }
 }

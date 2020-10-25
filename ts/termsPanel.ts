@@ -24,7 +24,9 @@ class TermsPanel {
     container: HTMLDivElement;
     projectId: string;
     selected: any;
+    selectedIndex: number = 0;
     terms: any[] = [];
+    rows: HTMLTableRowElement[] = [];
     table: HTMLTableElement;
 
     originSpan: HTMLSpanElement;
@@ -77,17 +79,7 @@ class TermsPanel {
         this.selected = undefined;
         this.terms = [];
         this.originSpan.innerText = '';
-    }
-
-    insertTerm(): void {
-        if (this.terms.length === 0) {
-            return;
-        }
-        if (!this.selected) {
-            this.electron.ipcRenderer.send('show-message', { type: 'warning', message: 'Select term' });
-            return;
-        }
-        this.electron.ipcRenderer.send('paste-term', this.selected.target);
+        this.rows = [];
     }
 
     getTerm(i: number) {
@@ -102,9 +94,14 @@ class TermsPanel {
     }
 
     setTerms(terms: any[]): void {
+        if (terms.length === 0) {
+            this.clear();
+            return;
+        }
         this.terms = terms;
         this.table.innerHTML = '';
         let length: number = terms.length;
+        this.rows = [];
         for (let i: number = 0; i < length; i++) {
             let term: any = terms[i];
             let row: HTMLTableRowElement = document.createElement('tr');
@@ -116,6 +113,7 @@ class TermsPanel {
                 }
                 this.originSpan.innerText = term.origin;
                 row.classList.add('selected');
+                this.selectedIndex = i;
             });
             this.table.appendChild(row);
 
@@ -135,6 +133,36 @@ class TermsPanel {
             target.innerText = term.target;
             target.style.width = '49%';
             row.appendChild(target);
+
+            this.rows.push(row);
+        }
+        if (this.rows.length > 0) {
+            this.rows[0].classList.add('selected');
+            this.selected = this.terms[0];
+            this.originSpan.innerText = this.terms[0].origin;
+            this.selectedIndex = 0;
+        }
+    }
+
+    selectNextTerm(): void {
+        if (this.selectedIndex < this.rows.length - 1) {
+            this.rows[this.selectedIndex].classList.remove('selected');
+            this.selectedIndex++;
+            this.rows[this.selectedIndex].classList.add('selected');
+            this.selected = this.terms[this.selectedIndex];
+            this.originSpan.innerText = this.terms[this.selectedIndex].origin;
+            this.rows[this.selectedIndex].scrollIntoView()
+        }
+    }
+
+    selectPreviousTerm(): void {
+        if (this.selectedIndex > 0) {
+            this.rows[this.selectedIndex].classList.remove('selected');
+            this.selectedIndex--;
+            this.rows[this.selectedIndex].classList.add('selected');
+            this.selected = this.terms[this.selectedIndex];
+            this.originSpan.innerText = this.terms[this.selectedIndex].origin;
+            this.rows[this.selectedIndex].scrollIntoView()
         }
     }
 }

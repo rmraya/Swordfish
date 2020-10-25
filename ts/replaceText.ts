@@ -28,19 +28,16 @@ class ReplaceText {
         this.electron.ipcRenderer.on('set-theme', (event: Electron.IpcRendererEvent, arg: any) => {
             (document.getElementById('theme') as HTMLLinkElement).href = arg;
         });
-        this.electron.ipcRenderer.on('get-height', () => {
-            let body: HTMLBodyElement = document.getElementById('body') as HTMLBodyElement;
-            this.electron.ipcRenderer.send('replaceText-height', { width: body.clientWidth, height: body.clientHeight });
-        });
         document.addEventListener('keydown', (event: KeyboardEvent) => { KeyboardHandler.keyListener(event); });
         document.addEventListener('keydown', (event: KeyboardEvent) => {
-            if (event.code === 'Enter') {
+            if (event.code === 'Enter' || event.code === 'NumpadEnter') {
                 this.replaceText();
             }
             if (event.code === 'Escape') {
                 this.electron.ipcRenderer.send('close-replaceText');
             }
         });
+        this.electron.ipcRenderer.send('get-project-param');
         this.electron.ipcRenderer.on('set-project', (event: Electron.IpcRendererEvent, arg: any) => {
             this.project = arg.project;
         });
@@ -48,6 +45,8 @@ class ReplaceText {
             this.replaceText();
         });
         (document.getElementById('searchText') as HTMLInputElement).focus();
+        let body: HTMLBodyElement = document.getElementById('body') as HTMLBodyElement;
+        this.electron.ipcRenderer.send('replaceText-height', { width: body.clientWidth, height: body.clientHeight });
     }
 
     replaceText(): void {

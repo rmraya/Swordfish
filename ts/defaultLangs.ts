@@ -33,19 +33,17 @@ class DefaultLanguages {
         document.getElementById('save').addEventListener('click', () => {
             this.savePreferences();
         });
-        this.electron.ipcRenderer.on('get-height', () => {
-            let body: HTMLBodyElement = document.getElementById('body') as HTMLBodyElement;
-            this.electron.ipcRenderer.send('languages-height', { width: body.clientWidth, height: body.clientHeight });
-        });
         document.addEventListener('keydown', (event: KeyboardEvent) => {
             if (event.code === 'Escape') {
                 this.electron.ipcRenderer.send('close-defaultLangs');
             }
-            if (event.code === 'Enter') {
+            if (event.code === 'Enter' || event.code === 'NumpadEnter') {
                 this.savePreferences();
             }
         });
         (document.getElementById('srcLangSelect') as HTMLSelectElement).focus();
+        let body: HTMLBodyElement = document.getElementById('body') as HTMLBodyElement;
+        this.electron.ipcRenderer.send('languages-height', { width: body.clientWidth, height: body.clientHeight });
     }
 
     setLanguages(arg: any): void {

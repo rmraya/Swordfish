@@ -33,11 +33,9 @@ class Tags {
         this.tagInput.addEventListener('keydown', (event: KeyboardEvent) => {
             this.parseKey(event);
         });
-        this.electron.ipcRenderer.on('get-height', () => {
-            let body: HTMLBodyElement = document.getElementById('body') as HTMLBodyElement;
-            this.electron.ipcRenderer.send('tags-height', { width: body.clientWidth, height: body.clientHeight });
-        });
         document.getElementById('tagInput').focus();
+        let body: HTMLBodyElement = document.getElementById('body') as HTMLBodyElement;
+        this.electron.ipcRenderer.send('tags-height', { width: body.clientWidth, height: body.clientHeight });
     }
 
     parseKey(event: KeyboardEvent): void {

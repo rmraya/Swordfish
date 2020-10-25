@@ -28,16 +28,13 @@ class FilterSegments {
         this.electron.ipcRenderer.on('set-theme', (event: Electron.IpcRendererEvent, arg: any) => {
             (document.getElementById('theme') as HTMLLinkElement).href = arg;
         });
-        this.electron.ipcRenderer.on('get-height', () => {
-            let body: HTMLBodyElement = document.getElementById('body') as HTMLBodyElement;
-            this.electron.ipcRenderer.send('find-text-height', { width: body.clientWidth, height: body.clientHeight });
-        });
+        this.electron.ipcRenderer.send('get-filter-params');
         this.electron.ipcRenderer.on('set-params', (event: Electron.IpcRendererEvent, arg: any) => {
             this.setParams(arg);
         });
         document.addEventListener('keydown', (event: KeyboardEvent) => { KeyboardHandler.keyListener(event); });
         document.addEventListener('keydown', (event: KeyboardEvent) => {
-            if (event.code === 'Enter') {
+            if (event.code === 'Enter' || event.code === 'NumpadEnter') {
                 this.filterSegments();
             }
             if (event.code === 'Escape') {
@@ -51,6 +48,9 @@ class FilterSegments {
             this.clearFilter();
         });
         (document.getElementById('filterText') as HTMLInputElement).focus();
+        let body: HTMLBodyElement = document.getElementById('body') as HTMLBodyElement;
+        this.electron.ipcRenderer.send('find-text-height', { width: body.clientWidth, height: body.clientHeight });
+
     }
 
     filterSegments(): void {

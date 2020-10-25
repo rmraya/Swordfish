@@ -34,6 +34,7 @@ class Messages {
             let body: HTMLBodyElement = document.getElementById('body') as HTMLBodyElement;
             this.electron.ipcRenderer.send('messages-height', { width: body.clientWidth, height: body.clientHeight });
         });
+        this.electron.ipcRenderer.send('get-message-param');
         this.electron.ipcRenderer.on('set-message', (event: Electron.IpcRendererEvent, arg: any) => {
             this.setMessage(arg);
         });
@@ -41,10 +42,12 @@ class Messages {
             this.electron.ipcRenderer.send('close-messages');
         });
         document.addEventListener('keydown', (event: KeyboardEvent) => {
-            if (event.code === 'Escape' || event.code === 'Enter') {
+            if (event.code === 'Escape' || event.code === 'Enter' || event.code === 'NumpadEnter') {
                 this.electron.ipcRenderer.send('close-messages');
             }
         });
+        let body: HTMLBodyElement = document.getElementById('body') as HTMLBodyElement;
+        this.electron.ipcRenderer.send('messages-height', { width: body.clientWidth, height: body.clientHeight });
     }
 
     setMessage(arg: any): void {
@@ -60,8 +63,10 @@ class Messages {
         }
         if (arg.title) {
             document.getElementById('title').innerText = arg.title;
-        } 
+        }
         document.getElementById('message').innerHTML = arg.message;
+        let body: HTMLBodyElement = document.getElementById('body') as HTMLBodyElement;
+        this.electron.ipcRenderer.send('messages-height', { width: body.clientWidth, height: body.clientHeight });
     }
 }
 

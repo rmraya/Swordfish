@@ -30,7 +30,7 @@ class ConcordanceSearch {
         });
         document.addEventListener('keydown', (event: KeyboardEvent) => { KeyboardHandler.keyListener(event); });
         document.addEventListener('keydown', (event: KeyboardEvent) => {
-            if (event.code === 'Enter') {
+            if (event.code === 'Enter' || event.code === 'NumpadEnter') {
                 this.search();
             }
             if (event.code === 'Escape') {
@@ -44,18 +44,17 @@ class ConcordanceSearch {
         document.getElementById('searchButton').addEventListener('click', () => {
             this.search()
         });
-        this.electron.ipcRenderer.on('set-memories', (event: Electron.IpcRendererEvent, arg: any) => {
-            this.memories = arg;
+        this.electron.ipcRenderer.send('get-concordance-memories');
+        this.electron.ipcRenderer.on('set-concordance-memories', (event: Electron.IpcRendererEvent, arg: any) => {
+            this.memories = arg.memories;
         });
         this.electron.ipcRenderer.on('set-selected-text', (event: Electron.IpcRendererEvent, arg: any) => {
             this.setParams(arg);
         });
-        this.electron.ipcRenderer.on('get-height', () => {
-            let body: HTMLBodyElement = document.getElementById('body') as HTMLBodyElement;
-            this.electron.ipcRenderer.send('concordance-search-height', { width: body.clientWidth, height: body.clientHeight });
-        });
         (document.getElementById('maxEntries') as HTMLSelectElement).value = '20';
         (document.getElementById('searchText') as HTMLInputElement).focus();
+        let body: HTMLBodyElement = document.getElementById('body') as HTMLBodyElement;
+            this.electron.ipcRenderer.send('concordance-search-height', { width: body.clientWidth, height: body.clientHeight });
     }
 
     setLanguages(arg: any): void {

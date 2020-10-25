@@ -48,10 +48,6 @@ class AddFile {
         this.electron.ipcRenderer.on('set-languages', (event: Electron.IpcRendererEvent, arg: any) => {
             this.setLanguages(arg);
         });
-        this.electron.ipcRenderer.on('get-height', () => {
-            let body: HTMLBodyElement = document.getElementById('body') as HTMLBodyElement;
-            this.electron.ipcRenderer.send('add-file-height', { width: body.clientWidth, height: body.clientHeight });
-        });
         this.electron.ipcRenderer.send('get-types');
         this.electron.ipcRenderer.on('set-types', (event: Electron.IpcRendererEvent, arg: any) => {
             this.setTypes(arg);
@@ -69,7 +65,7 @@ class AddFile {
         });
         document.addEventListener('keydown', (event: KeyboardEvent) => { KeyboardHandler.keyListener(event); });
         document.addEventListener('keydown', (event: KeyboardEvent) => {
-            if (event.code === 'Enter') {
+            if (event.code === 'Enter' || event.code === 'NumpadEnter') {
                 this.addProject();
             }
             if (event.code === 'Escape') {
@@ -82,6 +78,8 @@ class AddFile {
         document.getElementById('addProjectButton').addEventListener('click', () => {
             this.addProject();
         });
+        let body: HTMLBodyElement = document.getElementById('body') as HTMLBodyElement;
+        this.electron.ipcRenderer.send('add-file-height', { width: body.clientWidth, height: body.clientHeight + 10 });
     }
 
     setClients(clients: string[]): void {

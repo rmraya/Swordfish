@@ -6,24 +6,24 @@
 	--even-row-background: #eceff1;
 	--odd-row-background: #cfd8dc;
 	--normal-color: #373737;
-	--accent-color: #3465aa;
-	--accent-alternative: #0551bb;
+	--accent-color: #0078d4;
+	--accent-alternative: #005a9e;
 	--accent-contrast: #ffffff;
-	--tooltip-background: #0d47a1;
+	--tooltip-background: #005a9e;
 	--tooltip-color: #fefefe;
 	--tab-hover: #cdcdcd;
 	--input-background: #fefefe;
 	--input-color: #262626;
 	--focus-border: #f57c00;
 	--disabled-input: #999999;
-	--selected-row: #90caf9;
-	--highlight-row: #bbdefb;
+	--selected-row: #c7e0f4;
+	--highlight-row: #71afe5;
 	--highlight-color: #dfe0e1;
 	--error-color: #960303;
 	--difference-color: #373737;
 	--difference-background: #b4d7fe;
 	--stats-text: #101010;
-	--stats-fill: #64b5f6;
+	--stats-fill: #71afe5;
 	--space-color: #7abff7;
 }
 
@@ -184,6 +184,32 @@ th {
 	background-color: var(--editing-background) !important;
 }
 
+.sourceContainer {
+	background-color: var(--even-row-background);
+	padding: 4px;
+	margin: 0;
+	width: 100%;
+	white-space: pre-wrap;
+	border-bottom: 1px solid var(--accent-color);
+}
+
+.targetContainer {
+	background-color: var(--od-row-background);
+	padding: 4px;
+	margin: 0;
+	width: 100%;
+	white-space: pre-wrap;
+	border-bottom: 1px solid var(--accent-color);
+}
+
+.machineContainer {
+	background-color: var(--od-row-background);
+	padding: 4px;
+	margin: 0;
+	width: 100%;
+	white-space: pre-wrap;
+}
+
 .fixed {
 	width: 1px;
 	text-align: center;
@@ -306,6 +332,10 @@ button:focus {
 button:hover {
 	background: var(--accent-alternative);
 	border: 1px solid var(--accent-alternative);
+	transition-property: all;
+    transition-duration: 0.5s;
+    transition-timing-function: cubic-bezier(0.14, 0.71, 0.38, 1);
+    transition-delay: 0s;
 }
 
 .row {
@@ -419,6 +449,10 @@ label {
 .toolbar a:hover {
 	background-color: var(--tab-hover);
 	text-decoration: none !important;
+	transition-property: all;
+    transition-duration: 0.5s;
+    transition-timing-function: cubic-bezier(0.14, 0.71, 0.38, 1);
+    transition-delay: 0s;
 }
 
 svg {
@@ -460,6 +494,10 @@ svg {
 .tab:hover {
 	background: var(--tab-hover);
 	border-bottom: 3px solid var(--tab-hover);
+	transition-property: all;
+    transition-duration: 0.5s;
+    transition-timing-function: cubic-bezier(0.14, 0.71, 0.38, 1);
+    transition-delay: 0s;
 }
 
 .selectedTab:hover {
