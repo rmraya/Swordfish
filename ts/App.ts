@@ -3851,7 +3851,7 @@ class Swordfish {
                         nodeIntegration: true
                     }
                 });
-                Swordfish.htmlContent = data.html;
+                Swordfish.htmlContent = table;
                 Swordfish.htmlTitle = 'Space Analysis';
                 Swordfish.htmlId = htmlViewerWindow.id;
                 htmlViewerWindow.setMenu(null);
@@ -3898,7 +3898,7 @@ class Swordfish {
                         nodeIntegration: true
                     }
                 });
-                Swordfish.htmlContent = data.html;
+                Swordfish.htmlContent = table;
                 Swordfish.htmlTitle = 'Tags Analysis';
                 Swordfish.htmlId = htmlViewerWindow.id;
                 htmlViewerWindow.setMenu(null);
