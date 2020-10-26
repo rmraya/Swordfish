@@ -27,7 +27,7 @@ You can subscribe to [Maxprograms Support](https://groups.io/g/maxprograms/) at 
 
 This project covers Swordfish IV and is in early development stage. Subscriptions are not available for purchase yet.
 
-Free installers for **Swordfish IV Preview 5** are available at [https://www.maxprograms.com/downloads/preview.html](https://www.maxprograms.com/downloads/preview.html).
+Free installers for **Swordfish IV Preview 6** are available at [https://www.maxprograms.com/downloads/preview.html](https://www.maxprograms.com/downloads/preview.html).
 
 
 ## Related Projects

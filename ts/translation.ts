@@ -124,7 +124,7 @@ class TranslationView {
                 event.cancelBubble = true;
                 this.gotoPrevious();
             }
-            if (event.key === 'b' || event.key === 'B') {
+            if ((event.ctrlKey || event.metaKey) && (event.key === 'b' || event.key === 'B')) {
                 event.preventDefault();
                 event.cancelBubble = true;
                 this.addTerm();

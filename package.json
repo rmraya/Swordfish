@@ -1,7 +1,7 @@
 {
     "name": "swordfish",
     "productName": "Swordfish",
-    "version": "3.9.5",
+    "version": "3.9.6",
     "description": "Swordfish Translation Editor",
     "main": "js/App.js",
     "scripts": {
