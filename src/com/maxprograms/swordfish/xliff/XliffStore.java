@@ -53,6 +53,8 @@ import javax.xml.parsers.ParserConfigurationException;
 
 import com.maxprograms.converters.Merge;
 import com.maxprograms.converters.TmxExporter;
+import com.maxprograms.languages.Language;
+import com.maxprograms.languages.LanguageUtils;
 import com.maxprograms.stats.RepetitionAnalysis;
 import com.maxprograms.swordfish.Constants;
 import com.maxprograms.swordfish.GlossariesHandler;
@@ -2057,7 +2059,9 @@ public class XliffStore {
                 sourceText = rs.getNString(2);
             }
         }
-        List<String> words = NGrams.buildWordList(sourceText, NGrams.TERM_SEPARATORS);
+        Language sourceLanguage = LanguageUtils.getLanguage(srcLang);
+        List<String> words = sourceLanguage.isCJK() ? cjkWordList(sourceText, NGrams.TERM_SEPARATORS)
+                : NGrams.buildWordList(sourceText, NGrams.TERM_SEPARATORS);
 
         List<Term> terms = new ArrayList<>();
 
@@ -2070,7 +2074,9 @@ public class XliffStore {
             StringBuilder termBuilder = new StringBuilder();
             for (int length = 0; length < MAXTERMLENGTH; length++) {
                 if (i + length < words.size()) {
-                    termBuilder.append(' ');
+                    if (!sourceLanguage.isCJK()) {
+                        termBuilder.append(' ');
+                    }
                     termBuilder.append(words.get(i + length));
                     String term = termBuilder.toString().trim();
                     if (!visited.containsKey(term)) {
@@ -2114,7 +2120,7 @@ public class XliffStore {
             public int compare(Term o1, Term o2) {
                 return o1.getSource().compareToIgnoreCase(o2.getSource());
             }
-            
+
         });
         Iterator<Term> it = terms.iterator();
         while (it.hasNext()) {
@@ -2127,6 +2133,7 @@ public class XliffStore {
     public void getProjectTerms(String glossary)
             throws IOException, SQLException, SAXException, ParserConfigurationException {
         getPreferences();
+        Language sourceLanguage = LanguageUtils.getLanguage(srcLang);
         int similarity = fuzzyTermSearches ? 70 : 100;
         GlossariesHandler.openGlossary(glossary);
         String glossaryName = GlossariesHandler.getGlossaryName(glossary);
@@ -2139,15 +2146,16 @@ public class XliffStore {
                     String unit = set.getString(2);
                     String segment = set.getString(3);
                     String sourceText = set.getNString(4);
-
-                    List<String> words = NGrams.buildWordList(sourceText, NGrams.TERM_SEPARATORS);
-
+                    List<String> words = sourceLanguage.isCJK() ? cjkWordList(sourceText, NGrams.TERM_SEPARATORS)
+                            : NGrams.buildWordList(sourceText, NGrams.TERM_SEPARATORS);
                     Map<String, String> visited = new Hashtable<>();
                     for (int i = 0; i < words.size(); i++) {
                         StringBuilder termBuilder = new StringBuilder();
                         for (int length = 0; length < MAXTERMLENGTH; length++) {
                             if (i + length < words.size()) {
-                                termBuilder.append(' ');
+                                if (!sourceLanguage.isCJK()) {
+                                    termBuilder.append(' ');
+                                }
                                 termBuilder.append(words.get(i + length));
                                 String term = termBuilder.toString().trim();
                                 if (!visited.containsKey(term)) {
@@ -2411,6 +2419,34 @@ public class XliffStore {
                     result.add(e.toString());
                 }
             }
+        }
+        return result;
+    }
+
+    public static List<String> cjkWordList(String string, String separator) {
+        List<String> result = new Vector<>();
+        String word = "";
+        for (int i = 0; i < string.length(); i++) {
+            char c = string.charAt(i);
+            if (Character.isIdeographic(c)) {
+                if (!word.isEmpty()) {
+                    result.add(word);
+                    word = "";
+                }
+                result.add("" + c);
+                continue;
+            }
+            if (separator.indexOf(c) != -1) {
+                if (!word.isEmpty()) {
+                    result.add(word);
+                    word = "";
+                }
+            } else {
+                word = word + c;
+            }
+        }
+        if (!word.isEmpty()) {
+            result.add(word);
         }
         return result;
     }
