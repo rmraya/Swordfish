@@ -31,9 +31,12 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
 import javax.xml.parsers.ParserConfigurationException;
 
+import com.maxprograms.languages.Language;
+import com.maxprograms.languages.LanguageUtils;
 import com.maxprograms.swordfish.Constants;
 import com.maxprograms.swordfish.tm.ITmEngine;
 import com.maxprograms.swordfish.tm.Match;
@@ -46,6 +49,7 @@ import com.maxprograms.swordfish.xliff.XliffUtils;
 import com.maxprograms.xml.Document;
 import com.maxprograms.xml.Element;
 import com.maxprograms.xml.SAXBuilder;
+import com.maxprograms.xml.XMLUtils;
 
 import org.json.JSONObject;
 import org.xml.sax.SAXException;
@@ -127,9 +131,9 @@ public class MatchAssembler {
                             String origSource = srcList.get(0).getSource().getText();
 
                             pureSource = pureSource.replace(tgtDiff, "<mrk type=\"term\" id=\"mrk" + mrkId
-                                    + "\" value=\"" + srcTerm + "\">" + srcDiff + "</mrk>");
+                                    + "\" value=\"" + XMLUtils.cleanText(srcTerm) + "\">" + srcDiff + "</mrk>");
                             pureTarget = pureTarget.replace(tgtTerm, "<mrk type=\"term\" id=\"mrk" + mrkId
-                                    + "\" value=\"" + origSource + "\">" + srcTerm + "</mrk>");
+                                    + "\" value=\"" + XMLUtils.cleanText(origSource) + "\">" + srcTerm + "</mrk>");
                             mrkId++;
                         }
                     }
@@ -156,13 +160,17 @@ public class MatchAssembler {
         }
 
         if (result.isEmpty()) {
-            List<String> words = NGrams.buildWordList(pureText, NGrams.TERM_SEPARATORS);
+            Language sourceLanguage = LanguageUtils.getLanguage(srcLang);
+            List<String> words = sourceLanguage.isCJK() ? XliffStore.cjkWordList(pureText, NGrams.TERM_SEPARATORS)
+                    : NGrams.buildWordList(pureText, NGrams.TERM_SEPARATORS);
             List<Term> terms = new ArrayList<>();
             for (int i = 0; i < words.size(); i++) {
                 StringBuilder termBuilder = new StringBuilder();
                 for (int length = 0; length < XliffStore.MAXTERMLENGTH; length++) {
                     if (i + length < words.size()) {
-                        termBuilder.append(' ');
+                        if (!sourceLanguage.isCJK()) {
+                            termBuilder.append(' ');
+                        }
                         termBuilder.append(words.get(i + length));
                         String term = termBuilder.toString().trim();
                         if (!visited.contains(term)) {
@@ -179,13 +187,24 @@ public class MatchAssembler {
             Collections.sort(terms);
             Iterator<Term> it = terms.iterator();
             String target = pureText;
+            Map<String, String> replacements = new ConcurrentHashMap<>();
             while (it.hasNext()) {
                 Term t = it.next();
-                target = target.replace(t.getSource(), "<mrk type=\"term\" id=\"mrk" + mrkId + "\" value=\""
-                        + t.getSource() + "\">" + t.getTarget() + "</mrk>");
+                String key = "%%%" + mrkId + "%%%";
+                String mrk = "<mrk type=\"term\" id=\"mrk" + mrkId + "\" value=\"" + XMLUtils.cleanText(t.getSource())
+                        + "\">" + t.getTarget() + "</mrk>";
+                target = target.replace(t.getSource(), key);
+                replacements.put(key, mrk);
                 mrkId++;
             }
             if (!target.equals(pureText)) {
+                Set<String> keys = replacements.keySet();
+                Iterator<String> k = keys.iterator();
+                while (k.hasNext()) {
+                    String key = k.next();
+                    String mrk = replacements.get(key);
+                    target = target.replace(key, mrk);
+                }
                 Element newSource = buildElement("<source>" + pureText + "</source>");
                 Element newTarget = buildElement("<target>" + target + "</target>");
 
