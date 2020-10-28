@@ -153,6 +153,7 @@ class Swordfish {
 
         if (process.platform === 'win32') {
             this.javapath = Swordfish.path.join(app.getAppPath(), 'bin', 'java.exe');
+            Swordfish.verticalPadding = 56;
         }
 
         if (!existsSync(Swordfish.appHome)) {
