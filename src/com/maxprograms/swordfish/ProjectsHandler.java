@@ -148,7 +148,7 @@ public class ProjectsHandler implements HttpHandler {
 				response = assembleMatches(request);
 			} else if ("/projects/applyAmAll".equals(url)) {
 				response = assembleMatchesAll(request);
-			} else if("/projects/removeAssembledMatches".equals(url)) {
+			} else if ("/projects/removeAssembledMatches".equals(url)) {
 				response = removeAssembledMatches(request);
 			} else if ("/projects/tmTranslate".equals(url)) {
 				response = tmTranslate(request);
@@ -174,6 +174,8 @@ public class ProjectsHandler implements HttpHandler {
 				response = acceptAll100Matches(request);
 			} else if ("/projects/generateStatistics".equals(url)) {
 				response = generateStatistics(request);
+			} else if ("/projects/exportHtml".equals(url)) {
+				response = exportHTML(request);
 			} else if ("/projects/replaceText".equals(url)) {
 				response = replaceText(request);
 			} else if ("/projects/applyMtAll".equals(url)) {
@@ -1392,6 +1394,44 @@ public class ProjectsHandler implements HttpHandler {
 			}
 		} catch (SQLException | JSONException | SAXException | IOException | ParserConfigurationException
 				| URISyntaxException e) {
+			logger.log(Level.ERROR, e);
+			result.put(Constants.REASON, e.getMessage());
+		}
+		return result;
+	}
+
+	private JSONObject exportHTML(String request) {
+		JSONObject result = new JSONObject();
+		try {
+			JSONObject json = new JSONObject(request);
+			String project = json.getString("project");
+			if (projectStores == null) {
+				projectStores = new Hashtable<>();
+				if (TmsServer.isDebug()) {
+					logger.log(Level.INFO, "Created store map");
+				}
+			}
+			shouldClose = false;
+			Project prj = projects.get(project);
+			if (!projectStores.containsKey(project)) {
+				shouldClose = true;
+				try {
+					XliffStore store = new XliffStore(prj.getXliff(), prj.getSourceLang().getCode(),
+							prj.getTargetLang().getCode());
+					projectStores.put(project, store);
+				} catch (SAXException | IOException | ParserConfigurationException | URISyntaxException
+						| SQLException e) {
+					logger.log(Level.ERROR, "Error creating project store", e);
+					result.put(Constants.REASON, e.getMessage());
+					return result;
+				}
+			}
+			String export = projectStores.get(project).exportHTML(prj.getDescription());
+			result.put("export", export);
+			if (shouldClose) {
+				closeProject(request);
+			}
+		} catch (SQLException | IOException | SAXException | ParserConfigurationException | DataFormatException e) {
 			logger.log(Level.ERROR, e);
 			result.put(Constants.REASON, e.getMessage());
 		}

@@ -433,8 +433,8 @@ public class InternalDatabase implements ITmEngine {
 	public void storeTu(Element tu) throws SQLException, IOException {
 		Set<String> tuLangs = Collections.synchronizedSortedSet(new TreeSet<>());
 		List<Element> tuvs = tu.getChildren("tuv");
-		String tuid = tu.getAttributeValue("tuid", "");
-		if (tuid.equals("")) {
+		String tuid = tu.getAttributeValue("tuid");
+		if (tuid.isEmpty()) {
 			tuid = nextId();
 			tu.setAttribute("tuid", tuid);
 		}
@@ -446,7 +446,7 @@ public class InternalDatabase implements ITmEngine {
 			Element prop = kt.next();
 			props.put(prop.getAttributeValue("type"), prop.getText());
 		}
-		if (currSubject != null && !currSubject.equals("") && !props.containsKey("subject")) {
+		if (currSubject != null && !currSubject.isEmpty() && !props.containsKey("subject")) {
 			Element prop = new Element("prop");
 			prop.setAttribute("type", "subject");
 			prop.setText(XMLUtils.cleanText(currSubject));
@@ -459,7 +459,7 @@ public class InternalDatabase implements ITmEngine {
 		if (sub != null) {
 			tuDb.storeSubject(sub);
 		}
-		if (currCustomer != null && !currCustomer.equals("") && !props.containsKey("customer")) {
+		if (currCustomer != null && !currCustomer.isEmpty() && !props.containsKey("customer")) {
 			Element prop = new Element("prop");
 			prop.setAttribute("type", "customer");
 			prop.setText(XMLUtils.cleanText(currCustomer));
@@ -472,7 +472,7 @@ public class InternalDatabase implements ITmEngine {
 		if (cust != null) {
 			tuDb.storeCustomer(cust);
 		}
-		if (currProject != null && !currProject.equals("") && !props.containsKey("project")) {
+		if (currProject != null && !currProject.isEmpty() && !props.containsKey("project")) {
 			Element prop = new Element("prop");
 			prop.setAttribute("type", "project");
 			prop.setText(XMLUtils.cleanText(currProject));
@@ -485,10 +485,10 @@ public class InternalDatabase implements ITmEngine {
 		if (proj != null) {
 			tuDb.storeProject(proj);
 		}
-		if (tu.getAttributeValue("creationdate", "").equals("")) {
+		if (tu.getAttributeValue("creationdate").isEmpty()) {
 			tu.setAttribute("creationdate", creationDate);
 		}
-		if (tu.getAttributeValue("creationid", "").equals("")) {
+		if (tu.getAttributeValue("creationid").isEmpty()) {
 			tu.setAttribute("creationid", System.getProperty("user.name"));
 		}
 

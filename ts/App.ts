@@ -50,6 +50,7 @@ class Swordfish {
     static addTermWindow: BrowserWindow;
     static goToWindow: BrowserWindow;
     static sortSegmentsWindow: BrowserWindow;
+    static changeCaseWindow: BrowserWindow;
 
     javapath: string = Swordfish.path.join(app.getAppPath(), 'bin', 'java');
 
@@ -727,6 +728,21 @@ class Swordfish {
         ipcMain.on('analyze-tags', (event: IpcMainEvent, arg: any) => {
             Swordfish.analyzeTags(arg);
         });
+        ipcMain.on('export-project-html', (event: IpcMainEvent, arg: any) => {
+            Swordfish.exportHTML(arg);
+        });
+        ipcMain.on('show-change-case', () => {
+            Swordfish.showChangeCase();
+        });
+        ipcMain.on('close-change-case', () => {
+            Swordfish.destroyWindow(Swordfish.changeCaseWindow);
+        });
+        ipcMain.on('change-case-height', (event: IpcMainEvent, arg: any) => {
+            Swordfish.setHeight(Swordfish.changeCaseWindow, arg);
+        });
+        ipcMain.on('change-case-to', (event: IpcMainEvent, arg: any) => {
+            Swordfish.changeCaseTo(arg);
+        });
     } // end constructor
 
     static createWindow(): void {
@@ -798,11 +814,13 @@ class Swordfish {
             { label: 'Edit Next Segment', accelerator: 'PageDown', click: () => { Swordfish.mainWindow.webContents.send('next-segment'); } },
             { label: 'Go To Segment...', accelerator: 'CmdOrCtrl+G', click: () => { Swordfish.mainWindow.webContents.send('go-to'); } },
             new MenuItem({ type: 'separator' }),
-            { label: 'Edit Next Untranslated Segment', accelerator: 'F5', click: () => { Swordfish.mainWindow.webContents.send('next-untranslated'); } },
-            { label: 'Edit Next Unconfirmed Segment', accelerator: 'F6', click: () => { Swordfish.mainWindow.webContents.send('next-unconfirmed'); } },
+            { label: 'Edit Next Untranslated Segment', accelerator: 'CmdOrCtrl+U', click: () => { Swordfish.mainWindow.webContents.send('next-untranslated'); } },
+            { label: 'Edit Next Unconfirmed Segment', accelerator: 'CmdOrCtrl+Shift+U', click: () => { Swordfish.mainWindow.webContents.send('next-unconfirmed'); } },
             new MenuItem({ type: 'separator' }),
             { label: 'Save Segment Changes', accelerator: 'Alt+Enter', click: () => { Swordfish.mainWindow.webContents.send('save-edit', { confirm: false, next: 'none' }); } },
             { label: 'Discard Segment Changes', accelerator: 'Esc', click: () => { Swordfish.mainWindow.webContents.send('cancel-edit'); } },
+            new MenuItem({ type: 'separator' }),
+            { label: 'Change Case', accelerator: 'CmdOrCtrl+Alt+C', click: () => { Swordfish.mainWindow.webContents.send('change-case'); } },
             new MenuItem({ type: 'separator' }),
             { label: 'Split Segment', accelerator: 'CmdOrCtrl+H', click: () => { Swordfish.mainWindow.webContents.send('split-segment'); } },
             { label: 'Merge With Next Segment', accelerator: 'CmdOrCtrl+J', click: () => { Swordfish.mainWindow.webContents.send('merge-next'); } },
@@ -822,9 +840,9 @@ class Swordfish {
             previousMT = 'Ctrl+Alt+Left';
         }
         var viewMenu: Menu = Menu.buildFromTemplate([
-            { label: 'Projects', accelerator: 'CmdOrCtrl+Alt+1', click: () => { Swordfish.viewProjects(); } },
-            { label: 'Memories', accelerator: 'CmdOrCtrl+Alt+2', click: () => { Swordfish.viewMemories(); } },
-            { label: 'Glossaries', accelerator: 'CmdOrCtrl+Alt+3', click: () => { Swordfish.viewGlossaries(); } },
+            { label: 'Projects', accelerator: 'F6', click: () => { Swordfish.viewProjects(); } },
+            { label: 'Memories', accelerator: 'F7', click: () => { Swordfish.viewMemories(); } },
+            { label: 'Glossaries', accelerator: 'F8', click: () => { Swordfish.viewGlossaries(); } },
             new MenuItem({ type: 'separator' }),
             { label: 'Sort Segments', accelerator: 'F3', click: () => { Swordfish.mainWindow.webContents.send('sort-segments'); } },
             { label: 'Filter Segments', accelerator: 'CmdOrCtrl+F', click: () => { Swordfish.mainWindow.webContents.send('filter-segments'); } },
@@ -854,6 +872,7 @@ class Swordfish {
             { label: 'Remove Projects', click: () => { Swordfish.mainWindow.webContents.send('remove-projects'); } },
             new MenuItem({ type: 'separator' }),
             { label: 'Project Statistics', click: () => { Swordfish.mainWindow.webContents.send('request-statistics'); } },
+            { label: 'Export HTML', accelerator: 'F5', click: () => { Swordfish.mainWindow.webContents.send('export-html'); } },
             new MenuItem({ type: 'separator' }),
             { label: 'Import XLIFF File as Project', click: () => { Swordfish.showImportXliff(); } },
             { label: 'Export Project as XLIFF File', click: () => { Swordfish.mainWindow.webContents.send('export-project'); } }
@@ -946,8 +965,8 @@ class Swordfish {
             { label: 'Get Terms for All Segments', click: () => { Swordfish.mainWindow.webContents.send('apply-terminology-all'); } }
         ]);
         var qaMenu: Menu = Menu.buildFromTemplate([
-            { label: 'Check Inline Tags', click: () => { Swordfish.mainWindow.webContents.send('tags-analysis'); } },
-            { label: 'Check Initial/Trailing Spaces', click: () => { Swordfish.mainWindow.webContents.send('spaces-analysis'); } }
+            { label: 'Check Inline Tags', accelerator: 'F9', click: () => { Swordfish.mainWindow.webContents.send('tags-analysis'); } },
+            { label: 'Check Initial/Trailing Spaces', accelerator: 'F10', click: () => { Swordfish.mainWindow.webContents.send('spaces-analysis'); } }
         ]);
         var template: MenuItem[] = [
             new MenuItem({ label: '&File', role: 'fileMenu', submenu: fileMenu }),
@@ -2117,7 +2136,7 @@ class Swordfish {
                             clearInterval(intervalObject);
                             Swordfish.showMessage({ type: 'info', message: 'Imported ' + Swordfish.currentStatus.imported + ' segments.' });
                             return;
-                        } 
+                        }
                     }
                     if (Swordfish.currentStatus.status === Swordfish.ERROR) {
                         Swordfish.mainWindow.webContents.send('end-waiting');
@@ -2220,7 +2239,7 @@ class Swordfish {
                                     clearInterval(intervalObject);
                                     Swordfish.mainWindow.webContents.send('request-memories');
                                     return;
-                                } 
+                                }
                             }
                             if (Swordfish.currentStatus.status === Swordfish.ERROR) {
                                 Swordfish.mainWindow.webContents.send('end-waiting');
@@ -2263,7 +2282,7 @@ class Swordfish {
                                     clearInterval(intervalObject);
                                     Swordfish.mainWindow.webContents.send('request-glossaries');
                                     return;
-                                } 
+                                }
                             }
                             if (Swordfish.currentStatus.status === Swordfish.ERROR) {
                                 Swordfish.mainWindow.webContents.send('end-waiting');
@@ -2310,7 +2329,7 @@ class Swordfish {
                                         Swordfish.showMessage({ type: 'info', message: 'Memories exported' });
                                         clearInterval(intervalObject);
                                         return;
-                                    } 
+                                    }
                                 }
                                 if (Swordfish.currentStatus.status === Swordfish.ERROR) {
                                     Swordfish.mainWindow.webContents.send('end-waiting');
@@ -3782,7 +3801,6 @@ class Swordfish {
                     Swordfish.showMessage({ type: 'error', message: data.reason });
                     return;
                 }
-                Swordfish.mainWindow.webContents.send('reload-page', { project: arg.project });
             },
             (reason: string) => {
                 Swordfish.showMessage({ type: 'error', message: reason });
@@ -3912,6 +3930,63 @@ class Swordfish {
                 Swordfish.showMessage({ type: 'error', message: reason });
             }
         );
+    }
+
+    static exportHTML(arg: any): void {
+        Swordfish.mainWindow.webContents.send('start-waiting');
+        Swordfish.mainWindow.webContents.send('set-status', 'Exporting HTML');
+        Swordfish.sendRequest('/projects/exportHtml', arg,
+            (data: any) => {
+                Swordfish.mainWindow.webContents.send('end-waiting');
+                Swordfish.mainWindow.webContents.send('set-status', '');
+                if (data.status !== Swordfish.SUCCESS) {
+                    Swordfish.showMessage({ type: 'error', message: data.reason });
+                    return;
+                }
+                shell.openExternal('file://' + data.export).catch(() => {
+                    shell.openPath(data.export).catch((reason: any) => {
+                        if (reason instanceof Error) {
+                            console.log(reason.message);
+                        }
+                        this.showMessage({ type: 'error', message: 'Unable to open HTML.' });
+                    });
+                });;
+            },
+            (reason: string) => {
+                Swordfish.mainWindow.webContents.send('end-waiting');
+                Swordfish.mainWindow.webContents.send('set-status', '');
+                Swordfish.showMessage({ type: 'error', message: reason });
+            }
+        );
+    }
+
+    static showChangeCase(): void {
+        this.changeCaseWindow = new BrowserWindow({
+            parent: this.mainWindow,
+            width: 250,
+            minimizable: false,
+            maximizable: false,
+            resizable: false,
+            useContentSize: true,
+            show: false,
+            icon: this.iconPath,
+            webPreferences: {
+                nodeIntegration: true
+            }
+        });
+        this.changeCaseWindow.setMenu(null);
+        this.changeCaseWindow.loadURL('file://' + this.path.join(app.getAppPath(), 'html', 'changeCase.html'));
+        this.changeCaseWindow.once('ready-to-show', () => {
+            let bounds: Rectangle = Swordfish.mainWindow.getBounds();
+            this.changeCaseWindow.setPosition(bounds.x + Number.parseInt('' + (bounds.width / 5)), bounds.y + Number.parseInt('' + (bounds.height / 4)));
+            this.changeCaseWindow.show();
+        });
+
+    }
+
+    static changeCaseTo(arg: any) {
+        Swordfish.mainWindow.webContents.send('case-changed', arg);
+        Swordfish.destroyWindow(this.changeCaseWindow);
     }
 }
 

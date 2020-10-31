@@ -22,8 +22,8 @@ class TranslationView {
     electron = require('electron');
 
     static SVG_BLANK: string = "<svg xmlns='http://www.w3.org/2000/svg' height='24' viewBox='0 0 24 24' width='24'></svg>";
-    static SVG_UNTRANSLATED = "<svg xmlns:svg='http://www.w3.org/2000/svg' height='24' viewBox='0 0 24 24' width='24' version='1.1'><path d='M 19,5 V 19 H 5 V 5 H 19 M 19,3 H 5 C 3.9,3 3,3.9 3,5 v 14 c 0,1.1 0.9,2 2,2 h 14 c 1.1,0 2,-0.9 2,-2 V 5 C 21,3.9 20.1,3 19,3 Z' /></svg>"
-    static SVG_TRANSLATED: string = "<svg xmlns='http://www.w3.org/2000/svg' height='24' viewBox='0 0 24 24' width='24'><g><g><path d='M19,5v14H5V5H19 M19,3H5C3.9,3,3,3.9,3,5v14c0,1.1,0.9,2,2,2h14c1.1,0,2-0.9,2-2V5C21,3.9,20.1,3,19,3L19,3z'/></g><path d='M14,17H7v-2h7V17z M17,13H7v-2h10V13z M17,9H7V7h10V9z'/></g></svg>";
+    static SVG_UNTRANSLATED: string = "<svg xmlns:svg='http://www.w3.org/2000/svg' height='24' viewBox='0 0 24 24' width='24' version='1.1'><path d='M 19,5 V 19 H 5 V 5 H 19 M 19,3 H 5 C 3.9,3 3,3.9 3,5 v 14 c 0,1.1 0.9,2 2,2 h 14 c 1.1,0 2,-0.9 2,-2 V 5 C 21,3.9 20.1,3 19,3 Z' /></svg>";
+    static SVG_TRANSLATED: string = "<svg xmlns='http://www.w3.org/2000/svg' height='24' viewBox='0 0 24 24' width='24'><g><path d='M19,5v14H5V5H19 M19,3H5C3.9,3,3,3.9,3,5v14c0,1.1,0.9,2,2,2h14c1.1,0,2-0.9,2-2V5C21,3.9,20.1,3,19,3L19,3z'/><path d='M14,17H7v-2h7V17z M17,13H7v-2h10V13z M17,9H7V7h10V9z'/></g></svg>";
     static SVG_FINAL: string = "<svg xmlns='http://www.w3.org/2000/svg' height='24' viewBox='0 0 24 24' width='24'><path d='M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V5h14v14zM17.99 9l-1.41-1.42-6.59 6.59-2.58-2.57-1.42 1.41 4 3.99z'/></svg>";
     static SVG_LOCK: string = "<svg xmlns='http://www.w3.org/2000/svg' height='24' viewBox='0 0 24 24' width='24'><path d='M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zM9 6c0-1.66 1.34-3 3-3s3 1.34 3 3v2H9V6zm9 14H6V10h12v10zm-6-3c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2z'/></svg>";
 
@@ -128,6 +128,16 @@ class TranslationView {
                 event.preventDefault();
                 event.cancelBubble = true;
                 this.addTerm();
+            }
+            if ((event.ctrlKey || event.metaKey) && (event.key === 'u' || event.key === 'U') && !event.shiftKey) {
+                event.preventDefault();
+                event.cancelBubble = true;
+                this.nextUntranslated();
+            }
+            if ((event.ctrlKey || event.metaKey) && (event.key === 'u' || event.key === 'U') && event.shiftKey) {
+                event.preventDefault();
+                event.cancelBubble = true;
+                this.nextUnconfirmed();
             }
 
             // Insert tags with numeric keypad
@@ -385,6 +395,14 @@ class TranslationView {
         });
         topBar.appendChild(statisticsButton);
 
+        let htmlExportButton = document.createElement('a');
+        htmlExportButton.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" enable-background="new 0 0 24 24" height="24" viewBox="0 0 24 24" width="24"><path d="M19,3H5C3.89,3,3,3.9,3,5v14c0,1.1,0.89,2,2,2h14c1.1,0,2-0.9,2-2V5C21,3.9,20.11,3,19,3z M19,19H5V7h14V19z M17,12H7v-2 h10V12z M13,16H7v-2h6V16z"/></svg>' +
+            '<span class="tooltiptext bottomTooltip">Export HTML</span>';
+        htmlExportButton.className = 'tooltip';
+        htmlExportButton.addEventListener('click', () => {
+            this.exportHTML();
+        });
+        topBar.appendChild(htmlExportButton);
 
         let concordanceButton = document.createElement('a');
         concordanceButton.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path d="M21.172 24l-7.387-7.387c-1.388.874-3.024 1.387-4.785 1.387-4.971 0-9-4.029-9-9s4.029-9 9-9 9 4.029 9 9c0 1.761-.514 3.398-1.387 4.785l7.387 7.387-2.828 2.828zm-12.172-8c3.859 0 7-3.14 7-7s-3.141-7-7-7-7 3.14-7 7 3.141 7 7 7z"/></svg>' +
@@ -1598,6 +1616,7 @@ class TranslationView {
                 unit: this.currentId.unit,
                 segment: this.currentId.id
             });
+            this.currentTranslate.innerHTML = this.currentTranslate.innerHTML.indexOf('path') > 0 ? TranslationView.SVG_BLANK : TranslationView.SVG_LOCK;
             return;
         }
         this.electron.ipcRenderer.send('show-message', { type: 'warning', message: 'Select segment' });
@@ -1676,4 +1695,77 @@ class TranslationView {
     selectPreviousTerm(): void {
         this.termsPanel.selectPreviousTerm();
     }
+
+    exportHTML(): void {
+        this.electron.ipcRenderer.send('export-project-html', { project: this.projectId });
+    }
+
+    changeCase(): void {
+        if (!this.currentCell) {
+            this.electron.ipcRenderer.send('show-message', { type: 'warning', message: 'Select segment' });
+            return;
+        }
+        let translation = this.currentCell.innerText.trim();
+        if (translation === '') {
+            this.electron.ipcRenderer.send('show-message', { type: 'warning', message: 'Empty target' });
+            return;
+        }
+        this.electron.ipcRenderer.send('show-change-case');
+    }
+
+    caseChanged(arg: any): void {
+        console.log(JSON.stringify(arg));
+        if (arg.case === 'sentence') {
+            this.currentCell.innerText = this.sentence(this.currentCell.innerText);
+        }
+        if (arg.case === 'lowercase') {
+            this.currentCell.innerText = this.currentCell.innerText.toLocaleLowerCase(this.tgtLang);
+        }
+        if (arg.case === 'uppercase') {
+            this.currentCell.innerText = this.currentCell.innerText.toLocaleUpperCase(this.tgtLang);
+        }
+        if (arg.case === 'title') {
+            this.currentCell.innerText = this.title(this.currentCell.innerText);
+        }
+        if (arg.case === 'toggle') {
+            this.currentCell.innerText = this.toggle(this.currentCell.innerText);
+        }
+    }
+
+    isLower(str: string): boolean {
+        return str === str.toLocaleLowerCase(this.tgtLang);
+    }
+
+    sentence(str: string): string {
+        let result = '';
+        str = str.toLocaleLowerCase(this.tgtLang);
+        let changed = false;
+        for (let i: number = 0; i < str.length; i++) {
+            let c: string = str.charAt(i);
+            if (!changed) {
+                let d = c.toLocaleUpperCase(this.tgtLang);
+                if (c !== d) {
+                    c = d;
+                    changed = true;
+                }
+            }
+            result = result.concat(c);
+        }
+        return result;
+    }
+
+    title(str: string): string {
+        str = str.toLocaleLowerCase(this.tgtLang);
+        return str.replace(/(^|\s)\S/g, (t) => { return t.toLocaleUpperCase(this.tgtLang) });
+    }
+
+    toggle(str: string): string {
+        let result: string = '';
+        for (let i: number = 0; i < str.length; i++) {
+            let c: string = str.charAt(i);
+            result = this.isLower(c) ? result.concat(c.toLocaleUpperCase(this.tgtLang)) : result.concat(c.toLocaleLowerCase(this.tgtLang));
+        }
+        return result;
+    }
+
 }

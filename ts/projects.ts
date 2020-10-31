@@ -84,6 +84,15 @@ class ProjectsView {
         });
         topBar.appendChild(statisticsButton);
 
+        let htmlExportButton = document.createElement('a');
+        htmlExportButton.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" enable-background="new 0 0 24 24" height="24" viewBox="0 0 24 24" width="24"><path d="M19,3H5C3.89,3,3,3.9,3,5v14c0,1.1,0.89,2,2,2h14c1.1,0,2-0.9,2-2V5C21,3.9,20.11,3,19,3z M19,19H5V7h14V19z M17,12H7v-2 h10V12z M13,16H7v-2h6V16z"/></svg>' +
+            '<span class="tooltiptext bottomTooltip">Export HTML</span>';
+        htmlExportButton.className = 'tooltip';
+        htmlExportButton.addEventListener('click', () => {
+            this.exportHTML();
+        });
+        topBar.appendChild(htmlExportButton);
+
         let removeButton = document.createElement('a');
         removeButton.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 0 24 24" width="24"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM8 9h8v10H8V9zm7.5-5l-1-1h-5l-1 1H5v2h14V4h-3.5z"/></svg>' +
             '<span class="tooltiptext bottomTooltip">Remove Project</span>';
@@ -415,6 +424,21 @@ class ProjectsView {
                 cells[1].innerHTML = svg;
                 break;
             }
+        }
+    }
+
+    exportHTML(): void {
+        if (this.selected.size === 0) {
+            this.electron.ipcRenderer.send('show-message', { type: 'warning', message: 'Select project' });
+            return;
+        }
+        if (this.selected.size > 1) {
+            this.electron.ipcRenderer.send('show-message', { type: 'warning', message: 'Select one project' });
+            return;
+        }
+        for (let key of this.selected.keys()) {
+            let project = this.selected.get(key);
+            this.electron.ipcRenderer.send('export-project-html', { project: key });
         }
     }
 }

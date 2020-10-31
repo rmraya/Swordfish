@@ -88,6 +88,12 @@ public class XliffStore {
     public static final int THRESHOLD = 60;
     public static final int MAXTERMLENGTH = 5;
 
+    public static final String SVG_BLANK = "<svg xmlns='http://www.w3.org/2000/svg' height='24' viewBox='0 0 24 24' width='24'></svg>";
+    public static final String SVG_UNTRANSLATED = "<svg xmlns:svg='http://www.w3.org/2000/svg' height='24' viewBox='0 0 24 24' width='24' version='1.1'><path d='M 19,5 V 19 H 5 V 5 H 19 M 19,3 H 5 C 3.9,3 3,3.9 3,5 v 14 c 0,1.1 0.9,2 2,2 h 14 c 1.1,0 2,-0.9 2,-2 V 5 C 21,3.9 20.1,3 19,3 Z' /></svg>";
+    public static final String SVG_TRANSLATED = "<svg xmlns='http://www.w3.org/2000/svg' height='24' viewBox='0 0 24 24' width='24'><g><path d='M19,5v14H5V5H19 M19,3H5C3.9,3,3,3.9,3,5v14c0,1.1,0.9,2,2,2h14c1.1,0,2-0.9,2-2V5C21,3.9,20.1,3,19,3L19,3z'/><path d='M14,17H7v-2h7V17z M17,13H7v-2h10V13z M17,9H7V7h10V9z'/></g></svg>";
+    public static final String SVG_FINAL = "<svg xmlns='http://www.w3.org/2000/svg' height='24' viewBox='0 0 24 24' width='24'><path d='M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V5h14v14zM17.99 9l-1.41-1.42-6.59 6.59-2.58-2.57-1.42 1.41 4 3.99z'/></svg>";
+    public static final String SVG_LOCK = "<svg xmlns='http://www.w3.org/2000/svg' height='24' viewBox='0 0 24 24' width='24'><path d='M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zM9 6c0-1.66 1.34-3 3-3s3 1.34 3 3v2H9V6zm9 14H6V10h12v10zm-6-3c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2z'/></svg>";
+
     private String xliffFile;
     private SAXBuilder builder;
     private Document document;
@@ -2449,5 +2455,171 @@ public class XliffStore {
             result.add(word);
         }
         return result;
+    }
+
+    public String exportHTML(String title)
+            throws SQLException, IOException, SAXException, ParserConfigurationException, DataFormatException {
+        File output = new File(xliffFile + ".html");
+        try (FileOutputStream out = new FileOutputStream(output)) {
+            writeString(out, "<html>\n");
+            writeString(out, "<head>\n");
+            writeString(out, "<meta http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\" />\n");
+            writeString(out, "<title>" + XMLUtils.cleanText(title) + "</title>\n");
+            writeString(out, "<style>\n");
+            writeString(out, " * {font-family: sans-serif, Helvetica, Arial;}\n");
+            writeString(out, " table {border-collapse: collapse; width: 100%; border-top: 1px solid #cfd8dc;}\n");
+            writeString(out, " tr {border-bottom: 1px solid #cfd8dc;}\n");
+            writeString(out, " td {padding: 4px;}\n");
+            writeString(out, " .center {text-align: center;}\n");
+            writeString(out, " .orange {border-right: 3px solid #f57c00;}\n");
+            writeString(out, " .green {border-right: 3px solid #009688;}\n");
+            writeString(out, " .grey {border-right: 3px solid #cfd8dc;}\n");
+            writeString(out, " .preserve {white-space: pre-wrap;}\n");
+            writeString(out, " .space {background: #7abff7; border-radius: 2px;}\n");
+            writeString(out, " .text {width: 49%;}\n");
+            writeString(out,
+                    " .tag {background: #009688; color: #efefef; font-size: 0.8em; padding-left: 4px; padding-right: 4px; border-radius: 2px; vertical-align: text-top;}\n");
+            writeString(out,
+                    " .highlighted {color: #efefef; background-color: #0078d4; padding-left: 2px; padding-right: 2px; font-size: 0.9em; }");
+            writeString(out, "</style>\n");
+            writeString(out, "</head>\n");
+            writeString(out, "<body>\n");
+            writeString(out, "<h2>" + XMLUtils.cleanText(title) + "</h2>\n");
+            writeString(out, "<table>\n");
+            writeString(out, "<tr>\n");
+            writeString(out, "<th>#</th>\n");
+            writeString(out, "<th>" + LanguageUtils.getLanguage(srcLang).toString() + "</th>\n");
+            writeString(out, "<th>" + SVG_BLANK + "</th>\n");
+            writeString(out, "<th>" + LanguageUtils.getLanguage(tgtLang).toString() + "</th>\n");
+            writeString(out, "</tr>\n");
+
+            try (ResultSet rs = stmt.executeQuery(
+                    "SELECT source, target, state, space, translate FROM segments WHERE type='S' ORDER BY file, unitId, segId")) {
+                int count = 1;
+                while (rs.next()) {
+                    String src = rs.getNString(1);
+                    String tgt = rs.getNString(2);
+                    String state = rs.getString(3);
+                    boolean preserve = "Y".equals(rs.getString(4));
+                    boolean locked = "N".equals(rs.getString(5));
+                    Element source = buildElement(src);
+                    Element target = buildElement(tgt);
+                    String box = SVG_BLANK;
+                    String border = "grey";
+                    if (state.equals("translated")) {
+                        border = "orange";
+                        box = SVG_TRANSLATED;
+                    }
+                    if (state.equals("final")) {
+                        border = "green";
+                        box = SVG_FINAL;
+                    }
+                    if (locked) {
+                        box = SVG_LOCK;
+                    }
+                    String space = preserve ? "preserve" : "";
+                    tagsMap = new Hashtable<>();
+                    tag = 1;
+                    writeString(out, "<tr>\n");
+                    writeString(out, "<td class=\"center " + border + "\"> " + count++ + "</td>\n");
+                    writeString(out, "<td class=\"text " + space + " " + border + "\">"
+                            + XliffUtils.highlightSpaces(toHtml(source)) + "</td>\n");
+                    writeString(out, "<td class=\"center " + border + "\"> " + box + "</td>\n");
+                    writeString(out, "<td class=\"text " + space + "\">" + XliffUtils.highlightSpaces(toHtml(target))
+                            + "</td>\n");
+                    writeString(out, "</tr>\n");
+                }
+            }
+            writeString(out, "</table>\n");
+            writeString(out, "</body>\n");
+            writeString(out, "</html>");
+        }
+        return output.getAbsolutePath();
+    }
+
+    private static void writeString(FileOutputStream out, String string) throws IOException {
+        out.write(string.getBytes(StandardCharsets.UTF_8));
+    }
+
+    private String toHtml(Element seg) {
+        if (seg == null) {
+            return "";
+        }
+        List<XMLNode> list = seg.getContent();
+        Iterator<XMLNode> it = list.iterator();
+        StringBuilder text = new StringBuilder();
+        while (it.hasNext()) {
+            XMLNode o = it.next();
+            if (o.getNodeType() == XMLNode.TEXT_NODE) {
+                text.append(XliffUtils.cleanString(((TextNode) o).getText()));
+            } else if (o.getNodeType() == XMLNode.ELEMENT_NODE) {
+                // empty: <cp>, <ph>, <sc>, <ec>, <sm> and <em>.
+                // paired: <pc>, <mrk>,
+                Element e = (Element) o;
+                String type = e.getName();
+                if (type.equals("pc")) {
+                    String id = e.getAttributeValue("id");
+                    if (!tagsMap.containsKey("pc" + id)) {
+                        StringBuilder sb = new StringBuilder();
+                        sb.append("<span class=\"tag\">");
+                        sb.append(tag++);
+                        sb.append("</span>");
+                        tagsMap.put("pc" + id, sb.toString());
+                    }
+                    text.append(tagsMap.get("pc" + id));
+                    text.append(toHtml(e));
+                    if (!tagsMap.containsKey("/pc" + id)) {
+                        StringBuilder sb = new StringBuilder();
+                        sb.append("<span class=\"tag\">");
+                        sb.append(tag++);
+                        sb.append("</span>");
+                        tagsMap.put("/pc" + id, sb.toString());
+                    }
+                    text.append("/" + tagsMap.get(e.getName() + id));
+                } else if (type.equals("mrk")) {
+                    String id = e.getAttributeValue("id");
+                    if (!tagsMap.containsKey("mrk" + id)) {
+                        StringBuilder sb = new StringBuilder();
+                        sb.append("<span class=\"tag\">");
+                        sb.append(tag++);
+                        sb.append("</span>");
+                        tagsMap.put("mrk" + id, sb.toString());
+                    }
+                    text.append(tagsMap.get(e.getName() + id));
+                    text.append("<span class=\"highlighted\">");
+                    text.append(e.getText());
+                    text.append("</span>");
+                    if (!tagsMap.containsKey("/mrk" + id)) {
+                        StringBuilder sb = new StringBuilder();
+                        sb.append("<span class=\"tag\">");
+                        sb.append(tag++);
+                        sb.append("</span>");
+                        tagsMap.put("/mrk" + id, sb.toString());
+                    }
+                    text.append(tagsMap.get("/mrk" + id));
+                } else if (type.equals("cp")) {
+                    String hex = "cp" + e.getAttributeValue("hex");
+                    if (!tagsMap.containsKey(hex)) {
+                        StringBuilder sb = new StringBuilder();
+                        sb.append("<span class=\"tag\">");
+                        sb.append(tag++);
+                        sb.append("</span>");
+                        tagsMap.put(hex, sb.toString());
+                    }
+                    text.append(tagsMap.get(hex));
+                } else {
+                    String dataRef = e.getAttributeValue("dataRef");
+                    if (!tagsMap.containsKey(dataRef)) {
+                        StringBuilder sb = new StringBuilder();
+                        sb.append("<span class=\"tag\">");
+                        sb.append(tag++);
+                        sb.append("</span>");
+                        tagsMap.put(dataRef, sb.toString());
+                    }
+                    text.append(tagsMap.get(dataRef));
+                }
+            }
+        }
+        return text.toString();
     }
 }

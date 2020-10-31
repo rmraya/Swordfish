@@ -83,7 +83,7 @@ public class MatchQuality {
         int count = -1;
         int idx;
         String lcs = lcs(a, b);
-        while (!lcs.trim().equals("") && lcs.length() > longest * PENALTY / 100) {
+        while (!lcs.trim().isEmpty() && lcs.length() > longest * PENALTY / 100) {
             count++;
             idx = a.indexOf(lcs);
             a = a.substring(0, idx) + a.substring(idx + lcs.length());

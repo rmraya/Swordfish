@@ -355,6 +355,15 @@ class Main {
         Main.electron.ipcRenderer.on('previous-mt', () => {
             this.previousMT();
         });
+        Main.electron.ipcRenderer.on('export-html', () => {
+            this.exportHTML();
+        });
+        Main.electron.ipcRenderer.on('change-case', () => {
+            this.changeCase();
+        });
+        Main.electron.ipcRenderer.on('case-changed', (event: Electron.IpcRendererEvent, arg: any) => {
+            this.caseChanged(arg);
+        });
         let config: any = { attributes: true, childList: false, subtree: false };
         let observer = new MutationObserver((mutationsList) => {
             for (let mutation of mutationsList) {
@@ -917,6 +926,29 @@ class Main {
         let selected = Main.tabHolder.getSelected();
         if (Main.translationViews.has(selected)) {
             Main.translationViews.get(selected).selectPreviousTerm();
+        }
+    }
+
+    exportHTML(): void {
+        let selected = Main.tabHolder.getSelected();
+        if (Main.translationViews.has(selected)) {
+            Main.electron.ipcRenderer.send('export-project-html', { project: selected });
+            return;
+        }
+        this.projectsView.exportHTML();
+    }
+
+    changeCase(): void {
+        let selected = Main.tabHolder.getSelected();
+        if (Main.translationViews.has(selected)) {
+            Main.translationViews.get(selected).changeCase();
+        }
+    }
+
+    caseChanged(arg: any): void {
+        let selected = Main.tabHolder.getSelected();
+        if (Main.translationViews.has(selected)) {
+            Main.translationViews.get(selected).caseChanged(arg);
         }
     }
 }

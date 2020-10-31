@@ -154,7 +154,9 @@ td.final {
 }
 
 tr.selected {
-	background-color: var(--selected-row) !important;
+	border-top: 2px solid var(--focus-border) !important;
+	border-bottom: 2px solid var(--focus-border) !important;
+	background-color: var(--editing-background) !important;
 }
 
 tr.discover:hover {
@@ -261,6 +263,10 @@ input {
 	width: calc(100% - 10px);
 }
 
+.table_select {
+	width: calc(100% - 5px);
+}
+
 input:focus {
 	outline: none !important;
 	border: 1px solid var(--focus-border);
@@ -273,8 +279,8 @@ input:disabled {
 input[type=number] {
 	font-size: 0.8em;
 	width: 40px;
-	margin:0;
-	padding:0;
+	margin: 0;
+	padding: 0;
 	padding-left: 2px;
 }
 
@@ -284,7 +290,7 @@ select {
 	border: 1px solid var(--input-color);
 	font-size: 1em;
 	height: 1.6em;
-	border-radius:0;
+	border-radius: 0;
 }
 
 select:focus {
@@ -299,7 +305,7 @@ option {
 }
 
 textarea {
-	padding:0;
+	padding: 0;
 	font-size: medium;
 	background-color: var(--input-background);
 	color: var(--input-color);
@@ -333,16 +339,16 @@ button:hover {
 	background: var(--accent-alternative);
 	border: 1px solid var(--accent-alternative);
 	transition-property: all;
-    transition-duration: 0.5s;
-    transition-timing-function: cubic-bezier(0.14, 0.71, 0.38, 1);
-    transition-delay: 0s;
+	transition-duration: 0.5s;
+	transition-timing-function: cubic-bezier(0.14, 0.71, 0.38, 1);
+	transition-delay: 0s;
 }
 
 .row {
 	display: flex;
 	flex-direction: row;
 	width: 100%;
-	padding:0;
+	padding: 0;
 }
 
 label {
@@ -401,8 +407,8 @@ label {
 	color: var(--normal-color);
 	fill: var(--accent-color);
 	stroke: var(--accent-color);
-	padding-bottom:0;
-	padding-top:0;
+	padding-bottom: 0;
+	padding-top: 0;
 	padding-left: 4px;
 	padding-right: 4px;
 	justify-content: flex-start;
@@ -450,9 +456,9 @@ label {
 	background-color: var(--tab-hover);
 	text-decoration: none !important;
 	transition-property: all;
-    transition-duration: 0.5s;
-    transition-timing-function: cubic-bezier(0.14, 0.71, 0.38, 1);
-    transition-delay: 0s;
+	transition-duration: 0.5s;
+	transition-timing-function: cubic-bezier(0.14, 0.71, 0.38, 1);
+	transition-delay: 0s;
 }
 
 svg {
@@ -480,7 +486,7 @@ svg {
 	padding-top: 4px;
 	padding-left: 6px;
 	padding-right: 6px;
-	margin:0;
+	margin: 0;
 	margin-right: 1px !important;
 	box-shadow: none !important;
 	border-bottom: 3px solid var(--tab-background);
@@ -495,9 +501,9 @@ svg {
 	background: var(--tab-hover);
 	border-bottom: 3px solid var(--tab-hover);
 	transition-property: all;
-    transition-duration: 0.5s;
-    transition-timing-function: cubic-bezier(0.14, 0.71, 0.38, 1);
-    transition-delay: 0s;
+	transition-duration: 0.5s;
+	transition-timing-function: cubic-bezier(0.14, 0.71, 0.38, 1);
+	transition-delay: 0s;
 }
 
 .selectedTab:hover {
@@ -529,8 +535,8 @@ svg {
 }
 
 .titlepanel {
-	margin:0;
-	padding-top:0;
+	margin: 0;
+	padding-top: 0;
 	padding-left: 4px;
 	background: var(--accent-color);
 	color: var(--accent-contrast);

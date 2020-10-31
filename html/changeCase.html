@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <title>Change Case</title>
+    <link id="theme" rel="stylesheet" type="text/css" href="../css/light.css">
+    <link rel="stylesheet" type="text/css" href="../css/fonts.css">
+</head>
+
+<body id="body">
+
+    <table class="fill_width">
+        <tr>
+            <td class="middle">
+                <input type="radio" id="sentence" name="case" value="sentence">
+            </td>
+            <td class="middle noWrap fill_width">
+                <label for="sentence">Sentence case</label>
+            </td>
+        </tr>
+        <tr>
+            <td class="middle">
+                <input type="radio" id="lowercase" name="case" value="lowercase">
+            </td>
+            <td class="middle noWrap fill_width">
+                <label for="lowercase">lowercase</label>
+            </td>
+        </tr>
+        <tr>
+            <td class="middle">
+                <input type="radio" id="uppercase" name="case" value="uppercase" checked>
+            </td>
+            <td class="middle noWrap fill_width">
+                <label for="uppercase">UPPERCASE</label>
+            </td>
+        </tr>
+        <tr>
+            <td class="middle">
+                <input type="radio" id="title" name="case" value="title">
+            </td>
+            <td class="middle noWrap fill_width">
+                <label for="title">Title Case</label>
+            </td>
+        </tr>
+        <tr>
+            <td class="middle">
+                <input type="radio" id="toggle" name="case" value="toggle">
+            </td>
+            <td class="middle noWrap fill_width">
+                <label for="toggle">tOGGLE cASE</label>
+            </td>
+        </tr>
+    </table>
+    
+    <div class="buttonArea">
+        <button id="changeCase">Change Case</button>
+    </div>
+    <script src="../js/keyboardHandler.js"></script>
+    <script src="../js/changeCase.js"></script>
+</body>
+
+</html>

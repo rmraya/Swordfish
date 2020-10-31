@@ -346,7 +346,7 @@ public class XliffUtils {
                         while (mt.hasNext()) {
                             Element meta = mt.next();
                             if ("tool-id".equals(meta.getAttributeValue("type"))) {
-                                isOpenXLIFF = "OpenXLIFF".equals(meta.getText());
+                                isOpenXLIFF = com.maxprograms.converters.Constants.TOOLID.equals(meta.getText());
                             }
                         }
                     }
