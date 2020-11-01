@@ -2494,7 +2494,7 @@ public class XliffStore {
             writeString(out, "</tr>\n");
 
             try (ResultSet rs = stmt.executeQuery(
-                    "SELECT source, target, state, space, translate FROM segments WHERE type='S' ORDER BY file, unitId, segId")) {
+                    "SELECT source, target, state, space, translate, file, child FROM segments WHERE type='S' ORDER BY file, child")) {
                 int count = 1;
                 while (rs.next()) {
                     String src = rs.getNString(1);
