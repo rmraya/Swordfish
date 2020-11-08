@@ -1,10 +1,11 @@
 :root {
 	--editing-background: #ffffff;
-	--normal-background: #fafafa;
-	--tabHolder-background: #bdbdbd;
-	--tab-background: #eeeeee;
-	--even-row-background: #eceff1;
-	--odd-row-background: #cfd8dc;
+	--normal-background: #efefef;
+	--tabHolder-background: #78909c;
+	--tab-background: #e0e0e0;
+	--toolbar-background: #d2d0ce;
+	--even-row-background: #dadada;
+	--odd-row-background: #eaeaea;
 	--normal-color: #373737;
 	--accent-color: #0078d4;
 	--accent-alternative: #005a9e;
@@ -25,6 +26,9 @@
 	--stats-text: #101010;
 	--stats-fill: #71afe5;
 	--space-color: #7abff7;
+	--splitting-background: #bbdefb;
+	--even-unit: #02275f;
+	--odd-unit: #e20606;
 }
 
 body {
@@ -187,7 +191,7 @@ th {
 }
 
 .sourceContainer {
-	background-color: var(--even-row-background);
+	background-color: var(--normal-background);
 	padding: 4px;
 	margin: 0;
 	width: 100%;
@@ -196,12 +200,12 @@ th {
 }
 
 .targetContainer {
-	background-color: var(--od-row-background);
+	background-color: var(--normal-background);
 	padding: 4px;
 	margin: 0;
 	width: 100%;
 	white-space: pre-wrap;
-	border-bottom: 1px solid var(--accent-color);
+	border-bottom: 1px solid var(--normal-background);
 }
 
 .machineContainer {
@@ -403,7 +407,7 @@ label {
 .toolbar {
 	display: flex;
 	flex-direction: row;
-	background: var(--tab-background);
+	background: var(--toolbar-background);
 	color: var(--normal-color);
 	fill: var(--accent-color);
 	stroke: var(--accent-color);
@@ -670,4 +674,16 @@ svg.stats {
 	background: var(--space-color);
 	border-radius: 2px;
 	font-weight: 700;
+}
+
+.splitting {
+	background: var(--splitting-background);
+}
+
+.evenUnit {
+	border-right-color: var(--even-unit) !important;
+}
+
+.oddUnit {
+	border-right-color: var(--odd-unit) !important;
 }

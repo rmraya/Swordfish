@@ -108,7 +108,7 @@ public class MemoriesHandler implements HttpHandler {
 			if ("/memories/create".equals(url)) {
 				response = createMemory(request);
 			} else if ("/memories/list".equals(url)) {
-				response = listMemories(request);
+				response = listMemories();
 			} else if ("/memories/delete".equals(url)) {
 				response = deleteMemory(request);
 			} else if ("/memories/export".equals(url)) {
@@ -396,7 +396,7 @@ public class MemoriesHandler implements HttpHandler {
 		return result;
 	}
 
-	private static JSONObject listMemories(String request) throws IOException {
+	private static JSONObject listMemories() throws IOException {
 		JSONObject result = new JSONObject();
 		JSONArray array = new JSONArray();
 		result.put("memories", array);

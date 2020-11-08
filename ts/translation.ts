@@ -45,8 +45,8 @@ class TranslationView {
     srcLang: string;
     tgtLang: string;
     tbody: HTMLTableSectionElement;
-    sourceTh: HTMLTableCellElement;
-    targetTh: HTMLTableCellElement;
+    sourceTh: HTMLTableHeaderCellElement;
+    targetTh: HTMLTableHeaderCellElement;
 
     pagesSpan: HTMLSpanElement;
 
@@ -86,6 +86,8 @@ class TranslationView {
     memSelect: HTMLSelectElement;
     glossSelect: HTMLSelectElement;
 
+    returnTo: any = { file: '', unit: '', segment: '' };
+
     constructor(tab: Tab, projectId: string, sourceLang: string, targetLang: string) {
         this.container = tab.getContainer();
         this.projectId = projectId;
@@ -114,15 +116,35 @@ class TranslationView {
         this.rightPanel = verticalPanels.rightPanel();
 
         this.container.addEventListener('keydown', (event: KeyboardEvent) => {
-            if (event.key === 'PageDown') {
+            if (event.key === 'PageDown' && !(event.ctrlKey || event.metaKey)) {
                 event.preventDefault();
                 event.cancelBubble = true;
                 this.gotoNext();
             }
-            if (event.key === 'PageUp') {
+            if (event.key === 'PageUp'&& !(event.ctrlKey || event.metaKey)) {
                 event.preventDefault();
                 event.cancelBubble = true;
                 this.gotoPrevious();
+            }
+            if (event.key === 'PageDown' && (event.ctrlKey || event.metaKey) && !event.shiftKey) {
+                event.preventDefault();
+                event.cancelBubble = true;
+                this.nextPage();
+            }
+            if (event.key === 'PageUp'&& (event.ctrlKey || event.metaKey) && !event.shiftKey) {
+                event.preventDefault();
+                event.cancelBubble = true;
+                this.previousPage();
+            }
+            if (event.key === 'PageDown' && (event.ctrlKey || event.metaKey) && event.shiftKey) {
+                event.preventDefault();
+                event.cancelBubble = true;
+                this.lastPage();
+            }
+            if (event.key === 'PageUp'&& (event.ctrlKey || event.metaKey) && event.shiftKey) {
+                event.preventDefault();
+                event.cancelBubble = true;
+                this.firstPage();
             }
             if ((event.ctrlKey || event.metaKey) && (event.key === 'b' || event.key === 'B')) {
                 event.preventDefault();
@@ -257,6 +279,11 @@ class TranslationView {
                 this.setSegments(arg.segments);
             }
         });
+        this.electron.ipcRenderer.on('count-changed', (event: Electron.IpcRendererEvent, arg: any) => {
+            if (arg.project === this.projectId) {
+                this.electron.ipcRenderer.send('get-segments-count', { project: this.projectId });
+            }
+        });
         this.watchSizes();
 
         setTimeout(() => {
@@ -290,7 +317,7 @@ class TranslationView {
     }
 
     buildTopBar(topBar: HTMLDivElement): void {
-        let exportTranslations = document.createElement('a');
+        let exportTranslations: HTMLAnchorElement = document.createElement('a');
         exportTranslations.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 0 24 24" width="24"><path d="M19 12v7H5v-7H3v7c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2v-7h-2zm-6 .67l2.59-2.58L17 11.5l-5 5-5-5 1.41-1.41L11 12.67V3h2v9.67z"/></svg>' +
             '<span class="tooltiptext bottomTooltip">Export Translations</span>';
         exportTranslations.className = 'tooltip';
@@ -299,7 +326,7 @@ class TranslationView {
         });
         topBar.appendChild(exportTranslations);
 
-        let saveEdit = document.createElement('a');
+        let saveEdit: HTMLAnchorElement = document.createElement('a');
         saveEdit.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 0 24 24" width="24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm4.59-12.42L10 14.17l-2.59-2.58L6 13l4 4 8-8z"/></svg>' +
             '<span class="tooltiptext bottomTooltip">Save Changes</span>';
         saveEdit.className = 'tooltip';
@@ -309,7 +336,7 @@ class TranslationView {
         });
         topBar.appendChild(saveEdit);
 
-        let cancelEdit = document.createElement('a');
+        let cancelEdit: HTMLAnchorElement = document.createElement('a');
         cancelEdit.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 0 24 24" width="24"><path d="M12 2C6.47 2 2 6.47 2 12s4.47 10 10 10 10-4.47 10-10S17.53 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm3.59-13L12 10.59 8.41 7 7 8.41 10.59 12 7 15.59 8.41 17 12 13.41 15.59 17 17 15.59 13.41 12 17 8.41z"/></svg>' +
             '<span class="tooltiptext bottomTooltip">Discard Changes</span>';
         cancelEdit.className = 'tooltip';
@@ -318,7 +345,7 @@ class TranslationView {
         });
         topBar.appendChild(cancelEdit);
 
-        let confirmEdit = document.createElement('a');
+        let confirmEdit: HTMLAnchorElement = document.createElement('a');
         confirmEdit.innerHTML = TranslationView.SVG_FINAL +
             '<span class="tooltiptext bottomTooltip">Confirm Translation</span>';
         confirmEdit.className = 'tooltip';
@@ -328,7 +355,7 @@ class TranslationView {
         });
         topBar.appendChild(confirmEdit);
 
-        let confirmNextUntranslated = document.createElement('a');
+        let confirmNextUntranslated: HTMLAnchorElement = document.createElement('a');
         confirmNextUntranslated.innerHTML = TranslationView.SVG_UNTRANSLATED +
             '<span class="tooltiptext bottomTooltip">Confirm and go to Next Untranslated</span>';
         confirmNextUntranslated.className = 'tooltip';
@@ -337,7 +364,7 @@ class TranslationView {
         });
         topBar.appendChild(confirmNextUntranslated);
 
-        let confirmNextUnconfirmed = document.createElement('a');
+        let confirmNextUnconfirmed: HTMLAnchorElement = document.createElement('a');
         confirmNextUnconfirmed.innerHTML = TranslationView.SVG_TRANSLATED +
             '<span class="tooltiptext bottomTooltip">Confirm and go to Next Uncornfirmed</span>';
         confirmNextUnconfirmed.className = 'tooltip';
@@ -356,6 +383,25 @@ class TranslationView {
         });
         topBar.appendChild(goToLink);
 
+        let splitButton: HTMLAnchorElement = document.createElement('a');
+        splitButton.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 0 24 24" width="24"><path d="M8 19h3v4h2v-4h3l-4-4-4 4zm8-14h-3V1h-2v4H8l4 4 4-4zM4 11v2h16v-2H4z" /></svg>' +
+            '<span class="tooltiptext bottomTooltip">Split Segment</span>';
+        splitButton.className = 'tooltip';
+        splitButton.style.marginLeft = '20px';
+        splitButton.addEventListener('click', () => {
+            this.splitSegment();
+        });
+        topBar.appendChild(splitButton);
+
+        let mergeButton: HTMLAnchorElement = document.createElement('a');
+        mergeButton.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 0 24 24" width="24"><path d="M16 13h-3V3h-2v10H8l4 4 4-4zM4 19v2h16v-2H4z" /></svg>' +
+            '<span class="tooltiptext bottomTooltip">Merge With Next Segment</span>';
+        mergeButton.className = 'tooltip';
+        mergeButton.addEventListener('click', () => {
+            this.mergeNext();
+        });
+        topBar.appendChild(mergeButton);
+
         this.sortButton = document.createElement('a');
         this.sortButton.innerHTML = '<svg version="1.1" viewBox="0 0 24 24" height="24" width="24"><path style="stroke-width:0.6" d="m 8.666667,10.444444 v 3.111112 H 12 L 7,19 2,13.555556 H 5.333333 V 10.444444 H 2 L 7,5 12,10.444444 Z M 22,14.333333 h -8.333333 v 1.555556 H 22 Z M 22,19 H 13.666667 V 17.444444 H 22 Z m 0,-6.222222 H 13.666667 V 11.222222 H 22 Z M 22,9.6666667 H 13.666667 V 8.1111111 H 22 Z M 22,6.5555556 H 13.666667 V 5 H 22 Z" /></svg>' +
             '<span class="tooltiptext bottomTooltip">Sort Segments</span>';
@@ -366,7 +412,6 @@ class TranslationView {
         });
         topBar.appendChild(this.sortButton);
 
-
         this.filterButton = document.createElement('a');
         this.filterButton.innerHTML = '<svg version="1.1" viewBox="0 0 24 24" height="24" width="24"><path style="stroke-width:0.829702" d="M 18.091348,3.6666667 11.913044,14.119167 v 4.936666 l -0.826087,-0.5 V 14.119167 L 4.9086522,3.6666667 Z M 21,2 H 2 L 9.4347826,14.578333 V 19.5 L 13.565217,22 v -7.421667 z"/></svg>' +
             '<span class="tooltiptext bottomTooltip">Filter Segments</span>';
@@ -376,7 +421,7 @@ class TranslationView {
         });
         topBar.appendChild(this.filterButton);
 
-        let replaceText = document.createElement('a');
+        let replaceText: HTMLAnchorElement = document.createElement('a');
         replaceText.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 0 24 24" width="24"><path d="M11 6c1.38 0 2.63.56 3.54 1.46L12 10h6V4l-2.05 2.05C14.68 4.78 12.93 4 11 4c-3.53 0-6.43 2.61-6.92 6H6.1c.46-2.28 2.48-4 4.9-4zm5.64 9.14c.66-.9 1.12-1.97 1.28-3.14H15.9c-.46 2.28-2.48 4-4.9 4-1.38 0-2.63-.56-3.54-1.46L10 12H4v6l2.05-2.05C7.32 17.22 9.07 18 11 18c1.55 0 2.98-.51 4.14-1.36L20 21.49 21.49 20l-4.85-4.86z"/></svg>' +
             '<span class="tooltiptext bottomTooltip">Replace Text</span>';
         replaceText.className = 'tooltip';
@@ -385,7 +430,7 @@ class TranslationView {
         });
         topBar.appendChild(replaceText);
 
-        let statisticsButton = document.createElement('a');
+        let statisticsButton: HTMLAnchorElement = document.createElement('a');
         statisticsButton.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 0 24 24" width="24"><path d="M9 17H7v-7h2v7zm4 0h-2V7h2v10zm4 0h-2v-4h2v4zm2.5 2.1h-15V5h15v14.1zm0-16.1h-15c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h15c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2z"/></svg>' +
             '<span class="tooltiptext bottomTooltip">Project Statistics</span>';
         statisticsButton.className = 'tooltip';
@@ -395,7 +440,7 @@ class TranslationView {
         });
         topBar.appendChild(statisticsButton);
 
-        let htmlExportButton = document.createElement('a');
+        let htmlExportButton: HTMLAnchorElement = document.createElement('a');
         htmlExportButton.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" enable-background="new 0 0 24 24" height="24" viewBox="0 0 24 24" width="24"><path d="M19,3H5C3.89,3,3,3.9,3,5v14c0,1.1,0.89,2,2,2h14c1.1,0,2-0.9,2-2V5C21,3.9,20.11,3,19,3z M19,19H5V7h14V19z M17,12H7v-2 h10V12z M13,16H7v-2h6V16z"/></svg>' +
             '<span class="tooltiptext bottomTooltip">Export HTML</span>';
         htmlExportButton.className = 'tooltip';
@@ -404,7 +449,7 @@ class TranslationView {
         });
         topBar.appendChild(htmlExportButton);
 
-        let concordanceButton = document.createElement('a');
+        let concordanceButton: HTMLAnchorElement = document.createElement('a');
         concordanceButton.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path d="M21.172 24l-7.387-7.387c-1.388.874-3.024 1.387-4.785 1.387-4.971 0-9-4.029-9-9s4.029-9 9-9 9 4.029 9 9c0 1.761-.514 3.398-1.387 4.785l7.387 7.387-2.828 2.828zm-12.172-8c3.859 0 7-3.14 7-7s-3.141-7-7-7-7 3.14-7 7 3.141 7 7 7z"/></svg>' +
             '<span class="tooltiptext bottomTooltip">Concordance Search</span>';
         concordanceButton.className = 'tooltip';
@@ -414,7 +459,7 @@ class TranslationView {
         });
         topBar.appendChild(concordanceButton);
 
-        let addTermButton = document.createElement('a');
+        let addTermButton: HTMLAnchorElement = document.createElement('a');
         addTermButton.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 0 24 24" width="24"><path d="M14 10H2v2h12v-2zm0-4H2v2h12V6zm4 8v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zM2 16h8v-2H2v2z"/></svg>' +
             '<span class="tooltiptext bottomTooltip">Add Term to Glossary</span>';
         addTermButton.className = 'tooltip';
@@ -424,7 +469,7 @@ class TranslationView {
         });
         topBar.appendChild(addTermButton);
 
-        let termSearchButton = document.createElement('a');
+        let termSearchButton: HTMLAnchorElement = document.createElement('a');
         termSearchButton.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path d="M13 8h-8v-1h8v1zm0 2h-8v-1h8v1zm-3 2h-5v-1h5v1zm11.172 12l-7.387-7.387c-1.388.874-3.024 1.387-4.785 1.387-4.971 0-9-4.029-9-9s4.029-9 9-9 9 4.029 9 9c0 1.761-.514 3.398-1.387 4.785l7.387 7.387-2.828 2.828zm-12.172-8c3.859 0 7-3.14 7-7s-3.141-7-7-7-7 3.14-7 7 3.141 7 7 7z"/></svg>' +
             '<span class="tooltiptext bottomTooltip">Search Term in Glossary</span>';
         termSearchButton.className = 'tooltip';
@@ -433,7 +478,7 @@ class TranslationView {
         });
         topBar.appendChild(termSearchButton);
 
-        let tagsAnalysisButton = document.createElement('a');
+        let tagsAnalysisButton: HTMLAnchorElement = document.createElement('a');
         tagsAnalysisButton.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 0 24 24" width="24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V5h14v14zm-7-2h2V7h-4v2h2z"/></svg>' +
             '<span class="tooltiptext bottomTooltip">Check Inline Tags</span>';
         tagsAnalysisButton.className = 'tooltip';
@@ -443,7 +488,7 @@ class TranslationView {
         });
         topBar.appendChild(tagsAnalysisButton);
 
-        let spaceAnalysisButton = document.createElement('a');
+        let spaceAnalysisButton: HTMLAnchorElement = document.createElement('a');
         spaceAnalysisButton.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 0 24 24" width="24"><path d="M3 21h18v-2H3v2zM3 8v8l4-4-4-4zm8 9h10v-2H11v2zM3 3v2h18V3H3zm8 6h10V7H11v2zm0 4h10v-2H11v2z"/></svg>' +
             '<span class="tooltiptext bottomTooltip">Check Initial/Trailing Spaces</span>';
         spaceAnalysisButton.className = 'tooltip';
@@ -472,7 +517,7 @@ class TranslationView {
         });
         topBar.appendChild(this.memSelect);
 
-        let requestTranslation = document.createElement('a');
+        let requestTranslation: HTMLAnchorElement = document.createElement('a');
         requestTranslation.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path d="M21 21h-1.713l-.658-1.846h-3l-.663 1.846h-1.659l3.04-8h1.603l3.05 8zm-2.814-3.12l-1.049-3.018-1.054 3.018h2.103zm-9.464-12.037l.125-.562-1.02-.199-.101.464c-.345-.05-.712-.057-1.083-.019.009-.249.023-.494.045-.728h1.141v-.966h-1.004c.049-.246.092-.394.134-.533l-.997-.3c-.072.245-.134.484-.195.833h-1.138v.966h1.014c-.027.312-.043.637-.048.964-1.119.411-1.595 1.195-1.595 1.905 0 .84.663 1.578 1.709 1.482 1.301-.118 2.169-1.1 2.679-2.308.525.303.746.814.548 1.286-.185.436-.725.852-1.757.831v1.041c1.146.018 2.272-.417 2.715-1.469.431-1.028-.062-2.151-1.172-2.688zm-1.342.71c-.162.36-.375.717-.648.998-.041-.3-.07-.628-.086-.978.249-.032.499-.038.734-.02zm-1.758.336c.028.44.078.844.148 1.205-.927.169-.963-.744-.148-1.205zm15.378 5.111c.552 0 1 .449 1 1v8c0 .551-.448 1-1 1h-8c-.552 0-1-.449-1-1v-8c0-.551.448-1 1-1h8zm0-2h-8c-1.656 0-3 1.343-3 3v8c0 1.657 1.344 3 3 3h8c1.657 0 3-1.343 3-3v-8c0-1.657-1.343-3-3-3zm-13 3c0-.342.035-.677.102-1h-5.102c-.552 0-1-.449-1-1v-8c0-.551.448-1 1-1h8c.552 0 1 .449 1 1v5.101c.323-.066.657-.101 1-.101h1v-5c0-1.657-1.343-3-3-3h-8c-1.656 0-3 1.343-3 3v8c0 1.657 1.344 3 3 3h5v-1z"/></svg>' +
             '<span class="tooltiptext bottomCenterTooltip">Apply Translation Memory to All Segments</span>';
         requestTranslation.className = 'tooltip';
@@ -498,7 +543,7 @@ class TranslationView {
         });
         topBar.appendChild(this.glossSelect);
 
-        let requestTerms = document.createElement('a');
+        let requestTerms: HTMLAnchorElement = document.createElement('a');
         requestTerms.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" enable-background="new 0 0 24 24" height="24" viewBox="0 0 24 24" width="24"><path d="M14.17,5L19,9.83V19H5V5L14.17,5L14.17,5 M14.17,3H5C3.9,3,3,3.9,3,5v14c0,1.1,0.9,2,2,2h14c1.1,0,2-0.9,2-2V9.83 c0-0.53-0.21-1.04-0.59-1.41l-4.83-4.83C15.21,3.21,14.7,3,14.17,3L14.17,3z M7,15h10v2H7V15z M7,11h10v2H7V11z M7,7h7v2H7V7z"/></svg>' +
             '<span class="tooltiptext bottomRightTooltip">Get Terms for All Segments</span>';
         requestTerms.className = 'tooltip';
@@ -519,7 +564,7 @@ class TranslationView {
     }
 
     setSize() {
-        let main = document.getElementById('main');
+        let main: HTMLDivElement = document.getElementById('main') as HTMLDivElement;
         this.container.style.width = main.clientWidth + 'px';
         this.container.style.height = main.clientHeight + 'px';
         this.mainArea.style.height = (main.clientHeight - 34) + 'px';
@@ -527,7 +572,7 @@ class TranslationView {
     }
 
     watchSizes(): void {
-        let targetNode: HTMLElement = document.getElementById('main');
+        let targetNode: HTMLDivElement = document.getElementById('main') as HTMLDivElement;
         let config: any = { attributes: true, childList: false, subtree: false };
         this.observer = new MutationObserver((mutationsList) => {
             for (let mutation of mutationsList) {
@@ -596,7 +641,7 @@ class TranslationView {
         let tr: HTMLTableRowElement = document.createElement('tr');
         thead.appendChild(tr);
 
-        let th = document.createElement('th');
+        let th: HTMLTableHeaderCellElement = document.createElement('th');
         th.classList.add('fixed');
         th.innerText = '#'
         tr.appendChild(th);
@@ -706,7 +751,7 @@ class TranslationView {
         rowsLabel.style.marginTop = '4px';
         this.statusArea.appendChild(rowsLabel);
 
-        let rowDiv = document.createElement('div');
+        let rowDiv: HTMLDivElement = document.createElement('div');
         rowDiv.classList.add('tooltip');
         this.statusArea.appendChild(rowDiv);
 
@@ -768,7 +813,7 @@ class TranslationView {
         this.tmMatches = new TmMatches(matchesContainer, this.projectId);
 
         let config: any = { attributes: true, childList: false, subtree: false };
-        let observer = new MutationObserver((mutationsList) => {
+        let observer: MutationObserver = new MutationObserver((mutationsList) => {
             for (let mutation of mutationsList) {
                 if (mutation.type === 'attributes') {
                     matchesContainer.style.height = (this.memoryArea.clientHeight - memoryTitle.clientHeight) + 'px';
@@ -823,12 +868,13 @@ class TranslationView {
     setSegments(arg: any[]): void {
         this.tbody.innerHTML = '';
         this.tbody.parentElement.scrollTo({ top: 0, left: 0, behavior: 'smooth' });
-        let length = arg.length;
+        let length: number = arg.length;
         if (length === 0 && this.filterButton.classList.contains('active')) {
             this.electron.ipcRenderer.send('show-message', { type: 'warning', message: 'Nothing to display, consider clearing current filter' });
             this.container.classList.remove('wait');
             return;
         }
+        let returnRow: HTMLTableRowElement;
         for (let i = 0; i < length; i++) {
             let row: any = arg[i];
             let tr: HTMLTableRowElement = document.createElement('tr');
@@ -838,12 +884,25 @@ class TranslationView {
             tr.addEventListener('click', (event: MouseEvent) => this.rowClickListener(event));
             this.tbody.appendChild(tr);
 
+            if (row.file === this.returnTo.file && row.unit === this.returnTo.unit && row.segment === this.returnTo.segment) {
+                returnRow = tr;
+            }
+
             let td: HTMLTableCellElement = document.createElement('td');
             td.classList.add('middle');
             td.classList.add('center');
             td.classList.add('initial');
             td.innerText = row.index + 1;
             tr.appendChild(td);
+
+            if (length > 1 && ((i > 0 && arg[i - 1].unit === row.unit) || (i < length - 1 && arg[i + 1].unit === row.unit))) {
+                let unit: number = Number.parseInt(row.unit);
+                if (unit % 2 === 0) {
+                    td.classList.add('evenUnit');
+                } else {
+                    td.classList.add('oddUnit');
+                }
+            }
 
             td = document.createElement('td');
             td.classList.add('source');
@@ -903,6 +962,12 @@ class TranslationView {
         this.container.classList.remove('wait');
 
         let rows: HTMLCollection = this.tbody.rows;
+        this.currentId = { id: '', file: '', unit: '' };
+        if (returnRow) {
+            this.selectRow(returnRow, true);
+            this.returnTo = { file: '', unit: '', segment: '' };
+            return;
+        }
         this.selectRow((rows[0] as HTMLTableRowElement), true);
     }
 
@@ -989,7 +1054,7 @@ class TranslationView {
         let next: string = arg.next;
         this.currentCell.classList.remove('editing');
         this.currentRow.classList.remove('currentRow');
-        let translation = this.currentCell.innerHTML;
+        let translation: string = this.getTranslation(this.currentCell.innerHTML);
         this.currentCell.innerHTML = this.highlightSpaces(translation);
 
         let isConfirmed: boolean = this.currentState.classList.contains('final');
@@ -1105,6 +1170,13 @@ class TranslationView {
         }
     }
 
+    getTranslation(html: string): string {
+        if (html.trim() === '<br>') {
+            html = '';
+        }
+        return html;
+    }
+
     nextUntranslated(): void {
         this.saveEdit({ confirm: false, next: 'untranslated' });
         return;
@@ -1147,9 +1219,9 @@ class TranslationView {
         }
         this.currentRow = row;
         this.currentRow.classList.add('currentRow');
-        let id = this.currentRow.getAttribute('data-id');
-        let file = this.currentRow.getAttribute('data-file');
-        let unit = this.currentRow.getAttribute('data-unit');
+        let id: string = this.currentRow.getAttribute('data-id');
+        let file: string = this.currentRow.getAttribute('data-file');
+        let unit: string = this.currentRow.getAttribute('data-unit');
 
         let sameRow: boolean = (id === this.currentId.id && file === this.currentId.file && unit === this.currentId.unit);
 
@@ -1197,7 +1269,7 @@ class TranslationView {
     }
 
     getTags(element: HTMLTableCellElement): Map<string, string> {
-        let map = new Map<string, string>();
+        let map: Map<string, string> = new Map<string, string>();
         let children: HTMLCollectionOf<HTMLImageElement> = element.getElementsByTagName('img');
         let length: number = children.length;
         for (let i = 0; i < length; i++) {
@@ -1229,7 +1301,7 @@ class TranslationView {
             let tag: string = '' + arg.tag;
             if (this.sourceTags.has(tag)) {
                 let target: HTMLTableCellElement = this.currentRow.getElementsByClassName('target')[0] as HTMLTableCellElement;
-                let targetTags = this.getTags(target);
+                let targetTags: Map<string, string> = this.getTags(target);
                 if (targetTags.has(tag)) {
                     this.removeTag(tag);
                 }
@@ -1241,16 +1313,16 @@ class TranslationView {
     }
 
     autoPropagate(rows: any[]): void {
-        let length = rows.length;
-        for (let i = 0; i < length; i++) {
+        let length: number = rows.length;
+        for (let i: number = 0; i < length; i++) {
             this.updateBody(rows[i]);
         }
     }
 
     updateBody(data: any): void {
         let rows: HTMLCollectionOf<HTMLTableRowElement> = this.tbody.getElementsByTagName('tr');
-        let length = rows.length;
-        for (let i = 0; i < length; i++) {
+        let length: number = rows.length;
+        for (let i: number = 0; i < length; i++) {
             let row: HTMLTableRowElement = rows[i];
             if (row.getAttribute('data-file') === data.file && row.getAttribute('data-unit') === data.unit
                 && row.getAttribute('data-id') === data.segment) {
@@ -1268,10 +1340,10 @@ class TranslationView {
     setMatches(matches: any[]): void {
         this.tmMatches.clear();
         this.mtMatches.clear();
-        let length = matches.length;
+        let length: number = matches.length;
         let max: number = 0;
-        for (let i = 0; i < length; i++) {
-            let match = matches[i];
+        for (let i: number = 0; i < length; i++) {
+            let match: any = matches[i];
             match.project = this.projectId;
             if (match.type === 'tm') {
                 this.tmMatches.add(match);
@@ -1315,9 +1387,9 @@ class TranslationView {
             return;
         }
         let array: string[] = [];
-        let options = '<option value="none" class="error">-- Select Memory --</option>';
-        let length = memories.length;
-        for (let i = 0; i < length; i++) {
+        let options: string = '<option value="none" class="error">-- Select Memory --</option>';
+        let length: number = memories.length;
+        for (let i: number = 0; i < length; i++) {
             let mem: string[] = memories[i];
             array.push(mem[0]);
             options = options + '<option value="' + mem[0] + '">' + mem[1] + '</option>';
@@ -1405,26 +1477,47 @@ class TranslationView {
     }
 
     applyTranslationMemoryAll(): void {
-        if (this.memSelect.value === 'none') {
-            this.electron.ipcRenderer.send('show-message', { type: 'warning', message: 'Select memory' });
-            return;
+        this.returnTo = {
+            file: this.currentId.file,
+            unit: this.currentId.unit,
+            segment: this.currentId.id
         }
-        this.electron.ipcRenderer.send('search-memory-all', { project: this.projectId, memory: this.memSelect.value });
+        this.electron.ipcRenderer.send('show-apply-tm', { project: this.projectId, memory: this.memSelect.value });
     }
 
     removeAllTranslations(): void {
+        this.returnTo = {
+            file: this.currentId.file,
+            unit: this.currentId.unit,
+            segment: this.currentId.id
+        }
         this.electron.ipcRenderer.send('remove-translations', { project: this.projectId });
     }
 
     removeAllMatches(): void {
+        this.returnTo = {
+            file: this.currentId.file,
+            unit: this.currentId.unit,
+            segment: this.currentId.id
+        }
         this.electron.ipcRenderer.send('remove-all-matches', { project: this.projectId });
     }
 
     removeAllMachineTranslations(): void {
+        this.returnTo = {
+            file: this.currentId.file,
+            unit: this.currentId.unit,
+            segment: this.currentId.id
+        }
         this.electron.ipcRenderer.send('remove-machine-translations', { project: this.projectId });
     }
 
     unconfirmAllTranslations(): void {
+        this.returnTo = {
+            file: this.currentId.file,
+            unit: this.currentId.unit,
+            segment: this.currentId.id
+        }
         this.electron.ipcRenderer.send('unconfirm-translations', { project: this.projectId });
     }
 
@@ -1433,14 +1526,29 @@ class TranslationView {
     }
 
     copyAllSources(): void {
+        this.returnTo = {
+            file: this.currentId.file,
+            unit: this.currentId.unit,
+            segment: this.currentId.id
+        }
         this.electron.ipcRenderer.send('copy-sources', { project: this.projectId });
     }
 
     confirmAllTranslations(): void {
+        this.returnTo = {
+            file: this.currentId.file,
+            unit: this.currentId.unit,
+            segment: this.currentId.id
+        }
         this.electron.ipcRenderer.send('confirm-translations', { project: this.projectId });
     }
 
     acceptAll100Matches(): void {
+        this.returnTo = {
+            file: this.currentId.file,
+            unit: this.currentId.unit,
+            segment: this.currentId.id
+        }
         this.electron.ipcRenderer.send('accept-100-matches', { project: this.projectId });
     }
 
@@ -1499,6 +1607,11 @@ class TranslationView {
     }
 
     applyMachineTranslationsAll(): void {
+        this.returnTo = {
+            file: this.currentId.file,
+            unit: this.currentId.unit,
+            segment: this.currentId.id
+        }
         this.electron.ipcRenderer.send('apply-mt-all', { project: this.projectId });
     }
 
@@ -1510,6 +1623,11 @@ class TranslationView {
         if (this.glossSelect.value === 'none') {
             this.electron.ipcRenderer.send('show-message', { type: 'warning', message: 'Select glossary' });
             return;
+        }
+        this.returnTo = {
+            file: this.currentId.file,
+            unit: this.currentId.unit,
+            segment: this.currentId.id
         }
         this.electron.ipcRenderer.send('assemble-matches-all', {
             project: this.projectId,
@@ -1523,6 +1641,11 @@ class TranslationView {
     }
 
     acceptAllMachineTranslations(): void {
+        this.returnTo = {
+            file: this.currentId.file,
+            unit: this.currentId.unit,
+            segment: this.currentId.id
+        }
         this.electron.ipcRenderer.send('accept-mt-all', { project: this.projectId });
     }
 
@@ -1533,9 +1656,9 @@ class TranslationView {
             return;
         }
         let array: string[] = [];
-        let options = '<option value="none" class="error">-- Select Glossary --</option>';
-        let length = glossaries.length;
-        for (let i = 0; i < length; i++) {
+        let options: string = '<option value="none" class="error">-- Select Glossary --</option>';
+        let length: number = glossaries.length;
+        for (let i: number = 0; i < length; i++) {
             let mem: string[] = glossaries[i];
             array.push(mem[0]);
             options = options + '<option value="' + mem[0] + '">' + mem[1] + '</option>';
@@ -1624,8 +1747,8 @@ class TranslationView {
 
     highlightSpaces(text: string): string {
         let start: string = '';
-        for (let i = 0; i < text.length; i++) {
-            let c = text.charAt(i);
+        for (let i: number = 0; i < text.length; i++) {
+            let c: string = text.charAt(i);
             if (!this.isWhiteSpace(c)) {
                 break;
             }
@@ -1635,8 +1758,8 @@ class TranslationView {
             text = "<span class='space'>" + start + "</span>" + text.substring(start.length);
         }
         let end: string = '';
-        for (let i = text.length - 1; i >= 0; i--) {
-            let c = text.charAt(i);
+        for (let i: number = text.length - 1; i >= 0; i--) {
+            let c: string = text.charAt(i);
             if (!this.isWhiteSpace(c)) {
                 break;
             }
@@ -1714,7 +1837,6 @@ class TranslationView {
     }
 
     caseChanged(arg: any): void {
-        console.log(JSON.stringify(arg));
         if (arg.case === 'sentence') {
             this.currentCell.innerText = this.sentence(this.currentCell.innerText);
         }
@@ -1737,13 +1859,13 @@ class TranslationView {
     }
 
     sentence(str: string): string {
-        let result = '';
+        let result: string = '';
         str = str.toLocaleLowerCase(this.tgtLang);
-        let changed = false;
+        let changed: boolean = false;
         for (let i: number = 0; i < str.length; i++) {
             let c: string = str.charAt(i);
             if (!changed) {
-                let d = c.toLocaleUpperCase(this.tgtLang);
+                let d: string = c.toLocaleUpperCase(this.tgtLang);
                 if (c !== d) {
                     c = d;
                     changed = true;
@@ -1768,4 +1890,103 @@ class TranslationView {
         return result;
     }
 
+    splitSegment(): void {
+        if (this.currentState.classList.contains('final')) {
+            this.electron.ipcRenderer.send('show-message', { type: 'warning', message: 'Confirmed segment' });
+            return;
+        }
+        if (this.currentTranslate.innerHTML.indexOf('path') > 0) {
+            this.electron.ipcRenderer.send('show-message', { type: 'warning', message: 'Locked segment' });
+            return;
+        }
+        let source: HTMLTableCellElement = this.currentRow.getElementsByClassName('source')[0] as HTMLTableCellElement;
+        source.classList.add('splitting');
+        source.innerHTML = source.innerText;
+        source.contentEditable = 'true';
+        source.focus();
+        source.addEventListener('keydown', (key: KeyboardEvent) => this.sourceKeyListener(key, source.innerHTML));
+        source.addEventListener('focusout', () => {
+            source.classList.remove('splitting');
+        });
+    }
+
+    sourceKeyListener(event: KeyboardEvent, originalHTML: string): void {
+        let allowedKeys: string[] = ['Escape', 'Enter', 'NumpadEnter', 'ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown', 'Alt'];
+        if (!allowedKeys.includes(event.key)) {
+            event.preventDefault();
+            event.cancelBubble = true;
+            return;
+        }
+        if (event.key === 'Escape') {
+            let source: HTMLTableCellElement = event.currentTarget as HTMLTableCellElement;
+            source.innerHTML = originalHTML;
+            source.contentEditable = 'false';
+            this.currentCell.focus();
+        }
+
+        if (event.key === 'Enter' || event.key === 'NumpadEnter') {
+            event.preventDefault();
+            event.cancelBubble = true;
+            let selection: Selection = window.getSelection();
+            if (selection.rangeCount !== 0) {
+                let source: HTMLTableCellElement = event.currentTarget as HTMLTableCellElement;
+                source.contentEditable = 'false';
+                if (selection.anchorOffset === 0 || selection.anchorOffset === selection.anchorNode.textContent.length) {
+                    source.innerHTML = originalHTML;
+                    this.currentCell.focus();
+                } else {
+                    this.returnTo = {
+                        file: this.currentId.file,
+                        unit: this.currentId.unit,
+                        segment: this.currentId.id + '-1'
+                    }
+                    this.electron.ipcRenderer.send('split-at', {
+                        project: this.projectId,
+                        file: this.currentId.file,
+                        unit: this.currentId.unit,
+                        segment: this.currentId.id,
+                        text: selection.anchorNode.textContent,
+                        offset: selection.anchorOffset
+                    });
+                }
+            }
+        }
+    }
+
+    mergeNext(): void {
+        if (this.currentState.classList.contains('final')) {
+            this.electron.ipcRenderer.send('show-message', { type: 'warning', message: 'Confirmed segment' });
+            return;
+        }
+        if (this.currentTranslate.innerHTML.indexOf('path') > 0) {
+            this.electron.ipcRenderer.send('show-message', { type: 'warning', message: 'Locked segment' });
+            return;
+        }
+        let nextRow: HTMLTableRowElement = this.currentRow.nextElementSibling as HTMLTableRowElement;
+        if (nextRow) {
+            if (this.currentRow.getAttribute('data-file') === nextRow.getAttribute('data-file') && this.currentRow.getAttribute('data-unit') === nextRow.getAttribute('data-unit')) {
+                if (nextRow.getElementsByClassName('state')[0].classList.contains('final')) {
+                    this.electron.ipcRenderer.send('show-message', { type: 'warning', message: 'Confirmed segment' });
+                    return;
+                }
+                if (nextRow.getElementsByClassName('translate')[0].innerHTML.indexOf('path') > 0) {
+                    this.electron.ipcRenderer.send('show-message', { type: 'warning', message: 'Locked segment' });
+                    return;
+                }
+                this.returnTo = {
+                    file: this.currentId.file,
+                    unit: this.currentId.unit,
+                    segment: this.currentId.id
+                }
+                this.electron.ipcRenderer.send('merge-at', {
+                    project: this.projectId,
+                    file: this.currentId.file,
+                    unit: this.currentId.unit,
+                    segment: this.currentId.id
+                });
+                return;
+            }
+            this.electron.ipcRenderer.send('show-message', { type: 'warning', message: 'Segments from different paragraphs' });
+        }
+    }
 }

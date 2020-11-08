@@ -40,7 +40,6 @@ class Tags {
 
     parseKey(event: KeyboardEvent): void {
         let code: string = event.code;
-        console.log(code);
         if (code === 'Escape') {
             this.electron.ipcRenderer.send('close-tags');
         }

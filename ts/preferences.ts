@@ -67,12 +67,10 @@ class Preferences {
 
 
     constructor() {
-
         this.tabHolder = new TabHolder(document.getElementById('main') as HTMLDivElement, "preferencesHolder");
 
         let basicTab: Tab = new Tab('basicTab', 'Basic', false);
         basicTab.getLabel().addEventListener('click', () => {
-            let body: HTMLBodyElement = document.getElementById('body') as HTMLBodyElement;
             this.electron.ipcRenderer.send('settings-height', { width: body.clientWidth, height: body.clientHeight });
         });
         this.tabHolder.addTab(basicTab);
@@ -80,7 +78,6 @@ class Preferences {
 
         let mtTab: Tab = new Tab('mtTab', 'Machine Translation', false);
         mtTab.getLabel().addEventListener('click', () => {
-            let body: HTMLBodyElement = document.getElementById('body') as HTMLBodyElement;
             this.electron.ipcRenderer.send('settings-height', { width: body.clientWidth, height: body.clientHeight });
         });
         this.tabHolder.addTab(mtTab);
@@ -88,7 +85,6 @@ class Preferences {
 
         let spellcheckTab: Tab = new Tab('spellcheckTab', 'Spellchecker', false);
         spellcheckTab.getLabel().addEventListener('click', () => {
-            let body: HTMLBodyElement = document.getElementById('body') as HTMLBodyElement;
             this.electron.ipcRenderer.send('settings-height', { width: body.clientWidth, height: body.clientHeight });
         });
         this.tabHolder.addTab(spellcheckTab);
@@ -96,7 +92,6 @@ class Preferences {
 
         let advancedTab: Tab = new Tab('advancedTab', 'Advanced', false);
         advancedTab.getLabel().addEventListener('click', () => {
-            let body: HTMLBodyElement = document.getElementById('body') as HTMLBodyElement;
             this.electron.ipcRenderer.send('settings-height', { width: body.clientWidth, height: body.clientHeight });
         });
         this.tabHolder.addTab(advancedTab);
@@ -131,7 +126,6 @@ class Preferences {
             this.savePreferences();
         });
         this.electron.ipcRenderer.on('get-height', () => {
-            let body: HTMLBodyElement = document.getElementById('body') as HTMLBodyElement;
             this.electron.ipcRenderer.send('settings-height', { width: body.clientWidth, height: body.clientHeight });
         });
         this.electron.ipcRenderer.on('set-srx', (event, arg) => {

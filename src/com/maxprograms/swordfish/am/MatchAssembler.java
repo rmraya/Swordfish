@@ -61,9 +61,12 @@ public class MatchAssembler {
 
     private static SAXBuilder builder;
 
-    public static Match assembleMatch(Element segmentSource, String textOnly, List<Match> tmMatches,
-            ITmEngine glossEngine, String srcLang, String tgtLang)
-            throws IOException, ParserConfigurationException, SAXException, SQLException {
+    private MatchAssembler() {
+        // private for security
+    }
+
+    public static Match assembleMatch(String textOnly, List<Match> tmMatches, ITmEngine glossEngine, String srcLang,
+            String tgtLang) throws IOException, ParserConfigurationException, SAXException, SQLException {
         List<Match> result = new ArrayList<>();
 
         String pureText = textOnly.trim();

@@ -39,7 +39,7 @@ class ReplaceText {
         });
         this.electron.ipcRenderer.send('get-project-param');
         this.electron.ipcRenderer.on('set-project', (event: Electron.IpcRendererEvent, arg: any) => {
-            this.project = arg.project;
+            this.project = arg;
         });
         document.getElementById('replace').addEventListener('click', () => {
             this.replaceText();

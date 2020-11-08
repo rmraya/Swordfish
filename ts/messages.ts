@@ -30,10 +30,6 @@ class Messages {
         this.electron.ipcRenderer.on('set-theme', (event: Electron.IpcRendererEvent, arg: any) => {
             (document.getElementById('theme') as HTMLLinkElement).href = arg;
         });
-        this.electron.ipcRenderer.on('get-height', () => {
-            let body: HTMLBodyElement = document.getElementById('body') as HTMLBodyElement;
-            this.electron.ipcRenderer.send('messages-height', { width: body.clientWidth, height: body.clientHeight });
-        });
         this.electron.ipcRenderer.send('get-message-param');
         this.electron.ipcRenderer.on('set-message', (event: Electron.IpcRendererEvent, arg: any) => {
             this.setMessage(arg);

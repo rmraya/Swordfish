@@ -51,6 +51,7 @@ class Swordfish {
     static goToWindow: BrowserWindow;
     static sortSegmentsWindow: BrowserWindow;
     static changeCaseWindow: BrowserWindow;
+    static applyTmWindow: BrowserWindow;
 
     javapath: string = Swordfish.path.join(app.getAppPath(), 'bin', 'java');
 
@@ -191,8 +192,7 @@ class Swordfish {
             }
         });
 
-        var ck: Buffer = execFileSync(this.javapath, ['--module-path', 'lib', '-m', 'openxliff/com.maxprograms.server.CheckURL', 'http://localhost:8070/TMSServer'], { cwd: app.getAppPath() });
-        console.log(ck.toString());
+        execFileSync(this.javapath, ['--module-path', 'lib', '-m', 'openxliff/com.maxprograms.server.CheckURL', 'http://localhost:8070/TMSServer'], { cwd: app.getAppPath() });
 
         this.loadDefaults();
         Swordfish.loadPreferences();
@@ -294,7 +294,7 @@ class Swordfish {
             Swordfish.mainWindow.webContents.send('open-segment', arg);
         });
         ipcMain.on('get-project-param', (event: IpcMainEvent) => {
-            event.sender.send('set-project', Swordfish.projectParam);
+            Swordfish.projectParam ? event.sender.send('set-project', Swordfish.projectParam) : event.preventDefault();
         });
         ipcMain.on('replaceText-height', (event: IpcMainEvent, arg: any) => {
             Swordfish.setHeight(Swordfish.replaceTextWindow, arg);
@@ -378,7 +378,7 @@ class Swordfish {
             Swordfish.showImportTMX(arg);
         });
         ipcMain.on('get-memory-param', (event: IpcMainEvent) => {
-            event.sender.send('set-memory', Swordfish.memoryParam);
+            Swordfish.memoryParam ? event.sender.send('set-memory', Swordfish.memoryParam) : event.preventDefault();
         });
         ipcMain.on('show-import-glossary', (event: IpcMainEvent, arg: any) => {
             Swordfish.showImportGlossary(arg);
@@ -581,6 +581,15 @@ class Swordfish {
         ipcMain.on('search-memory-all', (event: IpcMainEvent, arg: any) => {
             Swordfish.tmTranslateAll(arg);
         });
+        ipcMain.on('show-apply-tm', (event: IpcMainEvent, arg: any) => {
+            Swordfish.showApplyTm(arg);
+        });
+        ipcMain.on('close-apply-tm', () => {
+            Swordfish.destroyWindow(Swordfish.applyTmWindow);
+        });
+        ipcMain.on('apply-tm-height', (event: IpcMainEvent, arg: any) => {
+            Swordfish.setHeight(Swordfish.applyTmWindow, arg);
+        });
         ipcMain.on('tm-translate', (event: IpcMainEvent, arg: any) => {
             Swordfish.tmTranslate(arg);
         });
@@ -743,6 +752,12 @@ class Swordfish {
         ipcMain.on('change-case-to', (event: IpcMainEvent, arg: any) => {
             Swordfish.changeCaseTo(arg);
         });
+        ipcMain.on('split-at', (event: IpcMainEvent, arg: any) => {
+            Swordfish.splitSegment(arg);
+        });
+        ipcMain.on('merge-at', (event: IpcMainEvent, arg: any) => {
+            Swordfish.mergeSegment(arg);
+        });
     } // end constructor
 
     static createWindow(): void {
@@ -849,10 +864,10 @@ class Swordfish {
             new MenuItem({ type: 'separator' }),
             { label: 'Close Selected Tab', accelerator: 'CmdOrCtrl+W', click: () => { Swordfish.closeSelectedTab(); } },
             new MenuItem({ type: 'separator' }),
-            { label: 'First Page', accelerator: 'CmdOrCtrl+Shift+Home', click: () => { Swordfish.mainWindow.webContents.send('first-page'); } },
-            { label: 'Previous Page', accelerator: 'CmdOrCtrl+Home', click: () => { Swordfish.mainWindow.webContents.send('previous-page'); } },
-            { label: 'Next Page', accelerator: 'CmdOrCtrl+End', click: () => { Swordfish.mainWindow.webContents.send('next-page'); } },
-            { label: 'Last Page', accelerator: 'CmdOrCtrl+Shift+End', click: () => { Swordfish.mainWindow.webContents.send('last-page'); } },
+            { label: 'First Page', accelerator: 'CmdOrCtrl+Shift+PageUp', click: () => { Swordfish.mainWindow.webContents.send('first-page'); } },
+            { label: 'Previous Page', accelerator: 'CmdOrCtrl+PageUp', click: () => { Swordfish.mainWindow.webContents.send('previous-page'); } },
+            { label: 'Next Page', accelerator: 'CmdOrCtrl+PageDown', click: () => { Swordfish.mainWindow.webContents.send('next-page'); } },
+            { label: 'Last Page', accelerator: 'CmdOrCtrl+Shift+PageDown', click: () => { Swordfish.mainWindow.webContents.send('last-page'); } },
             new MenuItem({ type: 'separator' }),
             { label: 'Next Translation Memory Match', accelerator: 'CmdOrCtrl+Alt+Right', click: () => { Swordfish.mainWindow.webContents.send('next-match'); } },
             { label: 'Previous Translation Memory Match', accelerator: 'CmdOrCtrl+Alt+Left', click: () => { Swordfish.mainWindow.webContents.send('previous-match'); } },
@@ -1634,7 +1649,7 @@ class Swordfish {
                 }
                 this.showMessage({ type: 'error', message: 'Unable to open Swordfish User Guide.' });
             });
-        });;
+        });
     }
 
     static showAbout(): void {
@@ -1779,7 +1794,7 @@ class Swordfish {
                 console.log(reason.message);
             }
             this.showMessage({ type: 'error', message: 'Unable to open release history.' });
-        });;
+        });
     }
 
     static showSupportGroup(): void {
@@ -1788,7 +1803,7 @@ class Swordfish {
                 console.log(reason.message);
             }
             this.showMessage({ type: 'error', message: 'Unable to open support group page.' });
-        });;
+        });
     }
 
     static setTheme(): void {
@@ -2544,7 +2559,33 @@ class Swordfish {
         );
     }
 
+    static showApplyTm(arg: any): void {
+        this.applyTmWindow = new BrowserWindow({
+            parent: this.mainWindow,
+            width: 450,
+            minimizable: false,
+            maximizable: false,
+            resizable: false,
+            useContentSize: true,
+            show: false,
+            icon: this.iconPath,
+            webPreferences: {
+                nodeIntegration: true
+            }
+        });
+        if (arg.memory) {
+            Swordfish.memoryParam = arg.memory;
+        }
+        Swordfish.projectParam = arg.project;
+        this.applyTmWindow.setMenu(null);
+        this.applyTmWindow.loadURL('file://' + this.path.join(app.getAppPath(), 'html', 'applyTm.html'));
+        this.applyTmWindow.once('ready-to-show', () => {
+            this.applyTmWindow.show();
+        });
+    }
+
     static tmTranslateAll(arg: any): void {
+        Swordfish.destroyWindow(Swordfish.applyTmWindow);
         Swordfish.mainWindow.webContents.send('start-waiting');
         Swordfish.mainWindow.webContents.send('set-status', 'Translating Project');
         Swordfish.sendRequest('/projects/tmTranslateAll', arg,
@@ -2556,6 +2597,7 @@ class Swordfish {
                     return;
                 }
                 Swordfish.mainWindow.webContents.send('reload-page', { project: arg.project });
+                Swordfish.showMessage({ type: 'info', message: 'Added translations to ' + data.translated + ' segments' });
             },
             (reason: string) => {
                 Swordfish.mainWindow.webContents.send('end-waiting');
@@ -2713,6 +2755,8 @@ class Swordfish {
                 case 'replaceText': parent = Swordfish.replaceTextWindow;
                     break;
                 case 'termSearch': parent = Swordfish.termSearchWindow;
+                    break;
+                case 'applyTm': parent = Swordfish.applyTmWindow;
                     break;
                 default: parent = Swordfish.mainWindow;
             }
@@ -3262,7 +3306,7 @@ class Swordfish {
                         }
                         this.showMessage({ type: 'error', message: 'Unable to open statistics.' });
                     });
-                });;
+                });
             },
             (reason: string) => {
                 Swordfish.mainWindow.webContents.send('end-waiting');
@@ -3320,7 +3364,7 @@ class Swordfish {
         }
     }
 
-    static showReplaceText(project: string): void {
+    static showReplaceText(arg: any): void {
         this.replaceTextWindow = new BrowserWindow({
             parent: this.mainWindow,
             width: 450,
@@ -3334,7 +3378,7 @@ class Swordfish {
                 nodeIntegration: true
             }
         });
-        this.projectParam = project;
+        this.projectParam = arg.project;
         this.replaceTextWindow.setMenu(null);
         this.replaceTextWindow.loadURL('file://' + this.path.join(app.getAppPath(), 'html', 'replaceText.html'));
         this.replaceTextWindow.once('ready-to-show', () => {
@@ -3766,6 +3810,11 @@ class Swordfish {
                                     Swordfish.mainWindow.webContents.send('end-waiting');
                                     Swordfish.mainWindow.webContents.send('set-status', '');
                                     clearInterval(intervalObject);
+                                    if (Swordfish.currentStatus.segments > 0) {
+                                        Swordfish.showMessage({ type: 'info', message: 'Added terms to ' + Swordfish.currentStatus.segments + ' segments' });
+                                        return;
+                                    }
+                                    Swordfish.showMessage({ type: 'info', message: 'Terms not found' });
                                     return;
                                 } else if (Swordfish.currentStatus.progress === Swordfish.PROCESSING) {
                                     // it's OK, keep waiting
@@ -3950,7 +3999,7 @@ class Swordfish {
                         }
                         this.showMessage({ type: 'error', message: 'Unable to open HTML.' });
                     });
-                });;
+                });
             },
             (reason: string) => {
                 Swordfish.mainWindow.webContents.send('end-waiting');
@@ -3981,12 +4030,41 @@ class Swordfish {
             this.changeCaseWindow.setPosition(bounds.x + Number.parseInt('' + (bounds.width / 5)), bounds.y + Number.parseInt('' + (bounds.height / 4)));
             this.changeCaseWindow.show();
         });
-
     }
 
     static changeCaseTo(arg: any) {
         Swordfish.mainWindow.webContents.send('case-changed', arg);
         Swordfish.destroyWindow(this.changeCaseWindow);
+    }
+
+    static splitSegment(arg: any): void {
+        Swordfish.sendRequest('/projects/splitSegment', arg,
+            (data: any) => {
+                if (data.status !== Swordfish.SUCCESS) {
+                    Swordfish.showMessage({ type: 'error', message: data.reason });
+                    return;
+                }
+                Swordfish.mainWindow.webContents.send('count-changed', { project: arg.project });
+            },
+            (reason: string) => {
+                Swordfish.showMessage({ type: 'error', message: reason });
+            }
+        );
+    }
+
+    static mergeSegment(arg: any): void {
+        Swordfish.sendRequest('/projects/mergeSegment', arg,
+            (data: any) => {
+                if (data.status !== Swordfish.SUCCESS) {
+                    Swordfish.showMessage({ type: 'error', message: data.reason });
+                    return;
+                }
+                Swordfish.mainWindow.webContents.send('count-changed', { project: arg.project });
+            },
+            (reason: string) => {
+                Swordfish.showMessage({ type: 'error', message: reason });
+            }
+        );
     }
 }
 

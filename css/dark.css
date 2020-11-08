@@ -3,6 +3,7 @@
 	--normal-background: #212121;
 	--tabHolder-background: #616161;
 	--tab-background: #424242;
+	--toolbar-background: #455a64;
 	--even-row-background: #424242;
 	--odd-row-background: #313131;
 	--normal-color: #dfe0e1;
@@ -25,6 +26,9 @@
 	--stats-text: #fefefe;
 	--stats-fill: #0d47a1;
 	--space-color: #448aff;
+	--splitting-background: #01579b;
+	--even-unit: #b2c8f8;
+	--odd-unit: #e20606;
 }
 
 body {
@@ -187,7 +191,7 @@ th {
 }
 
 .sourceContainer {
-	background-color: var(--even-row-background);
+	background-color: var(--normal-background);
 	padding: 4px;
 	margin: 0;
 	width: 100%;
@@ -196,12 +200,12 @@ th {
 }
 
 .targetContainer {
-	background-color: var(--od-row-background);
+	background-color: var(--normal-background);
 	padding: 4px;
 	margin: 0;
 	width: 100%;
 	white-space: pre-wrap;
-	border-bottom: 1px solid var(--accent-color);
+	border-bottom: 1px solid var(--normal-background);
 }
 
 .machineContainer {
@@ -670,4 +674,16 @@ svg.stats {
 	background: var(--space-color);
 	border-radius: 2px;
 	font-weight: 700;
+}
+
+.splitting {
+	background: var(--splitting-background);
+}
+
+.evenUnit {
+	border-right-color: var(--even-unit) !important;
+}
+
+.oddUnit {
+	border-right-color: var(--odd-unit) !important;
 }

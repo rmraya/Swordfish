@@ -634,6 +634,10 @@ class Main {
 
     applyTranslationMemoryAll(): void {
         let selected = Main.tabHolder.getSelected();
+        if (selected === 'projects') {
+            this.projectsView.applyTranslationMemoryAll();
+            return;
+        }
         if (Main.translationViews.has(selected)) {
             Main.translationViews.get(selected).applyTranslationMemoryAll();
         }
@@ -668,13 +672,17 @@ class Main {
     }
 
     splitSegment(): void {
-        // TODO
-        Main.electron.ipcRenderer.send('show-message', { type: 'info', message: 'Not implemented yet' });
+        let selected = Main.tabHolder.getSelected();
+        if (Main.translationViews.has(selected)) {
+            Main.translationViews.get(selected).splitSegment();
+        }
     }
 
     mergeNext(): void {
-        // TODO
-        Main.electron.ipcRenderer.send('show-message', { type: 'info', message: 'Not implemented yet' });
+        let selected = Main.tabHolder.getSelected();
+        if (Main.translationViews.has(selected)) {
+            Main.translationViews.get(selected).mergeNext();
+        }
     }
 
     setProjectMemories(arg: any): void {

@@ -437,8 +437,22 @@ class ProjectsView {
             return;
         }
         for (let key of this.selected.keys()) {
-            let project = this.selected.get(key);
             this.electron.ipcRenderer.send('export-project-html', { project: key });
+        }
+    }
+
+    applyTranslationMemoryAll(): void {
+        if (this.selected.size === 0) {
+            this.electron.ipcRenderer.send('show-message', { type: 'warning', message: 'Select project' });
+            return;
+        }
+        if (this.selected.size > 1) {
+            this.electron.ipcRenderer.send('show-message', { type: 'warning', message: 'Select one project' });
+            return;
+        }
+        for (let key of this.selected.keys()) {
+            let project = this.selected.get(key);
+            this.electron.ipcRenderer.send('show-apply-tm', { project: key, memory: project.memory });
         }
     }
 }
