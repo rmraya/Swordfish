@@ -22,6 +22,7 @@ class MemoriesView {
     electron = require('electron');
 
     container: HTMLDivElement;
+    topBar: HTMLDivElement;
     tableContainer: HTMLDivElement;
     tbody: HTMLTableSectionElement;
     selected: Map<string, any>;
@@ -30,9 +31,9 @@ class MemoriesView {
         this.selected = new Map<string, any>();
         this.container = div;
 
-        let topBar: HTMLDivElement = document.createElement('div');
-        topBar.className = 'toolbar';
-        this.container.appendChild(topBar);
+        this.topBar = document.createElement('div');
+        this.topBar.className = 'toolbar';
+        this.container.appendChild(this.topBar);
 
         let addButton = document.createElement('a');
         addButton.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 0 24 24" width="24"><path d="M20 6h-8l-2-2H4c-1.11 0-1.99.89-1.99 2L2 18c0 1.11.89 2 2 2h16c1.11 0 2-.89 2-2V8c0-1.11-.89-2-2-2zm0 12H4V6h5.17l2 2H20v10zm-8-4h2v2h2v-2h2v-2h-2v-2h-2v2h-2z"/></svg>' +
@@ -41,7 +42,7 @@ class MemoriesView {
         addButton.addEventListener('click', () => {
             this.addMemory()
         });
-        topBar.appendChild(addButton);
+        this.topBar.appendChild(addButton);
 
         let removeButton = document.createElement('a');
         removeButton.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 0 24 24" width="24"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM8 9h8v10H8V9zm7.5-5l-1-1h-5l-1 1H5v2h14V4h-3.5z"/></svg>' +
@@ -50,7 +51,7 @@ class MemoriesView {
         removeButton.addEventListener('click', () => {
             this.removeMemory()
         });
-        topBar.appendChild(removeButton);
+        this.topBar.appendChild(removeButton);
 
 
         let importButton = document.createElement('a');
@@ -61,7 +62,7 @@ class MemoriesView {
             this.importTMX();
         });
         importButton.style.marginLeft = '20px';
-        topBar.appendChild(importButton);
+        this.topBar.appendChild(importButton);
 
         let exportButton = document.createElement('a');
         exportButton.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" enable-background="new 0 0 24 24" height="24" viewBox="0 0 24 24" width="24"><path d="M9,5v2h6.59L4,18.59L5.41,20L17,8.41V15h2V5H9z"/></svg>' +
@@ -70,7 +71,7 @@ class MemoriesView {
         exportButton.addEventListener('click', () => {
             this.exportTMX();
         });
-        topBar.appendChild(exportButton);
+        this.topBar.appendChild(exportButton);
 
         let concordanceButton = document.createElement('a');
         concordanceButton.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path d="M21.172 24l-7.387-7.387c-1.388.874-3.024 1.387-4.785 1.387-4.971 0-9-4.029-9-9s4.029-9 9-9 9 4.029 9 9c0 1.761-.514 3.398-1.387 4.785l7.387 7.387-2.828 2.828zm-12.172-8c3.859 0 7-3.14 7-7s-3.141-7-7-7-7 3.14-7 7 3.141 7 7 7z"/></svg>' +
@@ -80,7 +81,7 @@ class MemoriesView {
         concordanceButton.addEventListener('click', () => {
             this.concordanceSearch();
         });
-        topBar.appendChild(concordanceButton);
+        this.topBar.appendChild(concordanceButton);
 
         this.tableContainer = document.createElement('div');
         this.tableContainer.classList.add('divContainer');
@@ -117,10 +118,8 @@ class MemoriesView {
     }
 
     setSizes(): void {
-        let main = document.getElementById('main');
-        this.container.style.width = main.clientWidth + 'px';
-        this.container.style.height = main.clientHeight + 'px';
-        this.tableContainer.style.height = (main.clientHeight - 65) + 'px';
+        let main: HTMLDivElement = document.getElementById('main') as HTMLDivElement;
+        this.tableContainer.style.height = (main.clientHeight - this.topBar.clientHeight) + 'px';
         this.tableContainer.style.width = this.container.clientWidth + 'px';
     }
 

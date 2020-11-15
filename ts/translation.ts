@@ -26,8 +26,14 @@ class TranslationView {
     static SVG_TRANSLATED: string = "<svg xmlns='http://www.w3.org/2000/svg' height='24' viewBox='0 0 24 24' width='24'><g><path d='M19,5v14H5V5H19 M19,3H5C3.9,3,3,3.9,3,5v14c0,1.1,0.9,2,2,2h14c1.1,0,2-0.9,2-2V5C21,3.9,20.1,3,19,3L19,3z'/><path d='M14,17H7v-2h7V17z M17,13H7v-2h10V13z M17,9H7V7h10V9z'/></g></svg>";
     static SVG_FINAL: string = "<svg xmlns='http://www.w3.org/2000/svg' height='24' viewBox='0 0 24 24' width='24'><path d='M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V5h14v14zM17.99 9l-1.41-1.42-6.59 6.59-2.58-2.57-1.42 1.41 4 3.99z'/></svg>";
     static SVG_LOCK: string = "<svg xmlns='http://www.w3.org/2000/svg' height='24' viewBox='0 0 24 24' width='24'><path d='M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zM9 6c0-1.66 1.34-3 3-3s3 1.34 3 3v2H9V6zm9 14H6V10h12v10zm-6-3c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2z'/></svg>";
+    static SVG_WARNING: string = "<svg xmlns='http://www.w3.org/2000/svg' height='24' viewBox='0 0 24 24' width='24'><path d='M11 15h2v2h-2v-2zm0-8h2v6h-2V7zm.99-5C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8z'/></svg>";
+    static SVG_NOTE: string = "<svg xmlns='http://www.w3.org/2000/svg' height='24' viewBox='0 0 24 24' width='24'><path d='M20 2H4c-1.1 0-1.99.9-1.99 2L2 22l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm0 14H5.17l-.59.59-.58.58V4h16v12zm-9-4h2v2h-2zm0-6h2v4h-2z'/></svg>";
+
+    static LOCK_FRAGMENT: string = 'M18 8h-1V6c0-2.76-2';
+    static NOTE_FRAGMENT: string = 'M20 2H4c-1.1 0-1.99';
 
     container: HTMLDivElement;
+    topBar: HTMLDivElement;
     observer: MutationObserver;
     rowsObserver: MutationObserver;
 
@@ -87,6 +93,9 @@ class TranslationView {
     glossSelect: HTMLSelectElement;
 
     returnTo: any = { file: '', unit: '', segment: '' };
+    returnNumber: number = -1;
+
+    notesVisible: boolean = false;
 
     constructor(tab: Tab, projectId: string, sourceLang: string, targetLang: string) {
         this.container = tab.getContainer();
@@ -95,11 +104,11 @@ class TranslationView {
         this.tgtLang = targetLang;
 
         this.sourceTags = new Map<string, string>();
-        let topBar: HTMLDivElement = document.createElement('div');
-        topBar.className = 'toolbar';
-        this.container.appendChild(topBar);
+        this.topBar = document.createElement('div');
+        this.topBar.className = 'toolbar';
+        this.container.appendChild(this.topBar);
 
-        this.buildTopBar(topBar);
+        this.buildTopBar();
 
         this.mainArea = document.createElement('div');
         this.mainArea.id = 'main' + projectId;
@@ -121,7 +130,7 @@ class TranslationView {
                 event.cancelBubble = true;
                 this.gotoNext();
             }
-            if (event.key === 'PageUp'&& !(event.ctrlKey || event.metaKey)) {
+            if (event.key === 'PageUp' && !(event.ctrlKey || event.metaKey)) {
                 event.preventDefault();
                 event.cancelBubble = true;
                 this.gotoPrevious();
@@ -131,7 +140,7 @@ class TranslationView {
                 event.cancelBubble = true;
                 this.nextPage();
             }
-            if (event.key === 'PageUp'&& (event.ctrlKey || event.metaKey) && !event.shiftKey) {
+            if (event.key === 'PageUp' && (event.ctrlKey || event.metaKey) && !event.shiftKey) {
                 event.preventDefault();
                 event.cancelBubble = true;
                 this.previousPage();
@@ -141,7 +150,7 @@ class TranslationView {
                 event.cancelBubble = true;
                 this.lastPage();
             }
-            if (event.key === 'PageUp'&& (event.ctrlKey || event.metaKey) && event.shiftKey) {
+            if (event.key === 'PageUp' && (event.ctrlKey || event.metaKey) && event.shiftKey) {
                 event.preventDefault();
                 event.cancelBubble = true;
                 this.firstPage();
@@ -316,7 +325,7 @@ class TranslationView {
         style.innerHTML = '.zoomable td { font-size: ' + zoom + 'em; } .zoom { font-size: ' + zoom + 'em; }';
     }
 
-    buildTopBar(topBar: HTMLDivElement): void {
+    buildTopBar(): void {
         let exportTranslations: HTMLAnchorElement = document.createElement('a');
         exportTranslations.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 0 24 24" width="24"><path d="M19 12v7H5v-7H3v7c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2v-7h-2zm-6 .67l2.59-2.58L17 11.5l-5 5-5-5 1.41-1.41L11 12.67V3h2v9.67z"/></svg>' +
             '<span class="tooltiptext bottomTooltip">Export Translations</span>';
@@ -324,17 +333,17 @@ class TranslationView {
         exportTranslations.addEventListener('click', () => {
             this.exportTranslations();
         });
-        topBar.appendChild(exportTranslations);
+        this.topBar.appendChild(exportTranslations);
 
-        let saveEdit: HTMLAnchorElement = document.createElement('a');
-        saveEdit.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 0 24 24" width="24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm4.59-12.42L10 14.17l-2.59-2.58L6 13l4 4 8-8z"/></svg>' +
+        let saveButton: HTMLAnchorElement = document.createElement('a');
+        saveButton.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 0 24 24" width="24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm4.59-12.42L10 14.17l-2.59-2.58L6 13l4 4 8-8z"/></svg>' +
             '<span class="tooltiptext bottomTooltip">Save Changes</span>';
-        saveEdit.className = 'tooltip';
-        saveEdit.style.marginLeft = '20px';
-        saveEdit.addEventListener('click', () => {
+        saveButton.className = 'tooltip';
+        saveButton.style.marginLeft = '20px';
+        saveButton.addEventListener('click', () => {
             this.saveEdit({ confirm: false, next: 'none' });
         });
-        topBar.appendChild(saveEdit);
+        this.topBar.appendChild(saveButton);
 
         let cancelEdit: HTMLAnchorElement = document.createElement('a');
         cancelEdit.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 0 24 24" width="24"><path d="M12 2C6.47 2 2 6.47 2 12s4.47 10 10 10 10-4.47 10-10S17.53 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm3.59-13L12 10.59 8.41 7 7 8.41 10.59 12 7 15.59 8.41 17 12 13.41 15.59 17 17 15.59 13.41 12 17 8.41z"/></svg>' +
@@ -343,7 +352,7 @@ class TranslationView {
         cancelEdit.addEventListener('click', () => {
             this.cancelEdit();
         });
-        topBar.appendChild(cancelEdit);
+        this.topBar.appendChild(cancelEdit);
 
         let confirmEdit: HTMLAnchorElement = document.createElement('a');
         confirmEdit.innerHTML = TranslationView.SVG_FINAL +
@@ -353,7 +362,7 @@ class TranslationView {
         confirmEdit.addEventListener('click', () => {
             this.saveEdit({ confirm: true, next: 'none' });
         });
-        topBar.appendChild(confirmEdit);
+        this.topBar.appendChild(confirmEdit);
 
         let confirmNextUntranslated: HTMLAnchorElement = document.createElement('a');
         confirmNextUntranslated.innerHTML = TranslationView.SVG_UNTRANSLATED +
@@ -362,7 +371,7 @@ class TranslationView {
         confirmNextUntranslated.addEventListener('click', () => {
             this.saveEdit({ confirm: true, next: 'untranslated' });
         });
-        topBar.appendChild(confirmNextUntranslated);
+        this.topBar.appendChild(confirmNextUntranslated);
 
         let confirmNextUnconfirmed: HTMLAnchorElement = document.createElement('a');
         confirmNextUnconfirmed.innerHTML = TranslationView.SVG_TRANSLATED +
@@ -371,7 +380,7 @@ class TranslationView {
         confirmNextUnconfirmed.addEventListener('click', () => {
             this.saveEdit({ confirm: true, next: 'unconfirmed' });
         });
-        topBar.appendChild(confirmNextUnconfirmed);
+        this.topBar.appendChild(confirmNextUnconfirmed);
 
         let goToLink: HTMLAnchorElement = document.createElement('a');
         goToLink.style.marginLeft = '10px';
@@ -381,7 +390,7 @@ class TranslationView {
         goToLink.addEventListener('click', () => {
             this.electron.ipcRenderer.send('show-go-to-window');
         });
-        topBar.appendChild(goToLink);
+        this.topBar.appendChild(goToLink);
 
         let splitButton: HTMLAnchorElement = document.createElement('a');
         splitButton.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 0 24 24" width="24"><path d="M8 19h3v4h2v-4h3l-4-4-4 4zm8-14h-3V1h-2v4H8l4 4 4-4zM4 11v2h16v-2H4z" /></svg>' +
@@ -391,7 +400,7 @@ class TranslationView {
         splitButton.addEventListener('click', () => {
             this.splitSegment();
         });
-        topBar.appendChild(splitButton);
+        this.topBar.appendChild(splitButton);
 
         let mergeButton: HTMLAnchorElement = document.createElement('a');
         mergeButton.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 0 24 24" width="24"><path d="M16 13h-3V3h-2v10H8l4 4 4-4zM4 19v2h16v-2H4z" /></svg>' +
@@ -400,7 +409,7 @@ class TranslationView {
         mergeButton.addEventListener('click', () => {
             this.mergeNext();
         });
-        topBar.appendChild(mergeButton);
+        this.topBar.appendChild(mergeButton);
 
         this.sortButton = document.createElement('a');
         this.sortButton.innerHTML = '<svg version="1.1" viewBox="0 0 24 24" height="24" width="24"><path style="stroke-width:0.6" d="m 8.666667,10.444444 v 3.111112 H 12 L 7,19 2,13.555556 H 5.333333 V 10.444444 H 2 L 7,5 12,10.444444 Z M 22,14.333333 h -8.333333 v 1.555556 H 22 Z M 22,19 H 13.666667 V 17.444444 H 22 Z m 0,-6.222222 H 13.666667 V 11.222222 H 22 Z M 22,9.6666667 H 13.666667 V 8.1111111 H 22 Z M 22,6.5555556 H 13.666667 V 5 H 22 Z" /></svg>' +
@@ -410,7 +419,7 @@ class TranslationView {
         this.sortButton.addEventListener('click', () => {
             this.sortSegments();
         });
-        topBar.appendChild(this.sortButton);
+        this.topBar.appendChild(this.sortButton);
 
         this.filterButton = document.createElement('a');
         this.filterButton.innerHTML = '<svg version="1.1" viewBox="0 0 24 24" height="24" width="24"><path style="stroke-width:0.829702" d="M 18.091348,3.6666667 11.913044,14.119167 v 4.936666 l -0.826087,-0.5 V 14.119167 L 4.9086522,3.6666667 Z M 21,2 H 2 L 9.4347826,14.578333 V 19.5 L 13.565217,22 v -7.421667 z"/></svg>' +
@@ -419,7 +428,7 @@ class TranslationView {
         this.filterButton.addEventListener('click', () => {
             this.filterSegments();
         });
-        topBar.appendChild(this.filterButton);
+        this.topBar.appendChild(this.filterButton);
 
         let replaceText: HTMLAnchorElement = document.createElement('a');
         replaceText.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 0 24 24" width="24"><path d="M11 6c1.38 0 2.63.56 3.54 1.46L12 10h6V4l-2.05 2.05C14.68 4.78 12.93 4 11 4c-3.53 0-6.43 2.61-6.92 6H6.1c.46-2.28 2.48-4 4.9-4zm5.64 9.14c.66-.9 1.12-1.97 1.28-3.14H15.9c-.46 2.28-2.48 4-4.9 4-1.38 0-2.63-.56-3.54-1.46L10 12H4v6l2.05-2.05C7.32 17.22 9.07 18 11 18c1.55 0 2.98-.51 4.14-1.36L20 21.49 21.49 20l-4.85-4.86z"/></svg>' +
@@ -428,7 +437,7 @@ class TranslationView {
         replaceText.addEventListener('click', () => {
             this.replaceText();
         });
-        topBar.appendChild(replaceText);
+        this.topBar.appendChild(replaceText);
 
         let statisticsButton: HTMLAnchorElement = document.createElement('a');
         statisticsButton.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 0 24 24" width="24"><path d="M9 17H7v-7h2v7zm4 0h-2V7h2v10zm4 0h-2v-4h2v4zm2.5 2.1h-15V5h15v14.1zm0-16.1h-15c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h15c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2z"/></svg>' +
@@ -438,7 +447,7 @@ class TranslationView {
         statisticsButton.addEventListener('click', () => {
             this.generateStatistics();
         });
-        topBar.appendChild(statisticsButton);
+        this.topBar.appendChild(statisticsButton);
 
         let htmlExportButton: HTMLAnchorElement = document.createElement('a');
         htmlExportButton.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" enable-background="new 0 0 24 24" height="24" viewBox="0 0 24 24" width="24"><path d="M19,3H5C3.89,3,3,3.9,3,5v14c0,1.1,0.89,2,2,2h14c1.1,0,2-0.9,2-2V5C21,3.9,20.11,3,19,3z M19,19H5V7h14V19z M17,12H7v-2 h10V12z M13,16H7v-2h6V16z"/></svg>' +
@@ -447,7 +456,7 @@ class TranslationView {
         htmlExportButton.addEventListener('click', () => {
             this.exportHTML();
         });
-        topBar.appendChild(htmlExportButton);
+        this.topBar.appendChild(htmlExportButton);
 
         let concordanceButton: HTMLAnchorElement = document.createElement('a');
         concordanceButton.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path d="M21.172 24l-7.387-7.387c-1.388.874-3.024 1.387-4.785 1.387-4.971 0-9-4.029-9-9s4.029-9 9-9 9 4.029 9 9c0 1.761-.514 3.398-1.387 4.785l7.387 7.387-2.828 2.828zm-12.172-8c3.859 0 7-3.14 7-7s-3.141-7-7-7-7 3.14-7 7 3.141 7 7 7z"/></svg>' +
@@ -457,7 +466,17 @@ class TranslationView {
         concordanceButton.addEventListener('click', () => {
             this.concordanceSearch();
         });
-        topBar.appendChild(concordanceButton);
+        this.topBar.appendChild(concordanceButton);
+
+        let notesButton: HTMLAnchorElement = document.createElement('a');
+        notesButton.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 0 24 24" width="24"><path d="M20 2H4c-1.1 0-1.99.9-1.99 2L2 22l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm0 14H5.17l-.59.59-.58.58V4h16v12zM6 12h2v2H6zm0-3h2v2H6zm0-3h2v2H6zm4 6h5v2h-5zm0-3h8v2h-8zm0-3h8v2h-8z"/></svg>' +
+            '<span class="tooltiptext bottomTooltip">Show/Hide Notes</span>';
+        notesButton.className = 'tooltip';
+        notesButton.style.marginLeft = '20px';
+        notesButton.addEventListener('click', () => {
+            this.showNotes();
+        });
+        this.topBar.appendChild(notesButton);
 
         let addTermButton: HTMLAnchorElement = document.createElement('a');
         addTermButton.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 0 24 24" width="24"><path d="M14 10H2v2h12v-2zm0-4H2v2h12V6zm4 8v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zM2 16h8v-2H2v2z"/></svg>' +
@@ -467,7 +486,7 @@ class TranslationView {
         addTermButton.addEventListener('click', () => {
             this.addTerm();
         });
-        topBar.appendChild(addTermButton);
+        this.topBar.appendChild(addTermButton);
 
         let termSearchButton: HTMLAnchorElement = document.createElement('a');
         termSearchButton.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path d="M13 8h-8v-1h8v1zm0 2h-8v-1h8v1zm-3 2h-5v-1h5v1zm11.172 12l-7.387-7.387c-1.388.874-3.024 1.387-4.785 1.387-4.971 0-9-4.029-9-9s4.029-9 9-9 9 4.029 9 9c0 1.761-.514 3.398-1.387 4.785l7.387 7.387-2.828 2.828zm-12.172-8c3.859 0 7-3.14 7-7s-3.141-7-7-7-7 3.14-7 7 3.141 7 7 7z"/></svg>' +
@@ -476,7 +495,7 @@ class TranslationView {
         termSearchButton.addEventListener('click', () => {
             this.searchTerm();
         });
-        topBar.appendChild(termSearchButton);
+        this.topBar.appendChild(termSearchButton);
 
         let tagsAnalysisButton: HTMLAnchorElement = document.createElement('a');
         tagsAnalysisButton.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 0 24 24" width="24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V5h14v14zm-7-2h2V7h-4v2h2z"/></svg>' +
@@ -486,7 +505,7 @@ class TranslationView {
         tagsAnalysisButton.addEventListener('click', () => {
             Main.electron.ipcRenderer.send('analyze-tags', { project: this.projectId });
         });
-        topBar.appendChild(tagsAnalysisButton);
+        this.topBar.appendChild(tagsAnalysisButton);
 
         let spaceAnalysisButton: HTMLAnchorElement = document.createElement('a');
         spaceAnalysisButton.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 0 24 24" width="24"><path d="M3 21h18v-2H3v2zM3 8v8l4-4-4-4zm8 9h10v-2H11v2zM3 3v2h18V3H3zm8 6h10V7H11v2zm0 4h10v-2H11v2z"/></svg>' +
@@ -495,18 +514,18 @@ class TranslationView {
         spaceAnalysisButton.addEventListener('click', () => {
             Main.electron.ipcRenderer.send('analyze-spaces', { project: this.projectId });
         });
-        topBar.appendChild(spaceAnalysisButton);
+        this.topBar.appendChild(spaceAnalysisButton);
 
         let filler: HTMLSpanElement = document.createElement('span');
         filler.innerHTML = '&nbsp;';
         filler.className = 'fill_width';
-        topBar.appendChild(filler);
+        this.topBar.appendChild(filler);
 
         let memLabel: HTMLLabelElement = document.createElement('label');
         memLabel.style.marginTop = '4px';
         memLabel.innerHTML = 'Memory';
         memLabel.setAttribute('for', 'memSelect' + this.projectId);
-        topBar.appendChild(memLabel);
+        this.topBar.appendChild(memLabel);
 
         this.memSelect = document.createElement('select');
         this.memSelect.id = 'memSelect' + this.projectId;
@@ -515,7 +534,7 @@ class TranslationView {
         this.memSelect.addEventListener('change', () => {
             this.electron.ipcRenderer.send('set-project-memory', { project: this.projectId, memory: this.memSelect.value });
         });
-        topBar.appendChild(this.memSelect);
+        this.topBar.appendChild(this.memSelect);
 
         let requestTranslation: HTMLAnchorElement = document.createElement('a');
         requestTranslation.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path d="M21 21h-1.713l-.658-1.846h-3l-.663 1.846h-1.659l3.04-8h1.603l3.05 8zm-2.814-3.12l-1.049-3.018-1.054 3.018h2.103zm-9.464-12.037l.125-.562-1.02-.199-.101.464c-.345-.05-.712-.057-1.083-.019.009-.249.023-.494.045-.728h1.141v-.966h-1.004c.049-.246.092-.394.134-.533l-.997-.3c-.072.245-.134.484-.195.833h-1.138v.966h1.014c-.027.312-.043.637-.048.964-1.119.411-1.595 1.195-1.595 1.905 0 .84.663 1.578 1.709 1.482 1.301-.118 2.169-1.1 2.679-2.308.525.303.746.814.548 1.286-.185.436-.725.852-1.757.831v1.041c1.146.018 2.272-.417 2.715-1.469.431-1.028-.062-2.151-1.172-2.688zm-1.342.71c-.162.36-.375.717-.648.998-.041-.3-.07-.628-.086-.978.249-.032.499-.038.734-.02zm-1.758.336c.028.44.078.844.148 1.205-.927.169-.963-.744-.148-1.205zm15.378 5.111c.552 0 1 .449 1 1v8c0 .551-.448 1-1 1h-8c-.552 0-1-.449-1-1v-8c0-.551.448-1 1-1h8zm0-2h-8c-1.656 0-3 1.343-3 3v8c0 1.657 1.344 3 3 3h8c1.657 0 3-1.343 3-3v-8c0-1.657-1.343-3-3-3zm-13 3c0-.342.035-.677.102-1h-5.102c-.552 0-1-.449-1-1v-8c0-.551.448-1 1-1h8c.552 0 1 .449 1 1v5.101c.323-.066.657-.101 1-.101h1v-5c0-1.657-1.343-3-3-3h-8c-1.656 0-3 1.343-3 3v8c0 1.657 1.344 3 3 3h5v-1z"/></svg>' +
@@ -525,14 +544,14 @@ class TranslationView {
         requestTranslation.addEventListener('click', () => {
             this.applyTranslationMemoryAll();
         });
-        topBar.appendChild(requestTranslation);
+        this.topBar.appendChild(requestTranslation);
 
         let glossLabel: HTMLLabelElement = document.createElement('label');
         glossLabel.style.marginLeft = '20px';
         glossLabel.style.marginTop = '4px';
         glossLabel.innerHTML = 'Glossary';
         glossLabel.setAttribute('for', 'glossSelect' + this.projectId);
-        topBar.appendChild(glossLabel);
+        this.topBar.appendChild(glossLabel);
 
         this.glossSelect = document.createElement('select');
         this.glossSelect.id = 'glossSelect' + this.projectId;
@@ -541,7 +560,7 @@ class TranslationView {
         this.glossSelect.addEventListener('change', () => {
             this.electron.ipcRenderer.send('set-project-glossary', { project: this.projectId, glossary: this.glossSelect.value });
         });
-        topBar.appendChild(this.glossSelect);
+        this.topBar.appendChild(this.glossSelect);
 
         let requestTerms: HTMLAnchorElement = document.createElement('a');
         requestTerms.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" enable-background="new 0 0 24 24" height="24" viewBox="0 0 24 24" width="24"><path d="M14.17,5L19,9.83V19H5V5L14.17,5L14.17,5 M14.17,3H5C3.9,3,3,3.9,3,5v14c0,1.1,0.9,2,2,2h14c1.1,0,2-0.9,2-2V9.83 c0-0.53-0.21-1.04-0.59-1.41l-4.83-4.83C15.21,3.21,14.7,3,14.17,3L14.17,3z M7,15h10v2H7V15z M7,11h10v2H7V11z M7,7h7v2H7V7z"/></svg>' +
@@ -551,7 +570,7 @@ class TranslationView {
         requestTerms.addEventListener('click', () => {
             this.applyTerminologyAll();
         });
-        topBar.appendChild(requestTerms);
+        this.topBar.appendChild(requestTerms);
     }
 
     close(): void {
@@ -567,7 +586,7 @@ class TranslationView {
         let main: HTMLDivElement = document.getElementById('main') as HTMLDivElement;
         this.container.style.width = main.clientWidth + 'px';
         this.container.style.height = main.clientHeight + 'px';
-        this.mainArea.style.height = (main.clientHeight - 34) + 'px';
+        this.mainArea.style.height = (main.clientHeight - this.topBar.clientHeight) + 'px';
         this.mainArea.style.width = this.container.clientWidth + 'px';
     }
 
@@ -709,7 +728,7 @@ class TranslationView {
         this.pageInput.addEventListener('change', () => {
             let page = Number.parseInt(this.pageInput.value, 10);
             if (page >= 0 && page <= this.maxPage) {
-                this.currentPage = page;
+                this.currentPage = page - 1;
                 this.getSegments();
             }
         });
@@ -789,7 +808,7 @@ class TranslationView {
         this.rowsObserver = new MutationObserver((mutationsList) => {
             for (let mutation of mutationsList) {
                 if (mutation.type === 'attributes') {
-                    tableContainer.style.height = (this.translationArea.clientHeight - 34) + 'px';
+                    tableContainer.style.height = (this.translationArea.clientHeight - this.statusArea.clientHeight) + 'px';
                     tableContainer.style.width = this.translationArea.clientWidth + 'px';
                     this.sourceTh.style.minWidth = (this.translationArea.clientWidth * 0.4) + 'px';
                     this.targetTh.style.minWidth = (this.translationArea.clientWidth * 0.4) + 'px';
@@ -895,6 +914,11 @@ class TranslationView {
             td.innerText = row.index + 1;
             tr.appendChild(td);
 
+            if (row.index + 1 === this.returnNumber) {
+                returnRow = tr;
+                this.electron.ipcRenderer.send('close-go-to');
+            }
+
             if (length > 1 && ((i > 0 && arg[i - 1].unit === row.unit) || (i < length - 1 && arg[i + 1].unit === row.unit))) {
                 let unit: number = Number.parseInt(row.unit);
                 if (unit % 2 === 0) {
@@ -919,6 +943,20 @@ class TranslationView {
             td.classList.add('center');
             td.classList.add('translate');
             td.innerHTML = row.translate ? TranslationView.SVG_BLANK : TranslationView.SVG_LOCK;
+            if ((row.tagErrors || row.spaceErrors) && row.translate) {
+                let title = '';
+                if (row.tagErrors) {
+                    title = 'Tag errors';
+                }
+                if (row.spaceErrors) {
+                    title = 'Space errors';
+                }
+                if (row.tagErrors && row.spaceErrors) {
+                    title = 'Tags and space errors';
+                }
+                td.classList.add('tooltip');
+                td.innerHTML = TranslationView.SVG_WARNING + '<span class="tooltiptext">' + title + '</span>';
+            }
             tr.appendChild(td);
 
             td = document.createElement('td');
@@ -934,7 +972,7 @@ class TranslationView {
             td.classList.add('middle');
             td.classList.add('state');
             td.classList.add(row.state);
-            if (row.state === 'initial') {
+            if (row.state === 'initial' && !row.hasNotes) {
                 td.innerHTML = TranslationView.SVG_BLANK;
             }
             if (row.state === 'translated') {
@@ -942,6 +980,9 @@ class TranslationView {
             }
             if (row.state === 'final') {
                 td.innerHTML = TranslationView.SVG_FINAL;
+            }
+            if (row.hasNotes) {
+                td.innerHTML = td.innerHTML + TranslationView.SVG_NOTE;
             }
             tr.appendChild(td);
 
@@ -964,11 +1005,12 @@ class TranslationView {
         let rows: HTMLCollection = this.tbody.rows;
         this.currentId = { id: '', file: '', unit: '' };
         if (returnRow) {
-            this.selectRow(returnRow, true);
+            this.selectRow(returnRow);
             this.returnTo = { file: '', unit: '', segment: '' };
+            this.returnNumber = -1;
             return;
         }
-        this.selectRow((rows[0] as HTMLTableRowElement), true);
+        this.selectRow((rows[0] as HTMLTableRowElement));
     }
 
     firstPage(): void {
@@ -1052,64 +1094,81 @@ class TranslationView {
     saveEdit(arg: any): void {
         let confirm: boolean = arg.confirm;
         let next: string = arg.next;
-        this.currentCell.classList.remove('editing');
-        this.currentRow.classList.remove('currentRow');
-        let translation: string = this.getTranslation(this.currentCell.innerHTML);
-        this.currentCell.innerHTML = this.highlightSpaces(translation);
 
-        let isConfirmed: boolean = this.currentState.classList.contains('final');
-        if (!confirm && isConfirmed && this.currentContent === this.currentCell.innerHTML) {
-            confirm = true;
-        }
-        if (arg.unconfirm) {
-            confirm = false;
-            this.currentState.classList.remove('final');
-            if (translation === '') {
-                this.currentState.classList.add('initial');
-                this.currentState.innerHTML = TranslationView.SVG_BLANK;
-            } else {
-                this.currentState.classList.add('translated');
-                this.currentState.innerHTML = TranslationView.SVG_TRANSLATED;
+        if (!this.currentTranslate.innerHTML.includes(TranslationView.LOCK_FRAGMENT)) {
+            // not locked
+            this.currentCell.classList.remove('editing');
+            this.currentRow.classList.remove('currentRow');
+            let translation: string = this.getTranslation(this.currentCell.innerHTML);
+            this.currentCell.innerHTML = this.highlightSpaces(translation);
+
+            let hasNotes: boolean = this.currentState.innerHTML.includes(TranslationView.NOTE_FRAGMENT);
+
+            let isConfirmed: boolean = this.currentState.classList.contains('final');
+            if (!confirm && isConfirmed && this.currentContent === this.currentCell.innerHTML) {
+                confirm = true;
             }
-        }
-        if (confirm) {
-            this.currentState.classList.remove('initial');
-            this.currentState.classList.remove('translated');
-            this.currentState.classList.add('final');
-            this.currentState.innerHTML = TranslationView.SVG_FINAL;
-        } else {
-            if (translation === '') {
+            if (arg.unconfirm) {
+                confirm = false;
                 this.currentState.classList.remove('final');
-                this.currentState.classList.remove('translated');
-                this.currentState.classList.add('initial');
-                this.currentState.innerHTML = TranslationView.SVG_BLANK;
-            } else {
-                this.currentState.classList.remove('final');
+                if (translation === '') {
+                    this.currentState.classList.add('initial');
+                    this.currentState.innerHTML = hasNotes ? TranslationView.SVG_NOTE : TranslationView.SVG_BLANK;
+                } else {
+                    this.currentState.classList.add('translated');
+                    this.currentState.innerHTML = TranslationView.SVG_TRANSLATED;
+                    if (hasNotes) {
+                        this.currentState.innerHTML = this.currentState.innerHTML + TranslationView.SVG_NOTE;
+                    }
+                }
+            }
+            if (confirm) {
                 this.currentState.classList.remove('initial');
-                this.currentState.classList.add('translated');
-                this.currentState.innerHTML = TranslationView.SVG_TRANSLATED;
+                this.currentState.classList.remove('translated');
+                this.currentState.classList.add('final');
+                this.currentState.innerHTML = TranslationView.SVG_FINAL;
+                if (hasNotes) {
+                    this.currentState.innerHTML = this.currentState.innerHTML + TranslationView.SVG_NOTE;
+                }
+            } else {
+                if (translation === '') {
+                    this.currentState.classList.remove('final');
+                    this.currentState.classList.remove('translated');
+                    this.currentState.classList.add('initial');
+                    this.currentState.innerHTML = hasNotes ? TranslationView.SVG_NOTE : TranslationView.SVG_BLANK;
+                } else {
+                    this.currentState.classList.remove('final');
+                    this.currentState.classList.remove('initial');
+                    this.currentState.classList.add('translated');
+                    this.currentState.innerHTML = TranslationView.SVG_TRANSLATED;
+                    if (hasNotes) {
+                        this.currentState.innerHTML = this.currentState.innerHTML + TranslationView.SVG_NOTE;
+                    }
+                }
             }
-        }
 
-        this.electron.ipcRenderer.send('save-translation', {
-            project: this.projectId,
-            file: this.currentId.file,
-            unit: this.currentId.unit,
-            segment: this.currentId.id, translation: translation,
-            confirm: confirm,
-            memory: this.memSelect.value
-        });
+            this.electron.ipcRenderer.send('save-translation', {
+                project: this.projectId,
+                file: this.currentId.file,
+                unit: this.currentId.unit,
+                segment: this.currentId.id,
+                translation: translation,
+                confirm: confirm,
+                memory: this.memSelect.value
+            });
+
+        }
         let rows: HTMLCollection = this.tbody.rows;
         if (next === 'none') {
-            this.selectRow(this.currentRow, true);
+            this.selectRow(this.currentRow);
         }
         if (next === 'clicked') {
             let index = arg.segment - 1;
             let row: HTMLTableRowElement = (rows[index] as HTMLTableRowElement);
-            this.selectRow(row, true);
+            this.selectRow(row);
         }
         if (next === 'number') {
-            let index = arg.segment - 1;
+            let index = arg.segment - 1 - (this.currentPage * this.rowsPage);
             if (index < 0) {
                 index = 0;
             }
@@ -1117,7 +1176,7 @@ class TranslationView {
                 index = rows.length - 1;
             }
             let row: HTMLTableRowElement = (rows[index] as HTMLTableRowElement);
-            this.selectRow(row, true);
+            this.selectRow(row);
             this.electron.ipcRenderer.send('close-go-to');
         }
         if (next === 'next') {
@@ -1126,7 +1185,7 @@ class TranslationView {
                 index = rows.length - 1;
             }
             let row: HTMLTableRowElement = (rows[index] as HTMLTableRowElement);
-            this.selectRow(row, true);
+            this.selectRow(row);
         }
         if (next === 'previous') {
             let index = this.currentRow.rowIndex - 2;
@@ -1134,7 +1193,7 @@ class TranslationView {
                 index = 0;
             }
             let row: HTMLTableRowElement = (rows[index] as HTMLTableRowElement);
-            this.selectRow(row, true);
+            this.selectRow(row);
         }
         if (next === 'untranslated') {
             let found: boolean = false;
@@ -1144,7 +1203,7 @@ class TranslationView {
                 let cell: HTMLTableCellElement = row.getElementsByClassName('state')[0] as HTMLTableCellElement;
                 if (cell.classList.contains('initial')) {
                     found = true;
-                    this.selectRow(row, true);
+                    this.selectRow(row);
                     break;
                 }
             }
@@ -1160,7 +1219,7 @@ class TranslationView {
                 let cell: HTMLTableCellElement = row.getElementsByClassName('state')[0] as HTMLTableCellElement;
                 if (cell.classList.contains('translated')) {
                     found = true;
-                    this.selectRow(row, true);
+                    this.selectRow(row);
                     break;
                 }
             }
@@ -1213,9 +1272,13 @@ class TranslationView {
         }
     }
 
-    selectRow(row: HTMLTableRowElement, focus: boolean) {
+    selectRow(row: HTMLTableRowElement) {
         if (this.currentRow) {
             this.currentRow.classList.remove('currentRow');
+        }
+        if (this.currentCell) {
+            this.currentCell.contentEditable = 'false';
+            this.currentCell.classList.remove('editing');
         }
         this.currentRow = row;
         this.currentRow.classList.add('currentRow');
@@ -1235,7 +1298,7 @@ class TranslationView {
         this.currentState = this.currentRow.getElementsByClassName('state')[0] as HTMLTableCellElement;
         this.currentTranslate = this.currentRow.getElementsByClassName('translate')[0] as HTMLTableCellElement;
         this.currentContent = this.currentCell.innerHTML;
-        if (this.currentTranslate.innerHTML.indexOf('path') === -1) { // SVG_BLANK doesn't have 'path'
+        if (!this.currentTranslate.innerHTML.includes(TranslationView.LOCK_FRAGMENT)) {
             this.currentCell.contentEditable = 'true';
             this.currentCell.classList.add('editing');
         }
@@ -1257,11 +1320,12 @@ class TranslationView {
                 unit: this.currentId.unit,
                 segment: this.currentId.id
             });
+            if (this.notesVisible) {
+                this.showNotes();
+            }
         }
         this.centerRow(this.currentRow);
-        if (focus) {
-            this.currentCell.focus();
-        }
+        this.currentCell.focus();
     }
 
     cancelEdit(): void {
@@ -1281,6 +1345,11 @@ class TranslationView {
 
     copySource(): void {
         let source: HTMLTableCellElement = this.currentRow.getElementsByClassName('source')[0] as HTMLTableCellElement;
+        if (this.currentTranslate.innerHTML.includes(TranslationView.LOCK_FRAGMENT)) {
+            this.electron.ipcRenderer.send('show-message', { type: 'warning', message: 'Locked segment' });
+            return;
+        }
+        let hasNotes = this.currentState.innerHTML.includes(TranslationView.NOTE_FRAGMENT);
         if (this.currentCell.innerHTML === source.innerHTML) {
             return;
         }
@@ -1288,15 +1357,23 @@ class TranslationView {
         this.currentState.classList.remove('final');
         if (source.innerHTML === '') {
             this.currentState.classList.add('initial');
-            this.currentState.innerHTML = TranslationView.SVG_BLANK;
+            this.currentState.innerHTML = hasNotes ? TranslationView.SVG_NOTE : TranslationView.SVG_BLANK;
         } else {
             this.currentState.classList.add('translated');
             this.currentState.innerHTML = TranslationView.SVG_TRANSLATED;
+            if (hasNotes) {
+                this.currentState.innerHTML = this.currentState.innerHTML + TranslationView.SVG_NOTE;
+            }
         }
         this.currentCell.focus();
     }
 
     insertTag(arg: any): void {
+        let isLocked: boolean = this.currentTranslate.innerHTML.includes(TranslationView.LOCK_FRAGMENT);
+        if (isLocked) {
+            this.electron.ipcRenderer.send('show-message', { type: 'warning', message: 'Locked segment' });
+            return;
+        }
         if (arg.tag) {
             let tag: string = '' + arg.tag;
             if (this.sourceTags.has(tag)) {
@@ -1739,7 +1816,9 @@ class TranslationView {
                 unit: this.currentId.unit,
                 segment: this.currentId.id
             });
-            this.currentTranslate.innerHTML = this.currentTranslate.innerHTML.indexOf('path') > 0 ? TranslationView.SVG_BLANK : TranslationView.SVG_LOCK;
+            let isLocked: boolean = this.currentTranslate.innerHTML.includes(TranslationView.LOCK_FRAGMENT);
+            this.currentTranslate.innerHTML = isLocked ? TranslationView.SVG_BLANK : TranslationView.SVG_LOCK;
+            this.selectRow(this.currentRow);
             return;
         }
         this.electron.ipcRenderer.send('show-message', { type: 'warning', message: 'Select segment' });
@@ -1800,7 +1879,17 @@ class TranslationView {
     }
 
     openSegment(arg: any): void {
-        this.saveEdit({ next: 'number', confirm: false, segment: arg.segment });
+        if (this.currentPage * this.rowsPage <= arg.segment && arg.segment < (this.currentPage + 1) * this.rowsPage) {
+            this.saveEdit({ next: 'number', confirm: false, segment: arg.segment });
+        } else {
+            let page = Math.floor(arg.segment / this.rowsPage) + 1;
+            if (page >= 0 && page <= this.maxPage) {
+                this.returnNumber = arg.segment;
+                this.currentPage = page - 1;
+                this.pageInput.value = '' + (this.currentPage + 1);
+                this.getSegments();
+            }
+        }
     }
 
     getSrcLang(): string {
@@ -1895,7 +1984,8 @@ class TranslationView {
             this.electron.ipcRenderer.send('show-message', { type: 'warning', message: 'Confirmed segment' });
             return;
         }
-        if (this.currentTranslate.innerHTML.indexOf('path') > 0) {
+        let isLocked: boolean = this.currentTranslate.innerHTML.includes(TranslationView.LOCK_FRAGMENT);
+        if (isLocked) {
             this.electron.ipcRenderer.send('show-message', { type: 'warning', message: 'Locked segment' });
             return;
         }
@@ -1958,7 +2048,8 @@ class TranslationView {
             this.electron.ipcRenderer.send('show-message', { type: 'warning', message: 'Confirmed segment' });
             return;
         }
-        if (this.currentTranslate.innerHTML.indexOf('path') > 0) {
+        let isLocked: boolean = this.currentTranslate.innerHTML.includes(TranslationView.LOCK_FRAGMENT);
+        if (isLocked) {
             this.electron.ipcRenderer.send('show-message', { type: 'warning', message: 'Locked segment' });
             return;
         }
@@ -1969,7 +2060,7 @@ class TranslationView {
                     this.electron.ipcRenderer.send('show-message', { type: 'warning', message: 'Confirmed segment' });
                     return;
                 }
-                if (nextRow.getElementsByClassName('translate')[0].innerHTML.indexOf('path') > 0) {
+                if (nextRow.getElementsByClassName('translate')[0].innerHTML.includes(TranslationView.LOCK_FRAGMENT)) {
                     this.electron.ipcRenderer.send('show-message', { type: 'warning', message: 'Locked segment' });
                     return;
                 }
@@ -1987,6 +2078,90 @@ class TranslationView {
                 return;
             }
             this.electron.ipcRenderer.send('show-message', { type: 'warning', message: 'Segments from different paragraphs' });
+        }
+    }
+
+    setErrors(arg: any): void {
+        let rows: HTMLCollectionOf<HTMLTableRowElement> = this.tbody.getElementsByTagName('tr');
+        let length: number = rows.length;
+        for (let i: number = 0; i < length; i++) {
+            let row: HTMLTableRowElement = rows[i];
+            if (row.getAttribute('data-file') === arg.file && row.getAttribute('data-unit') === arg.unit
+                && row.getAttribute('data-id') === arg.segment) {
+                let td: HTMLTableCellElement = row.getElementsByClassName('translate')[0] as HTMLTableCellElement;
+                let title = '';
+                if (arg.tagErrors) {
+                    title = 'Tag errors';
+                }
+                if (arg.spaceErrors) {
+                    title = 'Space errors';
+                }
+                if (arg.tagErrors && arg.spaceErrors) {
+                    title = 'Tags and space errors';
+                }
+                td.classList.add('tooltip');
+                td.innerHTML = TranslationView.SVG_WARNING + '<span class="tooltiptext">' + title + '</span>';
+                break;
+            }
+        }
+    }
+
+    clearErrors(arg: any): void {
+        let rows: HTMLCollectionOf<HTMLTableRowElement> = this.tbody.getElementsByTagName('tr');
+        let length: number = rows.length;
+        for (let i: number = 0; i < length; i++) {
+            let row: HTMLTableRowElement = rows[i];
+            if (row.getAttribute('data-file') === arg.file && row.getAttribute('data-unit') === arg.unit
+                && row.getAttribute('data-id') === arg.segment) {
+                let td: HTMLTableCellElement = row.getElementsByClassName('translate')[0] as HTMLTableCellElement;
+                if (!td.innerHTML.includes(TranslationView.LOCK_FRAGMENT)) {
+                    td.innerHTML = TranslationView.SVG_BLANK;
+                }
+                break;
+            }
+        }
+    }
+
+    showNotes(): void {
+        this.electron.ipcRenderer.send('show-notes', {
+            project: this.projectId,
+            file: this.currentId.file,
+            unit: this.currentId.unit,
+            segment: this.currentId.id
+        });
+    }
+
+    showingNotes(arg: boolean): void {
+        this.notesVisible = arg;
+    }
+
+    notesRemoved(arg: any) : void {
+        if (this.currentState.innerHTML.includes(TranslationView.NOTE_FRAGMENT)) {
+            console.log(JSON.stringify(arg));
+            if (this.currentState.classList.contains('final')) {
+                this.currentState.innerHTML = TranslationView.SVG_FINAL;
+            }
+            if (this.currentState.classList.contains('initial')) {
+                this.currentState.innerHTML = TranslationView.SVG_BLANK;
+            }
+            if (this.currentState.classList.contains('translated')) {
+                this.currentState.innerHTML = TranslationView.SVG_TRANSLATED;
+            }
+        }
+    }
+
+    notesAdded(arg: any) : void {
+        if (!this.currentState.innerHTML.includes(TranslationView.NOTE_FRAGMENT)) {
+            console.log(JSON.stringify(arg));
+            if (this.currentState.classList.contains('final')) {
+                this.currentState.innerHTML = TranslationView.SVG_FINAL + TranslationView.SVG_NOTE;
+            }
+            if (this.currentState.classList.contains('initial')) {
+                this.currentState.innerHTML = TranslationView.SVG_BLANK + TranslationView.SVG_NOTE;
+            }
+            if (this.currentState.classList.contains('translated')) {
+                this.currentState.innerHTML = TranslationView.SVG_TRANSLATED + TranslationView.SVG_NOTE;
+            }
         }
     }
 }

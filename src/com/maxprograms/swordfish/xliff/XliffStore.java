@@ -114,7 +114,10 @@ public class XliffStore {
     private PreparedStatement updateTargetStmt;
     private PreparedStatement unitMatches;
     private PreparedStatement unitTerms;
+    private PreparedStatement unitNotes;
     private PreparedStatement checkTerm;
+    private PreparedStatement getNotesStmt;
+    private PreparedStatement insertNoteStmt;
 
     private Statement stmt;
     private boolean preserve;
@@ -169,9 +172,18 @@ public class XliffStore {
             createTables();
         }
 
+        try {
+            Statement createNotes = conn.createStatement();
+            createNotes.execute("CREATE TABLE IF NOT EXISTS notes (file VARCHAR(50), unitId VARCHAR(256) NOT NULL, "
+                    + "segId VARCHAR(256) NOT NULL, noteid varchar(256) NOT NULL, note VARCHAR(6000) NOT NULL, PRIMARY KEY(file, unitId, segId, noteid) );");
+            conn.commit();
+        } catch (SQLException e) {
+            logger.log(Level.WARNING, "Error creating notes table");
+        }
+
         getUnitData = conn.prepareStatement("SELECT data, compressed FROM units WHERE file=? AND unitId=?");
         getSource = conn.prepareStatement(
-                "SELECT source, sourceText, state FROM segments WHERE file=? AND unitId=? AND segId=?");
+                "SELECT source, sourceText, state, translate FROM segments WHERE file=? AND unitId=? AND segId=?");
         getTargetStmt = conn
                 .prepareStatement("SELECT target, state FROM segments WHERE file=? AND unitId=? AND segId=?");
         updateTargetStmt = conn.prepareStatement(
@@ -190,6 +202,7 @@ public class XliffStore {
                 "SELECT termid, origin, source, target FROM terms WHERE file=? AND unitId=? AND segId=? ORDER BY source");
         checkTerm = conn
                 .prepareStatement("SELECT target FROM terms WHERE file=? AND unitId=? AND segId=? AND termid=?");
+        getNotesStmt = conn.prepareStatement("SELECT noteId, note FROM notes WHERE file=? AND unitId=? AND segId=?");
         stmt = conn.createStatement();
         if (needsLoading) {
             document = builder.build(xliffFile);
@@ -233,9 +246,11 @@ public class XliffStore {
         insertUnit = conn.prepareStatement("INSERT INTO units (file, unitId, data, compressed) VALUES (?,?,?,?)");
         insertSegmentStmt = conn.prepareStatement(
                 "INSERT INTO segments (file, unitId, segId, type, state, child, translate, tags, space, source, sourceText, target, targetText, words) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)");
+        insertNoteStmt = conn.prepareStatement("INSERT INTO notes (file, unitId, segId, noteId, note) values (?,?,?,?,?)");
         recurse(document.getRootElement());
         insertFile.close();
         insertUnit.close();
+        insertNoteStmt.close();
         insertSegmentStmt.close();
     }
 
@@ -264,12 +279,22 @@ public class XliffStore {
                     tagCount++;
                 }
             }
+
             Element matches = e.getChild("mtc:matches");
             if (matches != null) {
                 List<Element> m = matches.getChildren("mtc:match");
                 Iterator<Element> mit = m.iterator();
                 while (mit.hasNext()) {
                     insertMatch(currentFile, currentUnit, mit.next());
+                }
+            }
+
+            Element notes = e.getChild("notes");
+            if (notes != null) {
+                List<Element> n = notes.getChildren("note");
+                Iterator<Element> nit = n.iterator();
+                while (nit.hasNext()) {
+                    insertNote(currentFile, currentUnit, nit.next());
                 }
             }
             if (tagCount > 0) {
@@ -418,6 +443,15 @@ public class XliffStore {
         insertMatch(file, unit, segment, origin, type, similarity, source, target, tagsData);
     }
 
+    private void insertNote(String file, String unit, Element note) throws SQLException {
+        insertNoteStmt.setString(1, file);
+        insertNoteStmt.setString(2, unit);
+        insertNoteStmt.setString(3, note.getAttributeValue("mtc:ref", unit));
+        insertNoteStmt.setString(4, note.getAttributeValue("id", unit));
+        insertNoteStmt.setNString(5, note.getText());
+        insertNoteStmt.execute();
+    }
+
     public int size() throws SQLException {
         int count = 0;
         String sql = "SELECT count(*) FROM segments WHERE type='S'";
@@ -446,7 +480,7 @@ public class XliffStore {
         int idx = start;
         StringBuilder queryBuilder = new StringBuilder();
         queryBuilder.append(
-                "SELECT file, unitId, segId, child, source, target, tags, state, space, translate FROM segments WHERE type='S'");
+                "SELECT file, unitId, segId, child, source, target, tags, state, space, translate, sourceText, targetText FROM segments WHERE type='S'");
         if (!filterText.isEmpty()) {
             if (regExp) {
                 try {
@@ -523,6 +557,8 @@ public class XliffStore {
                 String segState = rs.getString(8);
                 boolean segPreserve = "Y".equals(rs.getString(9));
                 boolean segTranslate = "Y".equals(rs.getString(10));
+                String sourceText = rs.getNString(11);
+                String targetText = rs.getNString(12);
 
                 JSONObject tagsData = new JSONObject();
                 if (tags > 0) {
@@ -539,6 +575,11 @@ public class XliffStore {
                     target = buildElement(tgt);
                 }
 
+                boolean checkErrors = segTranslate
+                        && (segState.equals("final") || (segState.equals("translated") && acceptUnconfirmed));
+                boolean tagErrors = checkErrors ? hasTagErrors(source, target) : false;
+                boolean spaceErrors = checkErrors ? hasSpaceErrors(sourceText, targetText) : false;
+
                 tagsMap = new Hashtable<>();
                 JSONObject row = new JSONObject();
                 row.put("index", idx++);
@@ -553,10 +594,133 @@ public class XliffStore {
                 tag = 1;
                 row.put("target", addHtmlTags(target, filterText, caseSensitiveFilter, regExp, tagsData, segPreserve));
                 row.put("match", getBestMatch(file, unit, segId));
+                row.put("hasNotes", hasNotes(file, unit, segId));
+                row.put("tagErrors", tagErrors);
+                row.put("spaceErrors", spaceErrors);
                 result.add(row);
             }
         }
         return result;
+    }
+
+    private boolean hasNotes(String file, String unit, String segId) throws SQLException {
+        boolean result = false;
+        getNotesStmt.setString(1, file);
+        getNotesStmt.setString(2, unit);
+        getNotesStmt.setString(3, segId);
+        try (ResultSet rs = getNotesStmt.executeQuery()) {
+            while (rs.next()) {
+                result = true;
+            }
+        }
+        return result;
+    }
+
+    public JSONArray getNotes(String file, String unit, String segId) throws SQLException {
+        JSONArray array = new JSONArray();
+        getNotesStmt.setString(1, file);
+        getNotesStmt.setString(2, unit);
+        getNotesStmt.setString(3, segId);
+        try (ResultSet rs = getNotesStmt.executeQuery()) {
+            while (rs.next()) {
+                JSONObject note = new JSONObject();
+                note.put("id", rs.getString(1));
+                note.put("note", rs.getNString(2));
+                array.put(note);
+            }
+        }
+        return array;
+    }
+
+    public JSONArray addNote(String file, String unit, String segId, String noteText) throws SQLException {
+        String sql = "SELECT noteId FROM notes WHERE file=? AND unitId=? AND segId=?";
+        int maxId = 0;
+        try (PreparedStatement prep = conn.prepareStatement(sql)) {
+            prep.setString(1, file);
+            prep.setString(2, unit);
+            prep.setString(3, segId);
+            try (ResultSet rs = prep.executeQuery()) {
+                while (rs.next()) {
+                    String id = rs.getString(1);
+                    try {
+                        int number = Integer.valueOf(id);
+                        if (number > maxId) {
+                            maxId = number;
+                        }
+                    } catch (NumberFormatException e) {
+                        // ignore
+                    }
+                }
+            }
+        }
+        sql = "INSERT INTO notes (file, unitId, segId, noteId, note) values (?,?,?,?,?)";
+        try (PreparedStatement prep = conn.prepareStatement(sql)) {
+            prep.setString(1, file);
+            prep.setString(2, unit);
+            prep.setString(3, segId);
+            prep.setString(4, "" + (maxId + 1));
+            prep.setNString(5, noteText);
+            prep.executeUpdate();
+        }
+        conn.commit();
+        JSONArray array = new JSONArray();
+        getNotesStmt.setString(1, file);
+        getNotesStmt.setString(2, unit);
+        getNotesStmt.setString(3, segId);
+        try (ResultSet rs = getNotesStmt.executeQuery()) {
+            while (rs.next()) {
+                JSONObject note = new JSONObject();
+                note.put("id", rs.getString(1));
+                note.put("note", rs.getNString(2));
+                array.put(note);
+            }
+        }
+        return array;
+    }
+
+    public JSONArray removeNote(String file, String unit, String segId, String noteId) throws SQLException {
+        String sql = "DELETE FROM notes WHERE file=? AND unitId=? AND segId=? AND noteId=?";
+        try (PreparedStatement prep = conn.prepareStatement(sql)) {
+            prep.setString(1, file);
+            prep.setString(2, unit);
+            prep.setString(3, segId);
+            prep.setString(4, noteId);
+            prep.executeUpdate();
+        }
+        conn.commit();
+        JSONArray array = new JSONArray();
+        getNotesStmt.setString(1, file);
+        getNotesStmt.setString(2, unit);
+        getNotesStmt.setString(3, segId);
+        try (ResultSet rs = getNotesStmt.executeQuery()) {
+            while (rs.next()) {
+                JSONObject note = new JSONObject();
+                note.put("id", rs.getString(1));
+                note.put("note", rs.getNString(2));
+                array.put(note);
+            }
+        }
+        return array;
+    }
+
+    private boolean hasTagErrors(Element source, Element target) {
+        List<String> sourceTags = tagsList(source);
+        List<String> targetTags = tagsList(target);
+        if (sourceTags.size() != targetTags.size()) {
+            return true;
+        }
+        for (int i = 0; i < sourceTags.size(); i++) {
+            if (!sourceTags.get(i).equals(targetTags.get(i))) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private boolean hasSpaceErrors(String sourceText, String targetText) {
+        int[] sourceSpaces = countSpaces(sourceText);
+        int[] targetSpaces = countSpaces(targetText);
+        return sourceSpaces[0] != targetSpaces[0] || sourceSpaces[1] != targetSpaces[1];
     }
 
     private synchronized int getBestMatch(String file, String unit, String segment) throws SQLException {
@@ -609,6 +773,7 @@ public class XliffStore {
         insertTerm.close();
         getTerms.close();
         checkTerm.close();
+        getNotesStmt.close();
         stmt.close();
         conn.commit();
         conn.close();
@@ -643,10 +808,11 @@ public class XliffStore {
         catalog = json.getString("catalog");
     }
 
-    public synchronized JSONArray saveSegment(JSONObject json)
+    public synchronized JSONObject saveSegment(JSONObject json)
             throws IOException, SQLException, SAXException, ParserConfigurationException, DataFormatException {
 
-        JSONArray result = new JSONArray();
+        JSONObject result = new JSONObject();
+
         String file = json.getString("file");
         String unit = json.getString("unit");
         String segment = json.getString("segment");
@@ -655,14 +821,18 @@ public class XliffStore {
         String memory = json.getString("memory");
 
         String src = "";
+        String pureSource = "";
         getSource.setString(1, file);
         getSource.setString(2, unit);
         getSource.setString(3, segment);
         boolean wasFinal = false;
+        boolean translate = true;
         try (ResultSet rs = getSource.executeQuery()) {
             while (rs.next()) {
                 src = rs.getNString(1);
+                pureSource = rs.getNString(2);
                 wasFinal = rs.getString(3).equals("final");
+                translate = rs.getString(4).equals("Y");
             }
         }
         Element source = buildElement(src);
@@ -689,11 +859,21 @@ public class XliffStore {
 
         target.setContent(translated.getContent());
         String pureTarget = XliffUtils.pureText(target);
-
+        JSONArray propagated = new JSONArray();
         updateTarget(file, unit, segment, target, pureTarget, confirm);
         if (confirm && !pureTarget.isBlank() && (!unchanged || !wasFinal)) {
-            result = propagate(source, target);
+            propagated = propagate(source, target);
         }
+        result.put("propagated", propagated);
+
+        boolean checkErrors = translate && (confirm || (!pureTarget.isEmpty() && acceptUnconfirmed));
+
+        boolean tagErrors = checkErrors ? hasTagErrors(source, target) : false;
+        boolean spaceErrors = checkErrors ? hasSpaceErrors(pureSource, pureTarget) : false;
+
+        result.put("tagErrors", tagErrors);
+        result.put("spaceErrors", spaceErrors);
+
         if (!memory.equals(Constants.NONE) && !pureTarget.isBlank()) {
             Thread thread = new Thread() {
                 @Override
@@ -1436,9 +1616,11 @@ public class XliffStore {
                 "SELECT file, unitId, segId, matchId, origin, type, similarity, source, target, data, compressed FROM matches WHERE file=? AND unitId=? ORDER BY segId, similarity DESC");
         unitTerms = conn.prepareStatement(
                 "SELECT file, unitId, segId, termId, origin, source, target FROM terms WHERE file=? AND unitId=? ORDER BY segId");
+        unitNotes = conn.prepareStatement("SELECT segId, noteId, note FROM notes WHERE file=? AND unitId=? ORDER BY segId");
         recurseUpdating(document.getRootElement());
         unitTerms.close();
         unitMatches.close();
+        unitNotes.close();
         saveXliff();
     }
 
@@ -1459,6 +1641,10 @@ public class XliffStore {
             Element matches = getUnitMatches(currentFile, currentUnit);
             if (matches != null) {
                 insertMatches(e, matches);
+            }
+            Element notes = getUnitNotes(currentFile, currentUnit);
+            if (notes != null) {
+                insertNotes(e, notes);
             }
         }
         if ("segment".equals(e.getName())) {
@@ -1505,6 +1691,31 @@ public class XliffStore {
         unit.getContent().add(0, matches);
     }
 
+    private void insertNotes(Element unit, Element notes) {
+        Element old = unit.getChild("notes");
+        if (old != null) {
+            unit.removeChild(old);
+        }
+        boolean added = false;
+        List<XMLNode> newContent = new ArrayList<>();
+        List<XMLNode> oldContent = unit.getContent();
+        Iterator<XMLNode> it = oldContent.iterator();
+        while (it.hasNext()) {
+            XMLNode node = it.next();
+            if (node.getNodeType() == XMLNode.ELEMENT_NODE) {
+                Element e = (Element) node;
+                if (e.getNamespace().isEmpty() && !added) {
+                    newContent.add(notes);
+                    added = true;
+                }
+                newContent.add(node);
+            } else {
+                newContent.add(node);
+            }
+        }
+        unit.setContent(newContent);
+    }
+
     private void insertGlossary(Element unit, Element terms) {
         Element old = unit.getChild("gls:glossary");
         if (old != null) {
@@ -1532,6 +1743,22 @@ public class XliffStore {
             }
         }
         return matches.getChildren().isEmpty() ? null : matches;
+    }
+
+    private Element getUnitNotes(String file, String unit) throws SQLException {
+        Element notes = new Element("notes");
+        unitNotes.setString(1, file);
+        unitNotes.setString(2, unit);
+        try (ResultSet rs = unitNotes.executeQuery()) {
+            while (rs.next()) {
+                Element note = new Element("note");
+                note.setAttribute("mtc:ref", rs.getString(1));
+                note.setAttribute("id", rs.getString(2));
+                note.setText(rs.getNString(3));
+                notes.addContent(note);
+            }
+        }
+        return notes.getChildren().isEmpty() ? null : notes;
     }
 
     private Element getUnitTerms(String file, String unit) throws SQLException {
@@ -2653,8 +2880,8 @@ public class XliffStore {
     public void splitSegment(JSONObject json)
             throws SQLException, SAXException, IOException, ParserConfigurationException {
 
-        String currentFile = json.getString("file");
-        String currentUnit = json.getString("unit");
+        currentFile = json.getString("file");
+        currentUnit = json.getString("unit");
         String segmentId = json.getString("segment");
         int offset = json.getInt("offset");
 
@@ -2868,8 +3095,8 @@ public class XliffStore {
     public void mergeSegment(JSONObject json)
             throws SAXException, IOException, ParserConfigurationException, SQLException {
 
-        String currentFile = json.getString("file");
-        String currentUnit = json.getString("unit");
+        currentFile = json.getString("file");
+        currentUnit = json.getString("unit");
         String segmentId = json.getString("segment");
 
         Element unit = null;
@@ -3014,20 +3241,19 @@ public class XliffStore {
             target.setAttribute("xml:lang", tgtLang);
             return target;
         }
-        Element target = buildElement(tgt);
-        return target;
+        return buildElement(tgt);
     }
 
     private String getState(String file, String unit, String segment) throws SQLException {
         getTargetStmt.setString(1, file);
         getTargetStmt.setString(2, unit);
         getTargetStmt.setString(3, segment);
-        String state = "";
+        String result = "";
         try (ResultSet rs = getTargetStmt.executeQuery()) {
             while (rs.next()) {
-                state = rs.getString(2);
+                result = rs.getString(2);
             }
         }
-        return state;
+        return result;
     }
 }

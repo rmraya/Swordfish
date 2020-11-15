@@ -52,6 +52,8 @@ class Swordfish {
     static sortSegmentsWindow: BrowserWindow;
     static changeCaseWindow: BrowserWindow;
     static applyTmWindow: BrowserWindow;
+    static notesWindow: BrowserWindow;
+    static addNoteWindow: BrowserWindow;
 
     javapath: string = Swordfish.path.join(app.getAppPath(), 'bin', 'java');
 
@@ -60,7 +62,7 @@ class Swordfish {
     static verticalPadding: number = 46;
 
     static currentDefaults: Rectangle;
-    static currentPreferences = {
+    static currentPreferences: any = {
         theme: 'system',
         zoomFactor: '1.0',
         srcLang: 'none',
@@ -106,7 +108,8 @@ class Swordfish {
             defaultEnglish: 'en-US',
             defaultPortuguese: 'pt-BR',
             defaultSpanish: 'es'
-        }
+        },
+        os: process.platform
     }
     static currentCss: string;
     static currentStatus: any;
@@ -115,6 +118,8 @@ class Swordfish {
     static sortParams: any;
     static filterParams: any;
     static memoryParam: string;
+    static notesParam: any;
+    static notesEvent: IpcMainEvent;
     static concordanceMemories: any;
     static glossaryParam: string;
     static messageParam: any;
@@ -213,8 +218,10 @@ class Swordfish {
                     Swordfish.getDefaultLanguages();
                 }
                 Swordfish.spellCheckerLanguages = Swordfish.mainWindow.webContents.session.availableSpellCheckerLanguages;
+                setTimeout(() => {
+                    Swordfish.checkUpdates(true);
+                }, 4000);
             });
-            Swordfish.checkUpdates(true);
         });
 
         app.on('quit', () => {
@@ -758,6 +765,30 @@ class Swordfish {
         ipcMain.on('merge-at', (event: IpcMainEvent, arg: any) => {
             Swordfish.mergeSegment(arg);
         });
+        ipcMain.on('show-notes', (event: IpcMainEvent, arg: any) => {
+            Swordfish.showNotes(arg);
+        });
+        ipcMain.on('get-initial-notes', (event: IpcMainEvent) => {
+            Swordfish.notesEvent = event;
+            event.sender.send('note-params', Swordfish.notesParam);
+            Swordfish.getNotes(Swordfish.notesParam);
+        });
+        ipcMain.on('show-add-note', (event: IpcMainEvent, arg: any) => {
+            Swordfish.showAddNote(arg);
+        });
+        ipcMain.on('add-note-height', (event: IpcMainEvent, arg: any) => {
+            event.sender.send('note-params', Swordfish.notesParam);
+            Swordfish.setHeight(Swordfish.addNoteWindow, arg);
+        });
+        ipcMain.on('close-add-note', () => {
+            Swordfish.destroyWindow(Swordfish.addNoteWindow);
+        });
+        ipcMain.on('add-note', (event: IpcMainEvent, arg: any) => {
+            Swordfish.addNote(arg);
+        });
+        ipcMain.on('remove-note', (event: IpcMainEvent, arg: any) => {
+            Swordfish.removeNote(arg);
+        });
     } // end constructor
 
     static createWindow(): void {
@@ -861,6 +892,8 @@ class Swordfish {
             new MenuItem({ type: 'separator' }),
             { label: 'Sort Segments', accelerator: 'F3', click: () => { Swordfish.mainWindow.webContents.send('sort-segments'); } },
             { label: 'Filter Segments', accelerator: 'CmdOrCtrl+F', click: () => { Swordfish.mainWindow.webContents.send('filter-segments'); } },
+            new MenuItem({ type: 'separator' }),
+            { label: 'Show/Hide Notes', accelerator: 'F2', click: () => { Swordfish.toggleNotes(); } },
             new MenuItem({ type: 'separator' }),
             { label: 'Close Selected Tab', accelerator: 'CmdOrCtrl+W', click: () => { Swordfish.closeSelectedTab(); } },
             new MenuItem({ type: 'separator' }),
@@ -1064,7 +1097,6 @@ class Swordfish {
         let rect: Rectangle = window.getBounds();
         rect.height = arg.height + Swordfish.verticalPadding;
         window.setBounds(rect);
-        // TODO window.show();
     }
 
     static loadPreferences(): void {
@@ -1096,6 +1128,9 @@ class Swordfish {
         }
         if (!Swordfish.currentPreferences.zoomFactor) {
             Swordfish.currentPreferences.zoomFactor = '1.0';
+        }
+        if (!Swordfish.currentPreferences.os) {
+            Swordfish.currentPreferences.os = process.platform;
         }
     }
 
@@ -2448,6 +2483,25 @@ class Swordfish {
                 if (data.propagated.length > 0) {
                     Swordfish.mainWindow.webContents.send('auto-propagate', { project: arg.project, rows: data.propagated });
                 }
+                if (data.tagErrors || data.spaceErrors) {
+                    Swordfish.mainWindow.webContents.send('set-errors', {
+                        project: arg.project,
+                        file: arg.file,
+                        unit: arg.unit,
+                        segment: arg.segment,
+                        tagErrors: data.tagErrors,
+                        spaceErrors: data.spaceErrors
+                    });
+                } else {
+                    Swordfish.mainWindow.webContents.send('clear-errors', {
+                        project: arg.project,
+                        file: arg.file,
+                        unit: arg.unit,
+                        segment: arg.segment,
+                        tagErrors: data.tagErrors,
+                        spaceErrors: data.spaceErrors
+                    });
+                }
                 Swordfish.mainWindow.webContents.send('set-statistics', { project: arg.project, statistics: data.statistics });
             },
             (reason: string) => {
@@ -2700,6 +2754,9 @@ class Swordfish {
     }
 
     static setSpellcheckerLanguage(lang: string): void {
+        if (!Swordfish.spellCheckerLanguages) {
+            Swordfish.spellCheckerLanguages = Swordfish.mainWindow.webContents.session.availableSpellCheckerLanguages;
+        }
         if (Swordfish.spellCheckerLanguages.includes(lang)) {
             Swordfish.mainWindow.webContents.session.setSpellCheckerLanguages([lang]);
             return;
@@ -2757,6 +2814,8 @@ class Swordfish {
                 case 'termSearch': parent = Swordfish.termSearchWindow;
                     break;
                 case 'applyTm': parent = Swordfish.applyTmWindow;
+                    break;
+                case 'addNote': parent = Swordfish.addNoteWindow;
                     break;
                 default: parent = Swordfish.mainWindow;
             }
@@ -4062,6 +4121,128 @@ class Swordfish {
                 Swordfish.mainWindow.webContents.send('count-changed', { project: arg.project });
             },
             (reason: string) => {
+                Swordfish.showMessage({ type: 'error', message: reason });
+            }
+        );
+    }
+
+    static toggleNotes(): void {
+        if (Swordfish.notesWindow) {
+            Swordfish.destroyWindow(Swordfish.notesWindow);
+            Swordfish.mainWindow.webContents.send('notes-closed');
+            Swordfish.notesParam = undefined;
+            return;
+        }
+        Swordfish.mainWindow.webContents.send('notes-requested');
+    }
+
+    static showNotes(arg: any): void {
+        if (!Swordfish.notesWindow) {
+            Swordfish.notesWindow = new BrowserWindow({
+                parent: Swordfish.mainWindow,
+                width: 450,
+                height: 200,
+                minimizable: false,
+                maximizable: false,
+                resizable: true,
+                useContentSize: true,
+                show: false,
+                alwaysOnTop: true,
+                icon: this.iconPath,
+                webPreferences: {
+                    nodeIntegration: true
+                }
+            });
+            Swordfish.notesParam = arg;
+            Swordfish.notesWindow.setMenu(null);
+            Swordfish.notesWindow.loadURL(Swordfish.path.join('file://', app.getAppPath(), 'html', 'notes.html'));
+            Swordfish.notesWindow.addListener('closed', () => {
+                Swordfish.mainWindow.webContents.send('notes-closed');
+                Swordfish.notesWindow = undefined;
+            });
+            Swordfish.notesWindow.once('ready-to-show', () => {
+                Swordfish.notesWindow.show();
+            });
+            return;
+        }
+        Swordfish.getNotes(arg);
+    }
+
+    static getNotes(arg: any) {
+        if (!Swordfish.notesParam) {
+            return;
+        }
+        Swordfish.sendRequest('/projects/getNotes', arg,
+            function success(data: any) {
+                if (data.status === 'Success') {
+                    Swordfish.notesEvent.sender.send('note-params', arg);
+                    Swordfish.notesEvent.sender.send('set-notes', data);
+                } else {
+                    Swordfish.showMessage({ type: 'error', message: data.reason });
+                }
+            },
+            function error(reason: string) {
+                Swordfish.showMessage({ type: 'error', message: reason });
+            }
+        );
+    }
+
+    static showAddNote(arg: any): void {
+        Swordfish.notesParam = arg;
+        Swordfish.addNoteWindow = new BrowserWindow({
+            parent: Swordfish.mainWindow,
+            width: 350,
+            minimizable: false,
+            maximizable: false,
+            resizable: true,
+            useContentSize: true,
+            modal: true,
+            show: false,
+            icon: this.iconPath,
+            webPreferences: {
+                nodeIntegration: true
+            }
+        });
+        Swordfish.notesParam = arg;
+        Swordfish.addNoteWindow.setMenu(null);
+        Swordfish.addNoteWindow.loadURL(Swordfish.path.join('file://', app.getAppPath(), 'html', 'addNote.html'));
+        Swordfish.addNoteWindow.once('ready-to-show', () => {
+            Swordfish.addNoteWindow.show();
+        });
+    }
+
+    static addNote(arg: any) {
+        Swordfish.destroyWindow(Swordfish.addNoteWindow);
+        Swordfish.sendRequest('/projects/addNote', arg,
+            function success(data: any) {
+                if (data.status === 'Success') {
+                    Swordfish.notesEvent.sender.send('note-params', arg);
+                    Swordfish.notesEvent.sender.send('set-notes', data);
+                    Swordfish.mainWindow.webContents.send('notes-added', arg);
+                } else {
+                    Swordfish.showMessage({ type: 'error', message: data.reason });
+                }
+            },
+            function error(reason: string) {
+                Swordfish.showMessage({ type: 'error', message: reason });
+            }
+        );
+    }
+
+    static removeNote(arg: any) {
+        Swordfish.sendRequest('/projects/removeNote', arg,
+            function success(data: any) {
+                if (data.status === 'Success') {
+                    Swordfish.notesEvent.sender.send('note-params', arg);
+                    Swordfish.notesEvent.sender.send('set-notes', data);
+                    if (data.notes.length === 0) {
+                        Swordfish.mainWindow.webContents.send('notes-removed', arg);
+                    }
+                } else {
+                    Swordfish.showMessage({ type: 'error', message: data.reason });
+                }
+            },
+            function error(reason: string) {
                 Swordfish.showMessage({ type: 'error', message: reason });
             }
         );

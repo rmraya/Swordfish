@@ -80,7 +80,7 @@ public class ProjectsHandler implements HttpHandler {
 	private boolean paragraphSegmentation;
 
 	private Map<String, XliffStore> projectStores = new Hashtable<>();
-	
+
 	@Override
 	public void handle(HttpExchange exchange) throws IOException {
 		try {
@@ -212,6 +212,12 @@ public class ProjectsHandler implements HttpHandler {
 				response = splitSegment(request);
 			} else if ("/projects/mergeSegment".equals(url)) {
 				response = mergeSegment(request);
+			} else if ("/projects/getNotes".equals(url)) {
+				response = getNotes(request);
+			} else if ("/projects/addNote".equals(url)) {
+				response = addNote(request);
+			} else if ("/projects/removeNote".equals(url)) {
+				response = removeNote(request);
 			} else {
 				response.put(Constants.REASON, "Unknown request");
 			}
@@ -811,7 +817,7 @@ public class ProjectsHandler implements HttpHandler {
 		JSONObject json = new JSONObject(request);
 		String project = json.getString("project");
 		try {
-			result.put("propagated", projectStores.get(project).saveSegment(json));
+			result = projectStores.get(project).saveSegment(json);
 			JSONObject status = projectStores.get(project).getTranslationStatus();
 			result.put("statistics", status);
 			updateProjectStatus(project, status.getInt("percentage"));
@@ -1579,6 +1585,54 @@ public class ProjectsHandler implements HttpHandler {
 				projectStores.get(project).mergeSegment(json);
 			}
 		} catch (SQLException | JSONException | SAXException | IOException | ParserConfigurationException e) {
+			logger.log(Level.ERROR, e);
+			result.put(Constants.REASON, e.getMessage());
+		}
+		return result;
+	}
+
+	private JSONObject getNotes(String request) {
+		JSONObject result = new JSONObject();
+		JSONObject json = new JSONObject(request);
+		try {
+			String project = json.getString("project");
+			if (projectStores.containsKey(project)) {
+				result.put("notes", projectStores.get(project).getNotes(json.getString("file"), json.getString("unit"),
+						json.getString("segment")));
+			}
+		} catch (SQLException e) {
+			logger.log(Level.ERROR, e);
+			result.put(Constants.REASON, e.getMessage());
+		}
+		return result;
+	}
+
+	private JSONObject addNote(String request) {
+		JSONObject result = new JSONObject();
+		JSONObject json = new JSONObject(request);
+		try {
+			String project = json.getString("project");
+			if (projectStores.containsKey(project)) {
+				result.put("notes", projectStores.get(project).addNote(json.getString("file"), json.getString("unit"),
+						json.getString("segment"), json.getString("noteText")));
+			}
+		} catch (SQLException e) {
+			logger.log(Level.ERROR, e);
+			result.put(Constants.REASON, e.getMessage());
+		}
+		return result;
+	}
+
+	private JSONObject removeNote(String request) {
+		JSONObject result = new JSONObject();
+		JSONObject json = new JSONObject(request);
+		try {
+			String project = json.getString("project");
+			if (projectStores.containsKey(project)) {
+				result.put("notes", projectStores.get(project).removeNote(json.getString("file"), json.getString("unit"),
+						json.getString("segment"), json.getString("noteId")));
+			}
+		} catch (SQLException e) {
 			logger.log(Level.ERROR, e);
 			result.put(Constants.REASON, e.getMessage());
 		}

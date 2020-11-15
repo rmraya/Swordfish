@@ -364,11 +364,29 @@ class Main {
         Main.electron.ipcRenderer.on('case-changed', (event: Electron.IpcRendererEvent, arg: any) => {
             this.caseChanged(arg);
         });
+        Main.electron.ipcRenderer.on('set-errors', (event: Electron.IpcRendererEvent, arg: any) => {
+            this.setErrors(arg);
+        });
+        Main.electron.ipcRenderer.on('clear-errors', (event: Electron.IpcRendererEvent, arg: any) => {
+            this.clearErrors(arg);
+        });
+        Main.electron.ipcRenderer.on('notes-requested', () => {
+            this.notesRequested();
+        });
+        Main.electron.ipcRenderer.on('notes-closed', () => {
+            this.notesClosed();
+        }); 
+        Main.electron.ipcRenderer.on('notes-removed', (event: Electron.IpcRendererEvent, arg: any) => {
+            this.notesRemoved(arg);
+        });
+        Main.electron.ipcRenderer.on('notes-added', (event: Electron.IpcRendererEvent, arg: any) => {
+            this.notesAdded(arg);
+        });
         let config: any = { attributes: true, childList: false, subtree: false };
         let observer = new MutationObserver((mutationsList) => {
             for (let mutation of mutationsList) {
                 if (mutation.type === 'attributes') {
-                    Main.main.style.height = (this.mainContainer.clientHeight - 31) + 'px';
+                    Main.main.style.height = (this.mainContainer.clientHeight - Main.tabHolder.getTabsHeight()) + 'px';
                     Main.main.style.width = this.mainContainer.clientWidth + 'px';
                 }
             }
@@ -957,6 +975,48 @@ class Main {
         let selected = Main.tabHolder.getSelected();
         if (Main.translationViews.has(selected)) {
             Main.translationViews.get(selected).caseChanged(arg);
+        }
+    }
+
+    setErrors(arg:any): void {
+        let selected = Main.tabHolder.getSelected();
+        if (Main.translationViews.has(selected)) {
+            Main.translationViews.get(selected).setErrors(arg);
+        }
+    }
+
+    clearErrors(arg:any): void {
+        let selected = Main.tabHolder.getSelected();
+        if (Main.translationViews.has(selected)) {
+            Main.translationViews.get(selected).clearErrors(arg);
+        }
+    }
+
+    notesRequested(): void {
+        let selected = Main.tabHolder.getSelected();
+        for (let key of Main.translationViews.keys()) {
+            Main.translationViews.get(key).showingNotes(true);
+        }
+        if (Main.translationViews.has(selected)) {
+            Main.translationViews.get(selected).showNotes();
+        }
+    }
+
+    notesClosed(): void {
+        for (let key of Main.translationViews.keys()) {
+            Main.translationViews.get(key).showingNotes(false);
+        }
+    }
+
+    notesRemoved(arg: any): void {
+        if (Main.translationViews.has(arg.project)) {
+            Main.translationViews.get(arg.project).notesRemoved(arg);
+        }
+    }
+
+    notesAdded(arg: any): void {
+        if (Main.translationViews.has(arg.project)) {
+            Main.translationViews.get(arg.project).notesAdded(arg);
         }
     }
 }

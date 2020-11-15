@@ -22,6 +22,7 @@ class Preferences {
     electron = require('electron');
 
     tabHolder: TabHolder;
+    spellcheckTab: Tab;
 
     srcLangSelect: HTMLSelectElement;
     tgtLangSelect: HTMLSelectElement;
@@ -65,6 +66,7 @@ class Preferences {
     defaultPortuguese: HTMLSelectElement;
     defaultSpanish: HTMLSelectElement;
 
+    os: string;
 
     constructor() {
         this.tabHolder = new TabHolder(document.getElementById('main') as HTMLDivElement, "preferencesHolder");
@@ -83,12 +85,11 @@ class Preferences {
         this.tabHolder.addTab(mtTab);
         this.populateMtTab(mtTab.getContainer());
 
-        let spellcheckTab: Tab = new Tab('spellcheckTab', 'Spellchecker', false);
-        spellcheckTab.getLabel().addEventListener('click', () => {
+        this.spellcheckTab = new Tab('spellcheckTab', 'Spellchecker', false);
+        this.spellcheckTab.getLabel().addEventListener('click', () => {
             this.electron.ipcRenderer.send('settings-height', { width: body.clientWidth, height: body.clientHeight });
         });
-        this.tabHolder.addTab(spellcheckTab);
-        this.populateSpellcheckTab(spellcheckTab.getContainer());
+        this.tabHolder.addTab(this.spellcheckTab);
 
         let advancedTab: Tab = new Tab('advancedTab', 'Advanced', false);
         advancedTab.getLabel().addEventListener('click', () => {
@@ -223,11 +224,8 @@ class Preferences {
             this.myMemoryTgtLang.disabled = !this.enableMyMemory.checked;
         });
 
-        this.defaultEnglish.value = arg.spellchecker.defaultEnglish;
-        this.defaultPortuguese.value = arg.spellchecker.defaultPortuguese;
-        this.defaultSpanish.value = arg.spellchecker.defaultSpanish;
-
-
+        this.os = arg.os;
+        this.populateSpellcheckTab(this.spellcheckTab.getContainer(), arg.spellchecker);
     }
 
     setLanguages(arg: any): void {
@@ -331,6 +329,13 @@ class Preferences {
                 tgtLang: this.myMemoryTgtLang.value
             },
             spellchecker: {
+                defaultEnglish: 'en-US',
+                defaultPortuguese: 'pt-BR',
+                defaultSpanish: 'es'
+            }
+        }
+        if (this.os !== 'darwin') {
+            prefs.spellchecker = {
                 defaultEnglish: this.defaultEnglish.value,
                 defaultPortuguese: this.defaultPortuguese.value,
                 defaultSpanish: this.defaultSpanish.value
@@ -341,7 +346,7 @@ class Preferences {
 
     populateBasicTab(container: HTMLDivElement): void {
 
-        container.style.paddingTop = '10px';
+        container.style.padding = '10px';
 
         let langsTable: HTMLTableElement = document.createElement('table');
         langsTable.classList.add('fill_width');
@@ -366,7 +371,7 @@ class Preferences {
         tr.appendChild(td);
 
         this.srcLangSelect = document.createElement('select');
-        this.srcLangSelect.classList.add('fill_width');
+        this.srcLangSelect.classList.add('table_select');
         this.srcLangSelect.id = 'srcLangSelect';
         td.appendChild(this.srcLangSelect);
 
@@ -389,7 +394,7 @@ class Preferences {
         tr.appendChild(td);
 
         this.tgtLangSelect = document.createElement('select');
-        this.tgtLangSelect.classList.add('fill_width');
+        this.tgtLangSelect.classList.add('table_select');
         this.tgtLangSelect.id = 'tgtLangSelect';
         td.appendChild(this.tgtLangSelect);
 
@@ -445,9 +450,23 @@ class Preferences {
         td.appendChild(this.zoomFactor);
     }
 
-    populateSpellcheckTab(container: HTMLDivElement): void {
+    populateSpellcheckTab(container: HTMLDivElement, spellchecker: any): void {
 
-        container.style.paddingTop = '10px';
+        container.style.padding = '10px';
+
+        if (this.os === 'darwin') {
+            let macDiv = document.createElement('div');
+            macDiv.style.padding = '8px'
+            macDiv.innerHTML = 
+                '<p>By default, macOS automatically detects the language the user is typing in and adjusts its internal spellchecker accordingly.</p>' +
+                '<p>Follow these steps to select a specific language for spellchecking: </p>' +
+                '<ul><li>Open "System Preferences" application</li>' +
+                '<li>Select the "Keyboard" option' +
+                '<li>Select the "Text" tab</li>' +
+                '<li>Select your preferred language in the "Spelling" drop-down list</li></ul>';
+            container.appendChild(macDiv);
+            return;
+        }
 
         let langsTable: HTMLTableElement = document.createElement('table');
         langsTable.classList.add('fill_width');
@@ -473,7 +492,7 @@ class Preferences {
 
         this.defaultEnglish = document.createElement('select');
         this.defaultEnglish.id = 'defaultEnglish';
-        this.defaultEnglish.classList.add('fill_width');
+        this.defaultEnglish.classList.add('table_select');
         this.defaultEnglish.innerHTML = '<option value="en-AU">English (Australia)</option>' +
             '<option value="en-CA">English (Canada)</option>' +
             '<option value="en-GB">English (United Kingdom)</option>' +
@@ -500,7 +519,7 @@ class Preferences {
 
         this.defaultPortuguese = document.createElement('select');
         this.defaultPortuguese.id = 'defaultPortuguese';
-        this.defaultPortuguese.classList.add('fill_width');
+        this.defaultPortuguese.classList.add('table_select');
         this.defaultPortuguese.innerHTML = '<option value="pt-BR">Portuguese (Brazil)</option>' +
             '<option value="pt-PT">Portuguese (Portugal)</option>';
         td.appendChild(this.defaultPortuguese);
@@ -525,7 +544,7 @@ class Preferences {
 
         this.defaultSpanish = document.createElement('select');
         this.defaultSpanish.id = 'defaultSpanish';
-        this.defaultSpanish.classList.add('fill_width');
+        this.defaultSpanish.classList.add('table_select');
         this.defaultSpanish.innerHTML = '<option value="es">Spanish</option>' +
             '<option value="es-419">Spanish (Latin America and the Caribbean)</option>' +
             '<option value="es-AR">Spanish (Argentina)</option>' +
@@ -542,11 +561,15 @@ class Preferences {
             languagesButton.blur();
         });
         container.appendChild(languagesButton);
+
+        this.defaultEnglish.value = spellchecker.defaultEnglish;
+        this.defaultPortuguese.value = spellchecker.defaultPortuguese;
+        this.defaultSpanish.value = spellchecker.defaultSpanish;
     }
 
     populateAdvancedTab(container: HTMLDivElement): void {
 
-        container.style.paddingTop = '10px';
+        container.style.padding = '10px';
 
         let table: HTMLTableElement = document.createElement('table');
         table.classList.add('fill_width');
@@ -677,7 +700,14 @@ class Preferences {
 
     populateMtTab(container: HTMLDivElement): void {
 
-        let mtHolder: TabHolder = new TabHolder(container, 'mtHolder');
+        let holder: HTMLDivElement = document.createElement('div');
+        holder.style.width = '96%';
+        holder.style.marginLeft = '2%';
+        holder.style.marginTop = '10px';
+        holder.style.border = '1px solid var(--tabHolder-background)';
+        container.appendChild(holder);
+
+        let mtHolder: TabHolder = new TabHolder(holder, 'mtHolder');
 
         let googleTab: Tab = new Tab('googleTab', 'Google', false);
         googleTab.getLabel().addEventListener('click', () => {
@@ -747,7 +777,7 @@ class Preferences {
         td = document.createElement('td');
         td.classList.add('middle');
         td.classList.add('fill_width');
-        td.innerHTML = '<input type="text" id="googleKey" style="width: calc(100% - 6px);"/>';
+        td.innerHTML = '<input type="text" id="googleKey" class="table_input"/>';
         tr.appendChild(td);
 
         tr = document.createElement('tr');
@@ -762,7 +792,7 @@ class Preferences {
         td = document.createElement('td');
         td.classList.add('middle');
         td.classList.add('fill_width');
-        td.innerHTML = '<select id="googleSrcLang" class="fill_width"></select>';
+        td.innerHTML = '<select id="googleSrcLang" class="table_select"></select>';
         tr.appendChild(td);
 
         tr = document.createElement('tr');
@@ -777,7 +807,7 @@ class Preferences {
         td = document.createElement('td');
         td.classList.add('middle');
         td.classList.add('fill_width');
-        td.innerHTML = '<select id="googleTgtLang" class="fill_width"></select>';
+        td.innerHTML = '<select id="googleTgtLang" class="table_select"></select>';
         tr.appendChild(td);
 
         let neuralDiv: HTMLDivElement = document.createElement('div');
@@ -821,7 +851,7 @@ class Preferences {
         td = document.createElement('td');
         td.classList.add('middle');
         td.classList.add('fill_width');
-        td.innerHTML = '<input type="text" id="azureKey" style="width: calc(100% - 6px);"/>';
+        td.innerHTML = '<input type="text" id="azureKey" class="table_input"/>';
         tr.appendChild(td);
 
         tr = document.createElement('tr');
@@ -836,7 +866,7 @@ class Preferences {
         td = document.createElement('td');
         td.classList.add('middle');
         td.classList.add('fill_width');
-        td.innerHTML = '<select id="azureSrcLang" class="fill_width"></select>';
+        td.innerHTML = '<select id="azureSrcLang" class="table_select"></select>';
         tr.appendChild(td);
 
         tr = document.createElement('tr');
@@ -851,7 +881,7 @@ class Preferences {
         td = document.createElement('td');
         td.classList.add('middle');
         td.classList.add('fill_width');
-        td.innerHTML = '<select id="azureTgtLang" class="fill_width"></select>';
+        td.innerHTML = '<select id="azureTgtLang" class="table_select"></select>';
         tr.appendChild(td);
 
         this.enableAzure = document.getElementById('enableAzure') as HTMLInputElement;
@@ -887,7 +917,7 @@ class Preferences {
         td = document.createElement('td');
         td.classList.add('middle');
         td.classList.add('fill_width');
-        td.innerHTML = '<input type="text" id="yandexKey" style="width: calc(100% - 6px);"/>';
+        td.innerHTML = '<input type="text" id="yandexKey" class="table_input"/>';
         tr.appendChild(td);
 
         tr = document.createElement('tr');
@@ -902,7 +932,7 @@ class Preferences {
         td = document.createElement('td');
         td.classList.add('middle');
         td.classList.add('fill_width');
-        td.innerHTML = '<select id="yandexSrcLang" class="fill_width"></select>';
+        td.innerHTML = '<select id="yandexSrcLang" class="table_select"></select>';
         tr.appendChild(td);
 
         tr = document.createElement('tr');
@@ -917,7 +947,7 @@ class Preferences {
         td = document.createElement('td');
         td.classList.add('middle');
         td.classList.add('fill_width');
-        td.innerHTML = '<select id="yandexTgtLang" class="fill_width"></select>';
+        td.innerHTML = '<select id="yandexTgtLang" class="table_select"></select>';
         tr.appendChild(td);
 
         this.enableYandex = document.getElementById('enableYandex') as HTMLInputElement;
@@ -953,7 +983,7 @@ class Preferences {
         td = document.createElement('td');
         td.classList.add('middle');
         td.classList.add('fill_width');
-        td.innerHTML = '<input type="text" id="deeplKey" style="width: calc(100% - 6px);"/>';
+        td.innerHTML = '<input type="text" id="deeplKey" class="table_input"/>';
         tr.appendChild(td);
 
         tr = document.createElement('tr');
@@ -968,7 +998,7 @@ class Preferences {
         td = document.createElement('td');
         td.classList.add('middle');
         td.classList.add('fill_width');
-        td.innerHTML = '<select id="deeplSrcLang" class="fill_width"></select>';
+        td.innerHTML = '<select id="deeplSrcLang" class="table_select"></select>';
         tr.appendChild(td);
 
         tr = document.createElement('tr');
@@ -983,7 +1013,7 @@ class Preferences {
         td = document.createElement('td');
         td.classList.add('middle');
         td.classList.add('fill_width');
-        td.innerHTML = '<select id="deeplTgtLang" class="fill_width"></select>';
+        td.innerHTML = '<select id="deeplTgtLang" class="table_select"></select>';
         tr.appendChild(td);
 
         this.enableDeepL = document.getElementById('enableDeepL') as HTMLInputElement;
@@ -1019,7 +1049,7 @@ class Preferences {
         td = document.createElement('td');
         td.classList.add('middle');
         td.classList.add('fill_width');
-        td.innerHTML = '<input type="text" id="myMemoryKey" style="width: calc(100% - 6px);"/>';
+        td.innerHTML = '<input type="text" id="myMemoryKey" class="table_input"/>';
         tr.appendChild(td);
 
         tr = document.createElement('tr');
@@ -1034,7 +1064,7 @@ class Preferences {
         td = document.createElement('td');
         td.classList.add('middle');
         td.classList.add('fill_width');
-        td.innerHTML = '<select id="myMemorySrcLang" class="fill_width"></select>';
+        td.innerHTML = '<select id="myMemorySrcLang" class="table_select"></select>';
         tr.appendChild(td);
 
         tr = document.createElement('tr');
@@ -1049,7 +1079,7 @@ class Preferences {
         td = document.createElement('td');
         td.classList.add('middle');
         td.classList.add('fill_width');
-        td.innerHTML = '<select id="myMemoryTgtLang" class="fill_width"></select>';
+        td.innerHTML = '<select id="myMemoryTgtLang" class="table_select"></select>';
         tr.appendChild(td);
 
         this.enableMyMemory = document.getElementById('enableMyMemory') as HTMLInputElement;

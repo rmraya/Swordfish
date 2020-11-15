@@ -1,10 +1,10 @@
 :root {
 	--editing-background: #ffffff;
 	--normal-background: #efefef;
-	--tabHolder-background: #78909c;
+	--tabHolder-background: #c4c4c4;
 	--tab-background: #e0e0e0;
 	--toolbar-background: #d2d0ce;
-	--even-row-background: #dadada;
+	--even-row-background: #dcdcdc;
 	--odd-row-background: #eaeaea;
 	--normal-color: #373737;
 	--accent-color: #0078d4;
@@ -119,7 +119,7 @@ tbody {
 }
 
 td {
-	padding: 4px;
+	padding: 8px 4px;
 	vertical-align: top;
 	font-size: medium;
 }
@@ -411,16 +411,13 @@ label {
 	color: var(--normal-color);
 	fill: var(--accent-color);
 	stroke: var(--accent-color);
-	padding-bottom: 0;
-	padding-top: 0;
-	padding-left: 4px;
-	padding-right: 4px;
+	padding: 2px 4px;
 	justify-content: flex-start;
 	border-top: 1px solid var(--normal-background);
 }
 
 .toolbar button {
-	padding: 5px;
+	padding: 4px;
 	background: inherit;
 	border: none;
 	outline: none;
@@ -478,7 +475,7 @@ svg {
 	flex-flow: row;
 	color: var(--normal-color);
 	background: var(--tabHolder-background);
-	padding: 2px 0 0 8px;
+	padding: 4px 0 0 8px;
 }
 
 .tab {

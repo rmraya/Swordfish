@@ -117,6 +117,10 @@ class TabHolder {
         parent.appendChild(this.contentHolder);
     }
 
+    getTabsHeight(): number {
+        return this.tabsHolder.clientHeight;
+    }
+
     clear(): void {
         this.labels.forEach((value, key) => {
             this.tabsHolder.removeChild(value);

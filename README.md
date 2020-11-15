@@ -25,9 +25,20 @@ You can subscribe to [Maxprograms Support](https://groups.io/g/maxprograms/) at 
 
 ### Subscriptions
 
-This project covers Swordfish IV and is in early development stage. Subscriptions are not available for purchase yet.
+Ready to use installers and technical support for Swordfish are available as yearly subscriptions at [Maxprograms Online Store](https://www.maxprograms.com/store/buy.html).
 
-Free installers for **Swordfish IV Preview 8** are available at [https://www.maxprograms.com/downloads/preview.html](https://www.maxprograms.com/downloads/preview.html).
+The version of Swordfish included in the official installers from [Maxprograms Download Page](https://www.maxprograms.com/downloads/index.html) can be used at no cost for 30 days requesting a free Evaluation Key.
+
+Subscription version includes unlimited email support at tech@maxprograms.com
+
+### Differences sumary
+Differences | Source Code | Subscription Based
+-|----------- | -------------
+Ready To Use Installers| No | Yes
+Notarized macOS launcher| No | Yes
+Signed launcher and installer for Windows | No | Yes
+Restricted Features | None | None
+Technical Support |  Peer support at  [Groups.io](https://groups.io/g/maxprograms/)| - Direct email at tech@maxprograms.com  <br> - Peer support at [Groups.io](https://groups.io/g/maxprograms/)
 
 
 ## Related Projects
