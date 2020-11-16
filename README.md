@@ -25,9 +25,9 @@ You can subscribe to [Maxprograms Support](https://groups.io/g/maxprograms/) at 
 
 ### Subscriptions
 
-Ready to use installers and technical support for Swordfish are available as yearly subscriptions at [Maxprograms Online Store](https://www.maxprograms.com/store/buy.html).
-
 The version of Swordfish included in the official installers from [Maxprograms Download Page](https://www.maxprograms.com/downloads/index.html) can be used at no cost for 30 days requesting a free Evaluation Key.
+
+Personal Subscription Keys are available in  [Maxprograms Online Store](https://www.maxprograms.com/store/buy.html). Subscription Keys cannot be shared or transferred to different machines.
 
 Subscription version includes unlimited email support at tech@maxprograms.com
 
