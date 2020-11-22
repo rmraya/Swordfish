@@ -54,12 +54,16 @@ class Swordfish {
     static applyTmWindow: BrowserWindow;
     static notesWindow: BrowserWindow;
     static addNoteWindow: BrowserWindow;
+    static updatesWindow: BrowserWindow;
 
     javapath: string = Swordfish.path.join(app.getAppPath(), 'bin', 'java');
 
     static appHome: string = Swordfish.path.join(app.getPath('appData'), app.name);
     static iconPath: string = Swordfish.path.join(app.getAppPath(), 'icons', 'icon.png');
     static verticalPadding: number = 46;
+
+    static latestVersion: string;
+    static downloadLink: string;
 
     static currentDefaults: Rectangle;
     static currentPreferences: any = {
@@ -789,6 +793,22 @@ class Swordfish {
         ipcMain.on('remove-note', (event: IpcMainEvent, arg: any) => {
             Swordfish.removeNote(arg);
         });
+        ipcMain.on('updates-height', (event: IpcMainEvent, arg: any) => {
+            Swordfish.setHeight(Swordfish.updatesWindow, arg);
+        });
+        ipcMain.on('get-versions', (event: IpcMainEvent) => {
+            event.sender.send('set-versions', { current: app.getVersion(), latest: Swordfish.latestVersion });
+        });
+        ipcMain.on('close-updates', () => {
+            Swordfish.destroyWindow(Swordfish.updatesWindow);
+        });
+        ipcMain.on('release-history', () => {
+            Swordfish.showReleaseHistory();
+        });
+        ipcMain.on('download-latest', () => {
+            Swordfish.downloadLatest();
+        });
+
     } // end constructor
 
     static createWindow(): void {
@@ -806,7 +826,8 @@ class Swordfish {
             y: this.currentDefaults.y,
             useContentSize: true,
             webPreferences: {
-                nodeIntegration: true
+                nodeIntegration: true,
+                contextIsolation: false
             },
             show: false,
             icon: this.iconPath
@@ -950,7 +971,7 @@ class Swordfish {
             { label: 'Check for Updates...', click: () => { this.checkUpdates(false); } },
             { label: 'View Licenses', click: () => { this.showLicenses({ from: 'menu' }); } },
             new MenuItem({ type: 'separator' }),
-            { label: 'Release History', click: () => { this.showReleaseHistory(); } },
+            { label: 'Release History', click: () => { Swordfish.showReleaseHistory(); } },
             { label: 'Support Group', click: () => { this.showSupportGroup(); } }
         ]);
         let nextUntranslatedKey = 'Alt+Down';
@@ -1153,7 +1174,8 @@ class Swordfish {
             show: false,
             icon: this.iconPath,
             webPreferences: {
-                nodeIntegration: true
+                nodeIntegration: true,
+                contextIsolation: false
             }
         });
         this.sortParams = params;
@@ -1175,7 +1197,8 @@ class Swordfish {
             show: false,
             icon: this.iconPath,
             webPreferences: {
-                nodeIntegration: true
+                nodeIntegration: true,
+                contextIsolation: false
             }
         });
         this.filterParams = params;
@@ -1206,7 +1229,8 @@ class Swordfish {
             show: false,
             icon: this.iconPath,
             webPreferences: {
-                nodeIntegration: true
+                nodeIntegration: true,
+                contextIsolation: false
             }
         });
         this.addProjectWindow.setMenu(null);
@@ -1348,6 +1372,7 @@ class Swordfish {
             filters: [
                 { name: 'Any File', extensions: anyFile },
                 { name: 'Adobe InDesign Interchange', extensions: ['inx'] },
+                { name: 'Adobe InCopy ICML', extensions: ['icml'] },
                 { name: 'Adobe InDesign IDML', extensions: ['idml'] },
                 { name: 'DITA Map', extensions: ['ditamap', 'dita', 'xml'] },
                 { name: 'HTML Page', extensions: ['html', 'htm'] },
@@ -1363,6 +1388,7 @@ class Swordfish {
                 { name: 'RC (Windows C/C++ Resources)', extensions: ['rc'] },
                 { name: 'ResX (Windows .NET Resources)', extensions: ['resx'] },
                 { name: 'SDLXLIFF Document', extensions: ['sdlxliff'] },
+                { name: 'SRT Subtitle', extensions: ['srt'] },
                 { name: 'SVG (Scalable Vector Graphics)', extensions: ['svg'] },
                 { name: 'Trados Studio Package', extensions: ['sdlppx'] },
                 { name: 'TS (Qt Linguist translation source)', extensions: ['ts'] },
@@ -1384,7 +1410,8 @@ class Swordfish {
                     show: false,
                     icon: this.iconPath,
                     webPreferences: {
-                        nodeIntegration: true
+                        nodeIntegration: true,
+                        contextIsolation: false
                     }
                 });
                 this.addFileWindow.setMenu(null);
@@ -1543,6 +1570,7 @@ class Swordfish {
             filters: [
                 { name: 'Any File', extensions: anyFile },
                 { name: 'Adobe InDesign Interchange', extensions: ['inx'] },
+                { name: 'Adobe InCopy ICML', extensions: ['icml'] },
                 { name: 'Adobe InDesign IDML', extensions: ['idml'] },
                 { name: 'DITA Map', extensions: ['ditamap', 'dita', 'xml'] },
                 { name: 'HTML Page', extensions: ['html', 'htm'] },
@@ -1558,6 +1586,7 @@ class Swordfish {
                 { name: 'RC (Windows C/C++ Resources)', extensions: ['rc'] },
                 { name: 'ResX (Windows .NET Resources)', extensions: ['resx'] },
                 { name: 'SDLXLIFF Document', extensions: ['sdlxliff'] },
+                { name: 'SRT Subtitle', extensions: ['srt'] },
                 { name: 'SVG (Scalable Vector Graphics)', extensions: ['svg'] },
                 { name: 'Trados Studio Package', extensions: ['sdlppx'] },
                 { name: 'TS (Qt Linguist translation source)', extensions: ['ts'] },
@@ -1625,7 +1654,8 @@ class Swordfish {
             show: false,
             icon: this.iconPath,
             webPreferences: {
-                nodeIntegration: true
+                nodeIntegration: true,
+                contextIsolation: false
             }
         });
         this.addMemoryWindow.setMenu(null);
@@ -1698,7 +1728,8 @@ class Swordfish {
             show: false,
             icon: this.iconPath,
             webPreferences: {
-                nodeIntegration: true
+                nodeIntegration: true,
+                contextIsolation: false
             }
         });
         this.aboutWindow.setMenu(null);
@@ -1758,7 +1789,8 @@ class Swordfish {
             title: title,
             icon: this.iconPath,
             webPreferences: {
-                nodeIntegration: true
+                nodeIntegration: true,
+                contextIsolation: false
             }
         });
         licenseWindow.setMenu(null);
@@ -1788,7 +1820,8 @@ class Swordfish {
             show: false,
             icon: this.iconPath,
             webPreferences: {
-                nodeIntegration: true
+                nodeIntegration: true,
+                contextIsolation: false
             }
         });
         this.settingsWindow.setMenu(null);
@@ -1813,7 +1846,8 @@ class Swordfish {
             show: false,
             icon: this.iconPath,
             webPreferences: {
-                nodeIntegration: true
+                nodeIntegration: true,
+                contextIsolation: false
             }
         });
         this.licensesWindow.setMenu(null);
@@ -1846,7 +1880,7 @@ class Swordfish {
     }
 
     static checkUpdates(silent: boolean): void {
-        this.https.get('https://raw.githubusercontent.com/rmraya/Swordfish/master/package.json', (res: IncomingMessage) => {
+        this.https.get('https://maxprograms.com/swordfish.json', (res: IncomingMessage) => {
             if (res.statusCode === 200) {
                 let rawData = '';
                 res.on('data', (chunk: string) => {
@@ -1856,10 +1890,33 @@ class Swordfish {
                     try {
                         const parsedData = JSON.parse(rawData);
                         if (app.getVersion() !== parsedData.version) {
-                            Swordfish.showMessage({
-                                type: 'info',
-                                title: 'Updates Available',
-                                message: 'Version ' + parsedData.version + ' is available'
+                            Swordfish.latestVersion = parsedData.version;
+                            switch (process.platform) {
+                                case 'darwin': Swordfish.downloadLink = parsedData.darwin;
+                                    break;
+                                case 'win32': Swordfish.downloadLink = parsedData.win32;
+                                    break;
+                                case 'linux': Swordfish.downloadLink = parsedData.linux;
+                                    break;
+                            }
+                            Swordfish.updatesWindow = new BrowserWindow({
+                                parent: this.mainWindow,
+                                width: 600,
+                                useContentSize: true,
+                                minimizable: false,
+                                maximizable: false,
+                                resizable: false,
+                                show: false,
+                                icon: this.iconPath,
+                                webPreferences: {
+                                    nodeIntegration: true,
+                                    contextIsolation: false
+                                }
+                            });
+                            Swordfish.updatesWindow.setMenu(null);
+                            Swordfish.updatesWindow.loadURL('file://' + this.path.join(app.getAppPath(), 'html', 'updates.html'));
+                            Swordfish.updatesWindow.once('ready-to-show', () => {
+                                Swordfish.updatesWindow.show();
                             });
                         } else {
                             if (!silent) {
@@ -2007,7 +2064,8 @@ class Swordfish {
             show: false,
             icon: this.iconPath,
             webPreferences: {
-                nodeIntegration: true
+                nodeIntegration: true,
+                contextIsolation: false
             }
         });
         this.defaultLangsWindow.setMenu(null);
@@ -2132,7 +2190,8 @@ class Swordfish {
             show: false,
             icon: this.iconPath,
             webPreferences: {
-                nodeIntegration: true
+                nodeIntegration: true,
+                contextIsolation: false
             }
         });
         this.memoryParam = memory;
@@ -2154,7 +2213,8 @@ class Swordfish {
             show: false,
             icon: this.iconPath,
             webPreferences: {
-                nodeIntegration: true
+                nodeIntegration: true,
+                contextIsolation: false
             }
         });
         this.glossaryParam = glossary;
@@ -2624,7 +2684,8 @@ class Swordfish {
             show: false,
             icon: this.iconPath,
             webPreferences: {
-                nodeIntegration: true
+                nodeIntegration: true,
+                contextIsolation: false
             }
         });
         if (arg.memory) {
@@ -2732,7 +2793,8 @@ class Swordfish {
             show: false,
             icon: this.iconPath,
             webPreferences: {
-                nodeIntegration: true
+                nodeIntegration: true,
+                contextIsolation: false
             }
         });
         Swordfish.spellingLangsWindow.setMenu(null);
@@ -2831,7 +2893,8 @@ class Swordfish {
             show: false,
             icon: this.iconPath,
             webPreferences: {
-                nodeIntegration: true
+                nodeIntegration: true,
+                contextIsolation: false
             }
         });
         Swordfish.messageParam = arg;
@@ -2943,7 +3006,8 @@ class Swordfish {
             show: false,
             icon: this.iconPath,
             webPreferences: {
-                nodeIntegration: true
+                nodeIntegration: true,
+                contextIsolation: false
             }
         });
         this.addGlossaryWindow.setMenu(null);
@@ -2968,7 +3032,8 @@ class Swordfish {
             show: false,
             icon: this.iconPath,
             webPreferences: {
-                nodeIntegration: true
+                nodeIntegration: true,
+                contextIsolation: false
             }
         });
         this.importXliffWindow.setMenu(null);
@@ -3055,7 +3120,8 @@ class Swordfish {
                 show: false,
                 icon: this.iconPath,
                 webPreferences: {
-                    nodeIntegration: true
+                    nodeIntegration: true,
+                    contextIsolation: false
                 }
             });
             this.addFileWindow.setMenu(null);
@@ -3386,7 +3452,8 @@ class Swordfish {
             show: false,
             icon: this.iconPath,
             webPreferences: {
-                nodeIntegration: true
+                nodeIntegration: true,
+                contextIsolation: false
             }
         });
         this.tagsWindow.setMenu(null);
@@ -3407,7 +3474,8 @@ class Swordfish {
             show: false,
             icon: this.iconPath,
             webPreferences: {
-                nodeIntegration: true
+                nodeIntegration: true,
+                contextIsolation: false
             }
         });
         this.goToWindow.setMenu(null);
@@ -3434,7 +3502,8 @@ class Swordfish {
             show: false,
             icon: this.iconPath,
             webPreferences: {
-                nodeIntegration: true
+                nodeIntegration: true,
+                contextIsolation: false
             }
         });
         this.projectParam = arg.project;
@@ -3676,7 +3745,8 @@ class Swordfish {
             show: false,
             icon: this.iconPath,
             webPreferences: {
-                nodeIntegration: true
+                nodeIntegration: true,
+                contextIsolation: false
             }
         });
         Swordfish.concordanceMemories = arg;
@@ -3710,7 +3780,8 @@ class Swordfish {
                     show: false,
                     icon: this.iconPath,
                     webPreferences: {
-                        nodeIntegration: true
+                        nodeIntegration: true,
+                        contextIsolation: false
                     }
                 });
                 Swordfish.htmlContent = data.html;
@@ -3739,7 +3810,8 @@ class Swordfish {
             show: false,
             icon: this.iconPath,
             webPreferences: {
-                nodeIntegration: true
+                nodeIntegration: true,
+                contextIsolation: false
             }
         });
         this.glossaryParam = arg.glossary;
@@ -3773,7 +3845,8 @@ class Swordfish {
                     show: false,
                     icon: this.iconPath,
                     webPreferences: {
-                        nodeIntegration: true
+                        nodeIntegration: true,
+                        contextIsolation: false
                     }
                 });
                 Swordfish.htmlTitle = 'Term Search';
@@ -3802,7 +3875,8 @@ class Swordfish {
             show: false,
             icon: this.iconPath,
             webPreferences: {
-                nodeIntegration: true
+                nodeIntegration: true,
+                contextIsolation: false
             }
         });
         this.glossaryParam = glossary;
@@ -3975,7 +4049,8 @@ class Swordfish {
                     show: false,
                     icon: this.iconPath,
                     webPreferences: {
-                        nodeIntegration: true
+                        nodeIntegration: true,
+                        contextIsolation: false
                     }
                 });
                 Swordfish.htmlContent = table;
@@ -4022,7 +4097,8 @@ class Swordfish {
                     show: false,
                     icon: this.iconPath,
                     webPreferences: {
-                        nodeIntegration: true
+                        nodeIntegration: true,
+                        contextIsolation: false
                     }
                 });
                 Swordfish.htmlContent = table;
@@ -4079,7 +4155,8 @@ class Swordfish {
             show: false,
             icon: this.iconPath,
             webPreferences: {
-                nodeIntegration: true
+                nodeIntegration: true,
+                contextIsolation: false
             }
         });
         this.changeCaseWindow.setMenu(null);
@@ -4150,7 +4227,8 @@ class Swordfish {
                 alwaysOnTop: true,
                 icon: this.iconPath,
                 webPreferences: {
-                    nodeIntegration: true
+                    nodeIntegration: true,
+                    contextIsolation: false
                 }
             });
             Swordfish.notesParam = arg;
@@ -4200,7 +4278,8 @@ class Swordfish {
             show: false,
             icon: this.iconPath,
             webPreferences: {
-                nodeIntegration: true
+                nodeIntegration: true,
+                contextIsolation: false
             }
         });
         Swordfish.notesParam = arg;
@@ -4246,6 +4325,15 @@ class Swordfish {
                 Swordfish.showMessage({ type: 'error', message: reason });
             }
         );
+    }
+
+    static downloadLatest(): void {
+        shell.openExternal(Swordfish.downloadLink).catch((reason: any) => {
+            if (reason instanceof Error) {
+                console.log(reason.message);
+            }
+            this.showMessage({ type: 'error', message: 'Unable to download latest version.' });
+        });
     }
 }
 

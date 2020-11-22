@@ -120,7 +120,7 @@ public class MTUtils {
 
     private static String[] deepLsrcLang = { "de", "en", "fr", "it", "ja", "es", "nl", "pl", "pt", "ru", "zh" };
 
-    private static String[] deepLtgtLang = { "de", "en", "fr", "it", "ja", "es", "nl", "pl", "pt", "pt-BR", "ru",
+    private static String[] deepLtgtLang = { "de", "en-GB", "en-US", "fr", "it", "ja", "es", "nl", "pl", "pt", "pt-BR", "ru",
             "zh" };
 
     public static JSONObject getMTLanguages() throws IOException {

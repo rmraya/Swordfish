@@ -84,7 +84,6 @@ class SortSegments {
     }
 
     clearSorting(): void {
-        let sortDesc: boolean = (document.getElementById('descending') as HTMLInputElement).checked;
         this.electron.ipcRenderer.send('sort-options', { sortOption: 'none', sortDesc: false });
     }
 }

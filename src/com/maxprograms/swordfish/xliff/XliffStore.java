@@ -172,14 +172,11 @@ public class XliffStore {
             createTables();
         }
 
-        try {
-            Statement createNotes = conn.createStatement();
+        try (Statement createNotes = conn.createStatement()) {
             createNotes.execute("CREATE TABLE IF NOT EXISTS notes (file VARCHAR(50), unitId VARCHAR(256) NOT NULL, "
                     + "segId VARCHAR(256) NOT NULL, noteid varchar(256) NOT NULL, note VARCHAR(6000) NOT NULL, PRIMARY KEY(file, unitId, segId, noteid) );");
-            conn.commit();
-        } catch (SQLException e) {
-            logger.log(Level.WARNING, "Error creating notes table");
         }
+        conn.commit();
 
         getUnitData = conn.prepareStatement("SELECT data, compressed FROM units WHERE file=? AND unitId=?");
         getSource = conn.prepareStatement(
@@ -246,7 +243,8 @@ public class XliffStore {
         insertUnit = conn.prepareStatement("INSERT INTO units (file, unitId, data, compressed) VALUES (?,?,?,?)");
         insertSegmentStmt = conn.prepareStatement(
                 "INSERT INTO segments (file, unitId, segId, type, state, child, translate, tags, space, source, sourceText, target, targetText, words) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)");
-        insertNoteStmt = conn.prepareStatement("INSERT INTO notes (file, unitId, segId, noteId, note) values (?,?,?,?,?)");
+        insertNoteStmt = conn
+                .prepareStatement("INSERT INTO notes (file, unitId, segId, noteId, note) values (?,?,?,?,?)");
         recurse(document.getRootElement());
         insertFile.close();
         insertUnit.close();
@@ -444,9 +442,13 @@ public class XliffStore {
     }
 
     private void insertNote(String file, String unit, Element note) throws SQLException {
+        String ref = note.getAttributeValue("mtc:ref", unit);
+        if (ref.startsWith("#")) {
+            ref = ref.substring(1);
+        }
         insertNoteStmt.setString(1, file);
         insertNoteStmt.setString(2, unit);
-        insertNoteStmt.setString(3, note.getAttributeValue("mtc:ref", unit));
+        insertNoteStmt.setString(3, ref);
         insertNoteStmt.setString(4, note.getAttributeValue("id", unit));
         insertNoteStmt.setNString(5, note.getText());
         insertNoteStmt.execute();
@@ -577,9 +579,13 @@ public class XliffStore {
 
                 boolean checkErrors = segTranslate
                         && (segState.equals("final") || (segState.equals("translated") && acceptUnconfirmed));
-                boolean tagErrors = checkErrors ? hasTagErrors(source, target) : false;
-                boolean spaceErrors = checkErrors ? hasSpaceErrors(sourceText, targetText) : false;
 
+                boolean tagErrors = false;
+                boolean spaceErrors = false;
+                if (checkErrors) {
+                    tagErrors = hasTagErrors(source, target);
+                    spaceErrors = hasSpaceErrors(sourceText, targetText);
+                }
                 tagsMap = new Hashtable<>();
                 JSONObject row = new JSONObject();
                 row.put("index", idx++);
@@ -643,7 +649,7 @@ public class XliffStore {
                 while (rs.next()) {
                     String id = rs.getString(1);
                     try {
-                        int number = Integer.valueOf(id);
+                        int number = Integer.parseInt(id);
                         if (number > maxId) {
                             maxId = number;
                         }
@@ -868,8 +874,12 @@ public class XliffStore {
 
         boolean checkErrors = translate && (confirm || (!pureTarget.isEmpty() && acceptUnconfirmed));
 
-        boolean tagErrors = checkErrors ? hasTagErrors(source, target) : false;
-        boolean spaceErrors = checkErrors ? hasSpaceErrors(pureSource, pureTarget) : false;
+        boolean tagErrors = false;
+        boolean spaceErrors = false;
+        if (checkErrors) {
+            tagErrors = hasTagErrors(source, target);
+            spaceErrors = hasSpaceErrors(pureSource, pureTarget);
+        }
 
         result.put("tagErrors", tagErrors);
         result.put("spaceErrors", spaceErrors);
@@ -1616,7 +1626,8 @@ public class XliffStore {
                 "SELECT file, unitId, segId, matchId, origin, type, similarity, source, target, data, compressed FROM matches WHERE file=? AND unitId=? ORDER BY segId, similarity DESC");
         unitTerms = conn.prepareStatement(
                 "SELECT file, unitId, segId, termId, origin, source, target FROM terms WHERE file=? AND unitId=? ORDER BY segId");
-        unitNotes = conn.prepareStatement("SELECT segId, noteId, note FROM notes WHERE file=? AND unitId=? ORDER BY segId");
+        unitNotes = conn
+                .prepareStatement("SELECT segId, noteId, note FROM notes WHERE file=? AND unitId=? ORDER BY segId");
         recurseUpdating(document.getRootElement());
         unitTerms.close();
         unitMatches.close();
@@ -1752,7 +1763,7 @@ public class XliffStore {
         try (ResultSet rs = unitNotes.executeQuery()) {
             while (rs.next()) {
                 Element note = new Element("note");
-                note.setAttribute("mtc:ref", rs.getString(1));
+                note.setAttribute("mtc:ref", "#" + rs.getString(1));
                 note.setAttribute("id", rs.getString(2));
                 note.setText(rs.getNString(3));
                 notes.addContent(note);
@@ -1889,17 +1900,27 @@ public class XliffStore {
                 String segment = rs.getString(3);
                 String pure = rs.getNString(4);
 
-                List<Match> tmMatches = tmEngine.searchTranslation(pure, srcLang, tgtLang, 60, false);
+                try {
+                    List<Match> tmMatches = tmEngine.searchTranslation(pure, srcLang, tgtLang, 60, false);
 
-                Match match = MatchAssembler.assembleMatch(pure, tmMatches, glossEngine, srcLang, tgtLang);
-                if (match != null) {
-                    Element matchSource = match.getSource();
-                    matchSource.setAttribute("xml:lang", srcLang);
-                    Element target = match.getTarget();
-                    target.setAttribute("xml:lang", tgtLang);
-                    insertMatch(file, unit, segment, "Auto", Constants.AM, match.getSimilarity(), matchSource, target,
-                            new JSONObject());
-                    conn.commit();
+                    Match match = MatchAssembler.assembleMatch(pure, tmMatches, glossEngine, srcLang, tgtLang);
+                    if (match != null) {
+                        Element matchSource = match.getSource();
+                        matchSource.setAttribute("xml:lang", srcLang);
+                        Element target = match.getTarget();
+                        target.setAttribute("xml:lang", tgtLang);
+                        insertMatch(file, unit, segment, "Auto", Constants.AM, match.getSimilarity(), matchSource,
+                                target, new JSONObject());
+                        conn.commit();
+                    }
+                } catch (IOException | ParserConfigurationException | SAXException | SQLException ex) {
+                    // Ignore errors in individual segments
+                    JSONObject errorSegment = new JSONObject();
+                    errorSegment.put("file", file);
+                    errorSegment.put("unit", unit);
+                    errorSegment.put("segment", segment);
+                    logger.log(Level.WARNING,
+                            "Error assembling matches: " + ex.getMessage() + "\n" + errorSegment.toString());
                 }
             }
         }
