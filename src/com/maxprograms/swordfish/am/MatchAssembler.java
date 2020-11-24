@@ -23,7 +23,6 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.sql.SQLException;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -31,6 +30,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.Vector;
 import java.util.concurrent.ConcurrentHashMap;
 
 import javax.xml.parsers.ParserConfigurationException;
@@ -49,6 +49,8 @@ import com.maxprograms.swordfish.xliff.XliffUtils;
 import com.maxprograms.xml.Document;
 import com.maxprograms.xml.Element;
 import com.maxprograms.xml.SAXBuilder;
+import com.maxprograms.xml.TextNode;
+import com.maxprograms.xml.XMLNode;
 import com.maxprograms.xml.XMLUtils;
 
 import org.json.JSONObject;
@@ -67,9 +69,9 @@ public class MatchAssembler {
 
     public static Match assembleMatch(String textOnly, List<Match> tmMatches, ITmEngine glossEngine, String srcLang,
             String tgtLang) throws IOException, ParserConfigurationException, SAXException, SQLException {
-        List<Match> result = new ArrayList<>();
+        List<Match> result = new Vector<>();
 
-        String pureText = textOnly.trim();
+        String pureText = clean(textOnly.trim());
         Set<String> visited = new HashSet<>();
         int mrkId = 1;
 
@@ -77,14 +79,14 @@ public class MatchAssembler {
             Match match = tmMatches.get(i);
             Element source = XliffUtils.toXliff("source", match.getSource(), new JSONObject());
             Element target = XliffUtils.toXliff("target", match.getTarget(), new JSONObject());
-            String pureSource = XliffUtils.pureText(source).trim();
+            String pureSource = clean(XliffUtils.pureText(source).trim());
 
             if (visited.contains(pureSource)) {
                 continue;
             }
             visited.add(pureSource);
 
-            String pureTarget = XliffUtils.pureText(target);
+            String pureTarget = clean(XliffUtils.pureText(target));
 
             DifferenceTagger tagger = new DifferenceTagger(pureText, pureSource);
             String taggedSrc = tagger.getXDifferences();
@@ -146,7 +148,7 @@ public class MatchAssembler {
                     tgtEnd = taggedTgt.indexOf(END);
                 }
 
-                if (!pureSource.equals(XliffUtils.pureText(source))) {
+                if (!pureSource.equals(clean(XliffUtils.pureText(source)))) {
                     Element newSource = buildElement("<source>" + pureSource + "</source>");
                     Element newTarget = buildElement("<target>" + pureTarget + "</target>");
 
@@ -156,7 +158,7 @@ public class MatchAssembler {
                     properties.put("creationtool", Constants.APPNAME);
                     properties.put("creationtoolversion", Constants.VERSION);
 
-                    Match newMatch = new Match(newSource, newTarget, similarity, "Auto", properties);
+                    Match newMatch = new Match(uncleanElement(newSource), uncleanElement(newTarget), similarity, "Auto", properties);
                     result.add(newMatch);
                 }
             }
@@ -166,7 +168,7 @@ public class MatchAssembler {
             Language sourceLanguage = LanguageUtils.getLanguage(srcLang);
             List<String> words = sourceLanguage.isCJK() ? XliffStore.cjkWordList(pureText, NGrams.TERM_SEPARATORS)
                     : NGrams.buildWordList(pureText, NGrams.TERM_SEPARATORS);
-            List<Term> terms = new ArrayList<>();
+            List<Term> terms = new Vector<>();
             for (int i = 0; i < words.size(); i++) {
                 StringBuilder termBuilder = new StringBuilder();
                 for (int length = 0; length < XliffStore.MAXTERMLENGTH; length++) {
@@ -216,7 +218,7 @@ public class MatchAssembler {
                 properties.put("creationtool", Constants.APPNAME);
                 properties.put("creationtoolversion", Constants.VERSION);
 
-                Match newMatch = new Match(newSource, newTarget, 0, "Auto", properties);
+                Match newMatch = new Match(uncleanElement(newSource), uncleanElement(newTarget), 0, "Auto", properties);
                 result.add(newMatch);
             }
         }
@@ -271,5 +273,33 @@ public class MatchAssembler {
 
     public static boolean isEmail(String string) {
         return string.matches("\\s*\\w+([-+.]\\w)*@\\w+([-.]\\w+)*\\.\\w+([-.]\\w+)*\\s*");
+    }
+
+    private static String clean(String string) {
+        return string.replace("<", "\uE0A0").replace("&", "\uE0A1");
+    }
+
+    private static String unclean(String string) {
+        return string.replace("\uE0A1", "&").replace("\uE0A0", "<");
+    }
+    
+    private static Element uncleanElement(Element e) {
+        List<XMLNode> newContent = new Vector<>();
+        List<XMLNode> oldContent = e.getContent();
+        Iterator<XMLNode> it = oldContent.iterator();
+        while (it.hasNext()) {
+            XMLNode node = it.next();
+            if (node.getNodeType() == XMLNode.TEXT_NODE) {
+                TextNode t = (TextNode) node;
+                t.setText(unclean(t.getText()));
+                newContent.add(t);
+            } else if (node.getNodeType() == XMLNode.ELEMENT_NODE) {
+                newContent.add(uncleanElement((Element) node));
+            } else {
+                newContent.add(node);
+            }
+        }
+        e.setContent(newContent);
+        return e;
     }
 }
