@@ -22,7 +22,7 @@ class TranslationView {
     electron = require('electron');
 
     static SVG_BLANK: string = "<svg xmlns='http://www.w3.org/2000/svg' height='24' viewBox='0 0 24 24' width='24'></svg>";
-    static SVG_UNTRANSLATED: string = "<svg xmlns:svg='http://www.w3.org/2000/svg' height='24' viewBox='0 0 24 24' width='24' version='1.1'><path d='M 19,5 V 19 H 5 V 5 H 19 M 19,3 H 5 C 3.9,3 3,3.9 3,5 v 14 c 0,1.1 0.9,2 2,2 h 14 c 1.1,0 2,-0.9 2,-2 V 5 C 21,3.9 20.1,3 19,3 Z' /></svg>";
+    static SVG_UNTRANSLATED: string = "<svg xmlns='http://www.w3.org/2000/svg' height='24' viewBox='0 0 24 24' width='24'><path d='M19 5v14H5V5h14m0-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2z'/></svg>";
     static SVG_TRANSLATED: string = "<svg xmlns='http://www.w3.org/2000/svg' height='24' viewBox='0 0 24 24' width='24'><g><path d='M19,5v14H5V5H19 M19,3H5C3.9,3,3,3.9,3,5v14c0,1.1,0.9,2,2,2h14c1.1,0,2-0.9,2-2V5C21,3.9,20.1,3,19,3L19,3z'/><path d='M14,17H7v-2h7V17z M17,13H7v-2h10V13z M17,9H7V7h10V9z'/></g></svg>";
     static SVG_FINAL: string = "<svg xmlns='http://www.w3.org/2000/svg' height='24' viewBox='0 0 24 24' width='24'><path d='M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V5h14v14zM17.99 9l-1.41-1.42-6.59 6.59-2.58-2.57-1.42 1.41 4 3.99z'/></svg>";
     static SVG_LOCK: string = "<svg xmlns='http://www.w3.org/2000/svg' height='24' viewBox='0 0 24 24' width='24'><path d='M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zM9 6c0-1.66 1.34-3 3-3s3 1.34 3 3v2H9V6zm9 14H6V10h12v10zm-6-3c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2z'/></svg>";
@@ -422,7 +422,7 @@ class TranslationView {
         this.topBar.appendChild(this.sortButton);
 
         this.filterButton = document.createElement('a');
-        this.filterButton.innerHTML = '<svg version="1.1" viewBox="0 0 24 24" height="24" width="24"><path style="stroke-width:0.829702" d="M 18.091348,3.6666667 11.913044,14.119167 v 4.936666 l -0.826087,-0.5 V 14.119167 L 4.9086522,3.6666667 Z M 21,2 H 2 L 9.4347826,14.578333 V 19.5 L 13.565217,22 v -7.421667 z"/></svg>' +
+        this.filterButton.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="0 0 24 24" height="24" width="24"><path style="stroke-width:0.829702" d="M 18.091348,3.6666667 11.913044,14.119167 v 4.936666 l -0.826087,-0.5 V 14.119167 L 4.9086522,3.6666667 Z M 21,2 H 2 L 9.4347826,14.578333 V 19.5 L 13.565217,22 v -7.421667 z"/></svg>' +
             '<span class="tooltiptext bottomTooltip">Filter Segments</span>';
         this.filterButton.className = 'tooltip';
         this.filterButton.addEventListener('click', () => {
@@ -1774,6 +1774,11 @@ class TranslationView {
         if (this.glossSelect.value === 'none') {
             this.electron.ipcRenderer.send('show-message', { type: 'warning', message: 'Select glossary' });
             return;
+        }
+        this.returnTo = {
+            file: this.currentId.file,
+            unit: this.currentId.unit,
+            segment: this.currentId.id
         }
         this.electron.ipcRenderer.send('get-project-terms', { project: this.projectId, glossary: this.glossSelect.value });
     }

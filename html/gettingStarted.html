@@ -1,0 +1,283 @@
+<!Doctype html>
+<html>
+
+<head>
+    <title>Getting Started with Swordfish IV</title>
+    <link id="theme" rel="stylesheet" type="text/css" href="../css/light.css">
+    <link rel="stylesheet" type="text/css" href="../css/fonts.css">
+    <style>
+        svg {
+            height: 22px;
+            width: 22px;
+            padding: 0px;
+            margin-top: 0px;
+            vertical-align: middle;
+            fill: var(--accent-color);
+            stroke: var(--accent-color);
+        }
+
+        b {
+            color: var(--accent-color);
+            padding-right: 3px;
+            padding-left: 3px;
+        }
+
+        .userinput {
+            background: var(--toolbar-background);
+            font-family: 'Courier New', Courier, monospace;
+            padding-left: 3px;
+            padding-right: 3px;
+            border-radius: 2px;
+        }
+    </style>
+</head>
+
+<body id="body">
+
+    <div id="container" class="divContainer"
+        style="height: 400px; width: calc(100% - 40px); padding:10px; border:1px solid var(--input-color); background: var(--editing-background); margin:10px;">
+        <h3>Getting Started with Swordfish IV</h3>
+        <p>Only a few steps are necessary to translate with Swordfish IV. The basic workflow for translating
+            documents is:
+        </p>
+        <ol>
+            <li><a href="#translationWorkflow__step1">Setup memories and glossaries</a>
+            </li>
+            <li><a href="#translationWorkflow__step2">Create a project</a></li>
+            <li><a href="#translationWorkflow__step3">Translate a project</a></li>
+            <li><a href="#translationWorkflow__step4">Export translations</a></li>
+        </ol>
+        <div
+            style="margin-left:20px; margin-right: 20px; border-top: 1px solid var(--input-color); border-bottom: 1px solid var(--input-color); padding: 4px;">
+            <h4 style="margin: 0px;">Note:</h4>
+            <div style="padding: 4px;">Press <span class="userinput">F1</span> at any time to open <b>Swordfish IV User
+                    Guide</b> for additional information.</div>
+        </div>
+
+        <div id="translationWorkflow__step1">
+
+            <h3>Step 1: Setup Memories and Glossaries</h3>
+
+            <p>Swordfish IV uses <b>Translation Memory</b> (TM) technology to assist translators. It stores your
+                translations in <b>Memories</b> and offers them again when you need to translate a similar text.</p>
+
+            <ol>
+                <li>Click on the <b>Add Memory</b> button (<svg xmlns="http://www.w3.org/2000/svg" height="24"
+                        viewBox="0 0 24 24" width="24">
+                        <path
+                            d="M20 6h-8l-2-2H4c-1.11 0-1.99.89-1.99 2L2 18c0 1.11.89 2 2 2h16c1.11 0 2-.89 2-2V8c0-1.11-.89-2-2-2zm0 12H4V6h5.17l2 2H20v10zm-8-4h2v2h2v-2h2v-2h-2v-2h-2v2h-2z" />
+                    </svg>) of the <b>Memories</b> tab toolbar to create a Memory for storing your translations.</li>
+                <li>If you have Translation Memory data in TMX format, import your TMX files into your
+                    memories clicking on the <b>Import TMX File</b> button (<svg xmlns="http://www.w3.org/2000/svg"
+                        enable-background="new 0 0 24 24" height="24" viewBox="0 0 24 24" width="24">
+                        <path d="M19,9h-2v6.59L5.41,4L4,5.41L15.59,17H9v2h10V9z" /></svg>) of the <b>Memories</b> tab
+                    toolbar.</li>
+            </ol>
+
+            <p>Use <b>Glossaries</b> to store frequent terms and their translations for
+                consulting at translation time. Your glossary entries can also assist in assembling matches
+                with the <b>Auto-Translation</b> engine included in Swordfish IV.</p>
+
+            <ol>
+                <li>Click on the <b>Add Glossary</b> button (<svg xmlns="http://www.w3.org/2000/svg" height="24"
+                        viewBox="0 0 24 24" width="24">
+                        <path
+                            d="M20 6h-8l-2-2H4c-1.11 0-1.99.89-1.99 2L2 18c0 1.11.89 2 2 2h16c1.11 0 2-.89 2-2V8c0-1.11-.89-2-2-2zm0 12H4V6h5.17l2 2H20v10zm-8-4h2v2h2v-2h2v-2h-2v-2h-2v2h-2z" />
+                    </svg>) of the <b>Glossary</b> tab toolbar and complete the data
+                    requested in the dialog that appears.</li>
+                <li>If you have terminology data in TMX or TBX format, import that data into your glossaries clicking on
+                    the <b>Import
+                        Glossary</b> button (<svg xmlns="http://www.w3.org/2000/svg" enable-background="new 0 0 24 24"
+                        height="24" viewBox="0 0 24 24" width="24">
+                        <path d="M19,9h-2v6.59L5.41,4L4,5.41L15.59,17H9v2h10V9z" /></svg>) of the <b>Glossaries</b> tab
+                    toolbar.</li>
+            </ol>
+
+            <div
+                style="margin-left:20px; margin-right: 20px; border-top: 1px solid var(--input-color); border-bottom: 1px solid var(--input-color); padding: 4px;">
+                <h4 style="margin: 0px;">Note:</h4>
+                <div style="padding: 4px;">You can reuse memories and glossaries in different translation projects. It
+                    is not required to create a new memory or glossary at the start of each project.</div>
+            </div>
+        </div>
+
+        <div id="translationWorkflow__step2">
+            <h3>Step 2: Create a Project</h3>
+            <p>Swordfish IV allows you to translate one or more files at a time. Translation tasks
+                are organized as <b>Projects</b>.</p>
+
+            <p>There are two methods for creating projects:</p>
+
+            <ul class="ul">
+                <li>Click the <b>Translate Single File</b> button (<svg xmlns="http://www.w3.org/2000/svg" width="24"
+                        height="24" viewBox="0 0 24 24">
+                        <path
+                            d="m 21,16.166667 h -2.454545 v -2.5 h -1.636364 v 2.5 h -2.454546 v 1.666666 h 2.454546 v 2.5 h 1.636364 v -2.5 H 21 Z m -5.727273,4.166666 V 22 H 3 V 2 h 8.336455 c 2.587909,0 8.027181,6.0191667 8.027181,8.011667 V 12 h -1.636363 v -1.285833 c 0,-3.4225003 -4.909091,-2.0475003 -4.909091,-2.0475003 0,0 1.242,-5 -2.158364,-5 H 4.6363636 V 20.333333 Z" />
+                    </svg>) in the <b>Projects</b> tab toolbar to create a project containing one file using a
+                    simplified dialog.</li>
+                <li>Click the <b>Add Project</b> buton (<svg xmlns="http://www.w3.org/2000/svg" height="24"
+                        viewBox="0 0 24 24" width="24">
+                        <path
+                            d="M20 6h-8l-2-2H4c-1.11 0-1.99.89-1.99 2L2 18c0 1.11.89 2 2 2h16c1.11 0 2-.89 2-2V8c0-1.11-.89-2-2-2zm0 12H4V6h5.17l2 2H20v10zm-8-4h2v2h2v-2h2v-2h-2v-2h-2v2h-2z" />
+                    </svg>) in the <b>Projects</b> tab toolbar to create a project containing one or more files.</li>
+            </ul>
+
+            <p>When you create a project from a single file, the file name and location are used as project name. </p>
+        </div>
+
+        <div id="translationWorkflow__step3">
+            <h3>Step 3: Translate a project</h3>
+
+            <p>New projects are opened automatically for translation. To continue work on a closed project:</p>
+            <ol>
+                <li>In <b>Projects</b> tab, click the project that you want to translate.</li>
+                <li>Click the <b>Translate Project</b> button (<svg xmlns="http://www.w3.org/2000/svg" height="24"
+                        viewBox="0 0 24 24" width="24">
+                        <path
+                            d="M12.87 15.07l-2.54-2.51.03-.03c1.74-1.94 2.98-4.17 3.71-6.53H17V4h-7V2H8v2H1v1.99h11.17C11.5 7.92 10.44 9.75 9 11.35 8.07 10.32 7.3 9.19 6.69 8h-2c.73 1.63 1.73 3.17 2.98 4.56l-5.09 5.02L4 19l5-5 3.11 3.11.76-2.04zM18.5 10h-2L12 22h2l1.12-3h4.75L21 22h2l-4.5-12zm-2.62 7l1.62-4.33L19.12 17h-3.24z" />
+                    </svg>) on the <b>Projects</b> tab toolbar.</li>
+
+            </ol>
+            <p>The translation view has these special areas:</p>
+            <table>
+                <tr style="border-top: 1px solid var(--tabHolder-background);">
+                    <td><b>Top Toolbar</b></td>
+                    <td>Contains an array of buttons for performing different tasks. It also contains drop-down
+                        selectors for the active and glossary.</td>
+                </tr>
+                <tr style="border-top: 1px solid var(--tabHolder-background);">
+                    <td><b>Translation Panel</b></td>
+                    <td>Large scrollable table of segments, showing source text, segment status and translation.</td>
+                </tr>
+                <tr style="border-top: 1px solid var(--tabHolder-background);">
+                    <td><b>Side Panel</b></td>
+                    <td>Located on the right side, this section holds three panels: <b>Translation Memory</b>,
+                        <b>Machine Translation</b> and <b>Terms</b>.</td>
+                </tr>
+                <tr
+                    style="border-top: 1px solid var(--tabHolder-background);border-bottom: 1px solid var(--tabHolder-background);">
+                    <td><b>Navigation &amp; Status Bar</b></td>
+                    <td>Located at the bottom, this area contains buttons for navigating between project pages and
+                        provides translation status information.</td>
+                </tr>
+            </table>
+            <p>Click on a segment to start translating it. The corresponding row is highlighted and centered on screen
+                (whenever possible) and the cursor is positioned at the start of target text.</p>
+
+            <p>Source formatting is represented with green marks containing a number (i.e.: <svg
+                    xmlns="http://www.w3.org/2000/svg" width="17px" height="17px" version="1.1">
+                    <g>
+                        <rect style="fill:#009688" width="16px" height="16px" x="1" y="1" rx="3" ry="3" /><text
+                            style="font-size:12px;font-style:normal;font-weight:normal;text-align:center;font-family:sans-serif;"
+                            x="6" y="14" fill="#ffffff" fill-opacity="1">
+                            <tspan>3</tspan>
+                        </text></g>
+                </svg>). To insert green marks, also known as <i>tags</i>, press <span class="userinput">Ctrl+N</span>
+                on Windows/Linux, (<span class="userinput">Cmd+N</span> on macOS) where <i>N</i> is the number in the
+                mark. To insert a tag greater than 10, press <span class="userinput">Ctrl+T</span> (<span
+                    class="userinput">Cmd+T</span> on macOS) and use a dialog. You can also use the different options
+                for managing tags available in <b>Edit</b> menu.</p>
+
+            <div
+                style="margin-left:20px; margin-right: 20px; border-top: 1px solid var(--input-color); border-bottom: 1px solid var(--input-color); padding: 4px;">
+                <h4 style="margin: 0px;">Note:</h4>
+                <div style="padding: 4px;">In case a segment has tag errors or initial/trailing spaces errors, a
+                    warning icon (<svg xmlns='http://www.w3.org/2000/svg' height='24' viewBox='0 0 24 24' width='24'>
+                        <path
+                            d='M11 15h2v2h-2v-2zm0-8h2v6h-2V7zm.99-5C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8z' />
+                    </svg>) is displayed in the center column of the <b>Translation Panel</b> when the segment is
+                    confirmed.</div>
+            </div>
+
+
+            <p>When the segment is fully translated, press <span class="userinput">Ctrl+E</span> (<span
+                    class="userinput">Cmd+E</span> on macOS) or click the <b>Confirm Translation</b> button (<svg
+                    xmlns='http://www.w3.org/2000/svg' height='24' viewBox='0 0 24 24' width='24'>
+                    <path
+                        d='M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V5h14v14zM17.99 9l-1.41-1.42-6.59 6.59-2.58-2.57-1.42 1.41 4 3.99z' />
+                </svg>) on the top toolbar to confirm it. When you confirm a segment, its translation is stored in the
+                memory selected in the <b>Memory</b> drop-down of the top toolbar and is also automatically propagated
+                to all similar unconfirmed segments.</p>
+
+            <p>You have two more options for marking a segment as confirmed:</p>
+            <ul>
+                <li>Press <span class="userinput">Alt+Down Arrow</span> (<span class="userinput">Ctrl+Alt+Down
+                        Arrow</span> on macOS) or click the <b>Confirm and go to Next Untranslated</b> button (<svg
+                        xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 0 24 24" width="24">
+                        <path
+                            d="M19 5v14H5V5h14m0-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2z" />
+                    </svg>) on the top toolbar to confirm current segment and open next untranslated one.</li>
+                <li>Press <span class="userinput">Alt+Shift+Down Arrow</span> (<span class="userinput">Ctrl+Shift+Down
+                        Arrow</span> on macOS) or click the <b>Confirm and go to Next Unconfirmed</b> button (<svg
+                        xmlns='http://www.w3.org/2000/svg' height='24' viewBox='0 0 24 24' width='24'>
+                        <g>
+                            <path
+                                d='M19,5v14H5V5H19 M19,3H5C3.9,3,3,3.9,3,5v14c0,1.1,0.9,2,2,2h14c1.1,0,2-0.9,2-2V5C21,3.9,20.1,3,19,3L19,3z' />
+                            <path d='M14,17H7v-2h7V17z M17,13H7v-2h10V13z M17,9H7V7h10V9z' />
+                        </g>
+                    </svg>) on the top toolbar to confirm current segment and open next unconfirmed one.</li>
+            </ul>
+            <p>Use <span class="userinput">Page Up</span> and <span class="userinput">Page Down</span> keys to move to
+                next and previous segments and translate them.</p>
+
+            <p>When all segments have been translated, press <span class="userinput">F5</span> or click on the
+                <b>Export HTML</b> button on the top toolbar to export an HTML version of your translations for review.
+                Note any segments with errors and correct them.</p>
+            <p>To visit a segment knowing its number, press <span class="userinput">Ctrl+G</span> (<span
+                    class="userinput">Cmd+G</span> on macOS). The <b>Go To Segment</b> dialog appears. Type the number
+                of the segment you want to review in the <b>Segment Number</b> box and press <span
+                    class="userinput">Enter</span>.</p>
+
+            <p>Press <span class="userinput">F9</span> or click the <b>Check Inline Tags</b> button (<svg
+                    xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 0 24 24" width="24">
+                    <path
+                        d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V5h14v14zm-7-2h2V7h-4v2h2z" />
+                </svg>) from the top toolbar and check the dialog that appears. Make sure that there are no tag erros in
+                the project because the translated document may become unusable.</p>
+
+            <p>To verify that all initial and trailing spaces are OK, press <span class="userinput">F10</span> or click
+                the <b>Check Initial/Trailing Spaces</b>
+                button (<svg xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 0 24 24" width="24">
+                    <path
+                        d="M3 21h18v-2H3v2zM3 8v8l4-4-4-4zm8 9h10v-2H11v2zM3 3v2h18V3H3zm8 6h10V7H11v2zm0 4h10v-2H11v2z" />
+                </svg>) on the top toolbar. This task in not required for some Asian target languages.</p>
+        </div>
+
+        <div id="translationWorkflow__step4">
+            <h3>Step 4: Export translations</h3>
+
+            <p>Once all segments have been translated and reviewed, generate the translated version of your project.</p>
+            <p>Click the <b>Export Translations</b> button (<svg xmlns="http://www.w3.org/2000/svg" height="24"
+                    viewBox="0 0 24 24" width="24">
+                    <path
+                        d="M19 12v7H5v-7H3v7c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2v-7h-2zm-6 .67l2.59-2.58L17 11.5l-5 5-5-5 1.41-1.41L11 12.67V3h2v9.67z" />
+                </svg>) from the top toolbar or the <b>Projects</b> tab toolbar. The Operating System will display a
+                dialog for selecting where to save the translated documents.</p>
+
+            <p>After your translations are exported, a new dialog will offer to open the translated file or folder.</p>
+        </div>
+
+        <div id="translationWorkflow__step4">
+            <h3>Important Tips</h3>
+            <ul>
+                <li>Browse the application menu to get a sense of all available options.</li>
+                <li>Check the <b>Swordfish User Guide</b> for additional information (press <span
+                        class="userinput">F1</span> at any time).</li>
+                <li>Join Maxprograms <b>Support Group</b> group and ask for any assistance you may need.</li>
+            </ul>
+        </div>
+    </div>
+
+
+    <div class="buttonArea" id="buttonArea">
+        <input type="checkbox" id="showWindow" checked><label for="showWindow"
+            style="margin-top: 4px; width: 100%">Always show on startup</label>
+        <button id="supportGroup">Support Group</button>
+        <button id="userGuide">User Guide</button>
+    </div>
+
+    <script src="../js/keyboardHandler.js"></script>
+    <script src="../js/gettingStarted.js"></script>
+</body>
+
+</html>

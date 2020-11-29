@@ -55,6 +55,7 @@ class Swordfish {
     static notesWindow: BrowserWindow;
     static addNoteWindow: BrowserWindow;
     static updatesWindow: BrowserWindow;
+    static gettingStartedWindow: BrowserWindow;
 
     javapath: string = Swordfish.path.join(app.getAppPath(), 'bin', 'java');
 
@@ -225,6 +226,13 @@ class Swordfish {
                 setTimeout(() => {
                     Swordfish.checkUpdates(true);
                 }, 4000);
+                if (Swordfish.currentPreferences.showGuide === undefined) {
+                    Swordfish.currentPreferences.showGuide = true;
+                }
+                if (Swordfish.currentPreferences.showGuide) {
+                    Swordfish.showGettingStarted();
+                }
+                
             });
         });
 
@@ -808,6 +816,25 @@ class Swordfish {
         ipcMain.on('download-latest', () => {
             Swordfish.downloadLatest();
         });
+        ipcMain.on('getting-started-height', (event: IpcMainEvent, arg: any) => {
+            Swordfish.setHeight(Swordfish.gettingStartedWindow, arg);
+        });
+        ipcMain.on('close-getting-started', () => {
+            Swordfish.destroyWindow(Swordfish.gettingStartedWindow);
+        });
+        ipcMain.on('show-help', () => {
+            Swordfish.showHelp();
+        });
+        ipcMain.on('show-support', () => {
+            Swordfish.showSupportGroup();
+        });
+        ipcMain.on('show-getting-started', (event: IpcMainEvent, arg: any) => {
+            Swordfish.currentPreferences.showGuide = arg.showGuide;
+            Swordfish.savePreferences(Swordfish.currentPreferences);
+        })
+        ipcMain.on('get-show guide', (event: IpcMainEvent) => {
+            event.sender.send('set-show guide', { showGuide: Swordfish.currentPreferences.showGuide });
+        });       
 
     } // end constructor
 
@@ -935,7 +962,7 @@ class Swordfish {
         var projectsMenu: Menu = Menu.buildFromTemplate([
             { label: 'New Project', accelerator: 'CmdOrCtrl+N', click: () => { Swordfish.addProject(); } },
             { label: 'Translate Projects', click: () => { Swordfish.translateProjects(); } },
-            { label: 'Export Translations', accelerator: 'CmdOrCtrl+S', click: () => { Swordfish.mainWindow.webContents.send('export-translations'); } },
+            { label: 'Export Translations', accelerator: 'CmdOrCtrl+Alt+S', click: () => { Swordfish.mainWindow.webContents.send('export-translations'); } },
             { label: 'Export Translations as TMX File', click: () => { Swordfish.mainWindow.webContents.send('export-translations-tmx'); } },
             new MenuItem({ type: 'separator' }),
             { label: 'Remove Projects', click: () => { Swordfish.mainWindow.webContents.send('remove-projects'); } },
@@ -967,6 +994,7 @@ class Swordfish {
         ]);
         var helpMenu: Menu = Menu.buildFromTemplate([
             { label: 'Swordfish User Guide', accelerator: 'F1', click: () => { this.showHelp(); } },
+            { label: 'Getting Started Guide', click: () => { Swordfish.showGettingStarted(); } },
             new MenuItem({ type: 'separator' }),
             { label: 'Check for Updates...', click: () => { this.checkUpdates(false); } },
             { label: 'View Licenses', click: () => { this.showLicenses({ from: 'menu' }); } },
@@ -3944,6 +3972,7 @@ class Swordfish {
                                     Swordfish.mainWindow.webContents.send('set-status', '');
                                     clearInterval(intervalObject);
                                     if (Swordfish.currentStatus.segments > 0) {
+                                        Swordfish.mainWindow.webContents.send('reload-page', { project: arg.project });
                                         Swordfish.showMessage({ type: 'info', message: 'Added terms to ' + Swordfish.currentStatus.segments + ' segments' });
                                         return;
                                     }
@@ -4333,6 +4362,29 @@ class Swordfish {
                 console.log(reason.message);
             }
             this.showMessage({ type: 'error', message: 'Unable to download latest version.' });
+        });
+    }
+
+    static showGettingStarted() {
+        Swordfish.gettingStartedWindow = new BrowserWindow({
+            parent: Swordfish.mainWindow,
+            width: 750,
+            minimizable: false,
+            maximizable: false,
+            resizable: false,
+            useContentSize: true,
+            modal: false,
+            show: false,
+            icon: this.iconPath,
+            webPreferences: {
+                nodeIntegration: true,
+                contextIsolation: false
+            }
+        });
+        Swordfish.gettingStartedWindow.setMenu(null);
+        Swordfish.gettingStartedWindow.loadURL(Swordfish.path.join('file://', app.getAppPath(), 'html', 'gettingStarted.html'));
+        Swordfish.gettingStartedWindow.once('ready-to-show', () => {
+            Swordfish.gettingStartedWindow.show();
         });
     }
 }
