@@ -1834,8 +1834,8 @@ public class XliffStore {
             match.put("origin", origin);
             match.put("type", Constants.MT);
             match.put("similarity", 0);
-            match.put("source", sourceText);
-            match.put("target", translation.getString("target"));
+            match.put("source", XMLUtils.cleanText(sourceText));
+            match.put("target", XMLUtils.cleanText(translation.getString("target")));
             result.put(match);
         }
         conn.commit();
