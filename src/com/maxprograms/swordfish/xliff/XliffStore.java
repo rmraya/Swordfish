@@ -1672,7 +1672,17 @@ public class XliffStore {
             }
             Element updated = getTarget(currentFile, currentUnit, id);
             target.setContent(updated.getContent());
-            e.setAttribute("state", getState(currentFile, currentUnit, id));
+            String st = getState(currentFile, currentUnit, id); 
+            if (Constants.INITIAL.equals(st)) {
+                if (target.getContent().isEmpty()) {
+                    e.removeChild(target);
+                } else {
+                    st = Constants.TRANSLATED;
+                    logger.log(Level.WARNING, "Changing segment state from 'initial' to 'translated'");
+                }
+            }
+            e.setAttribute("state", st);
+            
         }
         if ("ignorable".equals(e.getName())) {
             Element source = e.getChild("source");
