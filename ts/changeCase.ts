@@ -35,6 +35,7 @@ class ChangeCase {
                 this.changeCase();
             }
         });
+        document.getElementById('changeCase').addEventListener('click', () => { this.changeCase(); });
         document.getElementById('uppercase').focus();
         let body: HTMLBodyElement = document.getElementById('body') as HTMLBodyElement;
         this.electron.ipcRenderer.send('change-case-height', { width: body.clientWidth, height: body.clientHeight });
@@ -42,19 +43,19 @@ class ChangeCase {
 
     changeCase(): void {
         if ((document.getElementById('sentence') as HTMLInputElement).checked) {
-            this.electron.ipcRenderer.send('change-case-to', {case: 'sentence'});
+            this.electron.ipcRenderer.send('change-case-to', { case: 'sentence' });
         }
         if ((document.getElementById('lowercase') as HTMLInputElement).checked) {
-            this.electron.ipcRenderer.send('change-case-to', {case: 'lowercase'});
+            this.electron.ipcRenderer.send('change-case-to', { case: 'lowercase' });
         }
         if ((document.getElementById('uppercase') as HTMLInputElement).checked) {
-            this.electron.ipcRenderer.send('change-case-to', {case: 'uppercase'});
+            this.electron.ipcRenderer.send('change-case-to', { case: 'uppercase' });
         }
         if ((document.getElementById('title') as HTMLInputElement).checked) {
-            this.electron.ipcRenderer.send('change-case-to', {case: 'title'});
+            this.electron.ipcRenderer.send('change-case-to', { case: 'title' });
         }
         if ((document.getElementById('toggle') as HTMLInputElement).checked) {
-            this.electron.ipcRenderer.send('change-case-to', {case: 'toggle'});
+            this.electron.ipcRenderer.send('change-case-to', { case: 'toggle' });
         }
     }
 }
