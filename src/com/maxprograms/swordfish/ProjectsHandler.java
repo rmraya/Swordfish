@@ -406,7 +406,9 @@ public class ProjectsHandler implements HttpHandler {
 				@Override
 				public void run() {
 					try {
-						projectStores.get(project).exportTMX(output);
+						Project prj = projects.get(project);
+						projectStores.get(project).exportTMX(output, prj.getDescription(), prj.getClient(),
+								prj.getSubject());
 						obj.put(Constants.PROGRESS, Constants.COMPLETED);
 						processes.put(id, obj);
 					} catch (IOException | SAXException | ParserConfigurationException | SQLException e) {
@@ -1629,8 +1631,8 @@ public class ProjectsHandler implements HttpHandler {
 		try {
 			String project = json.getString("project");
 			if (projectStores.containsKey(project)) {
-				result.put("notes", projectStores.get(project).removeNote(json.getString("file"), json.getString("unit"),
-						json.getString("segment"), json.getString("noteId")));
+				result.put("notes", projectStores.get(project).removeNote(json.getString("file"),
+						json.getString("unit"), json.getString("segment"), json.getString("noteId")));
 			}
 		} catch (SQLException e) {
 			logger.log(Level.ERROR, e);

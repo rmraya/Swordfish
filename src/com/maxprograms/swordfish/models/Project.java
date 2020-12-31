@@ -192,6 +192,14 @@ public class Project implements Serializable, Comparable<Project> {
 		this.glossary = glossary;
 	}
 
+	public String getClient() {
+		return client;
+	}
+
+	public String getSubject() {
+		return subject;
+	}
+
 	@Override
 	public int compareTo(Project o) {
 		return creationDate.compareTo(o.getCreationDate());

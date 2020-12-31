@@ -51,7 +51,6 @@ import java.util.zip.DataFormatException;
 import javax.xml.parsers.ParserConfigurationException;
 
 import com.maxprograms.converters.Merge;
-import com.maxprograms.converters.TmxExporter;
 import com.maxprograms.languages.Language;
 import com.maxprograms.languages.LanguageUtils;
 import com.maxprograms.stats.RepetitionAnalysis;
@@ -66,6 +65,7 @@ import com.maxprograms.swordfish.tm.ITmEngine;
 import com.maxprograms.swordfish.tm.Match;
 import com.maxprograms.swordfish.tm.MatchQuality;
 import com.maxprograms.swordfish.tm.NGrams;
+import com.maxprograms.swordfish.tm.TMUtils;
 import com.maxprograms.xml.Catalog;
 import com.maxprograms.xml.Document;
 import com.maxprograms.xml.Element;
@@ -1602,10 +1602,77 @@ public class XliffStore {
         Skeletons.embedSkeletons(xliffFile, output);
     }
 
-    public void exportTMX(String output) throws SQLException, SAXException, IOException, ParserConfigurationException {
-        updateXliff();
-        getPreferences();
-        TmxExporter.export(xliffFile, output, catalog);
+    public void exportTMX(String output, String description, String client, String subject)
+            throws SQLException, SAXException, IOException, ParserConfigurationException {
+        Element d = new Element("prop");
+        d.setAttribute("type", "project");
+        d.setText(description);
+        Element c = null;
+        if (!client.isBlank()) {
+            c = new Element("prop");
+            c.setAttribute("type", "customer");
+            c.setText(client);
+        }
+        Element s = null;
+        if (!subject.isBlank()) {
+            s = new Element("prop");
+            s.setAttribute("type", "subject");
+            s.setText(subject);
+        }
+        try (FileOutputStream out = new FileOutputStream(output)) {
+            writeTmxHeader(out);
+            String sql = "SELECT file, unitId, segId, source, target  FROM segments WHERE type='S' AND state='final' ORDER BY SELECT file, unitId, segId";
+
+            try (ResultSet rs = stmt.executeQuery(sql)) {
+                while (rs.next()) {
+                    String file = rs.getString(1);
+                    String unit = rs.getString(2);
+                    String segment = rs.getString(3);
+
+                    StringBuilder key = new StringBuilder();
+                    key.append(xliffFile.hashCode());
+                    key.append('-');
+                    key.append(file);
+                    key.append('-');
+                    key.append(unit);
+                    key.append('-');
+                    key.append(segment);
+
+                    String src = rs.getNString(4);
+                    Element source = buildElement(src);
+                    String tgt = rs.getNString(5);
+                    Element target = buildElement(tgt);
+
+                    Map<String, String> tags = getTags(source);
+
+                    Element tuv = XliffUtils.toTu(key.toString(), source, target, tags);
+                    tuv.getContent().add(0, d);
+                    if (c != null) {
+                        tuv.getContent().add(0, c);
+                    }
+                    if (s != null) {
+                        tuv.getContent().add(0, s);
+                    }
+                    Indenter.indent(tuv, 2);
+                    writeString(out, tuv.toString());
+                }
+            }
+            writeString(out, "</body>\n");
+            writeString(out, "</tmx>\n");
+        }
+    }
+
+    private void writeTmxHeader(FileOutputStream out) throws IOException {
+        writeString(out, "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
+        writeString(out,
+                "<!DOCTYPE tmx PUBLIC \"-//LISA OSCAR:1998//DTD for Translation Memory eXchange//EN\" \"tmx14.dtd\" >\n");
+        writeString(out, "<tmx version=\"1.4\">\n");
+        writeString(out,
+                "<header creationtool=\"" + Constants.APPNAME + "\" creationtoolversion=\"" + Constants.VERSION
+                        + "\" srclang=\"" + srcLang + "\" "
+                        + " adminlang=\"en\" datatype=\"xml\" o-tmf=\"unknown\" segtype=\"block\" creationdate=\""
+                        + TMUtils.creationDate() + "\"/>\n");
+        writeString(out, "<body>\n");
     }
 
     public void exportTranslations(String output)
@@ -1672,7 +1739,7 @@ public class XliffStore {
             }
             Element updated = getTarget(currentFile, currentUnit, id);
             target.setContent(updated.getContent());
-            String st = getState(currentFile, currentUnit, id); 
+            String st = getState(currentFile, currentUnit, id);
             if (Constants.INITIAL.equals(st)) {
                 if (target.getContent().isEmpty()) {
                     e.removeChild(target);
@@ -1682,7 +1749,6 @@ public class XliffStore {
                 }
             }
             e.setAttribute("state", st);
-            
         }
         if ("ignorable".equals(e.getName())) {
             Element source = e.getChild("source");
