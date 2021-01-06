@@ -6,24 +6,23 @@
 	--toolbar-background: #454545;
 	--even-row-background: #424242;
 	--odd-row-background: #313131;
-	--normal-color: #dfe0e1;
-	--accent-color: #3465aa;
-	--accent-alternative: #0551bb;
-	--accent-contrast: #ffffff;
-	--tooltip-background: #0d47a1;
-	--tooltip-color: #fefefe;
+	--normal-color: #FFFFFF;
+	--accent-color: #0073B5;
+	--accent-alternative: #004885;
+	--accent-contrast: #FFFFFF;
+	--tooltip-background: #004885;
+	--tooltip-color: #FFFFFF;
 	--tab-hover: #2f363d;
 	--input-background: #424242;
 	--input-color: #e3e3e4;
 	--focus-border: #f57c00;
 	--disabled-input: #555555;
-	--selected-row: #1a237e;
 	--highlight-row: #37474f;
 	--highlight-color: #dfe0e1;
 	--error-color: #960303;
 	--difference-color: #dfe0e1;
 	--difference-background: #4d7198;
-	--stats-text: #fefefe;
+	--stats-text: #FFFFFF;
 	--stats-fill: #0d47a1;
 	--space-color: #448aff;
 	--splitting-background: #01579b;
@@ -226,6 +225,7 @@ th {
 	background-color: var(--accent-color);
 	padding-left: 2px;
 	padding-right: 2px;
+	border-radius: 2px;
 }
 
 .difference {
@@ -466,6 +466,12 @@ svg {
 	fill: var(--normal-color);
 	stroke: var(--normal-color);
 	stroke-width: 0.3;
+}
+
+th svg {
+	margin-top: 4px;
+	fill: var(--accent-contrast) !important;
+	stroke: var(--accent-contrast) !important;
 }
 
 /* tabs */

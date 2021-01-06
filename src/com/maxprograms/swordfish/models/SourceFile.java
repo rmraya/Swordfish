@@ -19,6 +19,7 @@ SOFTWARE.
 package com.maxprograms.swordfish.models;
 
 import java.io.Serializable;
+import java.nio.charset.StandardCharsets;
 
 import org.json.JSONObject;
 
@@ -38,7 +39,11 @@ public class SourceFile implements Serializable, Comparable<SourceFile> {
 	public SourceFile(JSONObject json) {
 		this.file = json.getString("file");
 		this.type = json.getString("type");
-		this.encoding = json.getString("encoding");
+		if (json.has("encoding")) {
+			this.encoding = json.getString("encoding");
+		} else {
+			this.encoding = StandardCharsets.UTF_8.name();
+		}
 	}
 
 	public String getFile() {

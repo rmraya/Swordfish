@@ -51,8 +51,14 @@ class TranslationView {
     srcLang: string;
     tgtLang: string;
     tbody: HTMLTableSectionElement;
+    numberTh: HTMLTableHeaderCellElement;
     sourceTh: HTMLTableHeaderCellElement;
+    translateTh: HTMLTableHeaderCellElement;
+    matchTh: HTMLTableHeaderCellElement;
+    finalTh: HTMLTableHeaderCellElement;
     targetTh: HTMLTableHeaderCellElement;
+
+    zoom: number = 1.0;
 
     pagesSpan: HTMLSpanElement;
 
@@ -310,19 +316,21 @@ class TranslationView {
         });
         this.electron.ipcRenderer.send('get-zoom');
         this.electron.ipcRenderer.on('set-zoom', (event: Electron.IpcRendererEvent, arg: any) => {
-            this.setzoom(arg.zoom);
+            this.setZoom(arg.zoom);
         });
         this.setSpellChecker();
     }
 
-    setzoom(zoom: string): void {
+    setZoom(zoom: string): void {
+        this.zoom = Number.parseFloat(zoom);
         let style: HTMLStyleElement = document.getElementById('zoom') as HTMLStyleElement;
         if (!style) {
             style = document.createElement('style');
             style.id = 'zoom';
             document.head.appendChild(style);
         }
-        style.innerHTML = '.zoomable td { font-size: ' + zoom + 'em; } .zoom { font-size: ' + zoom + 'em; }';
+        style.innerHTML = '.zoomable td { font-size: ' + zoom + 'em; } .zoom { font-size: ' + zoom + 'em; } .match { width: ' + (40 * this.zoom) + 'px; }';
+        this.setColumnWidths();
     }
 
     buildTopBar(): void {
@@ -652,32 +660,39 @@ class TranslationView {
         table.classList.add('stripes');
         table.classList.add('zoomable');
         table.style.width = 'calc(100% - 2px)';
+        table.style.tableLayout = 'fixed';
         tableContainer.appendChild(table);
 
         let thead: HTMLTableSectionElement = document.createElement('thead');
         table.appendChild(thead);
 
         let tr: HTMLTableRowElement = document.createElement('tr');
+        tr.classList.add('middle');
         thead.appendChild(tr);
 
-        let th: HTMLTableHeaderCellElement = document.createElement('th');
-        th.classList.add('fixed');
-        th.innerText = '#'
-        tr.appendChild(th);
+        this.numberTh = document.createElement('th');
+        this.numberTh.classList.add('fixed');
+        this.numberTh.innerText = '#'
+        tr.appendChild(this.numberTh);
 
         this.sourceTh = document.createElement('th');
         this.sourceTh.innerText = 'Source (' + this.srcLang + ')';
-        this.sourceTh.style.minWidth = '200px';
         tr.appendChild(this.sourceTh);
 
-        th = document.createElement('th');
-        th.innerText = 'Status';
-        th.colSpan = 3;
-        tr.appendChild(th);
+        this.translateTh = document.createElement('th');
+        this.translateTh.innerHTML = '&nbsp;';
+        tr.appendChild(this.translateTh);
+
+        this.matchTh = document.createElement('th');
+        this.matchTh.innerText = '%';
+        tr.appendChild(this.matchTh);
+
+        this.finalTh = document.createElement('th');
+        this.finalTh.innerHTML = TranslationView.SVG_FINAL;
+        tr.appendChild(this.finalTh);
 
         this.targetTh = document.createElement('th');
         this.targetTh.innerText = 'Target (' + this.tgtLang + ')';
-        this.targetTh.style.minWidth = '200px';
         tr.appendChild(this.targetTh);
 
         this.tbody = document.createElement('tbody');
@@ -810,12 +825,47 @@ class TranslationView {
                 if (mutation.type === 'attributes') {
                     tableContainer.style.height = (this.translationArea.clientHeight - this.statusArea.clientHeight) + 'px';
                     tableContainer.style.width = this.translationArea.clientWidth + 'px';
-                    this.sourceTh.style.minWidth = (this.translationArea.clientWidth * 0.4) + 'px';
-                    this.targetTh.style.minWidth = (this.translationArea.clientWidth * 0.4) + 'px';
+                    this.setColumnWidths();
+
                 }
             }
         });
         this.rowsObserver.observe(this.translationArea, config);
+    }
+
+    setColumnWidths(): void {
+
+        let digits = 1;
+        if (this.segmentsCount > 10) {
+            digits = 2;
+        }
+        if (this.segmentsCount > 100) {
+            digits = 3;
+        }
+        if (this.segmentsCount > 100) {
+            digits = 4;
+        }
+        if (this.segmentsCount > 1000) {
+            digits = 5;
+        }
+        if (this.segmentsCount > 10000) {
+            digits = 6;
+        }
+        if (this.segmentsCount > 100000) {
+            digits = 7;
+        }
+        let numbersWidth = (digits * 9 * this.zoom) + 11; // 9: digit width 11: padding
+
+        let status = (40 * this.zoom) + 8;
+
+        let width: number = (this.translationArea.clientWidth - numbersWidth - status) / 2;
+
+        this.numberTh.style.width = (100 * numbersWidth / this.translationArea.clientWidth) + '%';
+        this.translateTh.style.width = (100 * 32 / this.translationArea.clientWidth) + '%';
+        this.matchTh.style.width = (100 * (40 * this.zoom + 8) / this.translationArea.clientWidth) + '%';
+        this.finalTh.style.width = (100 * 35 / this.translationArea.clientWidth) + '%';
+        this.sourceTh.style.width = (100 * width / this.translationArea.clientWidth) + '%';
+        this.targetTh.style.width = (100 * width / this.translationArea.clientWidth) + '%';
     }
 
     buildRightSide(): void {
@@ -1001,6 +1051,8 @@ class TranslationView {
         this.termsPanel.clear();
         this.currentRow = undefined;
         this.container.classList.remove('wait');
+
+        this.setColumnWidths();
 
         let rows: HTMLCollection = this.tbody.rows;
         this.currentId = { id: '', file: '', unit: '' };
@@ -2140,7 +2192,7 @@ class TranslationView {
         this.notesVisible = arg;
     }
 
-    notesRemoved(arg: any) : void {
+    notesRemoved(arg: any): void {
         if (this.currentState.innerHTML.includes(TranslationView.NOTE_FRAGMENT)) {
             console.log(JSON.stringify(arg));
             if (this.currentState.classList.contains('final')) {
@@ -2155,7 +2207,7 @@ class TranslationView {
         }
     }
 
-    notesAdded(arg: any) : void {
+    notesAdded(arg: any): void {
         if (!this.currentState.innerHTML.includes(TranslationView.NOTE_FRAGMENT)) {
             console.log(JSON.stringify(arg));
             if (this.currentState.classList.contains('final')) {

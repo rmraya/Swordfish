@@ -7,23 +7,22 @@
 	--even-row-background: #dcdcdc;
 	--odd-row-background: #eaeaea;
 	--normal-color: #373737;
-	--accent-color: #0078d4;
-	--accent-alternative: #005a9e;
-	--accent-contrast: #ffffff;
-	--tooltip-background: #005a9e;
-	--tooltip-color: #fefefe;
+	--accent-color: #0073B5;
+	--accent-alternative: #004885;
+	--accent-contrast: #FFFFFF;
+	--tooltip-background: #004885;
+	--tooltip-color: #FFFFFF;
 	--tab-hover: #cdcdcd;
 	--input-background: #fefefe;
 	--input-color: #262626;
 	--focus-border: #f57c00;
 	--disabled-input: #999999;
-	--selected-row: #c7e0f4;
 	--highlight-row: #71afe5;
 	--highlight-color: #dfe0e1;
 	--error-color: #960303;
 	--difference-color: #373737;
 	--difference-background: #b4d7fe;
-	--stats-text: #101010;
+	--stats-text: #000000;
 	--stats-fill: #71afe5;
 	--space-color: #7abff7;
 	--splitting-background: #bbdefb;
@@ -226,6 +225,7 @@ th {
 	background-color: var(--accent-color);
 	padding-left: 2px;
 	padding-right: 2px;
+	border-radius: 2px;
 }
 
 .difference {
@@ -466,6 +466,12 @@ svg {
 	fill: var(--normal-color);
 	stroke: var(--normal-color);
 	stroke-width: 0.3;
+}
+
+th svg {
+	margin-top: 4px;
+	fill: var(--accent-contrast) !important;
+	stroke: var(--accent-contrast) !important;
 }
 
 /* tabs */
