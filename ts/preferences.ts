@@ -163,7 +163,7 @@ class Preferences {
         this.googleNeural.checked = arg.google.neural;
         this.googleKey.disabled = !arg.google.enabled;
         this.googleSrcLang.disabled = !arg.google.enabled;
-        this.googleTgtLang.disabled = !arg.google.enabledd;
+        this.googleTgtLang.disabled = !arg.google.enabled;
         this.googleNeural.disabled = !arg.google.enabled;
         this.enableGoogle.addEventListener('change', () => {
             this.googleKey.disabled = !this.enableGoogle.checked;
@@ -245,7 +245,7 @@ class Preferences {
             this.electron.ipcRenderer.send('show-message', { type: 'warning', message: 'Enter Google API key', parent: 'preferences' });
             return;
         }
-        if (this.enableGoogle.checked && (this.googleSrcLang.value === 'none' || this.tgtLangSelect.value === 'none')) {
+        if (this.enableGoogle.checked && (this.googleSrcLang.value === 'none' || this.googleTgtLang.value === 'none')) {
             this.electron.ipcRenderer.send('show-message', { type: 'warning', message: 'Select Google languages', parent: 'preferences' });
             return;
         }
@@ -457,7 +457,7 @@ class Preferences {
         if (this.os === 'darwin') {
             let macDiv = document.createElement('div');
             macDiv.style.padding = '8px'
-            macDiv.innerHTML = 
+            macDiv.innerHTML =
                 '<p>By default, macOS automatically detects the language the user is typing in and adjusts its internal spellchecker accordingly.</p>' +
                 '<p>Follow these steps to select a specific language for spellchecking: </p>' +
                 '<ul><li>Open "System Preferences" application</li>' +
@@ -1105,6 +1105,8 @@ class Preferences {
         this.electron.ipcRenderer.send('get-preferences');
 
         this.googleNeural.addEventListener('change', (event: InputEvent) => {
+            let src = this.googleSrcLang.value;
+            let tgt = this.googleTgtLang.value;
             if (this.googleNeural.checked) {
                 this.googleSrcLang.innerHTML = this.getOptions(arg.google.nmtSrcLangs);
                 this.googleTgtLang.innerHTML = this.getOptions(arg.google.nmtTgtLangs);
@@ -1112,6 +1114,8 @@ class Preferences {
                 this.googleSrcLang.innerHTML = this.getOptions(arg.google.srcLangs);
                 this.googleTgtLang.innerHTML = this.getOptions(arg.google.tgtLangs);
             }
+            this.googleSrcLang.value = src;
+            this.googleTgtLang.value = tgt;
         });
 
         // TODO check Yandex directions

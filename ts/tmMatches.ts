@@ -163,9 +163,15 @@ class TmMatches {
 
     nextMatch(): void {
         this.tabHolder.selectNext();
+        let selected: string = this.tabHolder.getSelected();
+        let match: any = this.matches.get(selected);
+        this.origin.innerText = match.origin;
     }
 
     previousMatch(): void {
         this.tabHolder.selectPrevious();
+        let selected: string = this.tabHolder.getSelected();
+        let match: any = this.matches.get(selected);
+        this.origin.innerText = match.origin;
     }
 }

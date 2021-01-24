@@ -142,6 +142,8 @@ public class ProjectsHandler implements HttpHandler {
 				response = getSegmentsCount(request);
 			} else if ("/projects/save".equals(url)) {
 				response = save(request);
+			} else if ("/projects/saveSource".equals(url)) {
+				response = saveSource(request);
 			} else if ("/projects/matches".equals(url)) {
 				response = getMatches(request);
 			} else if ("/projects/machineTranslate".equals(url)) {
@@ -830,6 +832,19 @@ public class ProjectsHandler implements HttpHandler {
 		return result;
 	}
 
+	private JSONObject saveSource(String request) {
+		JSONObject result = new JSONObject();
+		JSONObject json = new JSONObject(request);
+		String project = json.getString("project");
+		try {
+			projectStores.get(project).saveSource(json);
+		} catch (IOException | SQLException | SAXException | ParserConfigurationException | DataFormatException e) {
+			logger.log(Level.ERROR, e);
+			result.put(Constants.REASON, e.getMessage());
+		}
+		return result;
+	}
+
 	private void updateProjectStatus(String projectId, int status) throws IOException {
 		JSONArray array = projectsList.getJSONArray("projects");
 		for (int i = 0; i < array.length(); i++) {
@@ -1244,15 +1259,39 @@ public class ProjectsHandler implements HttpHandler {
 	private JSONObject confirmAllTranslations(String request) {
 		JSONObject result = new JSONObject();
 		try {
-			JSONObject json = new JSONObject(request);
-			String project = json.getString("project");
-			if (projectStores.containsKey(project)) {
-				projectStores.get(project).confirmAllTranslations();
-				JSONObject status = projectStores.get(project).getTranslationStatus();
-				result.put("statistics", status);
-				updateProjectStatus(project, status.getInt("percentage"));
+			String id = "" + System.currentTimeMillis();
+			result.put("process", id);
+			if (processes == null) {
+				processes = new Hashtable<>();
 			}
-		} catch (SQLException | JSONException | IOException e) {
+			JSONObject obj = new JSONObject();
+			obj.put(Constants.PROGRESS, Constants.PROCESSING);
+			processes.put(id, obj);
+			Thread thread = new Thread() {
+				@Override
+				public void run() {
+					try {
+						JSONObject json = new JSONObject(request);
+						String project = json.getString("project");
+						String memory = json.getString("memory");
+						if (projectStores.containsKey(project)) {
+							projectStores.get(project).confirmAllTranslations(memory);
+							JSONObject status = projectStores.get(project).getTranslationStatus();
+							obj.put("statistics", status);
+							updateProjectStatus(project, status.getInt("percentage"));
+						}
+						obj.put(Constants.PROGRESS, Constants.COMPLETED);
+						processes.put(id, obj);
+					} catch (IOException | SQLException | SAXException | ParserConfigurationException e) {
+						logger.log(Level.WARNING, e.getMessage(), e);
+						obj.put(Constants.PROGRESS, Constants.ERROR);
+						obj.put(Constants.REASON, e.getMessage());
+						processes.put(id, obj);
+					}
+				}
+			};
+			thread.start();
+		} catch (JSONException e) {
 			logger.log(Level.ERROR, e);
 			result.put(Constants.REASON, e.getMessage());
 		}
@@ -1393,7 +1432,7 @@ public class ProjectsHandler implements HttpHandler {
 				}
 			};
 			thread.start();
-		} catch (IOException | JSONException e) {
+		} catch (IOException e) {
 			logger.log(Level.ERROR, e);
 			result.put(Constants.REASON, e.getMessage());
 		}

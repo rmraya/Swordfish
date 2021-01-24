@@ -382,6 +382,9 @@ class Main {
         Main.electron.ipcRenderer.on('notes-added', (event: Electron.IpcRendererEvent, arg: any) => {
             this.notesAdded(arg);
         });
+        Main.electron.ipcRenderer.on('edit-source', () => {
+            this.editSource();
+        });
         let config: any = { attributes: true, childList: false, subtree: false };
         let observer = new MutationObserver((mutationsList) => {
             for (let mutation of mutationsList) {
@@ -446,6 +449,13 @@ class Main {
                 Main.electron.ipcRenderer.send('close-project', { project: key });
                 break;
             }
+        }
+    }
+
+    editSource(): void {
+        let selected = Main.tabHolder.getSelected();
+        if (Main.translationViews.has(selected)) {
+            Main.translationViews.get(selected).editSource();
         }
     }
 

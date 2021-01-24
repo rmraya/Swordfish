@@ -555,6 +555,9 @@ class Swordfish {
         ipcMain.on('save-translation', (event: IpcMainEvent, arg: any) => {
             Swordfish.saveTranslation(arg);
         });
+        ipcMain.on('save-source', (event: IpcMainEvent, arg: any) => {
+            Swordfish.saveSource(arg);
+        });
         ipcMain.on('get-matches', (event: IpcMainEvent, arg: any) => {
             Swordfish.getMatches(arg);
         });
@@ -908,6 +911,8 @@ class Swordfish {
             { label: 'Edit Next Segment', accelerator: 'PageDown', click: () => { Swordfish.mainWindow.webContents.send('next-segment'); } },
             { label: 'Go To Segment...', accelerator: 'CmdOrCtrl+G', click: () => { Swordfish.mainWindow.webContents.send('go-to'); } },
             new MenuItem({ type: 'separator' }),
+            { label: 'Edit Source Text', accelerator: 'Alt+F2', click: () => { Swordfish.mainWindow.webContents.send('edit-source'); } },
+            new MenuItem({ type: 'separator' }),
             { label: 'Edit Next Untranslated Segment', accelerator: 'CmdOrCtrl+U', click: () => { Swordfish.mainWindow.webContents.send('next-untranslated'); } },
             { label: 'Edit Next Unconfirmed Segment', accelerator: 'CmdOrCtrl+Shift+U', click: () => { Swordfish.mainWindow.webContents.send('next-unconfirmed'); } },
             new MenuItem({ type: 'separator' }),
@@ -1185,6 +1190,7 @@ class Swordfish {
 
     static savePreferences(arg: any): void {
         Swordfish.destroyWindow(Swordfish.settingsWindow);
+        arg.showGuide = Swordfish.currentPreferences.showGuide;
         writeFileSync(Swordfish.path.join(app.getPath('appData'), app.name, 'preferences.json'), JSON.stringify(arg));
         Swordfish.loadPreferences();
         Swordfish.setTheme();
@@ -2598,6 +2604,39 @@ class Swordfish {
         );
     }
 
+    static saveSource(arg: any): void {
+        Swordfish.sendRequest('/projects/saveSource', arg,
+            (data: any) => {
+                if (data.status !== Swordfish.SUCCESS) {
+                    Swordfish.showMessage({ type: 'error', message: data.reason });
+                    return;
+                }
+                if (data.tagErrors || data.spaceErrors) {
+                    Swordfish.mainWindow.webContents.send('set-errors', {
+                        project: arg.project,
+                        file: arg.file,
+                        unit: arg.unit,
+                        segment: arg.segment,
+                        tagErrors: data.tagErrors,
+                        spaceErrors: data.spaceErrors
+                    });
+                } else {
+                    Swordfish.mainWindow.webContents.send('clear-errors', {
+                        project: arg.project,
+                        file: arg.file,
+                        unit: arg.unit,
+                        segment: arg.segment,
+                        tagErrors: data.tagErrors,
+                        spaceErrors: data.spaceErrors
+                    });
+                }
+            },
+            (reason: string) => {
+                Swordfish.showMessage({ type: 'error', message: reason });
+            }
+        );
+    }
+
     static getMatches(arg: any): void {
         Swordfish.sendRequest('/projects/matches', arg,
             (data: any) => {
@@ -3107,7 +3146,7 @@ class Swordfish {
                             Swordfish.mainWindow.webContents.send('end-waiting');
                             Swordfish.mainWindow.webContents.send('set-status', '');
                             clearInterval(intervalObject);
-                            Swordfish.mainWindow.webContents.send('request-projects');
+                            Swordfish.mainWindow.webContents.send('request-projects', { open: processId });
                             return;
                         } else if (Swordfish.currentStatus.progress === Swordfish.PROCESSING) {
                             // it's OK, keep waiting
@@ -3389,17 +3428,43 @@ class Swordfish {
         }).then((selection: Electron.MessageBoxReturnValue) => {
             if (selection.response === 0) {
                 Swordfish.mainWindow.webContents.send('start-waiting');
-                Swordfish.mainWindow.webContents.send('set-status', 'Updating status');
+                Swordfish.mainWindow.webContents.send('set-status', 'Confirming translations');
                 Swordfish.sendRequest('/projects/confirmAllTranslations', arg,
                     (data: any) => {
-                        Swordfish.mainWindow.webContents.send('end-waiting');
-                        Swordfish.mainWindow.webContents.send('set-status', '');
                         if (data.status !== Swordfish.SUCCESS) {
+                            Swordfish.mainWindow.webContents.send('end-waiting');
+                            Swordfish.mainWindow.webContents.send('set-status', '');
                             Swordfish.showMessage({ type: 'error', message: data.reason });
-                            return;
                         }
-                        Swordfish.mainWindow.webContents.send('reload-page', { project: arg.project });
-                        Swordfish.mainWindow.webContents.send('set-statistics', { project: arg.project, statistics: data.statistics });
+                        Swordfish.currentStatus = data;
+                        let processId: string = data.process;
+                        var intervalObject = setInterval(() => {
+                            if (Swordfish.currentStatus.progress) {
+                                if (Swordfish.currentStatus.progress === Swordfish.COMPLETED) {
+                                    Swordfish.mainWindow.webContents.send('end-waiting');
+                                    Swordfish.mainWindow.webContents.send('set-status', '');
+                                    clearInterval(intervalObject);
+                                    Swordfish.mainWindow.webContents.send('reload-page', { project: arg.project });
+                                    Swordfish.mainWindow.webContents.send('set-statistics', { project: arg.project, statistics: data.statistics });
+                                    return;
+                                } else if (Swordfish.currentStatus.progress === Swordfish.PROCESSING) {
+                                    // it's OK, keep waiting
+                                } else if (Swordfish.currentStatus.progress === Swordfish.ERROR) {
+                                    Swordfish.mainWindow.webContents.send('end-waiting');
+                                    Swordfish.mainWindow.webContents.send('set-status', '');
+                                    clearInterval(intervalObject);
+                                    Swordfish.showMessage({ type: 'error', message: Swordfish.currentStatus.reason });
+                                    return;
+                                } else {
+                                    Swordfish.mainWindow.webContents.send('end-waiting');
+                                    Swordfish.mainWindow.webContents.send('set-status', '');
+                                    clearInterval(intervalObject);
+                                    Swordfish.showMessage({ type: 'error', message: 'Unknown error confirming translations' });
+                                    return;
+                                }
+                            }
+                            Swordfish.getProjectsProgress(processId);
+                        }, 500);
                     },
                     (reason: string) => {
                         Swordfish.mainWindow.webContents.send('end-waiting');

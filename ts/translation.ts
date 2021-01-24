@@ -1380,6 +1380,59 @@ class TranslationView {
         this.currentCell.focus();
     }
 
+    editSource(): void {
+        if (this.currentState.classList.contains('final')) {
+            this.electron.ipcRenderer.send('show-message', { type: 'warning', message: 'Confirmed segment' });
+            return;
+        }
+        let isLocked: boolean = this.currentTranslate.innerHTML.includes(TranslationView.LOCK_FRAGMENT);
+        if (isLocked) {
+            this.electron.ipcRenderer.send('show-message', { type: 'warning', message: 'Locked segment' });
+            return;
+        }
+        let segmentId: any = this.currentId;
+        let source: HTMLTableCellElement = this.currentRow.getElementsByClassName('source')[0] as HTMLTableCellElement;
+        let originalSource = source.innerHTML;
+        source.classList.add('splitting');
+        source.contentEditable = 'true';
+        source.focus();
+        source.addEventListener('keydown', (event: KeyboardEvent) => {
+            if (event.key === 'Escape') {
+                source.innerHTML = originalSource;
+                source.contentEditable = 'false';
+                source.classList.remove('splitting');
+            }
+            if (event.key === 'Enter' && event.altKey) {
+                event.preventDefault();
+                event.cancelBubble = true;
+                this.saveSource(segmentId, source, originalSource);
+                this.currentCell.contentEditable = 'true';
+                this.currentCell.focus();
+            }
+        });
+        source.addEventListener('focusout', () => {
+            this.saveSource(segmentId, source, originalSource);
+        });
+    }
+
+    saveSource(segmentId: any, source: HTMLTableCellElement, originalSource: string): void {
+        source.classList.remove('splitting');
+        source.contentEditable = 'false';
+        let newSource: string = this.getTranslation(source.innerHTML);
+        if (newSource === '') {
+            source.innerHTML = originalSource;
+            return;
+        }
+        source.innerHTML = this.highlightSpaces(newSource);
+        this.electron.ipcRenderer.send('save-source', {
+            project: this.projectId,
+            file: segmentId.file,
+            unit: segmentId.unit,
+            segment: segmentId.id,
+            newSource: newSource
+        });
+    }
+
     cancelEdit(): void {
         this.currentCell.innerHTML = this.currentContent;
     }
@@ -1669,7 +1722,7 @@ class TranslationView {
             unit: this.currentId.unit,
             segment: this.currentId.id
         }
-        this.electron.ipcRenderer.send('confirm-translations', { project: this.projectId });
+        this.electron.ipcRenderer.send('confirm-translations', { project: this.projectId, memory: this.memSelect.value });
     }
 
     acceptAll100Matches(): void {

@@ -911,6 +911,62 @@ public class XliffStore {
         return result;
     }
 
+    public synchronized void saveSource(JSONObject json)
+            throws IOException, SQLException, SAXException, ParserConfigurationException, DataFormatException {
+
+        String file = json.getString("file");
+        String unit = json.getString("unit");
+        String segment = json.getString("segment");
+        String newSource = json.getString("newSource").replace("&nbsp;", "\u00A0").replace("<br>", "\n");
+
+        String src = "";
+        String pureSource = "";
+        getSource.setString(1, file);
+        getSource.setString(2, unit);
+        getSource.setString(3, segment);
+        try (ResultSet rs = getSource.executeQuery()) {
+            while (rs.next()) {
+                src = rs.getNString(1);
+                pureSource = rs.getNString(2);
+            }
+        }
+        Element source = buildElement(src);
+
+        Map<String, String> tags = getTags(source);
+
+        newSource = XliffUtils.clearSpan(newSource);
+
+        List<String[]> list = XliffUtils.harvestTags(newSource);
+        if (!list.isEmpty()) {
+            for (int i = 0; i < list.size(); i++) {
+                String code = list.get(i)[0];
+                String img = list.get(i)[1];
+                if (tags.containsKey(code)) {
+                    newSource = replace(newSource, img, tags.get(code));
+                } else {
+                    newSource = replace(newSource, img, "");
+                }
+            }
+        }
+        Element updated = buildElement("<source>" + newSource + "</source>");
+        if (source.getContent().equals(updated.getContent())) {
+            return;
+        }
+
+        source.setContent(updated.getContent());
+        pureSource = XliffUtils.pureText(source);
+
+        String sql = "UPDATE segments SET source=?, sourceText=? WHERE file=? AND unitId=? AND segId=?";
+        try (PreparedStatement prep = conn.prepareStatement(sql)) {
+            prep.setNString(1, source.toString());
+            prep.setNString(2, pureSource);
+            prep.setString(3, file);
+            prep.setString(4, unit);
+            prep.setString(5, segment);
+            prep.executeUpdate();
+        }
+    }
+
     public synchronized JSONObject getTranslationStatus() throws SQLException {
         JSONObject result = new JSONObject();
         int total = 0;
@@ -2206,8 +2262,58 @@ public class XliffStore {
         }
     }
 
-    public void confirmAllTranslations() throws SQLException {
-        stmt.execute("UPDATE segments SET state='final' WHERE type='S' AND targetText<>'' AND translate='Y' ");
+    public void confirmAllTranslations(String memory)
+            throws SQLException, SAXException, IOException, ParserConfigurationException {
+        if (memory.equals(Constants.NONE)) {
+            stmt.execute("UPDATE segments SET state='final' WHERE type='S' AND targetText<>'' AND translate='Y' ");
+            conn.commit();
+            return;
+        }
+        MemoriesHandler.openMemory(memory);
+        ITmEngine engine = MemoriesHandler.getEngine(memory);
+        String sql = "SELECT file, unitId, segId, FROM segments WHERE state<>'final' AND type='S' AND targetText<>'' AND translate='Y'";
+        try (ResultSet rs = stmt.executeQuery(sql)) {
+            try (PreparedStatement updateSegment = conn
+                    .prepareStatement("UPDATE segments SET state='final' WHERE file=? AND unitId=? AND segId=?")) {
+
+                try (PreparedStatement getSegment = conn.prepareStatement(
+                        "SELECT source, target, state, translate FROM segments WHERE file=? AND unitId=? AND segId=?")) {
+
+                    while (rs.next()) {
+                        String file = rs.getString(1);
+                        String unit = rs.getString(2);
+                        String segment = rs.getString(3);
+
+                        updateSegment.setString(1, file);
+                        updateSegment.setString(2, unit);
+                        updateSegment.setString(3, segment);
+                        updateSegment.executeUpdate();
+
+                        getSegment.setString(1, file);
+                        getSegment.setString(2, unit);
+                        getSegment.setString(3, segment);
+
+                        try (ResultSet rs2 = getSegment.executeQuery()) {
+                            while (rs2.next()) {
+                                Element source = buildElement(rs2.getNString(1));
+                                Element target = buildElement(rs2.getNString(2));
+                                Map<String, String> tags = getTags(source);
+                                StringBuilder key = new StringBuilder();
+                                key.append(xliffFile.hashCode());
+                                key.append('-');
+                                key.append(file);
+                                key.append('-');
+                                key.append(unit);
+                                key.append('-');
+                                key.append(segment);
+                                engine.storeTu(XliffUtils.toTu(key.toString(), source, target, tags));
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        MemoriesHandler.closeMemory(memory);
         conn.commit();
     }
 
