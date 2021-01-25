@@ -516,7 +516,7 @@ public class XliffStore {
                         queryBuilder.append(" AND targetText ILIKE '%");
                     }
                 }
-                queryBuilder.append(filterText);
+                queryBuilder.append(escape(filterText));
                 queryBuilder.append("%'");
             }
             if (!showUntranslated) {
@@ -2377,7 +2377,7 @@ public class XliffStore {
             queryBuilder.append(caseSensitive ? "', 'c')" : "', 'i')");
         } else {
             queryBuilder.append(caseSensitive ? "targetText LIKE '%" : "targetText ILIKE '%");
-            queryBuilder.append(searchText);
+            queryBuilder.append(escape(searchText));
             queryBuilder.append("%'");
         }
         queryBuilder.append(" AND translate='Y'");
@@ -2394,6 +2394,10 @@ public class XliffStore {
                 updateTarget(file, unit, segment, target, pureTarget, false);
             }
         }
+    }
+
+    private String escape(String string) {
+        return string.replace("'", "''").replace("%", "\\%").replace("_", "\\_");
     }
 
     private Element replaceText(Element target, String searchText, String replaceText, boolean isRegExp) {
