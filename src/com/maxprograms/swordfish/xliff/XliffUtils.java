@@ -244,8 +244,7 @@ public class XliffUtils {
                 if ("ept".equals(e.getName())) {
                     Element ec = new Element("ec");
                     tag++;
-                    ec.setAttribute("id", e.getAttributeValue("i"));
-                    ec.setAttribute("dataRef", "ec" + tag);
+                    ec.setAttribute("startRef", e.getAttributeValue("i"));
                     newContent.add(ec);
                     tags.put("sc" + tag, e.getText());
                 }
@@ -291,7 +290,7 @@ public class XliffUtils {
             }
             if (node.getNodeType() == XMLNode.ELEMENT_NODE) {
                 Element e = (Element) node;
-                if (e.getName().equals("ph")) {
+                if ("ph".equals(e.getName())) {
                     Element ph = new Element("ph");
                     String id = e.getAttributeValue("id");
                     ph.setAttribute("x", id);
@@ -299,6 +298,18 @@ public class XliffUtils {
                         ph.setText(tags.get(id));
                     }
                     result.add(ph);
+                }
+                if ("pc".equals(e.getName())) {
+                    Element head = new Element("ph");
+                    head.setText("<pc id\"" + e.getAttributeValue("id") + "\">");
+                    result.add(head);
+                    result.addAll(e.getContent());
+                    Element tail = new Element("ph");
+                    tail.setText("</pc>");
+                    result.add(tail);
+                }
+                if ("mrk".equals(e.getName())) {
+                    result.addAll(e.getContent());
                 }
             }
         }
@@ -393,8 +404,16 @@ public class XliffUtils {
                 + "%</text></svg>";
     }
 
-    public static String clearSpan(String text) {
-        int index = text.indexOf("<span");
+    public static String clearHTML(String text) {
+        int index = text.indexOf("<font");
+        while (index != -1) {
+            String start = text.substring(0, index);
+            int end = text.indexOf('>', index + 1);
+            text = start + text.substring(end + 1);
+            index = text.indexOf("<font");
+        }
+        text = text.replace("</font>", "");
+        index = text.indexOf("<span");
         while (index != -1) {
             String start = text.substring(0, index);
             int end = text.indexOf('>', index + 1);

@@ -114,7 +114,6 @@ public class ServicesHandler implements HttpHandler {
                 result.put("request", request);
                 result.put(Constants.REASON, "Unknown request");
             }
-
             if (!result.has(Constants.REASON)) {
                 result.put(Constants.STATUS, Constants.SUCCESS);
             } else {

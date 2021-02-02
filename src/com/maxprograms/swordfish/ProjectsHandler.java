@@ -665,7 +665,7 @@ public class ProjectsHandler implements HttpHandler {
 
 							boolean paragraph = paragraphSegmentation;
 							boolean mustResegment = false;
-							if (!paragraphSegmentation && !FileFormats.isBilingual(sf.getType())) {
+							if (!paragraphSegmentation) {
 								mustResegment = true;
 								paragraph = true;
 							}

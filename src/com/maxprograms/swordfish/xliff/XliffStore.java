@@ -66,6 +66,7 @@ import com.maxprograms.swordfish.tm.Match;
 import com.maxprograms.swordfish.tm.MatchQuality;
 import com.maxprograms.swordfish.tm.NGrams;
 import com.maxprograms.swordfish.tm.TMUtils;
+import com.maxprograms.xliff2.FromXliff2;
 import com.maxprograms.xml.Catalog;
 import com.maxprograms.xml.Document;
 import com.maxprograms.xml.Element;
@@ -140,6 +141,7 @@ public class XliffStore {
 
     private static int tag;
     private Map<String, String> tagsMap;
+    private Map<String, Element> notesMap;
 
     private static Pattern pattern;
     private static String lastFilterText;
@@ -287,12 +289,22 @@ public class XliffStore {
                 }
             }
 
+            notesMap = new HashMap<>();
             Element notes = e.getChild("notes");
             if (notes != null) {
                 List<Element> n = notes.getChildren("note");
                 Iterator<Element> nit = n.iterator();
                 while (nit.hasNext()) {
-                    insertNote(currentFile, currentUnit, nit.next());
+                    Element note = nit.next();
+                    if (note.hasAttribute("mtc:ref")) {
+                        String segId = note.getAttributeValue("mtc:ref");
+                        if (segId.startsWith("#")) {
+                            segId = segId.substring(1);
+                        }
+                        insertNote(currentFile, currentUnit, segId, note);
+                    } else {
+                        notesMap.put(note.getAttributeValue("id"), note);
+                    }
                 }
             }
             if (tagCount > 0) {
@@ -341,6 +353,9 @@ public class XliffStore {
                     Element glossEntry = it.next();
                     if (glossEntry.hasAttribute("ref")) {
                         String segId = glossEntry.getAttributeValue("ref");
+                        if (segId.startsWith("#")) {
+                            segId = segId.substring(1);
+                        }
                         Element term = glossEntry.getChild("gls:term");
                         String source = term.getText();
                         String origin = term.getAttributeValue("source");
@@ -369,12 +384,26 @@ public class XliffStore {
                 }
                 target.setAttribute("xml:lang", tgtLang);
             }
+
+            List<String> segmentNotes = new ArrayList<>();
+            if (!notesMap.isEmpty()) {
+                segmentNotes.addAll(harvestNotes(source));
+                source = FromXliff2.removeComments(source);
+                segmentNotes.addAll(harvestNotes(target));
+                target = FromXliff2.removeComments(target);
+            }
+
             state = e.getAttributeValue("state",
                     XliffUtils.pureText(target).isEmpty() ? Constants.INITIAL : Constants.TRANSLATED);
             preserve = preserve || sourcePreserve
                     || "preserve".equals(target.getAttributeValue("xml:space", "default"));
 
             insertSegment(currentFile, currentUnit, id, "S", translate, source, target);
+            for (int i = 0; i < segmentNotes.size(); i++) {
+                String noteId = segmentNotes.get(i);
+                Element note = notesMap.get(noteId);
+                insertNote(currentFile, currentUnit, id, note);
+            }
         }
         if ("ignorable".equals(e.getName())) {
             String id = e.getAttributeValue("id");
@@ -392,6 +421,30 @@ public class XliffStore {
         if ("file".equals(e.getName())) {
             conn.commit();
         }
+    }
+
+    private List<String> harvestNotes(Element element) {
+        List<String> result = new ArrayList<>();
+        if ("mrk".equals(element.getName()) && "comment".equals(element.getAttributeValue("type"))) {
+            if (element.hasAttribute("ref")) {
+                String ref = element.getAttributeValue("ref");
+                result.add(ref.substring(ref.indexOf('=') + 1));
+            }
+            if (element.hasAttribute("value")) {
+                Element note = new Element("note");
+                note.setText(element.getAttributeValue("value"));
+                String id = "" + (result.size() + 100);
+                note.setAttribute("id", id);
+                notesMap.put(id, note);
+                result.add(id);
+            }
+        }
+        List<Element> children = element.getChildren();
+        Iterator<Element> it = children.iterator();
+        while (it.hasNext()) {
+            result.addAll(harvestNotes(it.next()));
+        }
+        return result;
     }
 
     private synchronized void insertSegment(String file, String unit, String segment, String type, boolean translate,
@@ -441,14 +494,10 @@ public class XliffStore {
         insertMatch(file, unit, segment, origin, type, similarity, source, target, tagsData);
     }
 
-    private void insertNote(String file, String unit, Element note) throws SQLException {
-        String ref = note.getAttributeValue("mtc:ref", unit);
-        if (ref.startsWith("#")) {
-            ref = ref.substring(1);
-        }
+    private void insertNote(String file, String unit, String segId, Element note) throws SQLException {
         insertNoteStmt.setString(1, file);
         insertNoteStmt.setString(2, unit);
-        insertNoteStmt.setString(3, ref);
+        insertNoteStmt.setString(3, segId);
         insertNoteStmt.setString(4, note.getAttributeValue("id", unit));
         insertNoteStmt.setNString(5, note.getText());
         insertNoteStmt.execute();
@@ -845,7 +894,7 @@ public class XliffStore {
 
         Map<String, String> tags = getTags(source);
 
-        translation = XliffUtils.clearSpan(translation);
+        translation = XliffUtils.clearHTML(translation);
 
         List<String[]> list = XliffUtils.harvestTags(translation);
         if (!list.isEmpty()) {
@@ -934,7 +983,7 @@ public class XliffStore {
 
         Map<String, String> tags = getTags(source);
 
-        newSource = XliffUtils.clearSpan(newSource);
+        newSource = XliffUtils.clearHTML(newSource);
 
         List<String[]> list = XliffUtils.harvestTags(newSource);
         if (!list.isEmpty()) {
@@ -1457,7 +1506,7 @@ public class XliffStore {
                         sb.append("\"/>");
                         tagsMap.put("/pc" + id, sb.toString());
                     }
-                    text.append("/" + tagsMap.get(e.getName() + id));
+                    text.append(tagsMap.get("/pc" + id));
                 } else if (type.equals("mrk")) {
                     String id = e.getAttributeValue("id");
                     boolean isTerm = e.getAttributeValue("type").equals("term");
@@ -1796,15 +1845,31 @@ public class XliffStore {
             Element updated = getTarget(currentFile, currentUnit, id);
             target.setContent(updated.getContent());
             String st = getState(currentFile, currentUnit, id);
-            if (Constants.INITIAL.equals(st)) {
-                if (target.getContent().isEmpty()) {
-                    e.removeChild(target);
-                } else {
-                    st = Constants.TRANSLATED;
-                    logger.log(Level.WARNING, "Changing segment state from 'initial' to 'translated'");
+            if (Constants.INITIAL.equals(st) && !target.getContent().isEmpty()) {
+                st = Constants.TRANSLATED;
+                logger.log(Level.WARNING, "Changing segment state from 'initial' to 'translated'");
+            }
+            JSONArray notesArray = getNotes(currentFile, currentUnit, id);
+            if (notesArray.length() > 0) {
+                target = FromXliff2.removeComments(target);
+                for (int i = 0; i < notesArray.length(); i++) {
+                    JSONObject json = notesArray.getJSONObject(i);
+                    String noteId = json.getString("id");
+                    Element mrk = new Element("mrk");
+                    mrk.setAttribute("id", "tn" + noteId);
+                    mrk.setAttribute("type", "comment");
+                    mrk.setAttribute("ref", "#n=" + noteId);
+                    mrk.setContent(target.getContent());
+                    List<XMLNode> content = new Vector<>();
+                    content.add(mrk);
+                    target.setContent(content);
                 }
             }
             e.setAttribute("state", st);
+
+            if (Constants.INITIAL.equals(st) && target.getContent().isEmpty()) {
+                e.removeChild(target);
+            }
         }
         if ("ignorable".equals(e.getName())) {
             Element source = e.getChild("source");
@@ -1875,7 +1940,7 @@ public class XliffStore {
         try (ResultSet rs = unitMatches.executeQuery()) {
             while (rs.next()) {
                 Element match = new Element("mtc:match");
-                match.setAttribute("ref", rs.getString(3));
+                match.setAttribute("ref", "#" + rs.getString(3));
                 match.setAttribute("id", rs.getString(4));
                 match.setAttribute("origin", rs.getString(5));
                 match.setAttribute("type", rs.getString(6));
@@ -1895,7 +1960,6 @@ public class XliffStore {
         try (ResultSet rs = unitNotes.executeQuery()) {
             while (rs.next()) {
                 Element note = new Element("note");
-                note.setAttribute("mtc:ref", "#" + rs.getString(1));
                 note.setAttribute("id", rs.getString(2));
                 note.setText(rs.getNString(3));
                 notes.addContent(note);
@@ -1911,7 +1975,7 @@ public class XliffStore {
         try (ResultSet rs = unitTerms.executeQuery()) {
             while (rs.next()) {
                 Element entry = new Element("gls:glossEntry");
-                entry.setAttribute("ref", rs.getString(3));
+                entry.setAttribute("ref", "#" + rs.getString(3));
                 entry.setAttribute("id", rs.getString(4));
                 glossary.addContent(entry);
 
