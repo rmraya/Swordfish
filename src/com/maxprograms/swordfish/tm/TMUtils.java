@@ -21,6 +21,7 @@ package com.maxprograms.swordfish.tm;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.io.Reader;
 import java.lang.System.Logger;
 import java.lang.System.Logger.Level;
 import java.nio.charset.StandardCharsets;
@@ -150,4 +151,15 @@ public class TMUtils {
 		}
 		return text.toString();
 	}
+
+	public static String getString(Reader reader) throws IOException {
+        StringBuilder sb = new StringBuilder();
+        char[] array = new char[1024];
+        int read = 0;
+        while ((read = reader.read(array)) != -1) {
+            sb.append(array, 0, read);
+        }
+        reader.close();
+        return sb.toString();
+    }
 }

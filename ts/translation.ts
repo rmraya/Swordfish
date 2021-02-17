@@ -981,6 +981,9 @@ class TranslationView {
             td = document.createElement('td');
             td.classList.add('source');
             td.lang = this.srcLang;
+            if (TranslationView.isBiDi(this.srcLang)) {
+                td.dir = 'rtl';
+            }
             td.classList.add('initial');
             if (row.preserve) {
                 td.classList.add('preserve');
@@ -1039,6 +1042,9 @@ class TranslationView {
             td = document.createElement('td');
             td.classList.add('target');
             td.lang = this.tgtLang;
+            if (TranslationView.isBiDi(this.tgtLang)) {
+                td.dir = 'rtl';
+            }
             td.spellcheck = true;
             if (row.preserve) {
                 td.classList.add('preserve');
@@ -1063,6 +1069,12 @@ class TranslationView {
             return;
         }
         this.selectRow((rows[0] as HTMLTableRowElement));
+    }
+
+    static isBiDi(code: string): boolean {
+        return code.startsWith("ar") || code.startsWith("fa") || code.startsWith("az") || code.startsWith("ur")
+            || code.startsWith("pa-PK") || code.startsWith("ps") || code.startsWith("prs") || code.startsWith("ug")
+            || code.startsWith("he") || code.startsWith("ji") || code.startsWith("yi");
     }
 
     firstPage(): void {

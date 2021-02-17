@@ -127,11 +127,18 @@ class TermsPanel {
             let source: HTMLTableCellElement = document.createElement('td');
             source.innerText = term.source;
             source.style.width = '49%';
+            source.classList.add('initial')
+            if (TranslationView.isBiDi(term.srcLang)) {
+                source.dir='rtl';
+            }
             row.appendChild(source);
 
             let target: HTMLTableCellElement = document.createElement('td');
             target.innerText = term.target;
             target.style.width = '49%';
+            if (TranslationView.isBiDi(term.tgtLang)) {
+                target.dir='rtl';
+            }
             row.appendChild(target);
 
             this.rows.push(row);

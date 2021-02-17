@@ -947,6 +947,12 @@ class Main {
                     srcLang: Main.translationViews.get(selected).getSrcLang(),
                     tgtLang: Main.translationViews.get(selected).getTgtLang()
                 });
+            } else {
+                Main.electron.ipcRenderer.send('selected-text', {
+                    selected: "",
+                    srcLang: Main.translationViews.get(selected).getSrcLang(),
+                    tgtLang: Main.translationViews.get(selected).getTgtLang()
+                });
             }
         }
     }

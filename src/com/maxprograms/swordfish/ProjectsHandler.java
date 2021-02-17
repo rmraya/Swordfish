@@ -1465,7 +1465,7 @@ public class ProjectsHandler implements HttpHandler {
 			if (projectStores.containsKey(project)) {
 				result.put("terms", projectStores.get(project).getTerms(json));
 			}
-		} catch (SQLException | JSONException e) {
+		} catch (SQLException | IOException e) {
 			logger.log(Level.ERROR, e);
 			result.put(Constants.REASON, e.getMessage());
 		}
@@ -1641,7 +1641,7 @@ public class ProjectsHandler implements HttpHandler {
 				result.put("notes", projectStores.get(project).getNotes(json.getString("file"), json.getString("unit"),
 						json.getString("segment")));
 			}
-		} catch (SQLException e) {
+		} catch (SQLException | IOException e) {
 			logger.log(Level.ERROR, e);
 			result.put(Constants.REASON, e.getMessage());
 		}
@@ -1657,7 +1657,7 @@ public class ProjectsHandler implements HttpHandler {
 				result.put("notes", projectStores.get(project).addNote(json.getString("file"), json.getString("unit"),
 						json.getString("segment"), json.getString("noteText")));
 			}
-		} catch (SQLException e) {
+		} catch (SQLException | IOException e) {
 			logger.log(Level.ERROR, e);
 			result.put(Constants.REASON, e.getMessage());
 		}
@@ -1673,7 +1673,7 @@ public class ProjectsHandler implements HttpHandler {
 				result.put("notes", projectStores.get(project).removeNote(json.getString("file"),
 						json.getString("unit"), json.getString("segment"), json.getString("noteId")));
 			}
-		} catch (SQLException e) {
+		} catch (SQLException | IOException e) {
 			logger.log(Level.ERROR, e);
 			result.put(Constants.REASON, e.getMessage());
 		}

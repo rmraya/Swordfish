@@ -48,6 +48,18 @@ class AddTerm {
         this.electron.ipcRenderer.on('set-selected-text', (event: Electron.IpcRendererEvent, arg: any) => {
             this.setParams(arg);
         });
+        document.getElementById('srcLangSelect').addEventListener('change', (ev: Event) => {
+            let code: string = (document.getElementById('srcLangSelect') as HTMLSelectElement).value;
+            if (this.isBiDi(code)) {
+                (document.getElementById('source') as HTMLInputElement).dir = 'rtl';
+            }
+        });
+        document.getElementById('tgtLangSelect').addEventListener('change', (ev: Event) => {
+            let code: string = (document.getElementById('tgtLangSelect') as HTMLSelectElement).value;
+            if (this.isBiDi(code)) {
+                (document.getElementById('target') as HTMLInputElement).dir = 'rtl';
+            }
+        });
         document.getElementById('addTermButton').addEventListener('click', () => {
             this.addTerm();
         });
@@ -94,20 +106,44 @@ class AddTerm {
             languageOptions = languageOptions + '<option value="' + lang.code + '">' + lang.description + '</option>';
         }
         document.getElementById('srcLangSelect').innerHTML = languageOptions;
-        (document.getElementById('srcLangSelect') as HTMLSelectElement).value = arg.srcLang;
+        if ((document.getElementById('srcLangSelect') as HTMLSelectElement).value === 'none') {
+            (document.getElementById('srcLangSelect') as HTMLSelectElement).value = arg.srcLang;
+        }
         document.getElementById('tgtLangSelect').innerHTML = languageOptions;
-        (document.getElementById('tgtLangSelect') as HTMLSelectElement).value = arg.tgtLang;
+        if ((document.getElementById('tgtLangSelect') as HTMLSelectElement).value === 'none') {
+            (document.getElementById('tgtLangSelect') as HTMLSelectElement).value = arg.tgtLang;
+        }
         this.electron.ipcRenderer.send('get-selection');
     }
 
     setParams(arg: any): void {
-        if (arg.lang === arg.srcLang) {
-            (document.getElementById('source') as HTMLInputElement).value = arg.selected;
-            (document.getElementById('target') as HTMLInputElement).focus();
-        } else {
-            (document.getElementById('target') as HTMLInputElement).value = arg.selected;
-            (document.getElementById('source') as HTMLInputElement).focus();
+        if (arg.lang) {
+            if (arg.lang === arg.srcLang) {
+                (document.getElementById('source') as HTMLInputElement).value = arg.selected;
+                (document.getElementById('target') as HTMLInputElement).focus();
+            } else {
+                (document.getElementById('target') as HTMLInputElement).value = arg.selected;
+                (document.getElementById('source') as HTMLInputElement).focus();
+            }
         }
+        if (arg.srcLang) {
+            (document.getElementById('srcLangSelect') as HTMLSelectElement).value = arg.srcLang;
+            if (this.isBiDi(arg.srcLang)) {
+                (document.getElementById('source') as HTMLInputElement).dir = 'rtl';
+            }
+        }
+        if (arg.tgtLang) {
+            (document.getElementById('tgtLangSelect') as HTMLSelectElement).value = arg.tgtLang;
+            if (this.isBiDi(arg.tgtLang)) {
+                (document.getElementById('target') as HTMLInputElement).dir = 'rtl';
+            }
+        }
+    }
+
+    isBiDi(code: string): boolean {
+        return code.startsWith("ar") || code.startsWith("fa") || code.startsWith("az") || code.startsWith("ur")
+            || code.startsWith("pa-PK") || code.startsWith("ps") || code.startsWith("prs") || code.startsWith("ug")
+            || code.startsWith("he") || code.startsWith("ji") || code.startsWith("yi");
     }
 }
 

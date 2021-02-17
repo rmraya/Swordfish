@@ -94,31 +94,35 @@ class TmMatches {
         let tab = new Tab(match.matchId, match.similarity + '%', false);
 
         let height: number = this.container.clientHeight - 65; // tabHolder.labels + toolbar
-        let width: number = this.container.clientWidth;
         tab.getContainer().style.height = height + 'px';
 
         let matchDiv = document.createElement('div');
         matchDiv.style.display = 'flex';
         matchDiv.style.flexDirection = 'column';
         matchDiv.style.height = height + 'px';
+        matchDiv.style.width = 'calc(100% - 8px)';
         tab.getContainer().appendChild(matchDiv);
 
         let sourceDiv: HTMLDivElement = document.createElement('div');
         sourceDiv.classList.add('divContainer');
         sourceDiv.classList.add('sourceContainer');
         sourceDiv.classList.add('zoom');
+        if (TranslationView.isBiDi(match.srcLang)) {
+            sourceDiv.dir = 'rtl';
+        }
         sourceDiv.innerHTML = match.source;
         let sourceHeight: number = height / 2;
         sourceDiv.style.height = sourceHeight + 'px';
-        sourceDiv.style.width = width + 'px';
         matchDiv.appendChild(sourceDiv);
 
         let targetDiv: HTMLDivElement = document.createElement('div');
         targetDiv.classList.add('divContainer');
         targetDiv.classList.add('targetContainer');
         targetDiv.classList.add('zoom');
+        if (TranslationView.isBiDi(match.tgtLang)) {
+            targetDiv.dir = 'rtl';
+        }
         targetDiv.style.height = (height - sourceHeight) + 'px';
-        targetDiv.style.width = width + 'px';
         targetDiv.innerHTML = match.target;
 
         matchDiv.appendChild(targetDiv);
@@ -137,15 +141,12 @@ class TmMatches {
         let observer = new MutationObserver((mutationsList) => {
             for (let mutation of mutationsList) {
                 if (mutation.type === 'attributes') {
-                    let height = this.container.clientHeight - 65; // tabHolder.labels + toolbar
-                    let width: number = this.container.clientWidth;
+                    let height: number = this.container.clientHeight - 65; // tabHolder.labels + toolbar
                     tab.getContainer().style.height = height + 'px';
                     matchDiv.style.height = height + 'px';
                     let sourceHeight: number = height / 2;
                     sourceDiv.style.height = sourceHeight + 'px';
-                    sourceDiv.style.width = width + 'px';
                     targetDiv.style.height = (height - sourceHeight) + 'px';
-                    targetDiv.style.width = width + 'px';
                 }
             }
         });

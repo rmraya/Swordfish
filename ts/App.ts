@@ -837,8 +837,7 @@ class Swordfish {
         })
         ipcMain.on('get-show guide', (event: IpcMainEvent) => {
             event.sender.send('set-show guide', { showGuide: Swordfish.currentPreferences.showGuide });
-        });       
-
+        });
     } // end constructor
 
     static createWindow(): void {

@@ -98,7 +98,11 @@ class MtMatches {
         div.classList.add('divContainer');
         div.classList.add('machineContainer');
         div.classList.add('zoom');
+        div.style.width = ('calc(100% - 8px');
         div.innerHTML = match.target;
+        if (TranslationView.isBiDi(match.tgtLang)) {
+            div.dir = 'rtl';
+        }
 
         this.tabHolder.addTab(tab);
     }

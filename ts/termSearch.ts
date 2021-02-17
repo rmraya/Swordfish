@@ -53,6 +53,12 @@ class TermSearch {
         });
         (document.getElementById('similarity') as HTMLSelectElement).value = '70';
         (document.getElementById('searchText') as HTMLInputElement).focus();
+        document.getElementById('languagesSelect').addEventListener('change', (ev: Event) => {
+            let code: string = (document.getElementById('languagesSelect') as HTMLSelectElement).value;
+            if (this.isBiDi(code)) {
+                (document.getElementById('searchText') as HTMLInputElement).dir = 'rtl';
+            }
+        });
         let body: HTMLBodyElement = document.getElementById('body') as HTMLBodyElement;
         this.electron.ipcRenderer.send('term-search-height', { width: body.clientWidth, height: body.clientHeight });
     }
@@ -71,8 +77,11 @@ class TermSearch {
 
     setParams(arg: any): void {
         (document.getElementById('searchText') as HTMLInputElement).value = arg.selected;
-        if (arg.lang !== '') {
+        if (arg.lang) {
             (document.getElementById('languagesSelect') as HTMLSelectElement).value = arg.lang;
+            if (this.isBiDi(arg.lang)) {
+                (document.getElementById('searchText') as HTMLInputElement).dir = 'rtl';
+            }
         }
     }
 
@@ -98,6 +107,12 @@ class TermSearch {
             caseSensitive: caseSensitive.checked,
             glossary: this.glossary
         });
+    }
+
+    isBiDi(code: string): boolean {
+        return code.startsWith("ar") || code.startsWith("fa") || code.startsWith("az") || code.startsWith("ur")
+            || code.startsWith("pa-PK") || code.startsWith("ps") || code.startsWith("prs") || code.startsWith("ug")
+            || code.startsWith("he") || code.startsWith("ji") || code.startsWith("yi");
     }
 }
 

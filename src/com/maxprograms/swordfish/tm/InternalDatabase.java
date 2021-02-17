@@ -22,6 +22,7 @@ package com.maxprograms.swordfish.tm;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.StringReader;
 import java.lang.System.Logger;
 import java.lang.System.Logger.Level;
 import java.nio.charset.StandardCharsets;
@@ -95,6 +96,26 @@ public class InternalDatabase implements ITmEngine {
 			createTable();
 			logger.log(Level.INFO, "H2 database created");
 		}
+
+		boolean needsUpgrade = false;
+        try (Statement stmt = conn.createStatement()) {
+            String sql = "SELECT TYPE_NAME FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME='TUV' AND COLUMN_NAME='SEG'";
+            try (ResultSet rs = stmt.executeQuery(sql)) {
+                while (rs.next()) {
+                    needsUpgrade = !rs.getString(1).equalsIgnoreCase("CLOB");
+                }
+            }
+        }
+		if (needsUpgrade) {
+			String s1 = "ALTER TABLE TUV ALTER COLUMN SEG SET DATA TYPE CLOB";
+            String s2 = "ALTER TABLE TUV ALTER COLUMN PURETEXT SET DATA TYPE CLOB";
+			try (Statement upgrade = conn.createStatement()) {
+                upgrade.execute(s1);
+                upgrade.execute(s2);
+                conn.commit();
+            }
+		}
+
 		storeTUV = conn.prepareStatement("INSERT INTO tuv (tuid, lang, seg, puretext, textlength) VALUES (?,?,?,?,?)");
 		searchTUV = conn.prepareStatement("SELECT textlength FROM tuv WHERE tuid=? AND lang=?");
 		deleteTUV = conn.prepareStatement("DELETE FROM tuv WHERE tuid=? AND lang=?");
@@ -115,7 +136,7 @@ public class InternalDatabase implements ITmEngine {
 	}
 
 	private void createTable() throws SQLException {
-		String sql = "CREATE TABLE tuv (tuid VARCHAR(256) NOT NULL, lang VARCHAR(15) NOT NULL, seg VARCHAR(6000) NOT NULL, puretext VARCHAR(4000) NOT NULL, textlength INTEGER NOT NULL, PRIMARY KEY(tuid, lang));";
+		String sql = "CREATE TABLE tuv (tuid VARCHAR(256) NOT NULL, lang VARCHAR(15) NOT NULL, seg CLOB NOT NULL, puretext CLOB NOT NULL, textlength INTEGER NOT NULL, PRIMARY KEY(tuid, lang));";
 		try (Statement stmt = conn.createStatement()) {
 			stmt.execute(sql);
 		}
@@ -199,7 +220,7 @@ public class InternalDatabase implements ITmEngine {
 				try (ResultSet rs = stmt.executeQuery()) {
 					while (rs.next()) {
 						String lang = rs.getString(1);
-						String seg = rs.getString(2);
+						String seg = TMUtils.getString(rs.getNCharacterStream(2));
 						if (seg.equals("<seg></seg>")) {
 							continue;
 						}
@@ -319,8 +340,8 @@ public class InternalDatabase implements ITmEngine {
 						stmt.setString(2, tuid);
 						try (ResultSet rs = stmt.executeQuery()) {
 							while (rs.next()) {
-								String pure = rs.getNString(1);
-								String srcSeg = rs.getNString(2);
+								String pure = TMUtils.getString(rs.getNCharacterStream(1));
+								String srcSeg = TMUtils.getString(rs.getNCharacterStream(2));
 								int distance;
 								if (caseSensitive) {
 									distance = MatchQuality.similarity(searchStr, pure);
@@ -335,7 +356,7 @@ public class InternalDatabase implements ITmEngine {
 									try (ResultSet rs2 = stmt2.executeQuery()) {
 										while (rs2.next()) {
 											String lang = rs2.getString(1);
-											String seg = rs2.getNString(2);
+											String seg = TMUtils.getString(rs2.getNCharacterStream(2));
 											target = TMUtils.buildTuv(lang, seg);
 											tgtFound = true;
 										}
@@ -418,7 +439,7 @@ public class InternalDatabase implements ITmEngine {
 				try (ResultSet rs2 = stmt2.executeQuery()) {
 					while (rs2.next()) {
 						String lang = rs2.getString(1);
-						String seg = rs2.getNString(2);
+						String seg = TMUtils.getString(rs2.getNCharacterStream(2));
 						Element tuv = TMUtils.buildTuv(lang, seg);
 						tu.addContent(tuv);
 					}
@@ -507,18 +528,10 @@ public class InternalDatabase implements ITmEngine {
 				if (puretext.length() < 1) {
 					continue;
 				}
-				String ele = seg.toString();
-				if (ele.length() > 6000) {
-					ele = puretext;
-				}
-				if (ele.length() > 6000) {
-					throw new IOException("Segment too large");
-				}
-				int length = puretext.length();
 				storeTUV.setString(2, lang);
-				storeTUV.setString(3, ele);
-				storeTUV.setString(4, puretext);
-				storeTUV.setInt(5, length);
+				storeTUV.setNCharacterStream(3, new StringReader(seg.toString()));
+				storeTUV.setNCharacterStream(4, new StringReader(puretext));
+				storeTUV.setInt(5, puretext.length());
 				storeTUV.execute();
 				tuLangs.add(lang);
 
@@ -600,7 +613,7 @@ public class InternalDatabase implements ITmEngine {
 			try (ResultSet rs = stmt.executeQuery()) {
 				while (rs.next()) {
 					String lang = rs.getString(1);
-					String seg = rs.getString(2);
+					String seg = TMUtils.getString(rs.getNCharacterStream(2));
 					if (seg.equals("<seg></seg>")) {
 						continue;
 					}
@@ -685,7 +698,7 @@ public class InternalDatabase implements ITmEngine {
 					stmt.setString(2, tuid);
 					try (ResultSet rs = stmt.executeQuery()) {
 						while (rs.next()) {
-							String pure = rs.getNString(1);
+							String pure = TMUtils.getString(rs.getNCharacterStream(1));
 							int distance;
 							if (caseSensitive) {
 								distance = MatchQuality.similarity(searchStr, pure);
