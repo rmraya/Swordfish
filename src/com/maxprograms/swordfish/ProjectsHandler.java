@@ -838,7 +838,7 @@ public class ProjectsHandler implements HttpHandler {
 		String project = json.getString("project");
 		try {
 			projectStores.get(project).saveSource(json);
-		} catch (IOException | SQLException | SAXException | ParserConfigurationException | DataFormatException e) {
+		} catch (IOException | SQLException | SAXException | ParserConfigurationException e) {
 			logger.log(Level.ERROR, e);
 			result.put(Constants.REASON, e.getMessage());
 		}

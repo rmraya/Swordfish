@@ -30,6 +30,7 @@ import java.lang.System.Logger;
 import java.lang.System.Logger.Level;
 import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
@@ -181,9 +182,9 @@ public class XliffStore {
         conn.commit();
 
         boolean needsUpgrade = false;
-        try (Statement stmt = conn.createStatement()) {
+        try (Statement stm = conn.createStatement()) {
             String sql = "SELECT TYPE_NAME FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME='UNITS' AND COLUMN_NAME='DATA'";
-            try (ResultSet rs = stmt.executeQuery(sql)) {
+            try (ResultSet rs = stm.executeQuery(sql)) {
                 while (rs.next()) {
                     needsUpgrade = !rs.getString(1).equalsIgnoreCase("CLOB");
                 }
@@ -889,13 +890,13 @@ public class XliffStore {
         getSource.setString(2, unit);
         getSource.setString(3, segment);
         boolean wasFinal = false;
-        boolean translate = true;
+        boolean translatable = true;
         try (ResultSet rs = getSource.executeQuery()) {
             while (rs.next()) {
                 src = TMUtils.getString(rs.getNCharacterStream(1));
                 pureSource = TMUtils.getString(rs.getNCharacterStream(2));
                 wasFinal = rs.getString(3).equals("final");
-                translate = rs.getString(4).equals("Y");
+                translatable = rs.getString(4).equals("Y");
             }
         }
         Element source = buildElement(src);
@@ -929,7 +930,7 @@ public class XliffStore {
         }
         result.put("propagated", propagated);
 
-        boolean checkErrors = translate && (confirm || (!pureTarget.isEmpty() && acceptUnconfirmed));
+        boolean checkErrors = translatable && (confirm || (!pureTarget.isEmpty() && acceptUnconfirmed));
 
         boolean tagErrors = false;
         boolean spaceErrors = false;
@@ -969,7 +970,7 @@ public class XliffStore {
     }
 
     public synchronized void saveSource(JSONObject json)
-            throws IOException, SQLException, SAXException, ParserConfigurationException, DataFormatException {
+            throws IOException, SQLException, SAXException, ParserConfigurationException {
 
         String file = json.getString("file");
         String unit = json.getString("unit");
@@ -1791,9 +1792,63 @@ public class XliffStore {
             throws SAXException, IOException, ParserConfigurationException, SQLException {
         updateXliff();
         getPreferences();
-        List<String> result = Merge.merge(xliffFile, output, catalog, acceptUnconfirmed);
+        File adjusted = reviewStates();
+        List<String> result = Merge.merge(adjusted.getAbsolutePath(), output, catalog, acceptUnconfirmed);
         if (!"0".equals(result.get(0))) {
             throw new IOException(result.get(1));
+        }
+        Files.delete(adjusted.toPath());
+    }
+
+    private File reviewStates() throws SAXException, IOException, ParserConfigurationException {
+        File xliff = new File(xliffFile);
+        File adjusted = new File(xliff.getParentFile(), "adjusted.xlf");
+        document = builder.build(xliffFile);
+        recurseStates(document.getRootElement());
+        XMLOutputter outputter = new XMLOutputter();
+        outputter.preserveSpace(true);
+        Indenter.indent(document.getRootElement(), 2);
+        try (FileOutputStream out = new FileOutputStream(adjusted)) {
+            outputter.output(document, out);
+        }
+        return adjusted;
+    }
+
+    private void recurseStates(Element e) {
+        if ("segment".equals(e.getName())) {
+            if ("initial".equals(e.getAttributeValue("state"))) {
+                Element source = e.getChild("source");
+                Element target = e.getChild("target");
+                if (target == null) {
+                    target = new Element("target");
+                    target.setAttribute("xml:lang", tgtLang);
+                    if ("preserve".equals(source.getAttributeValue("xml:space", "default"))) {
+                        target.setAttribute("xml:space", "preserve");
+                    }
+                    e.addContent(target);
+                }
+                target.setContent(source.getContent());
+            }
+            return;
+        }
+        if ("ignorable".equals(e.getName())) {
+            Element target = e.getChild("target");
+            if (target == null) {
+                Element source = e.getChild("source");
+                target = new Element("target");
+                target.setAttribute("xml:lang", tgtLang);
+                if ("preserve".equals(source.getAttributeValue("xml:space", "default"))) {
+                    target.setAttribute("xml:space", "preserve");
+                }
+                target.setContent(source.getContent());
+                e.addContent(target);
+            }
+            return;
+        }
+        List<Element> children = e.getChildren();
+        Iterator<Element> it = children.iterator();
+        while (it.hasNext()) {
+            recurseStates(it.next());
         }
     }
 
