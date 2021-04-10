@@ -32,8 +32,11 @@ import java.lang.System.Logger.Level;
 import java.net.URI;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
@@ -45,6 +48,7 @@ import com.maxprograms.converters.EncodingResolver;
 import com.maxprograms.converters.FileFormats;
 import com.maxprograms.languages.Language;
 import com.maxprograms.languages.LanguageUtils;
+import com.maxprograms.swordfish.models.Memory;
 import com.maxprograms.swordfish.mt.MTUtils;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
@@ -108,6 +112,10 @@ public class ServicesHandler implements HttpHandler {
                 result = getMTLanguages();
             } else if ("/services/getSpellingLanguages".equals(url)) {
                 result = getSpellingLanguages(request);
+            } else if ("/services/remoteDatabases".equals(url)) {
+                result = RemoteUtils.remoteDatabases(request);
+            } else if ("/services/addDatabases".equals(url)) {
+                result = addDatabases(request);
             } else {
                 result = new JSONObject();
                 result.put("url", url);
@@ -157,6 +165,30 @@ public class ServicesHandler implements HttpHandler {
             array.put(json);
         }
         result.put("charsets", array);
+        return result;
+    }
+
+    private JSONObject addDatabases(String request) throws ParseException, IOException {
+        JSONObject result = new JSONObject();
+        JSONObject json = new JSONObject(request);
+        String server = json.getString("server");
+        String user = json.getString("user");
+        String password = json.getString("password");
+        String type = json.getString("type");
+        JSONArray array = json.getJSONArray("databases");
+        SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm");
+        for (int i = 0; i < array.length(); i++) {
+            JSONObject obj = array.getJSONObject(i);
+            Date creationDate = df.parse(obj.getString("creationDate"));
+            Memory mem = new Memory(obj.getString("id"), obj.getString("name"), obj.getString("project"),
+                    obj.getString("subject"), obj.getString("client"), creationDate, Memory.REMOTE, server, user,
+                    password);
+            if ("memory".equals(type)) {
+                MemoriesHandler.addMemory(mem);
+            } else {
+                GlossariesHandler.addGlossary(mem);
+            }
+        }
         return result;
     }
 

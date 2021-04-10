@@ -134,6 +134,7 @@ class ProjectsView {
         let projectsTable = document.createElement('table');
         projectsTable.classList.add('fill_width');
         projectsTable.classList.add('stripes');
+        projectsTable.classList.add('discover');
         this.tableContainer.appendChild(projectsTable);
 
         projectsTable.innerHTML =

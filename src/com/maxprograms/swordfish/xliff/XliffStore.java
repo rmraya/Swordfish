@@ -20,7 +20,6 @@ SOFTWARE.
 package com.maxprograms.swordfish.xliff;
 
 import java.io.BufferedReader;
-import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.FileReader;
@@ -121,6 +120,7 @@ public class XliffStore {
     private PreparedStatement checkTerm;
     private PreparedStatement getNotesStmt;
     private PreparedStatement insertNoteStmt;
+    private PreparedStatement getSegment;
 
     private Statement stmt;
     private boolean preserve;
@@ -240,6 +240,7 @@ public class XliffStore {
         checkTerm = conn
                 .prepareStatement("SELECT target FROM terms WHERE file=? AND unitId=? AND segId=? AND termid=?");
         getNotesStmt = conn.prepareStatement("SELECT noteId, note FROM notes WHERE file=? AND unitId=? AND segId=?");
+        getSegment = conn.prepareStatement("SELECT source, target FROM segments WHERE file=? AND unitId=? AND segId=?");
         stmt = conn.createStatement();
         if (needsLoading) {
             document = builder.build(xliffFile);
@@ -623,7 +624,7 @@ public class XliffStore {
                 if (tags > 0) {
                     tagsData = getUnitData(file, unit);
                 }
-                Element source = buildElement(src);
+                Element source = XliffUtils.buildElement(src);
 
                 Element target = new Element("target");
                 target.setAttribute("xml:lang", tgtLang);
@@ -631,7 +632,7 @@ public class XliffStore {
                     target.setAttribute("xml:space", source.getAttributeValue("xml:space"));
                 }
                 if (tgt != null && !tgt.isBlank()) {
-                    target = buildElement(tgt);
+                    target = XliffUtils.buildElement(tgt);
                 }
 
                 boolean checkErrors = segTranslate
@@ -838,6 +839,7 @@ public class XliffStore {
         getTerms.close();
         checkTerm.close();
         getNotesStmt.close();
+        getSegment.close();
         stmt.close();
         conn.commit();
         conn.close();
@@ -899,7 +901,7 @@ public class XliffStore {
                 translatable = rs.getString(4).equals("Y");
             }
         }
-        Element source = buildElement(src);
+        Element source = XliffUtils.buildElement(src);
 
         Map<String, String> tags = getTags(source);
 
@@ -917,7 +919,7 @@ public class XliffStore {
                 }
             }
         }
-        Element translated = buildElement("<target>" + translation + "</target>");
+        Element translated = XliffUtils.buildElement("<target>" + translation + "</target>");
         Element target = getTarget(file, unit, segment);
         boolean unchanged = target.getContent().equals(translated.getContent());
 
@@ -988,7 +990,7 @@ public class XliffStore {
                 pureSource = TMUtils.getString(rs.getNCharacterStream(2));
             }
         }
-        Element source = buildElement(src);
+        Element source = XliffUtils.buildElement(src);
 
         Map<String, String> tags = getTags(source);
 
@@ -1006,7 +1008,7 @@ public class XliffStore {
                 }
             }
         }
-        Element updated = buildElement("<source>" + newSource + "</source>");
+        Element updated = XliffUtils.buildElement("<source>" + newSource + "</source>");
         if (source.getContent().equals(updated.getContent())) {
             return;
         }
@@ -1089,7 +1091,7 @@ public class XliffStore {
         String query = "SELECT file, unitId, segId, source, state, tags, space FROM segments WHERE translate='Y' AND type='S' AND state <> 'final' ";
         try (ResultSet rs = stmt.executeQuery(query)) {
             while (rs.next()) {
-                Element candidate = buildElement(TMUtils.getString(rs.getNCharacterStream(4)));
+                Element candidate = XliffUtils.buildElement(TMUtils.getString(rs.getNCharacterStream(4)));
                 int differences = tagDifferences(source, candidate);
                 String dummy = dummyTagger(candidate);
                 int similarity = MatchQuality.similarity(dummySource, dummy) - differences;
@@ -1117,7 +1119,7 @@ public class XliffStore {
                         row.put("target", translation);
                         result.put(row);
 
-                        Element translated = buildElement("<target>" + translation + "</target>");
+                        Element translated = XliffUtils.buildElement("<target>" + translation + "</target>");
                         translated.setAttribute("xml:lang", tgtLang);
                         translated.setAttribute("xml:space", preserve ? "preserve" : "default");
                         translated.setContent(target.getContent());
@@ -1619,11 +1621,6 @@ public class XliffStore {
         return source;
     }
 
-    private Element buildElement(String string) throws SAXException, IOException, ParserConfigurationException {
-        Document doc = builder.build(new ByteArrayInputStream(string.getBytes(StandardCharsets.UTF_8)));
-        return doc.getRootElement();
-    }
-
     private Map<String, String> getTags(Element root) {
         Map<String, String> result = new Hashtable<>();
         List<XMLNode> content = root.getContent();
@@ -1662,7 +1659,7 @@ public class XliffStore {
         try (ResultSet rs = getSource.executeQuery()) {
             while (rs.next()) {
                 String src = TMUtils.getString(rs.getNCharacterStream(1));
-                originalSource = buildElement(src);
+                originalSource = XliffUtils.buildElement(src);
             }
         }
         String dummySource = dummyTagger(originalSource);
@@ -1684,7 +1681,7 @@ public class XliffStore {
                 match.put("tgtLang", tgtLang);
 
                 String src = TMUtils.getString(rs.getNCharacterStream(8));
-                Element source = buildElement(src);
+                Element source = XliffUtils.buildElement(src);
                 String taggedSource = addHtmlTags(source, originalData);
 
                 List<String[]> tags = XliffUtils.harvestTags(taggedSource);
@@ -1700,7 +1697,7 @@ public class XliffStore {
                 match.put("source", tagged);
 
                 String tgt = TMUtils.getString(rs.getNCharacterStream(9));
-                Element target = buildElement(tgt);
+                Element target = XliffUtils.buildElement(tgt);
                 match.put("target", addHtmlTags(target, "", false, false, originalData, true));
 
                 result.put(match);
@@ -1752,9 +1749,9 @@ public class XliffStore {
                     key.append(segment);
 
                     String src = TMUtils.getString(rs.getNCharacterStream(4));
-                    Element source = buildElement(src);
+                    Element source = XliffUtils.buildElement(src);
                     String tgt = TMUtils.getString(rs.getNCharacterStream(5));
-                    Element target = buildElement(tgt);
+                    Element target = XliffUtils.buildElement(tgt);
 
                     Map<String, String> tags = getTags(source);
 
@@ -2007,8 +2004,8 @@ public class XliffStore {
                 match.setAttribute("origin", rs.getString(5));
                 match.setAttribute("type", rs.getString(6));
                 match.setAttribute("matchQuality", "" + rs.getInt(7));
-                match.addContent(buildElement(TMUtils.getString(rs.getNCharacterStream(8))));
-                match.addContent(buildElement(TMUtils.getString(rs.getNCharacterStream(9))));
+                match.addContent(XliffUtils.buildElement(TMUtils.getString(rs.getNCharacterStream(8))));
+                match.addContent(XliffUtils.buildElement(TMUtils.getString(rs.getNCharacterStream(9))));
                 matches.addContent(match);
             }
         }
@@ -2071,7 +2068,7 @@ public class XliffStore {
                 sourceText = TMUtils.getString(rs.getNCharacterStream(2));
             }
         }
-        Element source = buildElement("<source>" + XMLUtils.cleanText(sourceText) + "</source>");
+        Element source = XliffUtils.buildElement("<source>" + XMLUtils.cleanText(sourceText) + "</source>");
         JSONObject tagsData = new JSONObject();
         List<JSONObject> translations = translator.translate(sourceText);
         Iterator<JSONObject> it = translations.iterator();
@@ -2080,7 +2077,7 @@ public class XliffStore {
             String origin = translation.getString("key");
             source.setAttribute("xml:lang", translation.getString("srcLang"));
             String targetText = "<target>" + XMLUtils.cleanText(translation.getString("target")) + "</target>";
-            Element target = buildElement(targetText);
+            Element target = XliffUtils.buildElement(targetText);
             target.setAttribute("xml:lang", translation.getString("tgtLang"));
             insertMatch(file, unit, segment, origin, Constants.MT, 0, source, target, tagsData);
 
@@ -2205,7 +2202,7 @@ public class XliffStore {
                 pure = TMUtils.getString(rs.getNCharacterStream(2));
             }
         }
-        Element original = buildElement(src);
+        Element original = XliffUtils.buildElement(src);
         String memoryName = MemoriesHandler.getName(memory);
         MemoriesHandler.openMemory(memory);
         ITmEngine engine = MemoriesHandler.getEngine(memory);
@@ -2236,44 +2233,82 @@ public class XliffStore {
         String sql = "SELECT file, unitId, segId, source, sourceText, target FROM segments WHERE state <> 'final'";
         int count = 0;
         try (ResultSet rs = stmt.executeQuery(sql)) {
+            JSONObject params = new JSONObject();
+            params.put("srcLang", srcLang);
+            params.put("tgtLang", tgtLang);
+            JSONArray array = new JSONArray();
             while (rs.next()) {
                 String file = rs.getString(1);
                 String unit = rs.getString(2);
                 String segment = rs.getString(3);
-                String src = TMUtils.getString(rs.getNCharacterStream(4));
                 String pure = TMUtils.getString(rs.getNCharacterStream(5));
-                String tgt = TMUtils.getString(rs.getNCharacterStream(6));
-                Element original = buildElement(src);
-                if (tgt == null || tgt.isEmpty()) {
-                    tgt = "<target xml:lang=\"" + tgtLang + "\"/>";
-                }
-                Element originalTarget = buildElement(tgt);
-                boolean updated = false;
-                List<Match> matches = engine.searchTranslation(pure, srcLang, tgtLang, 60, false);
-                Iterator<Match> it = matches.iterator();
-                while (it.hasNext()) {
-                    Match m = it.next();
-                    JSONObject tags = new JSONObject();
-                    Element source = XliffUtils.toXliff("source", m.getSource(), tags);
-                    source.setAttribute("xml:lang", srcLang);
-                    Element target = XliffUtils.toXliff("target", m.getTarget(), tags);
-                    target.setAttribute("xml:lang", tgtLang);
-                    JSONObject obj = new JSONObject();
-                    obj.put("dataRef", tags);
-                    int similarity = m.getSimilarity() - tagDifferences(original, source) - penalization;
-                    insertMatch(file, unit, segment, memoryName, Constants.TM, similarity, source, target, obj);
-                    if (similarity == 100 && originalTarget.getContent().isEmpty() && !updated) {
-                        updateTarget(file, unit, segment, target, XliffUtils.pureText(target), false);
-                        updated = true;
-                    }
-                    conn.commit();
-                }
-                if (!matches.isEmpty()) {
-                    count++;
+                JSONObject json = new JSONObject();
+                json.put("file", file);
+                json.put("unit", unit);
+                json.put("segment", segment);
+                json.put("pure", pure);
+                array.put(json);
+                if (array.length() == 250) {
+                    params.put("segments", array);
+                    JSONArray translations = engine.batchTranslate(params);
+                    count += storeMatches(translations, memoryName, penalization);
+                    array = new JSONArray();
                 }
             }
+            params.put("segments", array);
+            JSONArray translations = engine.batchTranslate(params);
+            count += storeMatches(translations, memoryName, penalization);
         }
         MemoriesHandler.closeMemory(memory);
+        return count;
+    }
+
+    private int storeMatches(JSONArray translations, String memoryName, int penalization)
+            throws SAXException, IOException, ParserConfigurationException, SQLException {
+        int count = 0;
+        for (int i = 0; i < translations.length(); i++) {
+            JSONObject json = translations.getJSONObject(i);
+            JSONArray matches = json.getJSONArray("matches");
+            if (matches.length() > 0) {
+                String file = json.getString("file");
+                String unit = json.getString("unit");
+                String segment = json.getString("segment");
+
+                getSegment.setString(1, file);
+                getSegment.setString(2, unit);
+                getSegment.setString(3, segment);
+                try (ResultSet rs = getSegment.executeQuery()) {
+                    while (rs.next()) {
+                        String src = TMUtils.getString(rs.getNCharacterStream(1));
+                        String tgt = TMUtils.getString(rs.getNCharacterStream(2));
+                        Element original = XliffUtils.buildElement(src);
+                        if (tgt == null || tgt.isEmpty()) {
+                            tgt = "<target xml:lang=\"" + tgtLang + "\"/>";
+                        }
+                        Element originalTarget = XliffUtils.buildElement(tgt);
+                        boolean updated = false;
+                        for (int j = 0; j < matches.length(); j++) {
+                            Match m = new Match(matches.getJSONObject(j));
+                            JSONObject tags = new JSONObject();
+                            Element source = XliffUtils.toXliff("source", m.getSource(), tags);
+                            source.setAttribute("xml:lang", srcLang);
+                            Element target = XliffUtils.toXliff("target", m.getTarget(), tags);
+                            target.setAttribute("xml:lang", tgtLang);
+                            JSONObject obj = new JSONObject();
+                            obj.put("dataRef", tags);
+                            int similarity = m.getSimilarity() - tagDifferences(original, source) - penalization;
+                            insertMatch(file, unit, segment, memoryName, Constants.TM, similarity, source, target, obj);
+                            if (similarity == 100 && originalTarget.getContent().isEmpty() && !updated) {
+                                updateTarget(file, unit, segment, target, XliffUtils.pureText(target), false);
+                                updated = true;
+                            }
+                        }
+                    }
+                }
+                conn.commit();
+                count++;
+            }
+        }
         return count;
     }
 
@@ -2292,8 +2327,7 @@ public class XliffStore {
                 String unit = rs.getString(2);
                 String segment = rs.getString(3);
                 String src = TMUtils.getString(rs.getNCharacterStream(4));
-
-                Element source = buildElement(src);
+                Element source = XliffUtils.buildElement(src);
                 Element target = new Element("target");
                 target.setAttribute("xml:lang", tgtLang);
                 if (source.hasAttribute("xml:space")) {
@@ -2319,7 +2353,7 @@ public class XliffStore {
                 String segment = rs.getString(3);
                 String src = TMUtils.getString(rs.getNCharacterStream(4));
 
-                Element source = buildElement(src);
+                Element source = XliffUtils.buildElement(src);
                 Element target = pseudoTranslate(source);
                 String pureTarget = XliffUtils.pureText(target);
 
@@ -2375,7 +2409,7 @@ public class XliffStore {
                 String segment = rs.getString(3);
                 String src = TMUtils.getString(rs.getNCharacterStream(4));
 
-                Element source = buildElement(src);
+                Element source = XliffUtils.buildElement(src);
                 Element target = new Element("target");
                 target.setAttribute("xml:lang", tgtLang);
                 if (source.hasAttribute("xml:space")) {
@@ -2403,38 +2437,34 @@ public class XliffStore {
             try (PreparedStatement updateSegment = conn
                     .prepareStatement("UPDATE segments SET state='final' WHERE file=? AND unitId=? AND segId=?")) {
 
-                try (PreparedStatement getSegment = conn.prepareStatement(
-                        "SELECT source, target, state, translate FROM segments WHERE file=? AND unitId=? AND segId=?")) {
+                while (rs.next()) {
+                    String file = rs.getString(1);
+                    String unit = rs.getString(2);
+                    String segment = rs.getString(3);
 
-                    while (rs.next()) {
-                        String file = rs.getString(1);
-                        String unit = rs.getString(2);
-                        String segment = rs.getString(3);
+                    updateSegment.setString(1, file);
+                    updateSegment.setString(2, unit);
+                    updateSegment.setString(3, segment);
+                    updateSegment.executeUpdate();
 
-                        updateSegment.setString(1, file);
-                        updateSegment.setString(2, unit);
-                        updateSegment.setString(3, segment);
-                        updateSegment.executeUpdate();
+                    getSegment.setString(1, file);
+                    getSegment.setString(2, unit);
+                    getSegment.setString(3, segment);
 
-                        getSegment.setString(1, file);
-                        getSegment.setString(2, unit);
-                        getSegment.setString(3, segment);
-
-                        try (ResultSet rs2 = getSegment.executeQuery()) {
-                            while (rs2.next()) {
-                                Element source = buildElement(TMUtils.getString(rs2.getNCharacterStream(1)));
-                                Element target = buildElement(TMUtils.getString(rs2.getNCharacterStream(2)));
-                                Map<String, String> tags = getTags(source);
-                                StringBuilder key = new StringBuilder();
-                                key.append(xliffFile.hashCode());
-                                key.append('-');
-                                key.append(file);
-                                key.append('-');
-                                key.append(unit);
-                                key.append('-');
-                                key.append(segment);
-                                engine.storeTu(XliffUtils.toTu(key.toString(), source, target, tags));
-                            }
+                    try (ResultSet rs2 = getSegment.executeQuery()) {
+                        while (rs2.next()) {
+                            Element source = XliffUtils.buildElement(TMUtils.getString(rs2.getNCharacterStream(1)));
+                            Element target = XliffUtils.buildElement(TMUtils.getString(rs2.getNCharacterStream(2)));
+                            Map<String, String> tags = getTags(source);
+                            StringBuilder key = new StringBuilder();
+                            key.append(xliffFile.hashCode());
+                            key.append('-');
+                            key.append(file);
+                            key.append('-');
+                            key.append(unit);
+                            key.append('-');
+                            key.append(segment);
+                            engine.storeTu(XliffUtils.toTu(key.toString(), source, target, tags));
                         }
                     }
                 }
@@ -2460,9 +2490,9 @@ public class XliffStore {
                     perfectMatches.setString(3, segment);
                     try (ResultSet rs2 = perfectMatches.executeQuery()) {
                         while (rs2.next()) {
-                            Element source = buildElement(src);
+                            Element source = XliffUtils.buildElement(src);
                             String tgt = TMUtils.getString(rs2.getNCharacterStream(1));
-                            Element target = buildElement(tgt);
+                            Element target = XliffUtils.buildElement(tgt);
                             target.setAttribute("xml:lang", tgtLang);
                             if (source.hasAttribute("xml:space")) {
                                 target.setAttribute("xml:space", source.getAttributeValue("xml:space"));
@@ -2515,7 +2545,7 @@ public class XliffStore {
                 String segment = rs.getString(3);
                 String tgt = TMUtils.getString(rs.getNCharacterStream(4));
 
-                Element target = buildElement(tgt);
+                Element target = XliffUtils.buildElement(tgt);
                 target = replaceText(target, searchText, replaceText, isRegExp);
                 String pureTarget = XliffUtils.pureText(target);
                 updateTarget(file, unit, segment, target, pureTarget, false);
@@ -2560,7 +2590,7 @@ public class XliffStore {
                 String segment = rs.getString(3);
                 String sourceText = TMUtils.getString(rs.getNCharacterStream(4));
 
-                Element source = buildElement("<source>" + XMLUtils.cleanText(sourceText) + "</source>");
+                Element source = XliffUtils.buildElement("<source>" + XMLUtils.cleanText(sourceText) + "</source>");
 
                 JSONObject tagsData = new JSONObject();
                 List<JSONObject> translations = translator.translate(sourceText);
@@ -2570,7 +2600,7 @@ public class XliffStore {
                     String origin = translation.getString("key");
                     source.setAttribute("xml:lang", translation.getString("srcLang"));
                     String targetText = "<target>" + XMLUtils.cleanText(translation.getString("target")) + "</target>";
-                    Element target = buildElement(targetText);
+                    Element target = XliffUtils.buildElement(targetText);
                     target.setAttribute("xml:lang", translation.getString("tgtLang"));
                     insertMatch(file, unit, segment, origin, Constants.MT, 0, source, target, tagsData);
                 }
@@ -2595,9 +2625,9 @@ public class XliffStore {
                     mtMatches.setString(3, segment);
                     try (ResultSet rs2 = mtMatches.executeQuery()) {
                         while (rs2.next()) {
-                            Element source = buildElement(src);
+                            Element source = XliffUtils.buildElement(src);
                             String tgt = TMUtils.getString(rs2.getNCharacterStream(1));
-                            Element target = buildElement(tgt);
+                            Element target = XliffUtils.buildElement(tgt);
                             target.setAttribute("xml:lang", tgtLang);
                             if (source.hasAttribute("xml:space")) {
                                 target.setAttribute("xml:space", source.getAttributeValue("xml:space"));
@@ -2859,7 +2889,7 @@ public class XliffStore {
             sql = "SELECT file, unitId, segId, source FROM segments WHERE type='S' ORDER BY source, file, unitId, segId";
             try (ResultSet rs = stmt.executeQuery(sql)) {
                 while (rs.next()) {
-                    Element source = buildElement(TMUtils.getString(rs.getNCharacterStream(4)));
+                    Element source = XliffUtils.buildElement(TMUtils.getString(rs.getNCharacterStream(4)));
                     if (source.equals(currentSource)) {
                         lockStmt.setString(1, rs.getString(1));
                         lockStmt.setString(2, rs.getString(2));
@@ -2956,9 +2986,9 @@ public class XliffStore {
                     continue;
                 }
                 String sourceText = TMUtils.getString(rs.getNCharacterStream(5));
-                Element source = buildElement(sourceText);
+                Element source = XliffUtils.buildElement(sourceText);
                 String targetText = TMUtils.getString(rs.getNCharacterStream(6));
-                Element target = buildElement(targetText);
+                Element target = XliffUtils.buildElement(targetText);
 
                 List<String> sourceTags = tagsList(source);
                 List<String> targetTags = tagsList(target);
@@ -3095,8 +3125,8 @@ public class XliffStore {
                     String segState = rs.getString(3);
                     boolean segPreserve = "Y".equals(rs.getString(4));
                     boolean locked = "N".equals(rs.getString(5));
-                    Element source = buildElement(src);
-                    Element target = buildElement(tgt);
+                    Element source = XliffUtils.buildElement(src);
+                    Element target = XliffUtils.buildElement(tgt);
                     String box = SVG_BLANK;
                     String border = "grey";
                     if (segState.equals("translated")) {
@@ -3580,7 +3610,7 @@ public class XliffStore {
             target.setAttribute("xml:lang", tgtLang);
             return target;
         }
-        return buildElement(tgt);
+        return XliffUtils.buildElement(tgt);
     }
 
     private String getState(String file, String unit, String segment) throws SQLException {

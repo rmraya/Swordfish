@@ -33,9 +33,9 @@ import org.json.JSONObject;
 public class MTUtils {
 
     private MTUtils() {
-	// empty for security
+        // empty for security
     }
-        
+
     private static String[] azureSrcLanguages = { "de", "hi", "pt", "ty", "fil", "lt", "hr", "lv", "ht", "mww",
             "hu", "zh-Hans", "zh-Hant", "uk", "mg", "id", "mi", "ur", "ml", "af", "mr", "ms", "el", "mt",
             "en", "is", "it", "otq", "es", "et", "ar", "pt-pt", "tlh-Latn", "vi", "nb", "ja", "fa", "ro",
@@ -118,9 +118,11 @@ public class MTUtils {
             "tr-uk", "uk-bg", "uk-cs", "uk-de", "uk-en", "uk-es", "uk-fr", "uk-it", "uk-pl", "uk-ro",
             "uk-ru", "uk-sr", "uk-tr" };
 
-    private static String[] deepLsrcLang = { "de", "en", "fr", "it", "ja", "es", "nl", "pl", "pt", "ru", "zh" };
+    private static String[] deepLsrcLang = { "bg", "cs", "da", "de", "el", "en", "es", "et", "fi", "fr", "hu", "it",
+            "ja", "lt", "lv", "nl", "pl", "pt", "ro", "ru", "sk", "sl", "sv", "zh" };
 
-    private static String[] deepLtgtLang = { "de", "en-GB", "en-US", "fr", "it", "ja", "es", "nl", "pl", "pt", "pt-BR", "ru",
+    private static String[] deepLtgtLang = { "bg", "cs", "da", "de", "el", "en-GB", "en-US", "es", "et", "fi", "fr",
+            "hu", "it", "ja", "lt", "lv", "nl", "pl", "pt-BR", "pt-PT", "ro", "ru", "sk", "sl", "sv",
             "zh" };
 
     public static JSONObject getMTLanguages() throws IOException {

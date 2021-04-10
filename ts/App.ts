@@ -56,6 +56,8 @@ class Swordfish {
     static addNoteWindow: BrowserWindow;
     static updatesWindow: BrowserWindow;
     static gettingStartedWindow: BrowserWindow;
+    static serverSettingsWindow: BrowserWindow;
+    static browseDatabasesWindow: BrowserWindow;
 
     javapath: string = Swordfish.path.join(app.getAppPath(), 'bin', 'java');
 
@@ -129,6 +131,8 @@ class Swordfish {
     static glossaryParam: string;
     static messageParam: any;
     static projectParam: string;
+    static remoteTmParams: any;
+    static typeParam: string;
 
     static htmlContent: string;
     static htmlTitle: string;
@@ -185,7 +189,7 @@ class Swordfish {
         this.ls.on('close', (code: number) => {
             if (code === 0) {
                 let data: string = JSON.stringify({ command: 'stop' });
-                var options = {
+                let options = {
                     hostname: '127.0.0.1',
                     port: 8070,
                     path: '/',
@@ -194,7 +198,7 @@ class Swordfish {
                         'Content-Length': Buffer.byteLength(data)
                     }
                 };
-                var req: ClientRequest = request(options);
+                let req: ClientRequest = request(options);
                 req.write(data);
                 req.end();
                 console.log('Restarting server');
@@ -275,6 +279,30 @@ class Swordfish {
         });
         ipcMain.on('get-theme', (event: IpcMainEvent, arg: any) => {
             event.sender.send('set-theme', Swordfish.currentCss);
+        });
+        ipcMain.on('serverSettings-height', (event: IpcMainEvent, arg: any) => {
+            Swordfish.setHeight(Swordfish.serverSettingsWindow, arg);
+        });
+        ipcMain.on('close-serverSettings', () => {
+            Swordfish.destroyWindow(Swordfish.serverSettingsWindow);
+        });
+        ipcMain.on('browse-server', (event: IpcMainEvent, arg: any) => {
+            Swordfish.connectToServer(arg);
+        });
+        ipcMain.on('browseDatabases-height', (event: IpcMainEvent, arg: any) => {
+            Swordfish.setHeight(Swordfish.browseDatabasesWindow, arg);
+        });
+        ipcMain.on('get-databases', (event: IpcMainEvent, arg: any) => {
+            event.sender.send('set-databases', Swordfish.remoteTmParams);
+        });
+        ipcMain.on('show-server-settings', (event: IpcMainEvent, arg: any) => {
+            Swordfish.showServerSettings(arg.type);
+        });
+        ipcMain.on('close-browseServer', () => {
+            Swordfish.destroyWindow(Swordfish.browseDatabasesWindow);
+        });
+        ipcMain.on('add-databases', (event: IpcMainEvent, arg: any) => {
+            Swordfish.addDatabases(arg);
         });
         ipcMain.on('licenses-height', (event: IpcMainEvent, arg: any) => {
             Swordfish.setHeight(Swordfish.licensesWindow, arg);
@@ -558,6 +586,7 @@ class Swordfish {
         ipcMain.on('save-source', (event: IpcMainEvent, arg: any) => {
             Swordfish.saveSource(arg);
         });
+
         ipcMain.on('get-matches', (event: IpcMainEvent, arg: any) => {
             Swordfish.getMatches(arg);
         });
@@ -883,10 +912,10 @@ class Swordfish {
             }
             menu.popup();
         });
-        var fileMenu: Menu = Menu.buildFromTemplate([
+        let fileMenu: Menu = Menu.buildFromTemplate([
             { label: 'Open...', accelerator: 'CmdOrCtrl+O', click: () => { Swordfish.addFile(); } }
         ]);
-        var tagsMenu: Menu = Menu.buildFromTemplate([
+        let tagsMenu: Menu = Menu.buildFromTemplate([
             { label: 'Insert Tag "1"', accelerator: 'CmdOrCtrl+1', click: () => { Swordfish.mainWindow.webContents.send('insert-tag', { tag: 1 }); } },
             { label: 'Insert Tag "2"', accelerator: 'CmdOrCtrl+2', click: () => { Swordfish.mainWindow.webContents.send('insert-tag', { tag: 2 }); } },
             { label: 'Insert Tag "3"', accelerator: 'CmdOrCtrl+3', click: () => { Swordfish.mainWindow.webContents.send('insert-tag', { tag: 3 }); } },
@@ -898,7 +927,7 @@ class Swordfish {
             { label: 'Insert Tag "8"', accelerator: 'CmdOrCtrl+9', click: () => { Swordfish.mainWindow.webContents.send('insert-tag', { tag: 9 }); } },
             { label: 'Insert Tag "10"', accelerator: 'CmdOrCtrl+0', click: () => { Swordfish.mainWindow.webContents.send('insert-tag', { tag: 10 }); } }
         ]);
-        var editMenu: Menu = Menu.buildFromTemplate([
+        let editMenu: Menu = Menu.buildFromTemplate([
             { label: 'Undo', accelerator: 'CmdOrCtrl+Z', click: () => { Swordfish.mainWindow.webContents.undo(); } },
             new MenuItem({ type: 'separator' }),
             { label: 'Cut', accelerator: 'CmdOrCtrl+X', click: () => { Swordfish.mainWindow.webContents.cut(); } },
@@ -937,7 +966,7 @@ class Swordfish {
             nextMT = 'Ctrl+Alt+Right';
             previousMT = 'Ctrl+Alt+Left';
         }
-        var viewMenu: Menu = Menu.buildFromTemplate([
+        let viewMenu: Menu = Menu.buildFromTemplate([
             { label: 'Projects', accelerator: 'F6', click: () => { Swordfish.viewProjects(); } },
             { label: 'Memories', accelerator: 'F7', click: () => { Swordfish.viewMemories(); } },
             { label: 'Glossaries', accelerator: 'F8', click: () => { Swordfish.viewGlossaries(); } },
@@ -963,7 +992,7 @@ class Swordfish {
             new MenuItem({ label: 'Toggle Full Screen', role: 'togglefullscreen' }),
             new MenuItem({ label: 'Toggle Development Tools', accelerator: 'F12', role: 'toggleDevTools' }),
         ]);
-        var projectsMenu: Menu = Menu.buildFromTemplate([
+        let projectsMenu: Menu = Menu.buildFromTemplate([
             { label: 'New Project', accelerator: 'CmdOrCtrl+N', click: () => { Swordfish.addProject(); } },
             { label: 'Translate Projects', click: () => { Swordfish.translateProjects(); } },
             { label: 'Export Translations', accelerator: 'CmdOrCtrl+Alt+S', click: () => { Swordfish.mainWindow.webContents.send('export-translations'); } },
@@ -977,18 +1006,22 @@ class Swordfish {
             { label: 'Import XLIFF File as Project', click: () => { Swordfish.showImportXliff(); } },
             { label: 'Export Project as XLIFF File', click: () => { Swordfish.mainWindow.webContents.send('export-project'); } }
         ]);
-        var memoriesMenu: Menu = Menu.buildFromTemplate([
+        let memoriesMenu: Menu = Menu.buildFromTemplate([
             { label: 'Add Memory', click: () => { Swordfish.showAddMemory(); } },
             { label: 'Remove Memory', click: () => { Swordfish.removeMemory(); } },
+            new MenuItem({ type: 'separator' }),
+            { label: 'Add RemoteTM Memory', click: () => { Swordfish.showServerSettings('memory'); } },
             new MenuItem({ type: 'separator' }),
             { label: 'Concordance Search', accelerator: 'CmdOrCtrl+Y', click: () => { Swordfish.mainWindow.webContents.send('concordance-requested'); } },
             new MenuItem({ type: 'separator' }),
             { label: 'Import TMX File', click: () => { Swordfish.mainWindow.webContents.send('import-tmx'); } },
             { label: 'Export Memory as TMX File', click: () => { Swordfish.mainWindow.webContents.send('export-tmx'); } }
         ]);
-        var glossariesMenu: Menu = Menu.buildFromTemplate([
+        let glossariesMenu: Menu = Menu.buildFromTemplate([
             { label: 'Add Glossary', click: () => { Swordfish.showAddGlossary(); } },
             { label: 'Remove Glossary', click: () => { Swordfish.removeGlossary(); } },
+            new MenuItem({ type: 'separator' }),
+            { label: 'Add RemoteTM Glossary', click: () => { Swordfish.showServerSettings('glossary'); } },
             new MenuItem({ type: 'separator' }),
             { label: 'Search Term in Glossary', accelerator: 'CmdOrCtrl+D', click: () => { Swordfish.mainWindow.webContents.send('term-search-requested'); } },
             { label: 'Add Term to Glossary', accelerator: 'CmdOrCtrl+B', click: () => { Swordfish.mainWindow.webContents.send('add-term-requested'); } },
@@ -996,7 +1029,7 @@ class Swordfish {
             { label: 'Import Glossary', click: () => { Swordfish.mainWindow.webContents.send('import-glossary'); } },
             { label: 'Export Glossary', click: () => { Swordfish.mainWindow.webContents.send('export-glossary'); } }
         ]);
-        var helpMenu: Menu = Menu.buildFromTemplate([
+        let helpMenu: Menu = Menu.buildFromTemplate([
             { label: 'Swordfish User Guide', accelerator: 'F1', click: () => { this.showHelp(); } },
             { label: 'Getting Started Guide', click: () => { Swordfish.showGettingStarted(); } },
             new MenuItem({ type: 'separator' }),
@@ -1012,7 +1045,7 @@ class Swordfish {
             nextUntranslatedKey = 'Ctrl+Alt+Down';
             nextUnconfirmedKey = 'Ctrl+Shift+Down';
         }
-        var termsMenu: Menu = Menu.buildFromTemplate([
+        let termsMenu: Menu = Menu.buildFromTemplate([
             { label: 'Insert  Term "1"', accelerator: 'CmdOrCtrl+Alt+1', click: () => { Swordfish.mainWindow.webContents.send('insert-tem', { term: 1 }); } },
             { label: 'Insert  Term "2"', accelerator: 'CmdOrCtrl+Alt+2', click: () => { Swordfish.mainWindow.webContents.send('insert-tem', { term: 2 }); } },
             { label: 'Insert  Term "3"', accelerator: 'CmdOrCtrl+Alt+3', click: () => { Swordfish.mainWindow.webContents.send('insert-tem', { term: 3 }); } },
@@ -1024,7 +1057,7 @@ class Swordfish {
             { label: 'Insert  Term "8"', accelerator: 'CmdOrCtrl+Alt+9', click: () => { Swordfish.mainWindow.webContents.send('insert-tem', { term: 9 }); } },
             { label: 'Insert  Term "10"', accelerator: 'CmdOrCtrl+Alt+0', click: () => { Swordfish.mainWindow.webContents.send('insert-tem', { term: 10 }); } }
         ]);
-        var tasksMenu: Menu = Menu.buildFromTemplate([
+        let tasksMenu: Menu = Menu.buildFromTemplate([
             { label: 'Confirm Translation', accelerator: 'CmdOrCtrl+E', click: () => { Swordfish.mainWindow.webContents.send('save-edit', { confirm: true, next: 'none' }); } },
             { label: 'Unconfirm Translation', accelerator: 'CmdOrCtrl+Shift+E', click: () => { Swordfish.mainWindow.webContents.send('save-edit', { confirm: false, next: 'none', unconfirm: true }); } },
             { label: 'Confirm and go to Next Untranslated', accelerator: nextUntranslatedKey, click: () => { Swordfish.mainWindow.webContents.send('save-edit', { confirm: true, next: 'untranslated' }); } },
@@ -1065,11 +1098,11 @@ class Swordfish {
             new MenuItem({ label: 'Insert Term...', submenu: termsMenu }),
             { label: 'Get Terms for All Segments', click: () => { Swordfish.mainWindow.webContents.send('apply-terminology-all'); } }
         ]);
-        var qaMenu: Menu = Menu.buildFromTemplate([
+        let qaMenu: Menu = Menu.buildFromTemplate([
             { label: 'Check Inline Tags', accelerator: 'F9', click: () => { Swordfish.mainWindow.webContents.send('tags-analysis'); } },
             { label: 'Check Initial/Trailing Spaces', accelerator: 'F10', click: () => { Swordfish.mainWindow.webContents.send('spaces-analysis'); } }
         ]);
-        var template: MenuItem[] = [
+        let template: MenuItem[] = [
             new MenuItem({ label: '&File', role: 'fileMenu', submenu: fileMenu }),
             new MenuItem({ label: '&Edit', role: 'editMenu', submenu: editMenu }),
             new MenuItem({ label: '&View', role: 'viewMenu', submenu: viewMenu }),
@@ -1081,7 +1114,7 @@ class Swordfish {
             new MenuItem({ label: '&Help', role: 'help', submenu: helpMenu })
         ];
         if (process.platform === 'darwin') {
-            var appleMenu: Menu = Menu.buildFromTemplate([
+            let appleMenu: Menu = Menu.buildFromTemplate([
                 new MenuItem({ label: 'About...', click: () => { this.showAbout(); } }),
                 new MenuItem({
                     label: 'Preferences...', submenu: [
@@ -1099,7 +1132,7 @@ class Swordfish {
             ]);
             template.unshift(new MenuItem({ label: 'Swordfish', role: 'appMenu', submenu: appleMenu }));
         } else {
-            var help: MenuItem = template.pop();
+            let help: MenuItem = template.pop();
             template.push(new MenuItem({
                 label: '&Settings', submenu: [
                     { label: 'Preferences', click: () => { this.showSettings(); } }
@@ -1133,7 +1166,7 @@ class Swordfish {
         let defaultsFile: string = Swordfish.path.join(app.getPath('appData'), app.name, 'defaults.json');
         if (existsSync(defaultsFile)) {
             try {
-                var data: Buffer = readFileSync(defaultsFile);
+                let data: Buffer = readFileSync(defaultsFile);
                 Swordfish.currentDefaults = JSON.parse(data.toString());
             } catch (err) {
                 console.log(err);
@@ -1158,7 +1191,7 @@ class Swordfish {
         let preferencesFile = Swordfish.path.join(app.getPath('appData'), app.name, 'preferences.json');
         if (existsSync(preferencesFile)) {
             try {
-                var data: Buffer = readFileSync(preferencesFile);
+                let data: Buffer = readFileSync(preferencesFile);
                 Swordfish.currentPreferences = JSON.parse(data.toString());
             } catch (err) {
                 console.log(err);
@@ -1251,7 +1284,7 @@ class Swordfish {
         Swordfish.mainWindow.webContents.send('close-tab');
     }
 
-    static addProject() {
+    static addProject(): void {
         this.addProjectWindow = new BrowserWindow({
             parent: this.mainWindow,
             width: 900,
@@ -1331,7 +1364,7 @@ class Swordfish {
         Swordfish.mainWindow.webContents.send('set-status', 'Exporting translations');
         Swordfish.currentStatus = data;
         let processId: string = data.process;
-        var intervalObject = setInterval(() => {
+        let intervalObject = setInterval(() => {
             if (Swordfish.currentStatus.progress) {
                 if (Swordfish.currentStatus.progress === Swordfish.COMPLETED) {
                     Swordfish.mainWindow.webContents.send('end-waiting');
@@ -1394,7 +1427,8 @@ class Swordfish {
         }
     }
 
-    static addFile() {
+
+    static addFile(): void {
         let anyFile: string[] = [];
         if (process.platform === 'linux') {
             anyFile = ['*'];
@@ -1487,7 +1521,7 @@ class Swordfish {
                 }
                 Swordfish.currentStatus = data;
                 let processId: string = data.process;
-                var intervalObject = setInterval(() => {
+                let intervalObject = setInterval(() => {
                     if (Swordfish.currentStatus.progress) {
                         if (Swordfish.currentStatus.progress === Swordfish.COMPLETED) {
                             Swordfish.mainWindow.webContents.send('end-waiting');
@@ -1676,7 +1710,92 @@ class Swordfish {
         Swordfish.mainWindow.webContents.send('view-memories');
     }
 
-    static showAddMemory() {
+    static showServerSettings(type: string): void {
+        this.serverSettingsWindow = new BrowserWindow({
+            parent: this.mainWindow,
+            width: 450,
+            minimizable: false,
+            maximizable: false,
+            resizable: false,
+            useContentSize: true,
+            show: false,
+            icon: this.iconPath,
+            webPreferences: {
+                nodeIntegration: true,
+                contextIsolation: false
+            }
+        });
+        this.typeParam = type;
+        this.serverSettingsWindow.setMenu(null);
+        this.serverSettingsWindow.loadURL('file://' + this.path.join(app.getAppPath(), 'html', 'serverSettings.html'));
+        this.serverSettingsWindow.once('ready-to-show', () => {
+            this.serverSettingsWindow.show();
+        });
+    }
+
+    static showBrowseDatabases() {
+        this.browseDatabasesWindow = new BrowserWindow({
+            parent: this.mainWindow,
+            width: 650,
+            minimizable: false,
+            maximizable: false,
+            resizable: false,
+            useContentSize: true,
+            show: false,
+            icon: this.iconPath,
+            webPreferences: {
+                nodeIntegration: true,
+                contextIsolation: false
+            }
+        });
+        this.browseDatabasesWindow.setMenu(null);
+        this.browseDatabasesWindow.loadURL('file://' + this.path.join(app.getAppPath(), 'html', 'browseDatabases.html'));
+        this.browseDatabasesWindow.once('ready-to-show', () => {
+            this.browseDatabasesWindow.show();
+        });
+    }
+
+    static connectToServer(args: any): void {
+        Swordfish.sendRequest('/services/remoteDatabases', args,
+            (data: any) => {
+                if (data.status === Swordfish.SUCCESS) {
+                    this.remoteTmParams = {};
+                    this.remoteTmParams.server = args.server;
+                    this.remoteTmParams.user = args.user;
+                    this.remoteTmParams.password = args.password;
+                    this.remoteTmParams.memories = data.memories;
+                    this.remoteTmParams.type = this.typeParam;
+                    this.showBrowseDatabases();
+                } else {
+                    Swordfish.showMessage({ type: 'error', message: data.reason });
+                }
+            },
+            (reason: string) => {
+                Swordfish.showMessage({ type: 'error', message: reason });
+            }
+        );
+    }
+
+    static addDatabases(args: any): void {
+        Swordfish.sendRequest('/services/addDatabases', args,
+            (data: any) => {
+                if (data.status === Swordfish.SUCCESS) {
+                    if (args.type === 'memory') {
+                        Swordfish.mainWindow.webContents.send('request-memories');
+                    } else {
+                        Swordfish.mainWindow.webContents.send('request-glossaries');
+                    }
+                } else {
+                    Swordfish.showMessage({ type: 'error', message: data.reason });
+                }
+            },
+            (reason: string) => {
+                Swordfish.showMessage({ type: 'error', message: reason });
+            }
+        );
+    }
+
+    static showAddMemory(): void {
         this.addMemoryWindow = new BrowserWindow({
             parent: this.mainWindow,
             width: 450,
@@ -1703,8 +1822,8 @@ class Swordfish {
     }
 
     static sendRequest(url: string, json: any, success: any, error: any) {
-        var postData: string = JSON.stringify(json);
-        var options = {
+        let postData: string = JSON.stringify(json);
+        let options = {
             hostname: '127.0.0.1',
             port: 8070,
             path: url,
@@ -1714,14 +1833,14 @@ class Swordfish {
             }
         };
         // Make a request
-        var req: ClientRequest = request(options);
+        let req: ClientRequest = request(options);
         req.on('response',
             (res: any) => {
                 res.setEncoding('utf-8');
                 if (res.statusCode != 200) {
                     error('sendRequest() error: ' + res.statusMessage);
                 }
-                var rawData: string = '';
+                let rawData: string = '';
                 res.on('data', (chunk: string) => {
                     rawData += chunk;
                 });
@@ -1773,8 +1892,8 @@ class Swordfish {
     }
 
     static openLicense(type: string) {
-        var licenseFile = '';
-        var title = '';
+        let licenseFile = '';
+        let title = '';
         switch (type) {
             case 'Swordfish':
                 licenseFile = 'file://' + this.path.join(app.getAppPath(), 'html', 'licenses', 'license.txt');
@@ -1814,7 +1933,7 @@ class Swordfish {
                 Swordfish.showMessage({ type: 'error', message: 'Unknown license' });
                 return;
         }
-        var licenseWindow = new BrowserWindow({
+        let licenseWindow = new BrowserWindow({
             parent: this.licensesWindow,
             width: 680,
             height: 400,
@@ -2086,7 +2205,7 @@ class Swordfish {
         });
     }
 
-    static getDefaultLanguages() {
+    static getDefaultLanguages(): void {
         this.defaultLangsWindow = new BrowserWindow({
             parent: this.mainWindow,
             width: 600,
@@ -2271,7 +2390,7 @@ class Swordfish {
                 }
                 Swordfish.currentStatus = data;
                 let processId: string = data.process;
-                var intervalObject = setInterval(() => {
+                let intervalObject = setInterval(() => {
                     if (Swordfish.currentStatus.status === Swordfish.SUCCESS) {
                         if (Swordfish.currentStatus.progress === Swordfish.COMPLETED) {
                             Swordfish.mainWindow.webContents.send('end-waiting');
@@ -2374,7 +2493,7 @@ class Swordfish {
                         }
                         Swordfish.currentStatus = data;
                         let processId: string = data.process;
-                        var intervalObject = setInterval(() => {
+                        let intervalObject = setInterval(() => {
                             if (Swordfish.currentStatus.status === Swordfish.SUCCESS) {
                                 if (Swordfish.currentStatus.progress === Swordfish.COMPLETED) {
                                     Swordfish.mainWindow.webContents.send('end-waiting');
@@ -2417,7 +2536,7 @@ class Swordfish {
                         }
                         Swordfish.currentStatus = data;
                         let processId: string = data.process;
-                        var intervalObject = setInterval(() => {
+                        let intervalObject = setInterval(() => {
                             if (Swordfish.currentStatus.status === Swordfish.SUCCESS) {
                                 if (Swordfish.currentStatus.progress === Swordfish.COMPLETED) {
                                     Swordfish.mainWindow.webContents.send('end-waiting');
@@ -2464,7 +2583,7 @@ class Swordfish {
                             }
                             Swordfish.currentStatus = data;
                             let processId: string = data.process;
-                            var intervalObject = setInterval(() => {
+                            let intervalObject = setInterval(() => {
                                 if (Swordfish.currentStatus.status === Swordfish.SUCCESS) {
                                     if (Swordfish.currentStatus.progress === Swordfish.COMPLETED) {
                                         Swordfish.mainWindow.webContents.send('end-waiting');
@@ -2492,10 +2611,7 @@ class Swordfish {
                 console.log(error);
             });
         } else {
-            // TODO
-            for (let i = 0; i < memories.length; i++) {
-                console.log(JSON.stringify(memories[i]));
-            }
+            Swordfish.showMessage({ type: 'warning', message: 'Select one memory' });
         }
     }
 
@@ -2518,7 +2634,7 @@ class Swordfish {
                             }
                             Swordfish.currentStatus = data;
                             let processId: string = data.process;
-                            var intervalObject = setInterval(() => {
+                            let intervalObject = setInterval(() => {
                                 if (Swordfish.currentStatus.status === Swordfish.SUCCESS) {
                                     if (Swordfish.currentStatus.progress === Swordfish.COMPLETED) {
                                         Swordfish.mainWindow.webContents.send('end-waiting');
@@ -2546,10 +2662,7 @@ class Swordfish {
                 console.log(error);
             });
         } else {
-            // TODO
-            for (let i = 0; i < glossaries.length; i++) {
-                console.log(JSON.stringify(glossaries[i]));
-            }
+            Swordfish.showMessage({ type: 'warning', message: 'Select one glossary' });
         }
     }
 
@@ -2945,6 +3058,10 @@ class Swordfish {
                     break;
                 case 'addNote': parent = Swordfish.addNoteWindow;
                     break;
+                case 'serverSettings': parent = Swordfish.serverSettingsWindow;
+                    break;
+                case 'browseDatabases': parent = Swordfish.browseDatabasesWindow;
+                    break;
                 default: parent = Swordfish.mainWindow;
             }
         }
@@ -3033,7 +3150,7 @@ class Swordfish {
         Swordfish.mainWindow.webContents.send('set-status', 'Exporting project');
         Swordfish.currentStatus = data;
         let processId: string = data.process;
-        var intervalObject = setInterval(() => {
+        let intervalObject = setInterval(() => {
             if (Swordfish.currentStatus.progress) {
                 if (Swordfish.currentStatus.progress === Swordfish.COMPLETED) {
                     Swordfish.mainWindow.webContents.send('end-waiting');
@@ -3139,7 +3256,7 @@ class Swordfish {
                 }
                 Swordfish.currentStatus = data;
                 let processId: string = data.process;
-                var intervalObject = setInterval(() => {
+                let intervalObject = setInterval(() => {
                     if (Swordfish.currentStatus.progress) {
                         if (Swordfish.currentStatus.progress === Swordfish.COMPLETED) {
                             Swordfish.mainWindow.webContents.send('end-waiting');
@@ -3420,6 +3537,7 @@ class Swordfish {
     }
 
     static confirmAllTranslations(arg: any): void {
+
         dialog.showMessageBox(Swordfish.mainWindow, {
             type: 'question',
             message: 'Confirm all translations?',
@@ -3437,7 +3555,7 @@ class Swordfish {
                         }
                         Swordfish.currentStatus = data;
                         let processId: string = data.process;
-                        var intervalObject = setInterval(() => {
+                        let intervalObject = setInterval(() => {
                             if (Swordfish.currentStatus.progress) {
                                 if (Swordfish.currentStatus.progress === Swordfish.COMPLETED) {
                                     Swordfish.mainWindow.webContents.send('end-waiting');
@@ -3647,7 +3765,7 @@ class Swordfish {
                         }
                         Swordfish.currentStatus = data;
                         let processId: string = data.process;
-                        var intervalObject = setInterval(() => {
+                        let intervalObject = setInterval(() => {
                             if (Swordfish.currentStatus.progress) {
                                 if (Swordfish.currentStatus.progress === Swordfish.COMPLETED) {
                                     Swordfish.mainWindow.webContents.send('end-waiting');
@@ -3702,7 +3820,7 @@ class Swordfish {
                         }
                         Swordfish.currentStatus = data;
                         let processId: string = data.process;
-                        var intervalObject = setInterval(() => {
+                        let intervalObject = setInterval(() => {
                             if (Swordfish.currentStatus.progress) {
                                 if (Swordfish.currentStatus.progress === Swordfish.COMPLETED) {
                                     Swordfish.mainWindow.webContents.send('end-waiting');
@@ -3800,7 +3918,7 @@ class Swordfish {
                 }
                 Swordfish.currentStatus = data;
                 let processId: string = data.process;
-                var intervalObject = setInterval(() => {
+                let intervalObject = setInterval(() => {
                     if (Swordfish.currentStatus.status === Swordfish.SUCCESS) {
                         if (Swordfish.currentStatus.progress === Swordfish.COMPLETED) {
                             Swordfish.mainWindow.webContents.send('end-waiting');
@@ -4029,7 +4147,7 @@ class Swordfish {
                         }
                         Swordfish.currentStatus = data;
                         let processId: string = data.process;
-                        var intervalObject = setInterval(() => {
+                        let intervalObject = setInterval(() => {
                             if (Swordfish.currentStatus.progress) {
                                 if (Swordfish.currentStatus.progress === Swordfish.COMPLETED) {
                                     Swordfish.mainWindow.webContents.send('end-waiting');
@@ -4429,7 +4547,7 @@ class Swordfish {
         });
     }
 
-    static showGettingStarted() {
+    static showGettingStarted(): void {
         Swordfish.gettingStartedWindow = new BrowserWindow({
             parent: Swordfish.mainWindow,
             width: 750,

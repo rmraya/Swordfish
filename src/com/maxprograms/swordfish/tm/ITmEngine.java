@@ -28,6 +28,8 @@ import javax.xml.parsers.ParserConfigurationException;
 
 import com.maxprograms.xml.Element;
 
+import org.json.JSONArray;
+import org.json.JSONObject;
 import org.xml.sax.SAXException;
 
 public interface ITmEngine {
@@ -44,13 +46,13 @@ public interface ITmEngine {
 	public abstract void exportMemory(String tmxfile, Set<String> langs, String srcLang)
 			throws IOException, SAXException, ParserConfigurationException, SQLException;
 
-	public abstract Set<String> getAllClients() throws SQLException;
+	public abstract Set<String> getAllClients() throws SQLException, IOException;
 
-	public abstract Set<String> getAllLanguages() throws SQLException;
+	public abstract Set<String> getAllLanguages() throws SQLException, IOException;
 
-	public abstract Set<String> getAllProjects() throws SQLException;
+	public abstract Set<String> getAllProjects() throws SQLException, IOException;
 
-	public abstract Set<String> getAllSubjects() throws SQLException;
+	public abstract Set<String> getAllSubjects() throws SQLException, IOException;
 
 	public abstract List<Match> searchTranslation(String searchStr, String srcLang, String tgtLang, int similarity,
 			boolean caseSensitive) throws IOException, SAXException, ParserConfigurationException, SQLException;
@@ -63,7 +65,7 @@ public interface ITmEngine {
 
 	public abstract void storeTu(Element tu) throws IOException, SQLException;
 
-	public abstract void commit() throws SQLException;
+	public abstract void commit() throws SQLException, IOException;
 
 	public abstract Element getTu(String tuid)
 			throws IOException, SAXException, ParserConfigurationException, SQLException;
@@ -72,4 +74,7 @@ public interface ITmEngine {
 			throws IOException, SAXException, ParserConfigurationException, SQLException;
 
 	public abstract void deleteDatabase() throws IOException, SQLException;
+
+	public abstract JSONArray batchTranslate(JSONObject params)
+			throws IOException, SAXException, ParserConfigurationException, SQLException;
 }

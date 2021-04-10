@@ -53,6 +53,7 @@ import com.maxprograms.swordfish.models.Memory;
 import com.maxprograms.swordfish.tbx.Tbx2Tmx;
 import com.maxprograms.swordfish.tm.ITmEngine;
 import com.maxprograms.swordfish.tm.InternalDatabase;
+import com.maxprograms.swordfish.tm.RemoteDatabase;
 import com.maxprograms.xml.Element;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
@@ -279,11 +280,13 @@ public class GlossariesHandler implements HttpHandler {
 							openEngines.remove(mem.getId());
 							useCount.remove(mem.getId());
 						}
-						try {
-							File wfolder = new File(getWorkFolder(), mem.getId());
-							TmsServer.deleteFolder(wfolder.getAbsolutePath());
-						} catch (IOException ioe) {
-							logger.log(Level.WARNING, "Folder '" + mem.getId() + "' will be deleted on next start");
+						if (mem.getType().equals(Memory.LOCAL)) {
+							try {
+								File wfolder = new File(getWorkFolder(), mem.getId());
+								TmsServer.deleteFolder(wfolder.getAbsolutePath());
+							} catch (IOException ioe) {
+								logger.log(Level.WARNING, "Folder '" + mem.getId() + "' will be deleted on next start");
+							}
 						}
 						glossaries.remove(mem.getId());
 					}
@@ -331,7 +334,7 @@ public class GlossariesHandler implements HttpHandler {
 					loadGlossariesList();
 				}
 				Memory mem = glossaries.get(json.getString("glossary"));
-				openGlossary(mem.getId());
+				openGlossary(mem);
 				ITmEngine engine = openEngines.get(mem.getId());
 				File tmx = new File(json.getString("file"));
 				Set<String> langSet = Collections.synchronizedSortedSet(new TreeSet<>());
@@ -340,12 +343,14 @@ public class GlossariesHandler implements HttpHandler {
 					for (int i = 0; i < langs.length(); i++) {
 						langSet.add(langs.getString(i));
 					}
+				} else {
+					langSet = engine.getAllLanguages();
 				}
 				engine.exportMemory(tmx.getAbsolutePath(), langSet, json.getString("srcLang"));
 				closeGlossary(mem.getId());
 				JSONObject completed = new JSONObject();
-					completed.put(Constants.PROGRESS, Constants.COMPLETED);
-					openTasks.put(process, completed);
+				completed.put(Constants.PROGRESS, Constants.COMPLETED);
+				openTasks.put(process, completed);
 			} catch (IOException | JSONException | SAXException | ParserConfigurationException | SQLException e) {
 				logger.log(Level.ERROR, e.getMessage(), e);
 				JSONObject error = new JSONObject();
@@ -358,6 +363,10 @@ public class GlossariesHandler implements HttpHandler {
 	}
 
 	public static synchronized void openGlossary(String id) throws IOException, SQLException {
+		openGlossary(glossaries.get(id));
+	}
+
+	public static synchronized void openGlossary(Memory memory) throws IOException, SQLException {
 		if (glossaries == null) {
 			loadGlossariesList();
 		}
@@ -365,13 +374,15 @@ public class GlossariesHandler implements HttpHandler {
 			openEngines = new ConcurrentHashMap<>();
 			useCount = new ConcurrentHashMap<>();
 		}
-		if (openEngines.containsKey(id)) {
-			int count = useCount.get(id) + 1;
-			useCount.put(id, count);
+		if (openEngines.containsKey(memory.getId())) {
+			int count = useCount.get(memory.getId()) + 1;
+			useCount.put(memory.getId(), count);
 			return;
 		}
-		openEngines.put(id, new InternalDatabase(id, getWorkFolder()));
-		useCount.put(id, 1);
+		ITmEngine engine = memory.getType().equals(Memory.LOCAL) ? new InternalDatabase(memory.getId(), getWorkFolder())
+				: new RemoteDatabase(memory.getServer(), memory.getUser(), memory.getPassword(), memory.getId());
+		openEngines.put(memory.getId(), engine);
+		useCount.put(memory.getId(), 1);
 	}
 
 	public static ITmEngine getEngine(String id) throws IOException {
@@ -431,7 +442,7 @@ public class GlossariesHandler implements HttpHandler {
 		openTasks.put(process, obj);
 		new Thread(() -> {
 			try {
-				openGlossary(id);
+				openGlossary(glossaries.get(id));
 				File tempFile = null;
 				String tmxFile = glossFile.getAbsolutePath();
 				if (isTBX(glossFile)) {
@@ -534,7 +545,7 @@ public class GlossariesHandler implements HttpHandler {
 		}
 		try {
 			String glossary = json.getString("glossary");
-			openGlossary(glossary);
+			openGlossary(glossaries.get(glossary));
 			Element tu = new Element("tu");
 			Element srcTuv = new Element("tuv");
 			srcTuv.setAttribute("xml:lang", json.getString("srcLang"));
@@ -573,7 +584,7 @@ public class GlossariesHandler implements HttpHandler {
 		String glossary = json.getString("glossary");
 		try {
 			List<Element> matches = new Vector<>();
-			openGlossary(glossary);
+			openGlossary(glossaries.get(glossary));
 			matches.addAll(openEngines.get(glossary).searchAll(searchStr, srcLang, similarity, caseSensitive));
 			closeGlossary(glossary);
 			result.put("count", matches.size());
@@ -640,5 +651,13 @@ public class GlossariesHandler implements HttpHandler {
 			loadGlossariesList();
 		}
 		return glossaries.get(id).getName();
+	}
+
+	protected static void addGlossary(Memory memory) throws IOException {
+		if (glossaries == null) {
+			loadGlossariesList();
+		}
+		glossaries.put(memory.getId(), memory);
+		saveGlossariesList();
 	}
 }

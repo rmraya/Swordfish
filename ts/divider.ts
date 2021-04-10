@@ -84,11 +84,11 @@ class VerticalSplit {
     }
 
     dragEnd(ev: DragEvent) {
-        var leftWidth: number = this.left.clientWidth + ev.offsetX;
+        let leftWidth: number = this.left.clientWidth + ev.offsetX;
         if (leftWidth < 5) {
             leftWidth = 5;
         }
-        var rightWidth: number = this.currentSum - leftWidth;
+        let rightWidth: number = this.currentSum - leftWidth;
         this.left.style.width = leftWidth + 'px';
         this.right.style.width = rightWidth + 'px';
         this.weights = [leftWidth, rightWidth];
@@ -283,11 +283,11 @@ class HorizontalSplit {
     }
 
     dragEnd(ev: DragEvent) {
-        var topHeight: number = this.top.clientHeight + ev.offsetY;
+        let topHeight: number = this.top.clientHeight + ev.offsetY;
         if (topHeight < 5) {
             topHeight = 5;
         }
-        var bottomHeight: number = this.currentSum - topHeight;
+        let bottomHeight: number = this.currentSum - topHeight;
         this.top.style.height = topHeight + 'px';
         this.bottom.style.height = bottomHeight + 'px';
         this.weights = [topHeight, bottomHeight];

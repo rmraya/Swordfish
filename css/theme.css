@@ -1,0 +1,11 @@
+:root {
+    --themeDarker: hsl(206, 100%, 24%);
+    --themeDark: hsl(206, 100%, 31%);
+    --themeDarkAlt: hsl(208, 84%, 40%);
+    --themePrimary: hsl(206, 100%, 42%);
+    --themeSecondary: hsl(208, 69%, 51%);
+    --themeTertiary: hsl(208, 69%, 67%);
+    --themeLight: hsl(207, 67%, 87%);
+    --themeLighter: hsl(209, 69%, 92%);
+    --themeLighterAlt: hsl(208, 68%, 96%);
+}

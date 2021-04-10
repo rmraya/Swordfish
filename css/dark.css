@@ -1,45 +1,22 @@
+@import "./theme.css";
+@import "./neutrals.css";
 :root {
-	--editing-background: #000000;
-	--normal-background: #212121;
-	--tabHolder-background: #616161;
-	--tab-background: #424242;
-	--toolbar-background: #454545;
-	--even-row-background: #424242;
-	--odd-row-background: #313131;
-	--normal-color: #FFFFFF;
-	--accent-color: #0073B5;
-	--accent-alternative: #004885;
-	--accent-contrast: #FFFFFF;
-	--tooltip-background: #004885;
-	--tooltip-color: #FFFFFF;
-	--tab-hover: #2f363d;
-	--input-background: #424242;
-	--input-color: #e3e3e4;
 	--focus-border: #f57c00;
-	--disabled-input: #555555;
-	--highlight-row: #37474f;
-	--highlight-color: #dfe0e1;
 	--error-color: #960303;
-	--difference-color: #dfe0e1;
-	--difference-background: #4d7198;
-	--stats-text: #FFFFFF;
-	--stats-fill: #0d47a1;
-	--space-color: #448aff;
-	--splitting-background: #01579b;
 	--even-unit: #b2c8f8;
 	--odd-unit: #e20606;
 }
 
 body {
-	background: var(--normal-background);
-	color: var(--normal-color);
-	fill: var(--normal-color);
-	stroke: var(--normal-color);
+	background: var(--gray190);
+	color: var(--white);
+	fill: var(--white);
+	stroke: var(--white);
 }
 
 .hdivider {
 	width: 2px;
-	background: var(--accent-color);
+	background: var(--themePrimary);
 	height: 100%;
 	position: relative;
 	cursor: col-resize;
@@ -50,7 +27,7 @@ body {
 .vdivider {
 	width: 100%;
 	height: 2px;
-	background: var(--accent-color);
+	background: var(--themePrimary);
 	position: relative;
 	cursor: row-resize;
 	display: block;
@@ -62,19 +39,19 @@ body {
 }
 
 header {
-	background: var(--accent-color);
-	color: var(--accent-contrast);
-	border-bottom: solid 2px var(--accent-color);
+	background: var(--themePrimary);
+	color: var(--white);
+	border-bottom: solid 2px var(--themePrimary);
 }
 
 footer {
-	background: var(--accent-color);
-	color: var(--accent-contrast);
-	border-top: 2px solid var(--accent-color);
+	background: var(--themePrimary);
+	color: var(--white);
+	border-top: 2px solid var(--themePrimary);
 }
 
 a {
-	color: var(--accent-color);
+	color: var(--themePrimary);
 	cursor: pointer;
 }
 
@@ -88,10 +65,10 @@ a:hover {
 	left: calc(40% - 100px);
 	width: 200px;
 	margin: auto;
-	background-color: var(--tooltip-background);
-	color: var(--tooltip-color);
+	background-color: var(--themeDarker);
+	color: var(--white);
 	padding: 20px;
-	border: 1px solid var(--tooltip-color);
+	border: 1px solid var(--white);
 }
 
 /* tables */
@@ -103,8 +80,8 @@ table {
 
 thead {
 	height: 24px;
-	background: var(--accent-color);
-	color: var(--accent-contrast);
+	background: var(--themeDarker);
+	color: var(--white);
 }
 
 thead tr {
@@ -129,19 +106,19 @@ td.list {
 }
 
 td.editing {
-	background-color: var(--editing-background) !important;
+	background-color: var(--black) !important;
 	outline: none !important;
 }
 
 td.fixed {
 	text-align: center;
 	vertical-align: middle;
-	color: var(--normal-color);
+	color: var(--white);
 	cursor: default !important;
 }
 
 td.initial {
-	border-right: 3px solid var(--normal-background);
+	border-right: 3px solid var(--gray190);
 }
 
 td.translated {
@@ -159,11 +136,11 @@ td.final {
 tr.selected {
 	border-top: 2px solid var(--focus-border) !important;
 	border-bottom: 2px solid var(--focus-border) !important;
-	background-color: var(--editing-background) !important;
+	background-color: var(--black) !important;
 }
 
-tr.discover:hover {
-	background-color: var(--highlight-row) !important;
+.discover tr:hover {
+	background-color: var(--gray190) !important;
 }
 
 th {
@@ -171,40 +148,40 @@ th {
 	top: 0;
 	z-index: 5;
 	font-weight: lighter;
-	background: var(--accent-color);
-	color: var(--accent-contrast);
+	background: var(--themePrimary);
+	color: var(--white);
 }
 
 .stripes tr:nth-child(odd) {
-	background-color: var(--odd-row-background);
+	background-color: var(--gray150);
 }
 
 .stripes tr:nth-child(even) {
-	background-color: var(--even-row-background);
+	background-color: var(--gray160);
 }
 
 .currentRow {
 	border-top: 2px solid var(--focus-border) !important;
 	border-bottom: 2px solid var(--focus-border) !important;
-	background-color: var(--editing-background) !important;
+	background-color: var(--black) !important;
 }
 
 .sourceContainer {
-	background-color: var(--normal-background);
+	background-color: var(--gray190);
 	padding: 4px;
 	margin: 0;
 	width: 100%;
 	white-space: pre-wrap;
-	border-bottom: 1px solid var(--accent-color);
+	border-bottom: 1px solid var(--themePrimary);
 }
 
 .targetContainer {
-	background-color: var(--normal-background);
+	background-color: var(--gray190);
 	padding: 4px;
 	margin: 0;
 	width: 100%;
 	white-space: pre-wrap;
-	border-bottom: 1px solid var(--normal-background);
+	border-bottom: 1px solid var(--gray190);
 }
 
 .machineContainer {
@@ -221,16 +198,16 @@ th {
 }
 
 .highlighted {
-	color: var(--highlight-color);
-	background-color: var(--accent-color);
+	color: var(--gray40);
+	background-color: var(--themePrimary);
 	padding-left: 2px;
 	padding-right: 2px;
 	border-radius: 2px;
 }
 
 .difference {
-	color: var(--difference-color);
-	background-color: var(--difference-background);
+	color: var(--gray10);
+	background-color: var(--themeDarkAlt);
 	padding-left: 2px;
 	padding-right: 2px;
 	border-radius: 2px;
@@ -255,12 +232,13 @@ th {
 /* inputs */
 
 input {
-	background-color: var(--input-background);
-	color: var(--input-color);
-	border: 1px solid var(--input-color);
+	background-color: var(--gray160);
+	color: var(--gray30);
+	border: 1px solid var(--gray30);
 	margin-top: 3px;
 	height: 1.4rem;
 	font-size: 1rem;
+	border-radius: 2px;
 }
 
 .table_input {
@@ -277,7 +255,7 @@ input:focus {
 }
 
 input:disabled {
-	background-color: var(--disabled-input);
+	background-color: var(--gray130);
 }
 
 input[type=number] {
@@ -289,12 +267,12 @@ input[type=number] {
 }
 
 select {
-	background-color: var(--input-background);
-	color: var(--input-color);
-	border: 1px solid var(--input-color);
+	background-color: var(--gray160);
+	color: var(--gray30);
+	border: 1px solid var(--gray30);
 	font-size: 1em;
 	height: 1.6em;
-	border-radius: 0;
+	border-radius: 2px;
 }
 
 select:focus {
@@ -304,16 +282,16 @@ select:focus {
 
 option {
 	font-size: 1em;
-	background-color: var(--input-background) !important;
-	color: var(--input-color);
+	background-color: var(--gray160);
+	color: var(--gray30);
 }
 
 textarea {
 	padding: 0;
 	font-size: medium;
-	background-color: var(--input-background);
-	color: var(--input-color);
-	border: 1px solid var(--input-color);
+	background-color: var(--gray160);
+	color: var(--gray30);
+	border: 1px solid var(--gray30);
 	outline: none;
 }
 
@@ -323,9 +301,9 @@ textarea:focus {
 }
 
 button {
-	color: var(--accent-contrast);
-	background: var(--accent-color);
-	border: 1px solid var(--accent-color);
+	color: var(--white);
+	background: var(--themePrimary);
+	border: 1px solid var(--themePrimary);
 	border-radius: 2px;
 	font-size: 1em;
 	text-align: center;
@@ -340,8 +318,8 @@ button:focus {
 }
 
 button:hover {
-	background: var(--accent-alternative);
-	border: 1px solid var(--accent-alternative);
+	background: var(--themeDarkAlt);
+	border: 1px solid var(--themeDarkAlt);
 	transition-property: all;
 	transition-duration: 0.5s;
 	transition-timing-function: cubic-bezier(0.14, 0.71, 0.38, 1);
@@ -407,13 +385,13 @@ label {
 .toolbar {
 	display: flex;
 	flex-direction: row;
-	background: var(--toolbar-background);
-	color: var(--normal-color);
-	fill: var(--accent-color);
-	stroke: var(--accent-color);
+	background: var(--gray160);
+	color: var(--white);
+	fill: var(--themePrimary);
+	stroke: var(--themePrimary);
 	padding: 2px 4px;
 	justify-content: flex-start;
-	border-top: 1px solid var(--normal-background);
+	border-top: 1px solid var(--gray190);
 }
 
 .toolbar button {
@@ -448,13 +426,13 @@ label {
 
 .toolbar a svg {
 	padding-top: 4px;
-	color: var(--normal-color);
-	fill: var(--normal-color);
-	stroke: var(--normal-color);
+	color: var(--white);
+	fill: var(--white);
+	stroke: var(--white);
 }
 
 .toolbar a:hover {
-	background-color: var(--tab-hover);
+	background-color: var(--gray190);
 	text-decoration: none !important;
 	transition-property: all;
 	transition-duration: 0.5s;
@@ -463,15 +441,15 @@ label {
 }
 
 svg {
-	fill: var(--normal-color);
-	stroke: var(--normal-color);
+	fill: var(--white);
+	stroke: var(--white);
 	stroke-width: 0.3;
 }
 
 th svg {
 	margin-top: 4px;
-	fill: var(--accent-contrast) !important;
-	stroke: var(--accent-contrast) !important;
+	fill: var(--white) !important;
+	stroke: var(--white) !important;
 }
 
 /* tabs */
@@ -479,34 +457,34 @@ th svg {
 .tabHolder {
 	display: flex;
 	flex-flow: row;
-	color: var(--normal-color);
-	background: var(--tabHolder-background);
+	color: var(--white);
+	background: var(--gray110);
 	padding: 4px 0 0 8px;
 }
 
 .tab {
 	overflow: hidden;
-	background: var(--tab-background);
-	color: var(--normal-color);
-	fill: var(--accent-color);
-	stroke: var(--accent-color);
+	background: var(--gray150);
+	color: var(--white);
+	fill: var(--themePrimary);
+	stroke: var(--themePrimary);
 	padding-top: 4px;
 	padding-left: 6px;
 	padding-right: 6px;
 	margin: 0;
 	margin-right: 1px !important;
 	box-shadow: none !important;
-	border-bottom: 3px solid var(--tab-background);
+	border-bottom: 3px solid var(--gray150);
 	text-decoration: none !important;
 }
 
 .selectedTab {
-	border-bottom: 3px solid var(--accent-color);
+	border-bottom: 3px solid var(--themePrimary);
 }
 
 .tab:hover {
-	background: var(--tab-hover);
-	border-bottom: 3px solid var(--tab-hover);
+	background: var(--gray190);
+	border-bottom: 3px solid var(--gray190);
 	transition-property: all;
 	transition-duration: 0.5s;
 	transition-timing-function: cubic-bezier(0.14, 0.71, 0.38, 1);
@@ -514,7 +492,7 @@ th svg {
 }
 
 .selectedTab:hover {
-	border-bottom: 3px solid var(--accent-color) !important;
+	border-bottom: 3px solid var(--themePrimary) !important;
 }
 
 .tab a {
@@ -524,7 +502,7 @@ th svg {
 }
 
 .tab a:hover {
-	background: var(--tab-hover);
+	background: var(--gray190);
 }
 
 .tabContent {
@@ -545,15 +523,15 @@ th svg {
 	margin: 0;
 	padding-top: 0;
 	padding-left: 4px;
-	background: var(--accent-color);
-	color: var(--accent-contrast);
-	border-bottom: 1px solid var(--normal-background);
+	background: var(--themePrimary);
+	color: var(--white);
+	border-bottom: 1px solid var(--gray190);
 	white-space: nowrap;
 	overflow-x: hidden;
 }
 
 .titlepanel a:hover {
-	background: var(--accent-alternative);
+	background: var(--themeDarkAlt);
 }
 
 .panelcontent {
@@ -576,8 +554,8 @@ th svg {
 }
 
 .tooltip .tooltiptext {
-	background-color: var(--tooltip-background);
-	color: var(--tooltip-color);
+	background-color: var(--themeDarker);
+	color: var(--white);
 	visibility: hidden;
 	padding: 4px;
 	border-radius: 2px;
@@ -612,7 +590,7 @@ th svg {
 }
 
 .highlight {
-	color: var(--highlight-color);
+	color: var(--gray40);
 }
 
 .active svg {
@@ -621,7 +599,7 @@ th svg {
 }
 
 .bordered {
-	border: 1px solid var(--normal-color) !important;
+	border: 1px solid var(--white) !important;
 }
 
 .error {
@@ -658,29 +636,29 @@ svg.stats {
 
 .statsRect {
 	stroke-width: 1;
-	stroke: var(--normal-color);
+	stroke: var(--white);
 	fill: none;
 }
 
 .statsFiller {
 	stroke: none;
-	fill: var(--stats-fill);
+	fill: var(--themeSecondary);
 }
 
 .statsText {
 	dominant-baseline: middle;
 	text-anchor: middle;
-	fill: var(--stats-text);
+	fill: var(--white);
 }
 
 .space {
-	background: var(--space-color);
+	background: var(--themeTertiary);
 	border-radius: 2px;
 	font-weight: 700;
 }
 
 .splitting {
-	background: var(--splitting-background);
+	background: var(--themePrimaryDark);
 }
 
 .evenUnit {

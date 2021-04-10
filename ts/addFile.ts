@@ -101,10 +101,10 @@ class AddFile {
     }
 
     setLanguages(arg: any): void {
-        var array = arg.languages;
-        var languageOptions = '<option value="none">Select Language</option>';
+        let array = arg.languages;
+        let languageOptions = '<option value="none">Select Language</option>';
         for (let i = 0; i < array.length; i++) {
-            var lang = array[i];
+            let lang = array[i];
             languageOptions = languageOptions + '<option value="' + lang.code + '">' + lang.description + '</option>';
         }
         document.getElementById('srcLangSelect').innerHTML = languageOptions;

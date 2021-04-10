@@ -402,7 +402,7 @@ class Main {
     }
 
     setStatus(arg: any): void {
-        var status: HTMLDivElement = document.getElementById('status') as HTMLDivElement;
+        let status: HTMLDivElement = document.getElementById('status') as HTMLDivElement;
         status.innerHTML = arg;
         if (arg.length > 0) {
             status.style.display = 'block';

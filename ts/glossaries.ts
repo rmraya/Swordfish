@@ -90,6 +90,16 @@ class GlossariesView {
         });
         this.topBar.appendChild(termSearchButton);
 
+        let remoteButton = document.createElement('a');
+        remoteButton.style.marginLeft = '20px';
+        remoteButton.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 0 24 24" width="24px"><path d="M12 6c2.62 0 4.88 1.86 5.39 4.43l.3 1.5 1.53.11c1.56.1 2.78 1.41 2.78 2.96 0 1.65-1.35 3-3 3H6c-2.21 0-4-1.79-4-4 0-2.05 1.53-3.76 3.56-3.97l1.07-.11.5-.95C8.08 7.14 9.94 6 12 6m0-2C9.11 4 6.6 5.64 5.35 8.04 2.34 8.36 0 10.91 0 14c0 3.31 2.69 6 6 6h13c2.76 0 5-2.24 5-5 0-2.64-2.05-4.78-4.65-4.96C18.67 6.59 15.64 4 12 4z"/></svg>' +
+            '<span class="tooltiptext bottomTooltip">Add RemoteTM Glossary</span>';
+        remoteButton.addEventListener('click', () => {
+            this.browseRemoteTM();
+        });
+        remoteButton.className = 'tooltip';
+        this.topBar.appendChild(remoteButton);
+
         this.tableContainer = document.createElement('div');
         this.tableContainer.classList.add('divContainer');
         this.container.appendChild(this.tableContainer);
@@ -97,11 +107,13 @@ class GlossariesView {
         let glossariesTable = document.createElement('table');
         glossariesTable.classList.add('fill_width');
         glossariesTable.classList.add('stripes');
+        glossariesTable.classList.add('discover');
         this.tableContainer.appendChild(glossariesTable);
 
         glossariesTable.innerHTML =
             '<thead><tr>' +
             '<th style="padding-left:5px;padding-right:5px;">Name</th>' +
+            '<th style="padding-left:5px;padding-right:5px;">Type</th>' +
             '<th style="padding-left:5px;padding-right:5px;">Project</th>' +
             '<th style="padding-left:5px;padding-right:5px;">Client</th>' +
             '<th style="padding-left:5px;padding-right:5px;">Subject</th>' +
@@ -209,6 +221,12 @@ class GlossariesView {
             tr.append(td);
 
             td = document.createElement('td');
+            td.classList.add('middle');
+            td.classList.add('center');
+            td.innerText = p.type;
+            tr.append(td);
+
+            td = document.createElement('td');
             td.classList.add('noWrap');
             td.classList.add('middle');
             td.classList.add('center');
@@ -287,5 +305,9 @@ class GlossariesView {
         for (let key of this.selected.keys()) {
             this.electron.ipcRenderer.send('show-add-term', { glossary: key });
         }
+    }
+
+    browseRemoteTM(): void {
+        this.electron.ipcRenderer.send('show-server-settings', { type: 'glossary' });
     }
 }

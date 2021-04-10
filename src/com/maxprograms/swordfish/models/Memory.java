@@ -22,6 +22,8 @@ import java.io.Serializable;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
+import com.maxprograms.swordfish.RemoteUtils;
+
 import org.json.JSONObject;
 
 public class Memory implements Serializable, Comparable<Memory> {
@@ -29,7 +31,7 @@ public class Memory implements Serializable, Comparable<Memory> {
 	private static final long serialVersionUID = -3800311066779683003L;
 
 	public static final String LOCAL = "Local";
-	public static final String REMOTE = "Remote";
+	public static final String REMOTE = "RemoteTM";
 
 	private String id;
 	private String name;
@@ -37,14 +39,22 @@ public class Memory implements Serializable, Comparable<Memory> {
 	private String subject;
 	private String client;
 	private Date creationDate;
+	private String type;
+	private String server;
+	private String user;
+	private String password;
 
-	public Memory(JSONObject object) {
-		this.id = object.getString("id");
-		this.name = object.getString("name");
-		this.project = object.has("project") ? object.getString("project") : "";
-		this.subject = object.has("subject") ? object.getString("subject") : "";
-		this.client = object.has("client") ? object.getString("client") : "";
-		this.creationDate = object.has("creationDate") ? new Date(object.getLong("creationDate")) : new Date();
+	public Memory(JSONObject json) {
+		id = json.getString("id");
+		name = json.getString("name");
+		project = json.has("project") ? json.getString("project") : "";
+		subject = json.has("subject") ? json.getString("subject") : "";
+		client = json.has("client") ? json.getString("client") : "";
+		creationDate = json.has("creationDate") ? new Date(json.getLong("creationDate")) : new Date();
+		type = json.has("type") ? json.getString("type") : LOCAL;
+		server = json.has("server") ? json.getString("server") : "";
+		user = json.has("user") ? json.getString("user") : "";
+		password = json.has("password") ? RemoteUtils.fromBase64(json.getString("password")) : "";
 	}
 
 	public JSONObject toJSON() {
@@ -57,16 +67,25 @@ public class Memory implements Serializable, Comparable<Memory> {
 		json.put("client", client);
 		json.put("creationDate", creationDate.getTime());
 		json.put("creationString", df.format(creationDate));
+		json.put("type", type);
+		json.put("server", server);
+		json.put("user", user);
+		json.put("password", RemoteUtils.toBase64(password));
 		return json;
 	}
 
-	public Memory(String id, String name, String project, String subject, String client, Date creationDate) {
+	public Memory(String id, String name, String project, String subject, String client, Date creationDate, String type,
+			String server, String user, String password) {
 		this.id = id;
 		this.name = name;
 		this.project = project;
 		this.subject = subject;
 		this.client = client;
 		this.creationDate = creationDate;
+		this.type = type;
+		this.server = server;
+		this.user = user;
+		this.password = password;
 	}
 
 	public String getId() {
@@ -109,18 +128,50 @@ public class Memory implements Serializable, Comparable<Memory> {
 		this.creationDate = creationDate;
 	}
 
+	public String getType() {
+		return type;
+	}
+
+	public void setType(String type) {
+		this.type = type;
+	}
+
+	public String getServer() {
+		return server;
+	}
+
+	public void setServer(String server) {
+		this.server = server;
+	}
+
+	public String getUser() {
+		return user;
+	}
+
+	public void setUser(String user) {
+		this.user = user;
+	}
+
+	public String getPassword() {
+		return password;
+	}
+
+	public void setPassword(String password) {
+		this.password = password;
+	}
+
 	@Override
 	public int compareTo(Memory o) {
-		return name.compareTo(o.getName());
+		return name.compareTo(o.name);
 	}
 
 	@Override
 	public boolean equals(Object obj) {
-		if (!(obj instanceof Memory)) {
-			return false;
+		if (obj instanceof Memory) {
+			Memory m = (Memory) obj;
+			return id.equals(m.getId());
 		}
-		Memory m = (Memory) obj;
-		return id.equals(m.getId());
+		return false;
 	}
 
 	@Override

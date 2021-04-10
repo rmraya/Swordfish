@@ -52,6 +52,7 @@ import com.maxprograms.languages.LanguageUtils;
 import com.maxprograms.swordfish.models.Memory;
 import com.maxprograms.swordfish.tm.ITmEngine;
 import com.maxprograms.swordfish.tm.InternalDatabase;
+import com.maxprograms.swordfish.tm.RemoteDatabase;
 import com.maxprograms.swordfish.xliff.XliffUtils;
 import com.maxprograms.xml.Element;
 import com.maxprograms.xml.TextNode;
@@ -158,7 +159,7 @@ public class MemoriesHandler implements HttpHandler {
 					loadMemoriesList();
 				}
 				Memory mem = memories.get(json.getString("memory"));
-				openMemory(mem.getId());
+				openMemory(mem);
 				ITmEngine engine = openEngines.get(mem.getId());
 				JSONArray array = new JSONArray();
 				Set<String> langs = engine.getAllLanguages();
@@ -222,7 +223,7 @@ public class MemoriesHandler implements HttpHandler {
 			List<Element> matches = new Vector<>();
 			for (int i = 0; i < mems.length(); i++) {
 				String memory = mems.getString(i);
-				openMemory(memory);
+				openMemory(memories.get(memory));
 				matches.addAll(
 						openEngines.get(memory).concordanceSearch(searchStr, srcLang, limit, isRegexp, caseSensitive));
 				closeMemory(memory);
@@ -264,7 +265,7 @@ public class MemoriesHandler implements HttpHandler {
 		openTasks.put(process, obj);
 		new Thread(() -> {
 			try {
-				openMemory(id);
+				openMemory(memories.get(id));
 				ITmEngine engine = openEngines.get(id);
 				String project = json.has("project") ? json.getString("project") : "";
 				String client = json.has("client") ? json.getString("client") : "";
@@ -321,7 +322,7 @@ public class MemoriesHandler implements HttpHandler {
 					loadMemoriesList();
 				}
 				Memory mem = memories.get(json.getString("memory"));
-				openMemory(mem.getId());
+				openMemory(mem);
 				ITmEngine engine = openEngines.get(mem.getId());
 				File tmx = new File(json.getString("tmx"));
 				Set<String> langSet = Collections.synchronizedSortedSet(new TreeSet<>());
@@ -330,6 +331,8 @@ public class MemoriesHandler implements HttpHandler {
 					for (int i = 0; i < langs.length(); i++) {
 						langSet.add(langs.getString(i));
 					}
+				} else {
+					langSet = engine.getAllLanguages();
 				}
 				engine.exportMemory(tmx.getAbsolutePath(), langSet, json.getString("srcLang"));
 				closeMemory(mem.getId());
@@ -371,11 +374,13 @@ public class MemoriesHandler implements HttpHandler {
 							openEngines.remove(mem.getId());
 							useCount.remove(mem.getId());
 						}
-						try {
-							File wfolder = new File(getWorkFolder(), mem.getId());
-							TmsServer.deleteFolder(wfolder.getAbsolutePath());
-						} catch (IOException ioe) {
-							logger.log(Level.WARNING, "Folder '" + mem.getId() + "' will be deleted on next start");
+						if (mem.getType().equals(Memory.LOCAL)) {
+							try {
+								File wfolder = new File(getWorkFolder(), mem.getId());
+								TmsServer.deleteFolder(wfolder.getAbsolutePath());
+							} catch (IOException ioe) {
+								logger.log(Level.WARNING, "Folder '" + mem.getId() + "' will be deleted on next start");
+							}
 						}
 						memories.remove(mem.getId());
 					}
@@ -523,6 +528,10 @@ public class MemoriesHandler implements HttpHandler {
 	}
 
 	public static synchronized void openMemory(String id) throws IOException, SQLException {
+		openMemory(memories.get(id));
+	}
+
+	public static synchronized void openMemory(Memory memory) throws IOException, SQLException {
 		if (memories == null) {
 			loadMemoriesList();
 		}
@@ -530,13 +539,15 @@ public class MemoriesHandler implements HttpHandler {
 			openEngines = new ConcurrentHashMap<>();
 			useCount = new ConcurrentHashMap<>();
 		}
-		if (openEngines.containsKey(id)) {
-			int count = useCount.get(id) + 1;
-			useCount.put(id, count);
+		if (openEngines.containsKey(memory.getId())) {
+			int count = useCount.get(memory.getId()) + 1;
+			useCount.put(memory.getId(), count);
 			return;
 		}
-		openEngines.put(id, new InternalDatabase(id, getWorkFolder()));
-		useCount.put(id, 1);
+		ITmEngine engine = memory.getType().equals(Memory.LOCAL) ? new InternalDatabase(memory.getId(), getWorkFolder())
+				: new RemoteDatabase(memory.getServer(), memory.getUser(), memory.getPassword(), memory.getId());
+		openEngines.put(memory.getId(), engine);
+		useCount.put(memory.getId(), 1);
 	}
 
 	public static synchronized void closeMemory(String id) throws IOException, SQLException {
@@ -705,5 +716,13 @@ public class MemoriesHandler implements HttpHandler {
 			}
 		}
 		return string.toString();
+	}
+
+	protected static void addMemory(Memory memory) throws IOException {
+		if (memories == null) {
+			loadMemoriesList();
+		}
+		memories.put(memory.getId(), memory);
+		saveMemoriesList();
 	}
 }

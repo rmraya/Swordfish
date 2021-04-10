@@ -25,12 +25,13 @@ public class Constants {
 	}
 
 	public static final String APPNAME = "Swordfish";
-	public static final String VERSION = "4.2.1";
-	public static final String BUILD = "20210316_1104";
+	public static final String VERSION = "4.3.0";
+	public static final String BUILD = "20210410_0801";
 
 	public static final String REASON = "reason";
 	public static final String STATUS = "status";
 	public static final String PROGRESS = "progress";
+	public static final String OK = "OK";
 
 	public static final String SUCCESS = "Success";
 	public static final String ERROR = "Error";

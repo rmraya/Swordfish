@@ -19,6 +19,7 @@ SOFTWARE.
 
 package com.maxprograms.swordfish.xliff;
 
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -53,6 +54,7 @@ public class XliffUtils {
     private static final String NOTXLIFF = "Selected file is not an XLIFF document";
     private static final String NOTSWORDFISH = "Selected file is not a Swordfish project";
     private static int maxTag = 0;
+    private static SAXBuilder builder;
 
     private XliffUtils() {
         // empty for security
@@ -319,7 +321,9 @@ public class XliffUtils {
     public static JSONObject getProjectDetails(File xliffFile) throws IOException {
         try {
             JSONObject result = new JSONObject();
-            SAXBuilder builder = new SAXBuilder();
+            if (builder == null) {
+                builder = new SAXBuilder();
+            }
             Document doc = builder.build(xliffFile);
             Element xliff = doc.getRootElement();
             if (!"xliff".equals(xliff.getName())) {
@@ -441,5 +445,13 @@ public class XliffUtils {
             }
         }
         return string.toString();
+    }
+
+    public static Element buildElement(String string) throws SAXException, IOException, ParserConfigurationException {
+        if (builder == null) {
+            builder = new SAXBuilder();
+        }
+        Document doc = builder.build(new ByteArrayInputStream(string.getBytes(StandardCharsets.UTF_8)));
+        return doc.getRootElement();
     }
 }

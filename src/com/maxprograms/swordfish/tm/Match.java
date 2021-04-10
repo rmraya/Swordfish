@@ -19,13 +19,19 @@ SOFTWARE.
 
 package com.maxprograms.swordfish.tm;
 
+import java.io.IOException;
 import java.io.Serializable;
+import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.Map;
 
+import javax.xml.parsers.ParserConfigurationException;
+
+import com.maxprograms.swordfish.xliff.XliffUtils;
 import com.maxprograms.xml.Element;
 
 import org.json.JSONObject;
+import org.xml.sax.SAXException;
 
 public class Match implements Serializable, Comparable<Match> {
 
@@ -43,6 +49,22 @@ public class Match implements Serializable, Comparable<Match> {
 		this.similarity = similarity;
 		this.origin = origin;
 		this.properties = properties;
+	}
+
+	public Match(JSONObject json) throws SAXException, IOException, ParserConfigurationException {
+		source = XliffUtils.buildElement(json.getString("source"));
+		target = XliffUtils.buildElement(json.getString("target"));
+		similarity = json.getInt("similarity");
+		origin = json.getString("origin");
+		properties = new Hashtable<>();
+		if (json.has("properties")) {
+			JSONObject props = json.getJSONObject("properties");
+			Iterator<String> it = props.keys();
+			while (it.hasNext()) {
+				String key = it.next();
+				properties.put(key, props.getString(key));
+			}
+		}
 	}
 
 	public JSONObject toJSON() {

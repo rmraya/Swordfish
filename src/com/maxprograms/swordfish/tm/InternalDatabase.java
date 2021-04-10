@@ -56,6 +56,8 @@ import com.maxprograms.xml.Element;
 import com.maxprograms.xml.Indenter;
 import com.maxprograms.xml.XMLUtils;
 
+import org.json.JSONArray;
+import org.json.JSONObject;
 import org.mapdb.Fun;
 import org.mapdb.Fun.Tuple2;
 import org.xml.sax.SAXException;
@@ -98,22 +100,22 @@ public class InternalDatabase implements ITmEngine {
 		}
 
 		boolean needsUpgrade = false;
-        try (Statement stmt = conn.createStatement()) {
-            String sql = "SELECT TYPE_NAME FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME='TUV' AND COLUMN_NAME='SEG'";
-            try (ResultSet rs = stmt.executeQuery(sql)) {
-                while (rs.next()) {
-                    needsUpgrade = !rs.getString(1).equalsIgnoreCase("CLOB");
-                }
-            }
-        }
+		try (Statement stmt = conn.createStatement()) {
+			String sql = "SELECT TYPE_NAME FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME='TUV' AND COLUMN_NAME='SEG'";
+			try (ResultSet rs = stmt.executeQuery(sql)) {
+				while (rs.next()) {
+					needsUpgrade = !rs.getString(1).equalsIgnoreCase("CLOB");
+				}
+			}
+		}
 		if (needsUpgrade) {
 			String s1 = "ALTER TABLE TUV ALTER COLUMN SEG SET DATA TYPE CLOB";
-            String s2 = "ALTER TABLE TUV ALTER COLUMN PURETEXT SET DATA TYPE CLOB";
+			String s2 = "ALTER TABLE TUV ALTER COLUMN PURETEXT SET DATA TYPE CLOB";
 			try (Statement upgrade = conn.createStatement()) {
-                upgrade.execute(s1);
-                upgrade.execute(s2);
-                conn.commit();
-            }
+				upgrade.execute(s1);
+				upgrade.execute(s2);
+				conn.commit();
+			}
 		}
 
 		storeTUV = conn.prepareStatement("INSERT INTO tuv (tuid, lang, seg, puretext, textlength) VALUES (?,?,?,?,?)");
@@ -221,7 +223,7 @@ public class InternalDatabase implements ITmEngine {
 					while (rs.next()) {
 						String lang = rs.getString(1);
 						String seg = TMUtils.getString(rs.getNCharacterStream(2));
-						if (seg.equals("<seg></seg>")) {
+						if (seg.equals("<seg></seg>") || !langs.contains(lang)) {
 							continue;
 						}
 						try {
@@ -713,6 +715,26 @@ public class InternalDatabase implements ITmEngine {
 					}
 				}
 			}
+		}
+		return result;
+	}
+
+	@Override
+	public JSONArray batchTranslate(JSONObject params)
+			throws IOException, SAXException, ParserConfigurationException, SQLException {
+		JSONArray result = new JSONArray();
+		String srcLang = params.getString("srcLang");
+		String tgtLang = params.getString("tgtLang");
+		JSONArray segments = params.getJSONArray("segments");
+		for (int i = 0; i < segments.length(); i++) {
+			JSONObject json = segments.getJSONObject(i);
+			List<Match> matches = searchTranslation(json.getString("pure"), srcLang, tgtLang, 60, false);
+			JSONArray array = new JSONArray();
+			for (int j = 0; j < matches.size(); j++) {
+				array.put(matches.get(j).toJSON());
+			}
+			json.put("matches", array);
+			result.put(json);
 		}
 		return result;
 	}

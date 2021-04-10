@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <title>RemoteTM Server</title>
+    <link id="theme" rel="stylesheet" type="text/css" href="../css/light.css">
+    <link rel="stylesheet" type="text/css" href="../css/fonts.css">
+</head>
+
+<body id="body">
+    <table class="fill_width">
+        <tr>
+            <td class="middle noWrap">
+                <label for="serverURL">Server URL</label>
+            </td>
+            <td class="table_input middle">
+                <input type="text" id="serverURL" class="table_input">
+            </td>
+        </tr>
+        <tr>
+            <td class="middle">
+                <label for="userInput">Username</label>
+            </td>
+            <td class="fill_width middle">
+                <input id="userInput" class="table_input middle">
+            </td>
+        </tr>
+        <tr>
+            <td class="middle">
+                <label for="passwordInput">Password</label>
+            </td>
+            <td class="fill_width middle">
+                <input  id="passwordInput" class="table_input middle" type="password">
+            </td>
+        </tr>
+    </table>
+    <div class="buttonArea">
+        <button id="browseButton">Browse Server</button>
+    </div>
+
+    <script src="../js/keyboardHandler.js"></script>
+    <script src="../js/serverSettings.js"></script>
+</body>
+
+</html>
