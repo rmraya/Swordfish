@@ -89,7 +89,7 @@ public class RemoteDatabase implements ITmEngine {
 
         StringBuilder sb = new StringBuilder();
         try (InputStream stream = connection.getInputStream()) {
-            try (BufferedReader reader = new BufferedReader(new InputStreamReader(stream))) {
+            try (BufferedReader reader = new BufferedReader(new InputStreamReader(stream, StandardCharsets.UTF_8))) {
                 String line;
                 while ((line = reader.readLine()) != null) {
                     sb.append(line);
