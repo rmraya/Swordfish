@@ -18,14 +18,12 @@ SOFTWARE.
 *****************************************************************************/
 package com.maxprograms.swordfish.models;
 
-import java.io.Serializable;
 import java.nio.charset.StandardCharsets;
 
 import org.json.JSONObject;
 
-public class SourceFile implements Serializable, Comparable<SourceFile> {
+public class SourceFile implements Comparable<SourceFile> {
 
-	private static final long serialVersionUID = -3726822493975520037L;
 	private String file;
 	private String type;
 	private String encoding;

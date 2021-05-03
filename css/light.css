@@ -1,17 +1,18 @@
 @import "./theme.css";
 @import "./neutrals.css";
 :root {
-	--focus-border: #f57c00;
 	--error-color: #960303;
 	--even-unit: #02275f;
 	--odd-unit: #e20606;
+	--orange: #ff9800;
+	--teal: #009688;
 }
 
 body {
 	background: var(--gray30);
-	color: var(--black);
-	fill: var(--black);
-	stroke: var(--black);
+	color: var(--gray190);
+	fill: var(--gray190);
+	stroke: var(--gray190);
 }
 
 .hdivider {
@@ -80,13 +81,19 @@ table {
 
 thead {
 	height: 24px;
-	background: var(--themeDark);
-	color: var(--white);
+	background: var(--gray40);
+	color: var(--themeDark);
 }
 
 thead tr {
+	position: sticky;
+	z-index: 5;
 	background: inherit !important;
 	color: inherit !important;
+}
+
+.stripes tr {
+	border-bottom: 2px solid var(--gray40);
 }
 
 tbody {
@@ -106,7 +113,7 @@ td.list {
 }
 
 td.editing {
-	background-color: var(--white) !important;
+	background-color: var(--gray10) !important;
 	outline: none !important;
 }
 
@@ -122,52 +129,44 @@ td.initial {
 }
 
 td.translated {
-	border-right: 3px solid #ff9800;
+	border-right: 3px solid var(--orange);
 }
 
 td.reviewed {
-	border-right: 3px solid #ff9800;
+	border-right: 3px solid var(--orange);
 }
 
 td.final {
-	border-right: 3px solid #009688;
+	border-right: 3px solid var(--teal);
 }
 
 tr.selected {
-	border-top: 2px solid var(--focus-border) !important;
-	border-bottom: 2px solid var(--focus-border) !important;
 	background-color: var(--white) !important;
 }
 
 .discover tr:hover {
-	background-color: var(--gray30) !important;
+	background-color: var(--themeLight) !important;
 }
 
 th {
 	position: sticky;
-	top: 0;
 	z-index: 5;
-	font-weight: lighter;
-	background: var(--themePrimary);
-	color: var(--white);
-}
-
-.stripes tr:nth-child(odd) {
-	background-color: var(--gray40);
-}
-
-.stripes tr:nth-child(even) {
-	background-color: var(--gray50);
+	padding: 8px 4px;
+	top: 0;
+	font-weight: 300;
+	background: var(--gray40);
+	color: var(--themeDark);
+	fill: var(--themeDark);
 }
 
 .currentRow {
-	border-top: 2px solid var(--focus-border) !important;
-	border-bottom: 2px solid var(--focus-border) !important;
-	background-color: var(--white) !important;
+	border-top: 3px solid var(--themeDark) !important;
+	border-bottom: 3px solid var(--themeDark) !important;
+	background-color: var(--gray10) !important;
 }
 
 .sourceContainer {
-	background-color: var(--gray30);
+	background-color: var(--gray20);
 	padding: 4px;
 	margin: 0;
 	width: 100%;
@@ -176,12 +175,12 @@ th {
 }
 
 .targetContainer {
-	background-color: var(--gray30);
+	background-color: var(--gray20);
 	padding: 4px;
 	margin: 0;
 	width: 100%;
 	white-space: pre-wrap;
-	border-bottom: 1px solid var(--gray30);
+	border-bottom: 1px solid var(--gray20);
 }
 
 .machineContainer {
@@ -251,7 +250,7 @@ input {
 
 input:focus {
 	outline: none !important;
-	border: 1px solid var(--focus-border);
+	border: 1px solid var(--themePrimary);
 }
 
 input:disabled {
@@ -277,7 +276,7 @@ select {
 
 select:focus {
 	outline: none !important;
-	border: 1px solid var(--focus-border);
+	border: 1px solid var(--themePrimary);
 }
 
 option {
@@ -297,7 +296,7 @@ textarea {
 
 textarea:focus {
 	outline: none !important;
-	border: 1px solid var(--focus-border);
+	border: 1px solid var(--themePrimary);
 }
 
 button {
@@ -307,9 +306,9 @@ button {
 	border-radius: 2px;
 	font-size: 1em;
 	text-align: center;
-	margin: 3px;
-	padding-left: 4px;
-	padding-right: 4px;
+	margin: 4px;
+	padding-left: 8px;
+	padding-right: 8px;
 	white-space: nowrap;
 }
 
@@ -386,12 +385,11 @@ label {
 	display: flex;
 	flex-direction: row;
 	background: var(--gray50);
-	color: var(--black);
+	color: var(--gray190);
 	fill: var(--themePrimary);
 	stroke: var(--themePrimary);
 	padding: 2px 4px;
 	justify-content: flex-start;
-	border-top: 1px solid var(--gray30);
 }
 
 .toolbar button {
@@ -426,18 +424,19 @@ label {
 
 .toolbar a svg {
 	padding-top: 4px;
-	color: var(--black);
-	fill: var(--black);
-	stroke: var(--black);
+	color: var(--gray160);
+	fill: var(--gray160);
+	stroke: var(--gray160);
 }
 
 .toolbar a:hover {
-	background-color: var(--gray10);
+	background-color: var(--gray20);
 	text-decoration: none !important;
 	transition-property: all;
 	transition-duration: 0.5s;
 	transition-timing-function: cubic-bezier(0.14, 0.71, 0.38, 1);
 	transition-delay: 0s;
+	border-radius: 2px;
 }
 
 svg {
@@ -448,8 +447,8 @@ svg {
 
 th svg {
 	margin-top: 4px;
-	fill: var(--white) !important;
-	stroke: var(--white) !important;
+	fill: var(--themePrimary) !important;
+	stroke: var(--themePrimary) !important;
 }
 
 /* tabs */
@@ -458,51 +457,55 @@ th svg {
 	display: flex;
 	flex-flow: row;
 	color: var(--black);
-	background: var(--gray60);
-	padding: 4px 0 0 8px;
+	background: var(--gray30);
+	margin: 0;
+	padding: 0;
 }
 
 .tab {
 	overflow: hidden;
-	background: var(--gray40);
-	color: var(--black);
-	fill: var(--themePrimary);
-	stroke: var(--themePrimary);
-	padding-top: 4px;
-	padding-left: 6px;
-	padding-right: 6px;
+	background: var(--gray30);
+	color: var(--gray150);
+	fill: var(--gray150);
+	stroke: var(--gray150);
+	padding: 4px 12px;
 	margin: 0;
-	margin-right: 1px !important;
+	vertical-align: middle;
 	box-shadow: none !important;
-	border-bottom: 3px solid var(--gray40);
 	text-decoration: none !important;
 }
 
 .selectedTab {
-	border-bottom: 3px solid var(--themePrimary);
+	background: var(--gray50);
+	color: var(--black);
+	border-left: 1px solid var(--gray60) !important;
+	border-right: 1px solid var(--gray60) !important;
 }
 
 .tab:hover {
-	background: var(--gray10);
-	border-bottom: 3px solid var(--gray10);
-	transition-property: all;
-	transition-duration: 0.5s;
-	transition-timing-function: cubic-bezier(0.14, 0.71, 0.38, 1);
-	transition-delay: 0s;
+	color: var(--black);
+	fill: var(--black);
+	stroke: var(--black);
 }
 
 .selectedTab:hover {
-	border-bottom: 3px solid var(--themePrimary) !important;
+	color: var(--black);
+	fill: var(--black);
+	stroke: var(--black);
 }
 
 .tab a {
 	color: inherit;
+	fill: inherit;
+	stroke: inherit;
 	text-decoration: none;
 	cursor: pointer;
 }
 
 .tab a:hover {
-	background: var(--gray10);
+	color: inherit;
+	fill: inherit;
+	stroke: inherit;
 }
 
 .tabContent {
@@ -523,15 +526,11 @@ th svg {
 	margin: 0;
 	padding-top: 0;
 	padding-left: 4px;
-	background: var(--themePrimary);
-	color: var(--white);
-	border-bottom: 1px solid var(--gray30);
+	background: var(--themeDarkAlt);
+	color: var(--gray10);
+	border-bottom: 1px solid var(--gray110);
 	white-space: nowrap;
 	overflow-x: hidden;
-}
-
-.titlepanel a:hover {
-	background: var(--themeDarkAlt);
 }
 
 .panelcontent {
@@ -594,8 +593,8 @@ th svg {
 }
 
 .active svg {
-	stroke: var(--focus-border) !important;
-	fill: var(--focus-border) !important;
+	stroke: var(--themePrimary) !important;
+	fill: var(--themePrimary) !important;
 }
 
 .bordered {

@@ -25,12 +25,12 @@ class MtMatches {
     projectId: string;
 
     tabHolder: TabHolder;
-    matches: Map<string, any>;
+    matches: Map<string, Match>;
 
     constructor(div: HTMLDivElement, projectId: string) {
         this.container = div;
         this.projectId = projectId;
-        this.matches = new Map<string, any>();
+        this.matches = new Map<string, Match>();
 
         let tabContainer: HTMLDivElement = document.createElement('div');
         tabContainer.classList.add('fill_width');
@@ -74,7 +74,7 @@ class MtMatches {
             this.acceptTranslation();
         });
 
-        let config: any = { attributes: true, childList: false, subtree: false };
+        let config: MutationObserverInit = { attributes: true, childList: false, subtree: false };
         let observer = new MutationObserver((mutationsList) => {
             for (let mutation of mutationsList) {
                 if (mutation.type === 'attributes') {
@@ -90,7 +90,7 @@ class MtMatches {
         this.matches.clear();
     }
 
-    add(match: any) {
+    add(match: Match) {
         this.matches.set(match.matchId, match);
         let tab = new Tab(match.matchId, match.origin, false);
 
@@ -112,7 +112,7 @@ class MtMatches {
             return;
         }
         let selected: string = this.tabHolder.getSelected();
-        let match: any = this.matches.get(selected);
+        let match: Match = this.matches.get(selected);
         this.electron.ipcRenderer.send('accept-match', match);
     }
 

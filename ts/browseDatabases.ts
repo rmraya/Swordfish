@@ -17,14 +17,25 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 *****************************************************************************/
 
+class Database {
+    id: string;
+    name: string;
+    owner: string;
+    project: string;
+    subject: string;
+    client: string;
+    creationDate: string;
+    open: boolean;
+}
+
 class BrowseDatabases {
 
     electron = require('electron');
     databases: any;
-    selected: Map<string, any>;
+    selected: Map<string, Database>;
 
     constructor() {
-        this.selected = new Map<string, any>();
+        this.selected = new Map<string, Database>();
         this.electron.ipcRenderer.send('get-theme');
         this.electron.ipcRenderer.on('set-theme', (event: Electron.IpcRendererEvent, arg: any) => {
             (document.getElementById('theme') as HTMLLinkElement).href = arg;
@@ -55,7 +66,7 @@ class BrowseDatabases {
         let tbody = document.getElementById('tbody') as HTMLTableSectionElement;
         let length = this.databases.memories.length;
         for (let i = 0; i < length; i++) {
-            let database: any = this.databases.memories[i];
+            let database: Database = this.databases.memories[i];
             let tr: HTMLTableRowElement = document.createElement('tr');
             tr.addEventListener('click', (event: MouseEvent) => {
                 this.clicked(event, database);
@@ -98,7 +109,7 @@ class BrowseDatabases {
         });
     }
 
-    clicked(event: MouseEvent, memory: any): void {
+    clicked(event: MouseEvent, memory: Database): void {
         let tr: HTMLTableRowElement = event.currentTarget as HTMLTableRowElement;
         let isSelected: boolean = this.selected.has(memory.id);
         if (!isSelected) {

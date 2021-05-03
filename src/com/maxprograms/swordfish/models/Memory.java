@@ -18,7 +18,6 @@ SOFTWARE.
 *****************************************************************************/
 package com.maxprograms.swordfish.models;
 
-import java.io.Serializable;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
@@ -26,9 +25,7 @@ import com.maxprograms.swordfish.RemoteUtils;
 
 import org.json.JSONObject;
 
-public class Memory implements Serializable, Comparable<Memory> {
-
-	private static final long serialVersionUID = -3800311066779683003L;
+public class Memory implements Comparable<Memory> {
 
 	public static final String LOCAL = "Local";
 	public static final String REMOTE = "RemoteTM";

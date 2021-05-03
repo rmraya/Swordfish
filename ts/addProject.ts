@@ -217,7 +217,12 @@ class AddProject {
                 td = document.createElement('td');
                 td.className = 'noWrap';
                 td.style.overflowX = 'hidden';
-                td.innerText = file.file;
+                if (file.file.length > 50 && (file.file.indexOf('/') != -1 || file.file.indexOf('\\') != -1)) {
+                    td.innerText = file.file.substring(0, 10) + ' ... ' + file.file.substring(file.file.length - 35);
+                    td.title = file.file;
+                } else {
+                    td.innerText = file.file;
+                }
                 tr.appendChild(td);
 
                 td = document.createElement('td');

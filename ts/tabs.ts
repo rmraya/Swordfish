@@ -36,7 +36,7 @@ class Tab {
         this.label.id = this.id;
         if (description.length > 40) {
             this.label.title = description;
-            this.label.innerText = description.substr(0, 37) + '...';
+            this.label.innerText = '...' + description.substr(description.length - 37);
         } else {
             this.label.innerText = description;
         }
@@ -46,8 +46,8 @@ class Tab {
         this.labelDiv.appendChild(this.label);
         if (closeable) {
             let closeAnchor: HTMLAnchorElement = document.createElement('a');
-            closeAnchor.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16"><path style="stroke-width: 1.4;" d="M4 4 L12 12 M4 12 L12 4"/></svg>';
-            closeAnchor.style.marginLeft = '10px';
+            closeAnchor.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16"><path style="stroke-width: 1.4;" d="M6 6 L14 14 M6 14 L14 6"/></svg>';
+            closeAnchor.style.marginLeft = '8px';
             closeAnchor.addEventListener('click', () => {
                 this.parent.closeTab(this.id);
             });

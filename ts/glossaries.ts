@@ -25,10 +25,10 @@ class GlossariesView {
     topBar: HTMLDivElement;
     tbody: HTMLTableSectionElement;
     tableContainer: HTMLDivElement;
-    selected: Map<string, any>;
+    selected: Map<string, Memory>;
 
     constructor(div: HTMLDivElement) {
-        this.selected = new Map<string, any>();
+        this.selected = new Map<string, Memory>();
         this.container = div;
         this.topBar = document.createElement('div');
         this.topBar.className = 'toolbar';
@@ -144,7 +144,7 @@ class GlossariesView {
 
     watchSizes(): void {
         let targetNode: HTMLElement = document.getElementById('main');
-        let config: any = { attributes: true, childList: false, subtree: false };
+        let config: MutationObserverInit = { attributes: true, childList: false, subtree: false };
         let observer = new MutationObserver((mutationsList) => {
             for (let mutation of mutationsList) {
                 if (mutation.type === 'attributes') {
@@ -202,11 +202,11 @@ class GlossariesView {
         this.electron.ipcRenderer.send('get-glossaries');
     }
 
-    displayGlossaries(glossaries: any[]) {
+    displayGlossaries(glossaries: Memory[]) {
         this.tbody.innerHTML = '';
         let length = glossaries.length;
         for (let i = 0; i < length; i++) {
-            let p = glossaries[i];
+            let p: Memory = glossaries[i];
             let tr: HTMLTableRowElement = document.createElement('tr');
             tr.id = p.id;
             tr.addEventListener('click', (event: MouseEvent) => {
@@ -261,7 +261,7 @@ class GlossariesView {
         this.selected.clear();
     }
 
-    clicked(event: MouseEvent, glossary: any): void {
+    clicked(event: MouseEvent, glossary: Memory): void {
         let tr: HTMLTableRowElement = event.currentTarget as HTMLTableRowElement;
         let isSelected: boolean = this.selected.has(glossary.id);
         if (!isSelected) {

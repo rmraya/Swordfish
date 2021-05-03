@@ -35,6 +35,8 @@ import java.nio.file.Files;
 import java.sql.SQLException;
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.Iterator;
@@ -465,7 +467,6 @@ public class ProjectsHandler implements HttpHandler {
 
 	private JSONObject listProjects() {
 		JSONObject result = new JSONObject();
-
 		JSONArray array = projectsList.getJSONArray("projects");
 		for (int i = 0; i < array.length(); i++) {
 			int status = array.getJSONObject(i).getInt("status");
@@ -496,11 +497,7 @@ public class ProjectsHandler implements HttpHandler {
 			}
 		}
 		projectsList = new JSONObject(buffer.toString());
-		JSONArray array = projectsList.getJSONArray("projects");
-		for (int i = 0; i < array.length(); i++) {
-			JSONObject project = array.getJSONObject(i);
-			projects.put(project.getString("id"), new Project(project));
-		}
+		sortProjects();
 		if (firstRun) {
 			firstRun = false;
 			new Thread(() -> {
@@ -516,6 +513,30 @@ public class ProjectsHandler implements HttpHandler {
 				}
 			}).start();
 		}
+	}
+
+	private void sortProjects() throws JSONException, IOException {
+		JSONArray array = projectsList.getJSONArray("projects");
+		List<Project> list = new ArrayList<>();
+		for (int i = 0; i < array.length(); i++) {
+			Project project = new Project(array.getJSONObject(i));
+			list.add(project);
+		}
+		Collections.sort(list, new Comparator<Project>() {
+
+			@Override
+			public int compare(Project o1, Project o2) {
+				return o2.getCreationDate().compareTo(o1.getCreationDate());
+			}
+
+		});
+		array = new JSONArray();
+		for (int i = 0; i < list.size(); i++) {
+			Project project = list.get(i);
+			projects.put(project.getId(), project);
+			array.put(project.toJSON());
+		}
+		projectsList.put("projects", array);
 	}
 
 	private synchronized void saveProjectsList() throws IOException {
@@ -730,7 +751,7 @@ public class ProjectsHandler implements HttpHandler {
 
 						p.setFiles(sourceFiles);
 						projects.put(id, p);
-						projectsList.getJSONArray("projects").put(p.toJSON());
+						projectsList.getJSONArray("projects").put(0, p.toJSON());
 						saveProjectsList();
 						if (applyTM) {
 							XliffStore store = new XliffStore(p.getXliff(), p.getSourceLang().getCode(),

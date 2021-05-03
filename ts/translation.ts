@@ -17,6 +17,29 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 *****************************************************************************/
 
+class SegmentId {
+    file: string;
+    unit: string;
+    id: string;
+
+}
+
+class Segment {
+    index: number;
+    file: string;
+    unit: string;
+    segment: string;
+    state: string;
+    translate: boolean;
+    preserve: boolean;
+    source: string;
+    target: string;
+    match: number;
+    hasNotes: boolean;
+    tagErrors: boolean;
+    spaceErrors: boolean;
+}
+
 class TranslationView {
 
     electron = require('electron');
@@ -75,7 +98,7 @@ class TranslationView {
     currentState: HTMLTableCellElement;
     currentTranslate: HTMLTableCellElement;
     currentContent: string;
-    currentId: any = {};
+    currentId: SegmentId = { id: '', file: '', unit: '' };
     sourceTags: Map<string, string>;
 
     filterButton: HTMLAnchorElement;
@@ -600,7 +623,7 @@ class TranslationView {
 
     watchSizes(): void {
         let targetNode: HTMLDivElement = document.getElementById('main') as HTMLDivElement;
-        let config: any = { attributes: true, childList: false, subtree: false };
+        let config: MutationObserverInit = { attributes: true, childList: false, subtree: false };
         this.observer = new MutationObserver((mutationsList) => {
             for (let mutation of mutationsList) {
                 if (mutation.type === 'attributes') {
@@ -819,7 +842,7 @@ class TranslationView {
         this.statistics.classList.add('stats');
         this.statusArea.appendChild(this.statistics);
 
-        let config: any = { attributes: true, childList: false, subtree: false };
+        let config: MutationObserverInit = { attributes: true, childList: false, subtree: false };
         this.rowsObserver = new MutationObserver((mutationsList) => {
             for (let mutation of mutationsList) {
                 if (mutation.type === 'attributes') {
@@ -881,7 +904,7 @@ class TranslationView {
         this.memoryArea.appendChild(matchesContainer);
         this.tmMatches = new TmMatches(matchesContainer, this.projectId);
 
-        let config: any = { attributes: true, childList: false, subtree: false };
+        let config: MutationObserverInit = { attributes: true, childList: false, subtree: false };
         let observer: MutationObserver = new MutationObserver((mutationsList) => {
             for (let mutation of mutationsList) {
                 if (mutation.type === 'attributes') {
@@ -934,7 +957,7 @@ class TranslationView {
         this.electron.ipcRenderer.send('generate-statistics', { project: this.projectId });
     }
 
-    setSegments(arg: any[]): void {
+    setSegments(arg: Segment[]): void {
         this.tbody.innerHTML = '';
         this.tbody.parentElement.scrollTo({ top: 0, left: 0, behavior: 'smooth' });
         let length: number = arg.length;
@@ -945,7 +968,7 @@ class TranslationView {
         }
         let returnRow: HTMLTableRowElement;
         for (let i = 0; i < length; i++) {
-            let row: any = arg[i];
+            let row: Segment = arg[i];
             let tr: HTMLTableRowElement = document.createElement('tr');
             tr.setAttribute('data-file', row.file);
             tr.setAttribute('data-unit', row.unit);
@@ -961,7 +984,7 @@ class TranslationView {
             td.classList.add('middle');
             td.classList.add('center');
             td.classList.add('initial');
-            td.innerText = row.index + 1;
+            td.innerText = '' + (row.index + 1);
             tr.appendChild(td);
 
             if (row.index + 1 === this.returnNumber) {

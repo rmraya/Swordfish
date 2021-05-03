@@ -61,7 +61,7 @@ class Main {
 
         Main.tabHolder.selectTab('projects');
 
-        let observerOptions = {
+        let observerOptions: MutationObserverInit = {
             childList: true,
             attributes: false
         }
@@ -375,7 +375,7 @@ class Main {
         });
         Main.electron.ipcRenderer.on('notes-closed', () => {
             this.notesClosed();
-        }); 
+        });
         Main.electron.ipcRenderer.on('notes-removed', (event: Electron.IpcRendererEvent, arg: any) => {
             this.notesRemoved(arg);
         });
@@ -385,7 +385,10 @@ class Main {
         Main.electron.ipcRenderer.on('edit-source', () => {
             this.editSource();
         });
-        let config: any = { attributes: true, childList: false, subtree: false };
+        Main.electron.ipcRenderer.on('get-selection', () => {
+            Main.electron.ipcRenderer.send('set-selection', window.getSelection().toString())
+        });
+        let config: MutationObserverInit = { attributes: true, childList: false, subtree: false };
         let observer = new MutationObserver((mutationsList) => {
             for (let mutation of mutationsList) {
                 if (mutation.type === 'attributes') {
@@ -994,14 +997,14 @@ class Main {
         }
     }
 
-    setErrors(arg:any): void {
+    setErrors(arg: any): void {
         let selected = Main.tabHolder.getSelected();
         if (Main.translationViews.has(selected)) {
             Main.translationViews.get(selected).setErrors(arg);
         }
     }
 
-    clearErrors(arg:any): void {
+    clearErrors(arg: any): void {
         let selected = Main.tabHolder.getSelected();
         if (Main.translationViews.has(selected)) {
             Main.translationViews.get(selected).clearErrors(arg);

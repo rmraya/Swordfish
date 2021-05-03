@@ -20,7 +20,6 @@ SOFTWARE.
 package com.maxprograms.swordfish.tm;
 
 import java.io.IOException;
-import java.io.Serializable;
 import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.Map;
@@ -33,9 +32,7 @@ import com.maxprograms.xml.Element;
 import org.json.JSONObject;
 import org.xml.sax.SAXException;
 
-public class Match implements Serializable, Comparable<Match> {
-
-	private static final long serialVersionUID = -944405164833933436L;
+public class Match implements Comparable<Match> {
 
 	private Element source;
 	private Element target;

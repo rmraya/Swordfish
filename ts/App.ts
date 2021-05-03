@@ -138,6 +138,8 @@ class Swordfish {
     static htmlTitle: string;
     static htmlId: number;
 
+    static clipboardContent = '';
+
     stopping: boolean = false;
 
     static SUCCESS: string = 'Success';
@@ -165,6 +167,10 @@ class Swordfish {
                 }
                 Swordfish.mainWindow.focus();
             }
+        }
+
+        if (process.platform === 'darwin' && process.arch === 'arm64') {
+            Swordfish.verticalPadding = 56;
         }
 
         if (process.platform === 'win32') {
@@ -236,7 +242,7 @@ class Swordfish {
                 if (Swordfish.currentPreferences.showGuide) {
                     Swordfish.showGettingStarted();
                 }
-                
+
             });
         });
 
@@ -863,9 +869,12 @@ class Swordfish {
         ipcMain.on('show-getting-started', (event: IpcMainEvent, arg: any) => {
             Swordfish.currentPreferences.showGuide = arg.showGuide;
             Swordfish.savePreferences(Swordfish.currentPreferences);
-        })
+        });
         ipcMain.on('get-show guide', (event: IpcMainEvent) => {
             event.sender.send('set-show guide', { showGuide: Swordfish.currentPreferences.showGuide });
+        });
+        ipcMain.on('set-selection', (event: IpcMainEvent, arg: any) => {
+            Swordfish.clipboardContent = arg;
         });
     } // end constructor
 
@@ -930,9 +939,9 @@ class Swordfish {
         let editMenu: Menu = Menu.buildFromTemplate([
             { label: 'Undo', accelerator: 'CmdOrCtrl+Z', click: () => { Swordfish.mainWindow.webContents.undo(); } },
             new MenuItem({ type: 'separator' }),
-            { label: 'Cut', accelerator: 'CmdOrCtrl+X', click: () => { Swordfish.mainWindow.webContents.cut(); } },
-            { label: 'Copy', accelerator: 'CmdOrCtrl+C', click: () => { Swordfish.mainWindow.webContents.copy(); } },
-            { label: 'Paste', accelerator: 'CmdOrCtrl+V', click: () => { Swordfish.mainWindow.webContents.paste(); } },
+            { label: 'Cut', accelerator: 'CmdOrCtrl+X', click: () => { Swordfish.cut(); } },
+            { label: 'Copy', accelerator: 'CmdOrCtrl+C', click: () => { Swordfish.copy(); } },
+            { label: 'Paste', accelerator: 'CmdOrCtrl+V', click: () => { Swordfish.paste(); } },
             { label: 'Select All', accelerator: 'CmdOrCtrl+A', click: () => { Swordfish.mainWindow.webContents.selectAll(); } },
             new MenuItem({ type: 'separator' }),
             { label: 'Edit Previous Segment', accelerator: 'PageUp', click: () => { Swordfish.mainWindow.webContents.send('previous-segment'); } },
@@ -1003,8 +1012,8 @@ class Swordfish {
             { label: 'Project Statistics', click: () => { Swordfish.mainWindow.webContents.send('request-statistics'); } },
             { label: 'Export HTML', accelerator: 'F5', click: () => { Swordfish.mainWindow.webContents.send('export-html'); } },
             new MenuItem({ type: 'separator' }),
-            { label: 'Import XLIFF File as Project', click: () => { Swordfish.showImportXliff(); } },
-            { label: 'Export Project as XLIFF File', click: () => { Swordfish.mainWindow.webContents.send('export-project'); } }
+            { label: 'Import Project', click: () => { Swordfish.showImportXliff(); } },
+            { label: 'Export Project', click: () => { Swordfish.mainWindow.webContents.send('export-project'); } }
         ]);
         let memoriesMenu: Menu = Menu.buildFromTemplate([
             { label: 'Add Memory', click: () => { Swordfish.showAddMemory(); } },
@@ -2044,11 +2053,14 @@ class Swordfish {
                         if (app.getVersion() !== parsedData.version) {
                             Swordfish.latestVersion = parsedData.version;
                             switch (process.platform) {
-                                case 'darwin': Swordfish.downloadLink = parsedData.darwin;
+                                case 'darwin':
+                                    Swordfish.downloadLink = process.arch === 'arm64' ? parsedData.arm64 : parsedData.darwin;
                                     break;
-                                case 'win32': Swordfish.downloadLink = parsedData.win32;
+                                case 'win32':
+                                    Swordfish.downloadLink = parsedData.win32;
                                     break;
-                                case 'linux': Swordfish.downloadLink = parsedData.linux;
+                                case 'linux':
+                                    Swordfish.downloadLink = parsedData.linux;
                                     break;
                             }
                             Swordfish.updatesWindow = new BrowserWindow({
@@ -3228,7 +3240,7 @@ class Swordfish {
 
     static browseXLIFF(event: IpcMainEvent): void {
         dialog.showOpenDialog({
-            title: 'Import XLIFF File',
+            title: 'Import Project File',
             properties: ['openFile'],
             filters: [
                 { name: 'XLIFF File', extensions: ['xlf'] },
@@ -4568,6 +4580,23 @@ class Swordfish {
         Swordfish.gettingStartedWindow.once('ready-to-show', () => {
             Swordfish.gettingStartedWindow.show();
         });
+    }
+
+    static cut(): void {
+        Swordfish.mainWindow.webContents.cut();
+        Swordfish.mainWindow.webContents.send('get-selection');
+    }
+
+    static copy(): void {
+        Swordfish.mainWindow.webContents.copy();
+        Swordfish.mainWindow.webContents.send('get-selection');
+    }
+
+    static paste(): void {
+        if (Swordfish.clipboardContent !== clipboard.readText()) {
+            clipboard.writeText(clipboard.readText());
+        }
+        Swordfish.mainWindow.webContents.paste();
     }
 }
 

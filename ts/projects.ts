@@ -17,6 +17,28 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 *****************************************************************************/
 
+class SourceFile {
+    file: string;
+    type: string;
+    encoding: string;
+}
+
+class Project {
+    id: string;
+    description: string;
+    status: string;
+    sourceLang: string;
+    targetLang: string;
+    client: string;
+    subject: string;
+    creationDate: string;
+    files: SourceFile[];
+    xliff: string;
+    memory: string;
+    glossary: string;
+    svg: string;
+}
+
 class ProjectsView {
 
     electron = require('electron');
@@ -26,11 +48,11 @@ class ProjectsView {
     tableContainer: HTMLDivElement;
     tbody: HTMLTableSectionElement;
 
-    selected: Map<string, any>;
+    selected: Map<string, Project>;
     shouldOpen: string;
 
     constructor(div: HTMLDivElement) {
-        this.selected = new Map<string, any>();
+        this.selected = new Map<string, Project>();
         this.shouldOpen = '';
         this.container = div;
 
@@ -106,7 +128,7 @@ class ProjectsView {
 
         let importButton = document.createElement('a');
         importButton.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" enable-background="new 0 0 24 24" height="24" viewBox="0 0 24 24" width="24"><path d="M19,9h-2v6.59L5.41,4L4,5.41L15.59,17H9v2h10V9z"/></svg>' +
-            '<span class="tooltiptext bottomTooltip">Import XLIFF File as Project</span>';
+            '<span class="tooltiptext bottomTooltip">Import Project</span>';
         importButton.className = 'tooltip';
         importButton.addEventListener('click', () => {
             this.electron.ipcRenderer.send('import-xliff');
@@ -116,7 +138,7 @@ class ProjectsView {
 
         let exportButton = document.createElement('a');
         exportButton.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" enable-background="new 0 0 24 24" height="24" viewBox="0 0 24 24" width="24"><path d="M9,5v2h6.59L4,18.59L5.41,20L17,8.41V15h2V5H9z"/></svg>' +
-            '<span class="tooltiptext bottomTooltip">Export Project as XLIFF File</span>';
+            '<span class="tooltiptext bottomTooltip">Export Project</span>';
         exportButton.className = 'tooltip';
         exportButton.addEventListener('click', () => {
             this.exportProject();
@@ -175,7 +197,7 @@ class ProjectsView {
 
     watchSizes(): void {
         let targetNode: HTMLElement = document.getElementById('main');
-        let config: any = { attributes: true, childList: false, subtree: false };
+        let config: MutationObserverInit = { attributes: true, childList: false, subtree: false };
         let observer = new MutationObserver((mutationsList) => {
             for (let mutation of mutationsList) {
                 if (mutation.type === 'attributes') {
@@ -296,7 +318,7 @@ class ProjectsView {
             return;
         }
         for (let key of this.selected.keys()) {
-            let project = this.selected.get(key);
+            let project: Project = this.selected.get(key);
             this.electron.ipcRenderer.send('export-xliff', { projectId: key, description: project.description });
         }
     }
@@ -311,17 +333,17 @@ class ProjectsView {
             return;
         }
         for (let key of this.selected.keys()) {
-            let project = this.selected.get(key);
+            let project: Project = this.selected.get(key);
             this.electron.ipcRenderer.send('export-tmx-file', { projectId: key, description: project.description });
         }
     }
 
-    displayProjects(projects: any[]) {
+    displayProjects(projects: Project[]) {
         this.selected.clear();
         this.tbody.innerHTML = '';
         let length = projects.length;
         for (let i = 0; i < length; i++) {
-            let p = projects[i];
+            let p: Project = projects[i];
             let tr = document.createElement('tr');
             tr.id = p.id;
             tr.addEventListener('click', (event: MouseEvent) => {
@@ -337,7 +359,12 @@ class ProjectsView {
 
             let td = document.createElement('td');
             td.classList.add('list');
-            td.innerText = p.description;
+            if (p.description.length > 90 && (p.description.indexOf('/') != -1 || p.description.indexOf('\\') != -1)) {
+                td.innerText = p.description.substring(0, 30) + ' ... ' + p.description.substring(p.description.length - 50);
+                td.title = p.description;
+            } else {
+                td.innerText = p.description;
+            }
             tr.append(td);
 
             td = document.createElement('td');
@@ -387,7 +414,7 @@ class ProjectsView {
         }
     }
 
-    dblclicked(event: MouseEvent, project: any): void {
+    dblclicked(event: MouseEvent, project: Project): void {
         for (let key of this.selected.keys()) {
             document.getElementById(key).classList.remove('selected');
         }
@@ -396,7 +423,7 @@ class ProjectsView {
         this.openProjects();
     }
 
-    clicked(event: MouseEvent, project: any): void {
+    clicked(event: MouseEvent, project: Project): void {
         let tr: HTMLTableRowElement = event.currentTarget as HTMLTableRowElement;
         let isSelected: boolean = this.selected.has(project.id);
         if (!isSelected) {
@@ -451,7 +478,7 @@ class ProjectsView {
             return;
         }
         for (let key of this.selected.keys()) {
-            let project = this.selected.get(key);
+            let project: Project = this.selected.get(key);
             this.electron.ipcRenderer.send('show-apply-tm', { project: key, memory: project.memory });
         }
     }

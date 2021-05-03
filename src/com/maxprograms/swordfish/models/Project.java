@@ -19,7 +19,6 @@ SOFTWARE.
 package com.maxprograms.swordfish.models;
 
 import java.io.IOException;
-import java.io.Serializable;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -31,9 +30,7 @@ import com.maxprograms.languages.LanguageUtils;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
-public class Project implements Serializable, Comparable<Project> {
-
-	private static final long serialVersionUID = -7301458245016833998L;
+public class Project implements Comparable<Project> {
 
 	public static final int NEW = 0;
 
@@ -171,7 +168,7 @@ public class Project implements Serializable, Comparable<Project> {
 
 	public void setFiles(JSONArray array) {
 		files = new ArrayList<>();
-		for (int i=0 ; i<array.length() ; i++) {
+		for (int i = 0; i < array.length(); i++) {
 			files.add(new SourceFile(array.getJSONObject(i)));
 		}
 	}

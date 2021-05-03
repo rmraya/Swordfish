@@ -49,7 +49,7 @@ Technical Support |  Peer support at  [Groups.io](https://groups.io/g/maxprogram
 
 - JDK 11 or newer is required for compiling and building. Get it from [AdoptOpenJDK](https://adoptopenjdk.net/).
 - Apache Ant 1.10.7 or newer. Get it from [https://ant.apache.org/](https://ant.apache.org/)
-- Node.js 12.16.0 LTS or newer. Get it from [https://nodejs.org/](https://nodejs.org/)
+- Node.js 14.16.1 LTS or newer. Get it from [https://nodejs.org/](https://nodejs.org/)
 
 ## Building
 

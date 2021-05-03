@@ -17,6 +17,16 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 *****************************************************************************/
 
+class Match {
+    matchId: string;
+    similarity: number;
+    srcLang: string;
+    tgtLang: string;
+    source: string;
+    target: string;
+    origin: string;
+}
+
 class TmMatches {
 
     electron = require('electron');
@@ -25,13 +35,13 @@ class TmMatches {
     projectId: string;
 
     tabHolder: TabHolder;
-    matches: Map<string, any>;
+    matches: Map<string, Match>;
     origin: HTMLSpanElement;
 
     constructor(div: HTMLDivElement, projectId: string) {
         this.container = div;
         this.projectId = projectId;
-        this.matches = new Map<string, any>();
+        this.matches = new Map<string, Match>();
 
         let tabContainer: HTMLDivElement = document.createElement('div');
         tabContainer.classList.add('fill_width');
@@ -72,7 +82,7 @@ class TmMatches {
             this.acceptTranslation();
         });
 
-        let config: any = { attributes: true, childList: false, subtree: false };
+        let config: MutationObserverInit = { attributes: true, childList: false, subtree: false };
         let observer = new MutationObserver((mutationsList) => {
             for (let mutation of mutationsList) {
                 if (mutation.type === 'attributes') {
@@ -89,7 +99,7 @@ class TmMatches {
         this.matches.clear();
     }
 
-    add(match: any) {
+    add(match: Match) {
         this.matches.set(match.matchId, match);
         let tab = new Tab(match.matchId, match.similarity + '%', false);
 
@@ -137,7 +147,7 @@ class TmMatches {
             this.origin.innerText = match.origin;
         });
 
-        let config: any = { attributes: true, childList: false, subtree: false };
+        let config: MutationObserverInit = { attributes: true, childList: false, subtree: false };
         let observer = new MutationObserver((mutationsList) => {
             for (let mutation of mutationsList) {
                 if (mutation.type === 'attributes') {
@@ -158,21 +168,21 @@ class TmMatches {
             return;
         }
         let selected: string = this.tabHolder.getSelected();
-        let match: any = this.matches.get(selected);
+        let match: Match = this.matches.get(selected);
         this.electron.ipcRenderer.send('accept-match', match);
     }
 
     nextMatch(): void {
         this.tabHolder.selectNext();
         let selected: string = this.tabHolder.getSelected();
-        let match: any = this.matches.get(selected);
+        let match: Match = this.matches.get(selected);
         this.origin.innerText = match.origin;
     }
 
     previousMatch(): void {
         this.tabHolder.selectPrevious();
         let selected: string = this.tabHolder.getSelected();
-        let match: any = this.matches.get(selected);
+        let match: Match = this.matches.get(selected);
         this.origin.innerText = match.origin;
     }
 }

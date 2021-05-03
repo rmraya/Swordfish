@@ -50,7 +50,7 @@ class VerticalSplit {
         this.right.style.width = '50%';
         parent.appendChild(this.right);
 
-        let config: any = { attributes: true, childList: false, subtree: false };
+        let config: MutationObserverInit = { attributes: true, childList: false, subtree: false };
         let observer = new MutationObserver((mutationsList) => {
             for (let mutation of mutationsList) {
                 if (mutation.type === 'attributes') {
@@ -149,7 +149,7 @@ class ThreeVerticalPanels {
         this.right.style.width = '33%';
         parent.appendChild(this.right);
 
-        let config: any = { attributes: true, childList: false, subtree: false };
+        let config: MutationObserverInit = { attributes: true, childList: false, subtree: false };
         let observer = new MutationObserver((mutationsList) => {
             for (let mutation of mutationsList) {
                 if (mutation.type === 'attributes') {
@@ -249,7 +249,7 @@ class HorizontalSplit {
         this.bottom.style.height = '50%';
         parent.appendChild(this.bottom);
 
-        let config: any = { attributes: true, childList: false, subtree: false };
+        let config: MutationObserverInit = { attributes: true, childList: false, subtree: false };
         let observer = new MutationObserver((mutationsList) => {
             for (let mutation of mutationsList) {
                 if (mutation.type === 'attributes') {

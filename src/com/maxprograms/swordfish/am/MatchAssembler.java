@@ -77,8 +77,9 @@ public class MatchAssembler {
 
         for (int i = 0; i < tmMatches.size(); i++) {
             Match match = tmMatches.get(i);
-            Element source = XliffUtils.toXliff("source", match.getSource(), new JSONObject());
-            Element target = XliffUtils.toXliff("target", match.getTarget(), new JSONObject());
+            XliffUtils.setTags(new JSONObject());
+            Element source = XliffUtils.toXliff("", i, "source", match.getSource());
+            Element target = XliffUtils.toXliff("", i, "target", match.getTarget());
             String pureSource = clean(XliffUtils.pureText(source).trim());
 
             if (visited.contains(pureSource)) {
@@ -158,7 +159,8 @@ public class MatchAssembler {
                     properties.put("creationtool", Constants.APPNAME);
                     properties.put("creationtoolversion", Constants.VERSION);
 
-                    Match newMatch = new Match(uncleanElement(newSource), uncleanElement(newTarget), similarity, "Auto", properties);
+                    Match newMatch = new Match(uncleanElement(newSource), uncleanElement(newTarget), similarity, "Auto",
+                            properties);
                     result.add(newMatch);
                 }
             }
@@ -282,7 +284,7 @@ public class MatchAssembler {
     private static String unclean(String string) {
         return string.replace("\uE0A1", "&").replace("\uE0A0", "<");
     }
-    
+
     private static Element uncleanElement(Element e) {
         List<XMLNode> newContent = new Vector<>();
         List<XMLNode> oldContent = e.getContent();

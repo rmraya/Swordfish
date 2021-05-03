@@ -17,6 +17,19 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 *****************************************************************************/
 
+class Memory {
+    id: string;
+    name: string;
+    project: string;
+    subject: string;
+    client: string;
+    creationDate: number;
+    creationString: string;
+    type: string;
+    server: string;
+    user: string;
+}
+
 class MemoriesView {
 
     electron = require('electron');
@@ -25,10 +38,10 @@ class MemoriesView {
     topBar: HTMLDivElement;
     tableContainer: HTMLDivElement;
     tbody: HTMLTableSectionElement;
-    selected: Map<string, any>;
+    selected: Map<string, Memory>;
 
     constructor(div: HTMLDivElement) {
-        this.selected = new Map<string, any>();
+        this.selected = new Map<string, Memory>();
         this.container = div;
 
         this.topBar = document.createElement('div');
@@ -136,7 +149,7 @@ class MemoriesView {
 
     watchSizes(): void {
         let targetNode: HTMLElement = document.getElementById('main');
-        let config: any = { attributes: true, childList: false, subtree: false };
+        let config: MutationObserverInit = { attributes: true, childList: false, subtree: false };
         let observer = new MutationObserver((mutationsList) => {
             for (let mutation of mutationsList) {
                 if (mutation.type === 'attributes') {
@@ -194,7 +207,7 @@ class MemoriesView {
         this.electron.ipcRenderer.send('export-memories', memories);
     }
 
-    displayMemories(memories: any[]) {
+    displayMemories(memories: Memory[]) {
         this.tbody.innerHTML = '';
         let length = memories.length;
         for (let i = 0; i < length; i++) {
@@ -253,7 +266,7 @@ class MemoriesView {
         this.selected.clear();
     }
 
-    clicked(event: MouseEvent, memory: any): void {
+    clicked(event: MouseEvent, memory: Memory): void {
         let tr: HTMLTableRowElement = event.currentTarget as HTMLTableRowElement;
         let isSelected: boolean = this.selected.has(memory.id);
         if (!isSelected) {

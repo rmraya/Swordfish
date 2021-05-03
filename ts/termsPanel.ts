@@ -17,15 +17,23 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 *****************************************************************************/
 
+class Term {
+    srcLang: string;
+    tgtLang: string;
+    source: string;
+    target: string;
+    origin: string;
+}
+
 class TermsPanel {
 
     electron = require('electron');
 
     container: HTMLDivElement;
     projectId: string;
-    selected: any;
+    selected: Term;
     selectedIndex: number = 0;
-    terms: any[] = [];
+    terms: Term[] = [];
     rows: HTMLTableRowElement[] = [];
     table: HTMLTableElement;
 
@@ -63,7 +71,7 @@ class TermsPanel {
         this.originSpan.style.marginTop = '4px';
         toolbar.appendChild(this.originSpan);
 
-        let config: any = { attributes: true, childList: false, subtree: false };
+        let config: MutationObserverInit = { attributes: true, childList: false, subtree: false };
         let observer = new MutationObserver((mutationsList) => {
             for (let mutation of mutationsList) {
                 if (mutation.type === 'attributes') {
@@ -93,7 +101,7 @@ class TermsPanel {
         return '';
     }
 
-    setTerms(terms: any[]): void {
+    setTerms(terms: Term[]): void {
         if (terms.length === 0) {
             this.clear();
             return;
@@ -103,7 +111,7 @@ class TermsPanel {
         let length: number = terms.length;
         this.rows = [];
         for (let i: number = 0; i < length; i++) {
-            let term: any = terms[i];
+            let term: Term = terms[i];
             let row: HTMLTableRowElement = document.createElement('tr');
             row.addEventListener('click', () => {
                 this.selected = term;
@@ -129,7 +137,7 @@ class TermsPanel {
             source.style.width = '49%';
             source.classList.add('initial')
             if (TranslationView.isBiDi(term.srcLang)) {
-                source.dir='rtl';
+                source.dir = 'rtl';
             }
             row.appendChild(source);
 
@@ -137,7 +145,7 @@ class TermsPanel {
             target.innerText = term.target;
             target.style.width = '49%';
             if (TranslationView.isBiDi(term.tgtLang)) {
-                target.dir='rtl';
+                target.dir = 'rtl';
             }
             row.appendChild(target);
 

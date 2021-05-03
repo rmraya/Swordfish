@@ -32,7 +32,6 @@ import java.net.URL;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
-import java.util.ArrayList;
 import java.util.Base64;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -40,6 +39,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
+import java.util.Vector;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
@@ -315,7 +315,7 @@ public class RemoteDatabase implements ITmEngine {
         params.put("caseSensitive", caseSensitive);
         JSONObject json = postMessage("/memories", params);
         JSONArray array = json.getJSONArray("matches");
-        List<Match> matches = new ArrayList<>();
+        List<Match> matches = new Vector<>();
         for (int i = 0; i < array.length(); i++) {
             matches.add(toMatch(array.getJSONObject(i)));
         }
@@ -334,7 +334,7 @@ public class RemoteDatabase implements ITmEngine {
         params.put("caseSensitive", caseSensitive);
         JSONObject json = postMessage("/memories", params);
         JSONArray array = json.getJSONArray("tus");
-        List<Element> tus = new ArrayList<>();
+        List<Element> tus = new Vector<>();
         for (int i = 0; i < array.length(); i++) {
             tus.add(toElement(array.getString(i)));
         }
@@ -354,7 +354,7 @@ public class RemoteDatabase implements ITmEngine {
         params.put("caseSensitive", caseSensitive);
         JSONObject json = postMessage("/memories", params);
         JSONArray array = json.getJSONArray("tus");
-        List<Element> tus = new ArrayList<>();
+        List<Element> tus = new Vector<>();
         for (int i = 0; i < array.length(); i++) {
             tus.add(toElement(array.getString(i)));
         }
