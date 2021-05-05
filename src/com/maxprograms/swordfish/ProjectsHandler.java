@@ -751,7 +751,8 @@ public class ProjectsHandler implements HttpHandler {
 
 						p.setFiles(sourceFiles);
 						projects.put(id, p);
-						projectsList.getJSONArray("projects").put(0, p.toJSON());
+						projectsList.getJSONArray("projects").put(p.toJSON());
+						sortProjects();
 						saveProjectsList();
 						if (applyTM) {
 							XliffStore store = new XliffStore(p.getXliff(), p.getSourceLang().getCode(),
