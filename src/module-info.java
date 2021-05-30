@@ -30,6 +30,9 @@ module swordfish {
 	requires java.base;
 	requires java.xml;
 	requires java.sql;
+	requires java.net.http;
+	requires jdk.security.auth;
+	requires jdk.crypto.cryptoki;
 	requires transitive openxliff;
 	requires transitive jdk.httpserver;
 	requires transitive json;
