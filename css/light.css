@@ -17,7 +17,7 @@ body {
 
 .hdivider {
 	width: 2px;
-	background: var(--themePrimary);
+	background: transparent;
 	height: 100%;
 	position: relative;
 	cursor: col-resize;
@@ -28,7 +28,7 @@ body {
 .vdivider {
 	width: 100%;
 	height: 2px;
-	background: var(--themePrimary);
+	background: transparent;
 	position: relative;
 	cursor: row-resize;
 	display: block;
@@ -80,9 +80,9 @@ table {
 }
 
 thead {
-	height: 24px;
-	background: var(--gray40);
-	color: var(--themeDark);
+	height: 26px;
+	background: var(--themeDark);
+	color: var(--gray10);
 }
 
 thead tr {
@@ -90,10 +90,18 @@ thead tr {
 	z-index: 5;
 	background: inherit !important;
 	color: inherit !important;
+	border: none !important;
 }
 
 .stripes tr {
-	border-bottom: 2px solid var(--gray40);
+	border-top: 2px solid var(--gray50);
+	border-bottom: 2px solid var(--gray50);
+}
+
+.currentRow {
+	border-top: 3px solid var(--themeDark) !important;
+	border-bottom: 3px solid var(--themeDark) !important;
+	background-color: var(--gray10) !important;
 }
 
 tbody {
@@ -151,18 +159,13 @@ tr.selected {
 th {
 	position: sticky;
 	z-index: 5;
-	padding: 8px 4px;
+	padding: 0px 4px;
 	top: 0;
 	font-weight: 300;
-	background: var(--gray40);
-	color: var(--themeDark);
-	fill: var(--themeDark);
-}
-
-.currentRow {
-	border-top: 3px solid var(--themeDark) !important;
-	border-bottom: 3px solid var(--themeDark) !important;
-	background-color: var(--gray10) !important;
+	background: var(--themeDark);
+	color: var(--gray10);
+	fill: var(--gray10);
+	stroke: var(--gray10);
 }
 
 .sourceContainer {
@@ -442,13 +445,13 @@ label {
 svg {
 	fill: var(--black);
 	stroke: var(--black);
-	stroke-width: 0.3;
+	stroke-width: 0.1;
 }
 
 th svg {
 	margin-top: 4px;
-	fill: var(--themePrimary) !important;
-	stroke: var(--themePrimary) !important;
+	fill: var(--gray10) !important;
+	stroke: var(--gray10) !important;
 }
 
 /* tabs */
@@ -526,11 +529,12 @@ th svg {
 	margin: 0;
 	padding-top: 0;
 	padding-left: 4px;
-	background: var(--themeDarkAlt);
+	background: var(--themeDark);
 	color: var(--gray10);
-	border-bottom: 1px solid var(--gray110);
 	white-space: nowrap;
 	overflow-x: hidden;
+	height: 26px;
+	vertical-align: middle;
 }
 
 .panelcontent {
@@ -666,4 +670,67 @@ svg.stats {
 
 .oddUnit {
 	border-right-color: var(--odd-unit) !important;
+}
+
+.paddedPanel {
+	margin-top: 8px;
+	margin-right: 8px;
+	margin-left: 8px;
+	margin-bottom: 8px;
+	border-radius: 2px;
+	width: calc(100% - 16px);
+	height: calc(100% - 16px);
+	overflow: auto;
+	box-shadow: 0px 2px 4px var(--gray130);
+}
+
+.leftPaddedPanel {
+	margin-top: 8px;
+	margin-right: 4px;
+	margin-left: 8px;
+	margin-bottom: 8px;
+	border-radius: 2px;
+	width: calc(100% - 12px);
+	height: calc(100% - 16px);
+	overflow: auto;
+	box-shadow: 0px 2px 4px var(--gray130);
+}
+
+.rightPaddedPanel {
+	margin: 0px;
+	width: 100%;
+	height: 100%;
+}
+
+.topPaddedPanel {
+	margin-top: 8px;
+	margin-right: 8px;
+	margin-left: 4px;
+	margin-bottom: 4px;
+	border-radius: 2px;
+	width: calc(100% - 12px);
+	height: calc(100% - 12px);
+	box-shadow: 0px 2px 4px var(--gray130);
+}
+
+.centerPaddedPanel {
+	margin-top: 4px;
+	margin-right: 8px;
+	margin-left: 4px;
+	margin-bottom: 4px;
+	border-radius: 2px;
+	width: calc(100% - 12px);
+	height: calc(100% - 8px);
+	box-shadow: 0px 2px 4px var(--gray130);
+}
+
+.bottomPaddedPanel {
+	margin-top: 4px;
+	margin-right: 8px;
+	margin-left: 4px;
+	margin-bottom: 8px;
+	border-radius: 2px;
+	width: calc(100% - 12px);
+	height: calc(100% - 12px);
+	box-shadow: 0px 2px 4px var(--gray130);
 }

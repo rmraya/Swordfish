@@ -1,21 +1,14 @@
-/*****************************************************************************
-Copyright (c) 2007-2021 - Maxprograms,  http://www.maxprograms.com/
-
-Permission is hereby granted, free of charge, to any person obtaining a copy of 
-this software and associated documentation files (the "Software"), to compile, 
-modify and use the Software in its executable form without restrictions.
-
-Redistribution of this Software or parts of it in any form (source code or 
-executable binaries) requires prior written permission from Maxprograms.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR 
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, 
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE 
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER 
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, 
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE 
-SOFTWARE.
-*****************************************************************************/
+/*******************************************************************************
+ * Copyright (c) 2007-2021 Maxprograms.
+ *
+ * This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License 1.0
+ * which accompanies this distribution, and is available at
+ * https://www.eclipse.org/org/documents/epl-v10.html
+ *
+ * Contributors:
+ *     Maxprograms - initial API and implementation
+ *******************************************************************************/
 
 class SegmentId {
     file: string;
@@ -61,7 +54,6 @@ class TranslationView {
     rowsObserver: MutationObserver;
 
     mainArea: HTMLDivElement;
-    filesArea: HTMLDivElement;
     translationArea: HTMLDivElement;
     rightPanel: HTMLDivElement;
     segmentsArea: HTMLDivElement;
@@ -146,7 +138,6 @@ class TranslationView {
 
         let verticalPanels: VerticalSplit = new VerticalSplit(this.mainArea);
         verticalPanels.setWeights([75, 25]);
-        this.filesArea = verticalPanels.leftPanel();
 
         this.translationArea = verticalPanels.leftPanel();
         this.translationArea.style.height = '100%';
@@ -443,7 +434,7 @@ class TranslationView {
         this.topBar.appendChild(mergeButton);
 
         this.sortButton = document.createElement('a');
-        this.sortButton.innerHTML = '<svg version="1.1" viewBox="0 0 24 24" height="24" width="24"><path style="stroke-width:0.6" d="m 8.666667,10.444444 v 3.111112 H 12 L 7,19 2,13.555556 H 5.333333 V 10.444444 H 2 L 7,5 12,10.444444 Z M 22,14.333333 h -8.333333 v 1.555556 H 22 Z M 22,19 H 13.666667 V 17.444444 H 22 Z m 0,-6.222222 H 13.666667 V 11.222222 H 22 Z M 22,9.6666667 H 13.666667 V 8.1111111 H 22 Z M 22,6.5555556 H 13.666667 V 5 H 22 Z" /></svg>' +
+        this.sortButton.innerHTML = '<svg version="1.1" viewBox="0 0 24 24" height="24" width="24"><path style="stroke-width:0.1" d="m 8.666667,10.444444 v 3.111112 H 12 L 7,19 2,13.555556 H 5.333333 V 10.444444 H 2 L 7,5 12,10.444444 Z M 22,14.333333 h -8.333333 v 1.555556 H 22 Z M 22,19 H 13.666667 V 17.444444 H 22 Z m 0,-6.222222 H 13.666667 V 11.222222 H 22 Z M 22,9.6666667 H 13.666667 V 8.1111111 H 22 Z M 22,6.5555556 H 13.666667 V 5 H 22 Z" /></svg>' +
             '<span class="tooltiptext bottomTooltip">Sort Segments</span>';
         this.sortButton.className = 'tooltip';
         this.sortButton.style.marginLeft = '20px';
@@ -453,7 +444,7 @@ class TranslationView {
         this.topBar.appendChild(this.sortButton);
 
         this.filterButton = document.createElement('a');
-        this.filterButton.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="0 0 24 24" height="24" width="24"><path style="stroke-width:0.829702" d="M 18.091348,3.6666667 11.913044,14.119167 v 4.936666 l -0.826087,-0.5 V 14.119167 L 4.9086522,3.6666667 Z M 21,2 H 2 L 9.4347826,14.578333 V 19.5 L 13.565217,22 v -7.421667 z"/></svg>' +
+        this.filterButton.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="0 0 24 24" height="24" width="24"><path style="stroke-width:0.1" d="M 18.091348,3.6666667 11.913044,14.119167 v 4.936666 l -0.826087,-0.5 V 14.119167 L 4.9086522,3.6666667 Z M 21,2 H 2 L 9.4347826,14.578333 V 19.5 L 13.565217,22 v -7.421667 z"/></svg>' +
             '<span class="tooltiptext bottomTooltip">Filter Segments</span>';
         this.filterButton.className = 'tooltip';
         this.filterButton.addEventListener('click', () => {
@@ -674,15 +665,19 @@ class TranslationView {
     }
 
     buildTranslationArea(): void {
+
+        let leftPanel: HTMLDivElement = document.createElement('div');
+        leftPanel.classList.add('leftPaddedPanel');
+        this.translationArea.appendChild(leftPanel);
+
         let tableContainer: HTMLDivElement = document.createElement('div');
         tableContainer.classList.add('divContainer');
         tableContainer.classList.add('fill_width');
-        this.translationArea.appendChild(tableContainer);
+        leftPanel.appendChild(tableContainer);
 
         let table: HTMLTableElement = document.createElement('table');
         table.classList.add('stripes');
         table.classList.add('zoomable');
-        table.style.width = 'calc(100% - 2px)';
         table.style.tableLayout = 'fixed';
         tableContainer.appendChild(table);
 
@@ -711,7 +706,7 @@ class TranslationView {
         tr.appendChild(this.matchTh);
 
         this.finalTh = document.createElement('th');
-        this.finalTh.innerHTML = TranslationView.SVG_FINAL;
+        this.finalTh.innerHTML = '<svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M14.2222 0H1.77778C0.8 0 0 0.8 0 1.77778V14.2222C0 15.2 0.8 16 1.77778 16H14.2222C15.2 16 16 15.2 16 14.2222V1.77778C16 0.8 15.2 0 14.2222 0ZM14.2222 14.2222H1.77778V1.77778H14.2222V14.2222ZM13.3244 5.33333L12.0711 4.07111L6.21333 9.92889L3.92 7.64444L2.65778 8.89778L6.21333 12.4444L13.3244 5.33333Z"/></svg>';
         tr.appendChild(this.finalTh);
 
         this.targetTh = document.createElement('th');
@@ -724,7 +719,7 @@ class TranslationView {
         this.statusArea = document.createElement('div');
         this.statusArea.classList.add('toolbar');
         this.statusArea.style.borderTopColor = 'var(--accent-color)';
-        this.translationArea.appendChild(this.statusArea);
+        leftPanel.appendChild(this.statusArea);
 
         let firstLink: HTMLAnchorElement = document.createElement('a');
         firstLink.classList.add('tooltip');
@@ -846,8 +841,8 @@ class TranslationView {
         this.rowsObserver = new MutationObserver((mutationsList) => {
             for (let mutation of mutationsList) {
                 if (mutation.type === 'attributes') {
-                    tableContainer.style.height = (this.translationArea.clientHeight - this.statusArea.clientHeight) + 'px';
-                    tableContainer.style.width = this.translationArea.clientWidth + 'px';
+                    tableContainer.style.height = (leftPanel.clientHeight - this.statusArea.clientHeight) + 'px';
+                    tableContainer.style.width = leftPanel.clientWidth + 'px';
                     this.setColumnWidths();
 
                 }
@@ -892,61 +887,104 @@ class TranslationView {
     }
 
     buildRightSide(): void {
-        let horizontalSplit: ThreeHorizontalPanels = new ThreeHorizontalPanels(this.rightPanel);
+        let panelsContainer: HTMLDivElement = document.createElement('div');
+        panelsContainer.classList.add('rightPaddedPanel');
+        this.rightPanel.appendChild(panelsContainer);
 
-        this.memoryArea = horizontalSplit.topPanel();
+        let config: any = { attributes: true, childList: false, subtree: false };
+        let observer = new MutationObserver((mutationsList) => {
+            for (let mutation of mutationsList) {
+                if (mutation.type === 'attributes') {
+                    panelsContainer.style.height = this.rightPanel.clientHeight + 'px';
+                    panelsContainer.style.width = this.rightPanel.clientWidth + 'px';
+                }
+            }
+        });
+        observer.observe(this.rightPanel, config);
+
+        let horizontalSplit: ThreeHorizontalPanels = new ThreeHorizontalPanels(panelsContainer);
+
+        this.createMemoryArea(horizontalSplit.topPanel());
+        this.createTermsArea(horizontalSplit.bottomPanel());
+        this.createMachineArea(horizontalSplit.centerPanel());
+    }
+
+    createMemoryArea(topPanel: HTMLDivElement): void {
+        this.memoryArea = topPanel;
+
+        let panelsContainer: HTMLDivElement = document.createElement('div');
+        panelsContainer.classList.add('topPaddedPanel');
+        this.memoryArea.appendChild(panelsContainer);
+
         let memoryTitle: HTMLDivElement = document.createElement('div');
         memoryTitle.classList.add('titlepanel');
         memoryTitle.innerText = 'Translation Memory';
-        this.memoryArea.appendChild(memoryTitle);
+        panelsContainer.appendChild(memoryTitle);
         let matchesContainer: HTMLDivElement = document.createElement('div');
         matchesContainer.classList.add('fill_width');
-        this.memoryArea.appendChild(matchesContainer);
+        panelsContainer.appendChild(matchesContainer);
         this.tmMatches = new TmMatches(matchesContainer, this.projectId);
 
         let config: MutationObserverInit = { attributes: true, childList: false, subtree: false };
         let observer: MutationObserver = new MutationObserver((mutationsList) => {
             for (let mutation of mutationsList) {
                 if (mutation.type === 'attributes') {
-                    matchesContainer.style.height = (this.memoryArea.clientHeight - memoryTitle.clientHeight) + 'px';
+                    matchesContainer.style.height = (panelsContainer.clientHeight - memoryTitle.clientHeight) + 'px';
                 }
             }
         });
         observer.observe(this.memoryArea, config);
+    }
 
-        this.machineArea = horizontalSplit.centerPanel();
+    createMachineArea(centerPanel: HTMLDivElement): void {
+        this.machineArea = centerPanel;
+
+        let panelsContainer: HTMLDivElement = document.createElement('div');
+        panelsContainer.classList.add('centerPaddedPanel');
+        this.machineArea.appendChild(panelsContainer);
+
         let machineTitle: HTMLDivElement = document.createElement('div');
         machineTitle.classList.add('titlepanel');
         machineTitle.innerText = 'Machine Translation';
-        this.machineArea.appendChild(machineTitle);
+        panelsContainer.appendChild(machineTitle);
         let mtContainer: HTMLDivElement = document.createElement('div');
         mtContainer.classList.add('fill_width');
-        this.machineArea.appendChild(mtContainer);
+        panelsContainer.appendChild(mtContainer);
         this.mtMatches = new MtMatches(mtContainer, this.projectId);
 
-        observer = new MutationObserver((mutationsList) => {
+        let config: MutationObserverInit = { attributes: true, childList: false, subtree: false };
+        let observer: MutationObserver = new MutationObserver((mutationsList) => {
             for (let mutation of mutationsList) {
                 if (mutation.type === 'attributes') {
-                    mtContainer.style.height = (this.machineArea.clientHeight - machineTitle.clientHeight) + 'px';
+                    mtContainer.style.height = (panelsContainer.clientHeight - machineTitle.clientHeight) + 'px';
                 }
             }
         });
         observer.observe(this.machineArea, config);
+    }
 
-        this.termsArea = horizontalSplit.bottomPanel();
+    createTermsArea(bottomPanel: HTMLDivElement): void {
+        this.termsArea = bottomPanel;
+
+        let panelsContainer: HTMLDivElement = document.createElement('div');
+        panelsContainer.classList.add('bottomPaddedPanel');
+        this.termsArea.appendChild(panelsContainer);
+
         let termsTitle: HTMLDivElement = document.createElement('div');
         termsTitle.classList.add('titlepanel');
         termsTitle.innerText = 'Terms';
-        this.termsArea.appendChild(termsTitle);
+        panelsContainer.appendChild(termsTitle);
+
         let termsContainer: HTMLDivElement = document.createElement('div');
         termsContainer.classList.add('fill_width');
-        this.termsArea.appendChild(termsContainer);
+        panelsContainer.appendChild(termsContainer);
         this.termsPanel = new TermsPanel(termsContainer, this.projectId);
 
-        observer = new MutationObserver((mutationsList) => {
+        let config: MutationObserverInit = { attributes: true, childList: false, subtree: false };
+        let observer: MutationObserver = new MutationObserver((mutationsList) => {
             for (let mutation of mutationsList) {
                 if (mutation.type === 'attributes') {
-                    termsContainer.style.height = (this.termsArea.clientHeight - termsTitle.clientHeight) + 'px';
+                    termsContainer.style.height = (panelsContainer.clientHeight - termsTitle.clientHeight) + 'px';
                 }
             }
         });

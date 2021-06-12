@@ -1,21 +1,14 @@
-/*****************************************************************************
-Copyright (c) 2007-2021 - Maxprograms,  http://www.maxprograms.com/
-
-Permission is hereby granted, free of charge, to any person obtaining a copy of
-this software and associated documentation files (the "Software"), to compile,
-modify and use the Software in its executable form without restrictions.
-
-Redistribution of this Software or parts of it in any form (source code or
-executable binaries) requires prior written permission from Maxprograms.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
-*****************************************************************************/
+/*******************************************************************************
+ * Copyright (c) 2007-2021 Maxprograms.
+ *
+ * This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License 1.0
+ * which accompanies this distribution, and is available at
+ * https://www.eclipse.org/org/documents/epl-v10.html
+ *
+ * Contributors:
+ *     Maxprograms - initial API and implementation
+ *******************************************************************************/
 
 import { Buffer } from "buffer";
 import { execFileSync, spawn, ChildProcessWithoutNullStreams } from "child_process";
@@ -1848,6 +1841,7 @@ class Swordfish {
                 res.setEncoding('utf-8');
                 if (res.statusCode != 200) {
                     error('sendRequest() error: ' + res.statusMessage);
+                    return;
                 }
                 let rawData: string = '';
                 res.on('data', (chunk: string) => {
@@ -1905,8 +1899,8 @@ class Swordfish {
         let title = '';
         switch (type) {
             case 'Swordfish':
-                licenseFile = 'file://' + this.path.join(app.getAppPath(), 'html', 'licenses', 'license.txt');
-                title = 'Swordfish License';
+                licenseFile = 'file://' + this.path.join(app.getAppPath(), 'html', 'licenses', 'EclipsePublicLicense1.0.html');
+                title = 'Eclipse Public License 1.0';
                 break;
             case "electron":
                 licenseFile = 'file://' + this.path.join(app.getAppPath(), 'html', 'licenses', 'electron.txt');
