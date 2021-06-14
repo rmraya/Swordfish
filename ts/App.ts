@@ -239,12 +239,18 @@ class Swordfish {
             });
         });
 
+        app.on('before-quit', (event) => {
+            if (this.ls) {
+                event.preventDefault();
+                this.stopServer();
+            }
+        });
+
         app.on('quit', () => {
-            this.stopServer();
+            app.quit();
         });
 
         app.on('window-all-closed', () => {
-            this.stopServer();
             app.quit();
         });
 
@@ -1160,7 +1166,19 @@ class Swordfish {
     stopServer(): void {
         if (!this.stopping) {
             this.stopping = true;
-            this.ls.kill();
+            Swordfish.sendRequest('/', { command: 'stop' },
+                (data: any) => {
+                    if (data.status === 'OK') {
+                        this.ls = null;
+                        app.quit();
+                    } else {
+                        console.log('error stopping server ', JSON.stringify(data));
+                    }
+                },
+                (reason: string) => {
+                    Swordfish.showMessage({ type: 'error', message: reason });
+                }
+            );
         }
     }
 

@@ -36,6 +36,7 @@ import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
 import java.util.zip.DataFormatException;
@@ -75,7 +76,7 @@ public class ProjectsHandler implements HttpHandler {
 	private String catalogFile;
 	private boolean paragraphSegmentation;
 
-	private Map<String, XliffStore> projectStores = new Hashtable<>();
+	private static Map<String, XliffStore> projectStores = new Hashtable<>();
 
 	@Override
 	public void handle(HttpExchange exchange) throws IOException {
@@ -830,6 +831,24 @@ public class ProjectsHandler implements HttpHandler {
 			result.put(Constants.REASON, "Project is not open");
 		}
 		return result;
+	}
+
+	public static synchronized void closeAll() throws SQLException {
+		if (projectStores == null) {
+			if (TmsServer.isDebug()) {
+				logger.log(Level.INFO, "no open projects");
+			}
+			return;
+		}
+		Set<String> keys = projectStores.keySet();
+		Iterator<String> it = keys.iterator();
+		while (it.hasNext()) {
+			projectStores.get(it.next()).close();
+		}
+		projectStores.clear();
+		if (TmsServer.isDebug()) {
+			logger.log(Level.INFO, "Projects closed");
+		}
 	}
 
 	private JSONObject save(String request) {

@@ -951,6 +951,7 @@ public class XliffStore {
                         MemoriesHandler.openMemory(memory);
                         ITmEngine engine = MemoriesHandler.getEngine(memory);
                         engine.storeTu(XliffUtils.toTu(key.toString(), source, target, tags));
+                        engine.commit();
                         MemoriesHandler.closeMemory(memory);
                     } catch (IOException | SQLException e) {
                         logger.log(Level.ERROR, e);
@@ -1024,20 +1025,20 @@ public class XliffStore {
         int translated = 0;
         int confirmed = 0;
         int segments = 0;
-        String sql = "SELECT SUM(words), COUNT(*) FROM segments";
+        String sql = "SELECT SUM(words), COUNT(*) FROM segments WHERE type='S'";
         try (ResultSet rs = stmt.executeQuery(sql)) {
             while (rs.next()) {
                 total = rs.getInt(1);
                 segments = rs.getInt(2);
             }
         }
-        sql = "SELECT SUM(words) FROM segments WHERE state='final'";
+        sql = "SELECT SUM(words) FROM segments WHERE state='final' AND type='S'";
         try (ResultSet rs = stmt.executeQuery(sql)) {
             while (rs.next()) {
                 confirmed = rs.getInt(1);
             }
         }
-        sql = "SELECT SUM(words) FROM segments WHERE state <> 'initial'";
+        sql = "SELECT SUM(words) FROM segments WHERE state <> 'initial' AND type='S'";
         try (ResultSet rs = stmt.executeQuery(sql)) {
             while (rs.next()) {
                 translated = rs.getInt(1);

@@ -718,7 +718,6 @@ class TranslationView {
 
         this.statusArea = document.createElement('div');
         this.statusArea.classList.add('toolbar');
-        this.statusArea.style.borderTopColor = 'var(--accent-color)';
         leftPanel.appendChild(this.statusArea);
 
         let firstLink: HTMLAnchorElement = document.createElement('a');

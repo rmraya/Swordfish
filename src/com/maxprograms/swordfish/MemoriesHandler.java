@@ -35,6 +35,7 @@ import java.util.Set;
 import java.util.TreeSet;
 import java.util.Vector;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentHashMap.KeySetView;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
@@ -557,6 +558,24 @@ public class MemoriesHandler implements HttpHandler {
 			openEngines.get(id).close();
 			openEngines.remove(id);
 			useCount.remove(id);
+		}
+	}
+
+	public static synchronized void closeAll() throws IOException, SQLException {
+		if (openEngines == null) {
+			if (TmsServer.isDebug()) {
+				logger.log(Level.INFO, "no open memories");
+			}
+			return;
+		}
+		KeySetView<String, ITmEngine> keys = openEngines.keySet();
+		Iterator<String> it = keys.iterator();
+		while (it.hasNext()) {
+			openEngines.get(it.next()).close();
+		}
+		openEngines.clear();
+		if (TmsServer.isDebug()) {
+			logger.log(Level.INFO, "Memories closed");
 		}
 	}
 

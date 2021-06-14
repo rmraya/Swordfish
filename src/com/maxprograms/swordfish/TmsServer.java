@@ -13,18 +13,18 @@
 package com.maxprograms.swordfish;
 
 import java.io.BufferedReader;
-import java.io.ByteArrayInputStream;
+import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.io.OutputStream;
 import java.lang.System.Logger;
 import java.lang.System.Logger.Level;
 import java.net.InetSocketAddress;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.sql.SQLException;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
@@ -84,6 +84,7 @@ public class TmsServer implements HttpHandler {
 
 	@Override
 	public void handle(HttpExchange t) throws IOException {
+		JSONObject obj = new JSONObject();
 		try {
 			String request = "";
 			try (InputStream is = t.getRequestBody()) {
@@ -100,23 +101,25 @@ public class TmsServer implements HttpHandler {
 			String command = json.getString("command");
 			switch (command) {
 				case "version":
-					JSONObject obj = new JSONObject();
 					obj.put("tool", "TMSServer");
 					obj.put("version", Constants.VERSION);
 					obj.put("build", Constants.BUILD);
+					obj.put(Constants.STATUS, Constants.OK);
 					response = obj.toString();
 					break;
 				case "stop":
 					if (debug) {
 						logger.log(Level.INFO, "Stopping server");
 					}
+					closeAll();
+					obj.put(Constants.STATUS, Constants.OK);
+					response = obj.toString();
 					break;
 				default:
-					JSONObject unknown = new JSONObject();
-					unknown.put(Constants.STATUS, Constants.ERROR);
-					unknown.put(Constants.REASON, "Unknown command");
-					unknown.put("received", json.toString());
-					response = unknown.toString();
+					obj.put(Constants.STATUS, Constants.ERROR);
+					obj.put(Constants.REASON, "Unknown command");
+					obj.put("received", json.toString());
+					response = obj.toString();
 			}
 			if (debug) {
 				logger.log(Level.INFO, response);
@@ -124,29 +127,29 @@ public class TmsServer implements HttpHandler {
 			t.getResponseHeaders().add("content-type", "application/json; charset=utf-8");
 			byte[] bytes = response.getBytes(StandardCharsets.UTF_8);
 			t.sendResponseHeaders(200, bytes.length);
-			try (ByteArrayInputStream stream = new ByteArrayInputStream(bytes)) {
-				try (OutputStream os = t.getResponseBody()) {
-					byte[] array = new byte[2048];
-					int read;
-					while ((read = stream.read(array)) != -1) {
-						os.write(array, 0, read);
-					}
-				}
+			try (DataOutputStream stream = new DataOutputStream(t.getResponseBody())) {
+				stream.writeBytes(response);
 			}
 			if ("stop".equals(command)) {
-				if (debug) {
-					logger.log(Level.INFO, "Stopping server");
-				}
+				server.stop(0);
 				System.exit(0);
 			}
-		} catch (IOException e) {
+		} catch (IOException | SQLException e) {
 			logger.log(Level.ERROR, e);
-			String message = e.getMessage();
-			t.sendResponseHeaders(500, message.length());
-			try (OutputStream os = t.getResponseBody()) {
-				os.write(message.getBytes(StandardCharsets.UTF_8));
+			obj.put(Constants.STATUS, Constants.ERROR);
+			obj.put(Constants.REASON, e.getMessage());
+			String message = obj.toString();
+			t.sendResponseHeaders(200, message.getBytes(StandardCharsets.UTF_8).length);
+			try (DataOutputStream stream = new DataOutputStream(t.getResponseBody())) {
+				stream.writeBytes(message);
 			}
 		}
+	}
+
+	private void closeAll() throws IOException, SQLException {
+		MemoriesHandler.closeAll();
+		ProjectsHandler.closeAll();
+		GlossariesHandler.closeAll();
 	}
 
 	protected static String readRequestBody(InputStream is) throws IOException {
@@ -193,17 +196,17 @@ public class TmsServer implements HttpHandler {
 	}
 
 	public static String getCatalogFile() throws IOException {
-        File preferences = new File(getWorkFolder(), "preferences.json");
-        StringBuilder builder = new StringBuilder();
-        try (FileReader reader = new FileReader(preferences, StandardCharsets.UTF_8)) {
-            try (BufferedReader buffer = new BufferedReader(reader)) {
-                String line = "";
-                while ((line = buffer.readLine()) != null) {
-                    builder.append(line);
-                }
-            }
-        }
-        JSONObject json = new JSONObject(builder.toString());
-        return json.getString("catalog");
-    }
+		File preferences = new File(getWorkFolder(), "preferences.json");
+		StringBuilder builder = new StringBuilder();
+		try (FileReader reader = new FileReader(preferences, StandardCharsets.UTF_8)) {
+			try (BufferedReader buffer = new BufferedReader(reader)) {
+				String line = "";
+				while ((line = buffer.readLine()) != null) {
+					builder.append(line);
+				}
+			}
+		}
+		JSONObject json = new JSONObject(builder.toString());
+		return json.getString("catalog");
+	}
 }

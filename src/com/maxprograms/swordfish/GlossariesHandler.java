@@ -38,6 +38,7 @@ import java.util.Set;
 import java.util.TreeSet;
 import java.util.Vector;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentHashMap.KeySetView;
 
 import javax.xml.parsers.ParserConfigurationException;
 
@@ -405,6 +406,24 @@ public class GlossariesHandler implements HttpHandler {
 			openEngines.get(id).close();
 			openEngines.remove(id);
 			useCount.remove(id);
+		}
+	}
+
+	public static synchronized void closeAll() throws IOException, SQLException {
+		if (openEngines == null) {
+			if (TmsServer.isDebug()) {
+				logger.log(Level.INFO, "no open glossaries");
+			}
+			return;
+		}
+		KeySetView<String, ITmEngine> keys = openEngines.keySet();
+		Iterator<String> it = keys.iterator();
+		while (it.hasNext()) {
+			openEngines.get(it.next()).close();
+		}
+		openEngines.clear();
+		if (TmsServer.isDebug()) {
+			logger.log(Level.INFO, "Glossaries closed");
 		}
 	}
 
