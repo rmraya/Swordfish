@@ -34,8 +34,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.Vector;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentHashMap.KeySetView;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
@@ -63,9 +61,8 @@ public class MemoriesHandler implements HttpHandler {
 
 	private static Logger logger = System.getLogger(MemoriesHandler.class.getName());
 
-	private static ConcurrentHashMap<String, Memory> memories;
-	private static ConcurrentHashMap<String, ITmEngine> openEngines;
-	private static ConcurrentHashMap<String, Integer> useCount;
+	private static Map<String, Memory> memories;
+	private static Map<String, ITmEngine> engines;
 	private static Map<String, JSONObject> openTasks;
 	private static boolean firstRun = true;
 
@@ -143,7 +140,7 @@ public class MemoriesHandler implements HttpHandler {
 		}
 		final String process = "" + System.currentTimeMillis();
 		if (openTasks == null) {
-			openTasks = new ConcurrentHashMap<>();
+			openTasks = new Hashtable<>();
 		}
 		JSONObject obj = new JSONObject();
 		obj.put(Constants.PROGRESS, Constants.PROCESSING);
@@ -153,13 +150,13 @@ public class MemoriesHandler implements HttpHandler {
 				if (memories == null) {
 					loadMemoriesList();
 				}
-				Memory mem = memories.get(json.getString("memory"));
-				openMemory(mem);
-				ITmEngine engine = openEngines.get(mem.getId());
+				String memory = json.getString("memory");
+				open(memory);
+				ITmEngine engine = getEngine(memory);
 				JSONArray array = new JSONArray();
 				Set<String> langs = engine.getAllLanguages();
 				array.put(langs);
-				closeMemory(mem.getId());
+				close(memory);
 				JSONObject completed = new JSONObject();
 				completed.put("languages", array);
 				completed.put(Constants.PROGRESS, Constants.COMPLETED);
@@ -184,7 +181,7 @@ public class MemoriesHandler implements HttpHandler {
 		}
 		String process = json.getString("process");
 		if (openTasks == null) {
-			openTasks = new ConcurrentHashMap<>();
+			openTasks = new Hashtable<>();
 		}
 		if (openTasks.containsKey(process)) {
 			return openTasks.get(process);
@@ -206,29 +203,43 @@ public class MemoriesHandler implements HttpHandler {
 		boolean isRegexp = json.getBoolean("regExp");
 		boolean caseSensitive = json.getBoolean("caseSensitive");
 		int limit = json.getInt("limit");
-		JSONArray mems = json.getJSONArray("memories");
-		try {
-			if (isRegexp) {
-				try {
-					Pattern.compile(searchStr);
-				} catch (PatternSyntaxException e) {
-					throw new IOException("Invalid regular expression");
-				}
-			}
-			List<Element> matches = new Vector<>();
-			for (int i = 0; i < mems.length(); i++) {
-				String memory = mems.getString(i);
-				openMemory(memories.get(memory));
-				matches.addAll(
-						openEngines.get(memory).concordanceSearch(searchStr, srcLang, limit, isRegexp, caseSensitive));
-				closeMemory(memory);
-			}
-			result.put("count", matches.size());
-			result.put("html", generateHTML(matches, searchStr, isRegexp, caseSensitive));
-		} catch (IOException | SAXException | ParserConfigurationException | SQLException e) {
-			logger.log(Level.ERROR, e);
-			result.put(Constants.REASON, e.getMessage());
+		JSONArray memories = json.getJSONArray("memories");
+		final String process = "" + System.currentTimeMillis();
+		if (openTasks == null) {
+			openTasks = new Hashtable<>();
 		}
+		JSONObject obj = new JSONObject();
+		obj.put(Constants.PROGRESS, Constants.PROCESSING);
+		openTasks.put(process, obj);
+		new Thread(() -> {
+			try {
+				if (isRegexp) {
+					try {
+						Pattern.compile(searchStr);
+					} catch (PatternSyntaxException e) {
+						throw new IOException("Invalid regular expression");
+					}
+				}
+				List<Element> matches = new Vector<>();
+				for (int i = 0; i < memories.length(); i++) {
+					String memory = memories.getString(i);
+					open(memory);
+					ITmEngine engine = getEngine(memory);
+					matches.addAll(engine.concordanceSearch(searchStr, srcLang, limit, isRegexp, caseSensitive));
+					close(memory);
+				}
+				result.put("count", matches.size());
+				result.put("html", generateHTML(matches, searchStr, isRegexp, caseSensitive));
+				result.put(Constants.PROGRESS, Constants.COMPLETED);
+				openTasks.put(process, result);
+			} catch (IOException | SAXException | ParserConfigurationException | SQLException e) {
+				logger.log(Level.ERROR, e.getMessage(), e);
+				JSONObject error = new JSONObject();
+				error.put(Constants.REASON, e.getMessage());
+				openTasks.put(process, error);
+			}
+		}).start();
+		result.put("process", process);
 		return result;
 	}
 
@@ -239,8 +250,7 @@ public class MemoriesHandler implements HttpHandler {
 			result.put(Constants.REASON, "Missing 'memory' parameter");
 			return result;
 		}
-		String id = json.getString("memory");
-
+		String memory = json.getString("memory");
 		if (!json.has("tmx")) {
 			result.put(Constants.REASON, "Missing 'tmx' parameter");
 			return result;
@@ -253,21 +263,23 @@ public class MemoriesHandler implements HttpHandler {
 
 		final String process = "" + System.currentTimeMillis();
 		if (openTasks == null) {
-			openTasks = new ConcurrentHashMap<>();
+			openTasks = new Hashtable<>();
 		}
 		JSONObject obj = new JSONObject();
 		obj.put(Constants.PROGRESS, Constants.PROCESSING);
 		openTasks.put(process, obj);
 		new Thread(() -> {
 			try {
-				openMemory(memories.get(id));
-				ITmEngine engine = openEngines.get(id);
+				open(memory);
+				ITmEngine engine = getEngine(memory);
 				String project = json.has("project") ? json.getString("project") : "";
 				String client = json.has("client") ? json.getString("client") : "";
 				String subject = json.has("subject") ? json.getString("subject") : "";
 				try {
 					int imported = engine.storeTMX(tmx.getAbsolutePath(), project, client, subject);
-					logger.log(Level.INFO, "Imported " + imported);
+					if (TmsServer.isDebug()) {
+						logger.log(Level.INFO, "Imported " + imported);
+					}
 					JSONObject completed = new JSONObject();
 					completed.put("imported", imported);
 					completed.put(Constants.PROGRESS, Constants.COMPLETED);
@@ -278,7 +290,7 @@ public class MemoriesHandler implements HttpHandler {
 					openTasks.put(process, error);
 					logger.log(Level.ERROR, e.getMessage(), e);
 				}
-				closeMemory(id);
+				close(memory);
 			} catch (IOException | SQLException e) {
 				logger.log(Level.ERROR, e.getMessage(), e);
 				JSONObject error = new JSONObject();
@@ -306,7 +318,7 @@ public class MemoriesHandler implements HttpHandler {
 		}
 		final String process = "" + System.currentTimeMillis();
 		if (openTasks == null) {
-			openTasks = new ConcurrentHashMap<>();
+			openTasks = new Hashtable<>();
 		}
 		JSONObject obj = new JSONObject();
 		obj.put(Constants.PROGRESS, Constants.PROCESSING);
@@ -316,9 +328,9 @@ public class MemoriesHandler implements HttpHandler {
 				if (memories == null) {
 					loadMemoriesList();
 				}
-				Memory mem = memories.get(json.getString("memory"));
-				openMemory(mem);
-				ITmEngine engine = openEngines.get(mem.getId());
+				String memory = json.getString("memory");
+				open(memory);
+				ITmEngine engine = getEngine(memory);
 				File tmx = new File(json.getString("tmx"));
 				Set<String> langSet = Collections.synchronizedSortedSet(new TreeSet<>());
 				if (json.has("languages")) {
@@ -330,7 +342,7 @@ public class MemoriesHandler implements HttpHandler {
 					langSet = engine.getAllLanguages();
 				}
 				engine.exportMemory(tmx.getAbsolutePath(), langSet, json.getString("srcLang"));
-				closeMemory(mem.getId());
+				close(memory);
 				JSONObject completed = new JSONObject();
 				completed.put(Constants.PROGRESS, Constants.COMPLETED);
 				openTasks.put(process, completed);
@@ -353,7 +365,7 @@ public class MemoriesHandler implements HttpHandler {
 			final String process = "" + System.currentTimeMillis();
 			result.put("process", process);
 			if (openTasks == null) {
-				openTasks = new ConcurrentHashMap<>();
+				openTasks = new Hashtable<>();
 			}
 			JSONObject obj = new JSONObject();
 			obj.put(Constants.PROGRESS, Constants.PROCESSING);
@@ -362,22 +374,18 @@ public class MemoriesHandler implements HttpHandler {
 				try {
 					JSONArray array = json.getJSONArray("memories");
 					for (int i = 0; i < array.length(); i++) {
-						Memory mem = memories.get(array.getString(i));
-						if (openEngines != null && openEngines.containsKey(mem.getId())) {
-							ITmEngine engine = openEngines.get(mem.getId());
-							engine.close();
-							openEngines.remove(mem.getId());
-							useCount.remove(mem.getId());
-						}
-						if (mem.getType().equals(Memory.LOCAL)) {
+						String id = array.getString(i);
+						Memory memory = memories.get(id);
+						close(id);
+						if (memory.getType().equals(Memory.LOCAL)) {
 							try {
-								File wfolder = new File(getWorkFolder(), mem.getId());
+								File wfolder = new File(getWorkFolder(), id);
 								TmsServer.deleteFolder(wfolder.getAbsolutePath());
 							} catch (IOException ioe) {
-								logger.log(Level.WARNING, "Folder '" + mem.getId() + "' will be deleted on next start");
+								logger.log(Level.WARNING, "Folder '" + id + "' will be deleted on next start");
 							}
 						}
-						memories.remove(mem.getId());
+						memories.remove(id);
 					}
 					saveMemoriesList();
 					JSONObject completed = new JSONObject();
@@ -457,7 +465,8 @@ public class MemoriesHandler implements HttpHandler {
 	}
 
 	private static synchronized void loadMemoriesList() throws IOException {
-		memories = new ConcurrentHashMap<>();
+		memories = new Hashtable<>();
+		engines = new Hashtable<>();
 		File home = new File(getWorkFolder());
 		File list = new File(home, "memories.json");
 		if (!list.exists()) {
@@ -522,82 +531,52 @@ public class MemoriesHandler implements HttpHandler {
 		return workFolder.getAbsolutePath();
 	}
 
-	public static synchronized void openMemory(String id) throws IOException, SQLException {
-		openMemory(memories.get(id));
-	}
-
-	public static synchronized void openMemory(Memory memory) throws IOException, SQLException {
+	public static synchronized void open(String id) throws IOException, SQLException {
 		if (memories == null) {
 			loadMemoriesList();
 		}
-		if (openEngines == null) {
-			openEngines = new ConcurrentHashMap<>();
-			useCount = new ConcurrentHashMap<>();
+		if (!engines.containsKey(id)) {
+			Memory memory = memories.get(id);
+			ITmEngine engine = memory.getType().equals(Memory.LOCAL) ? new InternalDatabase(id, getWorkFolder())
+					: new RemoteDatabase(memory.getServer(), memory.getUser(), memory.getPassword(), id);
+			engines.put(id, engine);
 		}
-		if (openEngines.containsKey(memory.getId())) {
-			int count = useCount.get(memory.getId()) + 1;
-			useCount.put(memory.getId(), count);
-			return;
-		}
-		ITmEngine engine = memory.getType().equals(Memory.LOCAL) ? new InternalDatabase(memory.getId(), getWorkFolder())
-				: new RemoteDatabase(memory.getServer(), memory.getUser(), memory.getPassword(), memory.getId());
-		openEngines.put(memory.getId(), engine);
-		useCount.put(memory.getId(), 1);
 	}
 
-	public static synchronized void closeMemory(String id) throws IOException, SQLException {
-		if (openEngines == null) {
-			throw new IOException("No memories open");
-		}
-		if (!openEngines.containsKey(id)) {
-			throw new IOException("Memory already closed");
-		}
-		int count = useCount.get(id);
-		useCount.put(id, count - 1);
-		if (count == 1) {
-			openEngines.get(id).close();
-			openEngines.remove(id);
-			useCount.remove(id);
+	public static synchronized void close(String id) throws IOException, SQLException {
+		if (engines != null && engines.containsKey(id)) {
+			engines.get(id).close();
+			engines.remove(id);
 		}
 	}
 
 	public static synchronized void closeAll() throws IOException, SQLException {
-		if (openEngines == null) {
-			if (TmsServer.isDebug()) {
-				logger.log(Level.INFO, "no open memories");
-			}
-			return;
-		}
-		KeySetView<String, ITmEngine> keys = openEngines.keySet();
+		Set<String> keys = engines.keySet();
 		Iterator<String> it = keys.iterator();
 		while (it.hasNext()) {
-			openEngines.get(it.next()).close();
+			engines.get(it.next()).close();
 		}
-		openEngines.clear();
+		engines.clear();
 		if (TmsServer.isDebug()) {
 			logger.log(Level.INFO, "Memories closed");
 		}
 	}
 
-	public static ITmEngine getEngine(String memory) throws IOException {
+	public static ITmEngine getEngine(String id) throws IOException, SQLException {
 		if (memories == null) {
 			loadMemoriesList();
 		}
-		Memory mem = memories.get(memory);
-		if (openEngines == null) {
-			throw new IOException("No open memories");
+		if (!engines.containsKey(id)) {
+			open(id);
 		}
-		if (!openEngines.containsKey(mem.getId())) {
-			throw new IOException("Memory is not open");
-		}
-		return openEngines.get(mem.getId());
+		return engines.get(id);
 	}
 
-	public static String getName(String memory) throws IOException {
+	public static String getName(String id) throws IOException {
 		if (memories == null) {
 			loadMemoriesList();
 		}
-		return memories.get(memory).getName();
+		return memories.get(id).getName();
 	}
 
 	private String generateHTML(List<Element> matches, String searchStr, boolean isRegexp, boolean caseSensitive)

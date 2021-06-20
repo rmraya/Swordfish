@@ -10,16 +10,14 @@
  *     Maxprograms - initial API and implementation
  *******************************************************************************/
 
-import { Buffer } from "buffer";
 import { execFileSync, spawn, ChildProcessWithoutNullStreams } from "child_process";
 import { app, clipboard, BrowserWindow, dialog, ipcMain, Menu, MenuItem, shell, nativeTheme, Rectangle, IpcMainEvent, screen, Size } from "electron";
 import { existsSync, mkdirSync, readFile, readFileSync, writeFileSync, lstatSync } from "fs";
-import { ClientRequest, request, IncomingMessage } from "http";
+import fetch from "node-fetch";
 
 class Swordfish {
 
     static path = require('path');
-    static https = require('https');
 
     static mainWindow: BrowserWindow;
     static settingsWindow: BrowserWindow;
@@ -187,21 +185,14 @@ class Swordfish {
 
         this.ls.on('close', (code: number) => {
             if (code === 0) {
-                let data: string = JSON.stringify({ command: 'stop' });
-                let options = {
-                    hostname: '127.0.0.1',
-                    port: 8070,
-                    path: '/',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Content-Length': Buffer.byteLength(data)
-                    }
-                };
-                let req: ClientRequest = request(options);
-                req.write(data);
-                req.end();
-                console.log('Restarting server');
-                this.ls = spawn(this.javapath, ['--module-path', 'lib', '-m', 'swordfish/com.maxprograms.swordfish.TmsServer', '-port', '8070'], { cwd: app.getAppPath() });
+                Swordfish.sendRequest('/', { command: 'stop' },
+                    () => {
+                        console.log('Restarting server');
+                        this.ls = spawn(this.javapath, ['--module-path', 'lib', '-m', 'swordfish/com.maxprograms.swordfish.TmsServer', '-port', '8070'], { cwd: app.getAppPath() });
+                    },
+                    (reason: string) => {
+                        console.log('Error restarting server: ' + reason);
+                    });
             }
         });
 
@@ -235,7 +226,6 @@ class Swordfish {
                 if (Swordfish.currentPreferences.showGuide) {
                     Swordfish.showGettingStarted();
                 }
-
             });
         });
 
@@ -1841,42 +1831,20 @@ class Swordfish {
         Swordfish.mainWindow.webContents.send('view-glossaries');
     }
 
-    static sendRequest(url: string, json: any, success: any, error: any) {
-        let postData: string = JSON.stringify(json);
-        let options = {
-            hostname: '127.0.0.1',
-            port: 8070,
-            path: url,
-            headers: {
-                'Content-Type': 'application/json',
-                'Content-Length': Buffer.byteLength(postData)
-            }
-        };
-        // Make a request
-        let req: ClientRequest = request(options);
-        req.on('response',
-            (res: any) => {
-                res.setEncoding('utf-8');
-                if (res.statusCode != 200) {
-                    error('sendRequest() error: ' + res.statusMessage);
-                    return;
-                }
-                let rawData: string = '';
-                res.on('data', (chunk: string) => {
-                    rawData += chunk;
-                });
-                res.on('end', () => {
-                    try {
-                        success(JSON.parse(rawData));
-                    } catch (e) {
-                        console.log('Received data: ' + rawData);
-                        error(e.message);
-                    }
-                });
-            }
-        );
-        req.write(postData);
-        req.end();
+    static sendRequest(url: string, json: any, success: Function, error: Function) {
+        fetch('http://127.0.0.1:8070' + url, {
+            method: 'POST',
+            headers: [
+                ['Content-Type', 'application/json'],
+                ['Accept', 'application/json']
+            ],
+            body: JSON.stringify(json)
+        }).then(async (response) => {
+            let json: any = await response.json();
+            success(json);
+        }).catch((reason: any) => {
+            error(JSON.stringify(reason));
+        });
     }
 
     static showHelp(): void {
@@ -2053,68 +2021,55 @@ class Swordfish {
     }
 
     static checkUpdates(silent: boolean): void {
-        this.https.get('https://maxprograms.com/swordfish.json', (res: IncomingMessage) => {
-            if (res.statusCode === 200) {
-                let rawData = '';
-                res.on('data', (chunk: string) => {
-                    rawData += chunk;
-                });
-                res.on('end', () => {
-                    try {
-                        const parsedData = JSON.parse(rawData);
-                        if (app.getVersion() !== parsedData.version) {
-                            Swordfish.latestVersion = parsedData.version;
-                            switch (process.platform) {
-                                case 'darwin':
-                                    Swordfish.downloadLink = process.arch === 'arm64' ? parsedData.arm64 : parsedData.darwin;
-                                    break;
-                                case 'win32':
-                                    Swordfish.downloadLink = parsedData.win32;
-                                    break;
-                                case 'linux':
-                                    Swordfish.downloadLink = parsedData.linux;
-                                    break;
-                            }
-                            Swordfish.updatesWindow = new BrowserWindow({
-                                parent: this.mainWindow,
-                                width: 600,
-                                useContentSize: true,
-                                minimizable: false,
-                                maximizable: false,
-                                resizable: false,
-                                show: false,
-                                icon: this.iconPath,
-                                webPreferences: {
-                                    nodeIntegration: true,
-                                    contextIsolation: false
-                                }
-                            });
-                            Swordfish.updatesWindow.setMenu(null);
-                            Swordfish.updatesWindow.loadURL('file://' + this.path.join(app.getAppPath(), 'html', 'updates.html'));
-                            Swordfish.updatesWindow.once('ready-to-show', () => {
-                                Swordfish.updatesWindow.show();
-                            });
-                        } else {
-                            if (!silent) {
-                                Swordfish.showMessage({
-                                    type: 'info',
-                                    message: 'There are currently no updates available'
-                                });
-                            }
-                        }
-                    } catch (e) {
-                        Swordfish.showMessage({ type: 'error', message: e.message });
+        fetch('https://maxprograms.com/swordfish.json', {
+            method: 'GET'
+        }).then(async (response) => {
+            let parsedData: any = await response.json();
+            if (app.getVersion() !== parsedData.version) {
+                Swordfish.latestVersion = parsedData.version;
+                switch (process.platform) {
+                    case 'darwin':
+                        Swordfish.downloadLink = process.arch === 'arm64' ? parsedData.arm64 : parsedData.darwin;
+                        break;
+                    case 'win32':
+                        Swordfish.downloadLink = parsedData.win32;
+                        break;
+                    case 'linux':
+                        Swordfish.downloadLink = parsedData.linux;
+                        break;
+                }
+                Swordfish.updatesWindow = new BrowserWindow({
+                    parent: this.mainWindow,
+                    width: 600,
+                    useContentSize: true,
+                    minimizable: false,
+                    maximizable: false,
+                    resizable: false,
+                    show: false,
+                    icon: this.iconPath,
+                    webPreferences: {
+                        nodeIntegration: true,
+                        contextIsolation: false
                     }
+                });
+                Swordfish.updatesWindow.setMenu(null);
+                Swordfish.updatesWindow.loadURL('file://' + this.path.join(app.getAppPath(), 'html', 'updates.html'));
+                Swordfish.updatesWindow.once('ready-to-show', () => {
+                    Swordfish.updatesWindow.show();
                 });
             } else {
                 if (!silent) {
-                    Swordfish.showMessage({ type: 'error', message: 'Updates Request Failed.\nStatus code: ' + res.statusCode });
+                    Swordfish.showMessage({
+                        type: 'info',
+                        message: 'There are currently no updates available'
+                    });
                 }
             }
-        }).on('error', (e: any) => {
-            if (!silent) {
-                Swordfish.showMessage({ type: 'error', message: e.message });
-            }
+        }).catch((reason: any) => {
+            Swordfish.showMessage({
+                type: 'error',
+                message: JSON.stringify(reason)
+            });
         });
     }
 
@@ -3894,7 +3849,7 @@ class Swordfish {
                     Swordfish.mainWindow.focus();
                 }
             } catch (e) {
-                console.log(e);
+                // ignore
             }
         }
     }
@@ -3952,7 +3907,7 @@ class Swordfish {
                             return;
                         }
                     }
-                    if (Swordfish.currentStatus.ststus === Swordfish.ERROR) {
+                    if (Swordfish.currentStatus.status === Swordfish.ERROR) {
                         Swordfish.mainWindow.webContents.send('end-waiting');
                         Swordfish.mainWindow.webContents.send('set-status', '');
                         clearInterval(intervalObject);
@@ -3998,39 +3953,63 @@ class Swordfish {
                     Swordfish.showMessage({ type: 'error', message: data.reason });
                     return;
                 }
-                if (data.count === 0) {
-                    Swordfish.showMessage({ type: 'info', message: 'Text not found' });
-                    return;
-                }
-                let size: Rectangle = Swordfish.mainWindow.getBounds();
-                let htmlViewerWindow: BrowserWindow = new BrowserWindow({
-                    parent: Swordfish.concordanceSearchWindow,
-                    width: size.width * 0.6,
-                    height: size.height * 0.4,
-                    minimizable: false,
-                    maximizable: false,
-                    resizable: true,
-                    useContentSize: true,
-                    show: false,
-                    icon: this.iconPath,
-                    webPreferences: {
-                        nodeIntegration: true,
-                        contextIsolation: false
+                Swordfish.currentStatus = data;
+                let processId: string = data.process;
+                let intervalObject = setInterval(() => {
+                    if (Swordfish.currentStatus.status === Swordfish.SUCCESS) {
+                        if (Swordfish.currentStatus.progress === Swordfish.COMPLETED) {
+                            Swordfish.mainWindow.webContents.send('end-waiting');
+                            Swordfish.mainWindow.webContents.send('set-status', '');
+                            clearInterval(intervalObject);
+                            Swordfish.concordanceResults(Swordfish.currentStatus);
+                            return;
+                        }
                     }
-                });
-                Swordfish.htmlContent = data.html;
-                Swordfish.htmlTitle = 'Concordance Search';
-                Swordfish.htmlId = htmlViewerWindow.id;
-                htmlViewerWindow.setMenu(null);
-                htmlViewerWindow.loadURL('file://' + this.path.join(app.getAppPath(), 'html', 'htmlViewer.html'));
-                htmlViewerWindow.once('ready-to-show', () => {
-                    htmlViewerWindow.show();
-                });
+                    if (Swordfish.currentStatus.status === Swordfish.ERROR) {
+                        Swordfish.mainWindow.webContents.send('end-waiting');
+                        Swordfish.mainWindow.webContents.send('set-status', '');
+                        clearInterval(intervalObject);
+                        Swordfish.showMessage({ type: 'error', message: Swordfish.currentStatus.reason });
+                        return;
+                    }
+                    Swordfish.getMemoriesProgress(processId);
+                }, 500);
             },
             (reason: string) => {
                 Swordfish.showMessage({ type: 'error', message: reason });
             }
         );
+    }
+
+    static concordanceResults(data: any): void {
+        if (data.count === 0) {
+            Swordfish.showMessage({ type: 'info', message: 'Text not found' });
+            return;
+        }
+        let size: Rectangle = Swordfish.mainWindow.getBounds();
+        let htmlViewerWindow: BrowserWindow = new BrowserWindow({
+            parent: Swordfish.concordanceSearchWindow,
+            width: size.width * 0.6,
+            height: size.height * 0.4,
+            minimizable: false,
+            maximizable: false,
+            resizable: true,
+            useContentSize: true,
+            show: false,
+            icon: this.iconPath,
+            webPreferences: {
+                nodeIntegration: true,
+                contextIsolation: false
+            }
+        });
+        Swordfish.htmlContent = data.html;
+        Swordfish.htmlTitle = 'Concordance Search';
+        Swordfish.htmlId = htmlViewerWindow.id;
+        htmlViewerWindow.setMenu(null);
+        htmlViewerWindow.loadURL('file://' + this.path.join(app.getAppPath(), 'html', 'htmlViewer.html'));
+        htmlViewerWindow.once('ready-to-show', () => {
+            htmlViewerWindow.show();
+        });
     }
 
     static showTermSearch(arg: any): any {
@@ -4486,7 +4465,7 @@ class Swordfish {
             return;
         }
         Swordfish.sendRequest('/projects/getNotes', arg,
-            function success(data: any) {
+            (data: any) => {
                 if (data.status === 'Success') {
                     Swordfish.notesEvent.sender.send('note-params', arg);
                     Swordfish.notesEvent.sender.send('set-notes', data);
@@ -4494,7 +4473,7 @@ class Swordfish {
                     Swordfish.showMessage({ type: 'error', message: data.reason });
                 }
             },
-            function error(reason: string) {
+            (reason: string) => {
                 Swordfish.showMessage({ type: 'error', message: reason });
             }
         );
@@ -4528,7 +4507,7 @@ class Swordfish {
     static addNote(arg: any) {
         Swordfish.destroyWindow(Swordfish.addNoteWindow);
         Swordfish.sendRequest('/projects/addNote', arg,
-            function success(data: any) {
+            (data: any) => {
                 if (data.status === 'Success') {
                     Swordfish.notesEvent.sender.send('note-params', arg);
                     Swordfish.notesEvent.sender.send('set-notes', data);
@@ -4537,7 +4516,7 @@ class Swordfish {
                     Swordfish.showMessage({ type: 'error', message: data.reason });
                 }
             },
-            function error(reason: string) {
+            (reason: string) => {
                 Swordfish.showMessage({ type: 'error', message: reason });
             }
         );
@@ -4545,7 +4524,7 @@ class Swordfish {
 
     static removeNote(arg: any) {
         Swordfish.sendRequest('/projects/removeNote', arg,
-            function success(data: any) {
+            (data: any) => {
                 if (data.status === 'Success') {
                     Swordfish.notesEvent.sender.send('note-params', arg);
                     Swordfish.notesEvent.sender.send('set-notes', data);
@@ -4556,7 +4535,7 @@ class Swordfish {
                     Swordfish.showMessage({ type: 'error', message: data.reason });
                 }
             },
-            function error(reason: string) {
+            (reason: string) => {
                 Swordfish.showMessage({ type: 'error', message: reason });
             }
         );

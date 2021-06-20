@@ -19,12 +19,12 @@ import java.sql.SQLException;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.Vector;
-import java.util.concurrent.ConcurrentHashMap;
 
 import javax.xml.parsers.ParserConfigurationException;
 
@@ -187,7 +187,7 @@ public class MatchAssembler {
             Collections.sort(terms);
             Iterator<Term> it = terms.iterator();
             String target = pureText;
-            Map<String, String> replacements = new ConcurrentHashMap<>();
+            Map<String, String> replacements = new Hashtable<>();
             while (it.hasNext()) {
                 Term t = it.next();
                 String key = "%%%" + mrkId + "%%%";

@@ -398,28 +398,16 @@ public class InternalDatabase implements ITmEngine {
 				}
 			}
 		} else {
-			if (!caseSensitive) {
-				try (PreparedStatement stmt = conn.prepareStatement(
-						"SELECT tuid, puretext FROM tuv WHERE lang=? AND LOWER(puretext) LIKE ? LIMIT ?")) {
-					stmt.setString(1, srcLang);
-					stmt.setString(2, "%" + searchStr.toLowerCase() + "%");
-					stmt.setInt(3, limit);
-					try (ResultSet rs = stmt.executeQuery()) {
-						while (rs.next()) {
-							candidates.add(rs.getString(1));
-						}
-					}
-				}
-			} else {
-				try (PreparedStatement stmt = conn
-						.prepareStatement("SELECT tuid, puretext FROM tuv WHERE lang=? AND puretext LIKE ? LIMIT ?")) {
-					stmt.setString(1, srcLang);
-					stmt.setString(2, "%" + searchStr + "%");
-					stmt.setInt(3, limit);
-					try (ResultSet rs = stmt.executeQuery()) {
-						while (rs.next()) {
-							candidates.add(rs.getString(1));
-						}
+			String sql = caseSensitive ? "SELECT tuid, puretext FROM tuv WHERE lang=? AND puretext LIKE ? LIMIT ?"
+					: "SELECT tuid, puretext FROM tuv WHERE lang=? AND puretext ILIKE ? LIMIT ?";
+					String escaped = searchStr.replace("%", "\\%").replace("_", "\\_");
+					try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+				stmt.setString(1, srcLang);
+				stmt.setString(2, "%" + escaped + "%");
+				stmt.setInt(3, limit);
+				try (ResultSet rs = stmt.executeQuery()) {
+					while (rs.next()) {
+						candidates.add(rs.getString(1));
 					}
 				}
 			}
@@ -430,6 +418,9 @@ public class InternalDatabase implements ITmEngine {
 			while (it.hasNext()) {
 				String tuid = it.next();
 				Element tu = tuDb.getTu(tuid);
+				if (tu == null) {
+					throw new IOException("Memory has broken segments");
+				}
 				stmt2.setString(1, tuid);
 				try (ResultSet rs2 = stmt2.executeQuery()) {
 					while (rs2.next()) {
@@ -446,7 +437,7 @@ public class InternalDatabase implements ITmEngine {
 	}
 
 	@Override
-	public void storeTu(Element tu) throws SQLException, IOException {
+	public synchronized void storeTu(Element tu) throws SQLException, IOException {
 		Set<String> tuLangs = Collections.synchronizedSortedSet(new TreeSet<>());
 		List<Element> tuvs = tu.getChildren("tuv");
 		String tuid = tu.getAttributeValue("tuid");

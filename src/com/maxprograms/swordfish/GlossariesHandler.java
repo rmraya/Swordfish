@@ -37,8 +37,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.Vector;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentHashMap.KeySetView;
 
 import javax.xml.parsers.ParserConfigurationException;
 
@@ -62,9 +60,8 @@ public class GlossariesHandler implements HttpHandler {
 
 	private static Logger logger = System.getLogger(GlossariesHandler.class.getName());
 
-	private static ConcurrentHashMap<String, Memory> glossaries;
-	private static ConcurrentHashMap<String, ITmEngine> openEngines;
-	private static ConcurrentHashMap<String, Integer> useCount;
+	private static Map<String, Memory> glossaries;
+	private static Map<String, ITmEngine> engines;
 	private static Map<String, JSONObject> openTasks;
 	private static boolean firstRun = true;
 
@@ -143,7 +140,7 @@ public class GlossariesHandler implements HttpHandler {
 		}
 		String process = json.getString("process");
 		if (openTasks == null) {
-			openTasks = new ConcurrentHashMap<>();
+			openTasks = new Hashtable<>();
 		}
 		if (openTasks.containsKey(process)) {
 			return openTasks.get(process);
@@ -177,7 +174,8 @@ public class GlossariesHandler implements HttpHandler {
 	}
 
 	private static void loadGlossariesList() throws IOException {
-		glossaries = new ConcurrentHashMap<>();
+		glossaries = new Hashtable<>();
+		engines = new Hashtable<>();
 		File home = new File(getWorkFolder());
 		File list = new File(home, "glossaries.json");
 		if (!list.exists()) {
@@ -259,7 +257,7 @@ public class GlossariesHandler implements HttpHandler {
 			final String process = "" + System.currentTimeMillis();
 			result.put("process", process);
 			if (openTasks == null) {
-				openTasks = new ConcurrentHashMap<>();
+				openTasks = new Hashtable<>();
 			}
 			JSONObject obj = new JSONObject();
 			obj.put(Constants.PROGRESS, Constants.PROCESSING);
@@ -269,12 +267,7 @@ public class GlossariesHandler implements HttpHandler {
 					JSONArray array = json.getJSONArray("glossaries");
 					for (int i = 0; i < array.length(); i++) {
 						Memory mem = glossaries.get(array.getString(i));
-						if (openEngines != null && openEngines.containsKey(mem.getId())) {
-							ITmEngine engine = openEngines.get(mem.getId());
-							engine.close();
-							openEngines.remove(mem.getId());
-							useCount.remove(mem.getId());
-						}
+						closeGlossary(mem.getId());
 						if (mem.getType().equals(Memory.LOCAL)) {
 							try {
 								File wfolder = new File(getWorkFolder(), mem.getId());
@@ -318,7 +311,7 @@ public class GlossariesHandler implements HttpHandler {
 		}
 		final String process = "" + System.currentTimeMillis();
 		if (openTasks == null) {
-			openTasks = new ConcurrentHashMap<>();
+			openTasks = new Hashtable<>();
 		}
 		JSONObject obj = new JSONObject();
 		obj.put(Constants.PROGRESS, Constants.PROCESSING);
@@ -330,7 +323,7 @@ public class GlossariesHandler implements HttpHandler {
 				}
 				Memory mem = glossaries.get(json.getString("glossary"));
 				openGlossary(mem);
-				ITmEngine engine = openEngines.get(mem.getId());
+				ITmEngine engine = getEngine(mem.getId());
 				File tmx = new File(json.getString("file"));
 				Set<String> langSet = Collections.synchronizedSortedSet(new TreeSet<>());
 				if (json.has("languages")) {
@@ -358,6 +351,9 @@ public class GlossariesHandler implements HttpHandler {
 	}
 
 	public static synchronized void openGlossary(String id) throws IOException, SQLException {
+		if (glossaries == null) {
+			loadGlossariesList();
+		}
 		openGlossary(glossaries.get(id));
 	}
 
@@ -365,63 +361,36 @@ public class GlossariesHandler implements HttpHandler {
 		if (glossaries == null) {
 			loadGlossariesList();
 		}
-		if (openEngines == null) {
-			openEngines = new ConcurrentHashMap<>();
-			useCount = new ConcurrentHashMap<>();
-		}
-		if (openEngines.containsKey(memory.getId())) {
-			int count = useCount.get(memory.getId()) + 1;
-			useCount.put(memory.getId(), count);
-			return;
-		}
 		ITmEngine engine = memory.getType().equals(Memory.LOCAL) ? new InternalDatabase(memory.getId(), getWorkFolder())
 				: new RemoteDatabase(memory.getServer(), memory.getUser(), memory.getPassword(), memory.getId());
-		openEngines.put(memory.getId(), engine);
-		useCount.put(memory.getId(), 1);
+		engines.put(memory.getId(), engine);
 	}
 
-	public static ITmEngine getEngine(String id) throws IOException {
+	public static ITmEngine getEngine(String id) throws IOException, SQLException {
 		if (glossaries == null) {
 			loadGlossariesList();
 		}
-		if (openEngines == null) {
-			throw new IOException("No open glossaries");
+		if (!engines.containsKey(id)) {
+			openGlossary(id);
 		}
-		if (!openEngines.containsKey(id)) {
-			throw new IOException("Glossary is not open");
-		}
-		return openEngines.get(id);
+		return engines.get(id);
+
 	}
 
 	public static synchronized void closeGlossary(String id) throws IOException, SQLException {
-		if (openEngines == null) {
-			throw new IOException("No glossaries open");
-		}
-		if (!openEngines.containsKey(id)) {
-			throw new IOException("Glossary already closed");
-		}
-		int count = useCount.get(id);
-		useCount.put(id, count - 1);
-		if (count == 1) {
-			openEngines.get(id).close();
-			openEngines.remove(id);
-			useCount.remove(id);
+		if (engines != null && engines.containsKey(id)) {
+			engines.get(id).close();
+			engines.remove(id);
 		}
 	}
 
 	public static synchronized void closeAll() throws IOException, SQLException {
-		if (openEngines == null) {
-			if (TmsServer.isDebug()) {
-				logger.log(Level.INFO, "no open glossaries");
-			}
-			return;
-		}
-		KeySetView<String, ITmEngine> keys = openEngines.keySet();
+		Set<String> keys = engines.keySet();
 		Iterator<String> it = keys.iterator();
 		while (it.hasNext()) {
-			openEngines.get(it.next()).close();
+			engines.get(it.next()).close();
 		}
-		openEngines.clear();
+		engines.clear();
 		if (TmsServer.isDebug()) {
 			logger.log(Level.INFO, "Glossaries closed");
 		}
@@ -448,7 +417,7 @@ public class GlossariesHandler implements HttpHandler {
 
 		final String process = "" + System.currentTimeMillis();
 		if (openTasks == null) {
-			openTasks = new ConcurrentHashMap<>();
+			openTasks = new Hashtable<>();
 		}
 		JSONObject obj = new JSONObject();
 		obj.put(Constants.PROGRESS, Constants.PROCESSING);
@@ -463,7 +432,7 @@ public class GlossariesHandler implements HttpHandler {
 					Tbx2Tmx.convert(tmxFile, tempFile.getAbsolutePath());
 					tmxFile = tempFile.getAbsolutePath();
 				}
-				ITmEngine engine = openEngines.get(id);
+				ITmEngine engine = getEngine(id);
 				String project = json.has("project") ? json.getString("project") : "";
 				String client = json.has("client") ? json.getString("client") : "";
 				String subject = json.has("subject") ? json.getString("subject") : "";
@@ -558,7 +527,6 @@ public class GlossariesHandler implements HttpHandler {
 		}
 		try {
 			String glossary = json.getString("glossary");
-			openGlossary(glossaries.get(glossary));
 			Element tu = new Element("tu");
 			Element srcTuv = new Element("tuv");
 			srcTuv.setAttribute("xml:lang", json.getString("srcLang"));
@@ -572,8 +540,10 @@ public class GlossariesHandler implements HttpHandler {
 			Element tgtSeg = new Element("seg");
 			tgtSeg.setText(json.getString("targetTerm"));
 			tgtTuv.addContent(tgtSeg);
-			openEngines.get(glossary).storeTu(tu);
-			openEngines.get(glossary).commit();
+			openGlossary(glossaries.get(glossary));
+			ITmEngine engine = getEngine(glossary);
+			engine.storeTu(tu);
+			engine.commit();
 			closeGlossary(glossary);
 		} catch (IOException | SQLException e) {
 			logger.log(Level.ERROR, e);
@@ -598,7 +568,7 @@ public class GlossariesHandler implements HttpHandler {
 		try {
 			List<Element> matches = new Vector<>();
 			openGlossary(glossaries.get(glossary));
-			matches.addAll(openEngines.get(glossary).searchAll(searchStr, srcLang, similarity, caseSensitive));
+			matches.addAll(getEngine(glossary).searchAll(searchStr, srcLang, similarity, caseSensitive));
 			closeGlossary(glossary);
 			result.put("count", matches.size());
 			result.put("html", generateHTML(matches));

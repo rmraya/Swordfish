@@ -14,37 +14,38 @@ package com.maxprograms.swordfish.tm;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.NavigableSet;
 import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
 
 import org.mapdb.DB;
 import org.mapdb.DBMaker;
 import org.mapdb.Fun;
 
 public class FuzzyIndex {
-	
-	private Map<String, NavigableSet<Fun.Tuple2<Integer,String>>> maps;
+
+	private Map<String, NavigableSet<Fun.Tuple2<Integer, String>>> maps;
 	private Map<String, DB> databases;
 	private File folder;
 
 	public FuzzyIndex(File folder) {
 		this.folder = folder;
-		databases = new ConcurrentHashMap<>();
-		maps = new ConcurrentHashMap<>();
+		databases = new Hashtable<>();
+		maps = new Hashtable<>();
 	}
-	
-	NavigableSet<Fun.Tuple2<Integer,String>> getIndex(String lang) throws IOException {
+
+	NavigableSet<Fun.Tuple2<Integer, String>> getIndex(String lang) throws IOException {
 		if (!maps.containsKey(lang)) {
 			DB mapdb = null;
 			try {
-				mapdb = DBMaker.newFileDB(new File(folder, "index_" + lang)).closeOnJvmShutdown().asyncWriteEnable().make(); 
+				mapdb = DBMaker.newFileDB(new File(folder, "index_" + lang)).closeOnJvmShutdown().asyncWriteEnable()
+						.make();
 			} catch (Error ioe) {
 				throw new IOException(ioe.getMessage());
 			}
-			NavigableSet<Fun.Tuple2<Integer,String>> multiMap = mapdb.getTreeSet(lang);
+			NavigableSet<Fun.Tuple2<Integer, String>> multiMap = mapdb.getTreeSet(lang);
 			databases.put(lang, mapdb);
 			maps.put(lang, multiMap);
 		}
@@ -52,7 +53,8 @@ public class FuzzyIndex {
 	}
 
 	public synchronized void commit() {
-		Iterator<String> keys = databases.keySet().iterator();
+		Set<String> set = databases.keySet();
+		Iterator<String> keys = set.iterator();
 		while (keys.hasNext()) {
 			String key = keys.next();
 			databases.get(key).commit();
@@ -69,13 +71,13 @@ public class FuzzyIndex {
 	}
 
 	public synchronized void close() {
-		Iterator<String> keys = databases.keySet().iterator();
+		Set<String> set = databases.keySet();
+		Iterator<String> keys = set.iterator();
 		while (keys.hasNext()) {
-			String key = keys.next();
-			maps.remove(key);
-			DB db = databases.get(key);
-			databases.remove(key);
+			DB db = databases.get(keys.next());
 			db.close();
 		}
+		databases.clear();
+		maps.clear();
 	}
 }

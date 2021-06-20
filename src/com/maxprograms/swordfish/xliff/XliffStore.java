@@ -948,11 +948,11 @@ public class XliffStore {
                         key.append(unit);
                         key.append('-');
                         key.append(segment);
-                        MemoriesHandler.openMemory(memory);
+                        MemoriesHandler.open(memory);
                         ITmEngine engine = MemoriesHandler.getEngine(memory);
                         engine.storeTu(XliffUtils.toTu(key.toString(), source, target, tags));
                         engine.commit();
-                        MemoriesHandler.closeMemory(memory);
+                        MemoriesHandler.close(memory);
                     } catch (IOException | SQLException e) {
                         logger.log(Level.ERROR, e);
                     }
@@ -2137,10 +2137,10 @@ public class XliffStore {
         }
 
         String memory = json.getString("memory");
-        MemoriesHandler.openMemory(memory);
+        MemoriesHandler.open(memory);
         ITmEngine tmEngine = MemoriesHandler.getEngine(memory);
         List<Match> tmMatches = tmEngine.searchTranslation(pure, srcLang, tgtLang, 60, false);
-        MemoriesHandler.closeMemory(memory);
+        MemoriesHandler.close(memory);
 
         String glossary = json.getString("glossary");
         GlossariesHandler.openGlossary(glossary);
@@ -2163,7 +2163,7 @@ public class XliffStore {
             throws IOException, SQLException, SAXException, ParserConfigurationException {
 
         String memory = json.getString("memory");
-        MemoriesHandler.openMemory(memory);
+        MemoriesHandler.open(memory);
         ITmEngine tmEngine = MemoriesHandler.getEngine(memory);
 
         String glossary = json.getString("glossary");
@@ -2201,7 +2201,7 @@ public class XliffStore {
                 }
             }
         }
-        MemoriesHandler.closeMemory(memory);
+        MemoriesHandler.close(memory);
         GlossariesHandler.closeGlossary(glossary);
     }
 
@@ -2225,7 +2225,7 @@ public class XliffStore {
         }
         Element original = XliffUtils.buildElement(src);
         String memoryName = MemoriesHandler.getName(memory);
-        MemoriesHandler.openMemory(memory);
+        MemoriesHandler.open(memory);
         ITmEngine engine = MemoriesHandler.getEngine(memory);
         List<Match> matches = engine.searchTranslation(pure, srcLang, tgtLang, 60, false);
         for (int i = 0; i < matches.size(); i++) {
@@ -2241,14 +2241,14 @@ public class XliffStore {
             insertMatch(file, unit, segment, memoryName, Constants.TM, similarity, source, target, obj);
             conn.commit();
         }
-        MemoriesHandler.closeMemory(memory);
+        MemoriesHandler.close(memory);
         return getMatches(file, unit, segment);
     }
 
     public int tmTranslateAll(String memory, int penalization)
             throws IOException, SQLException, SAXException, ParserConfigurationException {
         String memoryName = MemoriesHandler.getName(memory);
-        MemoriesHandler.openMemory(memory);
+        MemoriesHandler.open(memory);
         ITmEngine engine = MemoriesHandler.getEngine(memory);
         String sql = "SELECT file, unitId, segId, source, sourceText, target FROM segments WHERE state <> 'final'";
         int count = 0;
@@ -2279,7 +2279,7 @@ public class XliffStore {
             JSONArray translations = engine.batchTranslate(params);
             count += storeMatches(translations, memoryName, penalization);
         }
-        MemoriesHandler.closeMemory(memory);
+        MemoriesHandler.close(memory);
         return count;
     }
 
@@ -2472,7 +2472,7 @@ public class XliffStore {
             conn.commit();
             return;
         }
-        MemoriesHandler.openMemory(memory);
+        MemoriesHandler.open(memory);
         ITmEngine engine = MemoriesHandler.getEngine(memory);
         String sql = "SELECT file, unitId, segId, FROM segments WHERE state<>'final' AND type='S' AND targetText<>'' AND translate='Y'";
         try (ResultSet rs = stmt.executeQuery(sql)) {
@@ -2512,7 +2512,7 @@ public class XliffStore {
                 }
             }
         }
-        MemoriesHandler.closeMemory(memory);
+        MemoriesHandler.close(memory);
         conn.commit();
     }
 
