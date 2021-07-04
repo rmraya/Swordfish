@@ -2066,10 +2066,12 @@ class Swordfish {
                 }
             }
         }).catch((reason: any) => {
-            Swordfish.showMessage({
-                type: 'error',
-                message: JSON.stringify(reason)
-            });
+            if (!silent) {
+                Swordfish.showMessage({
+                    type: 'error',
+                    message: JSON.stringify(reason)
+                });
+            }
         });
     }
 

@@ -256,6 +256,10 @@ input:focus {
 	border: 1px solid var(--themePrimary);
 }
 
+input:focus+label {
+	color: var(--themePrimary);
+}
+
 input:disabled {
 	background-color: var(--gray130);
 }
@@ -317,6 +321,7 @@ button {
 
 button:focus {
 	outline: none !important;
+	background: var(--themeDarkAlt);
 }
 
 button:hover {
