@@ -48,6 +48,7 @@ class TermsPanel {
         let toolbar: HTMLDivElement = document.createElement('div');
         toolbar.classList.add('toolbar');
         toolbar.classList.add('middle');
+        toolbar.classList.add('roundedBottom');
         this.container.appendChild(toolbar);
 
         let getTerms = document.createElement('a');

@@ -45,6 +45,7 @@ class TmMatches {
         let toolbar: HTMLDivElement = document.createElement('div');
         toolbar.classList.add('toolbar');
         toolbar.classList.add('middle');
+        toolbar.classList.add('roundedBottom');
         this.container.appendChild(toolbar);
 
         let acceptTranslation = document.createElement('a');
@@ -144,12 +145,11 @@ class TmMatches {
         let observer = new MutationObserver((mutationsList) => {
             for (let mutation of mutationsList) {
                 if (mutation.type === 'attributes') {
-                    let height: number = this.container.clientHeight - 65; // tabHolder.labels + toolbar
-                    tab.getContainer().style.height = height + 'px';
-                    matchDiv.style.height = height + 'px';
-                    let sourceHeight: number = height / 2;
-                    sourceDiv.style.height = sourceHeight + 'px';
-                    targetDiv.style.height = (height - sourceHeight) + 'px';
+                    let contentHeight: number = this.container.clientHeight - 65; // tabHolder.labels + toolbar
+                    tab.getContainer().style.height = contentHeight + 'px';
+                    matchDiv.style.height = contentHeight + 'px';
+                    sourceDiv.style.height = (contentHeight / 2) + 'px';
+                    targetDiv.style.height = (contentHeight / 2) + 'px';
                 }
             }
         });

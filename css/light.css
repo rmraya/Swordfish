@@ -149,7 +149,7 @@ td.final {
 }
 
 tr.selected {
-	background-color: var(--white) !important;
+	background-color: var(--themeLighter) !important;
 }
 
 .discover tr:hover {
@@ -465,7 +465,7 @@ th svg {
 	display: flex;
 	flex-flow: row;
 	color: var(--black);
-	background: var(--gray30);
+	background: var(--gray10);
 	margin: 0;
 	padding: 0;
 }
@@ -491,9 +491,9 @@ th svg {
 }
 
 .tab:hover {
-	color: var(--black);
-	fill: var(--black);
-	stroke: var(--black);
+	color: var(--themePrimary);
+	fill: var(--themePrimary);
+	stroke: var(--themePrimary);
 }
 
 .selectedTab:hover {
@@ -520,8 +520,8 @@ th svg {
 	display: block;
 }
 
-.hiddenTab {
-	display: none;
+.lighter {
+	background-color: var(--gray10);
 }
 
 .panel {
@@ -534,12 +534,17 @@ th svg {
 	margin: 0;
 	padding-top: 0;
 	padding-left: 4px;
+	border-radius: 4px 4px 0px 0px;
 	background: var(--themeDark);
 	color: var(--gray10);
 	white-space: nowrap;
 	overflow-x: hidden;
 	height: 26px;
 	vertical-align: middle;
+}
+
+.roundedBottom {
+	border-radius: 0px 0px 4px 4px;
 }
 
 .panelcontent {
@@ -645,7 +650,7 @@ svg.stats {
 .statsRect {
 	stroke-width: 1;
 	stroke: var(--black);
-	fill: none;
+	fill: var(--gray20);
 }
 
 .statsFiller {
@@ -682,11 +687,12 @@ svg.stats {
 	margin-right: 8px;
 	margin-left: 8px;
 	margin-bottom: 8px;
-	border-radius: 2px;
+	border-radius: 4px;
 	width: calc(100% - 16px);
 	height: calc(100% - 16px);
 	overflow: auto;
-	box-shadow: 0px 2px 4px var(--gray130);
+	background: var(--gray30);
+	border: 1px solid var(--gray130);
 }
 
 .leftPaddedPanel {
@@ -694,11 +700,12 @@ svg.stats {
 	margin-right: 4px;
 	margin-left: 8px;
 	margin-bottom: 8px;
-	border-radius: 2px;
+	border-radius: 4px;
 	width: calc(100% - 12px);
 	height: calc(100% - 16px);
 	overflow: auto;
-	box-shadow: 0px 2px 4px var(--gray130);
+	background: var(--gray30);
+	border: 1px solid var(--gray130);
 }
 
 .rightPaddedPanel {
@@ -712,10 +719,11 @@ svg.stats {
 	margin-right: 8px;
 	margin-left: 4px;
 	margin-bottom: 4px;
-	border-radius: 2px;
+	border-radius: 4px;
 	width: calc(100% - 12px);
 	height: calc(100% - 12px);
-	box-shadow: 0px 2px 4px var(--gray130);
+	background: var(--gray30);
+	border: 1px solid var(--gray130);
 }
 
 .centerPaddedPanel {
@@ -723,10 +731,11 @@ svg.stats {
 	margin-right: 8px;
 	margin-left: 4px;
 	margin-bottom: 4px;
-	border-radius: 2px;
+	border-radius: 4px;
 	width: calc(100% - 12px);
 	height: calc(100% - 8px);
-	box-shadow: 0px 2px 4px var(--gray130);
+	background: var(--gray30);
+	border: 1px solid var(--gray130);
 }
 
 .bottomPaddedPanel {
@@ -734,8 +743,9 @@ svg.stats {
 	margin-right: 8px;
 	margin-left: 4px;
 	margin-bottom: 8px;
-	border-radius: 2px;
+	border-radius: 4px;
 	width: calc(100% - 12px);
 	height: calc(100% - 12px);
-	box-shadow: 0px 2px 4px var(--gray130);
+	background: var(--gray30);
+	border: 1px solid var(--gray130);
 }

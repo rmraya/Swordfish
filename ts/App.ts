@@ -54,7 +54,7 @@ class Swordfish {
 
     static appHome: string = Swordfish.path.join(app.getPath('appData'), app.name);
     static iconPath: string = Swordfish.path.join(app.getAppPath(), 'icons', 'icon.png');
-    static verticalPadding: number = 46;
+    static verticalPadding: number = 50;
 
     static latestVersion: string;
     static downloadLink: string;
@@ -1192,7 +1192,7 @@ class Swordfish {
     static setHeight(window: BrowserWindow, arg: any) {
         let rect: Rectangle = window.getBounds();
         rect.height = arg.height + Swordfish.verticalPadding;
-        window.setBounds(rect);
+        window.setBounds(rect, true);
     }
 
     static loadPreferences(): void {
@@ -1203,6 +1203,11 @@ class Swordfish {
             try {
                 let data: Buffer = readFileSync(preferencesFile);
                 Swordfish.currentPreferences = JSON.parse(data.toString());
+                if (!existsSync(Swordfish.currentPreferences.catalog)) {
+                    Swordfish.currentPreferences.catalog = Swordfish.path.join(app.getAppPath(), 'catalog', 'catalog.xml');
+                    Swordfish.currentPreferences.srx = Swordfish.path.join(app.getAppPath(), 'srx', 'default.srx');
+                    writeFileSync(Swordfish.path.join(app.getPath('appData'), app.name, 'preferences.json'), JSON.stringify(Swordfish.currentPreferences));
+                }
             } catch (err) {
                 console.log(err);
             }
@@ -1345,7 +1350,7 @@ class Swordfish {
                     );
                 }
             }).catch((error: Error) => {
-                console.log(error);
+                console.log(error.message);
             });
         } else {
             dialog.showSaveDialog(Swordfish.mainWindow, {
@@ -1361,7 +1366,7 @@ class Swordfish {
                     );
                 }
             }).catch((error: Error) => {
-                console.log(error);
+                console.log(error.message);
             });
         }
     }
@@ -1437,7 +1442,6 @@ class Swordfish {
         }
     }
 
-
     static addFile(): void {
         let anyFile: string[] = [];
         if (process.platform === 'linux') {
@@ -1498,7 +1502,7 @@ class Swordfish {
                 });
             }
         }).catch((error: Error) => {
-            console.log(error);
+            console.log(error.message);
         });
     }
 
@@ -1643,7 +1647,6 @@ class Swordfish {
         }
         dialog.showOpenDialog({
             properties: ['openFile', 'multiSelections'],
-
             filters: [
                 { name: 'Any File', extensions: anyFile },
                 { name: 'Adobe InDesign Interchange', extensions: ['inx'] },
@@ -1677,7 +1680,7 @@ class Swordfish {
                 Swordfish.getFileType(event, value.filePaths);
             }
         }).catch((error: Error) => {
-            console.log(error);
+            console.log(error.message);
         });
     }
 
@@ -1792,8 +1795,10 @@ class Swordfish {
                 if (data.status === Swordfish.SUCCESS) {
                     if (args.type === 'memory') {
                         Swordfish.mainWindow.webContents.send('request-memories');
+                        Swordfish.showMessage({ type: 'info', message: 'Memory added' });
                     } else {
                         Swordfish.mainWindow.webContents.send('request-glossaries');
+                        Swordfish.showMessage({ type: 'info', message: 'Glossary added' });
                     }
                 } else {
                     Swordfish.showMessage({ type: 'error', message: data.reason });
@@ -1831,14 +1836,14 @@ class Swordfish {
         Swordfish.mainWindow.webContents.send('view-glossaries');
     }
 
-    static sendRequest(url: string, json: any, success: Function, error: Function) {
+    static sendRequest(url: string, params: any, success: Function, error: Function) {
         fetch('http://127.0.0.1:8070' + url, {
             method: 'POST',
             headers: [
                 ['Content-Type', 'application/json'],
                 ['Accept', 'application/json']
             ],
-            body: JSON.stringify(json)
+            body: JSON.stringify(params)
         }).then(async (response) => {
             let json: any = await response.json();
             success(json);
@@ -1885,6 +1890,8 @@ class Swordfish {
         let title = '';
         switch (type) {
             case 'Swordfish':
+            case "OpenXLIFF":
+            case "H2":
                 licenseFile = 'file://' + this.path.join(app.getAppPath(), 'html', 'licenses', 'EclipsePublicLicense1.0.html');
                 title = 'Eclipse Public License 1.0';
                 break;
@@ -1900,11 +1907,6 @@ class Swordfish {
             case "Java":
                 licenseFile = 'file://' + this.path.join(app.getAppPath(), 'html', 'licenses', 'java.html');
                 title = 'GPL2 with Classpath Exception';
-                break;
-            case "OpenXLIFF":
-            case "H2":
-                licenseFile = 'file://' + this.path.join(app.getAppPath(), 'html', 'licenses', 'EclipsePublicLicense1.0.html');
-                title = 'Eclipse Public License 1.0';
                 break;
             case "JSON":
                 licenseFile = 'file://' + this.path.join(app.getAppPath(), 'html', 'licenses', 'json.txt');
@@ -2069,7 +2071,7 @@ class Swordfish {
             if (!silent) {
                 Swordfish.showMessage({
                     type: 'error',
-                    message: JSON.stringify(reason)
+                    message: reason.message
                 });
             }
         });
@@ -2164,7 +2166,7 @@ class Swordfish {
                 event.sender.send('set-srx', value.filePaths[0]);
             }
         }).catch((error: Error) => {
-            console.log(error);
+            console.log(error.message);
         });
     }
 
@@ -2182,7 +2184,7 @@ class Swordfish {
                 event.sender.send('set-catalog', value.filePaths[0]);
             }
         }).catch((error: Error) => {
-            console.log(error);
+            console.log(error.message);
         });
     }
 
@@ -2589,7 +2591,7 @@ class Swordfish {
                     );
                 }
             }).catch((error: Error) => {
-                console.log(error);
+                console.log(error.message);
             });
         } else {
             Swordfish.showMessage({ type: 'warning', message: 'Select one memory' });
@@ -2640,7 +2642,7 @@ class Swordfish {
                     );
                 }
             }).catch((error: Error) => {
-                console.log(error);
+                console.log(error.message);
             });
         } else {
             Swordfish.showMessage({ type: 'warning', message: 'Select one glossary' });
@@ -3092,7 +3094,7 @@ class Swordfish {
                 );
             }
         }).catch((error: Error) => {
-            console.log(error);
+            console.log(error.message);
         });
     }
 
@@ -3119,7 +3121,7 @@ class Swordfish {
                 );
             }
         }).catch((error: Error) => {
-            console.log(error);
+            console.log(error.message);
         });
     }
 
@@ -3220,7 +3222,7 @@ class Swordfish {
                 event.sender.send('set-xliff', value.filePaths[0]);
             }
         }).catch((error: Error) => {
-            console.log(error);
+            console.log(error.message);
         });
     }
 

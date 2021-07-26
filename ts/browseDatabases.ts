@@ -60,14 +60,26 @@ class BrowseDatabases {
         let length = this.databases.memories.length;
         for (let i = 0; i < length; i++) {
             let database: Database = this.databases.memories[i];
+
+            let checkBox: HTMLInputElement = document.createElement('input');
+            checkBox.id = 'ck_' + database.id;
+            checkBox.type = 'checkbox';
+
             let tr: HTMLTableRowElement = document.createElement('tr');
             tr.addEventListener('click', (event: MouseEvent) => {
-                this.clicked(event, database);
+                this.clicked(tr, database, checkBox);
             });
             tr.id = database.id;
             tbody.appendChild(tr);
 
             let td: HTMLTableCellElement = document.createElement('td');
+            td.classList.add('center');
+            td.classList.add('list');
+            td.style.width = '24px';
+            td.appendChild(checkBox);
+            tr.append(td);
+
+            td = document.createElement('td');
             tr.appendChild(td);
             td.innerText = database.name;
 
@@ -102,22 +114,16 @@ class BrowseDatabases {
         });
     }
 
-    clicked(event: MouseEvent, memory: Database): void {
-        let tr: HTMLTableRowElement = event.currentTarget as HTMLTableRowElement;
+    clicked(tr: HTMLTableRowElement, memory: Database, checkbox: HTMLInputElement): void {
         let isSelected: boolean = this.selected.has(memory.id);
         if (!isSelected) {
-            if (!(event.ctrlKey || event.metaKey)) {
-                for (let key of this.selected.keys()) {
-                    document.getElementById(key).classList.remove('selected');
-                }
-                this.selected.clear()
-            }
             this.selected.set(memory.id, memory);
             tr.classList.add('selected');
         } else {
             this.selected.delete(memory.id);
             tr.classList.remove('selected');
         }
+        checkbox.checked = !isSelected;
     }
 }
 

@@ -203,7 +203,7 @@ public class MemoriesHandler implements HttpHandler {
 		boolean isRegexp = json.getBoolean("regExp");
 		boolean caseSensitive = json.getBoolean("caseSensitive");
 		int limit = json.getInt("limit");
-		JSONArray memories = json.getJSONArray("memories");
+		JSONArray memoriesArray = json.getJSONArray("memories");
 		final String process = "" + System.currentTimeMillis();
 		if (openTasks == null) {
 			openTasks = new Hashtable<>();
@@ -221,8 +221,8 @@ public class MemoriesHandler implements HttpHandler {
 					}
 				}
 				List<Element> matches = new Vector<>();
-				for (int i = 0; i < memories.length(); i++) {
-					String memory = memories.getString(i);
+				for (int i = 0; i < memoriesArray.length(); i++) {
+					String memory = memoriesArray.getString(i);
 					open(memory);
 					ITmEngine engine = getEngine(memory);
 					matches.addAll(engine.concordanceSearch(searchStr, srcLang, limit, isRegexp, caseSensitive));

@@ -208,6 +208,23 @@ public class XliffStore {
                 conn.commit();
             }
         }
+        needsUpgrade = true;
+        try (Statement stm = conn.createStatement()) {
+            String sql = "SELECT TYPE_NAME FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME='SEGMENTS' AND COLUMN_NAME='IDX'";
+            try (ResultSet rs = stm.executeQuery(sql)) {
+                while (rs.next()) {
+                    needsUpgrade = !rs.getString(1).equalsIgnoreCase("INTEGER");
+                }
+            }
+        }
+        if (needsUpgrade) {
+            String s1 = "ALTER TABLE segments ADD COLUMN idx INTEGER";
+            try (Statement upgrade = conn.createStatement()) {
+                upgrade.execute(s1);
+            }
+            conn.commit();
+            indexSegments();
+        }
 
         getUnitData = conn.prepareStatement("SELECT data, compressed FROM units WHERE file=? AND unitId=?");
         getSource = conn.prepareStatement(
@@ -237,6 +254,7 @@ public class XliffStore {
             document = builder.build(xliffFile);
             parseDocument();
             conn.commit();
+            indexSegments();
         }
     }
 
@@ -247,7 +265,7 @@ public class XliffStore {
         String segments = "CREATE TABLE segments (file VARCHAR(50), unitId VARCHAR(256) NOT NULL, "
                 + "segId VARCHAR(256) NOT NULL, type CHAR(1) NOT NULL DEFAULT 'S', state VARCHAR(12) DEFAULT 'initial', child INTEGER, "
                 + "translate CHAR(1), tags INTEGER DEFAULT 0, space CHAR(1) DEFAULT 'N', source CLOB NOT NULL, sourceText CLOB NOT NULL, "
-                + "target CLOB NOT NULL, targetText CLOB NOT NULL, words INTEGER NOT NULL DEFAULT 0, "
+                + "target CLOB NOT NULL, targetText CLOB NOT NULL, words INTEGER NOT NULL DEFAULT 0, idx INTEGER, "
                 + "PRIMARY KEY(file, unitId, segId, type) );";
         String matches = "CREATE TABLE matches (file VARCHAR(50), unitId VARCHAR(256) NOT NULL, "
                 + "segId VARCHAR(256) NOT NULL, matchId varchar(256), origin VARCHAR(256), type CHAR(2) NOT NULL DEFAULT 'tm', "
@@ -528,10 +546,9 @@ public class XliffStore {
             boolean showConfirmed, String sortOption, boolean sortDesc)
             throws SQLException, SAXException, IOException, ParserConfigurationException, DataFormatException {
         List<JSONObject> result = new Vector<>();
-        int idx = start;
         StringBuilder queryBuilder = new StringBuilder();
         queryBuilder.append(
-                "SELECT file, unitId, segId, child, source, target, tags, state, space, translate, sourceText, targetText FROM segments WHERE type='S'");
+                "SELECT file, unitId, segId, child, source, target, tags, state, space, translate, sourceText, targetText, idx FROM segments WHERE type='S'");
         if (!filterText.isEmpty()) {
             if (regExp) {
                 try {
@@ -610,6 +627,7 @@ public class XliffStore {
                 boolean segTranslate = "Y".equals(rs.getString(10));
                 String sourceText = TMUtils.getString(rs.getNCharacterStream(11));
                 String targetText = TMUtils.getString(rs.getNCharacterStream(12));
+                int idx = rs.getInt(13);
 
                 JSONObject tagsData = new JSONObject();
                 if (tags > 0) {
@@ -637,7 +655,7 @@ public class XliffStore {
                 }
                 tagsMap = new Hashtable<>();
                 JSONObject row = new JSONObject();
-                row.put("index", idx++);
+                row.put("index", idx);
                 row.put("file", file);
                 row.put("unit", unit);
                 row.put("segment", segId);
@@ -2074,8 +2092,6 @@ public class XliffStore {
 
     public JSONArray machineTranslate(JSONObject json, MT translator)
             throws SQLException, IOException, InterruptedException, SAXException, ParserConfigurationException {
-        JSONArray result = new JSONArray();
-
         String file = json.getString("file");
         String unit = json.getString("unit");
         String segment = json.getString("segment");
@@ -2101,23 +2117,9 @@ public class XliffStore {
             Element target = XliffUtils.buildElement(targetText);
             target.setAttribute("xml:lang", translation.getString("tgtLang"));
             insertMatch(file, unit, segment, origin, Constants.MT, 0, source, target, tagsData);
-
-            JSONObject match = new JSONObject();
-            match.put("file", file);
-            match.put("unit", unit);
-            match.put("segment", segment);
-            match.put("matchId", origin);
-            match.put("origin", origin);
-            match.put("type", Constants.MT);
-            match.put("similarity", 0);
-            match.put("source", XMLUtils.cleanText(sourceText));
-            match.put("srcLang", srcLang);
-            match.put("target", XMLUtils.cleanText(translation.getString("target")));
-            match.put("tgtLang", tgtLang);
-            result.put(match);
         }
         conn.commit();
-        return result;
+        return getMatches(file, unit, segment);
     }
 
     public void assembleMatches(JSONObject json)
@@ -3491,10 +3493,10 @@ public class XliffStore {
                 insertSegment(currentFile, currentUnit, id, "I", false, e.getChild("source"), e.getChild("target"));
             }
         }
-
         insertSegmentStmt.close();
-        saveXliff();
         conn.commit();
+        indexSegments();
+        saveXliff();
     }
 
     private void deleteUnitSegments(String file, String unit) throws SQLException {
@@ -3660,8 +3662,9 @@ public class XliffStore {
         }
 
         insertSegmentStmt.close();
-        saveXliff();
         conn.commit();
+        indexSegments();
+        saveXliff();
     }
 
     private Element getTarget(String file, String unit, String segment)
@@ -3695,5 +3698,25 @@ public class XliffStore {
             }
         }
         return result;
+    }
+
+    private void indexSegments() throws SQLException {
+        int idx = 0;
+        String update = "UPDATE segments SET idx=? WHERE file=? AND unitID=? AND segId=?";
+        try (PreparedStatement prep = conn.prepareStatement(update)) {
+            try (Statement st = conn.createStatement()) {
+                String sql = "SELECT file, unitId, segId, child FROM segments WHERE type='S' ORDER BY file, child";
+                try (ResultSet rs = st.executeQuery(sql)) {
+                    while (rs.next()) {
+                        prep.setInt(1, idx++);
+                        prep.setString(2, rs.getString(1));
+                        prep.setString(3, rs.getString(2));
+                        prep.setString(4, rs.getString(3));
+                        prep.executeUpdate();
+                    }
+                }
+            }
+        }
+        conn.commit();
     }
 }

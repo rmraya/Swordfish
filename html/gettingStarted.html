@@ -12,18 +12,18 @@
             padding: 0px;
             margin-top: 0px;
             vertical-align: middle;
-            fill: var(--accent-color);
-            stroke: var(--accent-color);
+            fill: var(--themePrimary);
+            stroke: var(--themePrimary);
         }
 
         b {
-            color: var(--accent-color);
+            color: var(--themePrimary);
             padding-right: 3px;
             padding-left: 3px;
         }
 
         .userinput {
-            background: var(--toolbar-background);
+            background: var(--gray50);
             font-family: 'Courier New', Courier, monospace;
             padding-left: 3px;
             padding-right: 3px;
@@ -35,7 +35,7 @@
 <body id="body">
 
     <div id="container" class="divContainer"
-        style="height: 400px; width: calc(100% - 40px); padding:10px; border:1px solid var(--input-color); background: var(--editing-background); margin:10px;">
+        style="height: 400px; width: calc(100% - 40px); padding:10px; border:1px solid var(--gray190); background: var(--gray10); margin:10px;">
         <h3>Getting Started with Swordfish IV</h3>
         <p>Only a few steps are necessary to translate with Swordfish IV. The basic workflow for translating
             documents is:
@@ -48,7 +48,7 @@
             <li><a href="#translationWorkflow__step4">Export translations</a></li>
         </ol>
         <div
-            style="margin-left:20px; margin-right: 20px; border-top: 1px solid var(--input-color); border-bottom: 1px solid var(--input-color); padding: 4px;">
+            style="margin-left:20px; margin-right: 20px; border-top: 1px solid var(--gray190); border-bottom: 1px solid var(--gray190); padding: 4px;">
             <h4 style="margin: 0px;">Note:</h4>
             <div style="padding: 4px;">Press <span class="userinput">F1</span> at any time to open <b>Swordfish IV User
                     Guide</b> for additional information.</div>
@@ -70,7 +70,8 @@
                 <li>If you have Translation Memory data in TMX format, import your TMX files into your
                     memories clicking on the <b>Import TMX File</b> button (<svg xmlns="http://www.w3.org/2000/svg"
                         enable-background="new 0 0 24 24" height="24" viewBox="0 0 24 24" width="24">
-                        <path d="M19,9h-2v6.59L5.41,4L4,5.41L15.59,17H9v2h10V9z" /></svg>) of the <b>Memories</b> tab
+                        <path d="M19,9h-2v6.59L5.41,4L4,5.41L15.59,17H9v2h10V9z" />
+                    </svg>) of the <b>Memories</b> tab
                     toolbar.</li>
             </ol>
 
@@ -89,12 +90,13 @@
                     the <b>Import
                         Glossary</b> button (<svg xmlns="http://www.w3.org/2000/svg" enable-background="new 0 0 24 24"
                         height="24" viewBox="0 0 24 24" width="24">
-                        <path d="M19,9h-2v6.59L5.41,4L4,5.41L15.59,17H9v2h10V9z" /></svg>) of the <b>Glossaries</b> tab
+                        <path d="M19,9h-2v6.59L5.41,4L4,5.41L15.59,17H9v2h10V9z" />
+                    </svg>) of the <b>Glossaries</b> tab
                     toolbar.</li>
             </ol>
 
             <div
-                style="margin-left:20px; margin-right: 20px; border-top: 1px solid var(--input-color); border-bottom: 1px solid var(--input-color); padding: 4px;">
+                style="margin-left:20px; margin-right: 20px; border-top: 1px solid var(--gray190); border-bottom: 1px solid var(--gray190); padding: 4px;">
                 <h4 style="margin: 0px;">Note:</h4>
                 <div style="padding: 4px;">You can reuse memories and glossaries in different translation projects. It
                     is not required to create a new memory or glossary at the start of each project.</div>
@@ -140,22 +142,22 @@
             </ol>
             <p>The translation view has these special areas:</p>
             <table>
-                <tr style="border-top: 1px solid var(--tabHolder-background);">
+                <tr style="border-top: 1px solid var(--gray30);">
                     <td><b>Top Toolbar</b></td>
                     <td>Contains an array of buttons for performing different tasks. It also contains drop-down
                         selectors for the active and glossary.</td>
                 </tr>
-                <tr style="border-top: 1px solid var(--tabHolder-background);">
+                <tr style="border-top: 1px solid var(--gray30);">
                     <td><b>Translation Panel</b></td>
                     <td>Large scrollable table of segments, showing source text, segment status and translation.</td>
                 </tr>
-                <tr style="border-top: 1px solid var(--tabHolder-background);">
+                <tr style="border-top: 1px solid var(--gray30);">
                     <td><b>Side Panel</b></td>
                     <td>Located on the right side, this section holds three panels: <b>Translation Memory</b>,
-                        <b>Machine Translation</b> and <b>Terms</b>.</td>
+                        <b>Machine Translation</b> and <b>Terms</b>.
+                    </td>
                 </tr>
-                <tr
-                    style="border-top: 1px solid var(--tabHolder-background);border-bottom: 1px solid var(--tabHolder-background);">
+                <tr style="border-top: 1px solid var(--gray30);border-bottom: 1px solid var(--gray30);">
                     <td><b>Navigation &amp; Status Bar</b></td>
                     <td>Located at the bottom, this area contains buttons for navigating between project pages and
                         provides translation status information.</td>
@@ -171,7 +173,8 @@
                             style="font-size:12px;font-style:normal;font-weight:normal;text-align:center;font-family:sans-serif;"
                             x="6" y="14" fill="#ffffff" fill-opacity="1">
                             <tspan>3</tspan>
-                        </text></g>
+                        </text>
+                    </g>
                 </svg>). To insert green marks, also known as <i>tags</i>, press <span class="userinput">Ctrl+N</span>
                 on Windows/Linux, (<span class="userinput">Cmd+N</span> on macOS) where <i>N</i> is the number in the
                 mark. To insert a tag greater than 10, press <span class="userinput">Ctrl+T</span> (<span
@@ -179,7 +182,7 @@
                 for managing tags available in <b>Edit</b> menu.</p>
 
             <div
-                style="margin-left:20px; margin-right: 20px; border-top: 1px solid var(--input-color); border-bottom: 1px solid var(--input-color); padding: 4px;">
+                style="margin-left:20px; margin-right: 20px; border-top: 1px solid var(--gray190); border-bottom: 1px solid var(--gray190); padding: 4px;">
                 <h4 style="margin: 0px;">Note:</h4>
                 <div style="padding: 4px;">In case a segment has tag errors or initial/trailing spaces errors, a
                     warning icon (<svg xmlns='http://www.w3.org/2000/svg' height='24' viewBox='0 0 24 24' width='24'>
@@ -222,7 +225,8 @@
 
             <p>When all segments have been translated, press <span class="userinput">F5</span> or click on the
                 <b>Export HTML</b> button on the top toolbar to export an HTML version of your translations for review.
-                Note any segments with errors and correct them.</p>
+                Note any segments with errors and correct them.
+            </p>
             <p>To visit a segment knowing its number, press <span class="userinput">Ctrl+G</span> (<span
                     class="userinput">Cmd+G</span> on macOS). The <b>Go To Segment</b> dialog appears. Type the number
                 of the segment you want to review in the <b>Segment Number</b> box and press <span

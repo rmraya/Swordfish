@@ -9,7 +9,7 @@
 }
 
 body {
-	background: var(--gray160);
+	background: var(--gray150);
 	color: var(--gray10);
 	fill: var(--gray10);
 	stroke: var(--gray10);
@@ -491,9 +491,9 @@ th svg {
 }
 
 .tab:hover {
-	color: var(--gray10);
-	fill: var(--gray10);
-	stroke: var(--gray10);
+	color: var(--themeTertiary);
+	fill: var(--themeTertiary);
+	stroke: var(--themeTertiary);
 }
 
 .selectedTab:hover {
@@ -520,8 +520,8 @@ th svg {
 	display: block;
 }
 
-.hiddenTab {
-	display: none;
+.lighter {
+	background-color: var(--gray150);
 }
 
 .panel {
@@ -534,12 +534,17 @@ th svg {
 	margin: 0;
 	padding-top: 0;
 	padding-left: 4px;
+	border-radius: 4px 4px 0px 0px;
 	background: var(--themeDark);
 	color: var(--white);
 	white-space: nowrap;
 	overflow-x: hidden;
 	height: 26px;
 	vertical-align: middle;
+}
+
+.roundedBottom {
+	border-radius: 0px 0px 4px 4px;
 }
 
 .panelcontent {
@@ -645,7 +650,7 @@ svg.stats {
 .statsRect {
 	stroke-width: 1;
 	stroke: var(--white);
-	fill: none;
+	fill: var(--gray160);
 }
 
 .statsFiller {
@@ -682,11 +687,12 @@ svg.stats {
 	margin-right: 8px;
 	margin-left: 8px;
 	margin-bottom: 8px;
-	border-radius: 2px;
+	border-radius: 4px;
 	width: calc(100% - 16px);
 	height: calc(100% - 16px);
 	overflow: auto;
-	box-shadow: 0px 2px 4px var(--black);
+	background: var(--gray160);
+	border: 1px solid var(--black);
 }
 
 .leftPaddedPanel {
@@ -694,11 +700,12 @@ svg.stats {
 	margin-right: 4px;
 	margin-left: 8px;
 	margin-bottom: 8px;
-	border-radius: 2px;
+	border-radius: 4px;
 	width: calc(100% - 12px);
 	height: calc(100% - 16px);
 	overflow: auto;
-	box-shadow: 0px 2px 4px var(--black);
+	background: var(--gray160);
+	border: 1px solid var(--black);
 }
 
 .rightPaddedPanel {
@@ -712,10 +719,11 @@ svg.stats {
 	margin-right: 8px;
 	margin-left: 4px;
 	margin-bottom: 4px;
-	border-radius: 2px;
+	border-radius: 4px;
 	width: calc(100% - 12px);
 	height: calc(100% - 12px);
-	box-shadow: 0px 2px 4px var(--black);
+	background: var(--gray160);
+	border: 1px solid var(--black);
 }
 
 .centerPaddedPanel {
@@ -723,10 +731,11 @@ svg.stats {
 	margin-right: 8px;
 	margin-left: 4px;
 	margin-bottom: 4px;
-	border-radius: 2px;
+	border-radius: 4px;
 	width: calc(100% - 12px);
 	height: calc(100% - 8px);
-	box-shadow: 0px 2px 4px var(--black);
+	background: var(--gray160);
+	border: 1px solid var(--black);
 }
 
 .bottomPaddedPanel {
@@ -734,8 +743,9 @@ svg.stats {
 	margin-right: 8px;
 	margin-left: 4px;
 	margin-bottom: 8px;
-	border-radius: 2px;
+	border-radius: 4px;
 	width: calc(100% - 12px);
 	height: calc(100% - 12px);
-	box-shadow: 0px 2px 4px var(--black);
+	background: var(--gray160);
+	border: 1px solid var(--black);
 }

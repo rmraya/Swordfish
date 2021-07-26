@@ -110,6 +110,7 @@ class MemoriesView {
 
         memoriesTable.innerHTML =
             '<thead><tr>' +
+            '<th>&nbsp;</th>' +
             '<th style="padding-left:5px;padding-right:5px;">Name</th>' +
             '<th style="padding-left:5px;padding-right:5px;">Type</th>' +
             '<th style="padding-left:5px;padding-right:5px;">Project</th>' +
@@ -205,14 +206,26 @@ class MemoriesView {
         let length = memories.length;
         for (let i = 0; i < length; i++) {
             let p = memories[i];
+
+            let checkBox: HTMLInputElement = document.createElement('input');
+            checkBox.id = 'ck_' + p.id;
+            checkBox.type = 'checkbox';
+
             let tr: HTMLTableRowElement = document.createElement('tr');
             tr.id = p.id;
             tr.addEventListener('click', (event: MouseEvent) => {
-                this.clicked(event, p);
+                this.clicked(tr, p, checkBox);
             });
             this.tbody.appendChild(tr);
 
             let td = document.createElement('td');
+            td.classList.add('center');
+            td.classList.add('list');
+            td.style.width = '24px';
+            td.appendChild(checkBox);
+            tr.append(td);
+
+            td = document.createElement('td');
             td.classList.add('noWrap');
             td.classList.add('middle');
             td.innerText = p.name;
@@ -259,22 +272,16 @@ class MemoriesView {
         this.selected.clear();
     }
 
-    clicked(event: MouseEvent, memory: Memory): void {
-        let tr: HTMLTableRowElement = event.currentTarget as HTMLTableRowElement;
+    clicked(tr: HTMLTableRowElement, memory: Memory, checkbox: HTMLInputElement): void {
         let isSelected: boolean = this.selected.has(memory.id);
         if (!isSelected) {
-            if (!(event.ctrlKey || event.metaKey)) {
-                for (let key of this.selected.keys()) {
-                    document.getElementById(key).classList.remove('selected');
-                }
-                this.selected.clear()
-            }
             this.selected.set(memory.id, memory);
             tr.classList.add('selected');
         } else {
             this.selected.delete(memory.id);
             tr.classList.remove('selected');
         }
+        checkbox.checked = !isSelected;
     }
 
     concordanceSearch(): void {

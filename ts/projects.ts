@@ -154,6 +154,7 @@ class ProjectsView {
 
         projectsTable.innerHTML =
             '<thead><tr>' +
+            '<th>&nbsp;</th>' +
             '<th>Name</th><th>Status</th>' +
             '<th style="padding-left:5px;padding-right:5px;">Src.Lang.</th>' +
             '<th style="padding-left:5px;padding-right:5px;">Tgt.Lang.</th>' +
@@ -256,9 +257,7 @@ class ProjectsView {
                 srcLang: project.sourceLang,
                 tgtLang: project.targetLang
             });
-            document.getElementById(key).classList.remove('selected');
         }
-        this.selected.clear();
     }
 
     exportTranslations(): void {
@@ -337,13 +336,18 @@ class ProjectsView {
         let length = projects.length;
         for (let i = 0; i < length; i++) {
             let p: Project = projects[i];
+
+            let checkBox: HTMLInputElement = document.createElement('input');
+            checkBox.id = 'ck_' + p.id;
+            checkBox.type = 'checkbox';
+
             let tr = document.createElement('tr');
             tr.id = p.id;
-            tr.addEventListener('click', (event: MouseEvent) => {
-                this.clicked(event, p);
+            tr.addEventListener('click', () => {
+                this.clicked(tr, p, checkBox);
             });
-            tr.addEventListener('dblclick', (event: MouseEvent) => {
-                this.dblclicked(event, p);
+            tr.addEventListener('dblclick', () => {
+                this.dblclicked(tr, p, checkBox);
             });
             this.tbody.appendChild(tr);
             if (this.shouldOpen === p.id) {
@@ -351,6 +355,13 @@ class ProjectsView {
             }
 
             let td = document.createElement('td');
+            td.classList.add('center');
+            td.classList.add('list');
+            td.style.width = '24px';
+            td.appendChild(checkBox);
+            tr.append(td);
+
+            td = document.createElement('td');
             td.classList.add('list');
             if (p.description.length > 90 && (p.description.indexOf('/') != -1 || p.description.indexOf('\\') != -1)) {
                 td.innerText = p.description.substring(0, 30) + ' ... ' + p.description.substring(p.description.length - 50);
@@ -407,31 +418,26 @@ class ProjectsView {
         }
     }
 
-    dblclicked(event: MouseEvent, project: Project): void {
+    dblclicked(tr: HTMLTableRowElement, project: Project, checkbox: HTMLInputElement): void {
         for (let key of this.selected.keys()) {
             document.getElementById(key).classList.remove('selected');
+            (document.getElementById('ck_' + key) as HTMLInputElement).checked = false;
         }
         this.selected.clear();
-        this.selected.set(project.id, project);
+        this.clicked(tr, project, checkbox);
         this.openProjects();
     }
 
-    clicked(event: MouseEvent, project: Project): void {
-        let tr: HTMLTableRowElement = event.currentTarget as HTMLTableRowElement;
+    clicked(tr: HTMLTableRowElement, project: Project, checkbox: HTMLInputElement): void {
         let isSelected: boolean = this.selected.has(project.id);
         if (!isSelected) {
-            if (!(event.ctrlKey || event.metaKey)) {
-                for (let key of this.selected.keys()) {
-                    document.getElementById(key).classList.remove('selected');
-                }
-                this.selected.clear();
-            }
             this.selected.set(project.id, project);
             tr.classList.add('selected');
         } else {
             this.selected.delete(project.id);
             tr.classList.remove('selected');
         }
+        checkbox.checked = !isSelected;
     }
 
     updateStatus(arg: any): void {
@@ -441,7 +447,7 @@ class ProjectsView {
         for (let i = 0; i < rows.length; i++) {
             if (rows[i].id === projectId) {
                 let cells: HTMLCollectionOf<HTMLTableCellElement> = rows[i].getElementsByTagName('td');
-                cells[1].innerHTML = svg;
+                cells[2].innerHTML = svg;
                 break;
             }
         }

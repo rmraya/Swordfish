@@ -78,9 +78,11 @@ class Tab {
         if (selected) {
             this.labelDiv.classList.add('selectedTab');
             this.container.classList.remove('hidden');
+            this.container.classList.add('lighter');
         } else {
             this.labelDiv.classList.remove('selectedTab');
             this.container.classList.add('hidden');
+            this.container.classList.remove('lighter');
         }
     }
 }

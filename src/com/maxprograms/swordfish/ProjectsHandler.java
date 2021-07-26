@@ -510,7 +510,7 @@ public class ProjectsHandler implements HttpHandler {
 		}
 	}
 
-	private void sortProjects() throws JSONException, IOException {
+	private void sortProjects() throws IOException {
 		JSONArray array = projectsList.getJSONArray("projects");
 		List<Project> list = new ArrayList<>();
 		for (int i = 0; i < array.length(); i++) {

@@ -34,6 +34,7 @@ class MtMatches {
         let toolbar: HTMLDivElement = document.createElement('div');
         toolbar.classList.add('toolbar');
         toolbar.classList.add('middle');
+        toolbar.classList.add('roundedBottom');
         this.container.appendChild(toolbar);
 
         let acceptTranslation = document.createElement('a');
