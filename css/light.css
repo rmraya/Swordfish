@@ -166,6 +166,7 @@ th {
 	color: var(--gray10);
 	fill: var(--gray10);
 	stroke: var(--gray10);
+	border-bottom: 3px solid var(--themeDark);
 }
 
 .sourceContainer {
@@ -465,7 +466,7 @@ th svg {
 	display: flex;
 	flex-flow: row;
 	color: var(--black);
-	background: var(--gray10);
+	background: var(--gray30);
 	margin: 0;
 	padding: 0;
 }
@@ -692,7 +693,6 @@ svg.stats {
 	height: calc(100% - 16px);
 	overflow: auto;
 	background: var(--gray30);
-	border: 1px solid var(--gray130);
 }
 
 .leftPaddedPanel {
@@ -705,7 +705,6 @@ svg.stats {
 	height: calc(100% - 16px);
 	overflow: auto;
 	background: var(--gray30);
-	border: 1px solid var(--gray130);
 }
 
 .rightPaddedPanel {
@@ -723,7 +722,6 @@ svg.stats {
 	width: calc(100% - 12px);
 	height: calc(100% - 12px);
 	background: var(--gray30);
-	border: 1px solid var(--gray130);
 }
 
 .centerPaddedPanel {
@@ -735,7 +733,6 @@ svg.stats {
 	width: calc(100% - 12px);
 	height: calc(100% - 8px);
 	background: var(--gray30);
-	border: 1px solid var(--gray130);
 }
 
 .bottomPaddedPanel {
@@ -747,5 +744,14 @@ svg.stats {
 	width: calc(100% - 12px);
 	height: calc(100% - 12px);
 	background: var(--gray30);
-	border: 1px solid var(--gray130);
+}
+
+::-webkit-scrollbar {
+	width: 12px;
+	mix-blend-mode: darken
+}
+
+::-webkit-scrollbar-thumb {
+	min-height: 12px !important;
+	background-color: var(--gray90);
 }

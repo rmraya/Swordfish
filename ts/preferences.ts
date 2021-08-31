@@ -122,10 +122,10 @@ class Preferences {
         this.electron.ipcRenderer.on('get-height', () => {
             this.electron.ipcRenderer.send('settings-height', { width: body.clientWidth, height: body.clientHeight });
         });
-        this.electron.ipcRenderer.on('set-srx', (event, arg) => {
+        this.electron.ipcRenderer.on('set-srx', (event: Electron.IpcRendererEvent, arg: string) => {
             this.defaultSRX.value = arg;
         });
-        this.electron.ipcRenderer.on('set-catalog', (event, arg) => {
+        this.electron.ipcRenderer.on('set-catalog', (event: Electron.IpcRendererEvent, arg: string) => {
             this.defaultCatalog.value = arg;
         });
         document.addEventListener('keydown', (event: KeyboardEvent) => {
@@ -339,8 +339,6 @@ class Preferences {
 
     populateBasicTab(container: HTMLDivElement): void {
 
-        container.style.padding = '10px';
-
         let langsTable: HTMLTableElement = document.createElement('table');
         langsTable.classList.add('fill_width');
         container.appendChild(langsTable);
@@ -444,9 +442,6 @@ class Preferences {
     }
 
     populateSpellcheckTab(container: HTMLDivElement, spellchecker: any): void {
-
-        container.style.padding = '10px';
-
         if (this.os === 'darwin') {
             let macDiv = document.createElement('div');
             macDiv.style.padding = '8px'
@@ -561,8 +556,6 @@ class Preferences {
     }
 
     populateAdvancedTab(container: HTMLDivElement): void {
-
-        container.style.padding = '10px';
 
         let table: HTMLTableElement = document.createElement('table');
         table.classList.add('fill_width');
@@ -694,7 +687,7 @@ class Preferences {
     populateMtTab(container: HTMLDivElement): void {
 
         let div : HTMLDivElement = document.createElement('div');
-        div.style.margin = '8px';
+        div.style.margin = '0px 4px';
         container.appendChild(div);
         
         let mtHolder: TabHolder = new TabHolder(div, 'mtHolder');

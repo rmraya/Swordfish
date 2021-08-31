@@ -24,6 +24,7 @@ import org.xml.sax.Locator;
 import org.xml.sax.SAXException;
 
 import com.maxprograms.swordfish.tm.ITmEngine;
+import com.maxprograms.xml.Catalog;
 import com.maxprograms.xml.Document;
 import com.maxprograms.xml.Element;
 import com.maxprograms.xml.IContentHandler;
@@ -173,5 +174,10 @@ class TMXContentHandler implements IContentHandler {
 	public Document getDocument() {
 		// do nothing
 		return null;
+	}
+
+	@Override
+	public void setCatalog(Catalog catalog) {
+		// do nothing
 	}
 }

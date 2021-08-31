@@ -47,6 +47,8 @@ class Tab {
             this.labelDiv.appendChild(closeAnchor);
         }
         this.container = document.createElement('div');
+        this.container.style.width = '100%';
+        this.container.style.height = '100%';
         this.container.classList.add('hidden');
     }
 
@@ -109,6 +111,8 @@ class TabHolder {
 
         this.contentHolder = document.createElement('div');
         this.contentHolder.id = id;
+        this.contentHolder.style.width = '100%';
+        this.contentHolder.style.height = '100%';
         parent.appendChild(this.contentHolder);
     }
 

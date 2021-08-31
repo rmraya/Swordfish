@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE ini-file PUBLIC "-//Maxprograms//Converters 2.0.0//EN" "configuration.dtd">
+<ini-file><tag hard-break="segment">consequence</tag>
+<tag ctype="x-bold" hard-break="inline">b</tag>
+<tag hard-break="segment">safety_instruction</tag>
+<tag hard-break="ignore">base64</tag>
+<tag ctype="x-italic" hard-break="inline">i</tag>
+<tag hard-break="segment">cause</tag>
+<tag hard-break="segment">image-title</tag>
+<tag hard-break="segment">title</tag>
+<tag hard-break="segment">p</tag>
+<tag hard-break="segment">result</tag>
+<tag hard-break="segment">instruction</tag>
+<tag hard-break="segment">meta</tag>
+<tag ctype="x-bold" hard-break="inline">emphasis</tag>
+<tag hard-break="segment">intermediateresult</tag>
+<tag hard-break="segment">subheading</tag>
+<tag ctype="x-link" hard-break="inline">dynamic_link</tag>
+<tag hard-break="segment">meta-ref</tag>
+<tag hard-break="segment">ul</tag>
+<tag hard-break="segment">td</tag>
+<tag hard-break="segment">li</tag>
+<tag hard-break="segment">tr</tag>
+<tag hard-break="segment">table</tag>
+<tag hard-break="segment">image-container</tag>
+<tag keep-format="yes" hard-break="segment">codeblock</tag>
+<tag hard-break="segment">ol</tag>
+<tag hard-break="segment">margin_text</tag>
+</ini-file>

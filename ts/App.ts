@@ -147,7 +147,6 @@ class Swordfish {
 
     constructor() {
 
-        app.allowRendererProcessReuse = true;
         if (!app.requestSingleInstanceLock()) {
             app.quit();
         } else {
@@ -229,7 +228,7 @@ class Swordfish {
             });
         });
 
-        app.on('before-quit', (event) => {
+        app.on('before-quit', (event: Event) => {
             if (this.ls) {
                 event.preventDefault();
                 this.stopServer();
@@ -883,7 +882,8 @@ class Swordfish {
             useContentSize: true,
             webPreferences: {
                 nodeIntegration: true,
-                contextIsolation: false
+                contextIsolation: false,
+                nativeWindowOpen: true
             },
             show: false,
             icon: this.iconPath
@@ -1256,7 +1256,8 @@ class Swordfish {
             icon: this.iconPath,
             webPreferences: {
                 nodeIntegration: true,
-                contextIsolation: false
+                contextIsolation: false,
+                nativeWindowOpen: true
             }
         });
         this.sortParams = params;
@@ -1279,7 +1280,8 @@ class Swordfish {
             icon: this.iconPath,
             webPreferences: {
                 nodeIntegration: true,
-                contextIsolation: false
+                contextIsolation: false,
+                nativeWindowOpen: true
             }
         });
         this.filterParams = params;
@@ -1311,7 +1313,8 @@ class Swordfish {
             icon: this.iconPath,
             webPreferences: {
                 nodeIntegration: true,
-                contextIsolation: false
+                contextIsolation: false,
+                nativeWindowOpen: true
             }
         });
         this.addProjectWindow.setMenu(null);
@@ -1492,7 +1495,8 @@ class Swordfish {
                     icon: this.iconPath,
                     webPreferences: {
                         nodeIntegration: true,
-                        contextIsolation: false
+                        contextIsolation: false,
+                        nativeWindowOpen: true
                     }
                 });
                 this.addFileWindow.setMenu(null);
@@ -1735,7 +1739,8 @@ class Swordfish {
             icon: this.iconPath,
             webPreferences: {
                 nodeIntegration: true,
-                contextIsolation: false
+                contextIsolation: false,
+                nativeWindowOpen: true
             }
         });
         this.typeParam = type;
@@ -1758,7 +1763,8 @@ class Swordfish {
             icon: this.iconPath,
             webPreferences: {
                 nodeIntegration: true,
-                contextIsolation: false
+                contextIsolation: false,
+                nativeWindowOpen: true
             }
         });
         this.browseDatabasesWindow.setMenu(null);
@@ -1822,7 +1828,8 @@ class Swordfish {
             icon: this.iconPath,
             webPreferences: {
                 nodeIntegration: true,
-                contextIsolation: false
+                contextIsolation: false,
+                nativeWindowOpen: true
             }
         });
         this.addMemoryWindow.setMenu(null);
@@ -1875,7 +1882,8 @@ class Swordfish {
             icon: this.iconPath,
             webPreferences: {
                 nodeIntegration: true,
-                contextIsolation: false
+                contextIsolation: false,
+                nativeWindowOpen: true
             }
         });
         this.aboutWindow.setMenu(null);
@@ -1933,7 +1941,8 @@ class Swordfish {
             icon: this.iconPath,
             webPreferences: {
                 nodeIntegration: true,
-                contextIsolation: false
+                contextIsolation: false,
+                nativeWindowOpen: true
             }
         });
         licenseWindow.setMenu(null);
@@ -1955,7 +1964,7 @@ class Swordfish {
     static showSettings(): void {
         this.settingsWindow = new BrowserWindow({
             parent: this.mainWindow,
-            width: 600,
+            width: 640,
             useContentSize: true,
             minimizable: false,
             maximizable: false,
@@ -1964,7 +1973,8 @@ class Swordfish {
             icon: this.iconPath,
             webPreferences: {
                 nodeIntegration: true,
-                contextIsolation: false
+                contextIsolation: false,
+                nativeWindowOpen: true
             }
         });
         this.settingsWindow.setMenu(null);
@@ -1990,7 +2000,8 @@ class Swordfish {
             icon: this.iconPath,
             webPreferences: {
                 nodeIntegration: true,
-                contextIsolation: false
+                contextIsolation: false,
+                nativeWindowOpen: true
             }
         });
         this.licensesWindow.setMenu(null);
@@ -2051,7 +2062,8 @@ class Swordfish {
                     icon: this.iconPath,
                     webPreferences: {
                         nodeIntegration: true,
-                        contextIsolation: false
+                        contextIsolation: false,
+                        nativeWindowOpen: true
                     }
                 });
                 Swordfish.updatesWindow.setMenu(null);
@@ -2200,7 +2212,8 @@ class Swordfish {
             icon: this.iconPath,
             webPreferences: {
                 nodeIntegration: true,
-                contextIsolation: false
+                contextIsolation: false,
+                nativeWindowOpen: true
             }
         });
         this.defaultLangsWindow.setMenu(null);
@@ -2326,7 +2339,8 @@ class Swordfish {
             icon: this.iconPath,
             webPreferences: {
                 nodeIntegration: true,
-                contextIsolation: false
+                contextIsolation: false,
+                nativeWindowOpen: true
             }
         });
         this.memoryParam = memory;
@@ -2349,7 +2363,8 @@ class Swordfish {
             icon: this.iconPath,
             webPreferences: {
                 nodeIntegration: true,
-                contextIsolation: false
+                contextIsolation: false,
+                nativeWindowOpen: true
             }
         });
         this.glossaryParam = glossary;
@@ -2847,7 +2862,8 @@ class Swordfish {
             icon: this.iconPath,
             webPreferences: {
                 nodeIntegration: true,
-                contextIsolation: false
+                contextIsolation: false,
+                nativeWindowOpen: true
             }
         });
         if (arg.memory) {
@@ -2956,7 +2972,8 @@ class Swordfish {
             icon: this.iconPath,
             webPreferences: {
                 nodeIntegration: true,
-                contextIsolation: false
+                contextIsolation: false,
+                nativeWindowOpen: true
             }
         });
         Swordfish.spellingLangsWindow.setMenu(null);
@@ -3060,7 +3077,8 @@ class Swordfish {
             icon: this.iconPath,
             webPreferences: {
                 nodeIntegration: true,
-                contextIsolation: false
+                contextIsolation: false,
+                nativeWindowOpen: true
             }
         });
         Swordfish.messageParam = arg;
@@ -3173,7 +3191,8 @@ class Swordfish {
             icon: this.iconPath,
             webPreferences: {
                 nodeIntegration: true,
-                contextIsolation: false
+                contextIsolation: false,
+                nativeWindowOpen: true
             }
         });
         this.addGlossaryWindow.setMenu(null);
@@ -3199,7 +3218,8 @@ class Swordfish {
             icon: this.iconPath,
             webPreferences: {
                 nodeIntegration: true,
-                contextIsolation: false
+                contextIsolation: false,
+                nativeWindowOpen: true
             }
         });
         this.importXliffWindow.setMenu(null);
@@ -3287,7 +3307,8 @@ class Swordfish {
                 icon: this.iconPath,
                 webPreferences: {
                     nodeIntegration: true,
-                    contextIsolation: false
+                    contextIsolation: false,
+                    nativeWindowOpen: true
                 }
             });
             this.addFileWindow.setMenu(null);
@@ -3646,7 +3667,8 @@ class Swordfish {
             icon: this.iconPath,
             webPreferences: {
                 nodeIntegration: true,
-                contextIsolation: false
+                contextIsolation: false,
+                nativeWindowOpen: true
             }
         });
         this.tagsWindow.setMenu(null);
@@ -3668,7 +3690,8 @@ class Swordfish {
             icon: this.iconPath,
             webPreferences: {
                 nodeIntegration: true,
-                contextIsolation: false
+                contextIsolation: false,
+                nativeWindowOpen: true
             }
         });
         this.goToWindow.setMenu(null);
@@ -3696,7 +3719,8 @@ class Swordfish {
             icon: this.iconPath,
             webPreferences: {
                 nodeIntegration: true,
-                contextIsolation: false
+                contextIsolation: false,
+                nativeWindowOpen: true
             }
         });
         this.projectParam = arg.project;
@@ -3939,7 +3963,8 @@ class Swordfish {
             icon: this.iconPath,
             webPreferences: {
                 nodeIntegration: true,
-                contextIsolation: false
+                contextIsolation: false,
+                nativeWindowOpen: true
             }
         });
         Swordfish.concordanceMemories = arg;
@@ -4003,7 +4028,8 @@ class Swordfish {
             icon: this.iconPath,
             webPreferences: {
                 nodeIntegration: true,
-                contextIsolation: false
+                contextIsolation: false,
+                nativeWindowOpen: true
             }
         });
         Swordfish.htmlContent = data.html;
@@ -4028,7 +4054,8 @@ class Swordfish {
             icon: this.iconPath,
             webPreferences: {
                 nodeIntegration: true,
-                contextIsolation: false
+                contextIsolation: false,
+                nativeWindowOpen: true
             }
         });
         this.glossaryParam = arg.glossary;
@@ -4063,7 +4090,8 @@ class Swordfish {
                     icon: this.iconPath,
                     webPreferences: {
                         nodeIntegration: true,
-                        contextIsolation: false
+                        contextIsolation: false,
+                        nativeWindowOpen: true
                     }
                 });
                 Swordfish.htmlTitle = 'Term Search';
@@ -4093,7 +4121,8 @@ class Swordfish {
             icon: this.iconPath,
             webPreferences: {
                 nodeIntegration: true,
-                contextIsolation: false
+                contextIsolation: false,
+                nativeWindowOpen: true
             }
         });
         this.glossaryParam = glossary;
@@ -4268,7 +4297,8 @@ class Swordfish {
                     icon: this.iconPath,
                     webPreferences: {
                         nodeIntegration: true,
-                        contextIsolation: false
+                        contextIsolation: false,
+                        nativeWindowOpen: true
                     }
                 });
                 Swordfish.htmlContent = table;
@@ -4316,7 +4346,8 @@ class Swordfish {
                     icon: this.iconPath,
                     webPreferences: {
                         nodeIntegration: true,
-                        contextIsolation: false
+                        contextIsolation: false,
+                        nativeWindowOpen: true
                     }
                 });
                 Swordfish.htmlContent = table;
@@ -4374,7 +4405,8 @@ class Swordfish {
             icon: this.iconPath,
             webPreferences: {
                 nodeIntegration: true,
-                contextIsolation: false
+                contextIsolation: false,
+                nativeWindowOpen: true
             }
         });
         this.changeCaseWindow.setMenu(null);
@@ -4446,7 +4478,8 @@ class Swordfish {
                 icon: this.iconPath,
                 webPreferences: {
                     nodeIntegration: true,
-                    contextIsolation: false
+                    contextIsolation: false,
+                    nativeWindowOpen: true
                 }
             });
             Swordfish.notesParam = arg;
@@ -4497,7 +4530,8 @@ class Swordfish {
             icon: this.iconPath,
             webPreferences: {
                 nodeIntegration: true,
-                contextIsolation: false
+                contextIsolation: false,
+                nativeWindowOpen: true
             }
         });
         Swordfish.notesParam = arg;
@@ -4567,7 +4601,8 @@ class Swordfish {
             icon: this.iconPath,
             webPreferences: {
                 nodeIntegration: true,
-                contextIsolation: false
+                contextIsolation: false,
+                nativeWindowOpen: true
             }
         });
         Swordfish.gettingStartedWindow.setMenu(null);
