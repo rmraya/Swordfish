@@ -27,17 +27,16 @@ class GettingStarted {
         });
         document.getElementById('supportGroup').addEventListener('click', () => { this.electron.ipcRenderer.send('show-support'); });
         document.getElementById('userGuide').addEventListener('click', () => { this.electron.ipcRenderer.send('show-help'); });
-        
+
         let showWindow: HTMLInputElement = document.getElementById('showWindow') as HTMLInputElement;
         showWindow.addEventListener('click', () => {
-            this.electron.ipcRenderer.send('show-getting-started', {showGuide: showWindow.checked});
+            this.electron.ipcRenderer.send('show-getting-started', { showGuide: showWindow.checked });
         });
         this.electron.ipcRenderer.send('get-show guide');
         this.electron.ipcRenderer.on('set-show guide', (event: Electron.IpcRendererEvent, arg: any) => {
             showWindow.checked = arg.showGuide;
         });
-        let body: HTMLBodyElement = document.getElementById('body') as HTMLBodyElement;
-        this.electron.ipcRenderer.send('getting-started-height', { width: body.clientWidth, height: body.clientHeight  });
+        this.electron.ipcRenderer.send('getting-started-height', { width: document.body.clientWidth, height: document.body.clientHeight });
         document.getElementById('container').focus();
     }
 }

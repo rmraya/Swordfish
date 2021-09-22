@@ -71,8 +71,7 @@ class AddFile {
         document.getElementById('addProjectButton').addEventListener('click', () => {
             this.addProject();
         });
-        let body: HTMLBodyElement = document.getElementById('body') as HTMLBodyElement;
-        this.electron.ipcRenderer.send('add-file-height', { width: body.clientWidth, height: body.clientHeight + 10 });
+        this.electron.ipcRenderer.send('add-file-height', { width: document.body.clientWidth, height: document.body.clientHeight });
     }
 
     setClients(clients: string[]): void {

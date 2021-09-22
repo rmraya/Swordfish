@@ -57,8 +57,7 @@ class ApplyTM {
         document.getElementById('applyTmButton').addEventListener('click', () => {
             this.applyTM();
         });
-        let body: HTMLBodyElement = document.getElementById('body') as HTMLBodyElement;
-        this.electron.ipcRenderer.send('apply-tm-height', { width: body.clientWidth, height: body.clientHeight });
+        this.electron.ipcRenderer.send('apply-tm-height', { width: document.body.clientWidth, height: document.body.clientHeight });
     }
 
     applyTM(): void {

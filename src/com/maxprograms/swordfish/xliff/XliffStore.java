@@ -2091,7 +2091,7 @@ public class XliffStore {
     }
 
     public JSONArray machineTranslate(JSONObject json, MT translator)
-            throws SQLException, IOException, InterruptedException, SAXException, ParserConfigurationException {
+            throws SQLException, IOException, InterruptedException, SAXException, ParserConfigurationException, DataFormatException {
         String file = json.getString("file");
         String unit = json.getString("unit");
         String segment = json.getString("segment");
@@ -2119,7 +2119,7 @@ public class XliffStore {
             insertMatch(file, unit, segment, origin, Constants.MT, 0, source, target, tagsData);
         }
         conn.commit();
-        return getMatches(file, unit, segment);
+        return getTaggedtMatches(json);
     }
 
     public void assembleMatches(JSONObject json)
@@ -2208,7 +2208,7 @@ public class XliffStore {
     }
 
     public JSONArray tmTranslate(JSONObject json)
-            throws SAXException, IOException, ParserConfigurationException, SQLException {
+            throws SAXException, IOException, ParserConfigurationException, SQLException, DataFormatException {
         String file = json.getString("file");
         String unit = json.getString("unit");
         String segment = json.getString("segment");
@@ -2244,7 +2244,7 @@ public class XliffStore {
             conn.commit();
         }
         MemoriesHandler.close(memory);
-        return getMatches(file, unit, segment);
+        return getTaggedtMatches(json);
     }
 
     public int tmTranslateAll(String memory, int penalization)

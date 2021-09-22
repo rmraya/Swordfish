@@ -13,6 +13,7 @@
 import { execFileSync, spawn, ChildProcessWithoutNullStreams } from "child_process";
 import { app, clipboard, BrowserWindow, dialog, ipcMain, Menu, MenuItem, shell, nativeTheme, Rectangle, IpcMainEvent, screen, Size } from "electron";
 import { existsSync, mkdirSync, readFile, readFileSync, writeFileSync, lstatSync } from "fs";
+import { Locations, Point } from "./locations";
 import fetch from "node-fetch";
 
 class Swordfish {
@@ -49,6 +50,11 @@ class Swordfish {
     static gettingStartedWindow: BrowserWindow;
     static serverSettingsWindow: BrowserWindow;
     static browseDatabasesWindow: BrowserWindow;
+
+    static registerExpiredWindow: BrowserWindow;
+    static registerSubscriptionWindow: BrowserWindow;
+    static requestEvaluationWindow: BrowserWindow;
+    static newSubscriptionWindow: BrowserWindow;
 
     javapath: string = Swordfish.path.join(app.getAppPath(), 'bin', 'java');
 
@@ -145,6 +151,8 @@ class Swordfish {
 
     ls: ChildProcessWithoutNullStreams;
 
+    static locations: Locations;
+
     constructor() {
 
         if (!app.requestSingleInstanceLock()) {
@@ -198,6 +206,7 @@ class Swordfish {
         execFileSync(this.javapath, ['--module-path', 'lib', '-m', 'openxliff/com.maxprograms.server.CheckURL', 'http://localhost:8070/TMSServer'], { cwd: app.getAppPath() });
 
         this.loadDefaults();
+        Swordfish.locations = new Locations(Swordfish.path.join(app.getPath('appData'), app.name, 'locations.json'));
         Swordfish.loadPreferences();
 
         app.on('ready', () => {
@@ -212,15 +221,15 @@ class Swordfish {
             Swordfish.mainWindow.once('ready-to-show', () => {
                 Swordfish.mainWindow.setBounds(Swordfish.currentDefaults);
                 Swordfish.mainWindow.show();
-                if (Swordfish.currentPreferences.srcLang === 'none') {
-                    Swordfish.getDefaultLanguages();
-                }
                 Swordfish.spellCheckerLanguages = Swordfish.mainWindow.webContents.session.availableSpellCheckerLanguages;
                 setTimeout(() => {
                     Swordfish.checkUpdates(true);
                 }, 4000);
                 if (Swordfish.currentPreferences.showGuide === undefined) {
                     Swordfish.currentPreferences.showGuide = true;
+                }
+                if (Swordfish.currentPreferences.srcLang === 'none') {
+                    Swordfish.getDefaultLanguages();
                 }
                 if (Swordfish.currentPreferences.showGuide) {
                     Swordfish.showGettingStarted();
@@ -806,6 +815,9 @@ class Swordfish {
         ipcMain.on('show-notes', (event: IpcMainEvent, arg: any) => {
             Swordfish.showNotes(arg);
         });
+        ipcMain.on('notes-height', (event: IpcMainEvent, arg: any) => {
+            Swordfish.setHeight(Swordfish.notesWindow, arg);
+        });
         ipcMain.on('get-initial-notes', (event: IpcMainEvent) => {
             Swordfish.notesEvent = event;
             event.sender.send('note-params', Swordfish.notesParam);
@@ -879,7 +891,6 @@ class Swordfish {
             height: this.currentDefaults.height,
             x: this.currentDefaults.x,
             y: this.currentDefaults.y,
-            useContentSize: true,
             webPreferences: {
                 nodeIntegration: true,
                 contextIsolation: false,
@@ -1251,7 +1262,6 @@ class Swordfish {
             minimizable: false,
             maximizable: false,
             resizable: false,
-            useContentSize: true,
             show: false,
             icon: this.iconPath,
             webPreferences: {
@@ -1266,6 +1276,7 @@ class Swordfish {
         this.sortSegmentsWindow.once('ready-to-show', () => {
             this.sortSegmentsWindow.show();
         });
+        Swordfish.setLocation(this.sortSegmentsWindow, 'sortSegments.html');
     }
 
     static showFilterSegments(params: any): void {
@@ -1275,7 +1286,6 @@ class Swordfish {
             minimizable: false,
             maximizable: false,
             resizable: false,
-            useContentSize: true,
             show: false,
             icon: this.iconPath,
             webPreferences: {
@@ -1291,6 +1301,7 @@ class Swordfish {
             this.filterParams = params;
             this.filterSegmentsWindow.show();
         });
+        Swordfish.setLocation(this.filterSegmentsWindow, 'filterSegments.html');
     }
 
     static viewProjects(): void {
@@ -1308,7 +1319,6 @@ class Swordfish {
             minimizable: false,
             maximizable: false,
             resizable: false,
-            useContentSize: true,
             show: false,
             icon: this.iconPath,
             webPreferences: {
@@ -1322,6 +1332,7 @@ class Swordfish {
         this.addProjectWindow.once('ready-to-show', () => {
             this.addProjectWindow.show();
         });
+        Swordfish.setLocation(this.addProjectWindow, 'addProject.html');
     }
 
     static exportOpenProject(arg: any): void {
@@ -1490,7 +1501,6 @@ class Swordfish {
                     minimizable: false,
                     maximizable: false,
                     resizable: false,
-                    useContentSize: true,
                     show: false,
                     icon: this.iconPath,
                     webPreferences: {
@@ -1504,6 +1514,7 @@ class Swordfish {
                 this.addFileWindow.once('ready-to-show', () => {
                     this.addFileWindow.show();
                 });
+                Swordfish.setLocation(this.addFileWindow, 'addFile.html');
             }
         }).catch((error: Error) => {
             console.log(error.message);
@@ -1734,7 +1745,6 @@ class Swordfish {
             minimizable: false,
             maximizable: false,
             resizable: false,
-            useContentSize: true,
             show: false,
             icon: this.iconPath,
             webPreferences: {
@@ -1749,6 +1759,7 @@ class Swordfish {
         this.serverSettingsWindow.once('ready-to-show', () => {
             this.serverSettingsWindow.show();
         });
+        Swordfish.setLocation(this.serverSettingsWindow, 'serverSettings.html');
     }
 
     static showBrowseDatabases() {
@@ -1758,7 +1769,6 @@ class Swordfish {
             minimizable: false,
             maximizable: false,
             resizable: false,
-            useContentSize: true,
             show: false,
             icon: this.iconPath,
             webPreferences: {
@@ -1772,6 +1782,7 @@ class Swordfish {
         this.browseDatabasesWindow.once('ready-to-show', () => {
             this.browseDatabasesWindow.show();
         });
+        Swordfish.setLocation(this.browseDatabasesWindow, 'browseDatabases.html');
     }
 
     static connectToServer(args: any): void {
@@ -1823,7 +1834,6 @@ class Swordfish {
             minimizable: false,
             maximizable: false,
             resizable: false,
-            useContentSize: true,
             show: false,
             icon: this.iconPath,
             webPreferences: {
@@ -1837,6 +1847,7 @@ class Swordfish {
         this.addMemoryWindow.once('ready-to-show', () => {
             this.addMemoryWindow.show();
         });
+        Swordfish.setLocation(this.addMemoryWindow, 'addMemory.html');
     }
 
     static viewGlossaries(): void {
@@ -1877,7 +1888,6 @@ class Swordfish {
             minimizable: false,
             maximizable: false,
             resizable: false,
-            useContentSize: true,
             show: false,
             icon: this.iconPath,
             webPreferences: {
@@ -1965,7 +1975,6 @@ class Swordfish {
         this.settingsWindow = new BrowserWindow({
             parent: this.mainWindow,
             width: 640,
-            useContentSize: true,
             minimizable: false,
             maximizable: false,
             resizable: false,
@@ -1982,6 +1991,7 @@ class Swordfish {
         this.settingsWindow.once('ready-to-show', () => {
             this.settingsWindow.show();
         });
+        Swordfish.setLocation(this.settingsWindow, 'preferences.html');
     }
 
     static showLicenses(arg: any): void {
@@ -1992,7 +2002,6 @@ class Swordfish {
         this.licensesWindow = new BrowserWindow({
             parent: parent,
             width: 430,
-            useContentSize: true,
             minimizable: false,
             maximizable: false,
             resizable: false,
@@ -2009,6 +2018,7 @@ class Swordfish {
         this.licensesWindow.once('ready-to-show', () => {
             this.licensesWindow.show();
         });
+        Swordfish.setLocation(this.licensesWindow, 'licenses.html');
     }
 
     static showReleaseHistory(): void {
@@ -2054,7 +2064,6 @@ class Swordfish {
                 Swordfish.updatesWindow = new BrowserWindow({
                     parent: this.mainWindow,
                     width: 600,
-                    useContentSize: true,
                     minimizable: false,
                     maximizable: false,
                     resizable: false,
@@ -2204,7 +2213,6 @@ class Swordfish {
         this.defaultLangsWindow = new BrowserWindow({
             parent: this.mainWindow,
             width: 600,
-            useContentSize: true,
             minimizable: false,
             maximizable: false,
             resizable: false,
@@ -2221,6 +2229,7 @@ class Swordfish {
         this.defaultLangsWindow.once('ready-to-show', () => {
             this.defaultLangsWindow.show();
         });
+        Swordfish.setLocation(this.defaultLangsWindow, 'defaultLangs.html');
     }
 
     static savelanguages(arg: any) {
@@ -2331,7 +2340,6 @@ class Swordfish {
         this.importTmxWindow = new BrowserWindow({
             parent: this.mainWindow,
             width: 600,
-            useContentSize: true,
             minimizable: false,
             maximizable: false,
             resizable: false,
@@ -2349,13 +2357,13 @@ class Swordfish {
         this.importTmxWindow.once('ready-to-show', () => {
             this.importTmxWindow.show();
         });
+        Swordfish.setLocation(this.importTmxWindow, 'importTmx.html');
     }
 
     static showImportGlossary(glossary: string): void {
         this.importGlossaryWindow = new BrowserWindow({
             parent: this.mainWindow,
             width: 600,
-            useContentSize: true,
             minimizable: false,
             maximizable: false,
             resizable: false,
@@ -2373,6 +2381,7 @@ class Swordfish {
         this.importGlossaryWindow.once('ready-to-show', () => {
             this.importGlossaryWindow.show();
         });
+        Swordfish.setLocation(this.importGlossaryWindow, 'importGlossary.html');
     }
 
     static importTmxFile(arg: any): void {
@@ -2857,7 +2866,6 @@ class Swordfish {
             minimizable: false,
             maximizable: false,
             resizable: false,
-            useContentSize: true,
             show: false,
             icon: this.iconPath,
             webPreferences: {
@@ -2875,6 +2883,7 @@ class Swordfish {
         this.applyTmWindow.once('ready-to-show', () => {
             this.applyTmWindow.show();
         });
+        Swordfish.setLocation(this.applyTmWindow, 'applyTm.html');
     }
 
     static tmTranslateAll(arg: any): void {
@@ -2964,7 +2973,6 @@ class Swordfish {
         Swordfish.spellingLangsWindow = new BrowserWindow({
             parent: this.mainWindow,
             width: 600,
-            useContentSize: true,
             minimizable: false,
             maximizable: false,
             resizable: false,
@@ -2981,6 +2989,7 @@ class Swordfish {
         Swordfish.spellingLangsWindow.once('ready-to-show', () => {
             Swordfish.spellingLangsWindow.show();
         });
+        Swordfish.setLocation(this.spellingLangsWindow, 'spellingLangs.html');
     }
 
     static getSpellCheckerLangs(event: IpcMainEvent): void {
@@ -3068,7 +3077,6 @@ class Swordfish {
         Swordfish.messagesWindow = new BrowserWindow({
             parent: parent,
             width: 600,
-            useContentSize: true,
             minimizable: false,
             maximizable: false,
             resizable: false,
@@ -3186,7 +3194,6 @@ class Swordfish {
             minimizable: false,
             maximizable: false,
             resizable: false,
-            useContentSize: true,
             show: false,
             icon: this.iconPath,
             webPreferences: {
@@ -3200,6 +3207,7 @@ class Swordfish {
         this.addGlossaryWindow.once('ready-to-show', () => {
             this.addGlossaryWindow.show();
         });
+        Swordfish.setLocation(this.addGlossaryWindow, 'addGlossary.html');
     }
 
     static removeGlossary(): void {
@@ -3210,7 +3218,6 @@ class Swordfish {
         this.importXliffWindow = new BrowserWindow({
             parent: this.mainWindow,
             width: 600,
-            useContentSize: true,
             minimizable: false,
             maximizable: false,
             resizable: false,
@@ -3227,6 +3234,7 @@ class Swordfish {
         this.importXliffWindow.once('ready-to-show', () => {
             this.importXliffWindow.show();
         });
+        Swordfish.setLocation(this.importXliffWindow, 'importXliff.html');
     }
 
     static browseXLIFF(event: IpcMainEvent): void {
@@ -3302,7 +3310,6 @@ class Swordfish {
                 minimizable: false,
                 maximizable: false,
                 resizable: false,
-                useContentSize: true,
                 show: false,
                 icon: this.iconPath,
                 webPreferences: {
@@ -3317,6 +3324,7 @@ class Swordfish {
                 Swordfish.selectedFile = files[0];
                 this.addFileWindow.show();
             });
+            Swordfish.setLocation(this.addFileWindow, 'addFile.html');
         } else {
             // TODO multiple files/folders
             console.log(JSON.stringify(arg));
@@ -3659,7 +3667,6 @@ class Swordfish {
         this.tagsWindow = new BrowserWindow({
             parent: this.mainWindow,
             width: 200,
-            useContentSize: true,
             minimizable: false,
             maximizable: false,
             resizable: false,
@@ -3676,13 +3683,13 @@ class Swordfish {
         this.tagsWindow.once('ready-to-show', () => {
             this.tagsWindow.show();
         });
+        Swordfish.setLocation(this.tagsWindow, 'tags.html');
     }
 
     static showGoToWindow(): void {
         this.goToWindow = new BrowserWindow({
             parent: this.mainWindow,
             width: 260,
-            useContentSize: true,
             minimizable: false,
             maximizable: false,
             resizable: false,
@@ -3699,6 +3706,7 @@ class Swordfish {
         this.goToWindow.once('ready-to-show', () => {
             this.goToWindow.show();
         });
+        Swordfish.setLocation(this.goToWindow, 'goTo.html');
     }
 
     static closeTagsWindow(): void {
@@ -3711,7 +3719,6 @@ class Swordfish {
         this.replaceTextWindow = new BrowserWindow({
             parent: this.mainWindow,
             width: 450,
-            useContentSize: true,
             minimizable: false,
             maximizable: false,
             resizable: false,
@@ -3729,6 +3736,7 @@ class Swordfish {
         this.replaceTextWindow.once('ready-to-show', () => {
             this.replaceTextWindow.show();
         });
+        Swordfish.setLocation(this.replaceTextWindow, 'replaceText.html');
     }
 
     static replaceText(arg: any): void {
@@ -3872,7 +3880,8 @@ class Swordfish {
                 window.destroy();
                 window = undefined;
                 if (parent) {
-                    parent.focus();
+                    parent.show();
+                    parent.focus()
                 } else {
                     Swordfish.mainWindow.focus();
                 }
@@ -3958,7 +3967,6 @@ class Swordfish {
             minimizable: false,
             maximizable: false,
             resizable: false,
-            useContentSize: true,
             show: false,
             icon: this.iconPath,
             webPreferences: {
@@ -3973,6 +3981,7 @@ class Swordfish {
         this.concordanceSearchWindow.once('ready-to-show', () => {
             this.concordanceSearchWindow.show();
         });
+        Swordfish.setLocation(this.concordanceSearchWindow, 'concordanceSearch.html');
     }
 
     static concordanceSearch(arg: any): void {
@@ -4023,7 +4032,6 @@ class Swordfish {
             minimizable: false,
             maximizable: false,
             resizable: true,
-            useContentSize: true,
             show: false,
             icon: this.iconPath,
             webPreferences: {
@@ -4049,7 +4057,6 @@ class Swordfish {
             minimizable: false,
             maximizable: false,
             resizable: false,
-            useContentSize: true,
             show: false,
             icon: this.iconPath,
             webPreferences: {
@@ -4064,6 +4071,7 @@ class Swordfish {
         this.termSearchWindow.once('ready-to-show', () => {
             this.termSearchWindow.show();
         });
+        Swordfish.setLocation(this.termSearchWindow, 'termSearch.html');
     }
 
     static termSearch(arg: any): void {
@@ -4085,7 +4093,6 @@ class Swordfish {
                     minimizable: false,
                     maximizable: false,
                     resizable: true,
-                    useContentSize: true,
                     show: false,
                     icon: this.iconPath,
                     webPreferences: {
@@ -4116,7 +4123,6 @@ class Swordfish {
             minimizable: false,
             maximizable: false,
             resizable: false,
-            useContentSize: true,
             show: false,
             icon: this.iconPath,
             webPreferences: {
@@ -4131,6 +4137,7 @@ class Swordfish {
         this.addTermWindow.once('ready-to-show', () => {
             this.addTermWindow.show();
         });
+        Swordfish.setLocation(this.addTermWindow, 'addTerm.html');
     }
 
     static addToGlossary(arg: any): void {
@@ -4292,7 +4299,6 @@ class Swordfish {
                     minimizable: false,
                     maximizable: false,
                     resizable: true,
-                    useContentSize: true,
                     show: false,
                     icon: this.iconPath,
                     webPreferences: {
@@ -4341,7 +4347,6 @@ class Swordfish {
                     minimizable: false,
                     maximizable: false,
                     resizable: true,
-                    useContentSize: true,
                     show: false,
                     icon: this.iconPath,
                     webPreferences: {
@@ -4400,7 +4405,6 @@ class Swordfish {
             minimizable: false,
             maximizable: false,
             resizable: false,
-            useContentSize: true,
             show: false,
             icon: this.iconPath,
             webPreferences: {
@@ -4413,9 +4417,12 @@ class Swordfish {
         this.changeCaseWindow.loadURL('file://' + this.path.join(app.getAppPath(), 'html', 'changeCase.html'));
         this.changeCaseWindow.once('ready-to-show', () => {
             let bounds: Rectangle = Swordfish.mainWindow.getBounds();
-            this.changeCaseWindow.setPosition(bounds.x + Number.parseInt('' + (bounds.width / 5)), bounds.y + Number.parseInt('' + (bounds.height / 4)));
+            if (!Swordfish.locations.hasLocation('changeCase.html')) {
+                this.changeCaseWindow.setPosition(bounds.x + Number.parseInt('' + (bounds.width / 5)), bounds.y + Number.parseInt('' + (bounds.height / 4)));
+            }
             this.changeCaseWindow.show();
         });
+        Swordfish.setLocation(this.changeCaseWindow, 'changeCase.html');
     }
 
     static changeCaseTo(arg: any) {
@@ -4468,11 +4475,10 @@ class Swordfish {
             Swordfish.notesWindow = new BrowserWindow({
                 parent: Swordfish.mainWindow,
                 width: 450,
-                height: 200,
+                height: 300,
                 minimizable: false,
                 maximizable: false,
                 resizable: true,
-                useContentSize: true,
                 show: false,
                 alwaysOnTop: true,
                 icon: this.iconPath,
@@ -4519,12 +4525,11 @@ class Swordfish {
     static showAddNote(arg: any): void {
         Swordfish.notesParam = arg;
         Swordfish.addNoteWindow = new BrowserWindow({
-            parent: Swordfish.mainWindow,
+            parent: Swordfish.notesWindow,
             width: 350,
             minimizable: false,
             maximizable: false,
             resizable: true,
-            useContentSize: true,
             modal: true,
             show: false,
             icon: this.iconPath,
@@ -4540,6 +4545,7 @@ class Swordfish {
         Swordfish.addNoteWindow.once('ready-to-show', () => {
             Swordfish.addNoteWindow.show();
         });
+        Swordfish.setLocation(this.addNoteWindow, 'addNote.html');
     }
 
     static addNote(arg: any) {
@@ -4595,7 +4601,6 @@ class Swordfish {
             minimizable: false,
             maximizable: false,
             resizable: false,
-            useContentSize: true,
             modal: false,
             show: false,
             icon: this.iconPath,
@@ -4610,6 +4615,7 @@ class Swordfish {
         Swordfish.gettingStartedWindow.once('ready-to-show', () => {
             Swordfish.gettingStartedWindow.show();
         });
+        Swordfish.setLocation(this.gettingStartedWindow, 'gettingStarted.html');
     }
 
     static cut(): void {
@@ -4627,6 +4633,17 @@ class Swordfish {
             clipboard.writeText(clipboard.readText());
         }
         Swordfish.mainWindow.webContents.paste();
+    }
+
+    static setLocation(window: BrowserWindow, key: string): void {
+        if (Swordfish.locations.hasLocation(key)) {
+            let position: Point = Swordfish.locations.getLocation(key);
+            window.setPosition(position.x, position.y, true);
+        }
+        window.addListener('moved', () => {
+            let bounds: Rectangle = window.getBounds();
+            Swordfish.locations.setLocation(key, bounds.x, bounds.y);
+        });
     }
 }
 

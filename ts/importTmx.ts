@@ -57,8 +57,7 @@ class ImportTMX {
             this.importTMX();
         });
         (document.getElementById('tmx') as HTMLInputElement).focus();
-        let body: HTMLBodyElement = document.getElementById('body') as HTMLBodyElement;
-        this.electron.ipcRenderer.send('import-tmx-height', { width: body.clientWidth, height: body.clientHeight });
+        this.electron.ipcRenderer.send('import-tmx-height', { width: document.body.clientWidth, height: document.body.clientHeight });
     }
 
     setProjectNames(projects: string[]): void {

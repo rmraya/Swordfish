@@ -9,7 +9,7 @@
 }
 
 body {
-	background: var(--gray30);
+	background: var(--gray10);
 	color: var(--gray190);
 	fill: var(--gray190);
 	stroke: var(--gray190);
@@ -40,19 +40,19 @@ body {
 }
 
 header {
-	background: var(--themePrimary);
+	background: var(--ClassicBlue70);
 	color: var(--white);
-	border-bottom: solid 2px var(--themePrimary);
+	border-bottom: solid 2px var(--ClassicBlue70);
 }
 
 footer {
-	background: var(--themePrimary);
+	background: var(--ClassicBlue70);
 	color: var(--white);
-	border-top: 2px solid var(--themePrimary);
+	border-top: 2px solid var(--ClassicBlue70);
 }
 
 a {
-	color: var(--themePrimary);
+	color: var(--ClassicBlue70);
 	cursor: pointer;
 }
 
@@ -66,7 +66,7 @@ a:hover {
 	left: calc(40% - 100px);
 	width: 200px;
 	margin: auto;
-	background-color: var(--themeDarker);
+	background-color: var(--ClassicBlue100);
 	color: var(--white);
 	padding: 20px;
 	border: 1px solid var(--white);
@@ -81,7 +81,7 @@ table {
 
 thead {
 	height: 26px;
-	background: var(--themeDark);
+	background: var(--ClassicBlue90);
 	color: var(--gray10);
 }
 
@@ -99,8 +99,8 @@ thead tr {
 }
 
 .currentRow {
-	border-top: 3px solid var(--themeDark) !important;
-	border-bottom: 3px solid var(--themeDark) !important;
+	border-top: 3px solid var(--ClassicBlue90) !important;
+	border-bottom: 3px solid var(--ClassicBlue90) !important;
 	background-color: var(--gray10) !important;
 }
 
@@ -149,11 +149,11 @@ td.final {
 }
 
 tr.selected {
-	background-color: var(--themeLighter) !important;
+	background-color: var(--ClassicBlue30) !important;
 }
 
 .discover tr:hover {
-	background-color: var(--themeLight) !important;
+	background-color: var(--ClassicBlue40) !important;
 }
 
 th {
@@ -162,11 +162,11 @@ th {
 	padding: 0px 4px;
 	top: 0;
 	font-weight: 300;
-	background: var(--themeDark);
+	background: var(--ClassicBlue90);
 	color: var(--gray10);
 	fill: var(--gray10);
 	stroke: var(--gray10);
-	border-bottom: 3px solid var(--themeDark);
+	border-bottom: 3px solid var(--ClassicBlue90);
 }
 
 .sourceContainer {
@@ -175,7 +175,7 @@ th {
 	margin: 0;
 	width: 100%;
 	white-space: pre-wrap;
-	border-bottom: 1px solid var(--themePrimary);
+	border-bottom: 1px solid var(--ClassicBlue70);
 }
 
 .targetContainer {
@@ -202,7 +202,7 @@ th {
 
 .highlighted {
 	color: var(--gray40);
-	background-color: var(--themePrimary);
+	background-color: var(--ClassicBlue70);
 	padding-left: 2px;
 	padding-right: 2px;
 	border-radius: 2px;
@@ -210,7 +210,7 @@ th {
 
 .difference {
 	color: var(--gray190);
-	background-color: var(--themeLight);
+	background-color: var(--ClassicBlue40);
 	padding-left: 2px;
 	padding-right: 2px;
 	border-radius: 2px;
@@ -249,20 +249,20 @@ input {
 }
 
 .table_select {
-	width: calc(100% - 5px);
+	width: calc(100% - 4px);
 }
 
 input:focus {
 	outline: none !important;
-	border: 1px solid var(--themePrimary);
+	border: 1px solid var(--ClassicBlue70);
 }
 
 input:focus+label {
-	color: var(--themePrimary);
+	color: var(--ClassicBlue70);
 }
 
 input:disabled {
-	background-color: var(--gray90);
+	background-color: var(--gray60);
 }
 
 input[type=number] {
@@ -284,7 +284,7 @@ select {
 
 select:focus {
 	outline: none !important;
-	border: 1px solid var(--themePrimary);
+	border: 1px solid var(--ClassicBlue70);
 }
 
 option {
@@ -304,13 +304,13 @@ textarea {
 
 textarea:focus {
 	outline: none !important;
-	border: 1px solid var(--themePrimary);
+	border: 1px solid var(--ClassicBlue70);
 }
 
 button {
 	color: var(--white);
-	background: var(--themePrimary);
-	border: 1px solid var(--themePrimary);
+	background: var(--ClassicBlue80);
+	border: 1px solid var(--ClassicBlue80);
 	border-radius: 2px;
 	font-size: 1em;
 	text-align: center;
@@ -322,12 +322,12 @@ button {
 
 button:focus {
 	outline: none !important;
-	background: var(--themeDarkAlt);
+	background: var(--ClassicBlue100);
 }
 
 button:hover {
-	background: var(--themeDarkAlt);
-	border: 1px solid var(--themeDarkAlt);
+	background: var(--ClassicBlue100);
+	border: 1px solid var(--ClassicBlue100);
 	transition-property: all;
 	transition-duration: 0.5s;
 	transition-timing-function: cubic-bezier(0.14, 0.71, 0.38, 1);
@@ -395,8 +395,8 @@ label {
 	flex-direction: row;
 	background: var(--gray50);
 	color: var(--gray190);
-	fill: var(--themePrimary);
-	stroke: var(--themePrimary);
+	fill: var(--ClassicBlue70);
+	stroke: var(--ClassicBlue70);
 	padding: 2px 4px;
 	justify-content: flex-start;
 }
@@ -466,14 +466,13 @@ th svg {
 	display: flex;
 	flex-flow: row;
 	color: var(--black);
-	background: var(--gray30);
-	margin: 0;
-	padding: 0;
+	margin: 0px;
+	padding: 0px 0px 0px 8px;
+	border-bottom: 1px solid var(--gray50);
 }
 
 .tab {
 	overflow: hidden;
-	background: var(--gray30);
 	color: var(--gray150);
 	fill: var(--gray150);
 	stroke: var(--gray150);
@@ -492,9 +491,9 @@ th svg {
 }
 
 .tab:hover {
-	color: var(--themePrimary);
-	fill: var(--themePrimary);
-	stroke: var(--themePrimary);
+	color: var(--ClassicBlue70);
+	fill: var(--ClassicBlue70);
+	stroke: var(--ClassicBlue70);
 }
 
 .selectedTab:hover {
@@ -521,10 +520,6 @@ th svg {
 	display: block;
 }
 
-.lighter {
-	background-color: var(--gray10);
-}
-
 .panel {
 	z-index: 5;
 	display: block;
@@ -536,7 +531,7 @@ th svg {
 	padding-top: 0;
 	padding-left: 4px;
 	border-radius: 4px 4px 0px 0px;
-	background: var(--themeDark);
+	background: var(--ClassicBlue90);
 	color: var(--gray10);
 	white-space: nowrap;
 	overflow-x: hidden;
@@ -568,7 +563,7 @@ th svg {
 }
 
 .tooltip .tooltiptext {
-	background-color: var(--themeDarker);
+	background-color: var(--ClassicBlue100);
 	color: var(--white);
 	visibility: hidden;
 	padding: 4px;
@@ -608,8 +603,8 @@ th svg {
 }
 
 .active svg {
-	stroke: var(--themePrimary) !important;
-	fill: var(--themePrimary) !important;
+	stroke: var(--ClassicBlue70) !important;
+	fill: var(--ClassicBlue70) !important;
 }
 
 .bordered {
@@ -656,7 +651,7 @@ svg.stats {
 
 .statsFiller {
 	stroke: none;
-	fill: var(--themeTertiary);
+	fill: var(--ClassicBlue50);
 }
 
 .statsText {
@@ -666,13 +661,13 @@ svg.stats {
 }
 
 .space {
-	background: var(--themeTertiary);
+	background: var(--ClassicBlue50);
 	border-radius: 2px;
 	font-weight: 700;
 }
 
 .splitting {
-	background: var(--themeLight);
+	background: var(--ClassicBlue40);
 }
 
 .evenUnit {
@@ -703,7 +698,8 @@ svg.stats {
 	border-radius: 4px;
 	width: calc(100% - 12px);
 	height: calc(100% - 16px);
-	overflow: auto;
+	overflow-y: auto;
+	overflow-x: hidden;
 	background: var(--gray30);
 }
 
@@ -747,11 +743,22 @@ svg.stats {
 }
 
 ::-webkit-scrollbar {
+	mix-blend-mode: lighten;
 	width: 12px;
-	mix-blend-mode: darken
+	height: 12px;
 }
 
 ::-webkit-scrollbar-thumb {
-	min-height: 12px !important;
+	min-height: 30px !important;
 	background-color: var(--gray90);
+	border-radius: 6px;
+}
+
+::-webkit-scrollbar-corner {
+	background-color: inherit;
+	border-radius: inherit;
+}
+
+::-webkit-scrollbar-button {
+	border-radius: inherit;
 }

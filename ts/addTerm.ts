@@ -57,8 +57,7 @@ class AddTerm {
             this.addTerm();
         });
         (document.getElementById('source') as HTMLInputElement).focus();
-        let body: HTMLBodyElement = document.getElementById('body') as HTMLBodyElement;
-        this.electron.ipcRenderer.send('add-term-height', { width: body.clientWidth, height: body.clientHeight });
+        this.electron.ipcRenderer.send('add-term-height', { width: document.body.clientWidth, height: document.body.clientHeight });
     }
 
     addTerm(): void {

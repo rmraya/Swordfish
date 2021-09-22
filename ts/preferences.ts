@@ -66,27 +66,27 @@ class Preferences {
 
         let basicTab: Tab = new Tab('basicTab', 'Basic', false);
         basicTab.getLabel().addEventListener('click', () => {
-            this.electron.ipcRenderer.send('settings-height', { width: body.clientWidth, height: body.clientHeight });
+            this.electron.ipcRenderer.send('settings-height', { width: document.body.clientWidth, height: document.body.clientHeight });
         });
         this.tabHolder.addTab(basicTab);
         this.populateBasicTab(basicTab.getContainer());
 
         let mtTab: Tab = new Tab('mtTab', 'Machine Translation', false);
         mtTab.getLabel().addEventListener('click', () => {
-            this.electron.ipcRenderer.send('settings-height', { width: body.clientWidth, height: body.clientHeight });
+            this.electron.ipcRenderer.send('settings-height', { width: document.body.clientWidth, height: document.body.clientHeight });
         });
         this.tabHolder.addTab(mtTab);
         this.populateMtTab(mtTab.getContainer());
 
         this.spellcheckTab = new Tab('spellcheckTab', 'Spellchecker', false);
         this.spellcheckTab.getLabel().addEventListener('click', () => {
-            this.electron.ipcRenderer.send('settings-height', { width: body.clientWidth, height: body.clientHeight });
+            this.electron.ipcRenderer.send('settings-height', { width: document.body.clientWidth, height: document.body.clientHeight });
         });
         this.tabHolder.addTab(this.spellcheckTab);
 
         let advancedTab: Tab = new Tab('advancedTab', 'Advanced', false);
         advancedTab.getLabel().addEventListener('click', () => {
-            this.electron.ipcRenderer.send('settings-height', { width: body.clientWidth, height: body.clientHeight });
+            this.electron.ipcRenderer.send('settings-height', { width: document.body.clientWidth, height: document.body.clientHeight });
         });
         this.tabHolder.addTab(advancedTab);
         this.populateAdvancedTab(advancedTab.getContainer());
@@ -120,7 +120,7 @@ class Preferences {
             this.savePreferences();
         });
         this.electron.ipcRenderer.on('get-height', () => {
-            this.electron.ipcRenderer.send('settings-height', { width: body.clientWidth, height: body.clientHeight });
+            this.electron.ipcRenderer.send('settings-height', { width: document.body.clientWidth, height: document.body.clientHeight });
         });
         this.electron.ipcRenderer.on('set-srx', (event: Electron.IpcRendererEvent, arg: string) => {
             this.defaultSRX.value = arg;
@@ -133,8 +133,7 @@ class Preferences {
                 this.electron.ipcRenderer.send('close-preferences');
             }
         });
-        let body: HTMLBodyElement = document.getElementById('body') as HTMLBodyElement;
-        this.electron.ipcRenderer.send('settings-height', { width: body.clientWidth, height: body.clientHeight });
+        this.electron.ipcRenderer.send('settings-height', { width: document.body.clientWidth, height: document.body.clientHeight });
     }
 
     setPreferences(arg: any): void {
@@ -338,7 +337,6 @@ class Preferences {
     }
 
     populateBasicTab(container: HTMLDivElement): void {
-
         let langsTable: HTMLTableElement = document.createElement('table');
         langsTable.classList.add('fill_width');
         container.appendChild(langsTable);
@@ -556,7 +554,6 @@ class Preferences {
     }
 
     populateAdvancedTab(container: HTMLDivElement): void {
-
         let table: HTMLTableElement = document.createElement('table');
         table.classList.add('fill_width');
         container.appendChild(table);
@@ -685,56 +682,51 @@ class Preferences {
     }
 
     populateMtTab(container: HTMLDivElement): void {
+        container.style.paddingTop = '10px';
 
-        let div : HTMLDivElement = document.createElement('div');
+        let div: HTMLDivElement = document.createElement('div');
         div.style.margin = '0px 4px';
         container.appendChild(div);
-        
+
         let mtHolder: TabHolder = new TabHolder(div, 'mtHolder');
 
         let googleTab: Tab = new Tab('googleTab', 'Google', false);
         googleTab.getLabel().addEventListener('click', () => {
-            let body: HTMLBodyElement = document.getElementById('body') as HTMLBodyElement;
-            this.electron.ipcRenderer.send('settings-height', { width: body.clientWidth, height: body.clientHeight });
+            this.electron.ipcRenderer.send('settings-height', { width: document.body.clientWidth, height: document.body.clientHeight });
         });
         mtHolder.addTab(googleTab);
         this.populateGoogleTab(googleTab.getContainer());
 
         let azureTab: Tab = new Tab('azureTab', 'Microsoft Azure', false);
         azureTab.getLabel().addEventListener('click', () => {
-            let body: HTMLBodyElement = document.getElementById('body') as HTMLBodyElement;
-            this.electron.ipcRenderer.send('settings-height', { width: body.clientWidth, height: body.clientHeight });
+            this.electron.ipcRenderer.send('settings-height', { width: document.body.clientWidth, height: document.body.clientHeight });
         });
         mtHolder.addTab(azureTab);
         this.populateAzureTab(azureTab.getContainer());
 
         let yandexTab: Tab = new Tab('yandexTab', 'Yandex', false);
         yandexTab.getLabel().addEventListener('click', () => {
-            let body: HTMLBodyElement = document.getElementById('body') as HTMLBodyElement;
-            this.electron.ipcRenderer.send('settings-height', { width: body.clientWidth, height: body.clientHeight });
+            this.electron.ipcRenderer.send('settings-height', { width: document.body.clientWidth, height: document.body.clientHeight });
         });
         mtHolder.addTab(yandexTab);
         this.populateYandexTab(yandexTab.getContainer());
 
         let deeplTab: Tab = new Tab('deeplTab', 'DeepL', false);
         deeplTab.getLabel().addEventListener('click', () => {
-            let body: HTMLBodyElement = document.getElementById('body') as HTMLBodyElement;
-            this.electron.ipcRenderer.send('settings-height', { width: body.clientWidth, height: body.clientHeight });
+            this.electron.ipcRenderer.send('settings-height', { width: document.body.clientWidth, height: document.body.clientHeight });
         });
         mtHolder.addTab(deeplTab);
         this.populateDeeplTab(deeplTab.getContainer());
 
         let myMemoryTab: Tab = new Tab('myMemoryTab', 'MyMemory', false);
         myMemoryTab.getLabel().addEventListener('click', () => {
-            let body: HTMLBodyElement = document.getElementById('body') as HTMLBodyElement;
-            this.electron.ipcRenderer.send('settings-height', { width: body.clientWidth, height: body.clientHeight });
+            this.electron.ipcRenderer.send('settings-height', { width: document.body.clientWidth, height: document.body.clientHeight });
         });
         mtHolder.addTab(myMemoryTab);
         this.populateMyMemoryTab(myMemoryTab.getContainer());
     }
 
     populateGoogleTab(container: HTMLDivElement): void {
-
         container.style.paddingTop = '10px';
 
         let googlelDiv: HTMLDivElement = document.createElement('div');
@@ -808,7 +800,6 @@ class Preferences {
     }
 
     populateAzureTab(container: HTMLDivElement): void {
-
         container.style.paddingTop = '10px';
 
         let azureDiv: HTMLDivElement = document.createElement('div');
@@ -874,7 +865,6 @@ class Preferences {
     }
 
     populateYandexTab(container: HTMLDivElement): void {
-
         container.style.paddingTop = '10px';
 
         let yandexDiv: HTMLDivElement = document.createElement('div');
@@ -940,7 +930,6 @@ class Preferences {
     }
 
     populateDeeplTab(container: HTMLDivElement): void {
-
         container.style.paddingTop = '10px';
 
         let deeplDiv: HTMLDivElement = document.createElement('div');
@@ -1006,7 +995,6 @@ class Preferences {
     }
 
     populateMyMemoryTab(container: HTMLDivElement): void {
-
         container.style.paddingTop = '10px';
 
         let myMemoryDiv: HTMLDivElement = document.createElement('div');

@@ -28,8 +28,7 @@ class SpellcheckerLanguages {
                 this.electron.ipcRenderer.send('close-spellingLangs');
             }
         });
-        let body: HTMLBodyElement = document.getElementById('body') as HTMLBodyElement;
-        this.electron.ipcRenderer.send('set-spellchecker-height', { width: body.clientWidth, height: 400 });
+        this.electron.ipcRenderer.send('set-spellchecker-height', { width: document.body.clientWidth, height: 400 });
     }
 
     setLanguages(languages: any[]): void {

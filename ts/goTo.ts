@@ -30,8 +30,7 @@ class GoTo {
         });
         document.getElementById('segInput').focus();
 
-        let body: HTMLBodyElement = document.getElementById('body') as HTMLBodyElement;
-        this.electron.ipcRenderer.send('go-to-height', { width: body.clientWidth, height: body.clientHeight });
+        this.electron.ipcRenderer.send('go-to-height', { width: document.body.clientWidth, height: document.body.clientHeight });
     }
 
     parseKey(event: KeyboardEvent): void {

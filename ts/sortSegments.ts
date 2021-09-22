@@ -46,8 +46,7 @@ class SortSegments {
             (document.getElementById('source') as HTMLInputElement).disabled = true;
             (document.getElementById('target') as HTMLInputElement).disabled = true;
         });
-        let body: HTMLBodyElement = document.getElementById('body') as HTMLBodyElement;
-        this.electron.ipcRenderer.send('sort-segments-height', { width: body.clientWidth, height: body.clientHeight });
+        this.electron.ipcRenderer.send('sort-segments-height', { width: document.body.clientWidth, height: document.body.clientHeight });
     }
 
     setParams(arg: any): void {

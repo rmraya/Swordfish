@@ -521,7 +521,9 @@ public class ProjectsHandler implements HttpHandler {
 
 			@Override
 			public int compare(Project o1, Project o2) {
-				return o2.getCreationDate().compareTo(o1.getCreationDate());
+				Long long1 = Long.parseLong(o1.getId());
+				Long long2 = Long.parseLong(o2.getId());
+				return Long.compare(long2, long1);
 			}
 
 		});
@@ -925,7 +927,8 @@ public class ProjectsHandler implements HttpHandler {
 			if (projectStores.containsKey(project)) {
 				result.put("matches", projectStores.get(project).machineTranslate(json, translator));
 			}
-		} catch (IOException | SQLException | JSONException | SAXException | ParserConfigurationException e) {
+		} catch (IOException | SQLException | JSONException | SAXException | ParserConfigurationException
+				| DataFormatException e) {
 			logger.log(Level.ERROR, e);
 			result.put(Constants.REASON, e.getMessage());
 		} catch (InterruptedException e) {
@@ -943,7 +946,8 @@ public class ProjectsHandler implements HttpHandler {
 			if (projectStores.containsKey(project)) {
 				result.put("matches", projectStores.get(project).tmTranslate(json));
 			}
-		} catch (IOException | SQLException | JSONException | SAXException | ParserConfigurationException e) {
+		} catch (IOException | SQLException | JSONException | SAXException | ParserConfigurationException
+				| DataFormatException e) {
 			logger.log(Level.ERROR, e);
 			result.put(Constants.REASON, e.getMessage());
 		}

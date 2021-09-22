@@ -57,8 +57,7 @@ class ImportGlossary {
             this.importGlossary();
         });
         (document.getElementById('file') as HTMLInputElement).focus();
-        let body: HTMLBodyElement = document.getElementById('body') as HTMLBodyElement;
-            this.electron.ipcRenderer.send('import-glossary-height', { width: body.clientWidth, height: body.clientHeight });
+        this.electron.ipcRenderer.send('import-glossary-height', { width: document.body.clientWidth, height: document.body.clientHeight });
     }
 
     setProjectNames(projects: string[]): void {

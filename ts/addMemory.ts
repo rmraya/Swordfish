@@ -44,8 +44,7 @@ class AddMemory {
             this.addMemory();
         });
         (document.getElementById('nameInput') as HTMLInputElement).focus();
-        let body: HTMLBodyElement = document.getElementById('body') as HTMLBodyElement;
-        this.electron.ipcRenderer.send('add-memory-height', { width: body.clientWidth, height: body.clientHeight });
+        this.electron.ipcRenderer.send('add-memory-height', { width: document.body.clientWidth, height: document.body.clientHeight });
     }
 
     addMemory(): void {

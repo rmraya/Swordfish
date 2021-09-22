@@ -52,8 +52,7 @@ class ConcordanceSearch {
                 (document.getElementById('searchText') as HTMLInputElement).dir = 'rtl';
             }
         });
-        let body: HTMLBodyElement = document.getElementById('body') as HTMLBodyElement;
-            this.electron.ipcRenderer.send('concordance-search-height', { width: body.clientWidth, height: body.clientHeight });
+        this.electron.ipcRenderer.send('concordance-search-height', { width: document.body.clientWidth, height: document.body.clientHeight });
     }
 
     setLanguages(arg: any): void {

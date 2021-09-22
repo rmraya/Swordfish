@@ -34,8 +34,7 @@ class AddNote {
             this.addNote();
         });
         (document.getElementById('area') as HTMLTextAreaElement).focus();
-        let body: HTMLBodyElement = document.getElementById('body') as HTMLBodyElement;
-        this.electron.ipcRenderer.send('add-note-height', { width: body.clientWidth, height: body.clientHeight });
+        this.electron.ipcRenderer.send('add-note-height', { width: document.body.clientWidth, height: document.body.clientHeight });
     }
 
     addNote(): void {

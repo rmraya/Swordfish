@@ -121,10 +121,10 @@ class Main {
             this.closeTab();
         });
         Main.electron.ipcRenderer.on('start-waiting', () => {
-            document.getElementById('body').classList.add("wait");
+            document.body.classList.add("wait");
         });
         Main.electron.ipcRenderer.on('end-waiting', () => {
-            document.getElementById('body').classList.remove("wait");
+            document.body.classList.remove("wait");
         });
         Main.electron.ipcRenderer.on('set-status', (event: Electron.IpcRendererEvent, arg: any) => {
             this.setStatus(arg);
@@ -431,9 +431,8 @@ class Main {
     }
 
     resizePanels(): void {
-        let body = document.getElementById('body');
-        this.mainContainer.style.width = body.clientWidth + 'px';
-        this.mainContainer.style.height = body.clientHeight + 'px';
+        this.mainContainer.style.width = document.body.clientWidth + 'px';
+        this.mainContainer.style.height = document.body.clientHeight + 'px';
     }
 
     static checkTabs(): void {

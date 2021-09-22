@@ -54,8 +54,7 @@ class Licenses {
                 this.electron.ipcRenderer.send('close-licenses');
             }
         });
-        let body: HTMLBodyElement = document.getElementById('body') as HTMLBodyElement;
-        this.electron.ipcRenderer.send('licenses-height', { width: body.clientWidth, height: body.clientHeight });
+        this.electron.ipcRenderer.send('licenses-height', { width: document.body.clientWidth, height: document.body.clientHeight });
     }
 
     openLicense(type: string) {

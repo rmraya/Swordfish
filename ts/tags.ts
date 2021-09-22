@@ -27,8 +27,7 @@ class Tags {
             this.parseKey(event);
         });
         document.getElementById('tagInput').focus();
-        let body: HTMLBodyElement = document.getElementById('body') as HTMLBodyElement;
-        this.electron.ipcRenderer.send('tags-height', { width: body.clientWidth, height: body.clientHeight });
+        this.electron.ipcRenderer.send('tags-height', { width: document.body.clientWidth, height: document.body.clientHeight });
     }
 
     parseKey(event: KeyboardEvent): void {

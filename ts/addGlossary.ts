@@ -44,8 +44,7 @@ class AddGlossary {
             this.addGlossary();
         });
         (document.getElementById('nameInput') as HTMLInputElement).focus();
-        let body: HTMLBodyElement = document.getElementById('body') as HTMLBodyElement;
-        this.electron.ipcRenderer.send('add-glossary-height', { width: body.clientWidth, height: body.clientHeight });
+        this.electron.ipcRenderer.send('add-glossary-height', { width: document.body.clientWidth, height: document.body.clientHeight });
     }
 
     addGlossary(): void {

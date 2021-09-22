@@ -35,8 +35,7 @@ class DefaultLanguages {
             }
         });
         (document.getElementById('srcLangSelect') as HTMLSelectElement).focus();
-        let body: HTMLBodyElement = document.getElementById('body') as HTMLBodyElement;
-        this.electron.ipcRenderer.send('languages-height', { width: body.clientWidth, height: body.clientHeight });
+        this.electron.ipcRenderer.send('languages-height', { width: document.body.clientWidth, height: document.body.clientHeight });
     }
 
     setLanguages(arg: any): void {

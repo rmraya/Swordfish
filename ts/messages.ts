@@ -35,8 +35,7 @@ class Messages {
                 this.electron.ipcRenderer.send('close-messages');
             }
         });
-        let body: HTMLBodyElement = document.getElementById('body') as HTMLBodyElement;
-        this.electron.ipcRenderer.send('messages-height', { width: body.clientWidth, height: body.clientHeight });
+        this.electron.ipcRenderer.send('messages-height', { width: document.body.clientWidth, height: document.body.clientHeight });
     }
 
     setMessage(arg: any): void {
@@ -54,8 +53,7 @@ class Messages {
             document.getElementById('title').innerText = arg.title;
         }
         document.getElementById('message').innerHTML = arg.message;
-        let body: HTMLBodyElement = document.getElementById('body') as HTMLBodyElement;
-        this.electron.ipcRenderer.send('messages-height', { width: body.clientWidth, height: body.clientHeight });
+        this.electron.ipcRenderer.send('messages-height', { width: document.body.clientWidth, height: document.body.clientHeight });
     }
 }
 

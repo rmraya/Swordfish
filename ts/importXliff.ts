@@ -61,8 +61,7 @@ class ImportXLIFF {
             this.importXLIFF();
         });
         (document.getElementById('projectInput') as HTMLInputElement).focus();
-        let body: HTMLBodyElement = document.getElementById('body') as HTMLBodyElement;
-        this.electron.ipcRenderer.send('import-xliff-height', { width: body.clientWidth, height: body.clientHeight });
+        this.electron.ipcRenderer.send('import-xliff-height', { width: document.body.clientWidth, height: document.body.clientHeight });
     }
 
     setClients(clients: string[]): void {

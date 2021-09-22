@@ -50,8 +50,7 @@ class BrowseDatabases {
         document.getElementById('addButton').addEventListener('click', () => {
             this.addSelected();
         });
-        let body: HTMLBodyElement = document.getElementById('body') as HTMLBodyElement;
-        this.electron.ipcRenderer.send('browseDatabases-height', { width: body.clientWidth, height: body.clientHeight });
+        this.electron.ipcRenderer.send('browseDatabases-height', { width: document.body.clientWidth, height: document.body.clientHeight });
     }
 
     setDatabases(arg: any) {

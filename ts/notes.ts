@@ -36,10 +36,19 @@ class Notes {
         document.getElementById('removeNote').addEventListener('click', () => {
             this.removeNote();
         });
-        let tabContainer: HTMLDivElement = document.getElementById('main') as HTMLDivElement;
-        tabContainer.classList.add('fill_width');
+        let main: HTMLDivElement = document.getElementById('main') as HTMLDivElement;
+        main.classList.add('fill_width');
 
-        this.tabHolder = new TabHolder(tabContainer, 'notes');
+        this.tabHolder = new TabHolder(main, 'notes');
+        window.addEventListener('resize', () => {
+            this.resize();
+        });
+    }
+
+    resize(): void {
+        let toolbar: HTMLDivElement = document.getElementById('toolbar') as HTMLDivElement;
+        let main: HTMLDivElement = document.getElementById('main') as HTMLDivElement;
+        main.style.height = (document.body.clientHeight - toolbar.clientHeight - 10) + 'px';
     }
 
     setNotes(notes: any[]): void {
@@ -47,8 +56,8 @@ class Notes {
         let length = notes.length;
         for (let i: number = 0; i < length; i++) {
             let tab = new Tab(notes[i].id, 'Note ' + notes[i].id, false);
-            tab.getContainer().style.padding = '8px';
             tab.getContainer().innerText = notes[i].note;
+            tab.getContainer().style.padding = '8px';
             this.tabHolder.addTab(tab);
         }
     }

@@ -38,8 +38,7 @@ class ReplaceText {
             this.replaceText();
         });
         (document.getElementById('searchText') as HTMLInputElement).focus();
-        let body: HTMLBodyElement = document.getElementById('body') as HTMLBodyElement;
-        this.electron.ipcRenderer.send('replaceText-height', { width: body.clientWidth, height: body.clientHeight });
+        this.electron.ipcRenderer.send('replaceText-height', { width: document.body.clientWidth, height: document.body.clientHeight });
     }
 
     replaceText(): void {

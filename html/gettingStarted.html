@@ -6,22 +6,35 @@
     <link id="theme" rel="stylesheet" type="text/css" href="../css/light.css">
     <link rel="stylesheet" type="text/css" href="../css/fonts.css">
     <style>
+        .gsbody {
+            background: var(--white) !important;
+            color: var(--gray190);
+            fill: var(--gray190);
+            stroke: var(--gray190);
+        }
+
         svg {
             height: 22px;
             width: 22px;
             padding: 0px;
             margin-top: 0px;
             vertical-align: middle;
-            fill: var(--themePrimary);
-            stroke: var(--themePrimary);
+            fill: var(--ClassicBlue90);
+            stroke: var(--ClassicBlue90);
+        }
+        a:focus {
+            outline: none;
         }
 
         b {
-            color: var(--themePrimary);
+            color: var(--ClassicBlue90);
             padding-right: 3px;
             padding-left: 3px;
         }
 
+        h3 {
+            color: var(--ClassicBlue100);
+        }
         .userinput {
             background: var(--gray50);
             font-family: 'Courier New', Courier, monospace;
@@ -34,8 +47,8 @@
 
 <body id="body">
 
-    <div id="container" class="divContainer"
-        style="height: 400px; width: calc(100% - 40px); padding:10px; border:1px solid var(--gray190); background: var(--gray10); margin:10px;">
+    <div id="container" class="divContainer gsbody"
+        style="height: 400px; width: calc(100% - 40px); padding:10px; border:1px solid var(--gray190); background: var(--gray10); margin:10px; border-radius: 4px;">
         <h3>Getting Started with Swordfish IV</h3>
         <p>Only a few steps are necessary to translate with Swordfish IV. The basic workflow for translating
             documents is:
