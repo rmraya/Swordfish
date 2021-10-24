@@ -2149,70 +2149,74 @@ class Swordfish {
     }
 
     static checkUpdates(silent: boolean): void {
-        session.defaultSession.clearCache();
-        let request: Electron.ClientRequest = net.request({ url: 'https://maxprograms.com/swordfish.json', session: session.defaultSession });
-        request.on('response', (response: IncomingMessage) => {
-            let responseData: string = '';
-            response.on('data', (chunk: Buffer) => {
-                responseData += chunk;
+        session.defaultSession.clearCache().then(() => {
+            let request: Electron.ClientRequest = net.request({
+                url: 'https://maxprograms.com/swordfish.json',
+                session: session.defaultSession
             });
-            response.on('end', () => {
-                try {
-                    let parsedData = JSON.parse(responseData);
-                    if (app.getVersion() !== parsedData.version) {
-                        Swordfish.latestVersion = parsedData.version;
-                        switch (process.platform) {
-                            case 'darwin':
-                                Swordfish.downloadLink = process.arch === 'arm64' ? parsedData.arm64 : parsedData.darwin;
-                                break;
-                            case 'win32':
-                                Swordfish.downloadLink = parsedData.win32;
-                                break;
-                            case 'linux':
-                                Swordfish.downloadLink = parsedData.linux;
-                                break;
-                        }
-                        Swordfish.updatesWindow = new BrowserWindow({
-                            parent: this.mainWindow,
-                            width: 600,
-                            minimizable: false,
-                            maximizable: false,
-                            resizable: false,
-                            show: false,
-                            icon: this.iconPath,
-                            webPreferences: {
-                                nodeIntegration: true,
-                                contextIsolation: false,
-                                nativeWindowOpen: true
+            request.on('response', (response: IncomingMessage) => {
+                let responseData: string = '';
+                response.on('data', (chunk: Buffer) => {
+                    responseData += chunk;
+                });
+                response.on('end', () => {
+                    try {
+                        let parsedData = JSON.parse(responseData);
+                        if (app.getVersion() !== parsedData.version) {
+                            Swordfish.latestVersion = parsedData.version;
+                            switch (process.platform) {
+                                case 'darwin':
+                                    Swordfish.downloadLink = process.arch === 'arm64' ? parsedData.arm64 : parsedData.darwin;
+                                    break;
+                                case 'win32':
+                                    Swordfish.downloadLink = parsedData.win32;
+                                    break;
+                                case 'linux':
+                                    Swordfish.downloadLink = parsedData.linux;
+                                    break;
                             }
-                        });
-                        Swordfish.updatesWindow.setMenu(null);
-                        Swordfish.updatesWindow.loadURL('file://' + this.path.join(app.getAppPath(), 'html', 'updates.html'));
-                        Swordfish.updatesWindow.once('ready-to-show', () => {
-                            Swordfish.updatesWindow.show();
-                        });
-                        this.updatesWindow.on('close', () => {
-                            this.mainWindow.focus();
-                        });
-                    } else {
+                            Swordfish.updatesWindow = new BrowserWindow({
+                                parent: this.mainWindow,
+                                width: 600,
+                                minimizable: false,
+                                maximizable: false,
+                                resizable: false,
+                                show: false,
+                                icon: this.iconPath,
+                                webPreferences: {
+                                    nodeIntegration: true,
+                                    contextIsolation: false,
+                                    nativeWindowOpen: true
+                                }
+                            });
+                            Swordfish.updatesWindow.setMenu(null);
+                            Swordfish.updatesWindow.loadURL('file://' + this.path.join(app.getAppPath(), 'html', 'updates.html'));
+                            Swordfish.updatesWindow.once('ready-to-show', () => {
+                                Swordfish.updatesWindow.show();
+                            });
+                            this.updatesWindow.on('close', () => {
+                                this.mainWindow.focus();
+                            });
+                        } else {
+                            if (!silent) {
+                                Swordfish.showMessage({
+                                    type: 'info',
+                                    message: 'There are currently no updates available'
+                                });
+                            }
+                        }
+                    } catch (reason: any) {
                         if (!silent) {
                             Swordfish.showMessage({
-                                type: 'info',
-                                message: 'There are currently no updates available'
+                                type: 'error',
+                                message: reason.message
                             });
                         }
                     }
-                } catch (reason: any) {
-                    if (!silent) {
-                        Swordfish.showMessage({
-                            type: 'error',
-                            message: reason.message
-                        });
-                    }
-                }
+                });
             });
+            request.end();
         });
-        request.end();
     }
 
     getTypes(event: IpcMainEvent): void {
