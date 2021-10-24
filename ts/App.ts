@@ -11,7 +11,7 @@
  *******************************************************************************/
 
 import { execFileSync, spawn, ChildProcessWithoutNullStreams } from "child_process";
-import { app, clipboard, BrowserWindow, dialog, ipcMain, Menu, MenuItem, shell, nativeTheme, Rectangle, IpcMainEvent, screen, Size, net, ClientRequest } from "electron";
+import { app, clipboard, BrowserWindow, dialog, ipcMain, Menu, MenuItem, shell, nativeTheme, Rectangle, IpcMainEvent, screen, Size, net, ClientRequest, session } from "electron";
 import { existsSync, mkdirSync, readFile, readFileSync, writeFileSync, lstatSync } from "fs";
 import { Locations, Point } from "./locations";
 import { IncomingMessage } from "electron/main";
@@ -2149,7 +2149,8 @@ class Swordfish {
     }
 
     static checkUpdates(silent: boolean): void {
-        let request = net.request('https://maxprograms.com/swordfish.json');
+        session.defaultSession.clearCache();
+        let request: Electron.ClientRequest = net.request({ url: 'https://maxprograms.com/swordfish.json', session: session.defaultSession });
         request.on('response', (response: IncomingMessage) => {
             let responseData: string = '';
             response.on('data', (chunk: Buffer) => {
