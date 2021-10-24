@@ -23,17 +23,22 @@ import java.io.OutputStream;
 import java.lang.System.Logger;
 import java.lang.System.Logger.Level;
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.StandardCopyOption;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 import java.util.TreeMap;
+import java.util.TreeSet;
 
 import javax.xml.parsers.ParserConfigurationException;
 
@@ -43,6 +48,13 @@ import com.maxprograms.languages.Language;
 import com.maxprograms.languages.LanguageUtils;
 import com.maxprograms.swordfish.models.Memory;
 import com.maxprograms.swordfish.mt.MTUtils;
+import com.maxprograms.xml.Attribute;
+import com.maxprograms.xml.Catalog;
+import com.maxprograms.xml.Document;
+import com.maxprograms.xml.Element;
+import com.maxprograms.xml.Indenter;
+import com.maxprograms.xml.SAXBuilder;
+import com.maxprograms.xml.XMLOutputter;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 
@@ -109,6 +121,22 @@ public class ServicesHandler implements HttpHandler {
                 result = RemoteUtils.remoteDatabases(request);
             } else if ("/services/addDatabases".equals(url)) {
                 result = addDatabases(request);
+            } else if ("/services/xmlFilters".equals(url)) {
+                result = getXmlFilters(request);
+            } else if ("/services/importFilter".equals(url)) {
+                result = importXmlFilter(request);
+            } else if ("/services/removeFilters".equals(url)) {
+                result = removeFilters(request);
+            } else if ("/services/exportFilters".equals(url)) {
+                result = exportFilters(request);
+            } else if ("/services/addFilter".equals(url)) {
+                result = addFilter(request);
+            } else if ("/services/filterData".equals(url)) {
+                result = getFilterData(request);
+            } else if ("/services/saveElement".equals(url)) {
+                result = saveElement(request);
+            } else if ("/services/removeElements".equals(url)) {
+                result = removeElements(request);
             } else {
                 result = new JSONObject();
                 result.put("url", url);
@@ -181,6 +209,250 @@ public class ServicesHandler implements HttpHandler {
             } else {
                 GlossariesHandler.addGlossary(mem);
             }
+        }
+        return result;
+    }
+
+    private JSONObject getXmlFilters(String request) {
+        JSONObject result = new JSONObject();
+        JSONObject json = new JSONObject(request);
+        File appFolder = new File(json.getString("path"));
+        File xmlFiltersFolder = new File(appFolder, "xmlfilter");
+        JSONArray array = new JSONArray();
+        List<String> list = new ArrayList<>();
+        String[] files = xmlFiltersFolder.list();
+        for (int i = 0; i < files.length; i++) {
+            if (files[i].endsWith(".xml")) {
+                list.add(files[i]);
+            }
+        }
+        Collections.sort(list, new Comparator<String>() {
+
+            @Override
+            public int compare(String o1, String o2) {
+                return o1.compareToIgnoreCase(o2);
+            }
+
+        });
+        for (int i = 0; i < list.size(); i++) {
+            array.put(list.get(i));
+        }
+        result.put("files", array);
+        return result;
+    }
+
+    private JSONObject importXmlFilter(String request) {
+        JSONObject result = new JSONObject();
+        JSONObject json = new JSONObject(request);
+        File appFolder = new File(json.getString("path"));
+        File xmlFiltersFolder = new File(appFolder, "xmlfilter");
+        File file = new File(json.getString("file"));
+        File targetFile = new File(xmlFiltersFolder, file.getName());
+        try {
+            SAXBuilder builder = new SAXBuilder();
+            builder.setEntityResolver(new Catalog(getCatalog()));
+            Document doc = builder.build(file);
+            if (!"ini-file".equals(doc.getRootElement().getName())) {
+                throw new IOException("Incorrect file type");
+            }
+            Files.copy(file.toPath(), targetFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
+        } catch (IOException | SAXException | ParserConfigurationException | URISyntaxException e) {
+            logger.log(Level.ERROR, "Error importing xml configuration", e);
+            result.put(Constants.REASON, e.getMessage());
+        }
+        return result;
+    }
+
+    private String getCatalog() throws IOException {
+        File preferences = new File(TmsServer.getWorkFolder(), "preferences.json");
+        StringBuilder builder = new StringBuilder();
+        try (FileReader reader = new FileReader(preferences, StandardCharsets.UTF_8)) {
+            try (BufferedReader buffer = new BufferedReader(reader)) {
+                String line = "";
+                while ((line = buffer.readLine()) != null) {
+                    builder.append(line);
+                }
+            }
+        }
+        JSONObject json = new JSONObject(builder.toString());
+        return json.getString("catalog");
+    }
+
+    private JSONObject removeFilters(String request) throws IOException {
+        JSONObject result = new JSONObject();
+        JSONObject json = new JSONObject(request);
+        File appFolder = new File(json.getString("path"));
+        File xmlFiltersFolder = new File(appFolder, "xmlfilter");
+        JSONArray files = json.getJSONArray("files");
+        for (int i = 0; i < files.length(); i++) {
+            File filter = new File(xmlFiltersFolder, files.getString(i));
+            Files.delete(filter.toPath());
+        }
+        return result;
+    }
+
+    private JSONObject exportFilters(String request) throws IOException {
+        JSONObject result = new JSONObject();
+        JSONObject json = new JSONObject(request);
+        File appFolder = new File(json.getString("path"));
+        File xmlFiltersFolder = new File(appFolder, "xmlfilter");
+        File targetFolder = new File(json.getString("folder"));
+        if (targetFolder.isFile()) {
+            targetFolder = targetFolder.getParentFile();
+        }
+        JSONArray files = json.getJSONArray("files");
+        for (int i = 0; i < files.length(); i++) {
+            File source = new File(xmlFiltersFolder, files.getString(i));
+            File target = new File(targetFolder, files.getString(i));
+            Files.copy(source.toPath(), target.toPath(), StandardCopyOption.REPLACE_EXISTING);
+        }
+        return result;
+    }
+
+    private JSONObject addFilter(String request) throws IOException {
+        JSONObject result = new JSONObject();
+        JSONObject json = new JSONObject(request);
+        File appFolder = new File(json.getString("path"));
+        File xmlFiltersFolder = new File(appFolder, "xmlfilter");
+        File configFile = new File(xmlFiltersFolder, "config_" + json.getString("root") + ".xml");
+        if (configFile.exists()) {
+            result.put(Constants.REASON, "Configuration exists");
+        } else {
+            Document doc = new Document(null, "ini-file", "-//MAXPROGRAMS//Converters 2.0.0//EN", "configuration.dtd");
+            XMLOutputter outputter = new XMLOutputter();
+            try (FileOutputStream out = new FileOutputStream(configFile)) {
+                outputter.output(doc, out);
+            }
+        }
+        return result;
+    }
+
+    private JSONObject getFilterData(String request)
+            throws SAXException, IOException, ParserConfigurationException, URISyntaxException {
+        JSONObject result = new JSONObject();
+        JSONObject json = new JSONObject(request);
+        File appFolder = new File(json.getString("path"));
+        File xmlFiltersFolder = new File(appFolder, "xmlfilter");
+        File configFile = new File(xmlFiltersFolder, json.getString("file"));
+        SAXBuilder builder = new SAXBuilder();
+        builder.setEntityResolver(new Catalog(getCatalog()));
+        Document doc = builder.build(configFile);
+        result = toJSON(doc.getRootElement());
+        return result;
+    }
+
+    private JSONObject saveElement(String request)
+            throws SAXException, IOException, ParserConfigurationException, URISyntaxException {
+        JSONObject result = new JSONObject();
+        JSONObject json = new JSONObject(request);
+        File appFolder = new File(json.getString("path"));
+        File xmlFiltersFolder = new File(appFolder, "xmlfilter");
+        File configFile = new File(xmlFiltersFolder, json.getString("filter"));
+        SAXBuilder builder = new SAXBuilder();
+        builder.setEntityResolver(new Catalog(getCatalog()));
+        Document doc = builder.build(configFile);
+        Element root = doc.getRootElement();
+        List<Element> tags = root.getChildren("tag");
+        Iterator<Element> it = tags.iterator();
+        boolean found = false;
+        while (it.hasNext()) {
+            Element tag = it.next();
+            if (tag.getText().equals(json.getString("name"))) {
+                found = true;
+                tag.setAttribute("hard-break", json.getString("type"));
+                String attributes = json.getString("attributes");
+                if (!attributes.isBlank()) {
+                    tag.setAttribute("attributes", attributes);
+                } else {
+                    tag.removeAttribute("attributes");
+                }
+                String keepSpace = json.getString("keepSpace");
+                if ("yes".equals(keepSpace)) {
+                    tag.setAttribute("keep-format", keepSpace);
+                } else {
+                    tag.removeAttribute("keep-format");
+                }
+                if ("inline".equals(json.getString("type"))) {
+                    tag.setAttribute("ctype", json.getString("inline"));
+                } else {
+                    tag.removeAttribute("ctype");
+                }
+            }
+        }
+        if (!found) {
+            Element tag = new Element("tag");
+            tag.setText(json.getString("name"));
+            tag.setAttribute("hard-break", json.getString("type"));
+            String attributes = json.getString("attributes");
+            if (!attributes.isBlank()) {
+                tag.setAttribute("attributes", attributes);
+            }
+            String keepSpace = json.getString("keepSpace");
+            if ("yes".equals(keepSpace)) {
+                tag.setAttribute("keep-format", keepSpace);
+            }
+            if ("inline".equals(json.getString("type"))) {
+                tag.setAttribute("ctype", json.getString("inline"));
+            }
+            tags.add(tag);
+        }
+        Collections.sort(tags, new Comparator<Element>() {
+
+            @Override
+            public int compare(Element o1, Element o2) {
+                return o1.getText().compareTo(o2.getText());
+            }
+
+        });
+        root.setChildren(tags);
+        Indenter.indent(root, 0);
+        XMLOutputter outputter = new XMLOutputter();
+        outputter.preserveSpace(true);
+        try (FileOutputStream out = new FileOutputStream(configFile)) {
+            outputter.output(doc, out);
+        }
+        return result;
+    }
+
+    private JSONObject removeElements(String request)
+            throws SAXException, IOException, ParserConfigurationException, URISyntaxException {
+        JSONObject result = new JSONObject();
+        JSONObject json = new JSONObject(request);
+        Set<String> names = new TreeSet<>();
+        JSONArray array = json.getJSONArray("elements");
+        for (int i = 0; i < array.length(); i++) {
+            names.add(array.getString(i));
+        }
+        File appFolder = new File(json.getString("path"));
+        File xmlFiltersFolder = new File(appFolder, "xmlfilter");
+        File configFile = new File(xmlFiltersFolder, json.getString("filter"));
+        SAXBuilder builder = new SAXBuilder();
+        builder.setEntityResolver(new Catalog(getCatalog()));
+        Document doc = builder.build(configFile);
+        Element root = doc.getRootElement();
+        List<Element> tags = root.getChildren("tag");
+        List<Element> newList = new ArrayList<>();
+        Iterator<Element> it = tags.iterator();
+        while (it.hasNext()) {
+            Element tag = it.next();
+            if (!names.contains(tag.getText())) {
+                newList.add(tag);
+            }
+        }
+        Collections.sort(newList, new Comparator<Element>() {
+
+            @Override
+            public int compare(Element o1, Element o2) {
+                return o1.getText().compareTo(o2.getText());
+            }
+
+        });
+        root.setChildren(newList);
+        Indenter.indent(root, 0);
+        XMLOutputter outputter = new XMLOutputter();
+        outputter.preserveSpace(true);
+        try (FileOutputStream out = new FileOutputStream(configFile)) {
+            outputter.output(doc, out);
         }
         return result;
     }
@@ -413,6 +685,36 @@ public class ServicesHandler implements HttpHandler {
         } catch (IOException e) {
             logger.log(Level.ERROR, e);
             result.put(Constants.REASON, e.getMessage());
+        }
+        return result;
+    }
+
+    private JSONObject toJSON(Element e) {
+        JSONObject result = new JSONObject();
+        result.put("name", e.getName());
+        JSONArray attributes = new JSONArray();
+        List<Attribute> atts = e.getAttributes();
+        for (int i = 0; i < atts.size(); i++) {
+            Attribute a = atts.get(i);
+            JSONArray o = new JSONArray();
+            o.put(a.getName());
+            o.put(a.getValue());
+            attributes.put(o);
+        }
+        if (attributes.length() > 0) {
+            result.put("attributes", attributes);
+        }
+        JSONArray array = new JSONArray();
+        List<Element> children = e.getChildren();
+        for (int i = 0; i < children.size(); i++) {
+            array.put(toJSON(children.get(i)));
+        }
+        if (array.length() > 0) {
+            result.put("children", array);
+        }
+        String text = e.getText().trim();
+        if (!text.isBlank()) {
+            result.put("content", text);
         }
         return result;
     }

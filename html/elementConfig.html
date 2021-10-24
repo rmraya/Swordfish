@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <title id="title">Element Configuration</title>
+    <link id="theme" rel="stylesheet" type="text/css" href="../css/light.css">
+    <link rel="stylesheet" type="text/css" href="../css/fonts.css">
+</head>
+
+<body id="body">
+    <table>
+        <tr>
+            <td class="middle noWrap">
+                <label>Element Name</label>
+            </td>
+            <td class="middle fill_width">
+                <input id="name" type="text" class="table_input"/>
+            </td>
+        </tr>
+        <tr>
+            <td class="middle noWrap">
+                <label>Element Type</label>
+            </td>
+            <td class="middle fill_width">
+                <select id="type" class="table_select">
+                    <option value="segment">Segment</option>
+                    <option value="inline">Inline</option>
+                    <option value="ignore">Ignore</option>
+                </select>
+            </td>
+        </tr>
+        <tr>
+            <td class="middle noWrap">
+                <label>Inline Type</label>
+            </td>
+            <td class="middle fill_width">
+                <select id="inline" class="table_select">
+                    <option value=""></option>
+                    <option value="image">image</option>
+                    <option value="pb">pb</option>
+                    <option value="lb">lb</option>
+                    <option value="x-bold">x-bold</option>
+                    <option value="x-entry">x-entry</option>
+                    <option value="x-font">x-font</option>
+                    <option value="x-italic">x-italic</option>
+                    <option value="x-link">x-link</option>
+                    <option value="x-underlined">x-underlined</option>
+                    <option value="x-other">x-other</option>
+                </select>
+            </td>   
+        </tr>
+        <tr>
+            <td class="middle noWrap">
+                <label>Translatable Attributes</label>
+            </td>
+            <td class="middle fill_width">
+                <input id="attributes" type="text" class="table_input"/>
+            </td>
+        </tr>
+    </table>
+    <div class="row middle" >
+        <input type="checkbox" id="keep" class="middle" style="margin-left: 8px;">
+        <label for="keep" style="padding-top: 2px;">Keep White Space</label>
+    </div>
+    <div class="buttonArea">
+        <button id="save">Save Element Configuration</button>
+    </div>
+    <script src="../js/keyboardHandler.js"></script>
+    <script src="../js/elementConfig.js"></script>
+</body>
+
+</html>

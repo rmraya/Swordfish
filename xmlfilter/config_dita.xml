@@ -2,7 +2,7 @@
 <!DOCTYPE ini-file PUBLIC "-//Maxprograms//Converters 2.0.0//EN" "configuration.dtd">
 <ini-file>
 <tag hard-break="inline" ctype="x-other">abbreviatedform</tag>
-<tag hard-break="segment" attributes="@navtitle">abbrevlist</tag>
+<tag hard-break="segment" attributes="navtitle">abbrevlist</tag>
 <tag hard-break="segment">abstract</tag>
 <tag hard-break="segment">addressdetails</tag>
 <tag hard-break="segment">administrativearea</tag>

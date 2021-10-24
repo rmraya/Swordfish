@@ -2035,7 +2035,6 @@ public class XliffStore {
             while (rs.next()) {
                 Element match = new Element("mtc:match");
                 match.setAttribute("ref", "#" + rs.getString(3));
-                match.setAttribute("id", rs.getString(4));
                 match.setAttribute("origin", rs.getString(5));
                 match.setAttribute("type", rs.getString(6));
                 match.setAttribute("matchQuality", "" + rs.getInt(7));
@@ -2074,7 +2073,6 @@ public class XliffStore {
             while (rs.next()) {
                 Element entry = new Element("gls:glossEntry");
                 entry.setAttribute("ref", "#" + rs.getString(3));
-                entry.setAttribute("id", rs.getString(4));
                 glossary.addContent(entry);
 
                 Element term = new Element("gls:term");
@@ -2090,8 +2088,8 @@ public class XliffStore {
         return glossary.getChildren().isEmpty() ? null : glossary;
     }
 
-    public JSONArray machineTranslate(JSONObject json, MT translator)
-            throws SQLException, IOException, InterruptedException, SAXException, ParserConfigurationException, DataFormatException {
+    public JSONArray machineTranslate(JSONObject json, MT translator) throws SQLException, IOException,
+            InterruptedException, SAXException, ParserConfigurationException, DataFormatException {
         String file = json.getString("file");
         String unit = json.getString("unit");
         String segment = json.getString("segment");
@@ -3589,12 +3587,10 @@ public class XliffStore {
             }
         }
 
-        unit.removeChild("mtc:matches");
-        unit.removeChild("gls:glossary");
-
         List<Element> oldContent = unit.getChildren();
         List<XMLNode> newContent = new Vector<>();
 
+        String deletedId = null;
         boolean adding = false;
         Iterator<Element> ot = oldContent.iterator();
         while (ot.hasNext()) {
@@ -3605,14 +3601,14 @@ public class XliffStore {
                 } else {
                     segment.getChild("source").addContent(child.getChild("source").getContent());
                     segment.getChild("target").addContent(child.getChild("target").getContent());
-                    deleteSegment(currentFile, currentUnit, child.getAttributeValue("id"));
+                    deletedId = child.getAttributeValue("id");
+                    deleteSegment(currentFile, currentUnit, deletedId);
                     adding = false;
                 }
                 if (segmentId.equals(child.getAttributeValue("id"))) {
                     adding = true;
                 }
-            }
-            if ("ignorable".equals(child.getName())) {
+            } else if ("ignorable".equals(child.getName())) {
                 if (!adding) {
                     newContent.add(child);
                 } else {
@@ -3622,9 +3618,33 @@ public class XliffStore {
                         segment.getChild("target").addContent(target.getContent());
                     }
                 }
+            } else {
+                newContent.add(child);
             }
         }
         unit.setContent(newContent);
+        if (deletedId != null) {
+            Element matches = unit.getChild("mtc:matches");
+            if (matches != null) {
+                Iterator<Element> it = matches.getChildren().iterator();
+                while (it.hasNext()) {
+                    Element match = it.next();
+                    if (match.getAttributeValue("ref").equals("#" + deletedId)) {
+                        match.setAttribute("ref", "#" + deletedId);
+                    }
+                }
+            }
+            Element terms = unit.getChild("gls:glossary");
+            if (terms != null) {
+                Iterator<Element> it = terms.getChildren().iterator();
+                while (it.hasNext()) {
+                    Element term = it.next();
+                    if (term.getAttributeValue("ref").equals("#" + deletedId)) {
+                        term.setAttribute("ref", "#" + deletedId);
+                    }
+                }
+            }
+        }
         Indenter.indent(unit, 2);
 
         deleteUnitSegments(currentFile, currentUnit);

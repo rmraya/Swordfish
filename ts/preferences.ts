@@ -61,6 +61,9 @@ class Preferences {
 
     os: string;
 
+    filtersTable: HTMLTableElement;
+    selected: Map<string, string>;
+
     constructor() {
         this.tabHolder = new TabHolder(document.getElementById('main') as HTMLDivElement, "preferencesHolder");
 
@@ -132,6 +135,11 @@ class Preferences {
             if (event.code === 'Escape') {
                 this.electron.ipcRenderer.send('close-preferences');
             }
+        });
+        this.selected = new Map<string, string>();
+        this.electron.ipcRenderer.send('get-xmlFilters');
+        this.electron.ipcRenderer.on('xmlFilters', (event: Electron.IpcRendererEvent, arg: any) => {
+            this.setFilters(arg);
         });
         this.electron.ipcRenderer.send('settings-height', { width: document.body.clientWidth, height: document.body.clientHeight });
     }
@@ -542,6 +550,7 @@ class Preferences {
         let languagesButton = document.createElement('button');
         languagesButton.innerText = 'Available Spellchecker Languages';
         languagesButton.style.marginTop = '10px';
+        languagesButton.style.marginLeft = '8px';
         languagesButton.addEventListener('click', () => {
             this.electron.ipcRenderer.send('show-spellchecker-langs');
             languagesButton.blur();
@@ -554,6 +563,30 @@ class Preferences {
     }
 
     populateAdvancedTab(container: HTMLDivElement): void {
+        container.style.paddingTop = '10px';
+
+        let div: HTMLDivElement = document.createElement('div');
+        div.style.margin = '0px 4px';
+        container.appendChild(div);
+
+        let advHolder: TabHolder = new TabHolder(div, 'advHolder');
+
+        let generalTab: Tab = new Tab('generalTab', 'General', false);
+        generalTab.getLabel().addEventListener('click', () => {
+            this.electron.ipcRenderer.send('settings-height', { width: document.body.clientWidth, height: document.body.clientHeight });
+        });
+        advHolder.addTab(generalTab);
+        this.populateAdvGeneralTab(generalTab.getContainer());
+
+        let xmlTab: Tab = new Tab('xmlTab', 'XML Filter', false);
+        xmlTab.getLabel().addEventListener('click', () => {
+            this.electron.ipcRenderer.send('settings-height', { width: document.body.clientWidth, height: document.body.clientHeight });
+        });
+        advHolder.addTab(xmlTab);
+        this.populateXmlFilterTab(xmlTab.getContainer());
+    }
+
+    populateAdvGeneralTab(container: HTMLDivElement): void {
         let table: HTMLTableElement = document.createElement('table');
         table.classList.add('fill_width');
         container.appendChild(table);
@@ -585,35 +618,6 @@ class Preferences {
         td = document.createElement('td');
         td.classList.add('middle');
         td.innerHTML = '<button id="browseSRX" class="dark">Browse...</button>';
-        tr.appendChild(td);
-
-        tr = document.createElement('tr');
-        table.appendChild(tr);
-
-        td = document.createElement('td');
-        td.classList.add('middle');
-        td.classList.add('noWrap');
-        tr.appendChild(td);
-
-        let catalogLabel: HTMLLabelElement = document.createElement('label');
-        catalogLabel.setAttribute('for', 'defaultCatalog');
-        catalogLabel.innerText = 'Defaut Catalog';
-        td.appendChild(catalogLabel);
-
-        td = document.createElement('td');
-        td.classList.add('middle');
-        td.classList.add('fill_width');
-        tr.appendChild(td);
-
-        this.defaultCatalog = document.createElement('input');
-        this.defaultCatalog.id = 'defaultCatalog';
-        this.defaultCatalog.type = 'text';
-        this.defaultCatalog.classList.add('fill_width');
-        td.appendChild(this.defaultCatalog);
-
-        td = document.createElement('td');
-        td.classList.add('middle');
-        td.innerHTML = '<button id="browseCatalog" class="dark">Browse...</button>';
         tr.appendChild(td);
 
         let row1: HTMLDivElement = document.createElement('div');
@@ -679,6 +683,100 @@ class Preferences {
         caseSensitiveLabel.setAttribute('for', 'caseSensitiveSearches');
         caseSensitiveLabel.style.marginTop = '4px';
         row4.appendChild(caseSensitiveLabel);
+
+    }
+
+    populateXmlFilterTab(container: HTMLDivElement): void {
+        let catalogTable: HTMLTableElement = document.createElement('table');
+        catalogTable.classList.add('fill_width');
+        container.appendChild(catalogTable);
+
+        let tr: HTMLTableRowElement = document.createElement('tr');
+        catalogTable.appendChild(tr);
+
+        let td: HTMLTableCellElement = document.createElement('td');
+        td.classList.add('middle');
+        td.classList.add('noWrap');
+        tr.appendChild(td);
+
+        let catalogLabel: HTMLLabelElement = document.createElement('label');
+        catalogLabel.setAttribute('for', 'defaultCatalog');
+        catalogLabel.innerText = 'Defaut Catalog';
+        td.appendChild(catalogLabel);
+
+        td = document.createElement('td');
+        td.classList.add('middle');
+        td.classList.add('fill_width');
+        tr.appendChild(td);
+
+        this.defaultCatalog = document.createElement('input');
+        this.defaultCatalog.id = 'defaultCatalog';
+        this.defaultCatalog.type = 'text';
+        this.defaultCatalog.classList.add('fill_width');
+        td.appendChild(this.defaultCatalog);
+
+        td = document.createElement('td');
+        td.classList.add('middle');
+        td.innerHTML = '<button id="browseCatalog" class="dark">Browse...</button>';
+        tr.appendChild(td);
+
+        let header: HTMLParagraphElement = document.createElement('p');
+        header.innerText = 'XML Filter Configuration Files:';
+        header.style.marginLeft = '8px';
+        container.appendChild(header);
+
+        let tableDiv: HTMLDivElement = document.createElement('div');
+        tableDiv.style.height = '200px';
+        tableDiv.style.margin = '8px';
+        tableDiv.style.width = 'calc(100% - 18px)';
+        tableDiv.classList.add('divContainer');
+        tableDiv.classList.add('bordered');
+        container.appendChild(tableDiv);
+
+        this.filtersTable = document.createElement('table');
+        this.filtersTable.classList.add('stripes');
+        this.filtersTable.classList.add('discover');
+        tableDiv.appendChild(this.filtersTable);
+
+        let buttonArea: HTMLDivElement = document.createElement('div');
+        buttonArea.classList.add('fill_width');
+        buttonArea.classList.add('butonArea');
+        container.appendChild(buttonArea);
+
+        let addButton: HTMLButtonElement = document.createElement('button');
+        addButton.innerText = 'Add';
+        addButton.addEventListener('click', () => {
+            this.addFilter();
+        });
+        buttonArea.appendChild(addButton);
+
+        let editButton: HTMLButtonElement = document.createElement('button');
+        editButton.innerText = 'Edit';
+        editButton.addEventListener('click', () => {
+            this.editFilter();
+        });
+        buttonArea.appendChild(editButton);
+
+        let removeButton: HTMLButtonElement = document.createElement('button');
+        removeButton.innerText = 'Remove';
+        removeButton.addEventListener('click', () => {
+            this.removeFilters();
+        });
+        buttonArea.appendChild(removeButton);
+
+        let importButton: HTMLButtonElement = document.createElement('button');
+        importButton.innerText = 'Import';
+        importButton.addEventListener('click', () => {
+            this.electron.ipcRenderer.send('import-xmlFilter');
+        });
+        buttonArea.appendChild(importButton);
+
+        let exportButton: HTMLButtonElement = document.createElement('button');
+        exportButton.innerText = 'Export';
+        exportButton.addEventListener('click', () => {
+            this.exportFilters();
+        });
+        buttonArea.appendChild(exportButton);
     }
 
     populateMtTab(container: HTMLDivElement): void {
@@ -1099,6 +1197,84 @@ class Preferences {
             languageOptions = languageOptions + '<option value="' + lang.code + '">' + lang.description + '</option>';
         }
         return languageOptions;
+    }
+
+    setFilters(json: any): void {
+        this.filtersTable.innerHTML = '';
+        let files: string[] = json.files;
+        for (let i = 0; i < files.length; i++) {
+            let row: HTMLTableRowElement = document.createElement('tr');
+            this.filtersTable.appendChild(row);
+            let col1: HTMLTableCellElement = document.createElement('td');
+            col1.classList.add('middle');
+            row.appendChild(col1);
+            let check: HTMLInputElement = document.createElement('input');
+            check.id = 'ck_' + files[i];
+            check.type = 'checkbox';
+            col1.appendChild(check);
+            row.addEventListener('click', (event: MouseEvent) => {
+                this.clicked(row, files[i], check);
+            });
+            let col2 = document.createElement('td');
+            col2.classList.add('fill_width');
+            col2.innerText = files[i];
+            row.appendChild(col2);
+        }
+        this.selected.clear();
+    }
+
+    clicked(row: HTMLTableRowElement, file: string, checkbox: HTMLInputElement): void {
+        let isSelected: boolean = this.selected.has(file);
+        if (!isSelected) {
+            this.selected.set(file, file);
+            row.classList.add('selected');
+        } else {
+            this.selected.delete(file);
+            row.classList.remove('selected');
+        }
+        checkbox.checked = !isSelected;
+    }
+
+    addFilter(): void {
+        this.electron.ipcRenderer.send('show-addXmlConfiguration');
+    }
+
+    editFilter(): void {
+        if (this.selected.size === 0) {
+            this.electron.ipcRenderer.send('show-message', { type: 'warning', message: 'Select configuration file', parent: 'preferences' });
+            return;
+        }
+        if (this.selected.size !== 1) {
+            this.electron.ipcRenderer.send('show-message', { type: 'warning', message: 'Select one configuration file', parent: 'preferences' });
+            return;
+        }
+        let it: IterableIterator<[string, string]> = this.selected.entries();
+        let first: IteratorResult<[string, string]> = it.next();
+        this.electron.ipcRenderer.send('edit-filterConfig', { file: this.selected.get(first.value[0]) });
+    }
+
+    removeFilters(): void {
+        if (this.selected.size === 0) {
+            this.electron.ipcRenderer.send('show-message', { type: 'warning', message: 'Select configuration file', parent: 'preferences' });
+            return;
+        }
+        let selectedFiles: string[] = [];
+        for (let key of this.selected.keys()) {
+            selectedFiles.push(key);
+        }
+        this.electron.ipcRenderer.send('remove-xmlFilters', { files: selectedFiles });
+    }
+
+    exportFilters(): void {
+        if (this.selected.size === 0) {
+            this.electron.ipcRenderer.send('show-message', { type: 'warning', message: 'Select configuration file', parent: 'preferences' });
+            return;
+        }
+        let selectedFiles: string[] = [];
+        for (let key of this.selected.keys()) {
+            selectedFiles.push(key);
+        }
+        this.electron.ipcRenderer.send('export-xmlFilters', { files: selectedFiles });
     }
 }
 

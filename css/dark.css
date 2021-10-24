@@ -158,6 +158,10 @@ th {
 	border-bottom: 3px solid var(--ClassicBlue90);
 }
 
+.left {
+	text-align: left;
+}
+
 .stripes tr {
 	border-top: 2px solid var(--gray110);
 	border-bottom: 2px solid var(--gray110);
@@ -188,7 +192,7 @@ th {
 }
 
 .machineContainer {
-	background-color: var(--od-row-background);
+	background-color: var(--gray160);
 	padding: 4px;
 	margin: 0;
 	width: 100%;
@@ -280,6 +284,10 @@ select {
 	font-size: 1em;
 	height: 1.6em;
 	border-radius: 2px;
+}
+
+select:disabled {
+	background-color: var(--gray130);
 }
 
 select:focus {
@@ -376,9 +384,7 @@ label {
 .buttonArea {
 	display: flex;
 	flex-direction: row;
-	padding: 10px;
-	padding-left: 16px;
-	padding-right: 16px;
+	padding: 8px 16px;
 	justify-content: flex-end;
 }
 
@@ -609,6 +615,7 @@ th svg {
 
 .bordered {
 	border: 1px solid var(--white) !important;
+	border-radius: 2px;
 }
 
 .error {
