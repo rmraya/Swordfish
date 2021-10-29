@@ -2961,8 +2961,7 @@ public class XliffStore {
                 idx++;
                 boolean segTranslate = rs.getString(8).equals("Y");
                 String segState = rs.getString(7);
-                if (!segTranslate || Constants.INITIAL.equals(segState)
-                        || (Constants.TRANSLATED.equals(segState) && !acceptUnconfirmed)) {
+                if (!segTranslate || Constants.INITIAL.equals(segState)) {
                     continue;
                 }
                 String sourceText = TMUtils.getString(rs.getNCharacterStream(5));

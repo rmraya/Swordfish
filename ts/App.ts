@@ -53,6 +53,8 @@ class Swordfish {
     static addXmlConfigurationWindow: BrowserWindow;
     static editXmlFilterWindow: BrowserWindow;
     static configElementWindow: BrowserWindow;
+    static tagsAnalysisWindow: BrowserWindow;
+    static spaceAnalysisWindow: BrowserWindow;
 
     javapath: string = Swordfish.path.join(app.getAppPath(), 'bin', 'java');
 
@@ -130,6 +132,7 @@ class Swordfish {
     static typeParam: string;
     static xmlFilter: string;
     static filterElement: any;
+    static activeProject: string;
 
     static htmlContent: string;
     static htmlTitle: string;
@@ -342,6 +345,7 @@ class Swordfish {
             Swordfish.destroyWindow(Swordfish.goToWindow);
         });
         ipcMain.on('go-to-segment', (event: IpcMainEvent, arg: any) => {
+            Swordfish.mainWindow.focus();
             Swordfish.mainWindow.webContents.send('open-segment', arg);
         });
         ipcMain.on('get-project-param', (event: IpcMainEvent) => {
@@ -930,6 +934,24 @@ class Swordfish {
         });
         ipcMain.on('add-xmlConfigurationFile', (event: IpcMainEvent, arg: any) => {
             Swordfish.addXmlConfiguration(event, arg);
+        });
+        ipcMain.on('tagsAnalysis-height', (event: IpcMainEvent, arg: any) => {
+            Swordfish.setHeight(Swordfish.tagsAnalysisWindow, arg);
+        });
+        ipcMain.on('close-tagsAnalysis', () => {
+            Swordfish.destroyWindow(Swordfish.tagsAnalysisWindow);
+        });
+        ipcMain.on('get-tagsErrors', (event: IpcMainEvent) => {
+            Swordfish.getTagErrors(event);
+        });
+        ipcMain.on('spaceAnalysis-height', (event: IpcMainEvent, arg: any) => {
+            Swordfish.setHeight(Swordfish.spaceAnalysisWindow, arg);
+        });
+        ipcMain.on('close-spaceAnalysis', () => {
+            Swordfish.destroyWindow(Swordfish.spaceAnalysisWindow);
+        });
+        ipcMain.on('get-spaceErrors', (event: IpcMainEvent) => {
+            Swordfish.getSpaceErrors(event);
         });
     } // end constructor
 
@@ -3213,6 +3235,10 @@ class Swordfish {
                     break;
                 case 'elementConfig': parent = Swordfish.configElementWindow;
                     break;
+                case 'tagsAnalysis': parent = Swordfish.tagsAnalysisWindow;
+                    break;
+                case 'spaceAnalysis': parent = Swordfish.spaceAnalysisWindow;
+                    break;
                 default: parent = Swordfish.mainWindow;
             }
         }
@@ -4453,49 +4479,67 @@ class Swordfish {
     }
 
     static analyzeSpaces(arg: any): void {
-        Swordfish.sendRequest('/projects/analyzeSpaces', arg,
+        Swordfish.activeProject = arg.project;
+        Swordfish.spaceAnalysisWindow = new BrowserWindow({
+            parent: this.mainWindow,
+            width: 400,
+            minimizable: false,
+            maximizable: false,
+            resizable: false,
+            show: false,
+            icon: this.iconPath,
+            webPreferences: {
+                nodeIntegration: true,
+                contextIsolation: false,
+                nativeWindowOpen: true
+            }
+        });
+        Swordfish.spaceAnalysisWindow.setMenu(null);
+        Swordfish.spaceAnalysisWindow.loadURL('file://' + this.path.join(app.getAppPath(), 'html', 'spaceAnalysis.html'));
+        Swordfish.spaceAnalysisWindow.once('ready-to-show', () => {
+            Swordfish.spaceAnalysisWindow.show();
+        });
+        Swordfish.spaceAnalysisWindow.on('close', () => {
+            this.mainWindow.focus();
+        });
+        Swordfish.setLocation(Swordfish.spaceAnalysisWindow, 'spaceAnalysis.html');
+    }
+
+    static analyzeTags(arg: any): void {
+        Swordfish.activeProject = arg.project;
+        Swordfish.tagsAnalysisWindow = new BrowserWindow({
+            parent: this.mainWindow,
+            width: 400,
+            minimizable: false,
+            maximizable: false,
+            resizable: false,
+            show: false,
+            icon: this.iconPath,
+            webPreferences: {
+                nodeIntegration: true,
+                contextIsolation: false,
+                nativeWindowOpen: true
+            }
+        });
+        Swordfish.tagsAnalysisWindow.setMenu(null);
+        Swordfish.tagsAnalysisWindow.loadURL('file://' + this.path.join(app.getAppPath(), 'html', 'tagsAnalysis.html'));
+        Swordfish.tagsAnalysisWindow.once('ready-to-show', () => {
+            Swordfish.tagsAnalysisWindow.show();
+        });
+        Swordfish.tagsAnalysisWindow.on('close', () => {
+            this.mainWindow.focus();
+        });
+        Swordfish.setLocation(Swordfish.tagsAnalysisWindow, 'tagsAnalysis.html');
+    }
+
+    static getTagErrors(event: IpcMainEvent): void {
+        Swordfish.sendRequest('/projects/analyzeTags', { project: Swordfish.activeProject },
             (data: any) => {
                 if (data.status !== Swordfish.SUCCESS) {
                     Swordfish.showMessage({ type: 'error', message: data.reason });
                     return;
                 }
-                if (data.errors.length === 0) {
-                    Swordfish.showMessage({ type: 'info', message: 'There are no errors in initial/trailing spaces' });
-                    return;
-                }
-                let table: string = '<div class="divContainer"><table class="stripes fill_width">';
-                let length = data.errors.length;
-                for (let i = 0; i < length; i++) {
-                    let line: any = data.errors[i];
-                    table = table + '<tr><td class="center initial">' + line.index + '</td><td class="center fill_width">' + line.type + '</td></tr>';
-                }
-                table = table + '</table></div>';
-                let htmlViewerWindow: BrowserWindow = new BrowserWindow({
-                    parent: this.mainWindow,
-                    width: 250,
-                    height: 350,
-                    minimizable: false,
-                    maximizable: false,
-                    resizable: true,
-                    show: false,
-                    icon: this.iconPath,
-                    webPreferences: {
-                        nodeIntegration: true,
-                        contextIsolation: false,
-                        nativeWindowOpen: true
-                    }
-                });
-                Swordfish.htmlContent = table;
-                Swordfish.htmlTitle = 'Space Analysis';
-                Swordfish.htmlId = htmlViewerWindow.id;
-                htmlViewerWindow.setMenu(null);
-                htmlViewerWindow.loadURL('file://' + this.path.join(app.getAppPath(), 'html', 'htmlViewer.html'));
-                htmlViewerWindow.once('ready-to-show', () => {
-                    htmlViewerWindow.show();
-                });
-                htmlViewerWindow.on('close', () => {
-                    this.mainWindow.focus();
-                });
+                event.sender.send('set-tagsErrors', data);
             },
             (reason: string) => {
                 Swordfish.showMessage({ type: 'error', message: reason });
@@ -4503,50 +4547,14 @@ class Swordfish {
         );
     }
 
-    static analyzeTags(arg: any): void {
-        Swordfish.sendRequest('/projects/analyzeTags', arg,
+    static getSpaceErrors(event: IpcMainEvent): void {
+        Swordfish.sendRequest('/projects/analyzeSpaces', { project: Swordfish.activeProject },
             (data: any) => {
                 if (data.status !== Swordfish.SUCCESS) {
                     Swordfish.showMessage({ type: 'error', message: data.reason });
                     return;
                 }
-                if (data.errors.length === 0) {
-                    Swordfish.showMessage({ type: 'info', message: 'There are no tag errors' });
-                    return;
-                }
-                let table: string = '<div class="divContainer"><table class="stripes fill_width">';
-                let length = data.errors.length;
-                for (let i = 0; i < length; i++) {
-                    let line: any = data.errors[i];
-                    table = table + '<tr><td class="center initial">' + line.index + '</td><td class="center fill_width">' + line.type + '</td></tr>';
-                }
-                table = table + '</table></div>';
-                let htmlViewerWindow: BrowserWindow = new BrowserWindow({
-                    parent: this.mainWindow,
-                    width: 250,
-                    height: 350,
-                    minimizable: false,
-                    maximizable: false,
-                    resizable: true,
-                    show: false,
-                    icon: this.iconPath,
-                    webPreferences: {
-                        nodeIntegration: true,
-                        contextIsolation: false,
-                        nativeWindowOpen: true
-                    }
-                });
-                Swordfish.htmlContent = table;
-                Swordfish.htmlTitle = 'Tags Analysis';
-                Swordfish.htmlId = htmlViewerWindow.id;
-                htmlViewerWindow.setMenu(null);
-                htmlViewerWindow.loadURL('file://' + this.path.join(app.getAppPath(), 'html', 'htmlViewer.html'));
-                htmlViewerWindow.once('ready-to-show', () => {
-                    htmlViewerWindow.show();
-                });
-                htmlViewerWindow.on('close', () => {
-                    this.mainWindow.focus();
-                });
+                event.sender.send('set-spaceErrors', data);
             },
             (reason: string) => {
                 Swordfish.showMessage({ type: 'error', message: reason });
