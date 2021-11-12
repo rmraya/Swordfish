@@ -11,6 +11,7 @@
 	<system systemId="http://www.w3.org/1999/XSL/Transform" uri="xml/transform.xsd" />
 	<public publicId="-//W3C//DTD XMLSCHEMA 200102//EN" uri="xml/XMLSchema.dtd" />
 	<public publicId="datatypes" uri="xml/datatypes.dtd" />
+	<system systemId="http://www.w3.org/2001/XMLSchema-datatypes" uri="xml/XMLSchema-datatypes.xsd" />
 	<system systemId="http://www.w3.org/2001/XInclude" uri="xinclude/xinclude.xsd" />
 	<system systemId="xinclude.mod" uri="xinclude/xinclude.mod" />
 
@@ -220,5 +221,5 @@
 	<uri name="http://schemas.openxmlformats.org/drawingml/2006/3/main" uri="openxml/dml-shapelineproperties.xsd" />
 	<uri name="http://schemas.openxmlformats.org/drawingml/2006/3/wordprocessingDrawing" uri="openxml/dml-wordprocessingdrawing.xsd" />
 	<uri name="http://schemas.openxmlformats.org/drawingml/2006/3/main" uri="openxml/dml-shapeeffects.xsd" />
-
+	
 </catalog>

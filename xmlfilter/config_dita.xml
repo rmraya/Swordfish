@@ -177,7 +177,7 @@
 <tag hard-break="segment">honorific</tag>
 <tag hard-break="segment">howtoavoid</tag>
 <tag hard-break="inline" ctype="x-italic">i</tag>
-<tag hard-break="inline" ctype="x-image" attributes="alt;longdescref">image</tag>
+<tag hard-break="inline" ctype="image" attributes="alt;longdescref">image</tag>
 <tag hard-break="segment" attributes="spectitle">imagemap</tag>
 <tag hard-break="segment">index-base</tag>
 <tag hard-break="segment">index-see</tag>

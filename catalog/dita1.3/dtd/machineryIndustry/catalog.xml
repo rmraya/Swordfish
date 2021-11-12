@@ -3,9 +3,13 @@
    <!--DITA Machinery Task Shell-->
    <public publicId="-//OASIS//DTD DITA 1.3 Machinery Task//EN"
            uri="dtd/machineryTask.dtd"/>
+   <public publicId="-//OASIS//DTD DITA 1.x Machinery Task//EN"
+           uri="dtd/machineryTask.dtd"/>
    <public publicId="-//OASIS//DTD DITA Machinery Task//EN"
            uri="dtd/machineryTask.dtd"/>
    <public publicId="-//OASIS//ELEMENTS DITA 1.3 Taskbody Constraint//EN"
+           uri="dtd/machineryTaskbodyConstraint.mod"/>
+   <public publicId="-//OASIS//ELEMENTS DITA 1.x Taskbody Constraint//EN"
            uri="dtd/machineryTaskbodyConstraint.mod"/>
    <public publicId="-//OASIS//ELEMENTS DITA Taskbody Constraint//EN"
            uri="dtd/machineryTaskbodyConstraint.mod"/>
@@ -14,5 +18,7 @@
    <public publicId="-//OASIS//ELEMENTS DITA Machinery Taskbody Constraint//EN"
            uri="dtd/machineryTaskbodyConstraint.mod"/>
    <public publicId="-//OASIS//ELEMENTS DITA 1.3 Machinery Taskbody Constraint//EN"
+           uri="dtd/machineryTaskbodyConstraint.mod"/>
+   <public publicId="-//OASIS//ELEMENTS DITA 1.x Machinery Taskbody Constraint//EN"
            uri="dtd/machineryTaskbodyConstraint.mod"/>
 </catalog>

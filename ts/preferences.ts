@@ -601,7 +601,7 @@ class Preferences {
 
         let srxLabel: HTMLLabelElement = document.createElement('label');
         srxLabel.setAttribute('for', 'defaultSRX');
-        srxLabel.innerText = 'Defaut SRX File';
+        srxLabel.innerText = 'Default SRX File';
         td.appendChild(srxLabel);
 
         td = document.createElement('td');
@@ -701,7 +701,7 @@ class Preferences {
 
         let catalogLabel: HTMLLabelElement = document.createElement('label');
         catalogLabel.setAttribute('for', 'defaultCatalog');
-        catalogLabel.innerText = 'Defaut Catalog';
+        catalogLabel.innerText = 'Default Catalog';
         td.appendChild(catalogLabel);
 
         td = document.createElement('td');

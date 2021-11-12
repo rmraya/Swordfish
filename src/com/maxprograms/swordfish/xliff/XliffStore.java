@@ -1489,143 +1489,170 @@ public class XliffStore {
                     }
                 }
             } else if (o.getNodeType() == XMLNode.ELEMENT_NODE) {
-                // empty: <cp>, <ph>, <sc>, <ec>, <sm> and <em>.
-                // paired: <pc>, <mrk>,
-                Element e = (Element) o;
-                String type = e.getName();
-                if (type.equals("pc")) {
-                    String id = e.getAttributeValue("id");
-                    if (!tagsMap.containsKey("pc" + id)) {
-                        XliffUtils.checkSVG(tag);
-                        String header = XliffUtils.getHeader(e);
-                        StringBuilder sb = new StringBuilder();
-                        sb.append("<img data-ref='");
-                        sb.append(id);
-                        sb.append("' data-id='");
-                        sb.append(tag);
-                        sb.append("' src='");
-                        sb.append(TmsServer.getWorkFolder().toURI().toURL().toString());
-                        sb.append("images/");
-                        sb.append(tag++);
-                        sb.append(".svg' align='bottom' alt='' title=\"");
-                        sb.append(XliffUtils.unquote(XliffUtils.cleanAngles(header)));
-                        sb.append("\"/>");
-                        tagsMap.put("pc" + id, sb.toString());
-                    }
-                    text.append(tagsMap.get("pc" + id));
-                    text.append(addHtmlTags(e, filterText, caseSensitive, regExp, originalData, preserve));
-                    if (!tagsMap.containsKey("/pc" + id)) {
-                        XliffUtils.checkSVG(tag);
-                        String tail = "</pc>";
-                        StringBuilder sb = new StringBuilder();
-                        sb.append("<img data-ref='/");
-                        sb.append(e.getAttributeValue("id"));
-                        sb.append("' data-id='");
-                        sb.append(tag);
-                        sb.append("' src='");
-                        sb.append(TmsServer.getWorkFolder().toURI().toURL().toString());
-                        sb.append("images/");
-                        sb.append(tag++);
-                        sb.append(".svg' align='bottom' alt='' title=\"");
-                        sb.append(XliffUtils.unquote(XliffUtils.cleanAngles(tail)));
-                        sb.append("\"/>");
-                        tagsMap.put("/pc" + id, sb.toString());
-                    }
-                    text.append(tagsMap.get("/pc" + id));
-                } else if (type.equals("mrk")) {
-                    String id = e.getAttributeValue("id");
-                    boolean isTerm = e.getAttributeValue("type").equals("term");
-                    if (!isTerm) {
-                        if (!tagsMap.containsKey("mrk" + id)) {
-                            XliffUtils.checkSVG(tag);
-                            String header = XliffUtils.getHeader(e);
-                            StringBuilder sb = new StringBuilder();
-                            sb.append("<img data-ref='");
-                            sb.append(id);
-                            sb.append("' data-id='");
-                            sb.append(tag);
-                            sb.append("' src='");
-                            sb.append(TmsServer.getWorkFolder().toURI().toURL().toString());
-                            sb.append("images/");
-                            sb.append(tag++);
-                            sb.append(".svg' align='bottom' alt='' title=\"");
-                            sb.append(XliffUtils.unquote(XliffUtils.cleanAngles(header)));
-                            sb.append("\"/>");
-                            tagsMap.put("mrk" + id, sb.toString());
-                        }
-                        text.append(tagsMap.get(e.getName() + id));
-                        text.append("<span " + XliffUtils.STYLE + ">");
-                    } else {
-                        text.append("<span " + XliffUtils.STYLE + " title=\"" + e.getAttributeValue("value") + "\">");
-                    }
-                    text.append(e.getText());
-                    text.append("</span>");
-                    if (!isTerm) {
-                        if (!tagsMap.containsKey("/mrk" + id)) {
-                            XliffUtils.checkSVG(tag);
-                            String tail = "</mrk>";
-                            StringBuilder sb = new StringBuilder();
-                            sb.append("<img data-ref='/");
-                            sb.append(e.getAttributeValue("id"));
-                            sb.append("' data-id='");
-                            sb.append(tag);
-                            sb.append("' src='");
-                            sb.append(TmsServer.getWorkFolder().toURI().toURL().toString());
-                            sb.append("images/");
-                            sb.append(tag++);
-                            sb.append(".svg' align='bottom' alt='' title=\"");
-                            sb.append(XliffUtils.unquote(XliffUtils.cleanAngles(tail)));
-                            sb.append("\"/>");
-                            tagsMap.put("/mrk" + id, sb.toString());
-                        }
-                        text.append(tagsMap.get("/mrk" + id));
-                    }
-                } else if (type.equals("cp")) {
-                    String hex = "cp" + e.getAttributeValue("hex");
-                    if (!tagsMap.containsKey(hex)) {
-                        XliffUtils.checkSVG(tag);
-                        StringBuilder sb = new StringBuilder();
-                        sb.append("<img data-ref='");
-                        sb.append(hex);
-                        sb.append("' data-id='");
-                        sb.append(tag);
-                        sb.append("' src='");
-                        sb.append(TmsServer.getWorkFolder().toURI().toURL().toString());
-                        sb.append("images/");
-                        sb.append(tag++);
-                        sb.append(".svg' align='bottom' alt='' title=\"");
-                        sb.append(XliffUtils.unquote(XliffUtils.cleanAngles(e.toString())));
-                        sb.append("\"/>");
-                        tagsMap.put(hex, sb.toString());
-                    }
-                    text.append(tagsMap.get(hex));
-                } else {
-                    String dataRef = e.getAttributeValue("dataRef");
-                    if (!tagsMap.containsKey(dataRef)) {
-                        XliffUtils.checkSVG(tag);
-                        StringBuilder sb = new StringBuilder();
-                        sb.append("<img data-ref='");
-                        sb.append(dataRef);
-                        sb.append("' data-id='");
-                        sb.append(tag);
-                        sb.append("' src='");
-                        sb.append(TmsServer.getWorkFolder().toURI().toURL().toString());
-                        sb.append("images/");
-                        sb.append(tag++);
-                        sb.append(".svg' align='bottom' alt='' title=\"");
-                        String title = "";
-                        if (originalData.has(dataRef)) {
-                            title = originalData.getString(dataRef);
-                        }
-                        sb.append(XliffUtils.unquote(XliffUtils.cleanAngles(title)));
-                        sb.append("\"/>");
-                        tagsMap.put(dataRef, sb.toString());
-                    }
-                    text.append(tagsMap.get(dataRef));
-                }
+                text.append(inline2html((Element) o, originalData));
             }
         }
         return preserve ? XliffUtils.highlightSpaces(text.toString()) : text.toString().trim();
+    }
+
+    private String inline2html(Element e, JSONObject originalData) throws IOException {
+        // empty: <cp>, <ph>, <sc>, <ec>, <sm> and <em>.
+        // paired: <pc>, <mrk>,
+        StringBuilder text = new StringBuilder();
+        String type = e.getName();
+        if (type.equals("pc")) {
+            String id = e.getAttributeValue("id");
+            if (!tagsMap.containsKey("pc" + id)) {
+                XliffUtils.checkSVG(tag);
+                String header = XliffUtils.getHeader(e);
+                StringBuilder sb = new StringBuilder();
+                sb.append("<img data-ref='");
+                sb.append(id);
+                sb.append("' data-id='");
+                sb.append(tag);
+                sb.append("' src='");
+                sb.append(TmsServer.getWorkFolder().toURI().toURL().toString());
+                sb.append("images/");
+                sb.append(tag++);
+                sb.append(".svg' align='bottom' alt='' title=\"");
+                sb.append(XliffUtils.unquote(XliffUtils.cleanAngles(header)));
+                sb.append("\"/>");
+                tagsMap.put("pc" + id, sb.toString());
+            }
+            text.append(tagsMap.get("pc" + id));
+            List<XMLNode> content = e.getContent();
+            Iterator<XMLNode> it = content.iterator();
+            while (it.hasNext()) {
+                XMLNode node = it.next();
+                if (node.getNodeType() == XMLNode.TEXT_NODE) {
+                    String s = ((TextNode) node).getText();
+                    text.append(XMLUtils.cleanText(s));
+                }
+                if (node.getNodeType() == XMLNode.ELEMENT_NODE) {
+                    text.append(inline2html((Element) node, originalData));
+                }
+            }
+            if (!tagsMap.containsKey("/pc" + id)) {
+                XliffUtils.checkSVG(tag);
+                String tail = "</pc>";
+                StringBuilder sb = new StringBuilder();
+                sb.append("<img data-ref='/");
+                sb.append(e.getAttributeValue("id"));
+                sb.append("' data-id='");
+                sb.append(tag);
+                sb.append("' src='");
+                sb.append(TmsServer.getWorkFolder().toURI().toURL().toString());
+                sb.append("images/");
+                sb.append(tag++);
+                sb.append(".svg' align='bottom' alt='' title=\"");
+                sb.append(XliffUtils.unquote(XliffUtils.cleanAngles(tail)));
+                sb.append("\"/>");
+                tagsMap.put("/pc" + id, sb.toString());
+            }
+            text.append(tagsMap.get("/pc" + id));
+        } else if (type.equals("mrk")) {
+            String id = e.getAttributeValue("id");
+            boolean isTerm = e.getAttributeValue("type").equals("term");
+            if (!isTerm) {
+                if (!tagsMap.containsKey("mrk" + id)) {
+                    XliffUtils.checkSVG(tag);
+                    String header = XliffUtils.getHeader(e);
+                    StringBuilder sb = new StringBuilder();
+                    sb.append("<img data-ref='");
+                    sb.append(id);
+                    sb.append("' data-id='");
+                    sb.append(tag);
+                    sb.append("' src='");
+                    sb.append(TmsServer.getWorkFolder().toURI().toURL().toString());
+                    sb.append("images/");
+                    sb.append(tag++);
+                    sb.append(".svg' align='bottom' alt='' title=\"");
+                    sb.append(XliffUtils.unquote(XliffUtils.cleanAngles(header)));
+                    sb.append("\"/>");
+                    tagsMap.put("mrk" + id, sb.toString());
+                }
+                text.append(tagsMap.get(e.getName() + id));
+                text.append("<span " + XliffUtils.STYLE + ">");
+            } else {
+                text.append("<span " + XliffUtils.STYLE + " title=\"" + e.getAttributeValue("value") + "\">");
+            }
+            List<XMLNode> content = e.getContent();
+            Iterator<XMLNode> it = content.iterator();
+            while (it.hasNext()) {
+                XMLNode node = it.next();
+                if (node.getNodeType() == XMLNode.TEXT_NODE) {
+                    String s = ((TextNode) node).getText();
+                    text.append(XMLUtils.cleanText(s));
+                }
+                if (node.getNodeType() == XMLNode.ELEMENT_NODE) {
+                    text.append(inline2html((Element) node, originalData));
+                }
+            }
+            text.append("</span>");
+            if (!isTerm) {
+                if (!tagsMap.containsKey("/mrk" + id)) {
+                    XliffUtils.checkSVG(tag);
+                    String tail = "</mrk>";
+                    StringBuilder sb = new StringBuilder();
+                    sb.append("<img data-ref='/");
+                    sb.append(e.getAttributeValue("id"));
+                    sb.append("' data-id='");
+                    sb.append(tag);
+                    sb.append("' src='");
+                    sb.append(TmsServer.getWorkFolder().toURI().toURL().toString());
+                    sb.append("images/");
+                    sb.append(tag++);
+                    sb.append(".svg' align='bottom' alt='' title=\"");
+                    sb.append(XliffUtils.unquote(XliffUtils.cleanAngles(tail)));
+                    sb.append("\"/>");
+                    tagsMap.put("/mrk" + id, sb.toString());
+                }
+                text.append(tagsMap.get("/mrk" + id));
+            }
+        } else if (type.equals("cp")) {
+            String hex = "cp" + e.getAttributeValue("hex");
+            if (!tagsMap.containsKey(hex)) {
+                XliffUtils.checkSVG(tag);
+                StringBuilder sb = new StringBuilder();
+                sb.append("<img data-ref='");
+                sb.append(hex);
+                sb.append("' data-id='");
+                sb.append(tag);
+                sb.append("' src='");
+                sb.append(TmsServer.getWorkFolder().toURI().toURL().toString());
+                sb.append("images/");
+                sb.append(tag++);
+                sb.append(".svg' align='bottom' alt='' title=\"");
+                sb.append(XliffUtils.unquote(XliffUtils.cleanAngles(e.toString())));
+                sb.append("\"/>");
+                tagsMap.put(hex, sb.toString());
+            }
+            text.append(tagsMap.get(hex));
+        } else {
+            String dataRef = e.getAttributeValue("dataRef");
+            if (!tagsMap.containsKey(dataRef)) {
+                XliffUtils.checkSVG(tag);
+                StringBuilder sb = new StringBuilder();
+                sb.append("<img data-ref='");
+                sb.append(dataRef);
+                sb.append("' data-id='");
+                sb.append(tag);
+                sb.append("' src='");
+                sb.append(TmsServer.getWorkFolder().toURI().toURL().toString());
+                sb.append("images/");
+                sb.append(tag++);
+                sb.append(".svg' align='bottom' alt='' title=\"");
+                String title = "";
+                if (originalData.has(dataRef)) {
+                    title = originalData.getString(dataRef);
+                }
+                sb.append(XliffUtils.unquote(XliffUtils.cleanAngles(title)));
+                sb.append("\"/>");
+                tagsMap.put(dataRef, sb.toString());
+            }
+            text.append(tagsMap.get(dataRef));
+        }
+        return text.toString();
     }
 
     private String replace(String source, String target, String replacement) {
@@ -1649,6 +1676,8 @@ public class XliffStore {
                 if ("mrk".equals(e.getName()) || "pc".equals(e.getName())) {
                     result.put(e.getAttributeValue("id"), XliffUtils.getHeader(e));
                     result.put("/" + e.getAttributeValue("id"), XliffUtils.getTail(e));
+                    Map<String, String> map = getTags(e);
+                    result.putAll(map);
                 } else if ("cp".equals(e.getName())) {
                     result.put("cp" + e.getAttributeValue("hex"), e.toString());
                 } else {
@@ -3246,72 +3275,95 @@ public class XliffStore {
             if (o.getNodeType() == XMLNode.TEXT_NODE) {
                 text.append(XliffUtils.cleanString(((TextNode) o).getText()));
             } else if (o.getNodeType() == XMLNode.ELEMENT_NODE) {
-                // empty: <cp>, <ph>, <sc>, <ec>, <sm> and <em>.
-                // paired: <pc>, <mrk>,
-                Element e = (Element) o;
-                String type = e.getName();
-                if (type.equals("pc")) {
-                    String id = e.getAttributeValue("id");
-                    if (!tagsMap.containsKey("pc" + id)) {
-                        StringBuilder sb = new StringBuilder();
-                        sb.append("<span class=\"tag\">");
-                        sb.append(tag++);
-                        sb.append("</span>");
-                        tagsMap.put("pc" + id, sb.toString());
-                    }
-                    text.append(tagsMap.get("pc" + id));
-                    text.append(toHtml(e));
-                    if (!tagsMap.containsKey("/pc" + id)) {
-                        StringBuilder sb = new StringBuilder();
-                        sb.append("<span class=\"tag\">");
-                        sb.append(tag++);
-                        sb.append("</span>");
-                        tagsMap.put("/pc" + id, sb.toString());
-                    }
-                    text.append("/" + tagsMap.get(e.getName() + id));
-                } else if (type.equals("mrk")) {
-                    String id = e.getAttributeValue("id");
-                    if (!tagsMap.containsKey("mrk" + id)) {
-                        StringBuilder sb = new StringBuilder();
-                        sb.append("<span class=\"tag\">");
-                        sb.append(tag++);
-                        sb.append("</span>");
-                        tagsMap.put("mrk" + id, sb.toString());
-                    }
-                    text.append(tagsMap.get(e.getName() + id));
-                    text.append("<span class=\"highlighted\">");
-                    text.append(e.getText());
-                    text.append("</span>");
-                    if (!tagsMap.containsKey("/mrk" + id)) {
-                        StringBuilder sb = new StringBuilder();
-                        sb.append("<span class=\"tag\">");
-                        sb.append(tag++);
-                        sb.append("</span>");
-                        tagsMap.put("/mrk" + id, sb.toString());
-                    }
-                    text.append(tagsMap.get("/mrk" + id));
-                } else if (type.equals("cp")) {
-                    String hex = "cp" + e.getAttributeValue("hex");
-                    if (!tagsMap.containsKey(hex)) {
-                        StringBuilder sb = new StringBuilder();
-                        sb.append("<span class=\"tag\">");
-                        sb.append(tag++);
-                        sb.append("</span>");
-                        tagsMap.put(hex, sb.toString());
-                    }
-                    text.append(tagsMap.get(hex));
-                } else {
-                    String dataRef = e.getAttributeValue("dataRef");
-                    if (!tagsMap.containsKey(dataRef)) {
-                        StringBuilder sb = new StringBuilder();
-                        sb.append("<span class=\"tag\">");
-                        sb.append(tag++);
-                        sb.append("</span>");
-                        tagsMap.put(dataRef, sb.toString());
-                    }
-                    text.append(tagsMap.get(dataRef));
+                text.append(processInline((Element) o));
+            }
+        }
+        return text.toString();
+    }
+
+    private String processInline(Element e) {
+        // empty: <cp>, <ph>, <sc>, <ec>, <sm> and <em>.
+        // paired: <pc>, <mrk>,
+        StringBuilder text = new StringBuilder();
+        String type = e.getName();
+        if (type.equals("pc")) {
+            String id = e.getAttributeValue("id");
+            if (!tagsMap.containsKey("pc" + id)) {
+                StringBuilder sb = new StringBuilder();
+                sb.append("<span class=\"tag\">");
+                sb.append(tag++);
+                sb.append("</span>");
+                tagsMap.put("pc" + id, sb.toString());
+            }
+            text.append(tagsMap.get("pc" + id));
+            List<XMLNode> content = e.getContent();
+            for (int i = 0; i < content.size(); i++) {
+                XMLNode node = content.get(i);
+                if (node.getNodeType() == XMLNode.TEXT_NODE) {
+                    text.append(XliffUtils.cleanString(((TextNode) node).getText()));
+                }
+                if (node.getNodeType() == XMLNode.ELEMENT_NODE) {
+                    text.append(processInline((Element) node));
                 }
             }
+            if (!tagsMap.containsKey("/pc" + id)) {
+                StringBuilder sb = new StringBuilder();
+                sb.append("<span class=\"tag\">");
+                sb.append(tag++);
+                sb.append("</span>");
+                tagsMap.put("/pc" + id, sb.toString());
+            }
+            text.append("/" + tagsMap.get(e.getName() + id));
+        } else if (type.equals("mrk")) {
+            String id = e.getAttributeValue("id");
+            if (!tagsMap.containsKey("mrk" + id)) {
+                StringBuilder sb = new StringBuilder();
+                sb.append("<span class=\"tag\">");
+                sb.append(tag++);
+                sb.append("</span>");
+                tagsMap.put("mrk" + id, sb.toString());
+            }
+            text.append(tagsMap.get(e.getName() + id));
+            text.append("<span class=\"highlighted\">");
+            List<XMLNode> content = e.getContent();
+            for (int i = 0; i < content.size(); i++) {
+                XMLNode node = content.get(i);
+                if (node.getNodeType() == XMLNode.TEXT_NODE) {
+                    text.append(XliffUtils.cleanString(((TextNode) node).getText()));
+                }
+                if (node.getNodeType() == XMLNode.ELEMENT_NODE) {
+                    text.append(processInline((Element) node));
+                }
+            }
+            text.append("</span>");
+            if (!tagsMap.containsKey("/mrk" + id)) {
+                StringBuilder sb = new StringBuilder();
+                sb.append("<span class=\"tag\">");
+                sb.append(tag++);
+                sb.append("</span>");
+                tagsMap.put("/mrk" + id, sb.toString());
+            }
+            text.append(tagsMap.get("/mrk" + id));
+        } else if (type.equals("cp")) {
+            String hex = "cp" + e.getAttributeValue("hex");
+            if (!tagsMap.containsKey(hex)) {
+                StringBuilder sb = new StringBuilder();
+                sb.append("<span class=\"tag\">");
+                sb.append(tag++);
+                sb.append("</span>");
+                tagsMap.put(hex, sb.toString());
+            }
+            text.append(tagsMap.get(hex));
+        } else {
+            String dataRef = e.getAttributeValue("dataRef");
+            if (!tagsMap.containsKey(dataRef)) {
+                StringBuilder sb = new StringBuilder();
+                sb.append("<span class=\"tag\">");
+                sb.append(tag++);
+                sb.append("</span>");
+                tagsMap.put(dataRef, sb.toString());
+            }
+            text.append(tagsMap.get(dataRef));
         }
         return text.toString();
     }

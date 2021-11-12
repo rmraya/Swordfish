@@ -132,8 +132,7 @@ public class XliffUtils {
 			}
 			String svg = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>"
 					+ "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"" + (width + 1)
-					+ "px\" height=\"17px\" version=\"1.1\"><g>" 
-					+ "<rect style=\"fill:#009688\" width=\"" + width
+					+ "px\" height=\"17px\" version=\"1.1\"><g><rect style=\"fill:#009688\" width=\"" + width
 					+ "px\" height=\"16px\" x=\"1\" y=\"1\" rx=\"3\" ry=\"3\" />"
 					+ "<text style=\"font-size:12px;font-style:normal;font-weight:normal;text-align:center;font-family:sans-serif;\" x=\"6\" y=\"14\" fill=\"#ffffff\" fill-opacity=\"1\">\n"
 					+ "<tspan>" + tag + "</tspan></text></g></svg>";
@@ -444,7 +443,17 @@ public class XliffUtils {
 			if (n.getNodeType() == XMLNode.ELEMENT_NODE) {
 				Element el = (Element) n;
 				if ("mrk".equals(el.getName()) || "pc".equals(el.getName())) {
-					string.append(pureText(el));
+					List<XMLNode> list = el.getContent();
+					for (int i = 0; i < list.size(); i++) {
+						XMLNode node = list.get(i);
+						if (node.getNodeType() == XMLNode.TEXT_NODE) {
+							TextNode t = (TextNode) node;
+							string.append(t.getText());
+						}
+						if (node.getNodeType() == XMLNode.ELEMENT_NODE) {
+							string.append(pureText((Element) node));
+						}
+					}
 				}
 			}
 		}
