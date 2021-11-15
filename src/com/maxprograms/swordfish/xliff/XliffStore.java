@@ -1628,6 +1628,25 @@ public class XliffStore {
                 tagsMap.put(hex, sb.toString());
             }
             text.append(tagsMap.get(hex));
+        } else if ("ph".equals(type)) {
+            String id = e.getAttributeValue("id");
+            if (!tagsMap.containsKey("ph" + id)) {
+                XliffUtils.checkSVG(tag);
+                StringBuilder sb = new StringBuilder();
+                sb.append("<img data-ref='");
+                sb.append(id);
+                sb.append("' data-id='");
+                sb.append(tag);
+                sb.append("' src='");
+                sb.append(TmsServer.getWorkFolder().toURI().toURL().toString());
+                sb.append("images/");
+                sb.append(tag++);
+                sb.append(".svg' align='bottom' alt='' title=\"");
+                sb.append(XliffUtils.unquote(XliffUtils.cleanAngles(e.toString())));
+                sb.append("\"/>");
+                tagsMap.put("ph" + id, sb.toString());
+            }
+            text.append(tagsMap.get("ph" + id));
         } else {
             String dataRef = e.getAttributeValue("dataRef");
             if (!tagsMap.containsKey(dataRef)) {
