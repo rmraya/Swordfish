@@ -137,6 +137,8 @@ public class ServicesHandler implements HttpHandler {
                 result = saveElement(request);
             } else if ("/services/removeElements".equals(url)) {
                 result = removeElements(request);
+            } else if ("/services/systemInfo".equals(url)) {
+                result = getSystemInformation();
             } else {
                 result = new JSONObject();
                 result.put("url", url);
@@ -571,6 +573,14 @@ public class ServicesHandler implements HttpHandler {
         }
         subjects = new JSONObject(buffer.toString());
         return subjects;
+    }
+
+    private static JSONObject getSystemInformation() {
+        JSONObject result = new JSONObject();
+        result.put("swordfish", Constants.VERSION + " Build: " + Constants.BUILD);
+        result.put("openxliff", com.maxprograms.converters.Constants.VERSION + " Build: " + com.maxprograms.converters.Constants.BUILD);
+        result.put("java", System.getProperty("java.version") + " Vendor: " + System.getProperty("java.vendor"));
+        return result;
     }
 
     private static JSONObject getProjects() throws IOException {

@@ -10,7 +10,7 @@
  *     Maxprograms - initial API and implementation
  *******************************************************************************/
 
-class About {
+class SystemInformation {
 
     electron = require('electron');
 
@@ -20,26 +20,24 @@ class About {
         this.electron.ipcRenderer.on('set-theme', (event: Electron.IpcRendererEvent, arg: any) => {
             (document.getElementById('theme') as HTMLLinkElement).href = arg;
         });
-        this.electron.ipcRenderer.on('set-version', (event: Electron.IpcRendererEvent, arg: any) => {
-            document.getElementById('version').innerHTML = arg;
-        });
-        document.getElementById('system').addEventListener('click', () => {
-            this.electron.ipcRenderer.send('system-info-clicked');
-            document.getElementById('system').blur();
-        });
-        document.getElementById('licensesButton').addEventListener('click', () => {
-            this.electron.ipcRenderer.send('licenses-clicked');
-            document.getElementById('licensesButton').blur();
+        this.electron.ipcRenderer.send('get-system-info');
+        this.electron.ipcRenderer.on('set-system-info', (event: Electron.IpcRendererEvent, arg: any) => {
+            this.setInfo(arg);
         });
         document.addEventListener('keydown', (event: KeyboardEvent) => {
             if (event.code === 'Escape') {
-                this.electron.ipcRenderer.send('close-about');
+                this.electron.ipcRenderer.send('close-systemInfo');
             }
         });
-        this.electron.ipcRenderer.send('about-height', { width: document.body.clientWidth, height: (document.body.clientHeight + 20) });
-        document.getElementById('system').blur();
+        this.electron.ipcRenderer.send('systemInfo-height', { width: document.body.clientWidth, height: (document.body.clientHeight + 20) });
     }
 
+    setInfo(info: any) {
+        document.getElementById('swordfish').innerText = info.swordfish;
+        document.getElementById('openxliff').innerText = info.openxliff;
+        document.getElementById('java').innerText = info.java;
+        document.getElementById('electron').innerText = info.electron;
+    }
 }
 
-new About();
+new SystemInformation();

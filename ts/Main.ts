@@ -399,7 +399,7 @@ class Main {
 
     setStatus(arg: any): void {
         let status: HTMLDivElement = document.getElementById('status') as HTMLDivElement;
-        status.innerHTML = arg;
+        status.innerText= arg;
         if (arg.length > 0) {
             status.style.display = 'block';
         } else {

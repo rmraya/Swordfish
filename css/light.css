@@ -1,5 +1,6 @@
 @import "./theme.css";
 @import "./neutrals.css";
+
 :root {
 	--error-color: #960303;
 	--even-unit: #02275f;
@@ -66,10 +67,11 @@ a:hover {
 	left: calc(40% - 100px);
 	width: 200px;
 	margin: auto;
-	background-color: var(--ClassicBlue100);
+	background-color: var(--ClassicBlue80);
 	color: var(--white);
 	padding: 20px;
-	border: 1px solid var(--white);
+	border-radius: 8px;
+	box-shadow: 0px 4px 8px var(--gray130);
 }
 
 /* tables */
@@ -319,7 +321,7 @@ button {
 	color: var(--white);
 	background: var(--ClassicBlue80);
 	border: 1px solid var(--ClassicBlue80);
-	border-radius: 2px;
+	border-radius: 4px;
 	font-size: 1em;
 	text-align: center;
 	margin: 4px;

@@ -12,7 +12,7 @@
 
 import { execFileSync, spawn, ChildProcessWithoutNullStreams } from "child_process";
 import { app, clipboard, BrowserWindow, dialog, ipcMain, Menu, MenuItem, shell, nativeTheme, Rectangle, IpcMainEvent, screen, Size, net, ClientRequest, session } from "electron";
-import { existsSync, mkdirSync, readFile, readFileSync, writeFileSync, lstatSync } from "fs";
+import { existsSync, mkdirSync, readFile, readFileSync, writeFileSync, lstatSync, appendFileSync, unlinkSync } from "fs";
 import { Locations, Point } from "./locations";
 import { IncomingMessage } from "electron/main";
 
@@ -55,6 +55,7 @@ class Swordfish {
     static configElementWindow: BrowserWindow;
     static tagsAnalysisWindow: BrowserWindow;
     static spaceAnalysisWindow: BrowserWindow;
+    static systemInfoWindow: BrowserWindow;
 
     javapath: string = Swordfish.path.join(app.getAppPath(), 'bin', 'java');
 
@@ -374,6 +375,18 @@ class Swordfish {
         });
         ipcMain.on('close-about', () => {
             Swordfish.destroyWindow(Swordfish.aboutWindow);
+        });
+        ipcMain.on('system-info-clicked', () => {
+            Swordfish.showSystemInfo();
+        });
+        ipcMain.on('close-systemInfo', () => {
+            Swordfish.destroyWindow(Swordfish.systemInfoWindow);
+        });
+        ipcMain.on('systemInfo-height', (event: IpcMainEvent, arg: any) => {
+            Swordfish.setHeight(Swordfish.systemInfoWindow, arg);
+        });
+        ipcMain.on('get-system-info', (event: IpcMainEvent) => {
+            Swordfish.getSystemInformation(event);
         });
         ipcMain.on('licenses-clicked', () => {
             Swordfish.showLicenses({ from: 'about' });
@@ -2118,6 +2131,48 @@ class Swordfish {
         Swordfish.setLocation(this.settingsWindow, 'preferences.html');
     }
 
+    static showSystemInfo() {
+        this.systemInfoWindow = new BrowserWindow({
+            parent: Swordfish.aboutWindow,
+            width: 430,
+            minimizable: false,
+            maximizable: false,
+            resizable: false,
+            show: false,
+            icon: this.iconPath,
+            webPreferences: {
+                nodeIntegration: true,
+                contextIsolation: false,
+                nativeWindowOpen: true
+            }
+        });
+        this.systemInfoWindow.setMenu(null);
+        this.systemInfoWindow.loadURL('file://' + this.path.join(app.getAppPath(), 'html', 'systemInfo.html'));
+        this.systemInfoWindow.once('ready-to-show', () => {
+            this.systemInfoWindow.show();
+        });
+        this.systemInfoWindow.on('close', () => {
+            Swordfish.aboutWindow.focus();
+        });
+        Swordfish.setLocation(this.systemInfoWindow, 'systemInfo.html');
+    }
+
+    static getSystemInformation(event: IpcMainEvent) {
+        this.sendRequest('/services/systemInfo', {},
+            (data: any) => {
+                if (data.status === Swordfish.SUCCESS) {
+                    data.electron = process.versions.electron;
+                    event.sender.send('set-system-info', data);
+                } else {
+                    Swordfish.showMessage({ type: 'error', message: data.reason });
+                }
+            },
+            (reason: string) => {
+                Swordfish.showMessage({ type: 'error', message: reason });
+            }
+        );
+    }
+
     static showLicenses(arg: any): void {
         let parent: BrowserWindow = Swordfish.mainWindow;
         if (arg.from === 'about' && Swordfish.aboutWindow) {
@@ -2178,6 +2233,14 @@ class Swordfish {
             });
             request.on('response', (response: IncomingMessage) => {
                 let responseData: string = '';
+                if (response.statusCode !== 200) {
+                    if (!silent) {
+                        Swordfish.showMessage({
+                            type: 'info',
+                            message: 'Server status: ' + response.statusCode
+                        });
+                    }
+                }
                 response.on('data', (chunk: Buffer) => {
                     responseData += chunk;
                 });
@@ -2236,6 +2299,14 @@ class Swordfish {
                         }
                     }
                 });
+            });
+            request.on('error', (error: Error) => {
+                if (!silent) {
+                    Swordfish.showMessage({
+                        type: 'error',
+                        message: error.message
+                    });
+                }
             });
             request.end();
         });
@@ -4787,12 +4858,58 @@ class Swordfish {
     }
 
     static downloadLatest(): void {
-        shell.openExternal(Swordfish.downloadLink).catch((reason: any) => {
-            if (reason instanceof Error) {
-                console.log(reason.message);
-            }
-            this.showMessage({ type: 'error', message: 'Unable to download latest version.' });
+        let downloadsFolder = app.getPath('downloads');
+        let url: URL = new URL(Swordfish.downloadLink);
+        let path: string = url.pathname;
+        path = path.substring(path.lastIndexOf('/') + 1);
+        let file: string = downloadsFolder + (process.platform === 'win32' ? '\\' : '/') + path;
+        if (existsSync(file)) {
+            unlinkSync(file);
+        }
+        let request: Electron.ClientRequest = net.request({
+            url: Swordfish.downloadLink,
+            session: session.defaultSession
         });
+        Swordfish.mainWindow.webContents.send('set-status', 'Downloading...');
+        Swordfish.updatesWindow.destroy();
+        request.on('response', (response: IncomingMessage) => {
+            let fileSize = Number.parseInt(response.headers['content-length'] as string);
+            let received: number = 0;
+            response.on('data', (chunk: Buffer) => {
+                received += chunk.length;
+                if (process.platform === 'win32' || process.platform === 'darwin') {
+                    Swordfish.mainWindow.setProgressBar(received / fileSize);
+                }
+                Swordfish.mainWindow.webContents.send('set-status', 'Downloaded: ' + Math.trunc(received * 100 / fileSize) + '%');
+                appendFileSync(file, chunk);
+            });
+            response.on('end', () => {
+                Swordfish.mainWindow.webContents.send('set-status', '');
+                dialog.showMessageBox({
+                    type: 'info',
+                    message: 'Update downloaded'
+                });
+                if (process.platform === 'win32' || process.platform === 'darwin') {
+                    Swordfish.mainWindow.setProgressBar(0);
+                    shell.openPath(file).then(() => {
+                        app.quit();
+                    }).catch((reason: string) => {
+                        dialog.showErrorBox('Error', reason);
+                    });
+                }
+                if (process.platform === 'linux') {
+                    shell.showItemInFolder(file);
+                }
+            });
+            response.on('error', (reason: string) => {
+                Swordfish.mainWindow.webContents.send('set-status', '');
+                dialog.showErrorBox('Error', reason);
+                if (process.platform === 'win32' || process.platform === 'darwin') {
+                    Swordfish.mainWindow.setProgressBar(0);
+                }
+            });
+        });
+        request.end();
     }
 
     static showGettingStarted(): void {
