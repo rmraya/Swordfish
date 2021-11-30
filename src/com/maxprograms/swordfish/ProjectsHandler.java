@@ -1403,7 +1403,7 @@ public class ProjectsHandler implements HttpHandler {
 			}
 			String export = projectStores.get(project).exportHTML(prj.getDescription());
 			result.put("export", export);
-		} catch (SQLException | IOException | SAXException | ParserConfigurationException e) {
+		} catch (SQLException | IOException | SAXException | ParserConfigurationException | DataFormatException e) {
 			logger.log(Level.ERROR, e);
 			result.put(Constants.REASON, e.getMessage());
 		}

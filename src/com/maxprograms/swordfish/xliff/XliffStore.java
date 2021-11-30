@@ -30,10 +30,13 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.TreeSet;
 import java.util.Vector;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -46,6 +49,7 @@ import com.maxprograms.converters.Merge;
 import com.maxprograms.languages.Language;
 import com.maxprograms.languages.LanguageUtils;
 import com.maxprograms.stats.RepetitionAnalysis;
+import com.maxprograms.stats.SvgStats;
 import com.maxprograms.swordfish.Constants;
 import com.maxprograms.swordfish.GlossariesHandler;
 import com.maxprograms.swordfish.MemoriesHandler;
@@ -71,6 +75,7 @@ import com.maxprograms.xml.XMLUtils;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
+import org.jsoup.Jsoup;
 import org.xml.sax.SAXException;
 
 public class XliffStore {
@@ -126,7 +131,7 @@ public class XliffStore {
     private String currentFile;
     private String currentUnit;
     private String state;
-    private boolean translate;
+    // private boolean translate;
     private int tagCount;
 
     private String srcLang;
@@ -314,7 +319,6 @@ public class XliffStore {
             tagCount = 0;
             nextId = 0;
             currentUnit = e.getAttributeValue("id");
-            translate = e.getAttributeValue("translate", "yes").equals("yes");
             preserve = "preserve".equals(e.getAttributeValue("xml:space", "default"));
             JSONObject data = new JSONObject();
 
@@ -413,6 +417,11 @@ public class XliffStore {
 
             state = e.getAttributeValue("state",
                     XliffUtils.pureText(target).isEmpty() ? Constants.INITIAL : Constants.TRANSLATED);
+            String subState = e.getAttributeValue("subState");
+            boolean translate = true;
+            if ("openxliff:locked".equals(subState)) {
+                translate = false;
+            }
             preserve = preserve || sourcePreserve
                     || "preserve".equals(target.getAttributeValue("xml:space", "default"));
 
@@ -1534,7 +1543,6 @@ public class XliffStore {
             }
             if (!tagsMap.containsKey("/pc" + id)) {
                 XliffUtils.checkSVG(tag);
-                String tail = "</pc>";
                 StringBuilder sb = new StringBuilder();
                 sb.append("<img data-ref='/");
                 sb.append(e.getAttributeValue("id"));
@@ -1545,7 +1553,7 @@ public class XliffStore {
                 sb.append("images/");
                 sb.append(tag++);
                 sb.append(".svg' align='bottom' alt='' title=\"");
-                sb.append(XliffUtils.unquote(XliffUtils.cleanAngles(tail)));
+                sb.append(XliffUtils.unquote(XliffUtils.cleanAngles("</pc>")));
                 sb.append("\"/>");
                 tagsMap.put("/pc" + id, sb.toString());
             }
@@ -1592,7 +1600,6 @@ public class XliffStore {
             if (!isTerm) {
                 if (!tagsMap.containsKey("/mrk" + id)) {
                     XliffUtils.checkSVG(tag);
-                    String tail = "</mrk>";
                     StringBuilder sb = new StringBuilder();
                     sb.append("<img data-ref='/");
                     sb.append(e.getAttributeValue("id"));
@@ -1603,7 +1610,7 @@ public class XliffStore {
                     sb.append("images/");
                     sb.append(tag++);
                     sb.append(".svg' align='bottom' alt='' title=\"");
-                    sb.append(XliffUtils.unquote(XliffUtils.cleanAngles(tail)));
+                    sb.append(XliffUtils.unquote(XliffUtils.cleanAngles("</mrk>")));
                     sb.append("\"/>");
                     tagsMap.put("/mrk" + id, sb.toString());
                 }
@@ -1632,6 +1639,7 @@ public class XliffStore {
             String id = e.getAttributeValue("id");
             if (!tagsMap.containsKey("ph" + id)) {
                 XliffUtils.checkSVG(tag);
+                String title = originalData.has(id) ? originalData.getString(id) : e.toString();
                 StringBuilder sb = new StringBuilder();
                 sb.append("<img data-ref='");
                 sb.append(id);
@@ -1642,7 +1650,7 @@ public class XliffStore {
                 sb.append("images/");
                 sb.append(tag++);
                 sb.append(".svg' align='bottom' alt='' title=\"");
-                sb.append(XliffUtils.unquote(XliffUtils.cleanAngles(e.toString())));
+                sb.append(XliffUtils.unquote(XliffUtils.cleanAngles(title)));
                 sb.append("\"/>");
                 tagsMap.put("ph" + id, sb.toString());
             }
@@ -1958,7 +1966,6 @@ public class XliffStore {
         if ("unit".equals(e.getName())) {
             tagCount = 0;
             currentUnit = e.getAttributeValue("id");
-            translate = e.getAttributeValue("translate", "yes").equals("yes");
             Element glossary = getUnitTerms(currentFile, currentUnit);
             if (glossary != null) {
                 insertGlossary(e, glossary);
@@ -1987,6 +1994,7 @@ public class XliffStore {
             Element updated = getTarget(currentFile, currentUnit, id);
             target.setContent(updated.getContent());
             String st = getState(currentFile, currentUnit, id);
+            boolean translate = isTranslatable(currentFile, currentUnit, id);
             if (Constants.INITIAL.equals(st) && !target.getContent().isEmpty()) {
                 st = Constants.TRANSLATED;
                 logger.log(Level.WARNING, "Changing segment state from 'initial' to 'translated'");
@@ -2008,7 +2016,11 @@ public class XliffStore {
                 }
             }
             e.setAttribute("state", st);
-
+            if (translate) {
+                e.removeAttribute("subState");
+            } else {
+                e.setAttribute("subState", "openxliff:locked");
+            }
             if (Constants.INITIAL.equals(st) && target.getContent().isEmpty()) {
                 e.removeChild(target);
             }
@@ -2604,9 +2616,585 @@ public class XliffStore {
             throws SQLException, SAXException, IOException, ParserConfigurationException, URISyntaxException {
         getCatalog();
         updateXliff();
-        RepetitionAnalysis instance = new RepetitionAnalysis();
-        instance.analyse(xliffFile, catalog);
-        return new File(xliffFile).getAbsolutePath() + ".log.html";
+        File file = new File(xliffFile);
+
+        Map<String, JSONObject> map = new HashMap<>();
+        Map<String, Set<String>> filesMap = new HashMap<>();
+
+        String sql = "SELECT file, SUM(words), COUNT(*) FROM segments WHERE type='S' GROUP BY file";
+        try (ResultSet rs = stmt.executeQuery(sql)) {
+            while (rs.next()) {
+                String fileId = rs.getString(1);
+                JSONObject json = new JSONObject();
+                int words = rs.getInt(2);
+                int segments = rs.getInt(3);
+                json.put("file", fileId);
+                json.put("words", words);
+                json.put("segments", segments);
+                map.put(fileId, json);
+            }
+        }
+
+        sql = "SELECT id, name FROM files";
+        try (ResultSet rs = stmt.executeQuery(sql)) {
+            while (rs.next()) {
+                String id = rs.getString(1);
+                String name = rs.getNString(2);
+                map.get(id).put("name", name);
+                if (filesMap.containsKey(name)) {
+                    Set<String> ids = filesMap.get(name);
+                    ids.add(id);
+                    filesMap.put(name, ids);
+                } else {
+                    Set<String> ids = new TreeSet<>();
+                    ids.add(id);
+                    filesMap.put(name, ids);
+                }
+            }
+        }
+
+        sql = "SELECT file, SUM(words), COUNT(*) FROM segments WHERE type = 'S' AND targettext = '' GROUP BY file";
+        try (ResultSet rs = stmt.executeQuery(sql)) {
+            while (rs.next()) {
+                String fileId = rs.getString(1);
+                int untranslated = rs.getInt(2);
+                int untranslatedSegments = rs.getInt(3);
+                map.get(fileId).put("untranslated", untranslated);
+                map.get(fileId).put("untranslatedSegments", untranslatedSegments);
+            }
+        }
+
+        sql = "SELECT file, SUM(words), COUNT(*) FROM segments WHERE type = 'S' AND targettext <> '' GROUP BY file";
+        try (ResultSet rs = stmt.executeQuery(sql)) {
+            while (rs.next()) {
+                String fileId = rs.getString(1);
+                int translated = rs.getInt(2);
+                int translatedSegments = rs.getInt(3);
+                map.get(fileId).put("translated", translated);
+                map.get(fileId).put("translatedSegments", translatedSegments);
+            }
+        }
+
+        sql = "SELECT file, SUM(words), COUNT(*) FROM segments WHERE type = 'S' AND state = 'final' GROUP BY file";
+        try (ResultSet rs = stmt.executeQuery(sql)) {
+            while (rs.next()) {
+                String fileId = rs.getString(1);
+                int confirmed = rs.getInt(2);
+                int confirmedSegments = rs.getInt(3);
+                map.get(fileId).put("confirmed", confirmed);
+                map.get(fileId).put("confirmedSegments", confirmedSegments);
+            }
+        }
+
+        Map<String, JSONObject> statusMap = new HashMap<>();
+        Set<String> currentFileSegments = null;
+        Set<String> otherFileSegments = new TreeSet<>();
+
+        sql = "SELECT MAX(similarity) FROM matches WHERE file = ? AND unitid = ? AND segid = ?";
+        try (PreparedStatement st = conn.prepareStatement(sql)) {
+            String currentFile = "";
+            JSONObject json = null;
+            sql = "SELECT file, unitid, segid, source, words,tags FROM segments WHERE type = 'S' ORDER BY file, unitid, segid";
+            try (ResultSet rs = stmt.executeQuery(sql)) {
+                while (rs.next()) {
+                    String fileId = rs.getString(1);
+                    String unitId = rs.getString(2);
+                    String segId = rs.getString(3);
+                    String source = rs.getNString(4);
+                    int words = rs.getInt(5);
+                    int tags = rs.getInt(6);
+                    if (!currentFile.equals(fileId)) {
+                        json = new JSONObject();
+                        json.put("newSegments", 0);
+                        json.put("100Segments", 0);
+                        json.put("95Segments", 0);
+                        json.put("85Segments", 0);
+                        json.put("75Segments", 0);
+                        json.put("50Segments", 0);
+                        json.put("intRepSegment", 0);
+                        json.put("extRepSegment", 0);
+                        json.put("newWords", 0);
+                        json.put("100Words", 0);
+                        json.put("95Words", 0);
+                        json.put("85Words", 0);
+                        json.put("75Words", 0);
+                        json.put("50Words", 0);
+                        json.put("tags", 0);
+                        json.put("intRep", 0);
+                        json.put("extRep", 0);
+                        statusMap.put(fileId, json);
+                        currentFile = fileId;
+                        if (currentFileSegments != null) {
+                            otherFileSegments.addAll(currentFileSegments);
+                        }
+                        currentFileSegments = new TreeSet<>();
+                    }
+                    json.put("tags", json.getInt("tags") + tags);
+                    st.setString(1, fileId);
+                    st.setString(2, unitId);
+                    st.setString(3, segId);
+                    int max = 0;
+                    try (ResultSet rs2 = st.executeQuery()) {
+                        while (rs2.next()) {
+                            max = rs2.getInt(1);
+                        }
+                    }
+                    if (max < 50) {
+                        if (currentFileSegments.contains(source)) {
+                            json.put("intRepSegment", json.getInt("intRepSegment") + 1);
+                            json.put("intRep", json.getInt("intRep") + words);
+                        } else if (otherFileSegments.contains(source)) {
+                            json.put("extRepSegment", json.getInt("extRepSegment") + 1);
+                            json.put("extRep", json.getInt("extRep") + words);
+                        } else {
+                            json.put("newSegments", json.getInt("newSegments") + 1);
+                            json.put("newWords", json.getInt("newWords") + words);
+                        }
+                    }
+                    currentFileSegments.add(source);
+                    if (max == 100) {
+                        json.put("100Segments", json.getInt("100Segments") + 1);
+                        json.put("100Words", json.getInt("100Words") + words);
+                    }
+                    if (max >= 95 && max <= 99) {
+                        json.put("95Segments", json.getInt("95Segments") + 1);
+                        json.put("95Words", json.getInt("95Words") + words);
+                    }
+                    if (max >= 85 && max <= 94) {
+                        json.put("85Segments", json.getInt("85Segments") + 1);
+                        json.put("85Words", json.getInt("85Words") + words);
+                    }
+                    if (max >= 75 && max <= 84) {
+                        json.put("75Segments", json.getInt("75Segments") + 1);
+                        json.put("75Words", json.getInt("75Words") + words);
+                    }
+                    if (max >= 50 && max <= 74) {
+                        json.put("50Segments", json.getInt("50Segments") + 1);
+                        json.put("50Words", json.getInt("50Words") + words);
+                    }
+                }
+            }
+        }
+
+        sql = "SELECT file, SUM(words), COUNT(*) FROM segments WHERE type = 'S' AND translate = 'N' GROUP BY file";
+        try (ResultSet rs = stmt.executeQuery(sql)) {
+            while (rs.next()) {
+                String fileId = rs.getString(1);
+                int confirmed = rs.getInt(2);
+                int confirmedSegments = rs.getInt(3);
+                map.get(fileId).put("locked", confirmed);
+                map.get(fileId).put("lockedSegments", confirmedSegments);
+            }
+        }
+
+        Set<String> keys = map.keySet();
+        Iterator<String> it = keys.iterator();
+        while (it.hasNext()) {
+            String key = it.next();
+            JSONObject json = map.get(key);
+            if (!json.has("untranslated")) {
+                json.put("untranslated", 0);
+                map.put(key, json);
+            }
+            if (!json.has("translated")) {
+                json.put("translated", 0);
+                map.put(key, json);
+            }
+            if (!json.has("confirmed")) {
+                json.put("confirmed", 0);
+                map.put(key, json);
+            }
+            if (!json.has("translatedSegments")) {
+                json.put("translatedSegments", 0);
+                map.put(key, json);
+            }
+            if (!json.has("untranslatedSegments")) {
+                json.put("untranslatedSegments", 0);
+                map.put(key, json);
+            }
+            if (!json.has("confirmedSegments")) {
+                json.put("confirmedSegments", 0);
+                map.put(key, json);
+            }
+            if (!json.has("locked")) {
+                json.put("locked", 0);
+                map.put(key, json);
+            }
+            if (!json.has("lockedSegments")) {
+                json.put("lockedSegments", 0);
+                map.put(key, json);
+            }
+        }
+
+        File log = new File(file.getAbsolutePath() + ".log.html");
+        try (FileOutputStream out = new FileOutputStream(log)) {
+
+            writeString(out, "<!DOCTYPE html>\n");
+            writeString(out, "<html>\n");
+            writeString(out, "<head>\n");
+            writeString(out, "  <meta http-equiv=\"Content-Type\" content=\"text/html; charset=utf-8\" />\n");
+            writeString(out, "  <title>Project Statistics</title>\n");
+            writeString(out, "  <style type=\"text/css\">\n");
+            writeString(out, "   * {\n");
+            writeString(out, "       font-family: Arial,Helvetica,sans-serif;\n");
+            writeString(out, "   }\n");
+            writeString(out, "   body {\n");
+            writeString(out, "       padding: 20px;\n");
+            writeString(out, "   }\n");
+            writeString(out, "   table {\n");
+            writeString(out, "       width:100%;\n");
+            writeString(out, "       border: 1px solid #aaaaaa;\n");
+            writeString(out, "       border-collapse: collapse;\n");
+            writeString(out, "       border-radius: 4px;\n");
+            writeString(out, "   }\n");
+            writeString(out, "   td {\n");
+            writeString(out, "       border: 1px solid #aaaaaa;\n");
+            writeString(out, "       text-align:right;\n");
+            writeString(out, "       padding:4px\n");
+            writeString(out, "   }\n");
+            writeString(out, "   th {\n");
+            writeString(out, "       font-weight: lighter;\n");
+            writeString(out, "       background:#2066A3;\n");
+            writeString(out, "       border: 1px solid #eeeeee;\n");
+            writeString(out, "       color:white;\n");
+            writeString(out, "       text-align:center;\n");
+            writeString(out, "       padding:4px\n");
+            writeString(out, "   }\n");
+            writeString(out, "   .left {\n");
+            writeString(out, "       text-align:left;\n");
+            writeString(out, "   }\n");
+            writeString(out, "   .total {\n");
+            writeString(out, "       font-weight: bolder;\n");
+            writeString(out, "       background: #efefef;\n");
+            writeString(out, "   }\n");
+            writeString(out, "   .center {\n");
+            writeString(out, "       text-align:center;\n");
+            writeString(out, "   }\n");
+            writeString(out, "   .right {\n");
+            writeString(out, "       text-align:right;\n");
+            writeString(out, "   }\n");
+            writeString(out, "  </style>\n");
+            writeString(out, "</head>\n");
+            writeString(out, "<body>\n");
+
+            writeString(out, "<h2>" + XMLUtils.cleanText(file.getName()) + "</h2>\n");
+
+            Set<String> files = new TreeSet<>();
+            files.addAll(filesMap.keySet());
+            it = files.iterator();
+            int count = 1;
+
+            int projectNew = 0;
+            int project100 = 0;
+            int project95 = 0;
+            int project85 = 0;
+            int project75 = 0;
+            int project50 = 0;
+            int projectIntRep = 0;
+            int projectExtRep = 0;
+
+            writeString(out, "<hr>\n");
+            writeString(out, "<h2>TM &amp; Repetition Analysis</h2>\n");
+            writeString(out, "<h3>Segments</h3>\n");
+
+            writeString(out, "<table>\n");
+            writeString(out,
+                    "<tr><th>#</th><th>Document</th><th>New</th><th>100%</th><th>95%&nbsp;-&nbsp;99%</th><th>85%&nbsp;-&nbsp;95%</th><th>75%&nbsp;-&nbsp;84%</th><th>50%&nbsp;-&nbsp;84%</th><th>Int.&nbsp;Rep.</th><th>Ext.&nbsp;Rep.</th><th>Total</th></tr>\n");
+            while (it.hasNext()) {
+                String fileName = it.next();
+                Set<String> set = filesMap.get(fileName);
+                Iterator<String> st = set.iterator();
+
+                int newSegments = 0;
+                int intRep = 0;
+                int extRep = 0;
+                int segments100 = 0;
+                int segments95 = 0;
+                int segments85 = 0;
+                int segments75 = 0;
+                int segments50 = 0;
+
+                while (st.hasNext()) {
+                    String key = st.next();
+                    JSONObject json = statusMap.get(key);
+                    newSegments += json.getInt("newSegments");
+                    intRep += json.getInt("intRepSegment");
+                    extRep += json.getInt("extRepSegment");
+                    segments100 += json.getInt("100Segments");
+                    segments95 += json.getInt("95Segments");
+                    segments85 += json.getInt("85Segments");
+                    segments75 += json.getInt("75Segments");
+                    segments50 += json.getInt("50Segments");
+                }
+                writeString(out, "<tr>");
+                writeString(out, "<td class='center'>" + count++ + "</td>");
+                writeString(out, "<td class='left'>" + XMLUtils.cleanText(fileName) + "</td>");
+                writeString(out, "<td>" + newSegments + "</td>");
+                writeString(out, "<td>" + segments100 + "</td>");
+                writeString(out, "<td>" + segments95 + "</td>");
+                writeString(out, "<td>" + segments85 + "</td>");
+                writeString(out, "<td>" + segments75 + "</td>");
+                writeString(out, "<td>" + segments50 + "</td>");
+                writeString(out, "<td>" + intRep + "</td>");
+                writeString(out, "<td>" + extRep + "</td>");
+                writeString(out, "<td class='total'>"
+                        + (newSegments + segments100 + segments95 + segments85 + segments75 + segments50 + intRep
+                                + extRep)
+                        + "</td>");
+                writeString(out, "</tr>\n");
+                projectNew += newSegments;
+                project100 += segments100;
+                project95 += segments95;
+                project85 += segments85;
+                project75 += segments75;
+                project50 += segments50;
+                projectIntRep += intRep;
+                projectExtRep += extRep;
+            }
+            writeString(out, "<tr>");
+            writeString(out, "<td class='total'>&nbsp;</td>");
+            writeString(out, "<td class='center total'>Total</td>");
+            writeString(out, "<td class='total'>" + projectNew + "</td>");
+            writeString(out, "<td class='total'>" + project100 + "</td>");
+            writeString(out, "<td class='total'>" + project95 + "</td>");
+            writeString(out, "<td class='total'>" + project85 + "</td>");
+            writeString(out, "<td class='total'>" + project75 + "</td>");
+            writeString(out, "<td class='total'>" + project50 + "</td>");
+            writeString(out, "<td class='total'>" + projectIntRep + "</td>");
+            writeString(out, "<td class='total'>" + projectExtRep + "</td>");
+            writeString(out, "<td class='total'>"
+                    + (projectNew + project100 + project95 + project85 + project75 + project50 + projectIntRep
+                            + projectExtRep)
+                    + "</td>");
+            writeString(out, "</tr>\n");
+            writeString(out, "</table>\n");
+
+            it = files.iterator();
+            count = 1;
+
+            projectNew = 0;
+            project100 = 0;
+            project95 = 0;
+            project85 = 0;
+            project75 = 0;
+            project50 = 0;
+            projectIntRep = 0;
+            projectExtRep = 0;
+            int projectTags = 0;
+            writeString(out, "<h3>Words</h3>\n");
+
+            writeString(out, "<table>\n");
+            writeString(out,
+                    "<tr><th>#</th><th>Document</th><th>New</th><th>100%</th><th>95%&nbsp;-&nbsp;99%</th><th>85%&nbsp;-&nbsp;95%</th><th>75%&nbsp;-&nbsp;84%</th><th>50%&nbsp;-&nbsp;84%</th><th>Int.&nbsp;Rep.</th><th>Ext.&nbsp;Rep.</th><th>Tags</th><th>Total</th></tr>\n");
+            while (it.hasNext()) {
+                String fileName = it.next();
+                Set<String> set = filesMap.get(fileName);
+                Iterator<String> st = set.iterator();
+
+                int newSegments = 0;
+                int intRep = 0;
+                int extRep = 0;
+                int segments100 = 0;
+                int segments95 = 0;
+                int segments85 = 0;
+                int segments75 = 0;
+                int segments50 = 0;
+                int tags = 0;
+
+                while (st.hasNext()) {
+                    String key = st.next();
+                    JSONObject json = statusMap.get(key);
+                    newSegments += json.getInt("newWords");
+                    intRep += json.getInt("intRep");
+                    extRep += json.getInt("extRep");
+                    segments100 += json.getInt("100Words");
+                    segments95 += json.getInt("95Words");
+                    segments85 += json.getInt("85Words");
+                    segments75 += json.getInt("75Words");
+                    segments50 += json.getInt("50Words");
+                    tags += json.getInt("tags");
+                }
+                writeString(out, "<tr>");
+                writeString(out, "<td class='center'>" + count++ + "</td>");
+                writeString(out, "<td class='left'>" + XMLUtils.cleanText(fileName) + "</td>");
+                writeString(out, "<td>" + newSegments + "</td>");
+                writeString(out, "<td>" + segments100 + "</td>");
+                writeString(out, "<td>" + segments95 + "</td>");
+                writeString(out, "<td>" + segments85 + "</td>");
+                writeString(out, "<td>" + segments75 + "</td>");
+                writeString(out, "<td>" + segments50 + "</td>");
+                writeString(out, "<td>" + intRep + "</td>");
+                writeString(out, "<td>" + extRep + "</td>");
+                writeString(out, "<td>" + tags + "</td>");
+                writeString(out, "<td class='total'>"
+                        + (newSegments + segments100 + segments95 + segments85 + segments75 + segments50 + intRep
+                                + extRep)
+                        + "</td>");
+                writeString(out, "</tr>\n");
+                projectNew += newSegments;
+                project100 += segments100;
+                project95 += segments95;
+                project85 += segments85;
+                project75 += segments75;
+                project50 += segments50;
+                projectIntRep += intRep;
+                projectExtRep += extRep;
+                projectTags += tags;
+            }
+            writeString(out, "<tr>");
+            writeString(out, "<td class='total'>&nbsp;</td>");
+            writeString(out, "<td class='center total'>Total</td>");
+            writeString(out, "<td class='total'>" + projectNew + "</td>");
+            writeString(out, "<td class='total'>" + project100 + "</td>");
+            writeString(out, "<td class='total'>" + project95 + "</td>");
+            writeString(out, "<td class='total'>" + project85 + "</td>");
+            writeString(out, "<td class='total'>" + project75 + "</td>");
+            writeString(out, "<td class='total'>" + project50 + "</td>");
+            writeString(out, "<td class='total'>" + projectIntRep + "</td>");
+            writeString(out, "<td class='total'>" + projectExtRep + "</td>");
+            writeString(out, "<td class='total'>" + projectTags + "</td>");
+            writeString(out, "<td class='total'>"
+                    + (projectNew + project100 + project95 + project85 + project75 + project50 + projectIntRep
+                            + projectExtRep)
+                    + "</td>");
+            writeString(out, "</tr>\n");
+            writeString(out, "</table>\n");
+
+            writeString(out, "<p><b>Int. Rep.</b>: Internal Repetition - Segment repetitions within one document<br>");
+            writeString(out, "<b>Ext. Rep.</b>: External Repetition - Segment repetitions between all documents</p>");
+            
+            it = files.iterator();
+            count = 1;
+            int projectSegments = 0;
+            int projectTranslatedSegments = 0;
+            int projectUntranslatedSegments = 0;
+            int projectConfirmedSegments = 0;
+
+            writeString(out, "<hr>\n");
+            writeString(out, "<h2>Translation Status</h2>\n");
+            writeString(out, "<h3>Segments</h3>\n");
+
+            writeString(out, "<table>\n");
+            writeString(out,
+                    "<tr><th>#</th><th>Document</th><th>Not Translated</th><th>Translated</th><th>Not Confirmed</th><th>Confirmed</th><th>Total</th></tr>\n");
+            while (it.hasNext()) {
+                String fileName = it.next();
+                Set<String> set = filesMap.get(fileName);
+                Iterator<String> st = set.iterator();
+                int fileSegments = 0;
+                int fileTranslated = 0;
+                int fileUntranslated = 0;
+                int fileConfirmed = 0;
+                while (st.hasNext()) {
+                    String key = st.next();
+                    JSONObject json = map.get(key);
+                    fileSegments += json.getInt("segments");
+                    fileTranslated += json.getInt("translatedSegments");
+                    fileUntranslated += json.getInt("untranslatedSegments");
+                    fileConfirmed += json.getInt("confirmedSegments");
+                }
+                writeString(out, "<tr>");
+                writeString(out, "<td class='center'>" + count++ + "</td>");
+                writeString(out, "<td class='left'>" + XMLUtils.cleanText(fileName) + "</td>");
+                writeString(out, "<td>" + fileUntranslated + "</td>");
+                writeString(out, "<td>" + fileTranslated + "</td>");
+                writeString(out, "<td>" + (fileSegments - fileConfirmed) + "</td>");
+                writeString(out, "<td>" + fileConfirmed + "</td>");
+                writeString(out, "<td class='total'>" + fileSegments + "</td>");
+                writeString(out, "</tr>\n");
+                projectSegments += fileSegments;
+                projectTranslatedSegments += fileTranslated;
+                projectUntranslatedSegments += fileUntranslated;
+                projectConfirmedSegments += fileConfirmed;
+
+            }
+            writeString(out, "<tr>");
+            writeString(out, "<td class='total'>&nbsp;</td>");
+            writeString(out, "<td class='center total'>Total</td>");
+            writeString(out, "<td class='total'>" + projectUntranslatedSegments + "</td>");
+            writeString(out, "<td class='total'>" + projectTranslatedSegments + "</td>");
+            writeString(out, "<td class='total'>" + (projectSegments - projectConfirmedSegments) + "</td>");
+            writeString(out, "<td class='total'>" + projectConfirmedSegments + "</td>");
+            writeString(out, "<td class='total'>" + projectSegments + "</td>");
+            writeString(out, "</tr>\n");
+            writeString(out, "</table>\n");
+
+            writeString(out, "<h3>Words</h3>\n");
+
+            count = 1;
+            int projectWords = 0;
+            int projectTranslated = 0;
+            int projectUntranslated = 0;
+            int projectConfirmed = 0;
+
+            writeString(out, "<table>\n");
+            writeString(out,
+                    "<tr><th>#</th><th>Document</th><th>Not Translated</th><th>Translated</th><th>Not Confirmed</th><th>Confirmed</th><th>Total</th></tr>\n");
+            it = files.iterator();
+            while (it.hasNext()) {
+                String fileName = it.next();
+                Set<String> set = filesMap.get(fileName);
+                Iterator<String> st = set.iterator();
+                int fileWords = 0;
+                int fileUntranslated = 0;
+                int fileTranslated = 0;
+                int fileConfirmed = 0;
+                while (st.hasNext()) {
+                    String key = st.next();
+                    JSONObject json = map.get(key);
+                    fileWords += json.getInt("words");
+                    fileTranslated += json.getInt("translated");
+                    fileUntranslated += json.getInt("untranslated");
+                    fileConfirmed += json.getInt("confirmed");
+                }
+                writeString(out, "<tr>");
+                writeString(out, "<td class='center'>" + count++ + "</td>");
+                writeString(out, "<td class='left'>" + XMLUtils.cleanText(fileName) + "</td>");
+                writeString(out, "<td>" + fileUntranslated + "</td>");
+                writeString(out, "<td>" + fileTranslated + "</td>");
+                writeString(out, "<td>" + (fileWords - fileConfirmed) + "</td>");
+                writeString(out, "<td>" + fileConfirmed + "</td>");
+                writeString(out, "<td class='total'>" + fileWords + "</td>");
+                writeString(out, "</tr>\n");
+                projectWords += fileWords;
+                projectTranslated += fileTranslated;
+                projectUntranslated += fileUntranslated;
+                projectConfirmed += fileConfirmed;
+            }
+            writeString(out, "<tr>");
+            writeString(out, "<td class='total'>&nbsp;</td>");
+            writeString(out, "<td class='center total'>Total</td>");
+            writeString(out, "<td class='total'>" + projectUntranslated + "</td>");
+            writeString(out, "<td class='total'>" + projectTranslated + "</td>");
+            writeString(out, "<td class='total'>" + (projectWords - projectConfirmed) + "</td>");
+            writeString(out, "<td class='total'>" + projectConfirmed + "</td>");
+            writeString(out, "<td class='total'>" + projectWords + "</td>");
+            writeString(out, "</tr>\n");
+            writeString(out, "</table>\n");
+
+            SvgStats svgStats = new SvgStats();
+            svgStats.analyse(xliffFile, catalog);
+
+            Element matchesSvg = svgStats.generateMatchesSvg();
+            Element translatedSvg = svgStats.generateTranslatedSvg();
+            Element approvedSvg = svgStats.generateApprovedSvg();
+
+            writeString(out, "<h3>Translated Segments</h3>\n");
+            writeString(out, translatedSvg.toString());
+            writeString(out, "\n<br>\n");
+
+            writeString(out, "<h3>Approved Segments</h3>\n");
+            writeString(out, approvedSvg.toString());
+            writeString(out, "\n<br>\n");
+
+            writeString(out, "<h3>TM Matches Quality</h3>\n");
+            writeString(out, matchesSvg.toString());
+            writeString(out, "\n<br>\n");
+
+            writeString(out, "</body>\n");
+            writeString(out, "</html>\n");
+        }
+        return log.getAbsolutePath();
     }
 
     public void replaceText(JSONObject json)
@@ -3196,7 +3784,7 @@ public class XliffStore {
     }
 
     public String exportHTML(String title)
-            throws SQLException, IOException, SAXException, ParserConfigurationException {
+            throws SQLException, IOException, SAXException, ParserConfigurationException, DataFormatException {
         File output = new File(xliffFile + ".html");
         try (FileOutputStream out = new FileOutputStream(output)) {
             writeString(out, "<html>\n");
@@ -3237,6 +3825,7 @@ public class XliffStore {
             try (ResultSet rs = stmt.executeQuery(
                     "SELECT source, target, state, space, translate, file, child FROM segments WHERE type='S' ORDER BY file, child")) {
                 int count = 1;
+                JSONObject tagsData = new JSONObject();
                 while (rs.next()) {
                     String src = TMUtils.getString(rs.getNCharacterStream(1));
                     String tgt = TMUtils.getString(rs.getNCharacterStream(2));
@@ -3261,13 +3850,20 @@ public class XliffStore {
                     String space = segPreserve ? "preserve" : "";
                     tagsMap = new Hashtable<>();
                     tag = 1;
+
                     writeString(out, "<tr>\n");
                     writeString(out, "<td class=\"center " + border + "\"> " + count++ + "</td>\n");
-                    writeString(out, "<td class=\"text " + space + " " + border + "\"" + sourceDir + ">"
-                            + XliffUtils.highlightSpaces(toHtml(source)) + "</td>\n");
+                    writeString(out,
+                            "<td class=\"text " + space + " " + border + "\"" + sourceDir + ">"
+                                    + XliffUtils.highlightSpaces(
+                                            removeSvg(addHtmlTags(source, "", false, false, tagsData, segPreserve)))
+                                    + "</td>\n");
                     writeString(out, "<td class=\"center " + border + "\"> " + box + "</td>\n");
-                    writeString(out, "<td class=\"text " + space + "\"" + targetDir + ">"
-                            + XliffUtils.highlightSpaces(toHtml(target)) + "</td>\n");
+                    writeString(out,
+                            "<td class=\"text " + space + "\"" + targetDir + ">"
+                                    + XliffUtils.highlightSpaces(
+                                            removeSvg(addHtmlTags(target, "", false, false, tagsData, segPreserve)))
+                                    + "</td>\n");
                     writeString(out, "</tr>\n");
                 }
             }
@@ -3282,109 +3878,30 @@ public class XliffStore {
         out.write(string.getBytes(StandardCharsets.UTF_8));
     }
 
-    private String toHtml(Element seg) {
-        if (seg == null) {
-            return "";
+    private static String removeSvg(String segment) {
+        if (segment.isEmpty()) {
+            return segment;
         }
-        List<XMLNode> list = seg.getContent();
-        Iterator<XMLNode> it = list.iterator();
-        StringBuilder text = new StringBuilder();
-        while (it.hasNext()) {
-            XMLNode o = it.next();
-            if (o.getNodeType() == XMLNode.TEXT_NODE) {
-                text.append(XliffUtils.cleanString(((TextNode) o).getText()));
-            } else if (o.getNodeType() == XMLNode.ELEMENT_NODE) {
-                text.append(processInline((Element) o));
-            }
+        int index = segment.indexOf("<img ");
+        while (index != -1) {
+            int end = segment.indexOf(">", index) + 1;
+            String start = segment.substring(0, index);
+            String img = segment.substring(index, end);
+            String tag = "<span class=\"tag\">" + parseImg(img) + "</span>";
+            String rest = segment.substring(end);
+            segment = start + tag + rest;
+            index = segment.indexOf("<img ");
         }
-        return text.toString();
+        return segment;
     }
 
-    private String processInline(Element e) {
-        // empty: <cp>, <ph>, <sc>, <ec>, <sm> and <em>.
-        // paired: <pc>, <mrk>,
-        StringBuilder text = new StringBuilder();
-        String type = e.getName();
-        if (type.equals("pc")) {
-            String id = e.getAttributeValue("id");
-            if (!tagsMap.containsKey("pc" + id)) {
-                StringBuilder sb = new StringBuilder();
-                sb.append("<span class=\"tag\">");
-                sb.append(tag++);
-                sb.append("</span>");
-                tagsMap.put("pc" + id, sb.toString());
-            }
-            text.append(tagsMap.get("pc" + id));
-            List<XMLNode> content = e.getContent();
-            for (int i = 0; i < content.size(); i++) {
-                XMLNode node = content.get(i);
-                if (node.getNodeType() == XMLNode.TEXT_NODE) {
-                    text.append(XliffUtils.cleanString(((TextNode) node).getText()));
-                }
-                if (node.getNodeType() == XMLNode.ELEMENT_NODE) {
-                    text.append(processInline((Element) node));
-                }
-            }
-            if (!tagsMap.containsKey("/pc" + id)) {
-                StringBuilder sb = new StringBuilder();
-                sb.append("<span class=\"tag\">");
-                sb.append(tag++);
-                sb.append("</span>");
-                tagsMap.put("/pc" + id, sb.toString());
-            }
-            text.append("/" + tagsMap.get(e.getName() + id));
-        } else if (type.equals("mrk")) {
-            String id = e.getAttributeValue("id");
-            if (!tagsMap.containsKey("mrk" + id)) {
-                StringBuilder sb = new StringBuilder();
-                sb.append("<span class=\"tag\">");
-                sb.append(tag++);
-                sb.append("</span>");
-                tagsMap.put("mrk" + id, sb.toString());
-            }
-            text.append(tagsMap.get(e.getName() + id));
-            text.append("<span class=\"highlighted\">");
-            List<XMLNode> content = e.getContent();
-            for (int i = 0; i < content.size(); i++) {
-                XMLNode node = content.get(i);
-                if (node.getNodeType() == XMLNode.TEXT_NODE) {
-                    text.append(XliffUtils.cleanString(((TextNode) node).getText()));
-                }
-                if (node.getNodeType() == XMLNode.ELEMENT_NODE) {
-                    text.append(processInline((Element) node));
-                }
-            }
-            text.append("</span>");
-            if (!tagsMap.containsKey("/mrk" + id)) {
-                StringBuilder sb = new StringBuilder();
-                sb.append("<span class=\"tag\">");
-                sb.append(tag++);
-                sb.append("</span>");
-                tagsMap.put("/mrk" + id, sb.toString());
-            }
-            text.append(tagsMap.get("/mrk" + id));
-        } else if (type.equals("cp")) {
-            String hex = "cp" + e.getAttributeValue("hex");
-            if (!tagsMap.containsKey(hex)) {
-                StringBuilder sb = new StringBuilder();
-                sb.append("<span class=\"tag\">");
-                sb.append(tag++);
-                sb.append("</span>");
-                tagsMap.put(hex, sb.toString());
-            }
-            text.append(tagsMap.get(hex));
-        } else {
-            String dataRef = e.getAttributeValue("dataRef");
-            if (!tagsMap.containsKey(dataRef)) {
-                StringBuilder sb = new StringBuilder();
-                sb.append("<span class=\"tag\">");
-                sb.append(tag++);
-                sb.append("</span>");
-                tagsMap.put(dataRef, sb.toString());
-            }
-            text.append(tagsMap.get(dataRef));
-        }
-        return text.toString();
+    private static String parseImg(String img) {
+        org.jsoup.nodes.Document doc = Jsoup.parse(img, StandardCharsets.UTF_8.name());
+        org.jsoup.nodes.Element e = doc.body().getElementsByTag("img").first();
+        String src = e.attr("src");
+        File svg = new File(src);
+        String name = svg.getName();
+        return name.substring(0, name.indexOf('.'));
     }
 
     public void splitSegment(JSONObject json)
@@ -3788,6 +4305,19 @@ public class XliffStore {
             }
         }
         return result;
+    }
+
+    private boolean isTranslatable(String file, String unit, String segment) throws SQLException {
+        getSource.setString(1, file);
+        getSource.setString(2, unit);
+        getSource.setString(3, segment);
+        boolean translate = true;
+        try (ResultSet rs = getSource.executeQuery()) {
+            while (rs.next()) {
+                translate = rs.getString(4).equals("Y");
+            }
+        }
+        return translate;
     }
 
     private void indexSegments() throws SQLException {

@@ -10,11 +10,11 @@
  *     Maxprograms - initial API and implementation
  *******************************************************************************/
 
-import { execFileSync, spawn, ChildProcessWithoutNullStreams } from "child_process";
-import { app, clipboard, BrowserWindow, dialog, ipcMain, Menu, MenuItem, shell, nativeTheme, Rectangle, IpcMainEvent, screen, Size, net, ClientRequest, session } from "electron";
-import { existsSync, mkdirSync, readFile, readFileSync, writeFileSync, lstatSync, appendFileSync, unlinkSync } from "fs";
-import { Locations, Point } from "./locations";
+import { ChildProcessWithoutNullStreams, execFileSync, spawn } from "child_process";
+import { app, BrowserWindow, ClientRequest, clipboard, dialog, ipcMain, IpcMainEvent, Menu, MenuItem, nativeTheme, net, Rectangle, screen, session, shell, Size } from "electron";
 import { IncomingMessage } from "electron/main";
+import { appendFileSync, existsSync, lstatSync, mkdirSync, readFile, readFileSync, unlinkSync, writeFileSync } from "fs";
+import { Locations, Point } from "./locations";
 
 class Swordfish {
 
@@ -239,6 +239,12 @@ class Swordfish {
                 if (Swordfish.currentPreferences.showGuide) {
                     Swordfish.showGettingStarted();
                 }
+                if (process.platform === 'darwin' && app.runningUnderARM64Translation) {
+                    Swordfish.showMessage({
+                        type: 'warning',
+                        message: 'You are running a version for Macs with Intel processors on a Mac with Apple M1 chipset.'
+                    });
+                }        
             });
         });
 
@@ -4314,6 +4320,7 @@ class Swordfish {
         htmlViewerWindow.on('close', () => {
             this.concordanceSearchWindow.focus();
         });
+
     }
 
     static showTermSearch(arg: any): any {
@@ -4381,6 +4388,7 @@ class Swordfish {
                 htmlViewerWindow.on('close', () => {
                     this.termSearchWindow.focus();
                 });
+
             },
             (reason: string) => {
                 Swordfish.showMessage({ type: 'error', message: reason });
