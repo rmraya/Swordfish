@@ -14,12 +14,12 @@ Swordfish uses TM (Translation Memory) and MT (Machine Translation). Supports se
 
 Swordfish is available in two modes:
 
-- Personal Use of Source Code
-- Yearly Subscriptions
+- Source Code
+- Yearly Subscriptions for installers and support
 
 ### Personal Use of Source Code
 
-Source code of Swordfish is free for personal use. Anyone can download the source code, compile, modify and use it at no cost in compliance with the accompanying license terms.
+Source code of Swordfish is free. Anyone can download the source code, compile, modify and use it at no cost in compliance with the accompanying license terms.
 
 You can subscribe to [Maxprograms Support](https://groups.io/g/maxprograms/) at Groups.io and request peer assistance for the source code version there.
 
