@@ -17,7 +17,7 @@ Swordfish is available in two modes:
 - Source Code
 - Yearly Subscriptions for installers and support
 
-### Personal Use of Source Code
+### Source Code
 
 Source code of Swordfish is free. Anyone can download the source code, compile, modify and use it at no cost in compliance with the accompanying license terms.
 
