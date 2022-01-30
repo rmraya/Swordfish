@@ -68,5 +68,6 @@ Technical Support |  Peer support at  [Groups.io](https://groups.io/g/maxprogram
   npm install
   npm start
 ```
+This video shows how to build and launch Swordfish IV: [https://www.maxprograms.com/tutorials/SwordfishIV_build.mp4](https://www.maxprograms.com/tutorials/SwordfishIV_build.mp4)
 
 Compile once and then simply run `npm start` to start Swordfish
