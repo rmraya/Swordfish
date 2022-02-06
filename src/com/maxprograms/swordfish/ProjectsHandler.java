@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007-2021 Maxprograms.
+ * Copyright (c) 2007-2022 Maxprograms.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 1.0
@@ -309,7 +309,7 @@ public class ProjectsHandler implements HttpHandler {
 						projectStores.get(project).exportTranslations(output);
 						obj.put(Constants.PROGRESS, Constants.COMPLETED);
 						processes.put(id, obj);
-					} catch (IOException | SAXException | ParserConfigurationException | SQLException e) {
+					} catch (Exception e) {
 						logger.log(Level.ERROR, e);
 						obj.put(Constants.PROGRESS, Constants.ERROR);
 						obj.put(Constants.REASON, e.getMessage());
@@ -763,8 +763,7 @@ public class ProjectsHandler implements HttpHandler {
 						}
 						obj.put(Constants.PROGRESS, Constants.COMPLETED);
 						processes.put(id, obj);
-					} catch (IOException | SAXException | ParserConfigurationException | SQLException
-							| URISyntaxException e) {
+					} catch (Exception e) {
 						logger.log(Level.ERROR, e.getMessage(), e);
 						obj.put(Constants.PROGRESS, Constants.ERROR);
 						obj.put(Constants.REASON, e.getMessage());
