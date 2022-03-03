@@ -185,7 +185,7 @@ class Swordfish {
             mkdirSync(Swordfish.appHome, { recursive: true });
         }
 
-        this.ls = spawn(this.javapath, ['-cp', 'lib/h2-1.4.200.jar', '--module-path', 'lib', '-m', 'swordfish/com.maxprograms.swordfish.TmsServer', '-port', '8070'], { cwd: app.getAppPath() });
+        this.ls = spawn(this.javapath, ['-cp', 'lib/h2-1.4.200.jar', '--module-path', 'lib', '-m', 'swordfish/com.maxprograms.swordfish.TmsServer', '-port', '8070'], { cwd: app.getAppPath(), windowsHide: true });
 
         this.ls.stdout.on('data', (data) => {
             console.log(`stdout: ${data}`);
@@ -208,8 +208,7 @@ class Swordfish {
             }
         });
 
-        execFileSync(this.javapath, ['--module-path', 'lib', '-m', 'openxliff/com.maxprograms.server.CheckURL', 'http://localhost:8070/TMSServer'], { cwd: app.getAppPath() });
-
+        execFileSync(this.javapath, ['--module-path', 'lib', '-m', 'openxliff/com.maxprograms.server.CheckURL', 'http://localhost:8070/TMSServer'], { cwd: app.getAppPath(), windowsHide: true });
         this.loadDefaults();
         Swordfish.locations = new Locations(Swordfish.path.join(app.getPath('appData'), app.name, 'locations.json'));
         Swordfish.loadPreferences();
@@ -244,12 +243,12 @@ class Swordfish {
                         type: 'warning',
                         message: 'You are running a version for Macs with Intel processors on a Mac with Apple M1 chipset.'
                     });
-                }        
+                }
             });
         });
 
         app.on('before-quit', (event: Event) => {
-            if (this.ls) {
+            if (!this.ls.killed) {
                 event.preventDefault();
                 this.stopServer();
             }
@@ -1262,19 +1261,16 @@ class Swordfish {
     stopServer(): void {
         if (!this.stopping) {
             this.stopping = true;
-            Swordfish.sendRequest('/', { command: 'stop' },
-                (data: any) => {
-                    if (data.status === 'OK') {
-                        this.ls = null;
-                        app.quit();
-                    } else {
-                        console.log('error stopping server ', JSON.stringify(data));
-                    }
-                },
-                (reason: string) => {
-                    Swordfish.showMessage({ type: 'error', message: reason });
-                }
-            );
+            let request: ClientRequest = net.request({
+                url: 'http://127.0.0.1:8070/',
+                method: 'POST'
+            });
+            request.setHeader('Content-Type', 'application/json');
+            request.setHeader('Accept', 'application/json');
+            request.write(JSON.stringify({ command: 'stop' }));
+            request.end();
+            this.ls.kill();
+            app.quit();
         }
     }
 
@@ -3178,7 +3174,6 @@ class Swordfish {
             (data: any) => {
                 if (data.status !== Swordfish.SUCCESS) {
                     Swordfish.showMessage({ type: 'error', message: data.reason });
-                    return;
                 }
             },
             (reason: string) => {
@@ -3192,7 +3187,6 @@ class Swordfish {
             (data: any) => {
                 if (data.status !== Swordfish.SUCCESS) {
                     Swordfish.showMessage({ type: 'error', message: data.reason });
-                    return;
                 }
             },
             (reason: string) => {
@@ -4429,7 +4423,6 @@ class Swordfish {
             (data: any) => {
                 if (data.status !== Swordfish.SUCCESS) {
                     Swordfish.showMessage({ type: 'error', message: data.reason });
-                    return;
                 }
             },
             (reason: string) => {
@@ -4518,7 +4511,6 @@ class Swordfish {
             (data: any) => {
                 if (data.status !== Swordfish.SUCCESS) {
                     Swordfish.showMessage({ type: 'error', message: data.reason });
-                    return;
                 }
             },
             (reason: string) => {

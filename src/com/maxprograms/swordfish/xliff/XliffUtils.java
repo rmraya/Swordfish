@@ -19,6 +19,7 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -220,6 +221,7 @@ public class XliffUtils {
 		Element xliff = new Element(name);
 		List<XMLNode> newContent = new Vector<>();
 		List<XMLNode> content = tuv.getChild("seg").getContent();
+		Map<String,String> pairs = new HashMap<>();
 		Iterator<XMLNode> it = content.iterator();
 		int tag = 0;
 		while (it.hasNext()) {
@@ -244,12 +246,13 @@ public class XliffUtils {
 					sc.setAttribute("dataRef", segId + "_" + match + "_sc" + tag);
 					newContent.add(sc);
 					tags.put(segId + "_" + match + "_sc" + tag, e.getText());
+					pairs.put(e.getAttributeValue("i"), segId + "_" + match + "_sc" + tag);
 				}
 				if ("ept".equals(e.getName())) {
 					Element ec = new Element("ec");
 					tag++;
-					ec.setAttribute("id", segId + "_" + match + "_ec" + tag);
 					ec.setAttribute("dataRef", segId + "_" + match + "_ec" + tag);
+					ec.setAttribute("startRef", pairs.get(e.getAttributeValue("i")));
 					newContent.add(ec);
 					tags.put(segId + "_" + match + "_ec" + tag, e.getText());
 				}

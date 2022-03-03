@@ -19,8 +19,8 @@ public class Constants {
 	}
 
 	public static final String APPNAME = "Swordfish";
-	public static final String VERSION = "4.14.0";
-	public static final String BUILD = "20220206_0744";
+	public static final String VERSION = "4.15.0";
+	public static final String BUILD = "20220302_1504";
 
 	public static final String REASON = "reason";
 	public static final String STATUS = "status";

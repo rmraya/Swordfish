@@ -1362,12 +1362,10 @@ class TranslationView {
 
     nextUntranslated(): void {
         this.saveEdit({ confirm: false, next: 'untranslated' });
-        return;
     }
 
     nextUnconfirmed(): void {
         this.saveEdit({ confirm: false, next: 'unconfirmed' });
-        return;
     }
 
     centerRow(row: HTMLTableRowElement): void {

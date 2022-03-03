@@ -31,6 +31,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.List;
@@ -1971,8 +1972,44 @@ public class XliffStore {
                 insertGlossary(e, glossary);
             }
             Element matches = getUnitMatches(currentFile, currentUnit);
+            Map<String, Element> matchesData = new HashMap<>();
             if (matches != null) {
+                List<Element> matchesList = matches.getChildren("mtc:match");
+                Iterator<Element> it = matchesList.iterator();
+                while (it.hasNext()) {
+                    Element match = it.next();
+                    Element originalData = match.getChild("originalData");
+                    if (originalData != null) {
+                        List<Element> dataList = originalData.getChildren("data");
+                        for (int i = 0; i < dataList.size(); i++) {
+                            Element data = dataList.get(i);
+                            matchesData.put(data.getAttributeValue("id"), data);
+                        }
+                    }
+                }
                 insertMatches(e, matches);
+            }
+            if (!matchesData.isEmpty()) {
+                Element originalData = e.getChild("originalData");
+                if (originalData == null) {
+                    originalData = new Element("originalData");
+                    insertOriginalData(e, originalData);
+                }
+                Map<String, Element> oldData = new HashMap<>();
+                List<Element> dataList = originalData.getChildren("data");
+                for (int i = 0; i < dataList.size(); i++) {
+                    Element data = dataList.get(i);
+                    oldData.put(data.getAttributeValue("id"), data);
+                }
+                Set<String> keys = matchesData.keySet();
+                Iterator<String> it = keys.iterator();
+                while (it.hasNext()) {
+                    String key = it.next();
+                    if (!oldData.containsKey(key)) {
+                        oldData.put(key, matchesData.get(key));
+                        originalData.addContent(matchesData.get(key));
+                    }
+                }
             }
             Element notes = getUnitNotes(currentFile, currentUnit);
             if (notes != null) {
@@ -2045,6 +2082,29 @@ public class XliffStore {
         }
     }
 
+    private void insertOriginalData(Element unit, Element originalData) {
+        List<XMLNode> newContent = new Vector<>();
+        boolean added = false;
+        List<XMLNode> oldContent = unit.getContent();
+        Iterator<XMLNode> it = oldContent.iterator();
+        while (it.hasNext()) {
+            XMLNode node = it.next();
+            if (node.getNodeType() == XMLNode.ELEMENT_NODE) {
+                Element e = (Element) node;
+                if ("segment".equals(e.getName()) || "ignorable".equals(e.getName())) {
+                    if (!added) {
+                        newContent.add(originalData);
+                        added = true;
+                    }
+                }
+                newContent.add(node);
+            } else {
+                newContent.add(node);
+            }
+        }
+        unit.setContent(newContent);
+    }
+
     private void insertMatches(Element unit, Element matches) {
         Element old = unit.getChild("mtc:matches");
         if (old != null) {
@@ -2098,16 +2158,49 @@ public class XliffStore {
                 match.setAttribute("origin", rs.getString(5));
                 match.setAttribute("type", rs.getString(6));
                 match.setAttribute("matchQuality", "" + rs.getInt(7));
+                Element originalData = new Element("originalData");
                 String data = TMUtils.getString(rs.getNCharacterStream(10));
                 if (!data.isEmpty()) {
-                    match.addContent(XliffUtils.buildElement(data));
+                    originalData = XliffUtils.buildElement(data);
+                    List<Element> newData = new Vector<>();
+                    List<Element> oldData = originalData.getChildren();
+                    Iterator<Element> it = oldData.iterator();
+                    while (it.hasNext()) {
+                        Element d = it.next();
+                        if (!d.getContent().isEmpty()) {
+                            newData.add(d);
+                        }
+                    }
+                    originalData.setChildren(newData);
+                    if (!newData.isEmpty()) {
+                        match.addContent(originalData);
+                    }
+                }
+                Set<String> dataRefs = new HashSet<>();
+                Iterator<Element> it = originalData.getChildren().iterator();
+                while (it.hasNext()) {
+                    dataRefs.add(it.next().getAttributeValue("id"));
                 }
                 match.addContent(XliffUtils.buildElement(TMUtils.getString(rs.getNCharacterStream(8))));
                 match.addContent(XliffUtils.buildElement(TMUtils.getString(rs.getNCharacterStream(9))));
+                removeMissingReferences(match.getChild("source"), dataRefs);
+                removeMissingReferences(match.getChild("target"), dataRefs);
                 matches.addContent(match);
             }
         }
         return matches.getChildren("mtc:match").isEmpty() ? null : matches;
+    }
+
+    private void removeMissingReferences(Element child, Set<String> references) {
+        List<Element> tags = child.getChildren();
+        Iterator<Element> it = tags.iterator();
+        while (it.hasNext()) {
+            Element tag = it.next();
+            String dataRef = tag.getAttributeValue("dataRef");
+            if (!dataRef.isEmpty() && !references.contains(dataRef)) {
+                tag.removeAttribute("dataRef");
+            }
+        }
     }
 
     private Element getUnitNotes(String file, String unit) throws SQLException, IOException {
@@ -3062,7 +3155,7 @@ public class XliffStore {
 
             writeString(out, "<p><b>Int. Rep.</b>: Internal Repetition - Segment repetitions within one document<br>");
             writeString(out, "<b>Ext. Rep.</b>: External Repetition - Segment repetitions between all documents</p>");
-            
+
             it = files.iterator();
             count = 1;
             int projectSegments = 0;
