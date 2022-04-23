@@ -400,8 +400,8 @@ public class InternalDatabase implements ITmEngine {
 		} else {
 			String sql = caseSensitive ? "SELECT tuid, puretext FROM tuv WHERE lang=? AND puretext LIKE ? LIMIT ?"
 					: "SELECT tuid, puretext FROM tuv WHERE lang=? AND puretext ILIKE ? LIMIT ?";
-					String escaped = searchStr.replace("%", "\\%").replace("_", "\\_");
-					try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+			String escaped = searchStr.replace("%", "\\%").replace("_", "\\_");
+			try (PreparedStatement stmt = conn.prepareStatement(sql)) {
 				stmt.setString(1, srcLang);
 				stmt.setString(2, "%" + escaped + "%");
 				stmt.setInt(3, limit);

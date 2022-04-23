@@ -130,10 +130,6 @@ public class TmsServer implements HttpHandler {
 			try (DataOutputStream stream = new DataOutputStream(t.getResponseBody())) {
 				stream.writeBytes(response);
 			}
-			if ("stop".equals(command)) {
-				server.stop(0);
-				System.exit(0);
-			}
 		} catch (IOException | SQLException e) {
 			logger.log(Level.ERROR, e);
 			obj.put(Constants.STATUS, Constants.ERROR);

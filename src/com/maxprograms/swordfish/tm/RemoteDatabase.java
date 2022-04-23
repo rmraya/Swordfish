@@ -57,7 +57,10 @@ public class RemoteDatabase implements ITmEngine {
     private SAXBuilder builder;
 
     public RemoteDatabase(String server, String user, String password, String dbname) throws IOException {
-        this.server = server;
+        if (server.endsWith("/")) {
+            server = server.substring(0, server.length() - 1);
+        }
+        this.server = server.strip();
         this.dbname = dbname;
         builder = new SAXBuilder();
         ticket = RemoteUtils.getTicket(server, user, password);

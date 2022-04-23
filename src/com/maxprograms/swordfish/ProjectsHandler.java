@@ -754,7 +754,7 @@ public class ProjectsHandler implements HttpHandler {
 						if (applyTM) {
 							XliffStore store = new XliffStore(p.getXliff(), p.getSourceLang().getCode(),
 									p.getTargetLang().getCode());
-							store.tmTranslateAll(memory, 0);
+							store.tmTranslateAll(memory, 0, processes, id);
 						}
 						if (searchTerms) {
 							XliffStore store = new XliffStore(p.getXliff(), p.getSourceLang().getCode(),
@@ -1022,19 +1022,41 @@ public class ProjectsHandler implements HttpHandler {
 			JSONObject json = new JSONObject(request);
 			String project = json.getString("project");
 			String memory = json.getString("memory");
-			int penalization = 0;
-			if (json.has("penalization")) {
-				penalization = json.getInt("penalization");
-			}
+			int penalization = json.has("penalization") ? json.getInt("penalization") : 0;
 			if (!projectStores.containsKey(project)) {
 				Project prj = projects.get(project);
 				XliffStore store = new XliffStore(prj.getXliff(), prj.getSourceLang().getCode(),
 						prj.getTargetLang().getCode());
 				projectStores.put(project, store);
 			}
-			result.put("translated", projectStores.get(project).tmTranslateAll(memory, penalization));
-		} catch (IOException | SQLException | JSONException | SAXException | ParserConfigurationException
-				| URISyntaxException e) {
+			String id = "" + System.currentTimeMillis();
+			result.put("process", id);
+			if (processes == null) {
+				processes = new Hashtable<>();
+			}
+			JSONObject obj = new JSONObject();
+			obj.put("percentage", 0);
+			obj.put(Constants.PROGRESS, Constants.PROCESSING);
+			processes.put(id, obj);
+			Thread thread = new Thread() {
+				@Override
+				public void run() {
+					try {
+						obj.put("translated",
+								projectStores.get(project).tmTranslateAll(memory, penalization, processes, id));
+						obj.put(Constants.PROGRESS, Constants.COMPLETED);
+						processes.put(id, obj);
+					} catch (JSONException | IOException | SQLException | SAXException
+							| ParserConfigurationException e) {
+						logger.log(Level.WARNING, e.getMessage(), e);
+						obj.put(Constants.PROGRESS, Constants.ERROR);
+						obj.put(Constants.REASON, e.getMessage());
+						processes.put(id, obj);
+					}
+				}
+			};
+			thread.start();
+		} catch (Exception e) {
 			logger.log(Level.ERROR, e.getMessage(), e);
 			result.put(Constants.REASON, e.getMessage());
 		}

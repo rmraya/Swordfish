@@ -141,8 +141,6 @@ class Swordfish {
 
     static clipboardContent = '';
 
-    stopping: boolean = false;
-
     static SUCCESS: string = 'Success';
     static LOADING: string = 'Loading';
     static COMPLETED: string = 'Completed';
@@ -194,21 +192,8 @@ class Swordfish {
         this.ls.stderr.on('data', (data) => {
             console.error(`stderr: ${data}`);
         });
+        execFileSync(this.javapath, ['--module-path', 'lib', '-m', 'swordfish/com.maxprograms.swordfish.CheckURL', 'http://localhost:8070/TMSServer'], { cwd: app.getAppPath(), windowsHide: true });
 
-        this.ls.on('close', (code: number) => {
-            if (code === 0) {
-                Swordfish.sendRequest('/', { command: 'stop' },
-                    () => {
-                        console.log('Restarting server');
-                        this.ls = spawn(this.javapath, ['--module-path', 'lib', '-m', 'swordfish/com.maxprograms.swordfish.TmsServer', '-port', '8070'], { cwd: app.getAppPath() });
-                    },
-                    (reason: string) => {
-                        console.log('Error restarting server: ' + reason);
-                    });
-            }
-        });
-
-        execFileSync(this.javapath, ['--module-path', 'lib', '-m', 'openxliff/com.maxprograms.server.CheckURL', 'http://localhost:8070/TMSServer'], { cwd: app.getAppPath(), windowsHide: true });
         this.loadDefaults();
         Swordfish.locations = new Locations(Swordfish.path.join(app.getPath('appData'), app.name, 'locations.json'));
         Swordfish.loadPreferences();
@@ -225,25 +210,7 @@ class Swordfish {
             Swordfish.mainWindow.once('ready-to-show', () => {
                 Swordfish.mainWindow.setBounds(Swordfish.currentDefaults);
                 Swordfish.mainWindow.show();
-                Swordfish.spellCheckerLanguages = Swordfish.mainWindow.webContents.session.availableSpellCheckerLanguages;
-                setTimeout(() => {
-                    Swordfish.checkUpdates(true);
-                }, 4000);
-                if (Swordfish.currentPreferences.showGuide === undefined) {
-                    Swordfish.currentPreferences.showGuide = true;
-                }
-                if (Swordfish.currentPreferences.srcLang === 'none') {
-                    Swordfish.getDefaultLanguages();
-                }
-                if (Swordfish.currentPreferences.showGuide) {
-                    Swordfish.showGettingStarted();
-                }
-                if (process.platform === 'darwin' && app.runningUnderARM64Translation) {
-                    Swordfish.showMessage({
-                        type: 'warning',
-                        message: 'You are running a version for Macs with Intel processors on a Mac with Apple M1 chipset.'
-                    });
-                }
+                Swordfish.startup();
             });
         });
 
@@ -988,8 +955,7 @@ class Swordfish {
             y: this.currentDefaults.y,
             webPreferences: {
                 nodeIntegration: true,
-                contextIsolation: false,
-                nativeWindowOpen: true
+                contextIsolation: false
             },
             show: false,
             icon: this.iconPath
@@ -1259,19 +1225,20 @@ class Swordfish {
     }
 
     stopServer(): void {
-        if (!this.stopping) {
-            this.stopping = true;
-            let request: ClientRequest = net.request({
-                url: 'http://127.0.0.1:8070/',
-                method: 'POST'
-            });
-            request.setHeader('Content-Type', 'application/json');
-            request.setHeader('Accept', 'application/json');
-            request.write(JSON.stringify({ command: 'stop' }));
-            request.end();
-            this.ls.kill();
-            app.quit();
-        }
+        let instance: Swordfish = this;
+        Swordfish.sendRequest('/', { command: 'stop' },
+            (data: any) => {
+                if (data.status === 'OK') {
+                    instance.ls.kill();
+                    app.quit();
+                } else {
+                    Swordfish.showMessage({ type: 'error', message: data.reason });
+                }
+            },
+            (reason: string) => {
+                Swordfish.showMessage({ type: 'error', message: reason });
+            }
+        );
     }
 
     loadDefaults(): void {
@@ -1357,8 +1324,7 @@ class Swordfish {
             icon: this.iconPath,
             webPreferences: {
                 nodeIntegration: true,
-                contextIsolation: false,
-                nativeWindowOpen: true
+                contextIsolation: false
             }
         });
         this.sortParams = params;
@@ -1384,8 +1350,7 @@ class Swordfish {
             icon: this.iconPath,
             webPreferences: {
                 nodeIntegration: true,
-                contextIsolation: false,
-                nativeWindowOpen: true
+                contextIsolation: false
             }
         });
         this.filterParams = params;
@@ -1420,8 +1385,7 @@ class Swordfish {
             icon: this.iconPath,
             webPreferences: {
                 nodeIntegration: true,
-                contextIsolation: false,
-                nativeWindowOpen: true
+                contextIsolation: false
             }
         });
         this.addProjectWindow.setMenu(null);
@@ -1607,8 +1571,7 @@ class Swordfish {
                     icon: this.iconPath,
                     webPreferences: {
                         nodeIntegration: true,
-                        contextIsolation: false,
-                        nativeWindowOpen: true
+                        contextIsolation: false
                     }
                 });
                 this.addFileWindow.setMenu(null);
@@ -1854,8 +1817,7 @@ class Swordfish {
             icon: this.iconPath,
             webPreferences: {
                 nodeIntegration: true,
-                contextIsolation: false,
-                nativeWindowOpen: true
+                contextIsolation: false
             }
         });
         this.typeParam = type;
@@ -1881,8 +1843,7 @@ class Swordfish {
             icon: this.iconPath,
             webPreferences: {
                 nodeIntegration: true,
-                contextIsolation: false,
-                nativeWindowOpen: true
+                contextIsolation: false
             }
         });
         this.browseDatabasesWindow.setMenu(null);
@@ -1949,8 +1910,7 @@ class Swordfish {
             icon: this.iconPath,
             webPreferences: {
                 nodeIntegration: true,
-                contextIsolation: false,
-                nativeWindowOpen: true
+                contextIsolation: false
             }
         });
         this.addMemoryWindow.setMenu(null);
@@ -2022,8 +1982,7 @@ class Swordfish {
             icon: this.iconPath,
             webPreferences: {
                 nodeIntegration: true,
-                contextIsolation: false,
-                nativeWindowOpen: true
+                contextIsolation: false
             }
         });
         this.aboutWindow.setMenu(null);
@@ -2084,8 +2043,7 @@ class Swordfish {
             icon: this.iconPath,
             webPreferences: {
                 nodeIntegration: true,
-                contextIsolation: false,
-                nativeWindowOpen: true
+                contextIsolation: false
             }
         });
         licenseWindow.setMenu(null);
@@ -2118,8 +2076,7 @@ class Swordfish {
             icon: this.iconPath,
             webPreferences: {
                 nodeIntegration: true,
-                contextIsolation: false,
-                nativeWindowOpen: true
+                contextIsolation: false
             }
         });
         this.settingsWindow.setMenu(null);
@@ -2144,8 +2101,7 @@ class Swordfish {
             icon: this.iconPath,
             webPreferences: {
                 nodeIntegration: true,
-                contextIsolation: false,
-                nativeWindowOpen: true
+                contextIsolation: false
             }
         });
         this.systemInfoWindow.setMenu(null);
@@ -2190,8 +2146,7 @@ class Swordfish {
             icon: this.iconPath,
             webPreferences: {
                 nodeIntegration: true,
-                contextIsolation: false,
-                nativeWindowOpen: true
+                contextIsolation: false
             }
         });
         this.licensesWindow.setMenu(null);
@@ -2272,8 +2227,7 @@ class Swordfish {
                                 icon: this.iconPath,
                                 webPreferences: {
                                     nodeIntegration: true,
-                                    contextIsolation: false,
-                                    nativeWindowOpen: true
+                                    contextIsolation: false
                                 }
                             });
                             Swordfish.updatesWindow.setMenu(null);
@@ -2436,8 +2390,7 @@ class Swordfish {
             icon: this.iconPath,
             webPreferences: {
                 nodeIntegration: true,
-                contextIsolation: false,
-                nativeWindowOpen: true
+                contextIsolation: false
             }
         });
         this.defaultLangsWindow.setMenu(null);
@@ -2566,8 +2519,7 @@ class Swordfish {
             icon: this.iconPath,
             webPreferences: {
                 nodeIntegration: true,
-                contextIsolation: false,
-                nativeWindowOpen: true
+                contextIsolation: false
             }
         });
         this.memoryParam = memory;
@@ -2593,8 +2545,7 @@ class Swordfish {
             icon: this.iconPath,
             webPreferences: {
                 nodeIntegration: true,
-                contextIsolation: false,
-                nativeWindowOpen: true
+                contextIsolation: false
             }
         });
         this.glossaryParam = glossary;
@@ -3095,8 +3046,7 @@ class Swordfish {
             icon: this.iconPath,
             webPreferences: {
                 nodeIntegration: true,
-                contextIsolation: false,
-                nativeWindowOpen: true
+                contextIsolation: false
             }
         });
         if (arg.memory) {
@@ -3117,17 +3067,49 @@ class Swordfish {
     static tmTranslateAll(arg: any): void {
         Swordfish.destroyWindow(Swordfish.applyTmWindow);
         Swordfish.mainWindow.webContents.send('start-waiting');
-        Swordfish.mainWindow.webContents.send('set-status', 'Translating Project');
+        Swordfish.mainWindow.webContents.send('set-status', 'Translating Project \u00A0\u00A0\u00A0 0%');
         Swordfish.sendRequest('/projects/tmTranslateAll', arg,
             (data: any) => {
-                Swordfish.mainWindow.webContents.send('end-waiting');
-                Swordfish.mainWindow.webContents.send('set-status', '');
                 if (data.status !== Swordfish.SUCCESS) {
+                    Swordfish.mainWindow.webContents.send('end-waiting');
+                    Swordfish.mainWindow.webContents.send('set-status', '');
                     Swordfish.showMessage({ type: 'error', message: data.reason });
-                    return;
                 }
-                Swordfish.mainWindow.webContents.send('reload-page', { project: arg.project });
-                Swordfish.showMessage({ type: 'info', message: 'Added translations to ' + data.translated + ' segments' });
+                Swordfish.currentStatus = data;
+                let processId: string = data.process;
+                let percentage: number = 0;
+                let intervalObject = setInterval(() => {
+                    if (Swordfish.currentStatus.progress) {
+                        if (Swordfish.currentStatus.progress === Swordfish.COMPLETED) {
+                            Swordfish.mainWindow.webContents.send('end-waiting');
+                            Swordfish.mainWindow.webContents.send('set-status', '');
+                            clearInterval(intervalObject);
+                            Swordfish.mainWindow.webContents.send('reload-page', { project: arg.project });
+                            Swordfish.showMessage({ type: 'info', message: 'Added translations to ' + Swordfish.currentStatus.translated + ' segments' });
+                            return;
+                        } else if (Swordfish.currentStatus.progress === Swordfish.PROCESSING) {
+                            // it's OK, keep waiting
+                            if (percentage !== Swordfish.currentStatus.percentage) {
+                                percentage = Swordfish.currentStatus.percentage;
+                                Swordfish.mainWindow.webContents.send('set-status', 'Translating Project \u00A0\u00A0\u00A0' + percentage + '%');
+                            }
+                        } else if (Swordfish.currentStatus.progress === Swordfish.ERROR) {
+                            Swordfish.mainWindow.webContents.send('end-waiting');
+                            Swordfish.mainWindow.webContents.send('set-status', '');
+                            clearInterval(intervalObject);
+                            Swordfish.showMessage({ type: 'error', message: Swordfish.currentStatus.reason });
+                            return;
+                        } else {
+                            Swordfish.mainWindow.webContents.send('end-waiting');
+                            Swordfish.mainWindow.webContents.send('set-status', '');
+                            clearInterval(intervalObject);
+                            Swordfish.showMessage({ type: 'error', message: 'Unknown error applying TM' });
+                            return;
+                        }
+                    }
+                    Swordfish.getProjectsProgress(processId);
+                }, 500);
+
             },
             (reason: string) => {
                 Swordfish.mainWindow.webContents.send('end-waiting');
@@ -3206,8 +3188,7 @@ class Swordfish {
             icon: this.iconPath,
             webPreferences: {
                 nodeIntegration: true,
-                contextIsolation: false,
-                nativeWindowOpen: true
+                contextIsolation: false
             }
         });
         Swordfish.spellingLangsWindow.setMenu(null);
@@ -3324,8 +3305,7 @@ class Swordfish {
             icon: this.iconPath,
             webPreferences: {
                 nodeIntegration: true,
-                contextIsolation: false,
-                nativeWindowOpen: true
+                contextIsolation: false
             }
         });
         Swordfish.messageParam = arg;
@@ -3440,8 +3420,7 @@ class Swordfish {
             icon: this.iconPath,
             webPreferences: {
                 nodeIntegration: true,
-                contextIsolation: false,
-                nativeWindowOpen: true
+                contextIsolation: false
             }
         });
         this.addGlossaryWindow.setMenu(null);
@@ -3470,8 +3449,7 @@ class Swordfish {
             icon: this.iconPath,
             webPreferences: {
                 nodeIntegration: true,
-                contextIsolation: false,
-                nativeWindowOpen: true
+                contextIsolation: false
             }
         });
         this.importXliffWindow.setMenu(null);
@@ -3562,8 +3540,7 @@ class Swordfish {
                 icon: this.iconPath,
                 webPreferences: {
                     nodeIntegration: true,
-                    contextIsolation: false,
-                    nativeWindowOpen: true
+                    contextIsolation: false
                 }
             });
             this.addFileWindow.setMenu(null);
@@ -3925,8 +3902,7 @@ class Swordfish {
             icon: this.iconPath,
             webPreferences: {
                 nodeIntegration: true,
-                contextIsolation: false,
-                nativeWindowOpen: true
+                contextIsolation: false
             }
         });
         this.tagsWindow.setMenu(null);
@@ -3951,8 +3927,7 @@ class Swordfish {
             icon: this.iconPath,
             webPreferences: {
                 nodeIntegration: true,
-                contextIsolation: false,
-                nativeWindowOpen: true
+                contextIsolation: false
             }
         });
         this.goToWindow.setMenu(null);
@@ -3983,8 +3958,7 @@ class Swordfish {
             icon: this.iconPath,
             webPreferences: {
                 nodeIntegration: true,
-                contextIsolation: false,
-                nativeWindowOpen: true
+                contextIsolation: false
             }
         });
         this.projectParam = arg.project;
@@ -4231,8 +4205,7 @@ class Swordfish {
             icon: this.iconPath,
             webPreferences: {
                 nodeIntegration: true,
-                contextIsolation: false,
-                nativeWindowOpen: true
+                contextIsolation: false
             }
         });
         Swordfish.concordanceMemories = arg;
@@ -4299,8 +4272,7 @@ class Swordfish {
             icon: this.iconPath,
             webPreferences: {
                 nodeIntegration: true,
-                contextIsolation: false,
-                nativeWindowOpen: true
+                contextIsolation: false
             }
         });
         Swordfish.htmlContent = data.html;
@@ -4328,8 +4300,7 @@ class Swordfish {
             icon: this.iconPath,
             webPreferences: {
                 nodeIntegration: true,
-                contextIsolation: false,
-                nativeWindowOpen: true
+                contextIsolation: false
             }
         });
         this.glossaryParam = arg.glossary;
@@ -4367,8 +4338,7 @@ class Swordfish {
                     icon: this.iconPath,
                     webPreferences: {
                         nodeIntegration: true,
-                        contextIsolation: false,
-                        nativeWindowOpen: true
+                        contextIsolation: false
                     }
                 });
                 Swordfish.htmlTitle = 'Term Search';
@@ -4401,8 +4371,7 @@ class Swordfish {
             icon: this.iconPath,
             webPreferences: {
                 nodeIntegration: true,
-                contextIsolation: false,
-                nativeWindowOpen: true
+                contextIsolation: false
             }
         });
         this.glossaryParam = glossary;
@@ -4561,8 +4530,7 @@ class Swordfish {
             icon: this.iconPath,
             webPreferences: {
                 nodeIntegration: true,
-                contextIsolation: false,
-                nativeWindowOpen: true
+                contextIsolation: false
             }
         });
         Swordfish.spaceAnalysisWindow.setMenu(null);
@@ -4588,8 +4556,7 @@ class Swordfish {
             icon: this.iconPath,
             webPreferences: {
                 nodeIntegration: true,
-                contextIsolation: false,
-                nativeWindowOpen: true
+                contextIsolation: false
             }
         });
         Swordfish.tagsAnalysisWindow.setMenu(null);
@@ -4672,8 +4639,7 @@ class Swordfish {
             icon: this.iconPath,
             webPreferences: {
                 nodeIntegration: true,
-                contextIsolation: false,
-                nativeWindowOpen: true
+                contextIsolation: false
             }
         });
         this.changeCaseWindow.setMenu(null);
@@ -4750,8 +4716,7 @@ class Swordfish {
                 icon: this.iconPath,
                 webPreferences: {
                     nodeIntegration: true,
-                    contextIsolation: false,
-                    nativeWindowOpen: true
+                    contextIsolation: false
                 }
             });
             Swordfish.notesParam = arg;
@@ -4804,8 +4769,7 @@ class Swordfish {
             icon: this.iconPath,
             webPreferences: {
                 nodeIntegration: true,
-                contextIsolation: false,
-                nativeWindowOpen: true
+                contextIsolation: false
             }
         });
         Swordfish.notesParam = arg;
@@ -4924,8 +4888,7 @@ class Swordfish {
             icon: this.iconPath,
             webPreferences: {
                 nodeIntegration: true,
-                contextIsolation: false,
-                nativeWindowOpen: true
+                contextIsolation: false
             }
         });
         Swordfish.gettingStartedWindow.setMenu(null);
@@ -4967,8 +4930,7 @@ class Swordfish {
             icon: this.iconPath,
             webPreferences: {
                 nodeIntegration: true,
-                contextIsolation: false,
-                nativeWindowOpen: true
+                contextIsolation: false
             }
         });
         Swordfish.editXmlFilterWindow.setMenu(null);
@@ -5056,8 +5018,7 @@ class Swordfish {
             icon: this.iconPath,
             webPreferences: {
                 nodeIntegration: true,
-                contextIsolation: false,
-                nativeWindowOpen: true
+                contextIsolation: false
             }
         });
         Swordfish.configElementWindow.setMenu(null);
@@ -5163,8 +5124,7 @@ class Swordfish {
             icon: this.iconPath,
             webPreferences: {
                 nodeIntegration: true,
-                contextIsolation: false,
-                nativeWindowOpen: true
+                contextIsolation: false
             }
         });
         Swordfish.addXmlConfigurationWindow.setMenu(null);
@@ -5223,6 +5183,26 @@ class Swordfish {
             let bounds: Rectangle = window.getBounds();
             Swordfish.locations.setLocation(key, bounds.x, bounds.y);
         });
+    }
+
+    static startup(): void {
+        Swordfish.spellCheckerLanguages = Swordfish.mainWindow.webContents.session.availableSpellCheckerLanguages;
+        Swordfish.checkUpdates(true);
+        if (Swordfish.currentPreferences.srcLang === 'none') {
+            Swordfish.getDefaultLanguages();
+        }
+        if (Swordfish.currentPreferences.showGuide === undefined) {
+            Swordfish.currentPreferences.showGuide = true;
+        }
+        if (Swordfish.currentPreferences.showGuide) {
+            Swordfish.showGettingStarted();
+        }
+        if (process.platform === 'darwin' && app.runningUnderARM64Translation) {
+            Swordfish.showMessage({
+                type: 'warning',
+                message: 'You are running a version for Macs with Intel processors on a Mac with Apple M1 chipset.'
+            });
+        }
     }
 }
 

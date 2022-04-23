@@ -70,6 +70,9 @@ public class RemoteUtils {
     }
 
     public static String getTicket(String server, String user, String password) throws IOException {
+        if (server.endsWith("/")) {
+            server = server.substring(0, server.length() - 1);
+        }
         URL serverUrl = new URL(server + "/remote");
         HttpsURLConnection connection = (HttpsURLConnection) serverUrl.openConnection();
         connection.setRequestMethod("GET");

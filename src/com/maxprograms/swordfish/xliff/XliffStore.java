@@ -2398,13 +2398,21 @@ public class XliffStore {
         return getTaggedtMatches(json);
     }
 
-    public int tmTranslateAll(String memory, int penalization)
+    public int tmTranslateAll(String memory, int penalization, Map<String, JSONObject> processes, String processId)
             throws IOException, SQLException, SAXException, ParserConfigurationException {
         String memoryName = MemoriesHandler.getName(memory);
         MemoriesHandler.open(memory);
         ITmEngine engine = MemoriesHandler.getEngine(memory);
-        String sql = "SELECT file, unitId, segId, source, sourceText, target FROM segments WHERE state <> 'final'";
+        String sql = "SELECT COUNT(*) FROM segments WHERE type = 'S' AND state <> 'final'";
+        int total = 0;
+        try (ResultSet rs = stmt.executeQuery(sql)) {
+            while (rs.next()) {
+                total = rs.getInt(1);
+            }
+        }
+        sql = "SELECT file, unitId, segId, source, sourceText, target FROM segments WHERE type = 'S' AND state <> 'final'";
         int count = 0;
+        int processed = 0;
         try (ResultSet rs = stmt.executeQuery(sql)) {
             JSONObject params = new JSONObject();
             params.put("srcLang", srcLang);
@@ -2421,6 +2429,14 @@ public class XliffStore {
                 json.put("segment", segment);
                 json.put("pure", pure);
                 array.put(json);
+                processed++;
+                if (processed % 20 == 0) {
+                    int percentage = Math.round(processed * 100 / total);
+                    if (percentage == 100) {
+                        percentage = 99;
+                    }
+                    processes.get(processId).put("percentage", percentage);
+                }
                 if (array.length() == 250) {
                     params.put("segments", array);
                     JSONArray translations = engine.batchTranslate(params);
@@ -2431,6 +2447,7 @@ public class XliffStore {
             params.put("segments", array);
             JSONArray translations = engine.batchTranslate(params);
             count += storeMatches(translations, memoryName, penalization);
+            processes.get(processId).put("percentage", 100);
         }
         MemoriesHandler.close(memory);
         return count;
