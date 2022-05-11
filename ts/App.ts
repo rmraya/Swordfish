@@ -239,10 +239,10 @@ class Swordfish {
                 Swordfish.mainWindow.webContents.send('set-theme', Swordfish.currentCss);
             }
         });
-        ipcMain.on('get-projects', (event: IpcMainEvent, arg: any) => {
+        ipcMain.on('get-projects', (event: IpcMainEvent) => {
             Swordfish.getProjects(event);
         });
-        ipcMain.on('get-memories', (event: IpcMainEvent, arg: any) => {
+        ipcMain.on('get-memories', (event: IpcMainEvent) => {
             Swordfish.getMemories(event);
         });
         ipcMain.on('show-add-file', () => {
@@ -257,7 +257,7 @@ class Swordfish {
         ipcMain.on('export-open-project', (event: IpcMainEvent, arg: any) => {
             Swordfish.exportOpenProject(arg);
         });
-        ipcMain.on('get-theme', (event: IpcMainEvent, arg: any) => {
+        ipcMain.on('get-theme', (event: IpcMainEvent) => {
             event.sender.send('set-theme', Swordfish.currentCss);
         });
         ipcMain.on('serverSettings-height', (event: IpcMainEvent, arg: any) => {
@@ -272,7 +272,7 @@ class Swordfish {
         ipcMain.on('browseDatabases-height', (event: IpcMainEvent, arg: any) => {
             Swordfish.setHeight(Swordfish.browseDatabasesWindow, arg);
         });
-        ipcMain.on('get-databases', (event: IpcMainEvent, arg: any) => {
+        ipcMain.on('get-databases', (event: IpcMainEvent) => {
             event.sender.send('set-databases', Swordfish.remoteTmParams);
         });
         ipcMain.on('show-server-settings', (event: IpcMainEvent, arg: any) => {
@@ -396,7 +396,7 @@ class Swordfish {
         ipcMain.on('close-addGlossary', () => {
             Swordfish.destroyWindow(Swordfish.addGlossaryWindow);
         });
-        ipcMain.on('get-glossaries', (event: IpcMainEvent, arg: any) => {
+        ipcMain.on('get-glossaries', (event: IpcMainEvent) => {
             Swordfish.getGlossaries(event);
         });
         ipcMain.on('remove-glossaries', (event: IpcMainEvent, arg: any) => {
@@ -429,7 +429,7 @@ class Swordfish {
         ipcMain.on('import-glossary-height', (event: IpcMainEvent, arg: any) => {
             Swordfish.setHeight(Swordfish.importGlossaryWindow, arg);
         });
-        ipcMain.on('get-glossary-file', (event: IpcMainEvent, arg: any) => {
+        ipcMain.on('get-glossary-file', (event: IpcMainEvent) => {
             Swordfish.getGlossaryFile(event);
         });
         ipcMain.on('import-glossary-file', (event: IpcMainEvent, arg: any) => {
@@ -1061,6 +1061,9 @@ class Swordfish {
             new MenuItem({ type: 'separator' }),
             new MenuItem({ label: 'Toggle Full Screen', role: 'togglefullscreen' })
         ]);
+        if (!app.isPackaged) {
+            viewMenu.append(new MenuItem({ label: 'Open Development Tools', accelerator: 'F12', click: () => { Swordfish.mainWindow.webContents.openDevTools() } }));
+        }
         let projectsMenu: Menu = Menu.buildFromTemplate([
             { label: 'New Project', accelerator: 'CmdOrCtrl+N', click: () => { Swordfish.addProject(); } },
             { label: 'Translate Projects', click: () => { Swordfish.translateProjects(); } },
@@ -1510,12 +1513,12 @@ class Swordfish {
         let fileName: string = file.file;
         if (fileName.endsWith('.sdlppx')) {
             return {
-                defaultPath: fileName.substr(0, fileName.lastIndexOf('.')) + '.sdlrpx',
+                defaultPath: fileName.substring(0, fileName.lastIndexOf('.')) + '.sdlrpx',
                 filters: [{ name: file.type, extensions: 'sdlrpx' }, { name: 'Any File', extensions: '*' }]
             }
         }
-        let name = fileName.substr(0, fileName.lastIndexOf('.'));
-        let extension = fileName.substr(fileName.lastIndexOf('.'));
+        let name = fileName.substring(0, fileName.lastIndexOf('.'));
+        let extension = fileName.substring(fileName.lastIndexOf('.'));
         return {
             defaultPath: name + '_' + lang + extension,
             filters: [{ name: file.type, extensions: extension }, { name: 'Any File', extensions: '*' }]

@@ -349,9 +349,6 @@ public class XliffUtils {
 				if (skeleton == null) {
 					throw new IOException(NOTSWORDFISH);
 				}
-				if (!skeleton.getAttributeValue("href").isEmpty()) {
-					throw new IOException(NOTSWORDFISH);
-				}
 				Element metadata = file.getChild("mda:metadata");
 				if (metadata == null) {
 					throw new IOException(NOTSWORDFISH);

@@ -60,6 +60,7 @@ public class InternalDatabase implements ITmEngine {
 	protected static final Logger logger = System.getLogger(InternalDatabase.class.getName());
 
 	private String dbname;
+	private String url;
 	private Connection conn;
 	private PreparedStatement storeTUV;
 	private PreparedStatement deleteTUV;
@@ -84,7 +85,7 @@ public class InternalDatabase implements ITmEngine {
 		if (!exists) {
 			database.mkdirs();
 		}
-		String url = "jdbc:h2:" + database.getAbsolutePath() + "/db";
+		url = "jdbc:h2:" + database.getAbsolutePath() + "/db";
 		conn = DriverManager.getConnection(url);
 
 		if (!exists) {
@@ -594,6 +595,11 @@ public class InternalDatabase implements ITmEngine {
 	@Override
 	public Element getTu(String tuid) throws SQLException, SAXException, IOException, ParserConfigurationException {
 		Element tu = tuDb.getTu(tuid);
+		if (tu == null) {
+			tu = new Element("tu");
+			tu.setAttribute("tuid", tuid);
+			logger.log(Level.WARNING, "tu is null for tuid " + tuid); // TODO repair TU
+		}
 		try (PreparedStatement stmt = conn.prepareStatement("SELECT lang, seg FROM tuv WHERE tuid=?")) {
 			stmt.setString(1, tuid);
 			try (ResultSet rs = stmt.executeQuery()) {
@@ -722,5 +728,4 @@ public class InternalDatabase implements ITmEngine {
 		}
 		return result;
 	}
-
 }

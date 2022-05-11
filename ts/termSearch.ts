@@ -46,7 +46,7 @@ class TermSearch {
         });
         (document.getElementById('similarity') as HTMLSelectElement).value = '70';
         (document.getElementById('searchText') as HTMLInputElement).focus();
-        document.getElementById('languagesSelect').addEventListener('change', (ev: Event) => {
+        document.getElementById('languagesSelect').addEventListener('change', () => {
             let code: string = (document.getElementById('languagesSelect') as HTMLSelectElement).value;
             if (this.isBiDi(code)) {
                 (document.getElementById('searchText') as HTMLInputElement).dir = 'rtl';
@@ -58,8 +58,7 @@ class TermSearch {
     setLanguages(arg: any): void {
         let array = arg.languages;
         let languageOptions = '<option value="none">Select Language</option>';
-        for (let i = 0; i < array.length; i++) {
-            let lang = array[i];
+        for (let lang of array) {
             languageOptions = languageOptions + '<option value="' + lang.code + '">' + lang.description + '</option>';
         }
         document.getElementById('languagesSelect').innerHTML = languageOptions;

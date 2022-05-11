@@ -87,8 +87,8 @@ class SpaceAnalysis {
             return;
         }
         let selectedRows: HTMLCollectionOf<Element> = document.getElementsByClassName('selected');
-        for (let i = 0; i < selectedRows.length; i++) {
-            selectedRows[i].classList.remove('selected');
+        for (let row of selectedRows) {
+            row.classList.remove('selected');
         }
         tr.classList.add('selected');
     }

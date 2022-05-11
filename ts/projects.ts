@@ -444,9 +444,9 @@ class ProjectsView {
         let projectId = arg.project;
         let svg = arg.statistics.svg;
         let rows: HTMLCollectionOf<HTMLTableRowElement> = this.tbody.getElementsByTagName('tr');
-        for (let i = 0; i < rows.length; i++) {
-            if (rows[i].id === projectId) {
-                let cells: HTMLCollectionOf<HTMLTableCellElement> = rows[i].getElementsByTagName('td');
+        for (let row of rows) {
+            if (row.id === projectId) {
+                let cells: HTMLCollectionOf<HTMLTableCellElement> = row.getElementsByTagName('td');
                 cells[2].innerHTML = svg;
                 break;
             }

@@ -41,13 +41,13 @@ class AddTerm {
         this.electron.ipcRenderer.on('set-selected-text', (event: Electron.IpcRendererEvent, arg: any) => {
             this.setParams(arg);
         });
-        document.getElementById('srcLangSelect').addEventListener('change', (ev: Event) => {
+        document.getElementById('srcLangSelect').addEventListener('change', () => {
             let code: string = (document.getElementById('srcLangSelect') as HTMLSelectElement).value;
             if (this.isBiDi(code)) {
                 (document.getElementById('source') as HTMLInputElement).dir = 'rtl';
             }
         });
-        document.getElementById('tgtLangSelect').addEventListener('change', (ev: Event) => {
+        document.getElementById('tgtLangSelect').addEventListener('change', () => {
             let code: string = (document.getElementById('tgtLangSelect') as HTMLSelectElement).value;
             if (this.isBiDi(code)) {
                 (document.getElementById('target') as HTMLInputElement).dir = 'rtl';
@@ -93,8 +93,7 @@ class AddTerm {
     setLanguages(arg: any): void {
         let array = arg.languages;
         let languageOptions = '<option value="none">Select Language</option>';
-        for (let i = 0; i < array.length; i++) {
-            let lang = array[i];
+        for (let lang of array) {
             languageOptions = languageOptions + '<option value="' + lang.code + '">' + lang.description + '</option>';
         }
         document.getElementById('srcLangSelect').innerHTML = languageOptions;

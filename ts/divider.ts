@@ -33,7 +33,7 @@ class VerticalSplit {
         this.divider.classList.add('hdivider');
         this.divider.draggable = true;
         this.divider.addEventListener('dragstart', (event: DragEvent) => {
-            this.dragStart(event);
+            this.dragStart();
         });
         this.divider.addEventListener('drag', (event: DragEvent) => {
             this.drag(event);
@@ -86,7 +86,7 @@ class VerticalSplit {
         return this.right;
     }
 
-    dragStart(ev: DragEvent): void {
+    dragStart(): void {
         this.currentSum = this.left.clientWidth + this.right.clientWidth;
     }
 

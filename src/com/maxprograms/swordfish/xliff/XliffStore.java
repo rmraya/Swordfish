@@ -46,6 +46,7 @@ import java.util.zip.DataFormatException;
 
 import javax.xml.parsers.ParserConfigurationException;
 
+import com.maxprograms.converters.Join;
 import com.maxprograms.converters.Merge;
 import com.maxprograms.languages.Language;
 import com.maxprograms.languages.LanguageUtils;
@@ -132,7 +133,6 @@ public class XliffStore {
     private String currentFile;
     private String currentUnit;
     private String state;
-    // private boolean translate;
     private int tagCount;
 
     private String srcLang;
@@ -1799,9 +1799,23 @@ public class XliffStore {
     }
 
     public void exportXliff(String output)
-            throws SAXException, IOException, ParserConfigurationException, SQLException, URISyntaxException {
+            throws SAXException, IOException, ParserConfigurationException, SQLException {
         updateXliff();
-        Skeletons.embedSkeletons(xliffFile, output);
+        File projectFolder = new File(xliffFile).getParentFile();
+        File tempFolder = new File(projectFolder, "tmp");
+        if (tempFolder.exists()) {
+            TmsServer.deleteFolder(tempFolder.getAbsolutePath());
+        }
+        List<String> files = Split.split(xliffFile, tempFolder.getAbsolutePath());
+        File tempFile = File.createTempFile("joined", ".xlf", tempFolder);
+        Join.join(files, tempFile.getAbsolutePath());
+        File outputFile = new File(output);
+        if (outputFile.exists()) {
+            Files.delete(outputFile.toPath());
+        }
+        Files.copy(tempFile.toPath(), outputFile.toPath());
+        Files.delete(tempFile.toPath());
+        TmsServer.deleteFolder(tempFolder.getAbsolutePath());
     }
 
     public void exportTMX(String output, String description, String client, String subject)
@@ -2195,10 +2209,10 @@ public class XliffStore {
         List<Element> tags = child.getChildren();
         Iterator<Element> it = tags.iterator();
         while (it.hasNext()) {
-            Element tag = it.next();
-            String dataRef = tag.getAttributeValue("dataRef");
+            Element e = it.next();
+            String dataRef = e.getAttributeValue("dataRef");
             if (!dataRef.isEmpty() && !references.contains(dataRef)) {
-                tag.removeAttribute("dataRef");
+                e.removeAttribute("dataRef");
             }
         }
     }
@@ -2431,7 +2445,7 @@ public class XliffStore {
                 array.put(json);
                 processed++;
                 if (processed % 20 == 0) {
-                    int percentage = Math.round(processed * 100 / total);
+                    int percentage = Math.round(processed * 100f / total);
                     if (percentage == 100) {
                         percentage = 99;
                     }
@@ -3894,7 +3908,7 @@ public class XliffStore {
     }
 
     public String exportHTML(String title)
-            throws SQLException, IOException, SAXException, ParserConfigurationException, DataFormatException {
+            throws SQLException, IOException, SAXException, ParserConfigurationException {
         File output = new File(xliffFile + ".html");
         try (FileOutputStream out = new FileOutputStream(output)) {
             writeString(out, "<html>\n");

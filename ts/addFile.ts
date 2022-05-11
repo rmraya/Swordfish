@@ -95,8 +95,7 @@ class AddFile {
     setLanguages(arg: any): void {
         let array = arg.languages;
         let languageOptions = '<option value="none">Select Language</option>';
-        for (let i = 0; i < array.length; i++) {
-            let lang = array[i];
+        for (let lang of array) {
             languageOptions = languageOptions + '<option value="' + lang.code + '">' + lang.description + '</option>';
         }
         document.getElementById('srcLangSelect').innerHTML = languageOptions;
@@ -107,9 +106,8 @@ class AddFile {
 
     setTypes(arg: any): void {
         this.typesOption = '<option value="none" class="error">Select Type</option>';
-        let length: number = arg.formats.length;
-        for (let i = 0; i < length; i++) {
-            this.typesOption = this.typesOption + '<option value="' + arg.formats[i].code + '">' + arg.formats[i].description + '</option>';
+        for (let format of arg.formats) {
+            this.typesOption = this.typesOption + '<option value="' + format.code + '">' + format.description + '</option>';
         }
         document.getElementById('typeSelect').innerHTML = this.typesOption;
         this.electron.ipcRenderer.send('get-charsets');

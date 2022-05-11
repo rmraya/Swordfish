@@ -66,12 +66,12 @@ class TranslationView {
     srcLang: string;
     tgtLang: string;
     tbody: HTMLTableSectionElement;
-    numberTh: HTMLTableHeaderCellElement;
-    sourceTh: HTMLTableHeaderCellElement;
-    translateTh: HTMLTableHeaderCellElement;
-    matchTh: HTMLTableHeaderCellElement;
-    finalTh: HTMLTableHeaderCellElement;
-    targetTh: HTMLTableHeaderCellElement;
+    numberTh: HTMLTableCellElement;
+    sourceTh: HTMLTableCellElement;
+    translateTh: HTMLTableCellElement;
+    matchTh: HTMLTableCellElement;
+    finalTh: HTMLTableCellElement;
+    targetTh: HTMLTableCellElement;
 
     zoom: number = 1.0;
 

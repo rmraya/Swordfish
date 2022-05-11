@@ -1192,8 +1192,7 @@ class Preferences {
 
     getOptions(array: any[]): string {
         let languageOptions = '<option value="none">Select Language</option>';
-        for (let i = 0; i < array.length; i++) {
-            let lang = array[i];
+        for (let lang of array) {
             languageOptions = languageOptions + '<option value="' + lang.code + '">' + lang.description + '</option>';
         }
         return languageOptions;
@@ -1202,22 +1201,22 @@ class Preferences {
     setFilters(json: any): void {
         this.filtersTable.innerHTML = '';
         let files: string[] = json.files;
-        for (let i = 0; i < files.length; i++) {
+        for (let file of files) {
             let row: HTMLTableRowElement = document.createElement('tr');
             this.filtersTable.appendChild(row);
             let col1: HTMLTableCellElement = document.createElement('td');
             col1.classList.add('middle');
             row.appendChild(col1);
             let check: HTMLInputElement = document.createElement('input');
-            check.id = 'ck_' + files[i];
+            check.id = 'ck_' + file;
             check.type = 'checkbox';
             col1.appendChild(check);
             row.addEventListener('click', (event: MouseEvent) => {
-                this.clicked(row, files[i], check);
+                this.clicked(row, file, check);
             });
             let col2 = document.createElement('td');
             col2.classList.add('fill_width');
-            col2.innerText = files[i];
+            col2.innerText = file;
             row.appendChild(col2);
         }
         this.selected.clear();

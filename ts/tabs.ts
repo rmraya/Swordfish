@@ -29,7 +29,7 @@ class Tab {
         this.label.id = this.id;
         if (description.length > 40) {
             this.label.title = description;
-            this.label.innerText = '...' + description.substr(description.length - 37);
+            this.label.innerText = '...' + description.substring(description.length - 37);
         } else {
             this.label.innerText = description;
         }
@@ -119,11 +119,11 @@ class TabHolder {
     }
 
     clear(): void {
-        this.labels.forEach((value, key) => {
+        this.labels.forEach((value) => {
             this.tabsHolder.removeChild(value);
         });
         this.labels.clear();
-        this.tabs.forEach((value, key) => {
+        this.tabs.forEach((value) => {
             this.contentHolder.removeChild(value.getContainer());
         });
         this.tabs.clear();

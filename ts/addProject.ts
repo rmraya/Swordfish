@@ -164,9 +164,8 @@ class AddProject {
 
     setSubjects(subjects: string[]): void {
         let options: string = '';
-        let length: number = subjects.length;
-        for (let i = 0; i < length; i++) {
-            options = options + '<option value="' + subjects[i] + '">' + subjects[i] + '</option>';
+        for (let subject of subjects) {
+            options = options + '<option value="' + subject + '">' + subject + '</option>';
         }
         document.getElementById('subjects').innerHTML = options;
     }
@@ -174,8 +173,7 @@ class AddProject {
     setLanguages(arg: any): void {
         let array = arg.languages;
         let languageOptions = '<option value="none">Select Language</option>';
-        for (let i = 0; i < array.length; i++) {
-            let lang = array[i];
+        for (let lang of array) {
             languageOptions = languageOptions + '<option value="' + lang.code + '">' + lang.description + '</option>';
         }
         document.getElementById('srcLangSelect').innerHTML = languageOptions;

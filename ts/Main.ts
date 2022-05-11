@@ -90,10 +90,10 @@ class Main {
         Main.electron.ipcRenderer.on('remove-projects', () => {
             this.projectsView.removeProjects();
         });
-        Main.electron.ipcRenderer.on('export-translations', (event: Electron.IpcRendererEvent, arg: any) => {
+        Main.electron.ipcRenderer.on('export-translations', () => {
             this.exportTranslations();
         });
-        Main.electron.ipcRenderer.on('export-project', (event: Electron.IpcRendererEvent, arg: any) => {
+        Main.electron.ipcRenderer.on('export-project', () => {
             this.projectsView.exportProject();
         });
         Main.electron.ipcRenderer.on('export-translations-tmx', () => {
@@ -159,10 +159,10 @@ class Main {
         Main.electron.ipcRenderer.on('term-search-requested', () => {
             this.searchTerm();
         });
-        Main.electron.ipcRenderer.on('apply-terminology', (event: Electron.IpcRendererEvent, arg: any) => {
+        Main.electron.ipcRenderer.on('apply-terminology', () => {
             this.applyTerminology();
         });
-        Main.electron.ipcRenderer.on('apply-terminology-all', (event: Electron.IpcRendererEvent, arg: any) => {
+        Main.electron.ipcRenderer.on('apply-terminology-all', () => {
             this.applyTerminologyAll();
         });
         Main.electron.ipcRenderer.on('add-term-requested', () => {
@@ -399,7 +399,7 @@ class Main {
 
     setStatus(arg: any): void {
         let status: HTMLDivElement = document.getElementById('status') as HTMLDivElement;
-        status.innerText= arg;
+        status.innerText = arg;
         if (arg.length > 0) {
             status.style.display = 'block';
         } else {

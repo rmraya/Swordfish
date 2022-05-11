@@ -46,8 +46,7 @@ class FilterConfig {
         let tbody: HTMLTableSectionElement = document.getElementById('tbody') as HTMLTableSectionElement;
         tbody.innerHTML = '';
         this.selected = new Map<string, any>();
-        for (let i = 0; i < children.length; i++) {
-            let tag: any = children[i];
+        for (let tag of children) {
             let attributes: string[][] = tag.attributes;
             let tr: HTMLTableRowElement = document.createElement('tr');
             tbody.appendChild(tr);
@@ -135,8 +134,7 @@ class FilterConfig {
     }
 
     getAttribute(attributes: string[][], name: string, defaultValue: string): string {
-        for (let i = 0; i < attributes.length; i++) {
-            let attribute: string[] = attributes[i];
+        for (let attribute of attributes) {
             if (attribute[0] === name) {
                 return attribute[1];
             }

@@ -37,33 +37,6 @@ public class Skeletons {
         // private for security
     }
 
-    public static void embedSkeletons(String xliffFile, String outputFile)
-            throws SAXException, IOException, ParserConfigurationException, URISyntaxException {
-        SAXBuilder builder = new SAXBuilder();
-        builder.setEntityResolver(new Catalog(XliffStore.getCatalog()));
-        Document doc = builder.build(xliffFile);
-        Element xliff = doc.getRootElement();
-        List<Element> files = xliff.getChildren("file");
-        Iterator<Element> it = files.iterator();
-        while (it.hasNext()) {
-            Element file = it.next();
-            Element skeleton = file.getChild("skeleton");
-            if (skeleton != null) {
-                String href = skeleton.getAttributeValue("href");
-                if (!href.isEmpty()) {
-                    File skl = new File(href);
-                    skeleton.addContent(Utils.encodeFromFile(skl.getAbsolutePath()));
-                    skeleton.removeAttribute("href");
-                }
-            }
-        }
-        try (FileOutputStream out = new FileOutputStream(outputFile)) {
-            XMLOutputter outputter = new XMLOutputter();
-            outputter.preserveSpace(true);
-            outputter.output(doc, out);
-        }
-    }
-
     public static void extractSkeletons(File xliffFile, File outputFile) throws IOException, SAXException,
             ParserConfigurationException, URISyntaxException {
         File xliffParent = outputFile.getParentFile();
@@ -79,7 +52,8 @@ public class Skeletons {
             if (skeleton != null) {
                 String href = skeleton.getAttributeValue("href");
                 if (href.isEmpty()) {
-                    File skl = File.createTempFile("file", ".skl", xliffParent);
+
+                    File skl = new File(xliffParent, file.getAttributeValue("original") + ".skl");
                     Utils.decodeToFile(skeleton.getText(), skl.getAbsolutePath());
                     skeleton.setAttribute("href", skl.getAbsolutePath());
                     skeleton.setContent(new Vector<>());

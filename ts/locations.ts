@@ -54,7 +54,7 @@ export class Locations {
         this.locations.forEach((value: Point, key: string) => {
             text = text + '\"' + key + '\": {\"x\":' + value.x + ', \"y\":' + value.y + '},';
         });
-        text = text.substr(0, text.length - 1) + '}'
+        text = text.substring(0, text.length - 1) + '}'
         let json = JSON.parse(text);
         writeFile(this.file, JSON.stringify(json), (err: Error) => {
             if (err) throw err;
