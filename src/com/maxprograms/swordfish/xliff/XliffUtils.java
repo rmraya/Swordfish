@@ -20,9 +20,11 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.Vector;
 
 import javax.xml.parsers.ParserConfigurationException;
@@ -221,7 +223,7 @@ public class XliffUtils {
 		Element xliff = new Element(name);
 		List<XMLNode> newContent = new Vector<>();
 		List<XMLNode> content = tuv.getChild("seg").getContent();
-		Map<String,String> pairs = new HashMap<>();
+		Map<String, String> pairs = new HashMap<>();
 		Iterator<XMLNode> it = content.iterator();
 		int tag = 0;
 		while (it.hasNext()) {
@@ -338,61 +340,66 @@ public class XliffUtils {
 			if (!"2.0".equals(xliff.getAttributeValue("version"))) {
 				throw new IOException(NOTSWORDFISH);
 			}
+			Set<String> originals = new HashSet<>();
 			JSONArray filesArray = new JSONArray();
 			List<Element> files = xliff.getChildren("file");
 			Iterator<Element> it = files.iterator();
 			while (it.hasNext()) {
 				Element file = it.next();
-				JSONObject fileObject = new JSONObject();
-				fileObject.put("file", file.getAttributeValue("original"));
-				Element skeleton = file.getChild("skeleton");
-				if (skeleton == null) {
-					throw new IOException(NOTSWORDFISH);
-				}
-				Element metadata = file.getChild("mda:metadata");
-				if (metadata == null) {
-					throw new IOException(NOTSWORDFISH);
-				}
-				boolean isOpenXLIFF = false;
-				List<Element> groups = metadata.getChildren("mda:metaGroup");
-				Iterator<Element> gt = groups.iterator();
-				while (gt.hasNext()) {
-					Element group = gt.next();
-					if ("tool".equals(group.getAttributeValue("category"))) {
-						List<Element> metaList = group.getChildren("mda:meta");
-						Iterator<Element> mt = metaList.iterator();
-						while (mt.hasNext()) {
-							Element meta = mt.next();
-							if ("tool-id".equals(meta.getAttributeValue("type"))) {
-								isOpenXLIFF = com.maxprograms.converters.Constants.TOOLID.equals(meta.getText());
+				String original = file.getAttributeValue("original");
+				if (!originals.contains(original)) {
+					JSONObject fileObject = new JSONObject();
+					fileObject.put("file", original);
+					Element skeleton = file.getChild("skeleton");
+					if (skeleton == null) {
+						throw new IOException(NOTSWORDFISH);
+					}
+					Element metadata = file.getChild("mda:metadata");
+					if (metadata == null) {
+						throw new IOException(NOTSWORDFISH);
+					}
+					boolean isOpenXLIFF = false;
+					List<Element> groups = metadata.getChildren("mda:metaGroup");
+					Iterator<Element> gt = groups.iterator();
+					while (gt.hasNext()) {
+						Element group = gt.next();
+						if ("tool".equals(group.getAttributeValue("category"))) {
+							List<Element> metaList = group.getChildren("mda:meta");
+							Iterator<Element> mt = metaList.iterator();
+							while (mt.hasNext()) {
+								Element meta = mt.next();
+								if ("tool-id".equals(meta.getAttributeValue("type"))) {
+									isOpenXLIFF = com.maxprograms.converters.Constants.TOOLID.equals(meta.getText());
+								}
+							}
+						}
+						if ("format".equals(group.getAttributeValue("category"))) {
+							List<Element> metaList = group.getChildren("mda:meta");
+							Iterator<Element> mt = metaList.iterator();
+							while (mt.hasNext()) {
+								Element meta = mt.next();
+								if ("datatype".equals(meta.getAttributeValue("type"))) {
+									fileObject.put("type", FileFormats.getFullName(meta.getText()));
+								}
+							}
+						}
+						if ("PI".equals(group.getAttributeValue("category"))) {
+							List<Element> metaList = group.getChildren("mda:meta");
+							Iterator<Element> mt = metaList.iterator();
+							while (mt.hasNext()) {
+								Element meta = mt.next();
+								if ("encoding".equals(meta.getAttributeValue("type"))) {
+									fileObject.put("encoding", meta.getText());
+								}
 							}
 						}
 					}
-					if ("format".equals(group.getAttributeValue("category"))) {
-						List<Element> metaList = group.getChildren("mda:meta");
-						Iterator<Element> mt = metaList.iterator();
-						while (mt.hasNext()) {
-							Element meta = mt.next();
-							if ("datatype".equals(meta.getAttributeValue("type"))) {
-								fileObject.put("type", FileFormats.getFullName(meta.getText()));
-							}
-						}
+					if (!isOpenXLIFF) {
+						throw new IOException(NOTSWORDFISH);
 					}
-					if ("PI".equals(group.getAttributeValue("category"))) {
-						List<Element> metaList = group.getChildren("mda:meta");
-						Iterator<Element> mt = metaList.iterator();
-						while (mt.hasNext()) {
-							Element meta = mt.next();
-							if ("encoding".equals(meta.getAttributeValue("type"))) {
-								fileObject.put("encoding", meta.getText());
-							}
-						}
-					}
+					filesArray.put(fileObject);
+					originals.add(original);
 				}
-				if (!isOpenXLIFF) {
-					throw new IOException(NOTSWORDFISH);
-				}
-				filesArray.put(fileObject);
 			}
 			result.put("sourceLang", xliff.getAttributeValue("srcLang"));
 			result.put("targetLang", xliff.getAttributeValue("trgLang"));

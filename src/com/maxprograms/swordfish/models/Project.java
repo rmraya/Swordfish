@@ -75,7 +75,10 @@ public class Project implements Comparable<Project> {
 		files = new ArrayList<>();
 		JSONArray filesArray = json.getJSONArray("files");
 		for (int i = 0; i < filesArray.length(); i++) {
-			files.add(new SourceFile(filesArray.getJSONObject(i)));
+			SourceFile sourceFile = new SourceFile(filesArray.getJSONObject(i));
+			if (!files.contains(sourceFile)) {
+				files.add(sourceFile);
+			}
 		}
 		xliff = json.getString("xliff");
 		memory = json.getString("memory");
