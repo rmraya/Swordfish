@@ -158,8 +158,7 @@ public class Memory implements Comparable<Memory> {
 
 	@Override
 	public boolean equals(Object obj) {
-		if (obj instanceof Memory) {
-			Memory m = (Memory) obj;
+		if (obj instanceof Memory m) {
 			return id.equals(m.getId());
 		}
 		return false;

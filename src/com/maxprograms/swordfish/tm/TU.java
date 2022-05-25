@@ -12,6 +12,7 @@
 
 package com.maxprograms.swordfish.tm;
 
+import java.io.Serializable;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Hashtable;
@@ -20,12 +21,15 @@ import java.util.Map;
 import java.util.Set;
 import java.util.Vector;
 
-public class TU {
+public class TU implements Serializable {
+	
+	private static final long serialVersionUID = 8284934106102485235L;
+	
 	private Set<String> langs;
 	private Map<String, String> props;
 	private List<String> notes;
 	private String creationdate;
-	Map<String, Tuv> tuvs;
+	private Map<String, Tuv> tuvs;
 
 	public TU() {
 		langs = Collections.synchronizedSet(new HashSet<>());

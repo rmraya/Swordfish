@@ -963,7 +963,7 @@ public class XliffStore {
         result.put("tagErrors", tagErrors);
         result.put("spaceErrors", spaceErrors);
 
-        if (!memory.equals(Constants.NONE) && !pureTarget.isBlank()) {
+        if (!memory.equals(Constants.NONE) && !pureTarget.isBlank() && confirm) {
             Thread thread = new Thread() {
                 @Override
                 public void run() {
