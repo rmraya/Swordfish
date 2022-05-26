@@ -59,7 +59,12 @@ public class TuDatabase {
 	}
 
 	public Element getTu(String tuid) {
-		return tumap.get(tuid.hashCode());
+		Element result = tumap.get(tuid.hashCode());
+		if (result == null) {
+			result = new Element("tu");
+			result.setAttribute("id", tuid);
+		}
+		return result;
 	}
 
 	public void rollback() {
@@ -92,10 +97,6 @@ public class TuDatabase {
 
 	public Set<Integer> getKeys() {
 		return tumap.keySet();
-	}
-
-	public Element getTu(Integer hashCode) {
-		return tumap.get(hashCode);
 	}
 
 	public void remove(String tuid) {

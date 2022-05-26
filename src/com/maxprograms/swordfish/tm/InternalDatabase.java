@@ -208,17 +208,7 @@ public class InternalDatabase implements ITmEngine {
 				try (ResultSet tuKeys = tus.executeQuery("SELECT DISTINCT TUID from TUV")) {
 					while (tuKeys.next()) {
 						String tuid = tuKeys.getString(1);
-						Element tu = new Element("tu");
-						try {
-							Element t = tuDb.getTu(tuid);
-							if (t != null) {
-								tu.clone(t);
-							} else {
-								tu.setAttribute("tuid", tuid);
-							}
-						} catch (RuntimeException re) {
-							tu.setAttribute("tuid", tuid);
-						}
+						Element tu = tuDb.getTu(tuid);
 						stmt.setString(1, tuid);
 						int count = 0;
 						try (ResultSet rs = stmt.executeQuery()) {
@@ -370,17 +360,7 @@ public class InternalDatabase implements ITmEngine {
 									if (tgtFound) {
 										Element source = TMUtils.buildTuv(srcLang, srcSeg);
 										Map<String, String> propsMap = new Hashtable<>();
-										Element tu = new Element("tu");
-										try {
-											Element t = tuDb.getTu(tuid);
-											if (t != null) {
-												tu.clone(t);
-											} else {
-												tu.setAttribute("tuid", tuid);
-											}
-										} catch (RuntimeException re) {
-											tu.setAttribute("tuid", tuid);
-										}
+										Element tu = getTu(tuid);
 										List<Element> props = tu.getChildren("prop");
 										Iterator<Element> pt = props.iterator();
 										while (pt.hasNext()) {
@@ -434,32 +414,11 @@ public class InternalDatabase implements ITmEngine {
 			}
 		}
 
-		try (PreparedStatement stmt2 = conn.prepareStatement("SELECT lang, seg FROM tuv WHERE tuid=?")) {
-			Iterator<String> it = candidates.iterator();
-			while (it.hasNext()) {
-				String tuid = it.next();
-				Element tu = new Element("tu");
-				try {
-					Element t = tuDb.getTu(tuid);
-					if (t != null) {
-						tu.clone(t);
-					} else {
-						tu.setAttribute("tuid", tuid);
-					}
-				} catch (RuntimeException re) {
-					tu.setAttribute("tuid", tuid);
-				}
-				stmt2.setString(1, tuid);
-				try (ResultSet rs2 = stmt2.executeQuery()) {
-					while (rs2.next()) {
-						String lang = rs2.getString(1);
-						String seg = TMUtils.getString(rs2.getNCharacterStream(2));
-						Element tuv = TMUtils.buildTuv(lang, seg);
-						tu.addContent(tuv);
-					}
-				}
-				result.add(tu);
-			}
+		Iterator<String> it = candidates.iterator();
+		while (it.hasNext()) {
+			String tuid = it.next();
+			Element tu = getTu(tuid);
+			result.add(tu);
 		}
 		return result;
 	}
@@ -622,16 +581,6 @@ public class InternalDatabase implements ITmEngine {
 	@Override
 	public Element getTu(String tuid) throws SQLException, SAXException, IOException, ParserConfigurationException {
 		Element tu = tuDb.getTu(tuid);
-		try {
-			Element t = tuDb.getTu(tuid);
-			if (t != null) {
-				tu.clone(t);
-			} else {
-				tu.setAttribute("tuid", tuid);
-			}
-		} catch (RuntimeException re) {
-			tu.setAttribute("tuid", tuid);
-		}
 		try (PreparedStatement stmt = conn.prepareStatement("SELECT lang, seg FROM tuv WHERE tuid=?")) {
 			stmt.setString(1, tuid);
 			try (ResultSet rs = stmt.executeQuery()) {
@@ -650,19 +599,17 @@ public class InternalDatabase implements ITmEngine {
 	}
 
 	@Override
-	public void removeTu(String tuid) throws IOException, SQLException {
-		Element tu = tuDb.getTu(tuid);
-		if (tu != null) {
-			List<Element> tuvs = tu.getChildren("tuv");
-			Iterator<Element> it = tuvs.iterator();
-			while (it.hasNext()) {
-				Element tuv = it.next();
-				String lang = LanguageUtils.normalizeCode(tuv.getAttributeValue("xml:lang"));
-				delete(tuid, lang);
-			}
-			tuDb.remove(tuid);
-			commit();
+	public void removeTu(String tuid) throws IOException, SQLException, SAXException, ParserConfigurationException {
+		Element tu = getTu(tuid);
+		List<Element> tuvs = tu.getChildren("tuv");
+		Iterator<Element> it = tuvs.iterator();
+		while (it.hasNext()) {
+			Element tuv = it.next();
+			String lang = LanguageUtils.normalizeCode(tuv.getAttributeValue("xml:lang"));
+			delete(tuid, lang);
 		}
+		tuDb.remove(tuid);
+		commit();
 	}
 
 	@Override
@@ -680,8 +627,7 @@ public class InternalDatabase implements ITmEngine {
 			throws IOException, SAXException, ParserConfigurationException, SQLException {
 		List<Element> result = new Vector<>();
 
-		int[] ngrams = null;
-		ngrams = NGrams.getNGrams(searchStr);
+		int[] ngrams = NGrams.getNGrams(searchStr);
 		int size = ngrams.length;
 		if (size == 0) {
 			return result;
@@ -692,7 +638,7 @@ public class InternalDatabase implements ITmEngine {
 		int minLength = searchStr.length() * similarity / 100;
 		int maxLength = searchStr.length() * (200 - similarity) / 100;
 
-		Hashtable<String, Integer> candidates = new Hashtable<>();
+		Map<String, Integer> candidates = new Hashtable<>();
 
 		try (PreparedStatement stmt = conn.prepareStatement(
 				"SELECT puretext FROM tuv WHERE lang=? AND tuid=? AND textlength>=? AND textlength<=?")) {
@@ -714,9 +660,10 @@ public class InternalDatabase implements ITmEngine {
 					}
 				}
 			}
-			Enumeration<String> tuids = candidates.keys();
-			while (tuids.hasMoreElements()) {
-				String tuid = tuids.nextElement();
+			Set<String> tuids = candidates.keySet();
+			Iterator<String> it = tuids.iterator();
+			while (it.hasNext()) {
+				String tuid = it.next();
 				int count = candidates.get(tuid);
 				if (count >= min && count <= max) {
 					stmt.setString(2, tuid);
@@ -730,17 +677,7 @@ public class InternalDatabase implements ITmEngine {
 								distance = MatchQuality.similarity(searchStr.toLowerCase(), pure.toLowerCase());
 							}
 							if (distance >= similarity) {
-								Element tu = new Element("tu");
-								try {
-									Element t = tuDb.getTu(tuid);
-									if (t != null) {
-										tu.clone(t);
-									} else {
-										tu.setAttribute("tuid", tuid);
-									}
-								} catch (RuntimeException re) {
-									tu.setAttribute("tuid", tuid);
-								}
+								Element tu = getTu(tuid);
 								result.add(tu);
 							}
 						}
