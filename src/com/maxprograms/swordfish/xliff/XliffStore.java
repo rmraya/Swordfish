@@ -405,7 +405,6 @@ public class XliffStore {
                 if (source.hasAttribute("xml:space")) {
                     target.setAttribute("xml:space", source.getAttributeValue("xml:space"));
                 }
-                target.setAttribute("xml:lang", tgtLang);
             }
 
             List<String> segmentNotes = new Vector<>();
@@ -477,10 +476,6 @@ public class XliffStore {
 
     private synchronized void insertSegment(String file, String unit, String segment, String type, boolean translate,
             Element source, Element target) throws SQLException {
-        source.setAttribute("xml:lang", srcLang);
-        if (target != null) {
-            target.setAttribute("xml:lang", tgtLang);
-        }
         String pureSource = XliffUtils.pureText(source);
         insertSegmentStmt.setString(1, file);
         insertSegmentStmt.setString(2, unit);
@@ -646,7 +641,6 @@ public class XliffStore {
                 Element source = XliffUtils.buildElement(src);
 
                 Element target = new Element("target");
-                target.setAttribute("xml:lang", tgtLang);
                 if (source.hasAttribute("xml:space")) {
                     target.setAttribute("xml:space", source.getAttributeValue("xml:space"));
                 }
@@ -978,7 +972,7 @@ public class XliffStore {
                         key.append(segment);
                         MemoriesHandler.open(memory);
                         ITmEngine engine = MemoriesHandler.getEngine(memory);
-                        engine.storeTu(XliffUtils.toTu(key.toString(), source, target, tags));
+                        engine.storeTu(XliffUtils.toTu(key.toString(), source, target, tags, srcLang, tgtLang));
                         engine.commit();
                         MemoriesHandler.close(memory);
                     } catch (IOException | SQLException e) {
@@ -1141,7 +1135,6 @@ public class XliffStore {
                         result.put(row);
 
                         Element translated = XliffUtils.buildElement("<target>" + translation + "</target>");
-                        translated.setAttribute("xml:lang", tgtLang);
                         translated.setAttribute("xml:space", preserve ? "preserve" : "default");
                         translated.setContent(target.getContent());
                         if (!translated.getChildren().isEmpty()) {
@@ -1861,7 +1854,7 @@ public class XliffStore {
 
                     Map<String, String> tags = getTags(source);
 
-                    Element tuv = XliffUtils.toTu(key.toString(), source, target, tags);
+                    Element tuv = XliffUtils.toTu(key.toString(), source, target, tags, srcLang, tgtLang);
                     tuv.getContent().add(0, d);
                     if (c != null) {
                         tuv.getContent().add(0, c);
@@ -1924,7 +1917,6 @@ public class XliffStore {
                 Element target = e.getChild("target");
                 if (target == null) {
                     target = new Element("target");
-                    target.setAttribute("xml:lang", tgtLang);
                     if ("preserve".equals(source.getAttributeValue("xml:space", "default"))) {
                         target.setAttribute("xml:space", "preserve");
                     }
@@ -1939,7 +1931,6 @@ public class XliffStore {
             if (target == null) {
                 Element source = e.getChild("source");
                 target = new Element("target");
-                target.setAttribute("xml:lang", tgtLang);
                 if ("preserve".equals(source.getAttributeValue("xml:space", "default"))) {
                     target.setAttribute("xml:space", "preserve");
                 }
@@ -2036,7 +2027,6 @@ public class XliffStore {
             Element target = e.getChild("target");
             if (target == null) {
                 target = new Element("target");
-                target.setAttribute("xml:lang", tgtLang);
                 if (source.hasAttribute("xml:space")) {
                     target.setAttribute("xml:space", source.getAttributeValue("xml:space"));
                 }
@@ -2081,7 +2071,6 @@ public class XliffStore {
             Element target = e.getChild("target");
             if (target == null) {
                 target = new Element("target");
-                target.setAttribute("xml:lang", tgtLang);
                 if (source.hasAttribute("xml:space")) {
                     target.setAttribute("xml:space", source.getAttributeValue("xml:space"));
                 }
@@ -2317,9 +2306,9 @@ public class XliffStore {
         if (match != null) {
             Element matchSource = match.getSource();
             matchSource.setAttribute("xml:lang", srcLang);
-            Element target = match.getTarget();
-            target.setAttribute("xml:lang", tgtLang);
-            insertMatch(file, unit, segment, "Auto", Constants.AM, match.getSimilarity(), matchSource, target,
+            Element matchTarget = match.getTarget();
+            matchTarget.setAttribute("xml:lang", tgtLang);
+            insertMatch(file, unit, segment, "Auto", Constants.AM, match.getSimilarity(), matchSource, matchTarget,
                     new JSONObject());
             conn.commit();
         }
@@ -2351,10 +2340,10 @@ public class XliffStore {
                     if (match != null) {
                         Element matchSource = match.getSource();
                         matchSource.setAttribute("xml:lang", srcLang);
-                        Element target = match.getTarget();
-                        target.setAttribute("xml:lang", tgtLang);
+                        Element matchTarget = match.getTarget();
+                        matchTarget.setAttribute("xml:lang", tgtLang);
                         insertMatch(file, unit, segment, "Auto", Constants.AM, match.getSimilarity(), matchSource,
-                                target, new JSONObject());
+                                matchTarget, new JSONObject());
                         conn.commit();
                     }
                 } catch (IOException | ParserConfigurationException | SAXException | SQLException ex) {
@@ -2398,14 +2387,14 @@ public class XliffStore {
         for (int i = 0; i < matches.size(); i++) {
             Match m = matches.get(i);
             XliffUtils.setTags(new JSONObject());
-            Element source = XliffUtils.toXliff(segment, i, "source", m.getSource());
-            source.setAttribute("xml:lang", srcLang);
-            Element target = XliffUtils.toXliff(segment, i, "target", m.getTarget());
-            target.setAttribute("xml:lang", tgtLang);
+            Element matchSource = XliffUtils.toXliff(segment, i, "source", m.getSource());
+            matchSource.setAttribute("xml:lang", srcLang);
+            Element matchTarget = XliffUtils.toXliff(segment, i, "target", m.getTarget());
+            matchTarget.setAttribute("xml:lang", tgtLang);
             JSONObject obj = new JSONObject();
             obj.put("dataRef", XliffUtils.getTags());
-            int similarity = m.getSimilarity() - tagDifferences(original, source);
-            insertMatch(file, unit, segment, memoryName, Constants.TM, similarity, source, target, obj);
+            int similarity = m.getSimilarity() - tagDifferences(original, matchSource);
+            insertMatch(file, unit, segment, memoryName, Constants.TM, similarity, matchSource, matchTarget, obj);
             conn.commit();
         }
         MemoriesHandler.close(memory);
@@ -2494,18 +2483,18 @@ public class XliffStore {
                         for (int j = 0; j < matches.length(); j++) {
                             Match m = new Match(matches.getJSONObject(j));
                             XliffUtils.setTags(new JSONObject());
-                            Element source = XliffUtils.toXliff(segment, j, "source", m.getSource());
-                            source.setAttribute("xml:lang", srcLang);
-                            Element target = XliffUtils.toXliff(segment, j, "target", m.getTarget());
-                            target.setAttribute("xml:lang", tgtLang);
-                            int similarity = m.getSimilarity() - tagDifferences(original, source) - penalization;
-                            insertMatch(file, unit, segment, memoryName, Constants.TM, similarity, source, target,
+                            Element matchSource = XliffUtils.toXliff(segment, j, "source", m.getSource());
+                            matchSource.setAttribute("xml:lang", srcLang);
+                            Element matchTarget = XliffUtils.toXliff(segment, j, "target", m.getTarget());
+                            matchTarget.setAttribute("xml:lang", tgtLang);
+                            int similarity = m.getSimilarity() - tagDifferences(original, matchSource) - penalization;
+                            insertMatch(file, unit, segment, memoryName, Constants.TM, similarity, matchSource, matchTarget,
                                     XliffUtils.getTags());
                             if (similarity == 100 && originalTarget.getContent().isEmpty() && !updated) {
-                                if (!target.getChildren().isEmpty()) {
-                                    target = fixTags(original, source, target);
+                                if (!matchTarget.getChildren().isEmpty()) {
+                                    matchTarget = fixTags(original, matchSource, matchTarget);
                                 }
-                                updateTarget(file, unit, segment, target, XliffUtils.pureText(target), false);
+                                updateTarget(file, unit, segment, matchTarget, XliffUtils.pureText(matchTarget), false);
                                 updated = true;
                             }
                         }
@@ -2555,7 +2544,6 @@ public class XliffStore {
                 String src = TMUtils.getString(rs.getNCharacterStream(4));
                 Element source = XliffUtils.buildElement(src);
                 Element target = new Element("target");
-                target.setAttribute("xml:lang", tgtLang);
                 if (source.hasAttribute("xml:space")) {
                     target.setAttribute("xml:space", source.getAttributeValue("xml:space"));
                 }
@@ -2590,7 +2578,6 @@ public class XliffStore {
 
     private Element pseudoTranslate(Element source) {
         Element target = new Element("target");
-        target.setAttribute("xml:lang", tgtLang);
         if (source.hasAttribute("xml:space")) {
             target.setAttribute("xml:space", source.getAttributeValue("xml:space"));
         }
@@ -2637,7 +2624,6 @@ public class XliffStore {
 
                 Element source = XliffUtils.buildElement(src);
                 Element target = new Element("target");
-                target.setAttribute("xml:lang", tgtLang);
                 if (source.hasAttribute("xml:space")) {
                     target.setAttribute("xml:space", source.getAttributeValue("xml:space"));
                 }
@@ -2690,7 +2676,7 @@ public class XliffStore {
                             key.append(unit);
                             key.append('-');
                             key.append(segment);
-                            engine.storeTu(XliffUtils.toTu(key.toString(), source, target, tags));
+                            engine.storeTu(XliffUtils.toTu(key.toString(), source, target, tags, srcLang, tgtLang));
                         }
                     }
                 }
@@ -3396,7 +3382,7 @@ public class XliffStore {
                 String segment = rs.getString(3);
                 String sourceText = TMUtils.getString(rs.getNCharacterStream(4));
 
-                Element source = XliffUtils.buildElement("<source>" + XMLUtils.cleanText(sourceText) + "</source>");
+                Element matchSource = XliffUtils.buildElement("<source>" + XMLUtils.cleanText(sourceText) + "</source>");
 
                 JSONObject tagsData = new JSONObject();
                 List<JSONObject> translations = translator.translate(sourceText);
@@ -3404,11 +3390,11 @@ public class XliffStore {
                 while (it.hasNext()) {
                     JSONObject translation = it.next();
                     String origin = translation.getString("key");
-                    source.setAttribute("xml:lang", translation.getString("srcLang"));
+                    matchSource.setAttribute("xml:lang", translation.getString("srcLang"));
                     String targetText = "<target>" + XMLUtils.cleanText(translation.getString("target")) + "</target>";
-                    Element target = XliffUtils.buildElement(targetText);
-                    target.setAttribute("xml:lang", translation.getString("tgtLang"));
-                    insertMatch(file, unit, segment, origin, Constants.MT, 0, source, target, tagsData);
+                    Element matchTarget = XliffUtils.buildElement(targetText);
+                    matchTarget.setAttribute("xml:lang", translation.getString("tgtLang"));
+                    insertMatch(file, unit, segment, origin, Constants.MT, 0, matchSource, matchTarget, tagsData);
                 }
                 conn.commit();
             }
@@ -3434,7 +3420,6 @@ public class XliffStore {
                             Element source = XliffUtils.buildElement(src);
                             String tgt = TMUtils.getString(rs2.getNCharacterStream(1));
                             Element target = XliffUtils.buildElement(tgt);
-                            target.setAttribute("xml:lang", tgtLang);
                             if (source.hasAttribute("xml:space")) {
                                 target.setAttribute("xml:space", source.getAttributeValue("xml:space"));
                             }
@@ -4114,7 +4099,6 @@ public class XliffStore {
         String pureTarget = XliffUtils.pureText(oldTarget);
 
         Element source1 = new Element("source");
-        source1.setAttribute("xml:lang", srcLang);
         source1.setAttribute("xml:space", oldSource.getAttributeValue("xml:space", "default"));
         source1.setContent(list1);
 
@@ -4125,12 +4109,10 @@ public class XliffStore {
         segment1.addContent(oldTarget);
 
         Element source2 = new Element("source");
-        source2.setAttribute("xml:lang", srcLang);
         source2.setAttribute("xml:space", oldSource.getAttributeValue("xml:space", "default"));
         source2.setContent(list2);
 
         Element target2 = new Element("target");
-        target2.setAttribute("xml:lang", tgtLang);
         if (oldSource.hasAttribute("xml:space")) {
             target2.setAttribute("xml:space", oldSource.getAttributeValue("xml:space"));
         }
@@ -4376,7 +4358,6 @@ public class XliffStore {
                     if (source.hasAttribute("xml:space")) {
                         target.setAttribute("xml:space", source.getAttributeValue("xml:space"));
                     }
-                    target.setAttribute("xml:lang", tgtLang);
                 }
                 state = e.getAttributeValue("state",
                         XliffUtils.pureText(target).isEmpty() ? Constants.INITIAL : Constants.TRANSLATED);
@@ -4412,7 +4393,6 @@ public class XliffStore {
         }
         if (tgt == null || tgt.isEmpty()) {
             Element target = new Element("target");
-            target.setAttribute("xml:lang", tgtLang);
             return target;
         }
         return XliffUtils.buildElement(tgt);

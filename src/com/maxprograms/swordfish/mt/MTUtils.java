@@ -38,64 +38,67 @@ public class MTUtils {
                         "te", "th", "ti", "tk", "tlh-Latn", "tlh-Piqd", "to", "tr", "tt", "ty", "ug", "uk", "ur", "uz",
                         "vi", "yua", "yue", "zh-Hans", "zh-Hant" };
 
-        private static String[] azureTgtLanguages = { "af", "am", "ar", "as", "az", "ba", "bg", "bn", "bo", "bs", "ca",
-                        "cs", "cy", "da", "de", "dv", "el", "en", "es", "et", "fa", "fi", "fil", "fj", "fr", "fr-CA",
-                        "ga", "gu", "he", "hi", "hr", "ht", "hu", "hy", "id", "is", "it", "iu", "ja", "ka", "kk", "km",
-                        "kmr", "kn", "ko", "ku", "ky", "lo", "lt", "lv", "lzh", "mg", "mi", "mk", "ml", "mn-Cyrl",
-                        "mn-Mong", "mr", "ms", "mt", "mww", "my", "nb", "ne", "nl", "or", "otq", "pa", "pl", "prs",
-                        "ps", "pt", "pt-PT", "ro", "ru", "sk", "sl", "sm", "sq", "sr-Cyrl", "sr-Latn", "sv", "sw", "ta",
-                        "te", "th", "ti", "tk", "tlh-Latn", "tlh-Piqd", "to", "tr", "tt", "ty", "ug", "uk", "ur", "uz",
-                        "vi", "yua", "yue", "zh-Hans", "zh-Hant" };
+        private static String[] azureTgtLanguages = { "af", "sq", "am", "ar", "hy", "as", "az", "ba", "eu", "bn", "bs",
+                        "bg", "my", "ca", "zh-Hans", "zh-Hant", "hr", "cs", "da", "prs", "dv", "nl", "en", "et", "fo",
+                        "fj", "fil", "fi", "fr", "fr-CA", "gl", "ka", "de", "el", "gu", "ht", "he", "hi", "mww", "hu",
+                        "is", "id", "ikt", "iu", "iu-Latn", "ga", "it", "ja", "kn", "kk", "km", "ky", "tlh-Piqd",
+                        "tlh-Latn", "ko", "ku", "lo", "lv", "lzh", "lt", "mk", "mg", "ms", "ml", "mt", "mi", "mr",
+                        "mn-Cyrl", "mn-Mong", "ne", "kmr", "nb", "or", "pa", "fa", "pl", "pt", "pt-PT", "ps", "otq",
+                        "ro", "ru", "sm", "sr-Cyrl", "sr-Latn", "sk", "sl", "so", "es", "sw", "sv", "ty", "ta", "tt",
+                        "te", "th", "bo", "ti", "to", "tr", "tk", "ug", "uk", "hsb", "ur", "uz", "vi", "cy", "yua",
+                        "yue", "zu" };
 
-        private static String[] gtSrcLanguages = { "af", "am", "ar", "az", "be", "bg", "bn", "bs", "ca", "ceb", "co",
-                        "cs", "cy", "da", "de", "el", "en", "eo", "es", "et", "eu", "fa", "fi", "fr", "fy", "ga", "gd",
-                        "gl", "gu", "ha", "haw", "he", "hi", "hmn", "hr", "ht", "hu", "hy", "id", "ig", "is", "it",
-                        "iw", "ja", "jw", "ka", "kk", "km", "kn", "ko", "ku", "ky", "la", "lb", "lo", "lt", "lv", "mg",
-                        "mi", "mk", "ml", "mn", "mr", "ms", "mt", "my", "ne", "nl", "no", "ny", "or", "pa", "pl", "ps",
-                        "pt", "ro", "ru", "rw", "sd", "si", "sk", "sl", "sm", "sn", "so", "sq", "sr", "st", "su", "sv",
-                        "sw", "ta", "te", "tg", "th", "tk", "tl", "tr", "tt", "ug", "uk", "ur", "uz", "vi", "xh", "yi",
-                        "yo", "zh", "zh-CN", "zh-TW", "zu" };
+        private static String[] gtSrcLanguages = { "af", "sq", "am", "ar", "hy", "az", "eu", "be", "bn", "bs", "bg",
+                        "my", "ca", "ceb", "zh", "zh-CN", "zh-TW", "co", "hr", "cs", "da", "nl", "en", "eo", "et", "fi",
+                        "fr", "gl", "ka", "de", "el", "gu", "ht", "ha", "haw", "he", "iw", "hi", "hmn", "hu", "is",
+                        "ig", "id", "ga", "it", "ja", "jw", "kn", "kk", "km", "rw", "ky", "ko", "ku", "lo", "la", "lv",
+                        "lt", "lb", "mk", "mg", "ms", "ml", "mt", "mi", "mr", "mn", "ne", "no", "ny", "or", "pa", "fa",
+                        "pl", "pt", "ps", "ro", "ru", "sm", "gd", "sr", "sn", "sd", "si", "sk", "sl", "so", "st", "es",
+                        "su", "sw", "sv", "tl", "tg", "ta", "tt", "te", "th", "tr", "tk", "ug", "uk", "ur", "uz", "vi",
+                        "cy", "fy", "xh", "yi", "yo", "zu" };
 
-        private static String[] gtTgtLanguages = { "af", "am", "ar", "az", "be", "bg", "bn", "bs", "ca", "ceb", "co",
-                        "cs", "cy", "da", "de", "el", "en", "eo", "es", "et", "eu", "fa", "fi", "fr", "fy", "ga", "gd",
-                        "gl", "gu", "ha", "haw", "he", "hi", "hmn", "hr", "ht", "hu", "hy", "id", "ig", "is", "it",
-                        "iw", "ja", "jw", "ka", "kk", "km", "kn", "ko", "ku", "ky", "la", "lb", "lo", "lt", "lv", "mg",
-                        "mi", "mk", "ml", "mn", "mr", "ms", "mt", "my", "ne", "nl", "no", "ny", "or", "pa", "pl", "ps",
-                        "pt", "ro", "ru", "rw", "sd", "si", "sk", "sl", "sm", "sn", "so", "sq", "sr", "st", "su", "sv",
-                        "sw", "ta", "te", "tg", "th", "tk", "tl", "tr", "tt", "ug", "uk", "ur", "uz", "vi", "xh", "yi",
-                        "yo", "zh", "zh-CN", "zh-TW", "zu" };
+        private static String[] gtTgtLanguages = { "af", "sq", "am", "ar", "hy", "az", "eu", "be", "bn", "bs", "bg",
+                        "my", "ca", "ceb", "zh", "zh-CN", "zh-TW", "co", "hr", "cs", "da", "nl", "en", "eo", "et", "fi",
+                        "fr", "gl", "ka", "de", "el", "gu", "ht", "ha", "haw", "he", "iw", "hi", "hmn", "hu", "is",
+                        "ig", "id", "ga", "it", "ja", "jw", "kn", "kk", "km", "rw", "ky", "ko", "ku", "lo", "la", "lv",
+                        "lt", "lb", "mk", "mg", "ms", "ml", "mt", "mi", "mr", "mn", "ne", "no", "ny", "or", "pa", "fa",
+                        "pl", "pt", "ps", "ro", "ru", "sm", "gd", "sr", "sn", "sd", "si", "sk", "sl", "so", "st", "es",
+                        "su", "sw", "sv", "tl", "tg", "ta", "tt", "te", "th", "tr", "tk", "ug", "uk", "ur", "uz", "vi",
+                        "cy", "fy", "xh", "yi", "yo", "zu" };
 
-        private static String[] gtSrcNmtLangs = { "af", "am", "ar", "az", "be", "bg", "bn", "bs", "ca", "ceb", "co",
-                        "cs", "cy", "da", "de", "el", "en", "eo", "es", "et", "eu", "fa", "fi", "fr", "fy", "ga", "gd",
-                        "gl", "gu", "ha", "haw", "he", "hi", "hmn", "hr", "ht", "hu", "hy", "id", "ig", "is", "it",
-                        "iw", "ja", "jw", "ka", "kk", "km", "kn", "ko", "ku", "lb", "lo", "lt", "lv", "mg", "mi", "mk",
-                        "ml", "mn", "mr", "ms", "mt", "my", "ne", "nl", "no", "ny", "pa", "pl", "ps", "pt", "ro", "ru",
-                        "sd", "si", "sk", "sl", "sm", "sn", "so", "sq", "sr", "st", "su", "sv", "sw", "ta", "te", "tg",
-                        "th", "tl", "tr", "uk", "ur", "uz", "vi", "xh", "yi", "yo", "zh", "zh-CN", "zh-TW", "zu" };
+        private static String[] gtSrcNmtLangs = { "af", "sq", "am", "ar", "hy", "az", "eu", "be", "bn", "bs", "bg",
+                        "my", "ca", "ceb", "zh", "zh-CN", "zh-TW", "co", "hr", "cs", "da", "nl", "en", "eo", "et", "fi",
+                        "fr", "gl", "ka", "de", "el", "gu", "ht", "ha", "haw", "he", "iw", "hi", "hmn", "hu", "is",
+                        "ig", "id", "ga", "it", "ja", "jw", "kn", "kk", "km", "rw", "ky", "ko", "ku", "lo", "la", "lv",
+                        "lt", "lb", "mk", "mg", "ms", "ml", "mt", "mi", "mr", "mn", "ne", "no", "ny", "or", "pa", "fa",
+                        "pl", "pt", "ps", "ro", "ru", "sm", "gd", "sr", "sn", "sd", "si", "sk", "sl", "so", "st", "es",
+                        "su", "sw", "sv", "tl", "tg", "ta", "tt", "te", "th", "tr", "tk", "ug", "uk", "ur", "uz", "vi",
+                        "cy", "fy", "xh", "yi", "yo", "zu" };
 
-        private static String[] gtTgtNmtLangs = { "af", "am", "ar", "az", "be", "bg", "bn", "bs", "ca", "ceb", "co",
-                        "cs", "cy", "da", "de", "el", "en", "eo", "es", "et", "eu", "fa", "fi", "fr", "fy", "ga", "gd",
-                        "gl", "gu", "ha", "haw", "he", "hi", "hmn", "hr", "ht", "hu", "hy", "id", "ig", "is", "it",
-                        "iw", "ja", "jw", "ka", "kk", "km", "kn", "ko", "ku", "lb", "lo", "lt", "lv", "mg", "mi", "mk",
-                        "ml", "mn", "mr", "ms", "mt", "my", "ne", "nl", "no", "ny", "pa", "pl", "ps", "pt", "ro", "ru",
-                        "sd", "si", "sk", "sl", "sm", "sn", "so", "sq", "sr", "st", "su", "sv", "sw", "ta", "te", "tg",
-                        "th", "tl", "tr", "uk", "ur", "uz", "vi", "xh", "yi", "yo", "zh", "zh-CN", "zh-TW", "zu" };
+        private static String[] gtTgtNmtLangs = { "af", "sq", "am", "ar", "hy", "az", "eu", "be", "bn", "bs", "bg",
+                        "my", "ca", "ceb", "zh", "zh-CN", "zh-TW", "co", "hr", "cs", "da", "nl", "en", "eo", "et", "fi",
+                        "fr", "gl", "ka", "de", "el", "gu", "ht", "ha", "haw", "he", "iw", "hi", "hmn", "hu", "is",
+                        "ig", "id", "ga", "it", "ja", "jw", "kn", "kk", "km", "rw", "ky", "ko", "ku", "lo", "la", "lv",
+                        "lt", "lb", "mk", "mg", "ms", "ml", "mt", "mi", "mr", "mn", "ne", "no", "ny", "or", "pa", "fa",
+                        "pl", "pt", "ps", "ro", "ru", "sm", "gd", "sr", "sn", "sd", "si", "sk", "sl", "so", "st", "es",
+                        "su", "sw", "sv", "tl", "tg", "ta", "tt", "te", "th", "tr", "tk", "ug", "uk", "ur", "uz", "vi",
+                        "cy", "fy", "xh", "yi", "yo", "zu" };
 
-        private static String[] yandexSrcLanguages = { "tt", "de", "hi", "lo", "pt", "lt", "hr", "lv", "ht", "hu", "yi",
-                        "hy", "uk", "mg", "id", "mi", "ur", "mk", "pap", "ml", "mn", "af", "mr", "uz", "ms", "el", "mt",
-                        "en", "eo", "is", "it", "am", "my", "es", "zh", "et", "eu", "ar", "vi", "mhr", "ja", "ne", "az",
-                        "fa", "ro", "nl", "ba", "udm", "ceb", "no", "be", "fi", "ru", "bg", "bn", "fr", "jv", "bs",
-                        "ka", "si", "sk", "sl", "ga", "sah", "gd", "ca", "sq", "sr", "kk", "km", "su", "kn", "sv", "ko",
-                        "mrj", "sw", "gl", "ta", "gu", "ky", "cs", "xh", "pa", "te", "cv", "tg", "th", "la", "cy", "lb",
-                        "tl", "pl", "da", "he", "tr" };
+        private static String[] yandexSrcLanguages = { "af", "sq", "am", "ar", "hy", "az", "ba", "eu", "be", "bn", "bs",
+                        "bg", "my", "ca", "ceb", "zh", "cv", "hr", "cs", "da", "nl", "mhr", "en", "eo", "et", "fi",
+                        "fr", "gl", "ka", "de", "el", "gu", "ht", "he", "hi", "hu", "is", "id", "ga", "it", "ja", "jv",
+                        "kn", "kk", "km", "ky", "ko", "lo", "la", "lv", "lt", "lb", "mk", "mg", "ms", "ml", "mt", "mi",
+                        "mr", "mn", "ne", "no", "pa", "pap", "fa", "pl", "pt", "ro", "ru", "gd", "sr", "si", "sk", "sl",
+                        "es", "su", "sw", "sv", "tl", "tg", "ta", "tt", "te", "th", "tr", "udm", "uk", "ur", "uz", "vi",
+                        "cy", "mrj", "xh", "sah", "yi", "zu" };
 
-        private static String[] yandexTgtLanguages = { "tt", "de", "hi", "lo", "pt", "lt", "hr", "lv", "ht", "hu", "yi",
-                        "hy", "uk", "mg", "id", "mi", "ur", "mk", "pap", "ml", "mn", "af", "mr", "uz", "ms", "el", "mt",
-                        "en", "eo", "is", "it", "am", "my", "es", "zh", "et", "eu", "ar", "vi", "mhr", "ja", "ne", "az",
-                        "fa", "ro", "nl", "ba", "udm", "ceb", "no", "be", "fi", "ru", "bg", "bn", "fr", "jv", "bs",
-                        "ka", "si", "sk", "sl", "ga", "sah", "gd", "ca", "sq", "sr", "kk", "km", "su", "kn", "sv", "ko",
-                        "mrj", "sw", "gl", "ta", "gu", "ky", "cs", "xh", "pa", "te", "cv", "tg", "th", "la", "cy", "lb",
-                        "tl", "pl", "da", "he", "tr" };
+        private static String[] yandexTgtLanguages = { "af", "sq", "am", "ar", "hy", "az", "ba", "eu", "be", "bn", "bs",
+                        "bg", "my", "ca", "ceb", "zh", "cv", "hr", "cs", "da", "nl", "mhr", "en", "eo", "et", "fi",
+                        "fr", "gl", "ka", "de", "el", "gu", "ht", "he", "hi", "hu", "is", "id", "ga", "it", "ja", "jv",
+                        "kn", "kk", "km", "ky", "ko", "lo", "la", "lv", "lt", "lb", "mk", "mg", "ms", "ml", "mt", "mi",
+                        "mr", "mn", "ne", "no", "pa", "pap", "fa", "pl", "pt", "ro", "ru", "gd", "sr", "si", "sk", "sl",
+                        "es", "su", "sw", "sv", "tl", "tg", "ta", "tt", "te", "th", "tr", "udm", "uk", "ur", "uz", "vi",
+                        "cy", "mrj", "xh", "sah", "yi", "zu" };
 
         private static String[] yandexDirections = { "az-ru", "be-bg", "be-cs", "be-de", "be-en", "be-es", "be-fr",
                         "be-it", "be-pl", "be-ro", "be-ru", "be-sr", "be-tr", "bg-be", "bg-ru", "bg-uk", "ca-en",

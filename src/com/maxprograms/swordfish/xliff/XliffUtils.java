@@ -264,7 +264,8 @@ public class XliffUtils {
 		return xliff;
 	}
 
-	public static Element toTu(String key, Element source, Element target, Map<String, String> tags) {
+	public static Element toTu(String key, Element source, Element target, Map<String, String> tags, String srcLang,
+			String tgtLang) {
 		String creationDate = TMUtils.creationDate();
 		Element tu = new Element("tu");
 		tu.setAttribute("tuid", key);
@@ -272,7 +273,7 @@ public class XliffUtils {
 		tu.setAttribute("creationtoolversion", Constants.VERSION);
 		tu.setAttribute("creationdate", creationDate);
 		Element tuv = new Element("tuv");
-		tuv.setAttribute("xml:lang", source.getAttributeValue("xml:lang"));
+		tuv.setAttribute("xml:lang", srcLang);
 		tuv.setAttribute("creationdate", creationDate);
 		tu.addContent(tuv);
 		Element seg = new Element("seg");
@@ -280,7 +281,7 @@ public class XliffUtils {
 		tuv.addContent(seg);
 
 		tuv = new Element("tuv");
-		tuv.setAttribute("xml:lang", target.getAttributeValue("xml:lang"));
+		tuv.setAttribute("xml:lang", tgtLang);
 		tuv.setAttribute("creationdate", creationDate);
 		tu.addContent(tuv);
 		seg = new Element("seg");
@@ -319,7 +320,7 @@ public class XliffUtils {
 					result.add(tail);
 				}
 				if ("mrk".equals(e.getName())) {
-					result.addAll(e.getContent());
+					result.addAll(toTmx(e, tags));
 				}
 			}
 		}
