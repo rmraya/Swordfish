@@ -578,8 +578,7 @@ public class ServicesHandler implements HttpHandler {
     private static JSONObject getSystemInformation() {
         JSONObject result = new JSONObject();
         result.put("swordfish", Constants.VERSION + " Build: " + Constants.BUILD);
-        result.put("openxliff",
-                com.maxprograms.converters.Constants.VERSION + " Build: " + com.maxprograms.converters.Constants.BUILD);
+        result.put("openxliff", com.maxprograms.converters.Constants.VERSION + " Build: " + com.maxprograms.converters.Constants.BUILD);
         result.put("java", System.getProperty("java.version") + " Vendor: " + System.getProperty("java.vendor"));
         return result;
     }
