@@ -6,7 +6,7 @@ An advanced CAT (Computer Aided Translation) tool based on XLIFF Standard that s
 
 Swordfish uses TM (Translation Memory) and MT (Machine Translation). Supports segment filtering, terminology, customization and more.
 
-#### Swordfish IV Running on macOS
+## Swordfish IV Running on macOS
 
 <a href="https://www.maxprograms.com/tutorials/TranslateFile.mp4"><img src="https://www.maxprograms.com/images/translateFile.png"></a>
 
@@ -32,24 +32,25 @@ Personal Subscription Keys are available in  [Maxprograms Online Store](https://
 Subscription version includes unlimited email support at tech@maxprograms.com
 
 ### Differences sumary
+
 Differences | Source Code | Subscription Based
--|----------- | -------------
+------------|:-----------:|:-----------------:
 Ready To Use Installers| No | Yes
 Notarized macOS launcher| No | Yes
 Signed launcher and installer for Windows | No | Yes
 Restricted Features | None | None
-Technical Support |  Peer support at  [Groups.io](https://groups.io/g/maxprograms/)| - Direct email at tech@maxprograms.com  <br> - Peer support at [Groups.io](https://groups.io/g/maxprograms/)
-
+Technical Support |  Peer support at [Groups.io](https://groups.io/g/maxprograms/)| - Direct email at tech@maxprograms.com  <br> - Peer support at [Groups.io](https://groups.io/g/maxprograms/)
 
 ## Related Projects
+
 - [RemoteTM](https://github.com/rmraya/RemoteTM)
 - [OpenXLIFF Filters](https://github.com/rmraya/OpenXLIFF)
 
 ## Requirements
 
 - JDK 17 or newer is required for compiling and building. Get it from [Adoptium](https://adoptium.net/).
-- Apache Ant 1.10.10 or newer. Get it from [https://ant.apache.org/](https://ant.apache.org/)
-- Node.js 16.13.0 LTS or newer. Get it from [https://nodejs.org/](https://nodejs.org/)
+- Apache Ant 1.10.12 or newer. Get it from [https://ant.apache.org/](https://ant.apache.org/)
+- Node.js 16.16.0 LTS or newer. Get it from [https://nodejs.org/](https://nodejs.org/)
 
 ## Building
 
@@ -68,6 +69,7 @@ Technical Support |  Peer support at  [Groups.io](https://groups.io/g/maxprogram
   npm install
   npm start
 ```
+
 This video shows how to build and launch Swordfish IV: [https://www.maxprograms.com/tutorials/SwordfishIV_build.mp4](https://www.maxprograms.com/tutorials/SwordfishIV_build.mp4)
 
 Compile once and then simply run `npm start` to start Swordfish

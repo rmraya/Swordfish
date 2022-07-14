@@ -580,7 +580,7 @@ public class GlossariesHandler implements HttpHandler {
 		return result;
 	}
 
-	private static String generateHTML(List<Element> matches) throws IOException {
+	private static String generateHTML(List<Element> matches) throws IOException, SAXException, ParserConfigurationException {
 		StringBuilder builder = new StringBuilder();
 		builder.append("<table class='stripes'><tr>");
 		List<Language> languages = MemoriesHandler.getLanguages(matches);
@@ -600,7 +600,7 @@ public class GlossariesHandler implements HttpHandler {
 		return builder.toString();
 	}
 
-	private static String parseTU(Element element, List<Language> languages) {
+	private static String parseTU(Element element, List<Language> languages) throws SAXException, IOException, ParserConfigurationException {
 		StringBuilder builder = new StringBuilder();
 		Map<String, Element> map = new Hashtable<>();
 		List<Element> tuvs = element.getChildren("tuv");

@@ -2488,8 +2488,8 @@ public class XliffStore {
                             Element matchTarget = XliffUtils.toXliff(segment, j, "target", m.getTarget());
                             matchTarget.setAttribute("xml:lang", tgtLang);
                             int similarity = m.getSimilarity() - tagDifferences(original, matchSource) - penalization;
-                            insertMatch(file, unit, segment, memoryName, Constants.TM, similarity, matchSource, matchTarget,
-                                    XliffUtils.getTags());
+                            insertMatch(file, unit, segment, memoryName, Constants.TM, similarity, matchSource,
+                                    matchTarget, XliffUtils.getTags());
                             if (similarity == 100 && originalTarget.getContent().isEmpty() && !updated) {
                                 if (!matchTarget.getChildren().isEmpty()) {
                                     matchTarget = fixTags(original, matchSource, matchTarget);
@@ -3382,7 +3382,8 @@ public class XliffStore {
                 String segment = rs.getString(3);
                 String sourceText = TMUtils.getString(rs.getNCharacterStream(4));
 
-                Element matchSource = XliffUtils.buildElement("<source>" + XMLUtils.cleanText(sourceText) + "</source>");
+                Element matchSource = XliffUtils
+                        .buildElement("<source>" + XMLUtils.cleanText(sourceText) + "</source>");
 
                 JSONObject tagsData = new JSONObject();
                 List<JSONObject> translations = translator.translate(sourceText);

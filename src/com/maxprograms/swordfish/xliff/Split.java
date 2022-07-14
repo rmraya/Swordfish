@@ -26,14 +26,14 @@ import java.util.TreeSet;
 
 import javax.xml.parsers.ParserConfigurationException;
 
+import org.xml.sax.SAXException;
+
 import com.maxprograms.converters.Join;
 import com.maxprograms.converters.Utils;
 import com.maxprograms.xml.Document;
 import com.maxprograms.xml.Element;
 import com.maxprograms.xml.SAXBuilder;
 import com.maxprograms.xml.XMLOutputter;
-
-import org.xml.sax.SAXException;
 
 public class Split {
 
@@ -81,7 +81,7 @@ public class Split {
                     file.setAttribute("original", original.substring(treeRoot.length()));
                     Element skeleton = file.getChild("skeleton");
                     String href = skeleton.getAttributeValue("href");
-                    if (!skeletons.contains(href)) {
+                    if (!skeletons.contains(href) && new File(href).exists()) {
                         skeleton.addContent(Utils.encodeFromFile(new File(href).getAbsolutePath()));
                         skeleton.removeAttribute("href");
                         skeletons.add(href);

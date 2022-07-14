@@ -580,7 +580,7 @@ public class MemoriesHandler implements HttpHandler {
 	}
 
 	private String generateHTML(List<Element> matches, String searchStr, boolean isRegexp, boolean caseSensitive)
-			throws IOException {
+			throws IOException, SAXException, ParserConfigurationException {
 		StringBuilder builder = new StringBuilder();
 		builder.append("<table class='stripes'><tr>");
 		List<Language> languages = getLanguages(matches);
@@ -601,7 +601,7 @@ public class MemoriesHandler implements HttpHandler {
 	}
 
 	private String parseTU(Element element, List<Language> languages, String searchStr, boolean isRegexp,
-			boolean caseSensitive) {
+			boolean caseSensitive) throws SAXException, IOException, ParserConfigurationException {
 		StringBuilder builder = new StringBuilder();
 		Map<String, Element> map = new Hashtable<>();
 		List<Element> tuvs = element.getChildren("tuv");
