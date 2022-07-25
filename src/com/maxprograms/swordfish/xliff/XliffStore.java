@@ -3500,18 +3500,14 @@ public class XliffStore {
                     if (!visited.containsKey(term)) {
                         visited.put(term, "");
                         List<Element> res = engine.searchAll(term, srcLang, similarity, caseSensitiveSearches);
-                        for (int j = 0; j < res.size(); j++) {
-                            JSONArray array = parseMatches(res);
-                            for (int h = 0; h < array.length(); h++) {
-                                JSONObject match = array.getJSONObject(h);
-                                Term candidate = new Term(match.getString("source"), match.getString("target"));
-                                if (!terms.contains(candidate)) {
-                                    terms.add(candidate);
-                                    match.put("origin", glossaryName);
-                                    result.put(match);
-                                    saveTerm(json.getString("file"), json.getString("unit"), json.getString("segment"),
-                                            glossaryName, match.getString("source"), match.getString("target"));
-                                }
+                        List<Term> array = parseMatches(res, glossaryName);
+                        for (int h = 0; h < array.size(); h++) {
+                            Term candidate = array.get(h);
+                            if (!terms.contains(candidate)) {
+                                terms.add(candidate);
+                                result.put(candidate.toJSON());
+                                saveTerm(json.getString("file"), json.getString("unit"), json.getString("segment"),
+                                        glossaryName, candidate.getSource(), candidate.getTarget());
                             }
                         }
                     }
@@ -3523,20 +3519,20 @@ public class XliffStore {
     }
 
     private JSONArray sortTerms(JSONArray array) {
+        if (array.length() == 0) {
+            return array;
+        }
         JSONArray result = new JSONArray();
         List<Term> terms = new Vector<>();
-        Map<Integer, JSONObject> map = new Hashtable<>();
         for (int i = 0; i < array.length(); i++) {
-            JSONObject obj = array.getJSONObject(i);
-            Term term = new Term(obj.getString("source"), obj.getString("target"));
-            terms.add(term);
-            map.put(term.hashCode(), obj);
+            terms.add(new Term(array.getJSONObject(i)));
         }
+        // sort ignoring term length
         Collections.sort(terms, (Term o1, Term o2) -> o1.getSource().compareToIgnoreCase(o2.getSource()));
         Iterator<Term> it = terms.iterator();
         while (it.hasNext()) {
             Term term = it.next();
-            result.put(map.get(term.hashCode()));
+            result.put(term.toJSON());
         }
         return result;
     }
@@ -3575,15 +3571,12 @@ public class XliffStore {
                                     visited.put(term, "");
                                     List<Element> res = engine.searchAll(term, srcLang, similarity,
                                             caseSensitiveSearches);
-                                    for (int j = 0; j < res.size(); j++) {
-                                        JSONArray array = parseMatches(res);
-                                        for (int h = 0; h < array.length(); h++) {
-                                            JSONObject match = array.getJSONObject(h);
-                                            match.put("origin", glossaryName);
-                                            saveTerm(file, unit, segment, glossaryName, match.getString("source"),
-                                                    match.getString("target"));
-                                            added = true;
-                                        }
+                                    List<Term> array = parseMatches(res, glossaryName);
+                                    for (int h = 0; h < array.size(); h++) {
+                                        Term candidate = array.get(h);
+                                        saveTerm(file, unit, segment, glossaryName, candidate.getSource(),
+                                                candidate.getTarget());
+                                        added = true;
                                     }
                                 }
                             }
@@ -3624,22 +3617,20 @@ public class XliffStore {
         }
     }
 
-    private JSONArray parseMatches(List<Element> matches) {
-        JSONArray result = new JSONArray();
+    private List<Term> parseMatches(List<Element> matches, String glossaryName) {
+        List<Term> result = new Vector<>();
         for (int i = 0; i < matches.size(); i++) {
             Map<String, String> map = new Hashtable<>();
-            Element element = matches.get(i);
-            List<Element> tuvs = element.getChildren("tuv");
+            Element tu = matches.get(i);
+            List<Element> tuvs = tu.getChildren("tuv");
             Iterator<Element> it = tuvs.iterator();
             while (it.hasNext()) {
                 Element tuv = it.next();
                 map.put(tuv.getAttributeValue("xml:lang"), MemoriesHandler.pureText(tuv.getChild("seg")));
             }
             if (map.containsKey(tgtLang)) {
-                JSONObject obj = new JSONObject();
-                obj.put("source", map.get(srcLang));
-                obj.put("target", map.get(tgtLang));
-                result.put(obj);
+                Term term = new Term(map.get(srcLang), map.get(tgtLang), srcLang, tgtLang, glossaryName);
+                result.add(term);
             }
         }
         return result;

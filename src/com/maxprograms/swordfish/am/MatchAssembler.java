@@ -178,7 +178,8 @@ public class MatchAssembler {
                             List<Match> res = glossEngine.searchTranslation(term, srcLang, tgtLang, 100, true);
                             if (!res.isEmpty()) {
                                 Match m = res.get(0);
-                                terms.add(new Term(m.getSource().getText(), m.getTarget().getText()));
+                                terms.add(new Term(m.getSource().getText(), m.getTarget().getText(), srcLang, tgtLang,
+                                        glossEngine.getName()));
                             }
                         }
                     }
