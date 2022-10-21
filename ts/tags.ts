@@ -48,5 +48,3 @@ class Tags {
         }
     }
 }
-
-new Tags();

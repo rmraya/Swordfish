@@ -106,5 +106,3 @@ class TermSearch {
             || code.startsWith("he") || code.startsWith("ji") || code.startsWith("yi");
     }
 }
-
-new TermSearch();

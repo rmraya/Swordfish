@@ -103,5 +103,3 @@ class ImportTMX {
         this.electron.ipcRenderer.send('import-tmx-file', params);
     }
 }
-
-new ImportTMX();

@@ -221,5 +221,3 @@ class AddFile {
         this.glossSelect.innerHTML = options;
     }
 }
-
-new AddFile();

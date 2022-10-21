@@ -47,5 +47,3 @@ class AddNote {
         this.electron.ipcRenderer.send('add-note', this.segmentData);
     }
 }
-
-new AddNote();

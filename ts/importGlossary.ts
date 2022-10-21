@@ -103,5 +103,3 @@ class ImportGlossary {
         this.electron.ipcRenderer.send('import-glossary-file', params);
     }
 }
-
-new ImportGlossary();

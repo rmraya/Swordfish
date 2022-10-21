@@ -35,7 +35,7 @@
   ctype:       Description to use for inline elements in <ph> placeholder.
 
   attributes:  List of attributes that contain translatable text. Write
-               attribute names separataed with ";".
+               attribute names separated with ";".
 
   keep-format: Set to "yes" if you need to preserve white spaces. If not
                present, "no" is assumed.

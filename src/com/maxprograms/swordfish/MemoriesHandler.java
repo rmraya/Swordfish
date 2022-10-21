@@ -12,11 +12,9 @@
 
 package com.maxprograms.swordfish;
 
-import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileOutputStream;
-import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -40,6 +38,10 @@ import java.util.regex.PatternSyntaxException;
 
 import javax.xml.parsers.ParserConfigurationException;
 
+import org.json.JSONArray;
+import org.json.JSONObject;
+import org.xml.sax.SAXException;
+
 import com.maxprograms.languages.Language;
 import com.maxprograms.languages.LanguageUtils;
 import com.maxprograms.swordfish.models.Memory;
@@ -52,10 +54,6 @@ import com.maxprograms.xml.TextNode;
 import com.maxprograms.xml.XMLNode;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
-
-import org.json.JSONArray;
-import org.json.JSONObject;
-import org.xml.sax.SAXException;
 
 public class MemoriesHandler implements HttpHandler {
 
@@ -378,12 +376,7 @@ public class MemoriesHandler implements HttpHandler {
 						Memory memory = memories.get(id);
 						close(id);
 						if (memory.getType().equals(Memory.LOCAL)) {
-							try {
-								File wfolder = new File(getWorkFolder(), id);
-								TmsServer.deleteFolder(wfolder.getAbsolutePath());
-							} catch (IOException ioe) {
-								logger.log(Level.WARNING, "Folder '" + id + "' will be deleted on next start");
-							}
+							deleteMemoryFolder(id);
 						}
 						memories.remove(id);
 					}
@@ -404,13 +397,20 @@ public class MemoriesHandler implements HttpHandler {
 		return result;
 	}
 
+	private static void deleteMemoryFolder(String id) {
+		try {
+			File wfolder = new File(getWorkFolder(), id);
+			TmsServer.deleteFolder(wfolder.getAbsolutePath());
+		} catch (IOException ioe) {
+			logger.log(Level.WARNING, "Folder '" + id + "' will be deleted on next start");
+		}
+	}
+
 	private static JSONObject listMemories() throws IOException {
 		JSONObject result = new JSONObject();
+		loadMemoriesList();
 		JSONArray array = new JSONArray();
 		result.put("memories", array);
-		if (memories == null) {
-			loadMemoriesList();
-		}
 		Vector<Memory> vector = new Vector<>();
 		vector.addAll(memories.values());
 		Collections.sort(vector);
@@ -472,16 +472,7 @@ public class MemoriesHandler implements HttpHandler {
 		if (!list.exists()) {
 			return;
 		}
-		StringBuffer buffer = new StringBuffer();
-		try (FileReader input = new FileReader(list, StandardCharsets.UTF_8)) {
-			try (BufferedReader reader = new BufferedReader(input)) {
-				String line;
-				while ((line = reader.readLine()) != null) {
-					buffer.append(line);
-				}
-			}
-		}
-		JSONObject json = new JSONObject(buffer.toString());
+		JSONObject json = TmsServer.readJSON(list);
 		Set<String> keys = json.keySet();
 		Iterator<String> it = keys.iterator();
 		while (it.hasNext()) {
@@ -523,12 +514,11 @@ public class MemoriesHandler implements HttpHandler {
 	}
 
 	public static String getWorkFolder() throws IOException {
-		File home = TmsServer.getWorkFolder();
-		File workFolder = new File(home, "memories");
-		if (!workFolder.exists()) {
-			Files.createDirectories(workFolder.toPath());
+		File home = TmsServer.getMemoriesFolder();
+		if (!home.exists()) {
+			Files.createDirectories(home.toPath());
 		}
-		return workFolder.getAbsolutePath();
+		return home.getAbsolutePath();
 	}
 
 	public static synchronized void open(String id) throws IOException, SQLException {

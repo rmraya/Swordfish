@@ -10,7 +10,7 @@
 }
 
 body {
-	background: var(--gray190);
+	background: var(--gray160);
 	color: var(--gray10);
 	fill: var(--gray10);
 	stroke: var(--gray10);

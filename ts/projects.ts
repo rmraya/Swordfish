@@ -30,6 +30,7 @@ class Project {
     memory: string;
     glossary: string;
     svg: string;
+    version: string;
 }
 
 class ProjectsView {
@@ -250,13 +251,8 @@ class ProjectsView {
             return;
         }
         for (let key of this.selected.keys()) {
-            let project = this.selected.get(key);
-            this.electron.ipcRenderer.send('add-tab', {
-                id: key,
-                description: project.description,
-                srcLang: project.sourceLang,
-                tgtLang: project.targetLang
-            });
+            let project: Project = this.selected.get(key);
+            this.electron.ipcRenderer.send('add-tab',  project);
         }
     }
 

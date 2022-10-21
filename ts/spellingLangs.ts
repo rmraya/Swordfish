@@ -51,5 +51,3 @@ class SpellcheckerLanguages {
         }
     }
 }
-
-new SpellcheckerLanguages();

@@ -15,6 +15,7 @@ import { app, BrowserWindow, ClientRequest, clipboard, dialog, ipcMain, IpcMainE
 import { IncomingMessage } from "electron/main";
 import { appendFileSync, existsSync, lstatSync, mkdirSync, readFile, readFileSync, unlinkSync, writeFileSync } from "fs";
 import { Locations, Point } from "./locations";
+import { Preferences } from "./preferences";
 
 class Swordfish {
 
@@ -67,11 +68,14 @@ class Swordfish {
     static downloadLink: string;
 
     static currentDefaults: Rectangle;
-    static currentPreferences: any = {
+    static currentPreferences: Preferences = {
         theme: 'system',
         zoomFactor: '1.0',
         srcLang: 'none',
         tgtLang: 'none',
+        projectsFolder: Swordfish.path.join(app.getPath('appData'), app.name, 'projects'),
+        memoriesFolder: Swordfish.path.join(app.getPath('appData'), app.name, 'memories'),
+        glossariesFolder: Swordfish.path.join(app.getPath('appData'), app.name, 'glossaries'),
         catalog: Swordfish.path.join(app.getAppPath(), 'catalog', 'catalog.xml'),
         srx: Swordfish.path.join(app.getAppPath(), 'srx', 'default.srx'),
         paragraphSegmentation: false,
@@ -114,7 +118,8 @@ class Swordfish {
             defaultPortuguese: 'pt-BR',
             defaultSpanish: 'es'
         },
-        os: process.platform
+        os: process.platform,
+        showGuide: true
     }
     static currentCss: string;
     static currentStatus: any;
@@ -188,7 +193,6 @@ class Swordfish {
         this.ls.stdout.on('data', (data) => {
             console.log(`stdout: ${data}`);
         });
-
         this.ls.stderr.on('data', (data) => {
             console.error(`stderr: ${data}`);
         });
@@ -290,7 +294,7 @@ class Swordfish {
         ipcMain.on('close-licenses', () => {
             Swordfish.destroyWindow(Swordfish.licensesWindow);
         });
-        ipcMain.on('save-preferences', (event: IpcMainEvent, arg: any) => {
+        ipcMain.on('save-preferences', (event: IpcMainEvent, arg: Preferences) => {
             Swordfish.savePreferences(arg);
         });
         ipcMain.on('save-languages', (event: IpcMainEvent, arg: any) => {
@@ -538,6 +542,15 @@ class Swordfish {
         ipcMain.on('get-preferences', (event: IpcMainEvent) => {
             event.sender.send('set-preferences', Swordfish.currentPreferences);
         });
+        ipcMain.on('browse-projects', (event: IpcMainEvent) => {
+            this.browseProjects(event);
+        });
+        ipcMain.on('browse-memories', (event: IpcMainEvent) => {
+            this.browseMemories(event);
+        });
+        ipcMain.on('browse-glossaries', (event: IpcMainEvent) => {
+            this.browseGlossaries(event);
+        });
         ipcMain.on('browse-srx', (event: IpcMainEvent) => {
             this.browseSRX(event);
         });
@@ -556,7 +569,7 @@ class Swordfish {
         ipcMain.on('show-message', (event: IpcMainEvent, arg: any) => {
             Swordfish.showMessage(arg);
         });
-        ipcMain.on('add-tab', (event: IpcMainEvent, arg: any) => {
+        ipcMain.on('add-tab', (event: IpcMainEvent, arg: Project) => {
             Swordfish.mainWindow.webContents.send('add-tab', arg);
         });
         ipcMain.on('get-segments-count', (event: IpcMainEvent, arg: any) => {
@@ -1275,10 +1288,14 @@ class Swordfish {
             try {
                 let data: Buffer = readFileSync(preferencesFile);
                 Swordfish.currentPreferences = JSON.parse(data.toString());
-                if (!existsSync(Swordfish.currentPreferences.catalog)) {
-                    Swordfish.currentPreferences.catalog = Swordfish.path.join(app.getAppPath(), 'catalog', 'catalog.xml');
-                    Swordfish.currentPreferences.srx = Swordfish.path.join(app.getAppPath(), 'srx', 'default.srx');
-                    writeFileSync(Swordfish.path.join(app.getPath('appData'), app.name, 'preferences.json'), JSON.stringify(Swordfish.currentPreferences));
+                if (!Swordfish.currentPreferences.projectsFolder) {
+                    Swordfish.currentPreferences.projectsFolder = Swordfish.path.join(app.getPath('appData'), app.name, 'projects');
+                }
+                if (!Swordfish.currentPreferences.memoriesFolder) {
+                    Swordfish.currentPreferences.memoriesFolder = Swordfish.path.join(app.getPath('appData'), app.name, 'memories');
+                }
+                if (!Swordfish.currentPreferences.glossariesFolder) {
+                    Swordfish.currentPreferences.glossariesFolder = Swordfish.path.join(app.getPath('appData'), app.name, 'glossaries');
                 }
             } catch (err) {
                 console.log(err);
@@ -1307,13 +1324,24 @@ class Swordfish {
         }
     }
 
-    static savePreferences(arg: any): void {
+    static savePreferences(preferences: Preferences): void {
         Swordfish.destroyWindow(Swordfish.settingsWindow);
-        arg.showGuide = Swordfish.currentPreferences.showGuide;
-        writeFileSync(Swordfish.path.join(app.getPath('appData'), app.name, 'preferences.json'), JSON.stringify(arg));
+        let reloadProjects: boolean = this.currentPreferences.projectsFolder !== preferences.projectsFolder;
+        let reloadMemories: boolean = this.currentPreferences.memoriesFolder !== preferences.memoriesFolder;
+        let reloadGlossaries: boolean = this.currentPreferences.glossariesFolder !== preferences.glossariesFolder;
+        writeFileSync(Swordfish.path.join(app.getPath('appData'), app.name, 'preferences.json'), JSON.stringify(preferences));
         Swordfish.loadPreferences();
         Swordfish.setTheme();
         Swordfish.mainWindow.webContents.send('set-zoom', { zoom: Swordfish.currentPreferences.zoomFactor });
+        if (reloadProjects) {
+            Swordfish.mainWindow.webContents.send('request-projects', {});
+        }
+        if (reloadMemories) {
+            Swordfish.mainWindow.webContents.send('request-memories');
+        }
+        if (reloadGlossaries) {
+            Swordfish.mainWindow.webContents.send('request-glossaries');
+        }
     }
 
     static showSortSegments(params: any): void {
@@ -2083,14 +2111,14 @@ class Swordfish {
             }
         });
         this.settingsWindow.setMenu(null);
-        this.settingsWindow.loadURL('file://' + this.path.join(app.getAppPath(), 'html', 'preferences.html'));
+        this.settingsWindow.loadURL('file://' + this.path.join(app.getAppPath(), 'html', 'preferencesDialog.html'));
         this.settingsWindow.once('ready-to-show', () => {
             this.settingsWindow.show();
         });
         this.settingsWindow.on('close', () => {
             this.mainWindow.focus();
         });
-        Swordfish.setLocation(this.settingsWindow, 'preferences.html');
+        Swordfish.setLocation(this.settingsWindow, 'preferencesDialog.html');
     }
 
     static showSystemInfo() {
@@ -2358,6 +2386,48 @@ class Swordfish {
         }).then((value: Electron.OpenDialogReturnValue) => {
             if (!value.canceled) {
                 event.sender.send('set-srx', value.filePaths[0]);
+            }
+        }).catch((error: Error) => {
+            console.log(error.message);
+        });
+    }
+
+    browseProjects(event: IpcMainEvent): void {
+        dialog.showOpenDialog({
+            title: 'Projects Folder',
+            defaultPath: Swordfish.currentPreferences.projectsFolder,
+            properties: ['openDirectory', 'createDirectory']
+        }).then((value: Electron.OpenDialogReturnValue) => {
+            if (!value.canceled) {
+                event.sender.send('set-projects-folder', value.filePaths[0]);
+            }
+        }).catch((error: Error) => {
+            console.log(error.message);
+        });
+    }
+
+    browseMemories(event: IpcMainEvent): void {
+        dialog.showOpenDialog({
+            title: 'Memories Folder',
+            defaultPath: Swordfish.currentPreferences.memoriesFolder,
+            properties: ['openDirectory', 'createDirectory']
+        }).then((value: Electron.OpenDialogReturnValue) => {
+            if (!value.canceled) {
+                event.sender.send('set-memories-folder', value.filePaths[0]);
+            }
+        }).catch((error: Error) => {
+            console.log(error.message);
+        });
+    }
+
+    browseGlossaries(event: IpcMainEvent): void {
+        dialog.showOpenDialog({
+            title: 'Glossaries Folder',
+            defaultPath: Swordfish.currentPreferences.glossariesFolder,
+            properties: ['openDirectory', 'createDirectory']
+        }).then((value: Electron.OpenDialogReturnValue) => {
+            if (!value.canceled) {
+                event.sender.send('set-glossaries-folder', value.filePaths[0]);
             }
         }).catch((error: Error) => {
             console.log(error.message);

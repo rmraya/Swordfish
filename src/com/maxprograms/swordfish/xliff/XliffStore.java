@@ -265,7 +265,7 @@ public class XliffStore {
     }
 
     private void createTables() throws SQLException {
-        String files = "CREATE TABLE files (id VARCHAR(50) NOT NULL, name VARCHAR(350) NOT NULL, PRIMARY KEY(id));";
+        String files = "CREATE TABLE files (id VARCHAR(50) NOT NULL, name VARCHAR(350) NOT NULL, PRIMARY KEY(id, name));";
         String units = "CREATE TABLE units (file VARCHAR(50), " + "unitId VARCHAR(256) NOT NULL, "
                 + "data CLOB NOT NULL, compressed CHAR(1) NOT NULL DEFAULT 'N', PRIMARY KEY(file, unitId) );";
         String segments = "CREATE TABLE segments (file VARCHAR(50), unitId VARCHAR(256) NOT NULL, "
@@ -2802,7 +2802,7 @@ public class XliffStore {
 
         sql = "SELECT MAX(similarity) FROM matches WHERE file = ? AND unitid = ? AND segid = ?";
         try (PreparedStatement st = conn.prepareStatement(sql)) {
-            String currentFile = "";
+            String currentFileId = "";
             JSONObject json = null;
             sql = "SELECT file, unitid, segid, source, words,tags FROM segments WHERE type = 'S' ORDER BY file, unitid, segid";
             try (ResultSet rs = stmt.executeQuery(sql)) {
@@ -2813,7 +2813,7 @@ public class XliffStore {
                     String source = rs.getNString(4);
                     int words = rs.getInt(5);
                     int tags = rs.getInt(6);
-                    if (!currentFile.equals(fileId)) {
+                    if (!currentFileId.equals(fileId)) {
                         json = new JSONObject();
                         json.put("newSegments", 0);
                         json.put("100Segments", 0);
@@ -2833,7 +2833,7 @@ public class XliffStore {
                         json.put("intRep", 0);
                         json.put("extRep", 0);
                         statusMap.put(fileId, json);
-                        currentFile = fileId;
+                        currentFileId = fileId;
                         if (currentFileSegments != null) {
                             otherFileSegments.addAll(currentFileSegments);
                         }
@@ -4384,8 +4384,7 @@ public class XliffStore {
             }
         }
         if (tgt == null || tgt.isEmpty()) {
-            Element target = new Element("target");
-            return target;
+            return new Element("target");
         }
         return XliffUtils.buildElement(tgt);
     }

@@ -57,5 +57,3 @@ class DefaultLanguages {
         this.electron.ipcRenderer.send('save-languages', prefs);
     }
 }
-
-new DefaultLanguages();

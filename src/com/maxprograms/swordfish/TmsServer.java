@@ -33,6 +33,7 @@ import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 import com.sun.net.httpserver.HttpServer;
 
+import org.json.JSONException;
 import org.json.JSONObject;
 
 public class TmsServer implements HttpHandler {
@@ -191,18 +192,53 @@ public class TmsServer implements HttpHandler {
 		return debug;
 	}
 
-	public static String getCatalogFile() throws IOException {
+	public static String getCatalogFile() throws IOException, JSONException {
+		JSONObject json = getPreferences();
+		return json.getString("catalog");
+	}
+
+	public static File getProjectsFolder() throws IOException, JSONException {
+		JSONObject json = getPreferences();
+		if (!json.has("projectsFolder")) {
+			return new File(getWorkFolder(), "projects");
+		}
+		return new File(json.getString("projectsFolder"));
+	}
+
+	public static File getMemoriesFolder() throws IOException, JSONException {
+		JSONObject json = getPreferences();
+		if (!json.has("memoriesFolder")) {
+			return new File(getWorkFolder(), "memories");
+		}
+		return new File(json.getString("memoriesFolder"));
+	}
+
+	public static File getGlossariesFolder() throws IOException, JSONException {
+		JSONObject json = getPreferences();
+		if (!json.has("glossariesFolder")) {
+			return new File(getWorkFolder(), "glossaries");
+		}
+		return new File(json.getString("glossariesFolder"));
+	}
+
+	public static JSONObject getPreferences() throws IOException, JSONException {
 		File preferences = new File(getWorkFolder(), "preferences.json");
+		return readJSON(preferences);
+	}
+
+	public static JSONObject readJSON(File json) throws IOException, JSONException {
 		StringBuilder builder = new StringBuilder();
-		try (FileReader reader = new FileReader(preferences, StandardCharsets.UTF_8)) {
+		try (FileReader reader = new FileReader(json, StandardCharsets.UTF_8)) {
 			try (BufferedReader buffer = new BufferedReader(reader)) {
 				String line = "";
 				while ((line = buffer.readLine()) != null) {
+					if (!builder.isEmpty()) {
+						builder.append('\n');
+					}
 					builder.append(line);
 				}
 			}
 		}
-		JSONObject json = new JSONObject(builder.toString());
-		return json.getString("catalog");
+		return new JSONObject(builder.toString());
 	}
 }

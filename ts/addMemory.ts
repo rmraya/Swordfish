@@ -89,5 +89,3 @@ class AddMemory {
         document.getElementById('subjects').innerHTML = options;
     }
 }
-
-new AddMemory();

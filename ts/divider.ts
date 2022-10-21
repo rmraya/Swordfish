@@ -94,16 +94,16 @@ class VerticalSplit {
         if (ev.clientX === 0 && ev.clientY === 0) {
             return;
         }
-        var leftWidth: number = this.left.clientWidth + ev.offsetX;
-        var rightWidth: number = this.currentSum - leftWidth;
+        let leftWidth: number = this.left.clientWidth + ev.offsetX;
+        let rightWidth: number = this.currentSum - leftWidth;
         this.left.style.width = leftWidth + 'px';
         this.right.style.width = rightWidth + 'px';
         this.weights = [leftWidth, rightWidth];
     }
 
     dragEnd(ev: DragEvent): void {
-        var leftWidth: number = this.left.clientWidth + ev.offsetX;
-        var rightWidth: number = this.currentSum - leftWidth;
+        let leftWidth: number = this.left.clientWidth + ev.offsetX;
+        let rightWidth: number = this.currentSum - leftWidth;
         this.left.style.width = leftWidth + 'px';
         this.right.style.width = rightWidth + 'px';
         this.weights = [leftWidth, rightWidth];

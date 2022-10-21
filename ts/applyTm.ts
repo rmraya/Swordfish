@@ -97,5 +97,3 @@ class ApplyTM {
         this.electron.ipcRenderer.send('get-memory-param');
     }
 }
-
-new ApplyTM();

@@ -142,5 +142,3 @@ class FilterConfig {
         return defaultValue;
     }
 }
-
-new FilterConfig();

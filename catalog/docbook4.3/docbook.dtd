@@ -55,7 +55,7 @@
      of DocBook.
 -->
 
-<!ENTITY % sgml.features "INCLUDE">
+<!ENTITY % sgml.features "IGNORE">
 
 <!ENTITY % docbook PUBLIC "-//OASIS//DTD DocBook XML V4.3//EN"
                    "docbookx.dtd">

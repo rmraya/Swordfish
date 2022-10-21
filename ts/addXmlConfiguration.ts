@@ -43,4 +43,3 @@ class AddXmlFilterConfiguration {
     }
 }
 
-new AddXmlFilterConfiguration();

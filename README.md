@@ -1,4 +1,4 @@
-# Swordfish IV
+# Swordfish
 
 ![Swordfish logo](https://www.maxprograms.com/images/swordfish_white.png)
 
@@ -6,7 +6,7 @@ An advanced CAT (Computer Aided Translation) tool based on XLIFF Standard that s
 
 Swordfish uses TM (Translation Memory) and MT (Machine Translation). Supports segment filtering, terminology, customization and more.
 
-## Swordfish IV Running on macOS
+## Swordfish Running on macOS
 
 <a href="https://www.maxprograms.com/tutorials/TranslateFile.mp4"><img src="https://www.maxprograms.com/images/translateFile.png"></a>
 
@@ -70,6 +70,6 @@ Technical Support |  Peer support at [Groups.io](https://groups.io/g/maxprograms
   npm start
 ```
 
-This video shows how to build and launch Swordfish IV: [https://www.maxprograms.com/tutorials/SwordfishIV_build.mp4](https://www.maxprograms.com/tutorials/SwordfishIV_build.mp4)
+This video shows how to build and launch Swordfish: [https://www.maxprograms.com/tutorials/SwordfishIV_build.mp4](https://www.maxprograms.com/tutorials/SwordfishIV_build.mp4)
 
 Compile once and then simply run `npm start` to start Swordfish

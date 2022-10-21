@@ -76,5 +76,3 @@ class ElementConfig {
         this.electron.ipcRenderer.send('save-elementConfig', this.elementConfig);
     }
 }
-
-new ElementConfig();

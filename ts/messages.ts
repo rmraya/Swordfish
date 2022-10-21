@@ -56,5 +56,3 @@ class Messages {
         this.electron.ipcRenderer.send('messages-height', { width: document.body.clientWidth, height: document.body.clientHeight });
     }
 }
-
-new Messages();

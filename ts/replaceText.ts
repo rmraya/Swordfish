@@ -62,5 +62,3 @@ class ReplaceText {
         });
     }
 }
-
-new ReplaceText();

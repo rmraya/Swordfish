@@ -316,5 +316,3 @@ class AddProject {
         this.glossSelect.innerHTML = options;
     }
 }
-
-new AddProject();

@@ -52,7 +52,6 @@ public class Skeletons {
             if (skeleton != null) {
                 String href = skeleton.getAttributeValue("href");
                 if (href.isEmpty()) {
-
                     File skl = new File(xliffParent, file.getAttributeValue("original") + ".skl");
                     Utils.decodeToFile(skeleton.getText(), skl.getAbsolutePath());
                     skeleton.setAttribute("href", skl.getAbsolutePath());

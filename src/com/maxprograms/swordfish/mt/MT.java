@@ -12,12 +12,11 @@
 
 package com.maxprograms.swordfish.mt;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 import java.util.List;
+
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import com.maxprograms.mt.AzureTranslator;
 import com.maxprograms.mt.DeepLTranslator;
@@ -26,8 +25,6 @@ import com.maxprograms.mt.MTranslator;
 import com.maxprograms.mt.MyMemoryTranslator;
 import com.maxprograms.mt.YandexTranslator;
 import com.maxprograms.swordfish.TmsServer;
-
-import org.json.JSONObject;
 
 public class MT {
 
@@ -98,18 +95,8 @@ public class MT {
         return translator.hasEngines();
     }
 
-    private void loadDefaults() throws IOException {
-        File preferences = new File(TmsServer.getWorkFolder(), "preferences.json");
-        StringBuilder builder = new StringBuilder();
-        try (FileReader reader = new FileReader(preferences, StandardCharsets.UTF_8)) {
-            try (BufferedReader buffer = new BufferedReader(reader)) {
-                String line = "";
-                while ((line = buffer.readLine()) != null) {
-                    builder.append(line);
-                }
-            }
-        }
-        JSONObject json = new JSONObject(builder.toString());
+    private void loadDefaults() throws IOException, JSONException {
+        JSONObject json = TmsServer.getPreferences();
 
         JSONObject google = json.getJSONObject("google");
         googleEnabled = google.getBoolean("enabled");
@@ -144,6 +131,6 @@ public class MT {
     }
 
     public List<JSONObject> translate(String text) throws IOException, InterruptedException {
-       return translator.translate(text);
+        return translator.translate(text);
     }
 }

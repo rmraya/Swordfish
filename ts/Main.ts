@@ -129,7 +129,7 @@ class Main {
         Main.electron.ipcRenderer.on('set-status', (event: Electron.IpcRendererEvent, arg: any) => {
             this.setStatus(arg);
         });
-        Main.electron.ipcRenderer.on('add-tab', (event: Electron.IpcRendererEvent, arg: any) => {
+        Main.electron.ipcRenderer.on('add-tab', (event: Electron.IpcRendererEvent, arg: Project) => {
             this.addTab(arg);
         });
         Main.electron.ipcRenderer.on('translate-projects', () => {
@@ -407,13 +407,13 @@ class Main {
         }
     }
 
-    addTab(arg: any): void {
+    addTab(arg: Project): void {
         if (Main.tabHolder.has(arg.id)) {
             Main.tabHolder.selectTab(arg.id);
             return;
         }
         let tab = new Tab(arg.id, arg.description, true);
-        let view: TranslationView = new TranslationView(tab, arg.id, arg.srcLang, arg.tgtLang);
+        let view: TranslationView = new TranslationView(tab, arg.id, arg.sourceLang, arg.targetLang);
         Main.tabHolder.addTab(tab);
         Main.tabHolder.selectTab(arg.id);
         tab.getLabel().addEventListener('click', () => {
@@ -1032,4 +1032,3 @@ class Main {
     }
 }
 
-new Main();

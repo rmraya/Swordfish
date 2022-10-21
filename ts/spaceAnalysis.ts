@@ -93,5 +93,3 @@ class SpaceAnalysis {
         tr.classList.add('selected');
     }
 }
-
-new SpaceAnalysis();

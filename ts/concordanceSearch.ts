@@ -108,5 +108,3 @@ class ConcordanceSearch {
             || code.startsWith("he") || code.startsWith("ji") || code.startsWith("yi");
     }
 }
-
-new ConcordanceSearch();

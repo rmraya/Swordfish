@@ -55,5 +55,3 @@ class ServerSettings {
         this.electron.ipcRenderer.send('browse-server', { server: server, user: user, password: password });
     }
 }
-
-new ServerSettings();

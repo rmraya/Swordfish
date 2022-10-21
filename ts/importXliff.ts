@@ -132,5 +132,3 @@ class ImportXLIFF {
         this.glossSelect.innerHTML = options;
     }
 }
-
-new ImportXLIFF();

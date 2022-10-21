@@ -49,5 +49,3 @@ class HtmlViewer {
         });
     }
 }
-
-new HtmlViewer();

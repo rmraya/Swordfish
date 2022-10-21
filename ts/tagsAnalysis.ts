@@ -93,5 +93,3 @@ class TagAnalysis {
         tr.classList.add('selected');
     }
 }
-
-new TagAnalysis();

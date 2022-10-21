@@ -41,5 +41,3 @@ class About {
     }
 
 }
-
-new About();

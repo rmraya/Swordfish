@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE ini-file PUBLIC "-//Maxprograms//Converters 2.0.0//EN" "configuration.dtd">
 <ini-file>
-<tag hard-break="inline" ctype="x-other">abbreviatedform</tag>
+<tag hard-break="inline" ctype="x-other">abbreviated-form</tag>
 <tag hard-break="segment" attributes="navtitle">abbrevlist</tag>
 <tag hard-break="segment">abstract</tag>
 <tag hard-break="segment">addressdetails</tag>
@@ -156,7 +156,7 @@
 <tag hard-break="segment">glossSymbol</tag>
 <tag hard-break="segment">glossSynonym</tag>
 <tag hard-break="segment">glossUsage</tag>
-<tag hard-break="segment">glossabbreviation</tag>
+<tag hard-break="segment">glossAbbreviation</tag>
 <tag hard-break="segment" attributes="navtitle">glossarylist</tag>
 <tag hard-break="segment">glossbody</tag>
 <tag hard-break="segment">glossdef</tag>
@@ -242,7 +242,7 @@
 <tag hard-break="segment">lcHotspotMap</tag>
 <tag hard-break="segment" attributes="spectitle">lcHotspotMap2</tag>
 <tag hard-break="segment" attributes="spectitle">lcInstruction</tag>
-<tag hard-break="segment" attributes="spectitle">lcInstructorenote2</tag>
+<tag hard-break="segment" attributes="spectitle">lcInstructornote2</tag>
 <tag hard-break="segment" attributes="spectitle">lcInstructornote</tag>
 <tag hard-break="segment" attributes="spectitle">lcInteraction</tag>
 <tag hard-break="segment">lcInteractionBase</tag>
@@ -278,6 +278,7 @@
 <tag hard-break="segment" attributes="spectitle">lcNextSteps</tag>
 <tag hard-break="segment" attributes="spectitle">lcNoLMS</tag>
 <tag hard-break="segment" attributes="spectitle">lcOJT</tag>
+<tag hard-break="segment">lcObjective</tag>
 <tag hard-break="segment">lcObjectiveGroup</tag>
 <tag hard-break="segment" attributes="spectitle">lcObjectives</tag>
 <tag hard-break="inline" ctype="x-other">lcObjectivesStem</tag>
@@ -330,7 +331,7 @@
 <tag hard-break="segment" attributes="spectitle">lcW3C</tag>
 <tag hard-break="segment">lcWorkDescription</tag>
 <tag hard-break="segment">lcWorkEnv</tag>
-<tag hard-break="segment">learninOverview</tag>
+<tag hard-break="segment">learningOverview</tag>
 <tag hard-break="segment">learningAssesment</tag>
 <tag hard-break="segment">learningAssesmentbody</tag>
 <tag hard-break="segment">learningBase</tag>
@@ -349,7 +350,7 @@
 <tag hard-break="segment">learningPlan</tag>
 <tag hard-break="segment" attributes="navtitle">learningPlanRef</tag>
 <tag hard-break="segment">learningPlanbody</tag>
-<tag hard-break="segment" attributes="navtitle">learningPostAssesmentRef</tag>
+<tag hard-break="segment" attributes="navtitle">learningPostAssessmentRef</tag>
 <tag hard-break="segment">learningPreAssesmentRef</tag>
 <tag hard-break="segment">learningSummary</tag>
 <tag hard-break="segment">learningSummaryRef</tag>
@@ -536,7 +537,7 @@
 <tag hard-break="inline" ctype="x-other">sup</tag>
 <tag hard-break="segment">supequip</tag>
 <tag hard-break="segment" attributes="spectitle">superqli</tag>
-<tag hard-break="segment">superqui</tag>
+<tag hard-break="segment">supequi</tag>
 <tag hard-break="segment">supplies</tag>
 <tag hard-break="segment">supply</tag>
 <tag hard-break="segment">supplyli</tag>
@@ -561,7 +562,7 @@
 <tag hard-break="segment">thead</tag>
 <tag hard-break="segment">thoroughfare</tag>
 <tag hard-break="segment">title</tag>
-<tag hard-break="segment">titlealt</tag>
+<tag hard-break="segment">titlealts</tag>
 <tag hard-break="inline" ctype="x-other">tm</tag>
 <tag hard-break="segment" attributes="navtitle">toc</tag>
 <tag hard-break="segment">topic</tag>

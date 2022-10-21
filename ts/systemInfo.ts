@@ -39,5 +39,3 @@ class SystemInformation {
         document.getElementById('electron').innerText = info.electron;
     }
 }
-
-new SystemInformation();

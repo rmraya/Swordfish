@@ -51,5 +51,3 @@ class ChangeCase {
         }
     }
 }
-
-new ChangeCase();

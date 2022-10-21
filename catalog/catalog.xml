@@ -135,6 +135,7 @@
 	<nextCatalog catalog="dita1.3/catalog.xml" />
 	<nextCatalog catalog="dita1.2/catalog-dita.xml" />
 	<nextCatalog catalog="dita1.2/catalog-dita-xsd.xml" />
+	<nextCatalog catalog="dita-lwdita/catalog-dita.xml" />
 
 	<!-- 
 	<nextCatalog catalog="dita1.1/catalog-dita.xml"/> 	

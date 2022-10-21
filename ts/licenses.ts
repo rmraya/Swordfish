@@ -61,5 +61,3 @@ class Licenses {
         this.electron.ipcRenderer.send('open-license', { type: type });
     }
 }
-
-new Licenses();

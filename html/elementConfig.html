@@ -7,14 +7,14 @@
     <link rel="stylesheet" type="text/css" href="../css/fonts.css">
 </head>
 
-<body id="body">
+<body id="body" onload="new ElementConfig();">
     <table>
         <tr>
             <td class="middle noWrap">
                 <label>Element Name</label>
             </td>
             <td class="middle fill_width">
-                <input id="name" type="text" class="table_input"/>
+                <input id="name" type="text" class="table_input" />
             </td>
         </tr>
         <tr>
@@ -47,18 +47,18 @@
                     <option value="x-underlined">x-underlined</option>
                     <option value="x-other">x-other</option>
                 </select>
-            </td>   
+            </td>
         </tr>
         <tr>
             <td class="middle noWrap">
                 <label>Translatable Attributes</label>
             </td>
             <td class="middle fill_width">
-                <input id="attributes" type="text" class="table_input"/>
+                <input id="attributes" type="text" class="table_input" />
             </td>
         </tr>
     </table>
-    <div class="row middle" >
+    <div class="row middle">
         <input type="checkbox" id="keep" class="middle" style="margin-left: 8px;">
         <label for="keep" style="padding-top: 2px;">Keep White Space</label>
     </div>

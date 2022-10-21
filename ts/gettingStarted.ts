@@ -40,5 +40,3 @@ class GettingStarted {
         document.getElementById('container').focus();
     }
 }
-
-new GettingStarted();

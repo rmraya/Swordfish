@@ -89,5 +89,3 @@ class AddGlossary {
         document.getElementById('subjects').innerHTML = options;
     }
 }
-
-new AddGlossary();

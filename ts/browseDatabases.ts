@@ -125,5 +125,3 @@ class BrowseDatabases {
         checkbox.checked = !isSelected;
     }
 }
-
-new BrowseDatabases();

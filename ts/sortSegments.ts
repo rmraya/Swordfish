@@ -79,5 +79,3 @@ class SortSegments {
         this.electron.ipcRenderer.send('sort-options', { sortOption: 'none', sortDesc: false });
     }
 }
-
-new SortSegments();

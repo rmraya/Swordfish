@@ -137,5 +137,3 @@ class AddTerm {
             || code.startsWith("he") || code.startsWith("ji") || code.startsWith("yi");
     }
 }
-
-new AddTerm();

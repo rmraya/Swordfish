@@ -11,7 +11,7 @@
  *******************************************************************************/
 
 class GoTo {
-    
+
     electron = require('electron');
 
     segInput: HTMLInputElement;
@@ -57,5 +57,3 @@ class GoTo {
         document.getElementById('segInput').focus();
     }
 }
-
-new GoTo();

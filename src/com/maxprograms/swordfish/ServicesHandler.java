@@ -12,11 +12,9 @@
 
 package com.maxprograms.swordfish;
 
-import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileOutputStream;
-import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -42,6 +40,10 @@ import java.util.TreeSet;
 
 import javax.xml.parsers.ParserConfigurationException;
 
+import org.json.JSONArray;
+import org.json.JSONObject;
+import org.xml.sax.SAXException;
+
 import com.maxprograms.converters.EncodingResolver;
 import com.maxprograms.converters.FileFormats;
 import com.maxprograms.languages.Language;
@@ -57,10 +59,6 @@ import com.maxprograms.xml.SAXBuilder;
 import com.maxprograms.xml.XMLOutputter;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
-
-import org.json.JSONArray;
-import org.json.JSONObject;
-import org.xml.sax.SAXException;
 
 public class ServicesHandler implements HttpHandler {
 
@@ -252,7 +250,7 @@ public class ServicesHandler implements HttpHandler {
         File targetFile = new File(xmlFiltersFolder, file.getName());
         try {
             SAXBuilder builder = new SAXBuilder();
-            builder.setEntityResolver(new Catalog(getCatalog()));
+            builder.setEntityResolver(new Catalog(TmsServer.getCatalogFile()));
             Document doc = builder.build(file);
             if (!"ini-file".equals(doc.getRootElement().getName())) {
                 throw new IOException("Incorrect file type");
@@ -263,21 +261,6 @@ public class ServicesHandler implements HttpHandler {
             result.put(Constants.REASON, e.getMessage());
         }
         return result;
-    }
-
-    private String getCatalog() throws IOException {
-        File preferences = new File(TmsServer.getWorkFolder(), "preferences.json");
-        StringBuilder builder = new StringBuilder();
-        try (FileReader reader = new FileReader(preferences, StandardCharsets.UTF_8)) {
-            try (BufferedReader buffer = new BufferedReader(reader)) {
-                String line = "";
-                while ((line = buffer.readLine()) != null) {
-                    builder.append(line);
-                }
-            }
-        }
-        JSONObject json = new JSONObject(builder.toString());
-        return json.getString("catalog");
     }
 
     private JSONObject removeFilters(String request) throws IOException {
@@ -337,7 +320,7 @@ public class ServicesHandler implements HttpHandler {
         File xmlFiltersFolder = new File(appFolder, "xmlfilter");
         File configFile = new File(xmlFiltersFolder, json.getString("file"));
         SAXBuilder builder = new SAXBuilder();
-        builder.setEntityResolver(new Catalog(getCatalog()));
+        builder.setEntityResolver(new Catalog(TmsServer.getCatalogFile()));
         Document doc = builder.build(configFile);
         result = toJSON(doc.getRootElement());
         return result;
@@ -351,7 +334,7 @@ public class ServicesHandler implements HttpHandler {
         File xmlFiltersFolder = new File(appFolder, "xmlfilter");
         File configFile = new File(xmlFiltersFolder, json.getString("filter"));
         SAXBuilder builder = new SAXBuilder();
-        builder.setEntityResolver(new Catalog(getCatalog()));
+        builder.setEntityResolver(new Catalog(TmsServer.getCatalogFile()));
         Document doc = builder.build(configFile);
         Element root = doc.getRootElement();
         List<Element> tags = root.getChildren("tag");
@@ -429,7 +412,7 @@ public class ServicesHandler implements HttpHandler {
         File xmlFiltersFolder = new File(appFolder, "xmlfilter");
         File configFile = new File(xmlFiltersFolder, json.getString("filter"));
         SAXBuilder builder = new SAXBuilder();
-        builder.setEntityResolver(new Catalog(getCatalog()));
+        builder.setEntityResolver(new Catalog(TmsServer.getCatalogFile()));
         Document doc = builder.build(configFile);
         Element root = doc.getRootElement();
         List<Element> tags = root.getChildren("tag");
@@ -539,16 +522,7 @@ public class ServicesHandler implements HttpHandler {
             clients.put("clients", new JSONArray());
             return clients;
         }
-        StringBuffer buffer = new StringBuffer();
-        try (FileReader input = new FileReader(clientsFile, StandardCharsets.UTF_8)) {
-            try (BufferedReader reader = new BufferedReader(input)) {
-                String line;
-                while ((line = reader.readLine()) != null) {
-                    buffer.append(line);
-                }
-            }
-        }
-        clients = new JSONObject(buffer.toString());
+        clients = TmsServer.readJSON(clientsFile);
         return clients;
     }
 
@@ -562,16 +536,7 @@ public class ServicesHandler implements HttpHandler {
             subjects.put("subjects", new JSONArray());
             return subjects;
         }
-        StringBuffer buffer = new StringBuffer();
-        try (FileReader input = new FileReader(subjectsFile, StandardCharsets.UTF_8)) {
-            try (BufferedReader reader = new BufferedReader(input)) {
-                String line;
-                while ((line = reader.readLine()) != null) {
-                    buffer.append(line);
-                }
-            }
-        }
-        subjects = new JSONObject(buffer.toString());
+        subjects = TmsServer.readJSON(subjectsFile);
         return subjects;
     }
 
@@ -596,16 +561,7 @@ public class ServicesHandler implements HttpHandler {
             }
             return projects;
         }
-        StringBuffer buffer = new StringBuffer();
-        try (FileReader input = new FileReader(projectsFile, StandardCharsets.UTF_8)) {
-            try (BufferedReader reader = new BufferedReader(input)) {
-                String line;
-                while ((line = reader.readLine()) != null) {
-                    buffer.append(line);
-                }
-            }
-        }
-        projects = new JSONObject(buffer.toString());
+        projects = TmsServer.readJSON(projectsFile);
         return projects;
     }
 
@@ -657,7 +613,7 @@ public class ServicesHandler implements HttpHandler {
             }
         }
         projects.put("projects", insertString(project, array));
-        File projectsFile = new File(TmsServer.getWorkFolder(), "projects.json");
+        File projectsFile = new File(TmsServer.getProjectsFolder(), "projects.json");
         try (FileOutputStream out = new FileOutputStream(projectsFile)) {
             out.write(projects.toString().getBytes(StandardCharsets.UTF_8));
         }

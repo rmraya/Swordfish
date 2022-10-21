@@ -12,11 +12,9 @@
 
 package com.maxprograms.swordfish;
 
-import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileOutputStream;
-import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -43,6 +41,11 @@ import java.util.zip.DataFormatException;
 
 import javax.xml.parsers.ParserConfigurationException;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+import org.xml.sax.SAXException;
+
 import com.maxprograms.converters.Convert;
 import com.maxprograms.converters.FileFormats;
 import com.maxprograms.converters.Join;
@@ -56,13 +59,9 @@ import com.maxprograms.swordfish.xliff.XliffStore;
 import com.maxprograms.swordfish.xliff.XliffUtils;
 import com.maxprograms.xliff2.Resegmenter;
 import com.maxprograms.xliff2.ToXliff2;
+import com.maxprograms.xml.Catalog;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
-
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-import org.xml.sax.SAXException;
 
 public class ProjectsHandler implements HttpHandler {
 
@@ -459,8 +458,9 @@ public class ProjectsHandler implements HttpHandler {
 		}
 	}
 
-	private JSONObject listProjects() {
+	private JSONObject listProjects() throws IOException {
 		JSONObject result = new JSONObject();
+		loadProjectsList();
 		JSONArray array = projectsList.getJSONArray("projects");
 		for (int i = 0; i < array.length(); i++) {
 			int status = array.getJSONObject(i).getInt("status");
@@ -481,16 +481,7 @@ public class ProjectsHandler implements HttpHandler {
 				out.write(json.toString(2).getBytes(StandardCharsets.UTF_8));
 			}
 		}
-		StringBuffer buffer = new StringBuffer();
-		try (FileReader input = new FileReader(list, StandardCharsets.UTF_8)) {
-			try (BufferedReader reader = new BufferedReader(input)) {
-				String line;
-				while ((line = reader.readLine()) != null) {
-					buffer.append(line);
-				}
-			}
-		}
-		projectsList = new JSONObject(buffer.toString());
+		projectsList = TmsServer.readJSON(list);
 		sortProjects();
 		if (firstRun) {
 			firstRun = false;
@@ -591,7 +582,7 @@ public class ProjectsHandler implements HttpHandler {
 				array.put(it.next());
 			}
 			result.put("segments", array);
-		} catch (IOException | SAXException | ParserConfigurationException | SQLException | DataFormatException e) {
+		} catch (IOException | SAXException | ParserConfigurationException | DataFormatException | SQLException e) {
 			logger.log(Level.ERROR, "Error loading segments", e);
 			result.put(Constants.REASON, e.getMessage());
 		}
@@ -712,7 +703,7 @@ public class ProjectsHandler implements HttpHandler {
 								res = ToXliff2.run(xliff, catalogFile);
 								if (mustResegment && "0".equals(res.get(0))) {
 									res = Resegmenter.run(xliff.getAbsolutePath(), srxFile, json.getString("srcLang"),
-											catalogFile);
+											new Catalog(catalogFile));
 								}
 							}
 							if (!"0".equals(res.get(0))) {
@@ -744,7 +735,6 @@ public class ProjectsHandler implements HttpHandler {
 						if (!p.getDescription().endsWith(sourceFiles.get(0).getFile())) {
 							ServicesHandler.addProject(p.getDescription());
 						}
-
 						p.setFiles(sourceFiles);
 						projects.put(id, p);
 						projectsList.getJSONArray("projects").put(p.toJSON());
@@ -781,29 +771,18 @@ public class ProjectsHandler implements HttpHandler {
 	}
 
 	private void loadPreferences() throws IOException {
-		File preferences = new File(TmsServer.getWorkFolder(), "preferences.json");
-		StringBuilder builder = new StringBuilder();
-		try (FileReader reader = new FileReader(preferences, StandardCharsets.UTF_8)) {
-			try (BufferedReader buffer = new BufferedReader(reader)) {
-				String line = "";
-				while ((line = buffer.readLine()) != null) {
-					builder.append(line);
-				}
-			}
-		}
-		JSONObject json = new JSONObject(builder.toString());
+		JSONObject json = TmsServer.getPreferences();
 		srxFile = json.getString("srx");
 		catalogFile = json.getString("catalog");
 		paragraphSegmentation = json.getBoolean("paragraphSegmentation");
 	}
 
 	private static File getWorkFolder() throws IOException {
-		File home = TmsServer.getWorkFolder();
-		File workFolder = new File(home, "projects");
-		if (!workFolder.exists()) {
-			Files.createDirectories(workFolder.toPath());
+		File home = TmsServer.getProjectsFolder();
+		if (!home.exists()) {
+			Files.createDirectories(home.toPath());
 		}
-		return workFolder;
+		return home;
 	}
 
 	private JSONObject closeProject(String request) {
@@ -925,8 +904,8 @@ public class ProjectsHandler implements HttpHandler {
 			if (projectStores.containsKey(project)) {
 				result.put("matches", projectStores.get(project).machineTranslate(json, translator));
 			}
-		} catch (IOException | SQLException | JSONException | SAXException | ParserConfigurationException
-				| DataFormatException e) {
+		} catch (IOException | SQLException | JSONException | SAXException | DataFormatException
+				| ParserConfigurationException e) {
 			logger.log(Level.ERROR, e);
 			result.put(Constants.REASON, e.getMessage());
 		} catch (InterruptedException e) {
@@ -944,8 +923,8 @@ public class ProjectsHandler implements HttpHandler {
 			if (projectStores.containsKey(project)) {
 				result.put("matches", projectStores.get(project).tmTranslate(json));
 			}
-		} catch (IOException | SQLException | JSONException | SAXException | ParserConfigurationException
-				| DataFormatException e) {
+		} catch (IOException | SQLException | JSONException | SAXException | DataFormatException
+				| ParserConfigurationException e) {
 			logger.log(Level.ERROR, e);
 			result.put(Constants.REASON, e.getMessage());
 		}
@@ -961,8 +940,8 @@ public class ProjectsHandler implements HttpHandler {
 				projectStores.get(project).assembleMatches(json);
 				result.put("matches", projectStores.get(project).getTaggedtMatches(json));
 			}
-		} catch (IOException | SQLException | JSONException | SAXException | ParserConfigurationException
-				| DataFormatException e) {
+		} catch (IOException | SQLException | JSONException | SAXException | DataFormatException
+				| ParserConfigurationException e) {
 			logger.log(Level.ERROR, e);
 			result.put(Constants.REASON, e.getMessage());
 		}

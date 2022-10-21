@@ -98,5 +98,3 @@ class FilterSegments {
         (document.getElementById('showConfirmed') as HTMLInputElement).checked = arg.showConfirmed;
     }
 }
-
-new FilterSegments();
