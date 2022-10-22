@@ -185,7 +185,7 @@ public class TmsServer implements HttpHandler {
 				deleteFolder(new File(f, list[i]).getAbsolutePath());
 			}
 		}
-		Files.delete(f.toPath());
+		Files.deleteIfExists(f.toPath());
 	}
 
 	public static boolean isDebug() {
