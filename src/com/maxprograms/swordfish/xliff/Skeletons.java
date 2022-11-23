@@ -23,6 +23,7 @@ import java.util.Vector;
 import javax.xml.parsers.ParserConfigurationException;
 
 import com.maxprograms.converters.Utils;
+import com.maxprograms.swordfish.TmsServer;
 import com.maxprograms.xml.Catalog;
 import com.maxprograms.xml.Document;
 import com.maxprograms.xml.Element;
@@ -41,7 +42,7 @@ public class Skeletons {
             ParserConfigurationException, URISyntaxException {
         File xliffParent = outputFile.getParentFile();
         SAXBuilder builder = new SAXBuilder();
-        builder.setEntityResolver(new Catalog(XliffStore.getCatalog()));
+        builder.setEntityResolver(new Catalog(TmsServer.getPreferences().getString("catalog")));
         Document doc = builder.build(xliffFile);
         Element xliff = doc.getRootElement();
         List<Element> files = xliff.getChildren("file");

@@ -56,7 +56,7 @@ export class Locations {
         });
         text = text.substring(0, text.length - 1) + '}'
         let json = JSON.parse(text);
-        writeFile(this.file, JSON.stringify(json), (err: Error) => {
+        writeFile(this.file, JSON.stringify(json, null, 2), (err: Error) => {
             if (err) throw err;
         });
     }

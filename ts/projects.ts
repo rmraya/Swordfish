@@ -41,12 +41,10 @@ class ProjectsView {
     topBar: HTMLDivElement;
     tableContainer: HTMLDivElement;
     tbody: HTMLTableSectionElement;
-
-    selected: Map<string, Project>;
+    projects: Project[];
     shouldOpen: string;
 
     constructor(div: HTMLDivElement) {
-        this.selected = new Map<string, Project>();
         this.shouldOpen = '';
         this.container = div;
 
@@ -170,7 +168,8 @@ class ProjectsView {
         // event listeners
 
         this.electron.ipcRenderer.on('set-projects', (event: Electron.IpcRendererEvent, arg: any) => {
-            this.displayProjects(arg);
+            this.projects = arg;
+            this.displayProjects();
         });
 
         // finish setup
@@ -245,109 +244,163 @@ class ProjectsView {
         this.electron.ipcRenderer.send('show-add-project');
     }
 
+    getSelectedProjects(): Map<string, Project> {
+        let selected: Map<string, Project> = new Map<string, Project>();
+        let checkboxes: HTMLCollectionOf<Element> = document.getElementsByClassName('projectSelection');
+        for (let i: number = 0; i < checkboxes.length; i++) {
+            let checkbox: HTMLInputElement = checkboxes[i] as HTMLInputElement;
+            let id: string = checkbox.id.substring('ck_'.length);
+            if (checkbox.checked) {
+                selected.set(id, this.getProject(id));
+            } else {
+                document.getElementById(id).classList.remove('selected');
+            }
+        }
+        return selected;
+    }
+
+    getProject(id: string): Project {
+        let length: number = this.projects.length;
+        for (let i = 0; i < length; i++) {
+            if (this.projects[i].id === id) {
+                return this.projects[i];
+            }
+        }
+        return null;
+    }
+
+    clearSelection(): void {
+        let checkboxes: HTMLCollectionOf<Element> = document.getElementsByClassName('projectSelection');
+        for (let i: number = 0; i < checkboxes.length; i++) {
+            let checkbox: HTMLInputElement = checkboxes[i] as HTMLInputElement;
+            checkbox.checked = false;
+            let id: string = checkbox.id.substring('ck_'.length);
+            document.getElementById(id).classList.remove('selected');
+        }
+    }
+
     openProjects(): void {
-        if (this.selected.size === 0) {
+        let selected = this.getSelectedProjects();
+        if (selected.size === 0) {
             this.electron.ipcRenderer.send('show-message', { type: 'warning', message: 'Select project' });
             return;
         }
-        for (let key of this.selected.keys()) {
-            let project: Project = this.selected.get(key);
-            this.electron.ipcRenderer.send('add-tab',  project);
+        for (let key of selected.keys()) {
+            let project: Project = selected.get(key);
+            this.electron.ipcRenderer.send('add-tab', project);
         }
     }
 
     exportTranslations(): void {
-        if (this.selected.size === 0) {
+        let selected = this.getSelectedProjects();
+        if (selected.size === 0) {
             this.electron.ipcRenderer.send('show-message', { type: 'warning', message: 'Select project' });
             return;
         }
-        if (this.selected.size > 1) {
+        if (selected.size > 1) {
             this.electron.ipcRenderer.send('show-message', { type: 'warning', message: 'Select one project' });
             return;
         }
-        for (let key of this.selected.keys()) {
-            this.electron.ipcRenderer.send('export-translations', this.selected.get(key));
+        for (let key of selected.keys()) {
+            this.electron.ipcRenderer.send('export-translations', selected.get(key));
         }
     }
 
     generateStatistics(): void {
-        if (this.selected.size === 0) {
+        let selected = this.getSelectedProjects();
+        if (selected.size === 0) {
             this.electron.ipcRenderer.send('show-message', { type: 'warning', message: 'Select project' });
             return;
         }
-        if (this.selected.size > 1) {
+        if (selected.size > 1) {
             this.electron.ipcRenderer.send('show-message', { type: 'warning', message: 'Select one project' });
             return;
         }
-        for (let key of this.selected.keys()) {
+        for (let key of selected.keys()) {
             this.electron.ipcRenderer.send('generate-statistics', { project: key });
         }
     }
 
     removeProjects(): void {
-        if (this.selected.size === 0) {
+        let selected = this.getSelectedProjects();
+        if (selected.size === 0) {
             this.electron.ipcRenderer.send('show-message', { type: 'warning', message: 'Select project' });
             return;
         }
         let projects: string[] = [];
-        for (let key of this.selected.keys()) {
-            projects.push(key);
+        for (let key of selected.keys()) {
+            if (!Main.tabHolder.has(key)) {
+                projects.push(key);
+            } else {
+                let p: Project = this.getProject(key);
+                this.electron.ipcRenderer.send('show-message', { type: 'warning', message: 'Project "' + p.description + '" is open' });
+            }
         }
         this.electron.ipcRenderer.send('remove-projects', { projects: projects });
     }
 
     exportProject(): void {
-        if (this.selected.size === 0) {
+        let selected = this.getSelectedProjects();
+        if (selected.size === 0) {
             this.electron.ipcRenderer.send('show-message', { type: 'warning', message: 'Select project' });
             return;
         }
-        if (this.selected.size > 1) {
+        if (selected.size > 1) {
             this.electron.ipcRenderer.send('show-message', { type: 'warning', message: 'Select one project' });
             return;
         }
-        for (let key of this.selected.keys()) {
-            let project: Project = this.selected.get(key);
+        for (let key of selected.keys()) {
+            let project: Project = selected.get(key);
             this.electron.ipcRenderer.send('export-xliff', { projectId: key, description: project.description });
         }
     }
 
     exportTMX(): void {
-        if (this.selected.size === 0) {
+        let selected = this.getSelectedProjects();
+        if (selected.size === 0) {
             this.electron.ipcRenderer.send('show-message', { type: 'warning', message: 'Select project' });
             return;
         }
-        if (this.selected.size > 1) {
+        if (selected.size > 1) {
             this.electron.ipcRenderer.send('show-message', { type: 'warning', message: 'Select one project' });
             return;
         }
-        for (let key of this.selected.keys()) {
-            let project: Project = this.selected.get(key);
+        for (let key of selected.keys()) {
+            let project: Project = selected.get(key);
             this.electron.ipcRenderer.send('export-tmx-file', { projectId: key, description: project.description });
         }
     }
 
-    displayProjects(projects: Project[]) {
-        this.selected.clear();
+    displayProjects() {
         this.tbody.innerHTML = '';
-        let length = projects.length;
+        let length = this.projects.length;
         for (let i = 0; i < length; i++) {
-            let p: Project = projects[i];
+            let p: Project = this.projects[i];
 
             let checkBox: HTMLInputElement = document.createElement('input');
             checkBox.id = 'ck_' + p.id;
             checkBox.type = 'checkbox';
+            checkBox.classList.add('projectSelection');
+            checkBox.addEventListener('click', () => {
+                checkBox.checked = !checkBox.checked;
+                if (checkBox.checked) {
+                    tr.classList.add('selected');
+                } else {
+                    tr.classList.remove('selected');
+                }
+            });
 
             let tr = document.createElement('tr');
             tr.id = p.id;
             tr.addEventListener('click', () => {
-                this.clicked(tr, p, checkBox);
+                this.clicked(tr, checkBox);
             });
             tr.addEventListener('dblclick', () => {
-                this.dblclicked(tr, p, checkBox);
+                this.dblclicked(tr, checkBox);
             });
             this.tbody.appendChild(tr);
             if (this.shouldOpen === p.id) {
-                this.selected.set(p.id, p);
+                this.clicked(tr, checkBox);
             }
 
             let td = document.createElement('td');
@@ -414,26 +467,20 @@ class ProjectsView {
         }
     }
 
-    dblclicked(tr: HTMLTableRowElement, project: Project, checkbox: HTMLInputElement): void {
-        for (let key of this.selected.keys()) {
-            document.getElementById(key).classList.remove('selected');
-            (document.getElementById('ck_' + key) as HTMLInputElement).checked = false;
-        }
-        this.selected.clear();
-        this.clicked(tr, project, checkbox);
+    dblclicked(tr: HTMLTableRowElement, checkbox: HTMLInputElement): void {
+        this.clearSelection();
+        checkbox.checked = true;
+        tr.classList.add('selected');
         this.openProjects();
     }
 
-    clicked(tr: HTMLTableRowElement, project: Project, checkbox: HTMLInputElement): void {
-        let isSelected: boolean = this.selected.has(project.id);
-        if (!isSelected) {
-            this.selected.set(project.id, project);
+    clicked(tr: HTMLTableRowElement, checkbox: HTMLInputElement): void {
+        checkbox.checked = !checkbox.checked;
+        if (checkbox.checked) {
             tr.classList.add('selected');
         } else {
-            this.selected.delete(project.id);
             tr.classList.remove('selected');
         }
-        checkbox.checked = !isSelected;
     }
 
     updateStatus(arg: any): void {
@@ -450,30 +497,32 @@ class ProjectsView {
     }
 
     exportHTML(): void {
-        if (this.selected.size === 0) {
+        let selected = this.getSelectedProjects();
+        if (selected.size === 0) {
             this.electron.ipcRenderer.send('show-message', { type: 'warning', message: 'Select project' });
             return;
         }
-        if (this.selected.size > 1) {
+        if (selected.size > 1) {
             this.electron.ipcRenderer.send('show-message', { type: 'warning', message: 'Select one project' });
             return;
         }
-        for (let key of this.selected.keys()) {
+        for (let key of selected.keys()) {
             this.electron.ipcRenderer.send('export-project-html', { project: key });
         }
     }
 
     applyTranslationMemoryAll(): void {
-        if (this.selected.size === 0) {
+        let selected = this.getSelectedProjects();
+        if (selected.size === 0) {
             this.electron.ipcRenderer.send('show-message', { type: 'warning', message: 'Select project' });
             return;
         }
-        if (this.selected.size > 1) {
+        if (selected.size > 1) {
             this.electron.ipcRenderer.send('show-message', { type: 'warning', message: 'Select one project' });
             return;
         }
-        for (let key of this.selected.keys()) {
-            let project: Project = this.selected.get(key);
+        for (let key of selected.keys()) {
+            let project: Project = selected.get(key);
             this.electron.ipcRenderer.send('show-apply-tm', { project: key, memory: project.memory });
         }
     }

@@ -68,7 +68,6 @@ public class ProjectsHandler implements HttpHandler {
 	private static Logger logger = System.getLogger(ProjectsHandler.class.getName());
 	private static Map<String, Project> projects;
 	private static Map<String, JSONObject> processes;
-	private static boolean firstRun = true;
 	protected JSONObject projectsList;
 
 	private String srxFile;
@@ -477,27 +476,10 @@ public class ProjectsHandler implements HttpHandler {
 		if (!list.exists()) {
 			JSONObject json = new JSONObject();
 			json.put("projects", new JSONArray());
-			try (FileOutputStream out = new FileOutputStream(list)) {
-				out.write(json.toString(2).getBytes(StandardCharsets.UTF_8));
-			}
+			TmsServer.writeJSON(list, json);
 		}
 		projectsList = TmsServer.readJSON(list);
 		sortProjects();
-		if (firstRun) {
-			firstRun = false;
-			new Thread(() -> {
-				try {
-					File[] filesList = home.listFiles();
-					for (int i = 0; i < filesList.length; i++) {
-						if (filesList[i].isDirectory() && !projects.containsKey(filesList[i].getName())) {
-							TmsServer.deleteFolder(filesList[i].getAbsolutePath());
-						}
-					}
-				} catch (IOException e) {
-					logger.log(Level.WARNING, "Error deleting folder", e);
-				}
-			}).start();
-		}
 	}
 
 	private void sortProjects() throws IOException {

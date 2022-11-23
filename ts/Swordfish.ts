@@ -1271,7 +1271,7 @@ class Swordfish {
 
     saveDefaults(): void {
         let defaultsFile: string = Swordfish.path.join(app.getPath('appData'), app.name, 'defaults.json');
-        writeFileSync(defaultsFile, JSON.stringify(Swordfish.mainWindow.getBounds()));
+        writeFileSync(defaultsFile, JSON.stringify(Swordfish.mainWindow.getBounds(), null, 2));
     }
 
     static setHeight(window: BrowserWindow, arg: any) {
@@ -1288,20 +1288,31 @@ class Swordfish {
             try {
                 let data: Buffer = readFileSync(preferencesFile);
                 Swordfish.currentPreferences = JSON.parse(data.toString());
-                if (!Swordfish.currentPreferences.projectsFolder) {
+                if (!Swordfish.currentPreferences.projectsFolder || !existsSync(Swordfish.currentPreferences.projectsFolder)) {
                     Swordfish.currentPreferences.projectsFolder = Swordfish.path.join(app.getPath('appData'), app.name, 'projects');
+                    writeFileSync(Swordfish.path.join(app.getPath('appData'), app.name, 'preferences.json'), JSON.stringify(Swordfish.currentPreferences, null, 2));
                 }
-                if (!Swordfish.currentPreferences.memoriesFolder) {
+                if (!Swordfish.currentPreferences.memoriesFolder || !existsSync(Swordfish.currentPreferences.memoriesFolder)) {
                     Swordfish.currentPreferences.memoriesFolder = Swordfish.path.join(app.getPath('appData'), app.name, 'memories');
+                    writeFileSync(Swordfish.path.join(app.getPath('appData'), app.name, 'preferences.json'), JSON.stringify(Swordfish.currentPreferences, null, 2));
                 }
-                if (!Swordfish.currentPreferences.glossariesFolder) {
+                if (!Swordfish.currentPreferences.glossariesFolder || !existsSync(Swordfish.currentPreferences.glossariesFolder)) {
                     Swordfish.currentPreferences.glossariesFolder = Swordfish.path.join(app.getPath('appData'), app.name, 'glossaries');
+                    writeFileSync(Swordfish.path.join(app.getPath('appData'), app.name, 'preferences.json'), JSON.stringify(Swordfish.currentPreferences, null, 2));
+                }
+                if (!existsSync(Swordfish.currentPreferences.catalog)) {
+                    Swordfish.currentPreferences.catalog = Swordfish.path.join(app.getAppPath(), 'catalog', 'catalog.xml');
+                    writeFileSync(Swordfish.path.join(app.getPath('appData'), app.name, 'preferences.json'), JSON.stringify(Swordfish.currentPreferences, null, 2));
+                }
+                if (!existsSync(Swordfish.currentPreferences.srx)) {
+                    Swordfish.currentPreferences.srx = Swordfish.path.join(app.getAppPath(), 'srx', 'default.srx');
+                    writeFileSync(Swordfish.path.join(app.getPath('appData'), app.name, 'preferences.json'), JSON.stringify(Swordfish.currentPreferences, null, 2));
                 }
             } catch (err) {
                 console.log(err);
             }
         } else {
-            writeFileSync(Swordfish.path.join(app.getPath('appData'), app.name, 'preferences.json'), JSON.stringify(Swordfish.currentPreferences));
+            writeFileSync(Swordfish.path.join(app.getPath('appData'), app.name, 'preferences.json'), JSON.stringify(Swordfish.currentPreferences, null, 2));
         }
         if (Swordfish.currentPreferences.theme === 'system') {
             if (nativeTheme.shouldUseDarkColors) {
@@ -1329,7 +1340,7 @@ class Swordfish {
         let reloadProjects: boolean = this.currentPreferences.projectsFolder !== preferences.projectsFolder;
         let reloadMemories: boolean = this.currentPreferences.memoriesFolder !== preferences.memoriesFolder;
         let reloadGlossaries: boolean = this.currentPreferences.glossariesFolder !== preferences.glossariesFolder;
-        writeFileSync(Swordfish.path.join(app.getPath('appData'), app.name, 'preferences.json'), JSON.stringify(preferences));
+        writeFileSync(Swordfish.path.join(app.getPath('appData'), app.name, 'preferences.json'), JSON.stringify(preferences, null, 2));
         Swordfish.loadPreferences();
         Swordfish.setTheme();
         Swordfish.mainWindow.webContents.send('set-zoom', { zoom: Swordfish.currentPreferences.zoomFactor });
@@ -2481,7 +2492,7 @@ class Swordfish {
         Swordfish.destroyWindow(this.defaultLangsWindow);
         this.currentPreferences.srcLang = arg.srcLang;
         this.currentPreferences.tgtLang = arg.tgtLang;
-        writeFileSync(Swordfish.path.join(app.getPath('appData'), app.name, 'preferences.json'), JSON.stringify(this.currentPreferences));
+        writeFileSync(Swordfish.path.join(app.getPath('appData'), app.name, 'preferences.json'), JSON.stringify(this.currentPreferences, null, 2));
     }
 
     static getSegmenstCount(event: IpcMainEvent, arg: any): void {

@@ -126,7 +126,12 @@ class AddFile {
     addFile(arg: any): void {
         let file: any = arg.files[0];
         this.selectedFile = file.file;
-        (document.getElementById('nameSpan') as HTMLLabelElement).innerText = file.file;
+        if (file.file.length > 90 && (file.file.indexOf('/') != -1 || file.file.indexOf('\\') != -1)) {
+            let shortName: string = file.file.substring(0, 30) + ' ... ' + file.file.substring(file.file.length - 60);
+            (document.getElementById('nameSpan') as HTMLLabelElement).innerText = shortName;
+        } else {
+            (document.getElementById('nameSpan') as HTMLLabelElement).innerText = file.file;
+        }
         let typeSelect = document.getElementById('typeSelect') as HTMLSelectElement;
         if (file.type !== 'Unknown') {
             typeSelect.value = file.type;

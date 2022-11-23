@@ -15,7 +15,6 @@ package com.maxprograms.swordfish;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -61,7 +60,6 @@ public class GlossariesHandler implements HttpHandler {
 	private static Map<String, Memory> glossaries;
 	private static Map<String, ITmEngine> engines;
 	private static Map<String, JSONObject> openTasks;
-	private static boolean firstRun = true;
 
 	@Override
 	public void handle(HttpExchange exchange) throws IOException {
@@ -187,21 +185,6 @@ public class GlossariesHandler implements HttpHandler {
 			JSONObject obj = json.getJSONObject(key);
 			glossaries.put(key, new Memory(obj));
 		}
-		if (firstRun) {
-			firstRun = false;
-			new Thread(() -> {
-				try {
-					File[] filesList = home.listFiles();
-					for (int i = 0; i < filesList.length; i++) {
-						if (filesList[i].isDirectory() && !glossaries.containsKey(filesList[i].getName())) {
-							TmsServer.deleteFolder(filesList[i].getAbsolutePath());
-						}
-					}
-				} catch (IOException e) {
-					logger.log(Level.WARNING, "Error deleting folder", e);
-				}
-			}).start();
-		}
 	}
 
 	private static void saveGlossariesList() throws IOException {
@@ -215,9 +198,7 @@ public class GlossariesHandler implements HttpHandler {
 		}
 		File home = new File(getWorkFolder());
 		File list = new File(home, "glossaries.json");
-		try (FileOutputStream out = new FileOutputStream(list)) {
-			out.write(json.toString(2).getBytes(StandardCharsets.UTF_8));
-		}
+		TmsServer.writeJSON(list, json);
 	}
 
 	private static JSONObject listGlossaries() throws IOException {

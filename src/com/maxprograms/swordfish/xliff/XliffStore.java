@@ -12,10 +12,8 @@
 
 package com.maxprograms.swordfish.xliff;
 
-import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileOutputStream;
-import java.io.FileReader;
 import java.io.IOException;
 import java.io.StringReader;
 import java.lang.System.Logger;
@@ -46,6 +44,11 @@ import java.util.zip.DataFormatException;
 
 import javax.xml.parsers.ParserConfigurationException;
 
+import org.json.JSONArray;
+import org.json.JSONObject;
+import org.jsoup.Jsoup;
+import org.xml.sax.SAXException;
+
 import com.maxprograms.converters.Join;
 import com.maxprograms.converters.Merge;
 import com.maxprograms.languages.Language;
@@ -74,11 +77,6 @@ import com.maxprograms.xml.TextNode;
 import com.maxprograms.xml.XMLNode;
 import com.maxprograms.xml.XMLOutputter;
 import com.maxprograms.xml.XMLUtils;
-
-import org.json.JSONArray;
-import org.json.JSONObject;
-import org.jsoup.Jsoup;
-import org.xml.sax.SAXException;
 
 public class XliffStore {
 
@@ -870,17 +868,7 @@ public class XliffStore {
     }
 
     private static void getPreferences() throws IOException {
-        File preferences = new File(TmsServer.getWorkFolder(), "preferences.json");
-        StringBuilder builder = new StringBuilder();
-        try (FileReader reader = new FileReader(preferences, StandardCharsets.UTF_8)) {
-            try (BufferedReader buffer = new BufferedReader(reader)) {
-                String line = "";
-                while ((line = buffer.readLine()) != null) {
-                    builder.append(line);
-                }
-            }
-        }
-        JSONObject json = new JSONObject(builder.toString());
+        JSONObject json = TmsServer.getPreferences();
         acceptUnconfirmed = json.getBoolean("acceptUnconfirmed");
         caseSensitiveSearches = json.getBoolean("caseSensitiveSearches");
         fuzzyTermSearches = json.getBoolean("fuzzyTermSearches");
@@ -2527,13 +2515,6 @@ public class XliffStore {
         return matchTarget;
     }
 
-    public static String getCatalog() throws IOException {
-        if (catalog == null) {
-            getPreferences();
-        }
-        return catalog;
-    }
-
     public void removeTranslations() throws SQLException, SAXException, IOException, ParserConfigurationException {
         String sql = "SELECT file, unitId, segId, source FROM segments WHERE type='S' AND translate='Y' and targetText<>'' ";
         try (ResultSet rs = stmt.executeQuery(sql)) {
@@ -2724,7 +2705,7 @@ public class XliffStore {
 
     public String generateStatistics()
             throws SQLException, SAXException, IOException, ParserConfigurationException, URISyntaxException {
-        getCatalog();
+        getPreferences();
         updateXliff();
         File file = new File(xliffFile);
 
