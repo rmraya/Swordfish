@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007-2022 Maxprograms.
+ * Copyright (c) 2023 Maxprograms.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 1.0
@@ -398,7 +398,7 @@ public class MemoriesHandler implements HttpHandler {
 	private static void deleteMemoryFolder(String id) {
 		try {
 			File wfolder = new File(getWorkFolder(), id);
-			TmsServer.deleteFolder(wfolder.getAbsolutePath());
+			TmsServer.deleteFolder(wfolder);
 		} catch (IOException ioe) {
 			logger.log(Level.WARNING, "Folder '" + id + "' will be deleted on next start");
 		}

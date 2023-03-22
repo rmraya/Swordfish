@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <srx version="2.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.lisa.org/srx20 srx20.xsd" xmlns="http://www.lisa.org/srx20">
-  <!--    =======================================================    -->
-  <!--    Copyright 2007-2022 © Maxprograms                          -->
-  <!--    This file is made available under the terms of the         -->
-  <!--    Eclipse Public License (EPL)                               -->
-  <!--    Revision: 7E2-B-8                                          -->
-  <!--    http://www.maxprograms.com                                 -->
-  <!--    =======================================================    -->
+  <!--     =======================================================     -->
+  <!--     Copyright 2007-2023 © Maxprograms                           -->
+  <!--     This file is made available under the terms of the          -->
+  <!--     Eclipse Public License (EPL)                                -->
+  <!--     Revision: 20230222_0819                                           -->
+  <!--     http://www.maxprograms.com                                  -->
+  <!--     =======================================================     -->
   <header cascade="yes" segmentsubflows="yes">
     <formathandle include="no" type="start"/>
     <formathandle include="yes" type="end"/>
@@ -5383,8 +5383,8 @@
           <afterbreak>\s</afterbreak>
         </rule>
         <rule break="no">
-          <beforebreak>\b[Zz]\.B\.</beforebreak>
-          <afterbreak>\s</afterbreak>
+          <beforebreak>\b[Zz]\.</beforebreak>
+          <afterbreak>\sB\.\s</afterbreak>
         </rule>
         <rule break="no">
           <beforebreak>\b[Zz]\.Hd\.</beforebreak>

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007-2022 Maxprograms.
+ * Copyright (c) 2023 Maxprograms.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 1.0
@@ -156,6 +156,9 @@ public class TmsServer implements HttpHandler {
 		try (BufferedReader rd = new BufferedReader(new InputStreamReader(is, StandardCharsets.UTF_8))) {
 			String line;
 			while ((line = rd.readLine()) != null) {
+				if (!request.isEmpty()) {
+					request.append('\n');
+				}
 				request.append(line);
 			}
 		}
@@ -179,15 +182,14 @@ public class TmsServer implements HttpHandler {
 		return workDir;
 	}
 
-	public static void deleteFolder(String folder) throws IOException {
-		File f = new File(folder);
-		if (f.isDirectory()) {
-			String[] list = f.list();
+	public static void deleteFolder(File folder) throws IOException {
+		if (folder.isDirectory()) {
+			String[] list = folder.list();
 			for (int i = 0; i < list.length; i++) {
-				deleteFolder(new File(f, list[i]).getAbsolutePath());
+				deleteFolder(new File(folder, list[i]));
 			}
 		}
-		Files.deleteIfExists(f.toPath());
+		Files.deleteIfExists(folder.toPath());
 	}
 
 	public static boolean isDebug() {

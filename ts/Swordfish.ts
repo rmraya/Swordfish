@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007-2022 Maxprograms.
+ * Copyright (c) 2023 Maxprograms.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 1.0
@@ -517,6 +517,9 @@ class Swordfish {
         });
         ipcMain.on('get-subjects', (event: IpcMainEvent) => {
             this.getSubjects(event);
+        });
+        ipcMain.on('get-home', (event: IpcMainEvent) => {
+            event.sender.send('set-home', app.getPath('home'));
         });
         ipcMain.on('get-types', (event: IpcMainEvent) => {
             this.getTypes(event);
@@ -1419,7 +1422,7 @@ class Swordfish {
     static addProject(): void {
         this.addProjectWindow = new BrowserWindow({
             parent: this.mainWindow,
-            width: 900,
+            width: 930,
             minimizable: false,
             maximizable: false,
             resizable: false,
@@ -2043,6 +2046,7 @@ class Swordfish {
         switch (type) {
             case 'Swordfish':
             case "OpenXLIFF":
+            case "XMLJava":
             case "H2":
                 licenseFile = 'file://' + this.path.join(app.getAppPath(), 'html', 'licenses', 'EclipsePublicLicense1.0.html');
                 title = 'Eclipse Public License 1.0';
@@ -2051,7 +2055,6 @@ class Swordfish {
                 licenseFile = 'file://' + this.path.join(app.getAppPath(), 'html', 'licenses', 'electron.txt');
                 title = 'MIT License';
                 break;
-            case "TypeScript":
             case "MapDB":
                 licenseFile = 'file://' + this.path.join(app.getAppPath(), 'html', 'licenses', 'Apache2.0.html');
                 title = 'Apache 2.0';
@@ -5290,4 +5293,8 @@ class Swordfish {
     }
 }
 
-new Swordfish();
+try {
+    new Swordfish();
+} catch (e) {
+    console.log("Unable to instantiate Swordfish();");
+}

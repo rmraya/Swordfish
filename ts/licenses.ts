@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007-2022 Maxprograms.
+ * Copyright (c) 2023 Maxprograms.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 1.0
@@ -25,8 +25,8 @@ class Licenses {
         document.getElementById('electron').addEventListener('click', () => {
             this.openLicense('electron');
         });
-        document.getElementById('TypeScript').addEventListener('click', () => {
-            this.openLicense('TypeScript');
+        document.getElementById('XMLJava').addEventListener('click', () => {
+            this.openLicense('XMLJava');
         });
         document.getElementById('Java').addEventListener('click', () => {
             this.openLicense('Java');

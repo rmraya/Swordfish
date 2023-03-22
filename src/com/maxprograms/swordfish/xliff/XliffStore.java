@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007-2022 Maxprograms.
+ * Copyright (c) 2023 Maxprograms.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 1.0
@@ -1785,7 +1785,7 @@ public class XliffStore {
         File projectFolder = new File(xliffFile).getParentFile();
         File tempFolder = new File(projectFolder, "tmp");
         if (tempFolder.exists()) {
-            TmsServer.deleteFolder(tempFolder.getAbsolutePath());
+            TmsServer.deleteFolder(tempFolder);
         }
         List<String> files = Split.split(xliffFile, tempFolder.getAbsolutePath());
         File tempFile = File.createTempFile("joined", ".xlf", tempFolder);
@@ -1796,7 +1796,7 @@ public class XliffStore {
         }
         Files.copy(tempFile.toPath(), outputFile.toPath());
         Files.delete(tempFile.toPath());
-        TmsServer.deleteFolder(tempFolder.getAbsolutePath());
+        TmsServer.deleteFolder(tempFolder);
     }
 
     public void exportTMX(String output, String description, String client, String subject)

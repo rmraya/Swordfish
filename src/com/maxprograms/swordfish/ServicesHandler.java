@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007-2022 Maxprograms.
+ * Copyright (c) 2023 Maxprograms.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 1.0
@@ -544,6 +544,7 @@ public class ServicesHandler implements HttpHandler {
         JSONObject result = new JSONObject();
         result.put("swordfish", Constants.VERSION + " Build: " + Constants.BUILD);
         result.put("openxliff", com.maxprograms.converters.Constants.VERSION + " Build: " + com.maxprograms.converters.Constants.BUILD);
+        result.put("xmljava", com.maxprograms.xml.Constants.VERSION + " Build: " + com.maxprograms.xml.Constants.BUILD);
         result.put("java", System.getProperty("java.version") + " Vendor: " + System.getProperty("java.vendor"));
         return result;
     }

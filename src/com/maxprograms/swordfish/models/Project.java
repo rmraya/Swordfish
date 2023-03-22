@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007-2022 Maxprograms.
+ * Copyright (c) 2023 Maxprograms.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 1.0
@@ -12,16 +12,20 @@
 
 package com.maxprograms.swordfish.models;
 
+import java.io.File;
 import java.io.IOException;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import com.maxprograms.converters.Utils;
 import com.maxprograms.languages.Language;
 import com.maxprograms.languages.LanguageUtils;
+import com.maxprograms.swordfish.ProjectsHandler;
 
 import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 
 public class Project implements Comparable<Project> {
@@ -81,11 +85,14 @@ public class Project implements Comparable<Project> {
 			}
 		}
 		xliff = json.getString("xliff");
+		if (!new File(xliff).isAbsolute()) {
+			xliff = Utils.getAbsolutePath(ProjectsHandler.getWorkFolder(), xliff);
+		}
 		memory = json.getString("memory");
 		glossary = json.getString("glossary");
 	}
 
-	public JSONObject toJSON() {
+	public JSONObject toJSON() throws IOException, JSONException {
 		JSONObject json = new JSONObject();
 		json.put("id", id);
 		json.put("description", description);
@@ -101,7 +108,7 @@ public class Project implements Comparable<Project> {
 			filesArray.put(it.next().toJSON());
 		}
 		json.put("files", filesArray);
-		json.put("xliff", xliff);
+		json.put("xliff", Utils.getRelativePath(ProjectsHandler.getWorkFolder().getAbsolutePath(), xliff));
 		json.put("memory", memory);
 		json.put("glossary", glossary);
 		return json;

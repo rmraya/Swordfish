@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007-2022 Maxprograms.
+ * Copyright (c) 2023 Maxprograms.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 1.0
@@ -20,6 +20,8 @@ class AddProject {
 
     memSelect: HTMLSelectElement;
     glossSelect: HTMLSelectElement;
+
+    homeFolder: string;
 
     constructor() {
         this.memSelect = document.getElementById('memorySelect') as HTMLSelectElement;
@@ -80,6 +82,10 @@ class AddProject {
             this.addProject();
         });
         (document.getElementById('nameInput') as HTMLInputElement).focus();
+        this.electron.ipcRenderer.send('get-home');
+        this.electron.ipcRenderer.on('set-home', (event: Electron.IpcRendererEvent, arg: any) => {
+            this.homeFolder = arg;
+        });
         this.electron.ipcRenderer.send('add-project-height', { width: document.body.clientWidth, height: document.body.clientHeight });
     }
 
@@ -208,7 +214,8 @@ class AddProject {
                 td.className = 'noWrap';
                 td.style.overflowX = 'hidden';
                 if (file.file.length > 50 && (file.file.indexOf('/') != -1 || file.file.indexOf('\\') != -1)) {
-                    td.innerText = file.file.substring(0, 10) + ' ... ' + file.file.substring(file.file.length - 35);
+                    let f = file.file.replace(this.homeFolder, '~');
+                    td.innerText = f.substring(0, 10) + ' ... ' + f.substring(f.length - 30);
                     td.title = file.file;
                 } else {
                     td.innerText = file.file;

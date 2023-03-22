@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007-2022 Maxprograms.
+ * Copyright (c) 2023 Maxprograms.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 1.0
@@ -15,6 +15,7 @@ class AddFile {
     electron = require('electron');
 
     selectedFile: string;
+    homeFolder: string;
     charsetOptions: string;
     typesOption: string;
 
@@ -71,7 +72,11 @@ class AddFile {
         document.getElementById('addProjectButton').addEventListener('click', () => {
             this.addProject();
         });
-        this.electron.ipcRenderer.send('add-file-height', { width: document.body.clientWidth, height: document.body.clientHeight });
+        this.electron.ipcRenderer.send('get-home');
+        this.electron.ipcRenderer.on('set-home', (event: Electron.IpcRendererEvent, arg: any) => {
+            this.homeFolder = arg;
+        });
+         this.electron.ipcRenderer.send('add-file-height', { width: document.body.clientWidth, height: document.body.clientHeight });
     }
 
     setClients(clients: string[]): void {
@@ -127,7 +132,8 @@ class AddFile {
         let file: any = arg.files[0];
         this.selectedFile = file.file;
         if (file.file.length > 90 && (file.file.indexOf('/') != -1 || file.file.indexOf('\\') != -1)) {
-            let shortName: string = file.file.substring(0, 30) + ' ... ' + file.file.substring(file.file.length - 60);
+            let f: string = file.file.replace(this.homeFolder, '~');
+            let shortName: string = f.substring(0, 30) + ' ... ' + f.substring(f.length - 60);
             (document.getElementById('nameSpan') as HTMLLabelElement).innerText = shortName;
         } else {
             (document.getElementById('nameSpan') as HTMLLabelElement).innerText = file.file;

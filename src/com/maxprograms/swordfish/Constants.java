@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007-2022 Maxprograms.
+ * Copyright (c) 2023 Maxprograms.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 1.0
@@ -19,8 +19,8 @@ public class Constants {
 	}
 
 	public static final String APPNAME = "Swordfish";
-	public static final String VERSION = "4.22.2";
-	public static final String BUILD = "20221121_0609";
+	public static final String VERSION = "4.23.0";
+	public static final String BUILD = "20230322_0835";
 
 	public static final String REASON = "reason";
 	public static final String STATUS = "status";

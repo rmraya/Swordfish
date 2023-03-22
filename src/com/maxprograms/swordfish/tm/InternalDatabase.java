@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007-2022 Maxprograms.
+ * Copyright (c) 2023 Maxprograms.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 1.0
@@ -619,7 +619,7 @@ public class InternalDatabase implements ITmEngine {
 
 	@Override
 	public void deleteDatabase() throws IOException, SQLException {
-		TmsServer.deleteFolder(new File(MemoriesHandler.getWorkFolder(), dbname).getAbsolutePath());
+		TmsServer.deleteFolder(new File(MemoriesHandler.getWorkFolder(), dbname));
 	}
 
 	@Override

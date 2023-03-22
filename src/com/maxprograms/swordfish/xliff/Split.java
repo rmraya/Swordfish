@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007-2022 Maxprograms.
+ * Copyright (c) 2023 Maxprograms.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 1.0
@@ -86,7 +86,7 @@ public class Split {
                         skeleton.removeAttribute("href");
                         skeletons.add(href);
                     } else {
-                        skeleton.setAttribute("href", Utils.makeRelativePath(parentFolder, href));
+                        skeleton.setAttribute("href", Utils.getRelativePath(parentFolder, href));
                     }
                     newRoot.addContent("\n");
                     newRoot.addContent(file);

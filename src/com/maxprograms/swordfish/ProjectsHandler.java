@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007-2022 Maxprograms.
+ * Copyright (c) 2023 Maxprograms.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 1.0
@@ -232,7 +232,7 @@ public class ProjectsHandler implements HttpHandler {
 		return response;
 	}
 
-	private JSONObject getProject(String request) {
+	private JSONObject getProject(String request) throws IOException, JSONException {
 		JSONObject json = new JSONObject(request);
 		if (!projects.containsKey(json.getString("project"))) {
 			JSONObject result = new JSONObject();
@@ -435,7 +435,7 @@ public class ProjectsHandler implements HttpHandler {
 					store.close();
 					projectStores.remove(project);
 				}
-				TmsServer.deleteFolder(new File(getWorkFolder(), project).getAbsolutePath());
+				TmsServer.deleteFolder(new File(getWorkFolder(), project));
 				removeFromList(project);
 			}
 			saveProjectsList();
@@ -693,7 +693,7 @@ public class ProjectsHandler implements HttpHandler {
 									logger.log(Level.INFO, "Conversion failed for: " + file.toString(2));
 								}
 								try {
-									TmsServer.deleteFolder(projectFolder.getAbsolutePath());
+									TmsServer.deleteFolder(projectFolder);
 								} catch (IOException e) {
 									logger.log(Level.ERROR, e);
 								}
@@ -759,7 +759,7 @@ public class ProjectsHandler implements HttpHandler {
 		paragraphSegmentation = json.getBoolean("paragraphSegmentation");
 	}
 
-	private static File getWorkFolder() throws IOException {
+	public static File getWorkFolder() throws IOException {
 		File home = TmsServer.getProjectsFolder();
 		if (!home.exists()) {
 			Files.createDirectories(home.toPath());
