@@ -13,6 +13,7 @@
 package com.maxprograms.swordfish.xliff;
 
 import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Set;
 import java.util.StringTokenizer;
 import java.util.Vector;
@@ -22,8 +23,8 @@ import com.maxprograms.swordfish.tm.NGrams;
 public class DifferenceTagger {
 
 	private int[][] matrix;
-	private Vector<String> xVector;
-	private Vector<String> yVector;
+	private List<String> xVector;
+	private List<String> yVector;
 	private StringBuffer differenceX;
 	private StringBuffer differenceY;
 
@@ -131,8 +132,8 @@ public class DifferenceTagger {
 		}
 	}
 
-	private static Vector<String> buildWordList(String src) {
-		Vector<String> result = new Vector<>();
+	private static List<String> buildWordList(String src) {
+		List<String> result = new Vector<>();
 		StringTokenizer tokenizer = new StringTokenizer(src, NGrams.TERM_SEPARATORS, true);
 		while (tokenizer.hasMoreElements()) {
 			String tk = tokenizer.nextToken();
