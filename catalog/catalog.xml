@@ -63,6 +63,7 @@
 	<system systemId="tbxxcsdtd.dtd" uri="tbx/tbxxcsdtd.dtd" />
 	<uri name="urn:TBXcs" uri="tbx/TBXcsV02.xsd" />
 	<uri name="x-schema:TBXdsV1-0.xml" uri="tbx/TBXdsV1-0.xml" />
+	<uri name="urn:iso:std:iso:30042:ed-2" uri="tbx/TBXcoreStructV03.rng" />
 
 	<public publicId="-//SRX//DTD SRX//EN" uri="srx/srx.dtd" />
 	<system systemId="srx.dtd" uri="srx/srx.dtd" />

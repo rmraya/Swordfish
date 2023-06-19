@@ -29,7 +29,7 @@ The version of Swordfish included in the official installers from [Maxprograms D
 
 Personal Subscription Keys are available in  [Maxprograms Online Store](https://www.maxprograms.com/store/buy.html). Subscription Keys cannot be shared or transferred to different machines.
 
-Subscription version includes unlimited email support at tech@maxprograms.com
+Subscription version includes unlimited email support at [tech@maxprograms.com](mailto:tech@maxprograms.com)
 
 ### Differences sumary
 
@@ -39,7 +39,7 @@ Ready To Use Installers| No | Yes
 Notarized macOS launcher| No | Yes
 Signed launcher and installer for Windows | No | Yes
 Restricted Features | None | None
-Technical Support |  Peer support at [Groups.io](https://groups.io/g/maxprograms/)| - Direct email at tech@maxprograms.com  <br> - Peer support at [Groups.io](https://groups.io/g/maxprograms/)
+Technical Support |  Peer support at [Groups.io](https://groups.io/g/maxprograms/)| - Direct email at [tech@maxprograms.com](mailto:tech@maxprograms.com)  <br> - Peer support at [Groups.io](https://groups.io/g/maxprograms/)
 
 ## Related Projects
 
@@ -50,8 +50,8 @@ Technical Support |  Peer support at [Groups.io](https://groups.io/g/maxprograms
 
 - JDK 17 or newer is required for compiling and building. Get it from [Adoptium](https://adoptium.net/).
 - Apache Ant 1.10.12 or newer. Get it from [https://ant.apache.org/](https://ant.apache.org/)
-- Node.js 18.15.0 LTS or newer. Get it from [https://nodejs.org/](https://nodejs.org/)
-- TypeScript 5.0.0 or newer, get it from [https://www.typescriptlang.org/](https://www.typescriptlang.org/)
+- Node.js 18.16.0 LTS or newer. Get it from [https://nodejs.org/](https://nodejs.org/)
+- TypeScript 5.1.0 or newer, get it from [https://www.typescriptlang.org/](https://www.typescriptlang.org/)
 
 ## Building
 

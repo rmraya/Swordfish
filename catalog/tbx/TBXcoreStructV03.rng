@@ -1,0 +1,713 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<grammar xmlns="http://relaxng.org/ns/structure/1.0"
+    xmlns:a="http://relaxng.org/ns/compatibility/annotations/1.0"
+    xmlns:sch="http://purl.oclc.org/dsdl/schematron"
+    datatypeLibrary="http://www.w3.org/2001/XMLSchema-datatypes" ns="urn:iso:std:iso:30042:ed-2">
+    <start>
+        <ref name="tbx" ns="urn:iso:std:iso:30042:ed-2"/>
+    </start>
+    <div>
+        <a:documentation>Attribute Classes</a:documentation>
+        <define name="id">
+            <optional>
+                <attribute name="id">
+                    <data type="ID"/>
+                </attribute>
+            </optional>
+        </define>
+        <define name="lang">
+            <optional>
+                <attribute name="xml:lang">
+                    <data type="language"/>
+                </attribute>
+            </optional>
+        </define>
+        <define name="idlang">
+            <ref name="id"/>
+            <ref name="lang"/>
+        </define>
+        <define name="target-IDREF">
+            <optional>
+                <attribute name="target">
+                    <data type="IDREF"/>
+                </attribute>
+            </optional>
+        </define>
+        <define name="IDLangTgtDtyp">
+            <ref name="id"/>
+            <ref name="lang"/>
+            <ref name="target-IDREF"/>
+            <optional>
+                <attribute name="datatype">
+                    <data type="string"/>
+                </attribute>
+            </optional>
+        </define>
+        <define name="idtype">
+            <ref name="id"/>
+            <optional>
+                <attribute name="type">
+                    <data type="string"/>
+                </attribute>
+            </optional>
+        </define>
+    </div>
+    <div>
+        <a:documentation>Elements</a:documentation>
+        <define name="admin">
+            <choice>
+                <element name="admin">
+                    <ref name="IDLangTgtDtyp"/>
+                    <attribute name="type">
+                        <data type="string"/>
+                    </attribute>
+                    <ref name="entity.noteText"/>
+                </element>
+                <element>
+                    <a:documentation>DCT Extension</a:documentation>
+                    <anyName>
+                        <except>
+                            <nsName ns="urn:iso:std:iso:30042:ed-2"/>
+                        </except>
+                    </anyName>
+                    <zeroOrMore>
+                        <attribute>
+                            <anyName/>
+                        </attribute>
+                    </zeroOrMore>
+                    <ref name="entity.noteText"/>
+                </element>
+            </choice>
+        </define>
+        <define name="adminGrp">
+            <element name="adminGrp">
+                <ref name="id"/>
+                <ref name="admin"/>
+                <zeroOrMore>
+                    <choice>
+                        <ref name="adminNote"/>
+                        <ref name="note"/>
+                        <ref name="ref"/>
+                        <ref name="xref"/>
+                    </choice>
+                </zeroOrMore>
+            </element>
+        </define>
+        <define name="adminNote">
+            <choice>
+                <element name="adminNote">
+                    <ref name="IDLangTgtDtyp"/>
+                    <attribute name="type">
+                        <data type="string"/>
+                    </attribute>
+                    <data type="string"/>
+                </element>
+                <element>
+                    <a:documentation>DCT Extension</a:documentation>
+                    <anyName>
+                        <except>
+                            <nsName ns="urn:iso:std:iso:30042:ed-2"/>
+                        </except>
+                    </anyName>
+                    <zeroOrMore>
+                        <attribute>
+                            <anyName/>
+                        </attribute>
+                    </zeroOrMore>
+                    <data type="string"/>
+                </element>
+            </choice>
+        </define>
+        <define name="back">
+            <element name="back">
+                <ref name="id"/>
+                <zeroOrMore>
+                    <ref name="refObjectSec"/>
+                </zeroOrMore>
+            </element>
+        </define>
+        <define name="body">
+            <element name="body">
+                <ref name="id"/>
+                <oneOrMore>
+                    <ref name="conceptEntry"/>
+                </oneOrMore>
+            </element>
+        </define>
+        <define name="change">
+            <element name="change">
+                <ref name="idlang"/>
+                <oneOrMore>
+                    <ref name="p"/>
+                </oneOrMore>
+            </element>
+        </define>
+        <define name="conceptEntry">
+            <element name="conceptEntry">
+                <attribute name="id">
+                    <data type="ID"/>
+                </attribute>
+                <ref name="entity.auxInfo"/>
+                <oneOrMore>
+                    <ref name="langSec"/>
+                </oneOrMore>
+            </element>
+        </define>
+        <define name="date">
+            <element name="date">
+                <ref name="id"/>
+                <choice>
+                    <data type="date" />
+                    <data type="dateTime"/>
+                </choice>
+            </element>
+        </define>
+        <define name="descrip">
+            <choice>
+                <element name="descrip">
+                    <ref name="IDLangTgtDtyp"/>
+                    <attribute name="type">
+                        <data type="string"/>
+                    </attribute>
+                    <ref name="entity.noteText"/>
+                </element>
+                <element>
+                    <a:documentation>DCT Extension</a:documentation>
+                    <anyName>
+                        <except>
+                            <nsName ns="urn:iso:std:iso:30042:ed-2"/>
+                        </except>
+                    </anyName>
+                    <zeroOrMore>
+                        <attribute>
+                            <anyName/>
+                        </attribute>
+                    </zeroOrMore>
+                    <ref name="entity.noteText"/>
+                </element>
+            </choice>
+        </define>
+        <define name="descripGrp">
+            <element name="descripGrp">
+                <ref name="id"/>
+                <ref name="descrip"/>
+                <zeroOrMore>
+                    <choice>
+                        <ref name="admin"/>
+                        <ref name="adminGrp"/>
+                        <ref name="descripNote"/>
+                        <ref name="note"/>
+                        <ref name="ref"/>
+                        <ref name="transacGrp"/>
+                        <ref name="xref"/>
+                    </choice>
+                </zeroOrMore>
+            </element>
+        </define>
+        <define name="descripNote">
+            <choice>
+                <element name="descripNote">
+                    <ref name="IDLangTgtDtyp"/>
+                    <attribute name="type">
+                        <data type="string"/>
+                    </attribute>
+                    <data type="string"/>
+                </element>
+                <element>
+                    <a:documentation>DCT Extension</a:documentation>
+                    <anyName>
+                        <except>
+                            <nsName ns="urn:iso:std:iso:30042:ed-2"/>
+                        </except>
+                    </anyName>
+                    <zeroOrMore>
+                        <attribute>
+                            <anyName/>
+                        </attribute>
+                    </zeroOrMore>
+                    <data type="string"/>
+                </element>
+            </choice>
+        </define>
+        <define name="ec">
+            <element name="ec">
+                <optional>
+                    <attribute name="startRef">
+                        <data type="IDREF"/>
+                    </attribute>
+                </optional>
+                <optional>
+                    <attribute name="isolated">
+                        <choice>
+                            <value>yes</value>
+                            <value>no</value>
+                        </choice>
+                    </attribute>
+                </optional>
+                <optional>
+                    <attribute name="disp"/>
+                </optional>
+                <optional>
+                    <attribute name="equiv"/>
+                </optional>
+                <optional>
+                    <attribute name="id">
+                        <data type="ID"/>
+                    </attribute>
+                </optional>
+                <optional>
+                    <attribute name="type">
+                        <choice>
+                            <value>fmt</value>
+                            <value>ui</value>
+                            <value>quote</value>
+                            <value>link</value>
+                            <value>image</value>
+                            <value>other</value>
+                        </choice>
+                    </attribute>
+                </optional>
+                <optional>
+                    <attribute name="subtype"/>
+                </optional>
+                <optional>
+                    <attribute name="target"/>
+                </optional>
+            </element>
+        </define>
+        <define name="encodingDesc">
+            <element name="encodingDesc">
+                <ref name="id"/>
+                <oneOrMore>
+                    <ref name="p"/>
+                </oneOrMore>
+            </element>
+        </define>
+        <define name="fileDesc">
+            <element name="fileDesc">
+                <ref name="id"/>
+                <optional>
+                    <ref name="publicationStmt"/>
+                </optional>
+                <optional>
+                    <ref name="titleStmt"/>
+                </optional>
+                <ref name="sourceDesc"/>
+            </element>
+        </define>
+        <define name="foreign">
+            <element name="foreign">
+                <ref name="idlang"/>
+                <ref name="entity.noteText"/>
+            </element>
+        </define>
+        <define name="hi">
+            <element name="hi">
+                <ref name="target-IDREF"/>
+                <optional>
+                    <attribute name="type">
+                        <choice>
+                            <value>entailedTerm</value>
+                            <value>hotkey</value>
+                            <value>italics</value>
+                            <value>bold</value>
+                            <value>superscript</value>
+                            <value>subscript</value>
+                            <value>math</value>
+                        </choice>
+                    </attribute>
+                </optional>
+                <data type="string"/>
+            </element>
+        </define>
+        <define name="item">
+            <element name="item">
+                <ref name="idtype"/>
+                <ref name="entity.noteText"/>
+            </element>
+        </define>
+        <define name="itemGrp">
+            <element name="itemGrp">
+                <ref name="id"/>
+                <ref name="item"/>
+                <ref name="entity.noteLinkInfo"/>
+            </element>
+        </define>
+        <define name="itemSet">
+            <element name="itemSet">
+                <ref name="idtype"/>
+                <oneOrMore>
+                    <choice>
+                        <ref name="itemGrp"/>
+                        <ref name="item"/>
+                    </choice>
+                </oneOrMore>
+            </element>
+        </define>
+        <define name="langSec">
+            <element name="langSec">
+                <attribute name="xml:lang">
+                    <data type="language"/>
+                </attribute>
+                <ref name="entity.auxInfo"/>
+                <oneOrMore>
+                    <ref name="termSec"/>
+                </oneOrMore>
+            </element>
+        </define>
+        <define name="note">
+            <element name="note">
+                <ref name="idlang"/>
+                <ref name="entity.noteText"/>
+            </element>
+        </define>
+        <define name="p">
+            <element name="p">
+                <ref name="idlang"/>
+                <optional>
+                    <attribute name="type"/>
+                </optional>
+                <ref name="entity.noteText"/>
+            </element>
+        </define>
+        <define name="ph">
+            <element name="ph">
+                <optional>
+                    <attribute name="type"/>
+                </optional>
+            </element>
+        </define>
+        <define name="publicationStmt">
+            <element name="publicationStmt">
+                <ref name="id"/>
+                <oneOrMore>
+                    <ref name="p"/>
+                </oneOrMore>
+            </element>
+        </define>
+        <define name="ref">
+            <choice>
+                <element name="ref">
+                    <ref name="IDLangTgtDtyp"/>
+                    <attribute name="type">
+                        <data type="string"/>
+                    </attribute>
+                    <data type="string"/>
+                </element>
+                <element>
+                    <a:documentation>DCT Extension</a:documentation>
+                    <anyName>
+                        <except>
+                            <nsName ns="urn:iso:std:iso:30042:ed-2"/>
+                        </except>
+                    </anyName>
+                    <zeroOrMore>
+                        <attribute>
+                            <anyName/>
+                        </attribute>
+                    </zeroOrMore>
+                    <data type="string"/>
+                </element>
+            </choice>
+        </define>
+        <define name="refObject">
+            <element name="refObject">
+                <ref name="id"/>
+                <oneOrMore>
+                    <choice>
+                        <ref name="itemSet"/>
+                        <ref name="itemGrp"/>
+                        <ref name="item"/>
+                    </choice>
+                </oneOrMore>
+            </element>
+        </define>
+        <define name="refObjectSec">
+            <element name="refObjectSec">
+                <ref name="id"/>
+                <attribute name="type"/>
+                <oneOrMore>
+                    <ref name="refObject"/>
+                </oneOrMore>
+            </element>
+        </define>
+        <define name="revisionDesc">
+            <element name="revisionDesc">
+                <ref name="idlang"/>
+                <oneOrMore>
+                    <ref name="change"/>
+                </oneOrMore>
+            </element>
+        </define>
+        <define name="sc">
+            <element name="sc">
+                <attribute name="id">
+                    <data type="ID"/>
+                </attribute>
+                <zeroOrMore>
+                    <choice>
+                        <attribute name="isolated">
+                            <choice>
+                                <value>yes</value>
+                                <value>no</value>
+                            </choice>
+                        </attribute>
+                    </choice>
+                </zeroOrMore>
+            </element>
+        </define>
+        <define name="sourceDesc">
+            <element name="sourceDesc">
+                <ref name="idlang"/>
+                <oneOrMore>
+                    <ref name="p"/>
+                </oneOrMore>
+            </element>
+        </define>
+        <define name="tbx">
+            <element name="tbx">
+                <attribute name="xml:lang">
+                    <data type="language"/>
+                </attribute>
+                <attribute name="type">
+                    <data type="string">
+                        <param name="pattern">TBX-.+</param>
+                    </data>
+                </attribute>
+                <attribute name="style">
+                    <choice>
+                        <value>dca</value>
+                        <value>dct</value>
+                    </choice>
+                </attribute>
+                <ref name="tbxHeader"/>
+                <ref name="text"/>
+            </element>
+        </define>
+        <define name="tbxHeader">
+            <element name="tbxHeader">
+                <ref name="id"/>
+                <ref name="fileDesc"/>
+                <optional>
+                    <ref name="encodingDesc"/>
+                </optional>
+                <optional>
+                    <ref name="revisionDesc"/>
+                </optional>
+            </element>
+        </define>
+        <define name="term">
+            <element name="term">
+                <ref name="id"/>
+                <ref name="entity.basicText"/>
+            </element>
+        </define>
+        <define name="termNote">
+            <choice>
+                <element name="termNote">
+                    <ref name="IDLangTgtDtyp"/>
+                    <attribute name="type">
+                        <data type="string"/>
+                    </attribute>
+                    <ref name="entity.noteText"/>
+                </element>
+                <element>
+                    <a:documentation>DCT Extension</a:documentation>
+                    <anyName>
+                        <except>
+                            <nsName ns="urn:iso:std:iso:30042:ed-2"/>
+                        </except>
+                    </anyName>
+                    <zeroOrMore>
+                        <attribute>
+                            <anyName/>
+                        </attribute>
+                    </zeroOrMore>
+                    <ref name="entity.noteText"/>
+                </element>
+            </choice>
+        </define>
+        <define name="termNoteGrp">
+            <element name="termNoteGrp">
+                <ref name="id"/>
+                <ref name="termNote"/>
+                <ref name="entity.noteLinkInfo"/>
+            </element>
+        </define>
+        <define name="termSec">
+            <element name="termSec">
+                <ref name="id"/>
+                <ref name="term"/>
+                <zeroOrMore>
+                    <choice>
+                        <ref name="termNote"/>
+                        <ref name="termNoteGrp"/>
+                    </choice>
+                </zeroOrMore>
+                <ref name="entity.auxInfo"/>
+            </element>
+        </define>
+        <define name="text">
+            <element name="text">
+                <ref name="id"/>
+                <optional>
+                    <ref name="body"/>
+                </optional>
+                <optional>
+                    <ref name="back"/>
+                </optional>
+            </element>
+        </define>
+        <define name="title">
+            <element name="title">
+                <ref name="idlang"/>
+                <text/>
+            </element>
+        </define>
+        <define name="titleStmt">
+            <element name="titleStmt">
+                <ref name="idlang"/>
+                <ref name="title"/>
+                <zeroOrMore>
+                    <ref name="note"/>
+                </zeroOrMore>
+            </element>
+        </define>
+        <define name="transac">
+            <choice>
+                <element name="transac">
+                    <ref name="IDLangTgtDtyp"/>
+                    <attribute name="type"/>
+                    <data type="string"/>
+                </element>
+                <element>
+                    <a:documentation>DCT Extension</a:documentation>
+                    <anyName>
+                        <except>
+                            <nsName ns="urn:iso:std:iso:30042:ed-2"/>
+                        </except>
+                    </anyName>
+                    <zeroOrMore>
+                        <attribute>
+                            <anyName/>
+                        </attribute>
+                    </zeroOrMore>
+                    <data type="string"/>
+                </element>
+            </choice>
+        </define>
+        <define name="transacGrp">
+            <element name="transacGrp">
+                <ref name="id"/>
+                <ref name="transac"/>
+                <zeroOrMore>
+                    <choice>
+                        <ref name="date"/>
+                        <ref name="note"/>
+                        <ref name="ref"/>
+                        <ref name="transacNote"/>
+                        <ref name="xref"/>
+                    </choice>
+                </zeroOrMore>
+            </element>
+        </define>
+        <define name="transacNote">
+            <choice>
+                <element name="transacNote">
+                    <ref name="IDLangTgtDtyp"/>
+                    <attribute name="type"/>
+                    <data type="string"/>
+                </element>
+                <element>
+                    <a:documentation>DCT Extension</a:documentation>
+                    <anyName>
+                        <except>
+                            <nsName ns="urn:iso:std:iso:30042:ed-2"/>
+                        </except>
+                    </anyName>
+                    <zeroOrMore>
+                        <attribute>
+                            <anyName/>
+                        </attribute>
+                    </zeroOrMore>
+                    <data type="string"/>
+                </element>
+            </choice>
+        </define>
+        <define name="xref">
+            <choice>
+                <element name="xref">
+                    <ref name="id"/>
+                    <attribute name="target">
+                        <data type="anyURI"/>
+                    </attribute>
+                    <attribute name="type"/>
+                    <data type="string"/>
+                </element>
+                <element>
+                    <a:documentation>DCT Extension</a:documentation>
+                    <anyName>
+                        <except>
+                            <nsName ns="urn:iso:std:iso:30042:ed-2"/>
+                        </except>
+                    </anyName>
+                    <zeroOrMore>
+                        <attribute>
+                            <anyName/>
+                        </attribute>
+                    </zeroOrMore>
+                    <data type="string"/>
+                </element>
+            </choice>
+        </define>
+    </div>
+    <div>
+        <a:documentation>Element Entities</a:documentation>
+        <define name="entity.auxInfo">
+            <zeroOrMore>
+                <choice>
+                    <ref name="admin"/>
+                    <ref name="adminGrp"/>
+                    <ref name="descrip"/>
+                    <ref name="descripGrp"/>
+                    <ref name="note"/>
+                    <ref name="ref"/>
+                    <ref name="transacGrp"/>
+                    <ref name="xref"/>
+                </choice>
+            </zeroOrMore>
+        </define>
+        <define name="entity.noteLinkInfo">
+            <zeroOrMore>
+                <choice>
+                    <ref name="admin"/>
+                    <ref name="adminGrp"/>
+                    <ref name="note"/>
+                    <ref name="ref"/>
+                    <ref name="transacGrp"/>
+                    <ref name="xref"/>
+                </choice>
+            </zeroOrMore>
+        </define>
+        <define name="entity.noteText">
+            <zeroOrMore>
+                <choice>
+                    <ref name="ec"/>
+                    <ref name="foreign"/>
+                    <ref name="hi"/>
+                    <ref name="ph"/>
+                    <ref name="sc"/>
+                    <text/>
+                </choice>
+            </zeroOrMore>
+        </define>
+        <define name="entity.basicText">
+            <zeroOrMore>
+                <choice>
+                    <ref name="hi"/>
+                    <text/>
+                </choice>
+            </zeroOrMore>
+        </define>
+    </div>
+</grammar>

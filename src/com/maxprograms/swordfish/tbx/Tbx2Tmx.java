@@ -114,7 +114,7 @@ public class Tbx2Tmx {
             String type = e.getAttributeValue("type");
             if (!type.isBlank()) {
                 Element prop = new Element("prop");
-                prop.setAttribute("tyoe", type);
+                prop.setAttribute("type", type);
                 prop.setText(e.getText());
                 currentTUV.getContent().add(0, prop);
             }

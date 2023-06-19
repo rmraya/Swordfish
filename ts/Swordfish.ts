@@ -1652,6 +1652,7 @@ class Swordfish {
         if (arg.from === 'addFile') {
             Swordfish.destroyWindow(Swordfish.addFileWindow);
         }
+        arg.xmlfilter= Swordfish.path.join(app.getAppPath(), 'xmlfilter');
         Swordfish.mainWindow.webContents.send('start-waiting');
         Swordfish.mainWindow.webContents.send('set-status', 'Creating project');
         Swordfish.sendRequest('/projects/create', arg,

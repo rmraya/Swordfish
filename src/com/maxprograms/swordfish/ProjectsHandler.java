@@ -678,6 +678,7 @@ public class ProjectsHandler implements HttpHandler {
 							params.put("srxFile", srxFile);
 							params.put("srcLang", json.getString("srcLang"));
 							params.put("tgtLang", json.getString("tgtLang"));
+							params.put("xmlfilter", json.getString("xmlfilter"));
 
 							List<String> res = Convert.run(params);
 
