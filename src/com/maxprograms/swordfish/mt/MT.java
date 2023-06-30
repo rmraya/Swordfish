@@ -19,6 +19,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import com.maxprograms.mt.AzureTranslator;
+import com.maxprograms.mt.ChatGptTranslator;
 import com.maxprograms.mt.DeepLTranslator;
 import com.maxprograms.mt.GoogleTranslator;
 import com.maxprograms.mt.MTranslator;
@@ -29,6 +30,9 @@ import com.maxprograms.swordfish.TmsServer;
 public class MT {
 
     private MTranslator translator;
+
+    private String srcLang;
+    private String tgtLang;
 
     private boolean googleEnabled;
     private String googleKey;
@@ -48,13 +52,20 @@ public class MT {
 
     private boolean deeplEnabled;
     private String deeplKey;
+    private boolean deeplProPlan;
     private String deeplSrcLang;
     private String deeplTgtLang;
+
+    private boolean chatGptEnabled;
+    private String chatGptKey;
+    private String model;
 
     private boolean myMemoryEnabled;
     private String myMemoryKey;
     private String myMemorySrcLang;
     private String myMemoryTgtLang;
+
+    private ChatGptTranslator chatGpt;
 
     public MT() throws IOException {
         loadDefaults();
@@ -78,10 +89,14 @@ public class MT {
             translator.addEngine(yt);
         }
         if (deeplEnabled) {
-            DeepLTranslator dl = new DeepLTranslator(deeplKey);
+            DeepLTranslator dl = new DeepLTranslator(deeplKey, deeplProPlan);
             dl.setSourceLanguage(deeplSrcLang);
             dl.setTargetLanguage(deeplTgtLang);
             translator.addEngine(dl);
+        }
+        if (chatGptEnabled) {
+            chatGpt = new ChatGptTranslator(chatGptKey, model);
+            translator.addEngine(chatGpt);
         }
         if (myMemoryEnabled) {
             MyMemoryTranslator mm = new MyMemoryTranslator(myMemoryKey);
@@ -120,8 +135,39 @@ public class MT {
         JSONObject deepl = json.getJSONObject("deepl");
         deeplEnabled = deepl.getBoolean("enabled");
         deeplKey = deepl.getString("apiKey");
+        if (deepl.has("proPlan")) {
+            deeplProPlan = deepl.getBoolean("proPlan");
+        } else {
+            deeplProPlan = true;
+        }
+        deeplProPlan = deepl.getBoolean("proPlan");
         deeplSrcLang = deepl.getString("srcLang");
         deeplTgtLang = deepl.getString("tgtLang");
+
+        if (json.has("chatGpt")) {
+            JSONObject chatGpt = json.getJSONObject("chatGpt");
+            chatGptEnabled = chatGpt.getBoolean("enabled");
+            chatGptKey = chatGpt.getString("apiKey");
+            switch (chatGpt.getString("model")) {
+                case "Davinci":
+                    model = ChatGptTranslator.DAVINCI;
+                    break;
+                case "Curie":
+                    model = ChatGptTranslator.CURIE;
+                    break;
+                case "Babbage":
+                    model = ChatGptTranslator.BABBAGE;
+                    break;
+                case "Ada":
+                    model = ChatGptTranslator.ADA;
+                    break;
+                default:
+                    throw new JSONException("Invalid ChatGPT model: " + chatGpt.getString("model"));
+            }
+            ;
+        } else {
+            chatGptEnabled = false;
+        }
 
         JSONObject myMemory = json.getJSONObject("myMemory");
         myMemoryEnabled = myMemory.getBoolean("enabled");
@@ -131,6 +177,18 @@ public class MT {
     }
 
     public List<JSONObject> translate(String text) throws IOException, InterruptedException {
+        if (chatGptEnabled) {
+            chatGpt.setSourceLanguage(srcLang);
+            chatGpt.setTargetLanguage(tgtLang);
+        }
         return translator.translate(text);
+    }
+
+    public void setProjectSourceLanguage(String srcLang) {
+        this.srcLang = srcLang;
+    }
+
+    public void setProjectTargetLanguage(String tgtLang) {
+        this.tgtLang = tgtLang;
     }
 }

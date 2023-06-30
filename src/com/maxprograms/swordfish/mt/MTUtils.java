@@ -93,21 +93,13 @@ public class MTUtils {
                         "ta", "tt", "te", "th", "ti", "ts", "tr", "tk", "ug", "uk", "ur", "uz", "vi", "cy", "fy", "xh",
                         "yi", "yo", "zu" };
 
-        private static String[] yandexSrcLanguages = { "ka-Latn", "uz-Cyrl", "af", "sq", "am", "ar", "hy", "az", "ba",
-                        "eu", "be", "bn", "bs", "bg", "my", "ca", "ceb", "zh", "cv", "hr", "cs", "da", "nl", "mhr",
-                        "en", "eo", "et", "fi", "fr", "gl", "ka", "de", "el", "gu", "ht", "he", "hi", "hu", "is", "id",
-                        "ga", "it", "ja", "jv", "kn", "kk", "km", "ky", "ko", "lo", "la", "lv", "lt", "lb", "mk", "mg",
-                        "ms", "ml", "mt", "mi", "mr", "mn", "ne", "no", "pa", "pap", "fa", "pl", "pt", "ro", "ru", "gd",
-                        "sr", "si", "sk", "sl", "es", "su", "sw", "sv", "tl", "tg", "ta", "tt", "te", "th", "tr", "udm",
-                        "uk", "ur", "uz", "vi", "cy", "mrj", "xh", "sah", "yi", "zu" };
+        private static String[] yandexSrcLanguages = { "az", "be", "bg", "ca", "cs", "da", "de", "el", "en", "es", "et",
+                        "fi", "fr", "hr", "hu", "hy", "it", "lt", "lv", "mk", "nl", "no", "pl", "pt", "ro", "ru", "sk",
+                        "sl", "sq", "sr", "sv", "tr", "uk" };
 
-        private static String[] yandexTgtLanguages = { "ka-Latn", "uz-Cyrl", "af", "sq", "am", "ar", "hy", "az", "ba",
-                        "eu", "be", "bn", "bs", "bg", "my", "ca", "ceb", "zh", "cv", "hr", "cs", "da", "nl", "mhr",
-                        "en", "eo", "et", "fi", "fr", "gl", "ka", "de", "el", "gu", "ht", "he", "hi", "hu", "is", "id",
-                        "ga", "it", "ja", "jv", "kn", "kk", "km", "ky", "ko", "lo", "la", "lv", "lt", "lb", "mk", "mg",
-                        "ms", "ml", "mt", "mi", "mr", "mn", "ne", "no", "pa", "pap", "fa", "pl", "pt", "ro", "ru", "gd",
-                        "sr", "si", "sk", "sl", "es", "su", "sw", "sv", "tl", "tg", "ta", "tt", "te", "th", "tr", "udm",
-                        "uk", "ur", "uz", "vi", "cy", "mrj", "xh", "sah", "yi", "zu", };
+        private static String[] yandexTgtLanguages = { "az", "be", "bg", "ca", "cs", "da", "de", "el", "en", "es", "et",
+                        "fi", "fr", "hr", "hu", "hy", "it", "lt", "lv", "mk", "nl", "no", "pl", "pt", "ro", "ru", "sk",
+                        "sl", "sq", "sr", "sv", "tr", "uk" };
 
         private static String[] yandexDirections = { "az-ru", "be-bg", "be-cs", "be-de", "be-en", "be-es", "be-fr",
                         "be-it", "be-pl", "be-ro", "be-ru", "be-sr", "be-tr", "bg-be", "bg-ru", "bg-uk", "ca-en",
@@ -128,12 +120,12 @@ public class MTUtils {
                         "uk-ru", "uk-sr", "uk-tr" };
 
         private static String[] deepLsrcLang = { "bg", "cs", "da", "de", "el", "en", "es", "et", "fi", "fr", "hu", "id",
-                        "it", "ja", "ko", "lt", "lv", "nb", "nl", "pl", "pt", "ro", "ru", "sk", "sl", "sv", "tr",
+                        "it", "ja", "ko", "lt", "lv", "nb", "nl", "pl", "pt", "ro", "ru", "sk", "sl", "sv", "tr", "uk",
                         "zh" };
 
         private static String[] deepLtgtLang = { "bg", "cs", "da", "de", "el", "en-GB", "en-US", "es", "et", "fi", "fr",
                         "hu", "id", "it", "ja", "ko", "lt", "lv", "nb", "nl", "pl", "pt-BR", "pt-PT", "ro", "ru", "sk",
-                        "sl", "sv", "tr", "zh" };
+                        "sl", "sv", "tr", "uk", "zh" };
 
         public static JSONObject getMTLanguages() throws IOException {
                 JSONObject result = new JSONObject();

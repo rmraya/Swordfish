@@ -2249,6 +2249,8 @@ public class XliffStore {
         }
         Element source = XliffUtils.buildElement("<source>" + XMLUtils.cleanText(sourceText) + "</source>");
         JSONObject tagsData = new JSONObject();
+        translator.setProjectSourceLanguage(srcLang);
+        translator.setProjectTargetLanguage(tgtLang);
         List<JSONObject> translations = translator.translate(sourceText);
         Iterator<JSONObject> it = translations.iterator();
         while (it.hasNext()) {

@@ -94,6 +94,9 @@ public class Split {
             }
             newRoot.addContent("\n");
             File xliffFile = new File(folder, original.substring(treeRoot.length()) + ".xlf");
+            if (!xliffFile.getParentFile().exists()) {
+                Files.createDirectories(xliffFile.getParentFile().toPath());
+            }
             result.add(xliffFile.getAbsolutePath());
             try (FileOutputStream out = new FileOutputStream(xliffFile)) {
                 outputter.output(newDoc, out);

@@ -2317,7 +2317,6 @@ class TranslationView {
 
     notesRemoved(arg: any): void {
         if (this.currentState.innerHTML.includes(TranslationView.NOTE_FRAGMENT)) {
-            console.log(JSON.stringify(arg));
             if (this.currentState.classList.contains('final')) {
                 this.currentState.innerHTML = TranslationView.SVG_FINAL;
             }
@@ -2332,7 +2331,6 @@ class TranslationView {
 
     notesAdded(arg: any): void {
         if (!this.currentState.innerHTML.includes(TranslationView.NOTE_FRAGMENT)) {
-            console.log(JSON.stringify(arg));
             if (this.currentState.classList.contains('final')) {
                 this.currentState.innerHTML = TranslationView.SVG_FINAL + TranslationView.SVG_NOTE;
             }

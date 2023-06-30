@@ -48,11 +48,18 @@ class PreferencesDialog {
     yandexKey: HTMLInputElement;
     yandexSrcLang: HTMLSelectElement;
     yandexTgtLang: HTMLSelectElement;
+    yandexDirections: string[];
 
     enableDeepL: HTMLInputElement;
     deeplKey: HTMLInputElement;
+    deeplPro: HTMLInputElement;
+    deeplFree: HTMLInputElement;
     deeplSrcLang: HTMLSelectElement;
     deeplTgtLang: HTMLSelectElement;
+
+    enableChatGPT: HTMLInputElement;
+    chatGPTKey: HTMLInputElement;
+    chatGPTModel: HTMLSelectElement;
 
     enableMyMemory: HTMLInputElement;
     myMemoryKey: HTMLInputElement;
@@ -235,7 +242,14 @@ class PreferencesDialog {
             this.deeplKey.disabled = !this.enableDeepL.checked;
             this.deeplSrcLang.disabled = !this.enableDeepL.checked;
             this.deeplTgtLang.disabled = !this.enableDeepL.checked;
+            this.deeplPro.disabled = !this.enableDeepL.checked;
+            this.deeplFree.disabled = !this.enableDeepL.checked;
         });
+        this.deeplPro.checked = preferences.deepl.proPlan;
+
+        this.enableChatGPT.checked = preferences.chatGpt.enabled;
+        this.chatGPTKey.value = preferences.chatGpt.apiKey;
+        this.chatGPTModel.value = preferences.chatGpt.model;
 
         this.enableMyMemory.checked = preferences.myMemory.enabled;
         this.myMemoryKey.value = preferences.myMemory.apiKey;
@@ -294,13 +308,24 @@ class PreferencesDialog {
             this.electron.ipcRenderer.send('show-message', { type: 'warning', message: 'Select Yandex languages', parent: 'preferences' });
             return;
         }
-
+        if (this.enableYandex.checked) {
+            let direction = this.yandexSrcLang.value + '-' + this.yandexTgtLang.value;
+            if (!this.yandexDirections.includes(direction)) {
+                this.electron.ipcRenderer.send('show-message', { type: 'warning', message: 'Translation direction not supported by Yandex', parent: 'preferences' });
+                return;
+            }
+        }
         if (this.enableDeepL.checked && this.deeplKey.value === '') {
             this.electron.ipcRenderer.send('show-message', { type: 'warning', message: 'Enter DeepL API key', parent: 'preferences' });
             return;
         }
         if (this.enableDeepL.checked && (this.deeplSrcLang.value === 'none' || this.deeplTgtLang.value === 'none')) {
             this.electron.ipcRenderer.send('show-message', { type: 'warning', message: 'Select DeepL languages', parent: 'preferences' });
+            return;
+        }
+
+        if (this.enableChatGPT.checked && this.chatGPTKey.value === '') {
+            this.electron.ipcRenderer.send('show-message', { type: 'warning', message: 'Enter ChatGPT API key', parent: 'preferences' });
             return;
         }
 
@@ -350,7 +375,13 @@ class PreferencesDialog {
                 enabled: this.enableDeepL.checked,
                 apiKey: this.deeplKey.value,
                 srcLang: this.deeplSrcLang.value,
-                tgtLang: this.deeplTgtLang.value
+                tgtLang: this.deeplTgtLang.value,
+                proPlan: this.deeplPro.checked
+            },
+            chatGpt: {
+                enabled: this.enableChatGPT.checked,
+                apiKey: this.chatGPTKey.value,
+                model: this.chatGPTModel.value
             },
             myMemory: {
                 enabled: this.enableMyMemory.checked,
@@ -935,6 +966,13 @@ class PreferencesDialog {
         mtHolder.addTab(deeplTab);
         this.populateDeeplTab(deeplTab.getContainer());
 
+        let chatGptTab: Tab = new Tab('chatGptTab', 'ChatGPT', false);
+        chatGptTab.getLabel().addEventListener('click', () => {
+            this.electron.ipcRenderer.send('settings-height', { width: document.body.clientWidth, height: document.body.clientHeight });
+        });
+        mtHolder.addTab(chatGptTab);
+        this.populateChatGptTab(chatGptTab.getContainer());
+
         let myMemoryTab: Tab = new Tab('myMemoryTab', 'MyMemory', false);
         myMemoryTab.getLabel().addEventListener('click', () => {
             this.electron.ipcRenderer.send('settings-height', { width: document.body.clientWidth, height: document.body.clientHeight });
@@ -1205,10 +1243,68 @@ class PreferencesDialog {
         td.innerHTML = '<select id="deeplTgtLang" class="table_select"></select>';
         tr.appendChild(td);
 
+        let deeplPlan: HTMLDivElement = document.createElement('div');
+        deeplPlan.classList.add('middle');
+        deeplPlan.classList.add('row');
+        deeplPlan.style.paddingLeft = '4px';
+        deeplPlan.innerHTML = '<input type="radio" id="deeplFree" name="deeplPlan" value="free" checked><label for="deeplFree" style="padding-top:4px;">Free Plan</label><input type="radio" id="deeplPro" name="deeplPlan" value="pro"><label for="deeplPro" style="padding-top:4px;">Pro Plan</label>';
+        container.appendChild(deeplPlan);
+
         this.enableDeepL = document.getElementById('enableDeepL') as HTMLInputElement;
         this.deeplKey = document.getElementById('deeplKey') as HTMLInputElement;
         this.deeplSrcLang = document.getElementById('deeplSrcLang') as HTMLSelectElement;
         this.deeplTgtLang = document.getElementById('deeplTgtLang') as HTMLSelectElement;
+        this.deeplFree = document.getElementById('deeplFree') as HTMLInputElement;
+        this.deeplPro = document.getElementById('deeplPro') as HTMLInputElement;
+    }
+
+    populateChatGptTab(container: HTMLDivElement): void {
+        container.style.paddingTop = '10px';
+
+        let chatGptDiv: HTMLDivElement = document.createElement('div');
+        chatGptDiv.classList.add('middle');
+        chatGptDiv.classList.add('row');
+        chatGptDiv.style.paddingLeft = '4px';
+        chatGptDiv.innerHTML = '<input type="checkbox" id="enableChatGPT"><label for="enableChatGPT" style="padding-top:4px;">Enable ChatGPT Translation</label>';
+        container.appendChild(chatGptDiv);
+
+        let langsTable: HTMLTableElement = document.createElement('table');
+        langsTable.classList.add('fill_width');
+        container.appendChild(langsTable);
+
+        let tr: HTMLTableRowElement = document.createElement('tr');
+        langsTable.appendChild(tr);
+
+        let td: HTMLTableCellElement = document.createElement('td');
+        td.classList.add('middle');
+        td.classList.add('noWrap');
+        td.innerHTML = '<label for="chatGPTKey">API Key</label>'
+        tr.appendChild(td);
+
+        td = document.createElement('td');
+        td.classList.add('middle');
+        td.classList.add('fill_width');
+        td.innerHTML = '<input type="text" id="chatGPTKey" class="table_input"/>';
+        tr.appendChild(td);
+
+        tr = document.createElement('tr');
+        langsTable.appendChild(tr);
+
+        td = document.createElement('td');
+        td.classList.add('middle');
+        td.classList.add('noWrap');
+        td.innerHTML = '<label for="chatGPTModel">ChatGPT Model</label>'
+        tr.appendChild(td);
+
+        td = document.createElement('td');
+        td.classList.add('middle');
+        td.classList.add('fill_width');
+        td.innerHTML = '<select id="chatGPTModel" class="table_select"><option value="Davinci">Davinci</option><option value="Curie">Curie</option><option value="Babbage">Babbage</option><option value="Ada">Ada</option></select>';
+        tr.appendChild(td);
+
+        this.enableChatGPT = document.getElementById('enableChatGPT') as HTMLInputElement;
+        this.chatGPTKey = document.getElementById('chatGPTKey') as HTMLInputElement;
+        this.chatGPTModel = document.getElementById('chatGPTModel') as HTMLSelectElement;
     }
 
     populateMyMemoryTab(container: HTMLDivElement): void {
@@ -1285,10 +1381,10 @@ class PreferencesDialog {
 
         this.yandexSrcLang.innerHTML = this.getOptions(arg.yandex.srcLangs);
         this.yandexTgtLang.innerHTML = this.getOptions(arg.yandex.tgtLangs);
+        this.yandexDirections = arg.yandex.directions;
 
         this.deeplSrcLang.innerHTML = this.getOptions(arg.deepl.srcLangs);
         this.deeplTgtLang.innerHTML = this.getOptions(arg.deepl.tgtLangs);
-
 
         this.electron.ipcRenderer.send('get-preferences');
 
@@ -1305,8 +1401,6 @@ class PreferencesDialog {
             this.googleSrcLang.value = src;
             this.googleTgtLang.value = tgt;
         });
-
-        // TODO check Yandex directions
     }
 
     getOptions(array: any[]): string {

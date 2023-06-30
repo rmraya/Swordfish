@@ -105,7 +105,13 @@ class Swordfish {
             enabled: false,
             apiKey: '',
             srcLang: 'none',
-            tgtLang: 'none'
+            tgtLang: 'none',
+            proPlan: true
+        },
+        chatGpt: {
+            enabled: false,
+            apiKey: '',
+            model: 'Davinci',
         },
         myMemory: {
             enabled: false,
@@ -1267,7 +1273,7 @@ class Swordfish {
                 let data: Buffer = readFileSync(defaultsFile);
                 Swordfish.currentDefaults = JSON.parse(data.toString());
             } catch (err) {
-                console.log(err);
+                console.error(err);
             }
         }
     }
@@ -1290,7 +1296,11 @@ class Swordfish {
         if (existsSync(preferencesFile)) {
             try {
                 let data: Buffer = readFileSync(preferencesFile);
-                Swordfish.currentPreferences = JSON.parse(data.toString());
+                let json: Preferences = JSON.parse(data.toString());
+                if (!json.hasOwnProperty('chatGpt')) {
+                    json.chatGpt = { enabled: false, apiKey: '', model: 'Davinci' };
+                }
+                Swordfish.currentPreferences = json;
                 if (!Swordfish.currentPreferences.projectsFolder || !existsSync(Swordfish.currentPreferences.projectsFolder)) {
                     Swordfish.currentPreferences.projectsFolder = Swordfish.path.join(app.getPath('appData'), app.name, 'projects');
                     writeFileSync(Swordfish.path.join(app.getPath('appData'), app.name, 'preferences.json'), JSON.stringify(Swordfish.currentPreferences, null, 2));
@@ -1312,7 +1322,7 @@ class Swordfish {
                     writeFileSync(Swordfish.path.join(app.getPath('appData'), app.name, 'preferences.json'), JSON.stringify(Swordfish.currentPreferences, null, 2));
                 }
             } catch (err) {
-                console.log(err);
+                console.error(err);
             }
         } else {
             writeFileSync(Swordfish.path.join(app.getPath('appData'), app.name, 'preferences.json'), JSON.stringify(Swordfish.currentPreferences, null, 2));
@@ -1474,7 +1484,7 @@ class Swordfish {
                     );
                 }
             }).catch((error: Error) => {
-                console.log(error.message);
+                console.error(error.message);
             });
         } else {
             dialog.showOpenDialog(Swordfish.mainWindow, {
@@ -1491,7 +1501,7 @@ class Swordfish {
                     );
                 }
             }).catch((error: Error) => {
-                console.log(error.message);
+                console.error(error.message);
             });
         }
     }
@@ -1520,7 +1530,7 @@ class Swordfish {
                                 shell.openExternal('file://' + output).catch(() => {
                                     shell.openPath(output).catch((reason: any) => {
                                         if (reason instanceof Error) {
-                                            console.log(reason.message);
+                                            console.error(reason.message);
                                         }
                                         this.showMessage({ type: 'error', message: 'Unable to open translated file.' });
                                     });
@@ -1630,7 +1640,7 @@ class Swordfish {
                 Swordfish.setLocation(this.addFileWindow, 'addFile.html');
             }
         }).catch((error: Error) => {
-            console.log(error.message);
+            console.error(error.message);
         });
     }
 
@@ -1652,7 +1662,7 @@ class Swordfish {
         if (arg.from === 'addFile') {
             Swordfish.destroyWindow(Swordfish.addFileWindow);
         }
-        arg.xmlfilter= Swordfish.path.join(app.getAppPath(), 'xmlfilter');
+        arg.xmlfilter = Swordfish.path.join(app.getAppPath(), 'xmlfilter');
         Swordfish.mainWindow.webContents.send('start-waiting');
         Swordfish.mainWindow.webContents.send('set-status', 'Creating project');
         Swordfish.sendRequest('/projects/create', arg,
@@ -1809,7 +1819,7 @@ class Swordfish {
                 Swordfish.getFileType(event, value.filePaths);
             }
         }).catch((error: Error) => {
-            console.log(error.message);
+            console.error(error.message);
         });
     }
 
@@ -2010,7 +2020,7 @@ class Swordfish {
         shell.openExternal('file://' + this.path.join(app.getAppPath(), 'swordfish.pdf')).catch(() => {
             shell.openPath(this.path.join(app.getAppPath(), 'swordfish.pdf')).catch((reason: any) => {
                 if (reason instanceof Error) {
-                    console.log(reason.message);
+                    console.error(reason.message);
                 }
                 this.showMessage({ type: 'error', message: 'Unable to open Swordfish User Guide.' });
             });
@@ -2209,7 +2219,7 @@ class Swordfish {
     static showReleaseHistory(): void {
         shell.openExternal('https://www.maxprograms.com/products/swfishlog.html').catch((reason: any) => {
             if (reason instanceof Error) {
-                console.log(reason.message);
+                console.error(reason.message);
             }
             this.showMessage({ type: 'error', message: 'Unable to open release history.' });
         });
@@ -2218,7 +2228,7 @@ class Swordfish {
     static showSupportGroup(): void {
         shell.openExternal('https://groups.io/g/maxprograms/').catch((reason: any) => {
             if (reason instanceof Error) {
-                console.log(reason.message);
+                console.error(reason.message);
             }
             this.showMessage({ type: 'error', message: 'Unable to open support group page.' });
         });
@@ -2403,7 +2413,7 @@ class Swordfish {
                 event.sender.send('set-srx', value.filePaths[0]);
             }
         }).catch((error: Error) => {
-            console.log(error.message);
+            console.error(error.message);
         });
     }
 
@@ -2417,7 +2427,7 @@ class Swordfish {
                 event.sender.send('set-projects-folder', value.filePaths[0]);
             }
         }).catch((error: Error) => {
-            console.log(error.message);
+            console.error(error.message);
         });
     }
 
@@ -2431,7 +2441,7 @@ class Swordfish {
                 event.sender.send('set-memories-folder', value.filePaths[0]);
             }
         }).catch((error: Error) => {
-            console.log(error.message);
+            console.error(error.message);
         });
     }
 
@@ -2445,7 +2455,7 @@ class Swordfish {
                 event.sender.send('set-glossaries-folder', value.filePaths[0]);
             }
         }).catch((error: Error) => {
-            console.log(error.message);
+            console.error(error.message);
         });
     }
 
@@ -2463,7 +2473,7 @@ class Swordfish {
                 event.sender.send('set-catalog', value.filePaths[0]);
             }
         }).catch((error: Error) => {
-            console.log(error.message);
+            console.error(error.message);
         });
     }
 
@@ -2879,7 +2889,7 @@ class Swordfish {
                     );
                 }
             }).catch((error: Error) => {
-                console.log(error.message);
+                console.error(error.message);
             });
         } else {
             Swordfish.showMessage({ type: 'warning', message: 'Select one memory' });
@@ -2930,7 +2940,7 @@ class Swordfish {
                     );
                 }
             }).catch((error: Error) => {
-                console.log(error.message);
+                console.error(error.message);
             });
         } else {
             Swordfish.showMessage({ type: 'warning', message: 'Select one glossary' });
@@ -3430,7 +3440,7 @@ class Swordfish {
                 );
             }
         }).catch((error: Error) => {
-            console.log(error.message);
+            console.error(error.message);
         });
     }
 
@@ -3457,7 +3467,7 @@ class Swordfish {
                 );
             }
         }).catch((error: Error) => {
-            console.log(error.message);
+            console.error(error.message);
         });
     }
 
@@ -3564,7 +3574,7 @@ class Swordfish {
                 event.sender.send('set-xliff', value.filePaths[0]);
             }
         }).catch((error: Error) => {
-            console.log(error.message);
+            console.error(error.message);
         });
     }
 
@@ -3965,7 +3975,7 @@ class Swordfish {
                 shell.openExternal('file://' + data.analysis).catch(() => {
                     shell.openPath(data.analysis).catch((reason: any) => {
                         if (reason instanceof Error) {
-                            console.log(reason.message);
+                            console.error(reason.message);
                         }
                         this.showMessage({ type: 'error', message: 'Unable to open statistics.' });
                     });
@@ -4702,7 +4712,7 @@ class Swordfish {
                 shell.openExternal('file://' + data.export).catch(() => {
                     shell.openPath(data.export).catch((reason: any) => {
                         if (reason instanceof Error) {
-                            console.log(reason.message);
+                            console.error(reason.message);
                         }
                         this.showMessage({ type: 'error', message: 'Unable to open HTML.' });
                     });
@@ -5146,7 +5156,7 @@ class Swordfish {
                 Swordfish.settingsWindow.focus();
             }
         }).catch((error: Error) => {
-            console.log(error.message);
+            console.error(error.message);
         });
     }
 
@@ -5195,7 +5205,7 @@ class Swordfish {
                 Swordfish.settingsWindow.focus();
             }
         }).catch((error: Error) => {
-            console.log(error.message);
+            console.error(error.message);
         });
     }
 
@@ -5297,5 +5307,5 @@ class Swordfish {
 try {
     new Swordfish();
 } catch (e) {
-    console.log("Unable to instantiate Swordfish();");
+    console.error("Unable to instantiate Swordfish();");
 }
