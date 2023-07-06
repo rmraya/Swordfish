@@ -15,7 +15,6 @@ package com.maxprograms.swordfish;
 import java.io.BufferedReader;
 import java.io.DataOutputStream;
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
@@ -31,12 +30,12 @@ import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 import com.sun.net.httpserver.HttpServer;
-
-import org.json.JSONException;
-import org.json.JSONObject;
 
 public class TmsServer implements HttpHandler {
 
@@ -204,7 +203,7 @@ public class TmsServer implements HttpHandler {
 	public static File getProjectsFolder() throws IOException, JSONException {
 		JSONObject json = getPreferences();
 		if (!json.has("projectsFolder")) {
-			json.put("projectsFolder",new File(getWorkFolder(), "projects").getAbsolutePath());
+			json.put("projectsFolder", new File(getWorkFolder(), "projects").getAbsolutePath());
 			writeJSON(new File(getWorkFolder(), "preferences.json"), json);
 		}
 		return new File(json.getString("projectsFolder"));
@@ -213,7 +212,7 @@ public class TmsServer implements HttpHandler {
 	public static File getMemoriesFolder() throws IOException, JSONException {
 		JSONObject json = getPreferences();
 		if (!json.has("memoriesFolder")) {
-			json.put("memoriesFolder",new File(getWorkFolder(), "memories").getAbsolutePath());
+			json.put("memoriesFolder", new File(getWorkFolder(), "memories").getAbsolutePath());
 			writeJSON(new File(getWorkFolder(), "preferences.json"), json);
 		}
 		return new File(json.getString("memoriesFolder"));
@@ -222,7 +221,7 @@ public class TmsServer implements HttpHandler {
 	public static File getGlossariesFolder() throws IOException, JSONException {
 		JSONObject json = getPreferences();
 		if (!json.has("glossariesFolder")) {
-			json.put("glossariesFolder",new File(getWorkFolder(), "glossaries").getAbsolutePath());
+			json.put("glossariesFolder", new File(getWorkFolder(), "glossaries").getAbsolutePath());
 			writeJSON(new File(getWorkFolder(), "preferences.json"), json);
 		}
 		return new File(json.getString("glossariesFolder"));
@@ -249,7 +248,7 @@ public class TmsServer implements HttpHandler {
 		return new JSONObject(builder.toString());
 	}
 
-	public static synchronized void writeJSON(File jsonFile, JSONObject json) throws FileNotFoundException, IOException, JSONException {
+	public static synchronized void writeJSON(File jsonFile, JSONObject json) throws IOException, JSONException {
 		try (FileOutputStream out = new FileOutputStream(jsonFile)) {
 			out.write(json.toString(2).getBytes(StandardCharsets.UTF_8));
 		}

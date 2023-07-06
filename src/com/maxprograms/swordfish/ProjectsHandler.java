@@ -28,7 +28,6 @@ import java.sql.SQLException;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.Iterator;
@@ -489,15 +488,10 @@ public class ProjectsHandler implements HttpHandler {
 			Project project = new Project(array.getJSONObject(i));
 			list.add(project);
 		}
-		Collections.sort(list, new Comparator<Project>() {
-
-			@Override
-			public int compare(Project o1, Project o2) {
-				Long long1 = Long.parseLong(o1.getId());
-				Long long2 = Long.parseLong(o2.getId());
-				return Long.compare(long2, long1);
-			}
-
+		Collections.sort(list, (o1, o2) -> {
+			Long long1 = Long.parseLong(o1.getId());
+			Long long2 = Long.parseLong(o2.getId());
+			return Long.compare(long2, long1);
 		});
 		array = new JSONArray();
 		for (int i = 0; i < list.size(); i++) {

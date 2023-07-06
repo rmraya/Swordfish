@@ -13,6 +13,7 @@
 package com.maxprograms.swordfish.mt;
 
 import java.io.IOException;
+import java.text.MessageFormat;
 import java.util.List;
 
 import org.json.JSONException;
@@ -145,10 +146,10 @@ public class MT {
         deeplTgtLang = deepl.getString("tgtLang");
 
         if (json.has("chatGpt")) {
-            JSONObject chatGpt = json.getJSONObject("chatGpt");
-            chatGptEnabled = chatGpt.getBoolean("enabled");
-            chatGptKey = chatGpt.getString("apiKey");
-            switch (chatGpt.getString("model")) {
+            JSONObject chatGptOption = json.getJSONObject("chatGpt");
+            chatGptEnabled = chatGptOption.getBoolean("enabled");
+            chatGptKey = chatGptOption.getString("apiKey");
+            switch (chatGptOption.getString("model")) {
                 case "Davinci":
                     model = ChatGptTranslator.DAVINCI;
                     break;
@@ -162,9 +163,9 @@ public class MT {
                     model = ChatGptTranslator.ADA;
                     break;
                 default:
-                    throw new JSONException("Invalid ChatGPT model: " + chatGpt.getString("model"));
+                    MessageFormat mf = new MessageFormat("Invalid ChatGPT model: {0}");
+                    throw new JSONException(mf.format(new String[] { chatGptOption.getString("model") }));
             }
-            ;
         } else {
             chatGptEnabled = false;
         }

@@ -60,7 +60,11 @@ class Tab {
         return this.id;
     }
 
-    getLabel(): HTMLDivElement {
+    getLabel(): HTMLAnchorElement {
+        return this.label;
+    }
+
+    getLabelDiv(): HTMLDivElement {
         return this.labelDiv;
     }
 
@@ -133,8 +137,8 @@ class TabHolder {
 
     addTab(tab: Tab): void {
         tab.setParent(this);
-        this.tabsHolder.appendChild(tab.getLabel());
-        this.labels.set(tab.getId(), tab.getLabel());
+        this.tabsHolder.appendChild(tab.getLabelDiv());
+        this.labels.set(tab.getId(), tab.getLabelDiv());
         this.contentHolder.appendChild(tab.getContainer());
         this.tabs.set(tab.getId(), tab);
         this.tabsList.push(tab.getId());

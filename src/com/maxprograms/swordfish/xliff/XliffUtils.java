@@ -304,7 +304,7 @@ public class XliffUtils {
 				if ("ph".equals(e.getName())) {
 					Element ph = new Element("ph");
 					String id = e.getAttributeValue("id");
-					ph.setAttribute("x", id);
+					ph.setAttribute("x", "" + id.hashCode());
 					if (tags.containsKey(id)) {
 						ph.setText(tags.get(id));
 					}

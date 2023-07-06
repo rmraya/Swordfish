@@ -137,7 +137,7 @@ class TmMatches {
             this.origin.innerText = match.origin;
         }
 
-        tab.getLabel().addEventListener('click', () => {
+        tab.getLabelDiv().addEventListener('click', () => {
             this.origin.innerText = match.origin;
         });
 

@@ -30,7 +30,6 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
@@ -226,14 +225,7 @@ public class ServicesHandler implements HttpHandler {
                 list.add(files[i]);
             }
         }
-        Collections.sort(list, new Comparator<String>() {
-
-            @Override
-            public int compare(String o1, String o2) {
-                return o1.compareToIgnoreCase(o2);
-            }
-
-        });
+        Collections.sort(list, (o1, o2) -> o1.compareToIgnoreCase(o2));
         for (int i = 0; i < list.size(); i++) {
             array.put(list.get(i));
         }
@@ -314,7 +306,6 @@ public class ServicesHandler implements HttpHandler {
 
     private JSONObject getFilterData(String request)
             throws SAXException, IOException, ParserConfigurationException, URISyntaxException {
-        JSONObject result = new JSONObject();
         JSONObject json = new JSONObject(request);
         File appFolder = new File(json.getString("path"));
         File xmlFiltersFolder = new File(appFolder, "xmlfilter");
@@ -322,8 +313,7 @@ public class ServicesHandler implements HttpHandler {
         SAXBuilder builder = new SAXBuilder();
         builder.setEntityResolver(new Catalog(TmsServer.getCatalogFile()));
         Document doc = builder.build(configFile);
-        result = toJSON(doc.getRootElement());
-        return result;
+        return toJSON(doc.getRootElement());
     }
 
     private JSONObject saveElement(String request)
@@ -381,14 +371,7 @@ public class ServicesHandler implements HttpHandler {
             }
             tags.add(tag);
         }
-        Collections.sort(tags, new Comparator<Element>() {
-
-            @Override
-            public int compare(Element o1, Element o2) {
-                return o1.getText().compareTo(o2.getText());
-            }
-
-        });
+        Collections.sort(tags, (o1, o2) -> o1.getText().compareTo(o2.getText()));
         root.setChildren(tags);
         Indenter.indent(root, 0);
         XMLOutputter outputter = new XMLOutputter();
@@ -424,14 +407,7 @@ public class ServicesHandler implements HttpHandler {
                 newList.add(tag);
             }
         }
-        Collections.sort(newList, new Comparator<Element>() {
-
-            @Override
-            public int compare(Element o1, Element o2) {
-                return o1.getText().compareTo(o2.getText());
-            }
-
-        });
+        Collections.sort(newList, (o1, o2) -> o1.getText().compareTo(o2.getText()));
         root.setChildren(newList);
         Indenter.indent(root, 0);
         XMLOutputter outputter = new XMLOutputter();
@@ -543,7 +519,8 @@ public class ServicesHandler implements HttpHandler {
     private static JSONObject getSystemInformation() {
         JSONObject result = new JSONObject();
         result.put("swordfish", Constants.VERSION + " Build: " + Constants.BUILD);
-        result.put("openxliff", com.maxprograms.converters.Constants.VERSION + " Build: " + com.maxprograms.converters.Constants.BUILD);
+        result.put("openxliff",
+                com.maxprograms.converters.Constants.VERSION + " Build: " + com.maxprograms.converters.Constants.BUILD);
         result.put("xmljava", com.maxprograms.xml.Constants.VERSION + " Build: " + com.maxprograms.xml.Constants.BUILD);
         result.put("java", System.getProperty("java.version") + " Vendor: " + System.getProperty("java.vendor"));
         return result;

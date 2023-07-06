@@ -108,8 +108,41 @@ public class TMUtils {
 		tuv.setAttribute("xml:lang", lang);
 		SAXBuilder builder = new SAXBuilder();
 		Element e = builder.build(new ByteArrayInputStream(seg.getBytes(StandardCharsets.UTF_8))).getRootElement();
+		checkAttributes(e);
 		tuv.addContent(e);
 		return tuv;
+	}
+
+	private static void checkAttributes(Element e) {
+		if (e.hasAttribute("x")) {
+			String x = e.getAttributeValue("x");
+			if (!isNumber(x)) {
+				e.setAttribute("x", "" + x.hashCode());
+			}
+		}
+		if (e.hasAttribute("i")) {
+			String i = e.getAttributeValue("i");
+			if (!isNumber(i)) {
+				e.setAttribute("i", "" + i.hashCode());
+			}
+		}
+		List<XMLNode> l = e.getContent();
+		Iterator<XMLNode> i = l.iterator();
+		while (i.hasNext()) {
+			XMLNode o = i.next();
+			if (o.getNodeType() == XMLNode.ELEMENT_NODE) {
+				checkAttributes((Element) o);
+			}
+		}
+	}
+
+	private static boolean isNumber(String s) {
+		try {
+			Double.parseDouble(s);
+			return true;
+		} catch (NumberFormatException e) {
+			return false;
+		}
 	}
 
 	public static String creationDate() {

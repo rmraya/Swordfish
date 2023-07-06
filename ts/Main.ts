@@ -33,21 +33,21 @@ class Main {
 
         let projectsTab = new Tab('projects', 'Projects', false);
         this.projectsView = new ProjectsView(projectsTab.getContainer());
-        projectsTab.getLabel().addEventListener('click', () => {
+        projectsTab.getLabelDiv().addEventListener('click', () => {
             this.projectsView.setSizes();
         });
         Main.tabHolder.addTab(projectsTab);
 
         let memoriesTab = new Tab('memories', 'Memories', false);
         this.memoriesView = new MemoriesView(memoriesTab.getContainer());
-        memoriesTab.getLabel().addEventListener('click', () => {
+        memoriesTab.getLabelDiv().addEventListener('click', () => {
             this.memoriesView.setSizes();
         });
         Main.tabHolder.addTab(memoriesTab);
 
         let glossariesTab = new Tab('glossaries', 'Glossaries', false);
         this.glossariesView = new GlossariesView(glossariesTab.getContainer());
-        glossariesTab.getLabel().addEventListener('click', () => {
+        glossariesTab.getLabelDiv().addEventListener('click', () => {
             this.glossariesView.setSizes();
         });
         Main.tabHolder.addTab(glossariesTab);
@@ -416,7 +416,7 @@ class Main {
         let view: TranslationView = new TranslationView(tab, arg.id, arg.sourceLang, arg.targetLang);
         Main.tabHolder.addTab(tab);
         Main.tabHolder.selectTab(arg.id);
-        tab.getLabel().addEventListener('click', () => {
+        tab.getLabelDiv().addEventListener('click', () => {
             view.setSize();
             view.setSpellChecker();
         });

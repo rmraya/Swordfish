@@ -80,27 +80,27 @@ class PreferencesDialog {
         this.tabHolder = new TabHolder(document.getElementById('main') as HTMLDivElement, "preferencesHolder");
 
         let basicTab: Tab = new Tab('basicTab', 'Basic', false);
-        basicTab.getLabel().addEventListener('click', () => {
+        basicTab.getLabelDiv().addEventListener('click', () => {
             this.electron.ipcRenderer.send('settings-height', { width: document.body.clientWidth, height: document.body.clientHeight });
         });
         this.tabHolder.addTab(basicTab);
         this.populateBasicTab(basicTab.getContainer());
 
         let mtTab: Tab = new Tab('mtTab', 'Machine Translation', false);
-        mtTab.getLabel().addEventListener('click', () => {
+        mtTab.getLabelDiv().addEventListener('click', () => {
             this.electron.ipcRenderer.send('settings-height', { width: document.body.clientWidth, height: document.body.clientHeight });
         });
         this.tabHolder.addTab(mtTab);
         this.populateMtTab(mtTab.getContainer());
 
         this.spellcheckTab = new Tab('spellcheckTab', 'Spellchecker', false);
-        this.spellcheckTab.getLabel().addEventListener('click', () => {
+        this.spellcheckTab.getLabelDiv().addEventListener('click', () => {
             this.electron.ipcRenderer.send('settings-height', { width: document.body.clientWidth, height: document.body.clientHeight });
         });
         this.tabHolder.addTab(this.spellcheckTab);
 
         let advancedTab: Tab = new Tab('advancedTab', 'Advanced', false);
-        advancedTab.getLabel().addEventListener('click', () => {
+        advancedTab.getLabelDiv().addEventListener('click', () => {
             this.electron.ipcRenderer.send('settings-height', { width: document.body.clientWidth, height: document.body.clientHeight });
         });
         this.tabHolder.addTab(advancedTab);
@@ -635,14 +635,14 @@ class PreferencesDialog {
         let advHolder: TabHolder = new TabHolder(div, 'advHolder');
 
         let generalTab: Tab = new Tab('generalTab', 'General', false);
-        generalTab.getLabel().addEventListener('click', () => {
+        generalTab.getLabelDiv().addEventListener('click', () => {
             this.electron.ipcRenderer.send('settings-height', { width: document.body.clientWidth, height: document.body.clientHeight });
         });
         advHolder.addTab(generalTab);
         this.populateAdvGeneralTab(generalTab.getContainer());
 
         let xmlTab: Tab = new Tab('xmlTab', 'XML Filter', false);
-        xmlTab.getLabel().addEventListener('click', () => {
+        xmlTab.getLabelDiv().addEventListener('click', () => {
             this.electron.ipcRenderer.send('settings-height', { width: document.body.clientWidth, height: document.body.clientHeight });
         });
         advHolder.addTab(xmlTab);
@@ -939,42 +939,42 @@ class PreferencesDialog {
         let mtHolder: TabHolder = new TabHolder(div, 'mtHolder');
 
         let googleTab: Tab = new Tab('googleTab', 'Google', false);
-        googleTab.getLabel().addEventListener('click', () => {
+        googleTab.getLabelDiv().addEventListener('click', () => {
             this.electron.ipcRenderer.send('settings-height', { width: document.body.clientWidth, height: document.body.clientHeight });
         });
         mtHolder.addTab(googleTab);
         this.populateGoogleTab(googleTab.getContainer());
 
         let azureTab: Tab = new Tab('azureTab', 'Microsoft Azure', false);
-        azureTab.getLabel().addEventListener('click', () => {
+        azureTab.getLabelDiv().addEventListener('click', () => {
             this.electron.ipcRenderer.send('settings-height', { width: document.body.clientWidth, height: document.body.clientHeight });
         });
         mtHolder.addTab(azureTab);
         this.populateAzureTab(azureTab.getContainer());
 
         let yandexTab: Tab = new Tab('yandexTab', 'Yandex', false);
-        yandexTab.getLabel().addEventListener('click', () => {
+        yandexTab.getLabelDiv().addEventListener('click', () => {
             this.electron.ipcRenderer.send('settings-height', { width: document.body.clientWidth, height: document.body.clientHeight });
         });
         mtHolder.addTab(yandexTab);
         this.populateYandexTab(yandexTab.getContainer());
 
         let deeplTab: Tab = new Tab('deeplTab', 'DeepL', false);
-        deeplTab.getLabel().addEventListener('click', () => {
+        deeplTab.getLabelDiv().addEventListener('click', () => {
             this.electron.ipcRenderer.send('settings-height', { width: document.body.clientWidth, height: document.body.clientHeight });
         });
         mtHolder.addTab(deeplTab);
         this.populateDeeplTab(deeplTab.getContainer());
 
         let chatGptTab: Tab = new Tab('chatGptTab', 'ChatGPT', false);
-        chatGptTab.getLabel().addEventListener('click', () => {
+        chatGptTab.getLabelDiv().addEventListener('click', () => {
             this.electron.ipcRenderer.send('settings-height', { width: document.body.clientWidth, height: document.body.clientHeight });
         });
         mtHolder.addTab(chatGptTab);
         this.populateChatGptTab(chatGptTab.getContainer());
 
         let myMemoryTab: Tab = new Tab('myMemoryTab', 'MyMemory', false);
-        myMemoryTab.getLabel().addEventListener('click', () => {
+        myMemoryTab.getLabelDiv().addEventListener('click', () => {
             this.electron.ipcRenderer.send('settings-height', { width: document.body.clientWidth, height: document.body.clientHeight });
         });
         mtHolder.addTab(myMemoryTab);

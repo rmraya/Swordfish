@@ -84,6 +84,7 @@ public class XliffStore {
 
     public static final int THRESHOLD = 60;
     public static final int MAXTERMLENGTH = 5;
+    public static final int BATCHSIZE = 100;
 
     public static final String SVG_BLANK = "<svg xmlns='http://www.w3.org/2000/svg' height='24' viewBox='0 0 24 24' width='24'></svg>";
     public static final String SVG_UNTRANSLATED = "<svg xmlns:svg='http://www.w3.org/2000/svg' height='24' viewBox='0 0 24 24' width='24' version='1.1'><path d='M 19,5 V 19 H 5 V 5 H 19 M 19,3 H 5 C 3.9,3 3,3.9 3,5 v 14 c 0,1.1 0.9,2 2,2 h 14 c 1.1,0 2,-0.9 2,-2 V 5 C 21,3.9 20.1,3 19,3 Z' /></svg>";
@@ -2403,47 +2404,54 @@ public class XliffStore {
                 total = rs.getInt(1);
             }
         }
-        sql = "SELECT file, unitId, segId, source, sourceText, target FROM segments WHERE type = 'S' AND state <> 'final'";
-        int count = 0;
-        int processed = 0;
-        try (ResultSet rs = stmt.executeQuery(sql)) {
-            JSONObject params = new JSONObject();
-            params.put("srcLang", srcLang);
-            params.put("tgtLang", tgtLang);
-            JSONArray array = new JSONArray();
-            while (rs.next()) {
-                String file = rs.getString(1);
-                String unit = rs.getString(2);
-                String segment = rs.getString(3);
-                String pure = TMUtils.getString(rs.getNCharacterStream(5));
-                JSONObject json = new JSONObject();
-                json.put("file", file);
-                json.put("unit", unit);
-                json.put("segment", segment);
-                json.put("pure", pure);
-                array.put(json);
-                processed++;
-                if (processed % 20 == 0) {
-                    int percentage = Math.round(processed * 100f / total);
-                    if (percentage == 100) {
-                        percentage = 99;
-                    }
-                    processes.get(processId).put("percentage", percentage);
-                }
-                if (array.length() == 250) {
-                    params.put("segments", array);
-                    JSONArray translations = engine.batchTranslate(params);
-                    count += storeMatches(translations, memoryName, penalization);
-                    array = new JSONArray();
-                }
-            }
-            params.put("segments", array);
-            JSONArray translations = engine.batchTranslate(params);
-            count += storeMatches(translations, memoryName, penalization);
-            processes.get(processId).put("percentage", 100);
+        if (total == 0) {
+            return 0;
         }
+        int processed = 0;
+        int offset = 0;
+        do {
+            processed += translateBatch(offset, engine, memoryName, penalization);
+            int percentage = Math.round(offset * 100f / total);
+            if (percentage == 100) {
+                percentage = 99;
+            }
+            processes.get(processId).put("percentage", percentage);
+            offset += BATCHSIZE;
+        } while (offset < total);
         MemoriesHandler.close(memory);
-        return count;
+        return processed;
+    }
+
+    private synchronized int translateBatch(int offset, ITmEngine engine, String memoryName, int penalization)
+            throws IOException, SQLException, SAXException, ParserConfigurationException {
+        String sql = "SELECT file, unitId, segId, source, sourceText, target FROM segments WHERE type = 'S' AND state <> 'final' OFFSET ?";
+        JSONObject params = new JSONObject();
+        JSONArray array = new JSONArray();
+        try (PreparedStatement prepared = conn.prepareStatement(sql)) {
+            prepared.setInt(1, offset);
+            try (ResultSet rs = prepared.executeQuery()) {
+                params.put("srcLang", srcLang);
+                params.put("tgtLang", tgtLang);
+                while (rs.next()) {
+                    String file = rs.getString(1);
+                    String unit = rs.getString(2);
+                    String segment = rs.getString(3);
+                    String pure = TMUtils.getString(rs.getNCharacterStream(5));
+                    JSONObject json = new JSONObject();
+                    json.put("file", file);
+                    json.put("unit", unit);
+                    json.put("segment", segment);
+                    json.put("pure", pure);
+                    array.put(json);
+                    if (array.length() == BATCHSIZE) {
+                        break;
+                    }
+                }
+                params.put("segments", array);
+            }
+        }
+        JSONArray translations = engine.batchTranslate(params);
+        return storeMatches(translations, memoryName, penalization);
     }
 
     private int storeMatches(JSONArray translations, String memoryName, int penalization)
