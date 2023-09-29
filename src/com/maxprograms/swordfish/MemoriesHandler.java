@@ -644,7 +644,8 @@ public class MemoriesHandler implements HttpHandler {
 		return text.toString();
 	}
 
-	public static List<Language> getLanguages(List<Element> matches) throws IOException {
+	public static List<Language> getLanguages(List<Element> matches)
+			throws IOException, SAXException, ParserConfigurationException {
 		Set<Language> set = new TreeSet<>();
 		Iterator<Element> it = matches.iterator();
 		while (it.hasNext()) {

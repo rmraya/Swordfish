@@ -19,14 +19,17 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-import com.maxprograms.converters.Utils;
-import com.maxprograms.languages.Language;
-import com.maxprograms.languages.LanguageUtils;
-import com.maxprograms.swordfish.ProjectsHandler;
+import javax.xml.parsers.ParserConfigurationException;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.xml.sax.SAXException;
+
+import com.maxprograms.converters.Utils;
+import com.maxprograms.languages.Language;
+import com.maxprograms.languages.LanguageUtils;
+import com.maxprograms.swordfish.ProjectsHandler;
 
 public class Project implements Comparable<Project> {
 
@@ -67,7 +70,7 @@ public class Project implements Comparable<Project> {
 		this.xliff = xliff;
 	}
 
-	public Project(JSONObject json) throws IOException {
+	public Project(JSONObject json) throws IOException, JSONException, SAXException, ParserConfigurationException {
 		id = json.getString("id");
 		description = json.getString("description");
 		status = json.getInt("status");

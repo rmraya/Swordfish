@@ -40,6 +40,7 @@ import java.util.TreeSet;
 import javax.xml.parsers.ParserConfigurationException;
 
 import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 import org.xml.sax.SAXException;
 
@@ -481,7 +482,7 @@ public class ServicesHandler implements HttpHandler {
         JSONObject result = new JSONObject();
         try {
             result = MTUtils.getMTLanguages();
-        } catch (IOException e) {
+        } catch (IOException | JSONException | SAXException | ParserConfigurationException e) {
             logger.log(Level.ERROR, "Error getting MT languages", e);
             result.put(Constants.REASON, e.getMessage());
         }
@@ -626,7 +627,7 @@ public class ServicesHandler implements HttpHandler {
                 array.put(a);
             }
             result.put("languages", array);
-        } catch (IOException e) {
+        } catch (IOException | SAXException | ParserConfigurationException e) {
             logger.log(Level.ERROR, e);
             result.put(Constants.REASON, e.getMessage());
         }

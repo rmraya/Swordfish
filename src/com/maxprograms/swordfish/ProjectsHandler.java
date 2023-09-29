@@ -99,7 +99,7 @@ public class ProjectsHandler implements HttpHandler {
 					}
 				}
 			}
-		} catch (IOException e) {
+		} catch (IOException | JSONException | SAXException | ParserConfigurationException e) {
 			logger.log(Level.ERROR, "Error processing projects " + exchange.getRequestURI().toString(), e);
 		}
 	}
@@ -299,22 +299,18 @@ public class ProjectsHandler implements HttpHandler {
 		obj.put(Constants.PROGRESS, Constants.PROCESSING);
 		processes.put(id, obj);
 		try {
-			Thread thread = new Thread() {
-				@Override
-				public void run() {
-					try {
-						projectStores.get(project).exportTranslations(output);
-						obj.put(Constants.PROGRESS, Constants.COMPLETED);
-						processes.put(id, obj);
-					} catch (Exception e) {
-						logger.log(Level.ERROR, e);
-						obj.put(Constants.PROGRESS, Constants.ERROR);
-						obj.put(Constants.REASON, e.getMessage());
-						processes.put(id, obj);
-					}
+			new Thread(() -> {
+				try {
+					projectStores.get(project).exportTranslations(output);
+					obj.put(Constants.PROGRESS, Constants.COMPLETED);
+					processes.put(id, obj);
+				} catch (Exception e) {
+					logger.log(Level.ERROR, e);
+					obj.put(Constants.PROGRESS, Constants.ERROR);
+					obj.put(Constants.REASON, e.getMessage());
+					processes.put(id, obj);
 				}
-			};
-			thread.start();
+			}).start();
 		} catch (Exception e) {
 			logger.log(Level.ERROR, "Error exporting translations", e);
 			result.put(Constants.REASON, e.getMessage());
@@ -348,22 +344,18 @@ public class ProjectsHandler implements HttpHandler {
 		obj.put(Constants.PROGRESS, Constants.PROCESSING);
 		processes.put(id, obj);
 		try {
-			Thread thread = new Thread() {
-				@Override
-				public void run() {
-					try {
-						projectStores.get(project).exportXliff(output);
-						obj.put(Constants.PROGRESS, Constants.COMPLETED);
-						processes.put(id, obj);
-					} catch (IOException | SAXException | ParserConfigurationException | SQLException e) {
-						logger.log(Level.ERROR, e);
-						obj.put(Constants.PROGRESS, Constants.ERROR);
-						obj.put(Constants.REASON, e.getMessage());
-						processes.put(id, obj);
-					}
+			new Thread(() -> {
+				try {
+					projectStores.get(project).exportXliff(output);
+					obj.put(Constants.PROGRESS, Constants.COMPLETED);
+					processes.put(id, obj);
+				} catch (IOException | SAXException | ParserConfigurationException | SQLException e) {
+					logger.log(Level.ERROR, e);
+					obj.put(Constants.PROGRESS, Constants.ERROR);
+					obj.put(Constants.REASON, e.getMessage());
+					processes.put(id, obj);
 				}
-			};
-			thread.start();
+			}).start();
 		} catch (Exception e) {
 			logger.log(Level.ERROR, "Error exporting translations", e);
 			result.put(Constants.REASON, e.getMessage());
@@ -397,24 +389,21 @@ public class ProjectsHandler implements HttpHandler {
 		obj.put(Constants.PROGRESS, Constants.PROCESSING);
 		processes.put(id, obj);
 		try {
-			Thread thread = new Thread() {
-				@Override
-				public void run() {
-					try {
-						Project prj = projects.get(project);
-						projectStores.get(project).exportTMX(output, prj.getDescription(), prj.getClient(),
-								prj.getSubject());
-						obj.put(Constants.PROGRESS, Constants.COMPLETED);
-						processes.put(id, obj);
-					} catch (IOException | SAXException | ParserConfigurationException | SQLException e) {
-						logger.log(Level.ERROR, e);
-						obj.put(Constants.PROGRESS, Constants.ERROR);
-						obj.put(Constants.REASON, e.getMessage());
-						processes.put(id, obj);
-					}
+			new Thread(() -> {
+				try {
+					Project prj = projects.get(project);
+					projectStores.get(project).exportTMX(output, prj.getDescription(), prj.getClient(),
+							prj.getSubject());
+					obj.put(Constants.PROGRESS, Constants.COMPLETED);
+					processes.put(id, obj);
+				} catch (IOException | SAXException | ParserConfigurationException | SQLException e) {
+					logger.log(Level.ERROR, e);
+					obj.put(Constants.PROGRESS, Constants.ERROR);
+					obj.put(Constants.REASON, e.getMessage());
+					processes.put(id, obj);
 				}
-			};
-			thread.start();
+			}).start();
+
 		} catch (Exception e) {
 			logger.log(Level.ERROR, "Error exporting TMX", e);
 			result.put(Constants.REASON, e.getMessage());
@@ -456,7 +445,7 @@ public class ProjectsHandler implements HttpHandler {
 		}
 	}
 
-	private JSONObject listProjects() throws IOException {
+	private JSONObject listProjects() throws IOException, JSONException, SAXException, ParserConfigurationException {
 		JSONObject result = new JSONObject();
 		loadProjectsList();
 		JSONArray array = projectsList.getJSONArray("projects");
@@ -468,7 +457,7 @@ public class ProjectsHandler implements HttpHandler {
 		return result;
 	}
 
-	private void loadProjectsList() throws IOException {
+	private void loadProjectsList() throws IOException, JSONException, SAXException, ParserConfigurationException {
 		projects = new Hashtable<>();
 		File home = getWorkFolder();
 		File list = new File(home, "projects.json");
@@ -481,7 +470,7 @@ public class ProjectsHandler implements HttpHandler {
 		sortProjects();
 	}
 
-	private void sortProjects() throws IOException {
+	private void sortProjects() throws IOException, JSONException, SAXException, ParserConfigurationException {
 		JSONArray array = projectsList.getJSONArray("projects");
 		List<Project> list = new ArrayList<>();
 		for (int i = 0; i < array.length(); i++) {
@@ -631,115 +620,111 @@ public class ProjectsHandler implements HttpHandler {
 			File projectFolder = new File(getWorkFolder(), id);
 			Files.createDirectories(projectFolder.toPath());
 			List<SourceFile> sourceFiles = new ArrayList<>();
-			Thread thread = new Thread() {
-				@Override
-				public void run() {
-					try {
-						List<String> xliffs = new ArrayList<>();
-						for (int i = 0; i < files.length(); i++) {
-							JSONObject file = files.getJSONObject(i);
-							String fullName = file.getString("file");
-							String shortName = fullName.substring(filesRoot.length());
-							if (shortName.startsWith("/") || shortName.startsWith("\\")) {
-								shortName = shortName.substring(1);
-							}
-							SourceFile sf = new SourceFile(shortName, FileFormats.getFullName(file.getString("type")),
-									file.getString("encoding"));
-							sourceFiles.add(sf);
-
-							boolean paragraph = paragraphSegmentation;
-							boolean mustResegment = false;
-							if (!paragraphSegmentation) {
-								mustResegment = true;
-								paragraph = true;
-							}
-
-							File source = new File(fullName);
-							File xliff = new File(projectFolder, shortName + ".xlf");
-							if (!xliff.getParentFile().exists()) {
-								Files.createDirectories(xliff.getParentFile().toPath());
-							}
-							File skl = new File(projectFolder, shortName + ".skl");
-
-							Map<String, String> params = new HashMap<>();
-							params.put("source", source.getAbsolutePath());
-							params.put("xliff", xliff.getAbsolutePath());
-							params.put("skeleton", skl.getAbsolutePath());
-							params.put("format", sf.getType());
-							params.put("catalog", catalogFile);
-							params.put("srcEncoding", sf.getEncoding());
-							params.put("paragraph", paragraph ? "yes" : "no");
-							params.put("srxFile", srxFile);
-							params.put("srcLang", json.getString("srcLang"));
-							params.put("tgtLang", json.getString("tgtLang"));
-							params.put("xmlfilter", json.getString("xmlfilter"));
-
-							List<String> res = Convert.run(params);
-
-							if ("0".equals(res.get(0))) {
-								res = ToXliff2.run(xliff, catalogFile);
-								if (mustResegment && "0".equals(res.get(0))) {
-									res = Resegmenter.run(xliff.getAbsolutePath(), srxFile, json.getString("srcLang"),
-											new Catalog(catalogFile));
-								}
-							}
-							if (!"0".equals(res.get(0))) {
-								if (TmsServer.isDebug()) {
-									logger.log(Level.INFO, "Conversion failed for: " + file.toString(2));
-								}
-								try {
-									TmsServer.deleteFolder(projectFolder);
-								} catch (IOException e) {
-									logger.log(Level.ERROR, e);
-								}
-								throw new IOException(res.get(1));
-							}
-							xliffs.add(xliff.getAbsolutePath());
+			new Thread(() -> {
+				try {
+					List<String> xliffs = new ArrayList<>();
+					for (int i = 0; i < files.length(); i++) {
+						JSONObject file = files.getJSONObject(i);
+						String fullName = file.getString("file");
+						String shortName = fullName.substring(filesRoot.length());
+						if (shortName.startsWith("/") || shortName.startsWith("\\")) {
+							shortName = shortName.substring(1);
 						}
-						if (xliffs.size() > 1) {
-							File main = new File(projectFolder, p.getId() + ".xlf");
-							Join.join(xliffs, main.getAbsolutePath());
-							for (int i = 0; i < xliffs.size(); i++) {
-								File x = new File(xliffs.get(i));
-								Files.delete(x.toPath());
+						SourceFile sf = new SourceFile(shortName, FileFormats.getFullName(file.getString("type")),
+								file.getString("encoding"));
+						sourceFiles.add(sf);
+
+						boolean paragraph = paragraphSegmentation;
+						boolean mustResegment = false;
+						if (!paragraphSegmentation) {
+							mustResegment = true;
+							paragraph = true;
+						}
+
+						File source = new File(fullName);
+						File xliff = new File(projectFolder, shortName + ".xlf");
+						if (!xliff.getParentFile().exists()) {
+							Files.createDirectories(xliff.getParentFile().toPath());
+						}
+						File skl = new File(projectFolder, shortName + ".skl");
+
+						Map<String, String> params = new HashMap<>();
+						params.put("source", source.getAbsolutePath());
+						params.put("xliff", xliff.getAbsolutePath());
+						params.put("skeleton", skl.getAbsolutePath());
+						params.put("format", sf.getType());
+						params.put("catalog", catalogFile);
+						params.put("srcEncoding", sf.getEncoding());
+						params.put("paragraph", paragraph ? "yes" : "no");
+						params.put("srxFile", srxFile);
+						params.put("srcLang", json.getString("srcLang"));
+						params.put("tgtLang", json.getString("tgtLang"));
+						params.put("xmlfilter", json.getString("xmlfilter"));
+
+						List<String> res = Convert.run(params);
+
+						if ("0".equals(res.get(0))) {
+							res = ToXliff2.run(xliff, catalogFile, "2.0");
+							if (mustResegment && "0".equals(res.get(0))) {
+								res = Resegmenter.run(xliff.getAbsolutePath(), srxFile, json.getString("srcLang"),
+										new Catalog(catalogFile));
 							}
-							p.setXliff(main.getAbsolutePath());
-						} else {
-							p.setXliff(xliffs.get(0));
 						}
-						ServicesHandler.addClient(json.getString("client"));
-						ServicesHandler.addSubject(json.getString("subject"));
-						if (!p.getDescription().endsWith(sourceFiles.get(0).getFile())) {
-							ServicesHandler.addProject(p.getDescription());
+						if (!"0".equals(res.get(0))) {
+							if (TmsServer.isDebug()) {
+								logger.log(Level.INFO, "Conversion failed for: " + file.toString(2));
+							}
+							try {
+								TmsServer.deleteFolder(projectFolder);
+							} catch (IOException e) {
+								logger.log(Level.ERROR, e);
+							}
+							throw new IOException(res.get(1));
 						}
-						p.setFiles(sourceFiles);
-						projects.put(id, p);
-						projectsList.getJSONArray("projects").put(p.toJSON());
-						sortProjects();
-						saveProjectsList();
-						if (applyTM) {
-							XliffStore store = new XliffStore(p.getXliff(), p.getSourceLang().getCode(),
-									p.getTargetLang().getCode());
-							store.tmTranslateAll(memory, 0, processes, id);
-						}
-						if (searchTerms) {
-							XliffStore store = new XliffStore(p.getXliff(), p.getSourceLang().getCode(),
-									p.getTargetLang().getCode());
-							store.getProjectTerms(glossary);
-						}
-						obj.put(Constants.PROGRESS, Constants.COMPLETED);
-						processes.put(id, obj);
-					} catch (Exception e) {
-						logger.log(Level.ERROR, e.getMessage(), e);
-						obj.put(Constants.PROGRESS, Constants.ERROR);
-						obj.put(Constants.REASON, e.getMessage());
-						processes.put(id, obj);
+						xliffs.add(xliff.getAbsolutePath());
 					}
+					if (xliffs.size() > 1) {
+						File main = new File(projectFolder, p.getId() + ".xlf");
+						Join.join(xliffs, main.getAbsolutePath());
+						for (int i = 0; i < xliffs.size(); i++) {
+							File x = new File(xliffs.get(i));
+							Files.delete(x.toPath());
+						}
+						p.setXliff(main.getAbsolutePath());
+					} else {
+						p.setXliff(xliffs.get(0));
+					}
+					ServicesHandler.addClient(json.getString("client"));
+					ServicesHandler.addSubject(json.getString("subject"));
+					if (!p.getDescription().endsWith(sourceFiles.get(0).getFile())) {
+						ServicesHandler.addProject(p.getDescription());
+					}
+					p.setFiles(sourceFiles);
+					projects.put(id, p);
+					projectsList.getJSONArray("projects").put(p.toJSON());
+					sortProjects();
+					saveProjectsList();
+					if (applyTM) {
+						XliffStore store = new XliffStore(p.getXliff(), p.getSourceLang().getCode(),
+								p.getTargetLang().getCode());
+						store.tmTranslateAll(memory, 0, processes, id);
+					}
+					if (searchTerms) {
+						XliffStore store = new XliffStore(p.getXliff(), p.getSourceLang().getCode(),
+								p.getTargetLang().getCode());
+						store.getProjectTerms(glossary);
+					}
+					obj.put(Constants.PROGRESS, Constants.COMPLETED);
+					processes.put(id, obj);
+				} catch (Exception e) {
+					logger.log(Level.ERROR, e.getMessage(), e);
+					obj.put(Constants.PROGRESS, Constants.ERROR);
+					obj.put(Constants.REASON, e.getMessage());
+					processes.put(id, obj);
 				}
-			};
-			thread.start();
+			}).start();
 			result.put(Constants.STATUS, Constants.SUCCESS);
-		} catch (IOException e) {
+		} catch (IOException | JSONException | SAXException | ParserConfigurationException e) {
 			logger.log(Level.ERROR, e);
 			result.put(Constants.STATUS, Constants.ERROR);
 			result.put(Constants.REASON, e.getMessage());
@@ -945,25 +930,20 @@ public class ProjectsHandler implements HttpHandler {
 			JSONObject obj = new JSONObject();
 			obj.put(Constants.PROGRESS, Constants.PROCESSING);
 			processes.put(id, obj);
-			Thread thread = new Thread() {
-				@Override
-				public void run() {
-					try {
-						if (projectStores.containsKey(project)) {
-							projectStores.get(project).assembleMatchesAll(json);
-						}
-						obj.put(Constants.PROGRESS, Constants.COMPLETED);
-						processes.put(id, obj);
-					} catch (IOException | SQLException | JSONException | SAXException
-							| ParserConfigurationException e) {
-						logger.log(Level.WARNING, e.getMessage(), e);
-						obj.put(Constants.PROGRESS, Constants.ERROR);
-						obj.put(Constants.REASON, e.getMessage());
-						processes.put(id, obj);
+			new Thread(() -> {
+				try {
+					if (projectStores.containsKey(project)) {
+						projectStores.get(project).assembleMatchesAll(json);
 					}
+					obj.put(Constants.PROGRESS, Constants.COMPLETED);
+					processes.put(id, obj);
+				} catch (IOException | SQLException | JSONException | SAXException | ParserConfigurationException e) {
+					logger.log(Level.WARNING, e.getMessage(), e);
+					obj.put(Constants.PROGRESS, Constants.ERROR);
+					obj.put(Constants.REASON, e.getMessage());
+					processes.put(id, obj);
 				}
-			};
-			thread.start();
+			}).start();
 		} catch (IOException | SAXException | ParserConfigurationException | URISyntaxException | SQLException e) {
 			logger.log(Level.ERROR, e);
 			result.put(Constants.REASON, e.getMessage());
@@ -993,24 +973,19 @@ public class ProjectsHandler implements HttpHandler {
 			obj.put("percentage", 0);
 			obj.put(Constants.PROGRESS, Constants.PROCESSING);
 			processes.put(id, obj);
-			Thread thread = new Thread() {
-				@Override
-				public void run() {
-					try {
-						obj.put("translated",
-								projectStores.get(project).tmTranslateAll(memory, penalization, processes, id));
-						obj.put(Constants.PROGRESS, Constants.COMPLETED);
-						processes.put(id, obj);
-					} catch (JSONException | IOException | SQLException | SAXException
-							| ParserConfigurationException e) {
-						logger.log(Level.WARNING, e.getMessage(), e);
-						obj.put(Constants.PROGRESS, Constants.ERROR);
-						obj.put(Constants.REASON, e.getMessage());
-						processes.put(id, obj);
-					}
+			new Thread(() -> {
+				try {
+					obj.put("translated",
+							projectStores.get(project).tmTranslateAll(memory, penalization, processes, id));
+					obj.put(Constants.PROGRESS, Constants.COMPLETED);
+					processes.put(id, obj);
+				} catch (JSONException | IOException | SQLException | SAXException | ParserConfigurationException e) {
+					logger.log(Level.WARNING, e.getMessage(), e);
+					obj.put(Constants.PROGRESS, Constants.ERROR);
+					obj.put(Constants.REASON, e.getMessage());
+					processes.put(id, obj);
 				}
-			};
-			thread.start();
+			}).start();
 		} catch (Exception e) {
 			logger.log(Level.ERROR, e.getMessage(), e);
 			result.put(Constants.REASON, e.getMessage());
@@ -1107,45 +1082,41 @@ public class ProjectsHandler implements HttpHandler {
 			if (!xliffFile.exists()) {
 				throw new IOException("XLIFF file does not exist");
 			}
-			Thread thread = new Thread() {
-				@Override
-				public void run() {
-					try {
-						JSONObject details = XliffUtils.getProjectDetails(xliffFile);
-						Project p = new Project(id, description, Project.NEW,
-								LanguageUtils.getLanguage(details.getString("sourceLang")),
-								LanguageUtils.getLanguage(details.getString("targetLang")), json.getString("client"),
-								json.getString("subject"), json.getString("memory"), json.getString("glossary"),
-								LocalDate.now());
-						p.setFiles(details.getJSONArray("files"));
-						File projectFolder = new File(getWorkFolder(), id);
-						Files.createDirectories(projectFolder.toPath());
-						File projectXliff = new File(projectFolder, xliffFile.getName());
-						Files.copy(xliffFile.toPath(), projectXliff.toPath());
-						Skeletons.extractSkeletons(xliffFile, projectXliff);
-						p.setXliff(projectXliff.getAbsolutePath());
-						XliffStore store = new XliffStore(p.getXliff(), p.getSourceLang().getCode(),
-								p.getTargetLang().getCode());
-						JSONObject status = store.getTranslationStatus();
-						store.close();
-						p.setStatus(status.getInt("percentage"));
-						ServicesHandler.addClient(json.getString("client"));
-						ServicesHandler.addSubject(json.getString("subject"));
-						projects.put(id, p);
-						projectsList.getJSONArray("projects").put(p.toJSON());
-						saveProjectsList();
-						obj.put(Constants.PROGRESS, Constants.COMPLETED);
-						processes.put(id, obj);
-					} catch (IOException | SAXException | ParserConfigurationException | URISyntaxException
-							| SQLException e) {
-						logger.log(Level.WARNING, e.getMessage(), e);
-						obj.put(Constants.PROGRESS, Constants.ERROR);
-						obj.put(Constants.REASON, e.getMessage());
-						processes.put(id, obj);
-					}
+			new Thread(() -> {
+				try {
+					JSONObject details = XliffUtils.getProjectDetails(xliffFile);
+					Project p = new Project(id, description, Project.NEW,
+							LanguageUtils.getLanguage(details.getString("sourceLang")),
+							LanguageUtils.getLanguage(details.getString("targetLang")), json.getString("client"),
+							json.getString("subject"), json.getString("memory"), json.getString("glossary"),
+							LocalDate.now());
+					p.setFiles(details.getJSONArray("files"));
+					File projectFolder = new File(getWorkFolder(), id);
+					Files.createDirectories(projectFolder.toPath());
+					File projectXliff = new File(projectFolder, xliffFile.getName());
+					Files.copy(xliffFile.toPath(), projectXliff.toPath());
+					Skeletons.extractSkeletons(xliffFile, projectXliff);
+					p.setXliff(projectXliff.getAbsolutePath());
+					XliffStore store = new XliffStore(p.getXliff(), p.getSourceLang().getCode(),
+							p.getTargetLang().getCode());
+					JSONObject status = store.getTranslationStatus();
+					store.close();
+					p.setStatus(status.getInt("percentage"));
+					ServicesHandler.addClient(json.getString("client"));
+					ServicesHandler.addSubject(json.getString("subject"));
+					projects.put(id, p);
+					projectsList.getJSONArray("projects").put(p.toJSON());
+					saveProjectsList();
+					obj.put(Constants.PROGRESS, Constants.COMPLETED);
+					processes.put(id, obj);
+				} catch (IOException | SAXException | ParserConfigurationException | URISyntaxException
+						| SQLException e) {
+					logger.log(Level.WARNING, e.getMessage(), e);
+					obj.put(Constants.PROGRESS, Constants.ERROR);
+					obj.put(Constants.REASON, e.getMessage());
+					processes.put(id, obj);
 				}
-			};
-			thread.start();
+			}).start();
 		} catch (IOException e) {
 			logger.log(Level.ERROR, e);
 			result.put(Constants.STATUS, Constants.ERROR);
@@ -1282,30 +1253,26 @@ public class ProjectsHandler implements HttpHandler {
 			JSONObject obj = new JSONObject();
 			obj.put(Constants.PROGRESS, Constants.PROCESSING);
 			processes.put(id, obj);
-			Thread thread = new Thread() {
-				@Override
-				public void run() {
-					try {
-						JSONObject json = new JSONObject(request);
-						String project = json.getString("project");
-						String memory = json.getString("memory");
-						if (projectStores.containsKey(project)) {
-							projectStores.get(project).confirmAllTranslations(memory);
-							JSONObject status = projectStores.get(project).getTranslationStatus();
-							obj.put("statistics", status);
-							updateProjectStatus(project, status.getInt("percentage"));
-						}
-						obj.put(Constants.PROGRESS, Constants.COMPLETED);
-						processes.put(id, obj);
-					} catch (IOException | SQLException | SAXException | ParserConfigurationException e) {
-						logger.log(Level.WARNING, e.getMessage(), e);
-						obj.put(Constants.PROGRESS, Constants.ERROR);
-						obj.put(Constants.REASON, e.getMessage());
-						processes.put(id, obj);
+			new Thread(() -> {
+				try {
+					JSONObject json = new JSONObject(request);
+					String project = json.getString("project");
+					String memory = json.getString("memory");
+					if (projectStores.containsKey(project)) {
+						projectStores.get(project).confirmAllTranslations(memory);
+						JSONObject status = projectStores.get(project).getTranslationStatus();
+						obj.put("statistics", status);
+						updateProjectStatus(project, status.getInt("percentage"));
 					}
+					obj.put(Constants.PROGRESS, Constants.COMPLETED);
+					processes.put(id, obj);
+				} catch (IOException | SQLException | SAXException | ParserConfigurationException e) {
+					logger.log(Level.WARNING, e.getMessage(), e);
+					obj.put(Constants.PROGRESS, Constants.ERROR);
+					obj.put(Constants.REASON, e.getMessage());
+					processes.put(id, obj);
 				}
-			};
-			thread.start();
+			}).start();
 		} catch (JSONException e) {
 			logger.log(Level.ERROR, e);
 			result.put(Constants.REASON, e.getMessage());
@@ -1420,33 +1387,28 @@ public class ProjectsHandler implements HttpHandler {
 			JSONObject obj = new JSONObject();
 			obj.put(Constants.PROGRESS, Constants.PROCESSING);
 			processes.put(id, obj);
-			Thread thread = new Thread() {
-				@Override
-				public void run() {
-					try {
-						JSONObject json = new JSONObject(request);
-						String project = json.getString("project");
-						if (projectStores.containsKey(project)) {
-							projectStores.get(project).applyMtAll(translator);
-						}
-						obj.put(Constants.PROGRESS, Constants.COMPLETED);
-						processes.put(id, obj);
-					} catch (InterruptedException e) {
-						logger.log(Level.WARNING, "MT interrupted", e);
-						obj.put(Constants.PROGRESS, Constants.ERROR);
-						obj.put(Constants.REASON, e.getMessage());
-						processes.put(id, obj);
-						Thread.currentThread().interrupt();
-					} catch (IOException | SQLException | JSONException | SAXException
-							| ParserConfigurationException e) {
-						logger.log(Level.WARNING, e.getMessage(), e);
-						obj.put(Constants.PROGRESS, Constants.ERROR);
-						obj.put(Constants.REASON, e.getMessage());
-						processes.put(id, obj);
+			new Thread(() -> {
+				try {
+					JSONObject json = new JSONObject(request);
+					String project = json.getString("project");
+					if (projectStores.containsKey(project)) {
+						projectStores.get(project).applyMtAll(translator);
 					}
+					obj.put(Constants.PROGRESS, Constants.COMPLETED);
+					processes.put(id, obj);
+				} catch (InterruptedException e) {
+					logger.log(Level.WARNING, "MT interrupted", e);
+					obj.put(Constants.PROGRESS, Constants.ERROR);
+					obj.put(Constants.REASON, e.getMessage());
+					processes.put(id, obj);
+					Thread.currentThread().interrupt();
+				} catch (IOException | SQLException | JSONException | SAXException | ParserConfigurationException e) {
+					logger.log(Level.WARNING, e.getMessage(), e);
+					obj.put(Constants.PROGRESS, Constants.ERROR);
+					obj.put(Constants.REASON, e.getMessage());
+					processes.put(id, obj);
 				}
-			};
-			thread.start();
+			}).start();
 		} catch (IOException e) {
 			logger.log(Level.ERROR, e);
 			result.put(Constants.REASON, e.getMessage());
@@ -1514,28 +1476,24 @@ public class ProjectsHandler implements HttpHandler {
 		obj.put(Constants.PROGRESS, Constants.PROCESSING);
 		processes.put(id, obj);
 		try {
-			Thread thread = new Thread() {
-				@Override
-				public void run() {
-					try {
-						String project = json.getString("project");
-						if (!projectStores.containsKey(project)) {
-							Project prj = projects.get(project);
-							XliffStore store = new XliffStore(prj.getXliff(), prj.getSourceLang().getCode(),
-									prj.getTargetLang().getCode());
-							projectStores.put(project, store);
-						}
-						obj.put("segments", projectStores.get(project).getProjectTerms(json.getString("glossary")));
-						obj.put(Constants.PROGRESS, Constants.COMPLETED);
-						processes.put(id, obj);
-					} catch (SQLException | JSONException | IOException | SAXException | ParserConfigurationException
-							| URISyntaxException e) {
-						logger.log(Level.ERROR, e);
-						result.put(Constants.REASON, e.getMessage());
+			new Thread(() -> {
+				try {
+					String project = json.getString("project");
+					if (!projectStores.containsKey(project)) {
+						Project prj = projects.get(project);
+						XliffStore store = new XliffStore(prj.getXliff(), prj.getSourceLang().getCode(),
+								prj.getTargetLang().getCode());
+						projectStores.put(project, store);
 					}
+					obj.put("segments", projectStores.get(project).getProjectTerms(json.getString("glossary")));
+					obj.put(Constants.PROGRESS, Constants.COMPLETED);
+					processes.put(id, obj);
+				} catch (SQLException | JSONException | IOException | SAXException | ParserConfigurationException
+						| URISyntaxException e) {
+					logger.log(Level.ERROR, e);
+					result.put(Constants.REASON, e.getMessage());
 				}
-			};
-			thread.start();
+			}).start();
 		} catch (JSONException e) {
 			result.put(Constants.REASON, e.getMessage());
 		}

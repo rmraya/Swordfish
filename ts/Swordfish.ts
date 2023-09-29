@@ -15,7 +15,6 @@ import { app, BrowserWindow, ClientRequest, clipboard, dialog, ipcMain, IpcMainE
 import { IncomingMessage } from "electron/main";
 import { appendFileSync, existsSync, lstatSync, mkdirSync, readFile, readFileSync, unlinkSync, writeFileSync } from "fs";
 import { Locations, Point } from "./locations";
-import { Preferences } from "./preferences";
 
 class Swordfish {
 
@@ -82,6 +81,7 @@ class Swordfish {
         acceptUnconfirmed: false,
         fuzzyTermSearches: false,
         caseSensitiveSearches: false,
+        caseSensitiveMatches: true,
         google: {
             enabled: false,
             apiKey: '',
@@ -111,7 +111,7 @@ class Swordfish {
         chatGpt: {
             enabled: false,
             apiKey: '',
-            model: 'Davinci',
+            model: 'gpt-3.5-turbo-instruct',
         },
         myMemory: {
             enabled: false,
@@ -1298,7 +1298,12 @@ class Swordfish {
                 let data: Buffer = readFileSync(preferencesFile);
                 let json: Preferences = JSON.parse(data.toString());
                 if (!json.hasOwnProperty('chatGpt')) {
-                    json.chatGpt = { enabled: false, apiKey: '', model: 'Davinci' };
+                    json.chatGpt = { enabled: false, apiKey: '', model: 'gpt-3.5-turbo-instruct' };
+                }
+                // Davinci, Babbage and Curie models were deprecated, replacing with the only one supported at this moment
+                json.chatGpt.model = 'gpt-3.5-turbo-instruct';
+                if (!json.hasOwnProperty('caseSensitiveMatches')) {
+                    json.caseSensitiveMatches = true;
                 }
                 Swordfish.currentPreferences = json;
                 if (!Swordfish.currentPreferences.projectsFolder || !existsSync(Swordfish.currentPreferences.projectsFolder)) {

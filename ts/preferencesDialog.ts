@@ -10,7 +10,6 @@
  *     Maxprograms - initial API and implementation
  *******************************************************************************/
 
-
 class PreferencesDialog {
 
     electron = require('electron');
@@ -31,7 +30,8 @@ class PreferencesDialog {
     paragraphSegmentation: HTMLInputElement;
     acceptUnconfirmed: HTMLInputElement;
     fuzzyTermSearches: HTMLInputElement;
-    caseSensitiveSearches: HTMLInputElement;
+    caseSensitiveTermSearches: HTMLInputElement;
+    caseSensitiveMatches: HTMLInputElement;
 
     enableGoogle: HTMLInputElement;
     googleKey: HTMLInputElement;
@@ -174,7 +174,7 @@ class PreferencesDialog {
         this.electron.ipcRenderer.send('settings-height', { width: document.body.clientWidth, height: document.body.clientHeight });
     }
 
-    setPreferences(preferences: any): void {
+    setPreferences(preferences: Preferences): void {
         this.themeColor.value = preferences.theme;
         this.srcLangSelect.value = preferences.srcLang;
         this.tgtLangSelect.value = preferences.tgtLang;
@@ -187,7 +187,8 @@ class PreferencesDialog {
         this.acceptUnconfirmed.checked = preferences.acceptUnconfirmed;
         this.paragraphSegmentation.checked = preferences.paragraphSegmentation;
         this.fuzzyTermSearches.checked = preferences.fuzzyTermSearches;
-        this.caseSensitiveSearches.checked = preferences.caseSensitiveSearches;
+        this.caseSensitiveTermSearches.checked = preferences.caseSensitiveSearches;
+        this.caseSensitiveMatches.checked = preferences.caseSensitiveMatches;
 
         this.enableGoogle.checked = preferences.google.enabled;
         this.googleKey.value = preferences.google.apiKey;
@@ -338,7 +339,7 @@ class PreferencesDialog {
             return;
         }
 
-        let prefs: any = {
+        let prefs: Preferences = {
             srcLang: this.srcLangSelect.value,
             tgtLang: this.tgtLangSelect.value,
             theme: this.themeColor.value,
@@ -351,7 +352,8 @@ class PreferencesDialog {
             paragraphSegmentation: this.paragraphSegmentation.checked,
             acceptUnconfirmed: this.acceptUnconfirmed.checked,
             fuzzyTermSearches: this.fuzzyTermSearches.checked,
-            caseSensitiveSearches: this.caseSensitiveSearches.checked,
+            caseSensitiveSearches: this.caseSensitiveTermSearches.checked,
+            caseSensitiveMatches: this.caseSensitiveMatches.checked,
             google: {
                 enabled: this.enableGoogle.checked,
                 apiKey: this.googleKey.value,
@@ -823,10 +825,10 @@ class PreferencesDialog {
         row4.classList.add('middle');
         container.appendChild(row4);
 
-        this.caseSensitiveSearches = document.createElement('input');
-        this.caseSensitiveSearches.type = 'checkbox';
-        this.caseSensitiveSearches.id = 'caseSensitiveSearches';
-        row4.appendChild(this.caseSensitiveSearches);
+        this.caseSensitiveTermSearches = document.createElement('input');
+        this.caseSensitiveTermSearches.type = 'checkbox';
+        this.caseSensitiveTermSearches.id = 'caseSensitiveSearches';
+        row4.appendChild(this.caseSensitiveTermSearches);
 
         let caseSensitiveLabel: HTMLLabelElement = document.createElement('label');
         caseSensitiveLabel.innerText = 'Case Sensitive Term Searches';
@@ -834,6 +836,21 @@ class PreferencesDialog {
         caseSensitiveLabel.style.marginTop = '4px';
         row4.appendChild(caseSensitiveLabel);
 
+        let row5: HTMLDivElement = document.createElement('div');
+        row5.classList.add('row');
+        row5.classList.add('middle');
+        container.appendChild(row5);
+
+        this.caseSensitiveMatches = document.createElement('input');
+        this.caseSensitiveMatches.type = 'checkbox';
+        this.caseSensitiveMatches.id = 'caseSensitiveMatches';
+        row5.appendChild(this.caseSensitiveMatches);
+
+        let caseSensitiveMatchesLabel: HTMLLabelElement = document.createElement('label');
+        caseSensitiveMatchesLabel.innerText = 'Case Sensitive TM Matches';
+        caseSensitiveMatchesLabel.setAttribute('for', 'caseSensitiveMatches');
+        caseSensitiveMatchesLabel.style.marginTop = '4px';
+        row5.appendChild(caseSensitiveMatchesLabel);
     }
 
     populateXmlFilterTab(container: HTMLDivElement): void {
@@ -1299,7 +1316,7 @@ class PreferencesDialog {
         td = document.createElement('td');
         td.classList.add('middle');
         td.classList.add('fill_width');
-        td.innerHTML = '<select id="chatGPTModel" class="table_select"><option value="Davinci">Davinci</option><option value="Curie">Curie</option><option value="Babbage">Babbage</option><option value="Ada">Ada</option></select>';
+        td.innerHTML = '<select id="chatGPTModel" class="table_select"><option value="gpt-3.5-turbo-instruct">gpt-3.5-turbo-instruct</option></select>';
         tr.appendChild(td);
 
         this.enableChatGPT = document.getElementById('enableChatGPT') as HTMLInputElement;

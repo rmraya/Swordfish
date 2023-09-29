@@ -125,7 +125,8 @@ public class XliffStore {
     private static String catalog;
     private static boolean acceptUnconfirmed;
     private static boolean fuzzyTermSearches;
-    private static boolean caseSensitiveSearches;
+    private static boolean caseSensitiveTermSearches;
+    private static boolean caseSensitiveMatches;
 
     private int index;
     private int nextId;
@@ -871,7 +872,8 @@ public class XliffStore {
     private static void getPreferences() throws IOException {
         JSONObject json = TmsServer.getPreferences();
         acceptUnconfirmed = json.getBoolean("acceptUnconfirmed");
-        caseSensitiveSearches = json.getBoolean("caseSensitiveSearches");
+        caseSensitiveTermSearches = json.getBoolean("caseSensitiveSearches");
+        caseSensitiveMatches = json.has("caseSensitiveMatches") ? json.getBoolean("caseSensitiveMatches") : true;
         fuzzyTermSearches = json.getBoolean("fuzzyTermSearches");
         catalog = json.getString("catalog");
     }
@@ -947,29 +949,25 @@ public class XliffStore {
         result.put("spaceErrors", spaceErrors);
 
         if (!memory.equals(Constants.NONE) && !pureTarget.isBlank() && confirm) {
-            Thread thread = new Thread() {
-                @Override
-                public void run() {
-                    try {
-                        StringBuilder key = new StringBuilder();
-                        key.append(xliffFile.hashCode());
-                        key.append('-');
-                        key.append(file);
-                        key.append('-');
-                        key.append(unit);
-                        key.append('-');
-                        key.append(segment);
-                        MemoriesHandler.open(memory);
-                        ITmEngine engine = MemoriesHandler.getEngine(memory);
-                        engine.storeTu(XliffUtils.toTu(key.toString(), source, target, tags, srcLang, tgtLang));
-                        engine.commit();
-                        MemoriesHandler.close(memory);
-                    } catch (IOException | SQLException e) {
-                        logger.log(Level.ERROR, e);
-                    }
+            new Thread(() -> {
+                try {
+                    StringBuilder key = new StringBuilder();
+                    key.append(xliffFile.hashCode());
+                    key.append('-');
+                    key.append(file);
+                    key.append('-');
+                    key.append(unit);
+                    key.append('-');
+                    key.append(segment);
+                    MemoriesHandler.open(memory);
+                    ITmEngine engine = MemoriesHandler.getEngine(memory);
+                    engine.storeTu(XliffUtils.toTu(key.toString(), source, target, tags, srcLang, tgtLang));
+                    engine.commit();
+                    MemoriesHandler.close(memory);
+                } catch (IOException | SQLException e) {
+                    logger.log(Level.ERROR, e);
                 }
-            };
-            thread.start();
+            }).start();
         }
         return result;
     }
@@ -2326,7 +2324,6 @@ public class XliffStore {
                 String pure = TMUtils.getString(rs.getNCharacterStream(4));
                 try {
                     List<Match> tmMatches = tmEngine.searchTranslation(pure, srcLang, tgtLang, 60, false);
-
                     Match match = MatchAssembler.assembleMatch(pure, tmMatches, glossEngine, srcLang, tgtLang);
                     if (match != null) {
                         Element matchSource = match.getSource();
@@ -2374,7 +2371,7 @@ public class XliffStore {
         String memoryName = MemoriesHandler.getName(memory);
         MemoriesHandler.open(memory);
         ITmEngine engine = MemoriesHandler.getEngine(memory);
-        List<Match> matches = engine.searchTranslation(pure, srcLang, tgtLang, 60, false);
+        List<Match> matches = engine.searchTranslation(pure, srcLang, tgtLang, 60, caseSensitiveMatches);
         for (int i = 0; i < matches.size(); i++) {
             Match m = matches.get(i);
             XliffUtils.setTags(new JSONObject());
@@ -3490,7 +3487,7 @@ public class XliffStore {
                     String term = termBuilder.toString().trim();
                     if (!visited.containsKey(term)) {
                         visited.put(term, "");
-                        List<Element> res = engine.searchAll(term, srcLang, similarity, caseSensitiveSearches);
+                        List<Element> res = engine.searchAll(term, srcLang, similarity, caseSensitiveTermSearches);
                         List<Term> array = parseMatches(res, glossaryName);
                         for (int h = 0; h < array.size(); h++) {
                             Term candidate = array.get(h);
@@ -3561,7 +3558,7 @@ public class XliffStore {
                                 if (!visited.containsKey(term)) {
                                     visited.put(term, "");
                                     List<Element> res = engine.searchAll(term, srcLang, similarity,
-                                            caseSensitiveSearches);
+                                            caseSensitiveTermSearches);
                                     List<Term> array = parseMatches(res, glossaryName);
                                     for (int h = 0; h < array.size(); h++) {
                                         Term candidate = array.get(h);

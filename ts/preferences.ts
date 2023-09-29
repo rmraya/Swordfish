@@ -10,7 +10,7 @@
  *     Maxprograms - initial API and implementation
  *******************************************************************************/
 
-export class Preferences {
+class Preferences {
     theme: string;
     zoomFactor: string;
     srcLang: string;
@@ -24,6 +24,7 @@ export class Preferences {
     acceptUnconfirmed: boolean;
     fuzzyTermSearches: boolean;
     caseSensitiveSearches: boolean;
+    caseSensitiveMatches: boolean;
     google: {
         enabled: boolean;
         apiKey: string;

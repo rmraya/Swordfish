@@ -17,11 +17,15 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import com.maxprograms.languages.Language;
-import com.maxprograms.languages.LanguageUtils;
+import javax.xml.parsers.ParserConfigurationException;
 
 import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
+import org.xml.sax.SAXException;
+
+import com.maxprograms.languages.Language;
+import com.maxprograms.languages.LanguageUtils;
 
 public class MTUtils {
 
@@ -127,7 +131,7 @@ public class MTUtils {
                         "hu", "id", "it", "ja", "ko", "lt", "lv", "nb", "nl", "pl", "pt-BR", "pt-PT", "ro", "ru", "sk",
                         "sl", "sv", "tr", "uk", "zh" };
 
-        public static JSONObject getMTLanguages() throws IOException {
+        public static JSONObject getMTLanguages() throws IOException, JSONException, SAXException, ParserConfigurationException {
                 JSONObject result = new JSONObject();
 
                 JSONObject google = new JSONObject();
@@ -156,7 +160,8 @@ public class MTUtils {
                 return result;
         }
 
-        private static JSONArray getLanguages(String[] langs) throws IOException {
+        private static JSONArray getLanguages(String[] langs)
+                        throws IOException, SAXException, ParserConfigurationException {
                 JSONArray array = new JSONArray();
                 List<Language> languages = new ArrayList<>();
                 for (int i = 0; i < langs.length; i++) {

@@ -150,17 +150,8 @@ public class MT {
             chatGptEnabled = chatGptOption.getBoolean("enabled");
             chatGptKey = chatGptOption.getString("apiKey");
             switch (chatGptOption.getString("model")) {
-                case "Davinci":
-                    model = ChatGptTranslator.DAVINCI;
-                    break;
-                case "Curie":
-                    model = ChatGptTranslator.CURIE;
-                    break;
-                case "Babbage":
-                    model = ChatGptTranslator.BABBAGE;
-                    break;
-                case "Ada":
-                    model = ChatGptTranslator.ADA;
+                case "gpt-3.5-turbo-instruct":
+                    model = ChatGptTranslator.TURBO_INSTRUCT;
                     break;
                 default:
                     MessageFormat mf = new MessageFormat("Invalid ChatGPT model: {0}");
