@@ -1589,7 +1589,7 @@ class TranslationView {
         }
     }
 
-    setMatches(matches: any[]): void {
+    setMatches(matches: Match[]): void {
         this.tmMatches.clear();
         this.mtMatches.clear();
         let length: number = matches.length;

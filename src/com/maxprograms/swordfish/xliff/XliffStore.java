@@ -2429,6 +2429,7 @@ public class XliffStore {
             try (ResultSet rs = prepared.executeQuery()) {
                 params.put("srcLang", srcLang);
                 params.put("tgtLang", tgtLang);
+                params.put("caseSensitiveMatches", caseSensitiveMatches);
                 while (rs.next()) {
                     String file = rs.getString(1);
                     String unit = rs.getString(2);

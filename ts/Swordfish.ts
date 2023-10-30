@@ -5303,7 +5303,7 @@ class Swordfish {
         if (process.platform === 'darwin' && app.runningUnderARM64Translation) {
             Swordfish.showMessage({
                 type: 'warning',
-                message: 'You are running a version for Macs with Intel processors on a Mac with Apple M1 chipset.'
+                message: 'You are running a version for Macs with Intel processors on a Mac with Apple chipset.'
             });
         }
     }

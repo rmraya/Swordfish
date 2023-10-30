@@ -695,9 +695,10 @@ public class InternalDatabase implements ITmEngine {
 		String srcLang = params.getString("srcLang");
 		String tgtLang = params.getString("tgtLang");
 		JSONArray segments = params.getJSONArray("segments");
+		boolean caseSensitiveMatches = params.getBoolean("caseSensitiveMatches");
 		for (int i = 0; i < segments.length(); i++) {
 			JSONObject json = segments.getJSONObject(i);
-			List<Match> matches = searchTranslation(json.getString("pure"), srcLang, tgtLang, 60, false);
+			List<Match> matches = searchTranslation(json.getString("pure"), srcLang, tgtLang, 60, caseSensitiveMatches);
 			JSONArray array = new JSONArray();
 			for (int j = 0; j < matches.size(); j++) {
 				array.put(matches.get(j).toJSON());
