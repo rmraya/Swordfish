@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2023 Maxprograms.
+ * Copyright (c) 2007 - 2024 Maxprograms.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 1.0
@@ -16,6 +16,8 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
@@ -23,6 +25,7 @@ import java.util.Base64;
 import javax.net.ssl.HttpsURLConnection;
 
 import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 
 public class RemoteUtils {
@@ -31,7 +34,7 @@ public class RemoteUtils {
         // empty for security
     }
 
-    public static JSONObject remoteDatabases(String request) {
+    public static JSONObject remoteDatabases(String request) throws JSONException, URISyntaxException {
         JSONObject result = new JSONObject();
         JSONObject json = new JSONObject(request);
         try {
@@ -45,8 +48,8 @@ public class RemoteUtils {
         return result;
     }
 
-    public static JSONArray getRemoteMemories(String server, String ticket) throws IOException {
-        URL serverUrl = new URL(server + "/memories");
+    public static JSONArray getRemoteMemories(String server, String ticket) throws IOException, URISyntaxException {
+        URL serverUrl = new URI(server + "/memories").toURL();
         HttpsURLConnection connection = (HttpsURLConnection) serverUrl.openConnection();
         connection.setRequestMethod("GET");
         connection.setRequestProperty("Session", ticket);
@@ -69,11 +72,11 @@ public class RemoteUtils {
         throw new IOException(result.getString(Constants.REASON));
     }
 
-    public static String getTicket(String server, String user, String password) throws IOException {
+    public static String getTicket(String server, String user, String password) throws IOException, URISyntaxException {
         if (server.endsWith("/")) {
             server = server.substring(0, server.length() - 1);
         }
-        URL serverUrl = new URL(server + "/remote");
+        URL serverUrl = new URI(server + "/remote").toURL();
         HttpsURLConnection connection = (HttpsURLConnection) serverUrl.openConnection();
         connection.setRequestMethod("GET");
         connection.setRequestProperty("Accept", "application/json");

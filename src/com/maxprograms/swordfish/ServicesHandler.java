@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2023 Maxprograms.
+ * Copyright (c) 2007 - 2024 Maxprograms.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 1.0
@@ -40,7 +40,6 @@ import java.util.TreeSet;
 import javax.xml.parsers.ParserConfigurationException;
 
 import org.json.JSONArray;
-import org.json.JSONException;
 import org.json.JSONObject;
 import org.xml.sax.SAXException;
 
@@ -49,7 +48,6 @@ import com.maxprograms.converters.FileFormats;
 import com.maxprograms.languages.Language;
 import com.maxprograms.languages.LanguageUtils;
 import com.maxprograms.swordfish.models.Memory;
-import com.maxprograms.swordfish.mt.MTUtils;
 import com.maxprograms.xml.Attribute;
 import com.maxprograms.xml.Catalog;
 import com.maxprograms.xml.Document;
@@ -111,8 +109,6 @@ public class ServicesHandler implements HttpHandler {
                 result = getSubjects();
             } else if ("/services/getProjects".equals(url)) {
                 result = getProjects();
-            } else if ("/services/getMTLanguages".equals(url)) {
-                result = getMTLanguages();
             } else if ("/services/getSpellingLanguages".equals(url)) {
                 result = getSpellingLanguages(request);
             } else if ("/services/remoteDatabases".equals(url)) {
@@ -473,17 +469,6 @@ public class ServicesHandler implements HttpHandler {
             result.put("languages", array);
         } catch (SAXException | IOException | ParserConfigurationException e) {
             logger.log(Level.ERROR, "Error getting languages", e);
-            result.put(Constants.REASON, e.getMessage());
-        }
-        return result;
-    }
-
-    private static JSONObject getMTLanguages() {
-        JSONObject result = new JSONObject();
-        try {
-            result = MTUtils.getMTLanguages();
-        } catch (IOException | JSONException | SAXException | ParserConfigurationException e) {
-            logger.log(Level.ERROR, "Error getting MT languages", e);
             result.put(Constants.REASON, e.getMessage());
         }
         return result;

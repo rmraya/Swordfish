@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2023 Maxprograms.
+ * Copyright (c) 2007 - 2024 Maxprograms.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 1.0
@@ -20,6 +20,7 @@ import java.io.OutputStream;
 import java.lang.System.Logger;
 import java.lang.System.Logger.Level;
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.sql.SQLException;
@@ -38,6 +39,7 @@ import java.util.regex.PatternSyntaxException;
 import javax.xml.parsers.ParserConfigurationException;
 
 import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 import org.xml.sax.SAXException;
 
@@ -157,7 +159,7 @@ public class MemoriesHandler implements HttpHandler {
 				completed.put("languages", array);
 				completed.put(Constants.PROGRESS, Constants.COMPLETED);
 				openTasks.put(process, completed);
-			} catch (IOException | SQLException e) {
+			} catch (IOException | SQLException | URISyntaxException e) {
 				logger.log(Level.ERROR, e.getMessage(), e);
 				JSONObject error = new JSONObject();
 				error.put(Constants.REASON, e.getMessage());
@@ -228,7 +230,7 @@ public class MemoriesHandler implements HttpHandler {
 				result.put("html", generateHTML(matches, searchStr, isRegexp, caseSensitive));
 				result.put(Constants.PROGRESS, Constants.COMPLETED);
 				openTasks.put(process, result);
-			} catch (IOException | SAXException | ParserConfigurationException | SQLException e) {
+			} catch (IOException | SAXException | ParserConfigurationException | SQLException | URISyntaxException e) {
 				logger.log(Level.ERROR, e.getMessage(), e);
 				JSONObject error = new JSONObject();
 				error.put(Constants.REASON, e.getMessage());
@@ -287,7 +289,7 @@ public class MemoriesHandler implements HttpHandler {
 					logger.log(Level.ERROR, e.getMessage(), e);
 				}
 				close(memory);
-			} catch (IOException | SQLException e) {
+			} catch (IOException | SQLException | URISyntaxException e) {
 				logger.log(Level.ERROR, e.getMessage(), e);
 				JSONObject error = new JSONObject();
 				error.put(Constants.REASON, e.getMessage());
@@ -342,7 +344,7 @@ public class MemoriesHandler implements HttpHandler {
 				JSONObject completed = new JSONObject();
 				completed.put(Constants.PROGRESS, Constants.COMPLETED);
 				openTasks.put(process, completed);
-			} catch (IOException | SAXException | ParserConfigurationException | SQLException e) {
+			} catch (IOException | SAXException | ParserConfigurationException | SQLException | JSONException | URISyntaxException e) {
 				logger.log(Level.ERROR, e.getMessage(), e);
 				JSONObject error = new JSONObject();
 				error.put(Constants.REASON, e.getMessage());
@@ -382,7 +384,7 @@ public class MemoriesHandler implements HttpHandler {
 					JSONObject completed = new JSONObject();
 					completed.put(Constants.PROGRESS, Constants.COMPLETED);
 					openTasks.put(process, completed);
-				} catch (IOException | SQLException e) {
+				} catch (IOException | SQLException | URISyntaxException e) {
 					logger.log(Level.ERROR, e.getMessage(), e);
 					JSONObject error = new JSONObject();
 					error.put(Constants.REASON, e.getMessage());
@@ -502,7 +504,7 @@ public class MemoriesHandler implements HttpHandler {
 		return home.getAbsolutePath();
 	}
 
-	public static synchronized void open(String id) throws IOException, SQLException {
+	public static synchronized void open(String id) throws IOException, SQLException, URISyntaxException {
 		if (memories == null) {
 			loadMemoriesList();
 		}
@@ -514,14 +516,14 @@ public class MemoriesHandler implements HttpHandler {
 		}
 	}
 
-	public static synchronized void close(String id) throws IOException, SQLException {
+	public static synchronized void close(String id) throws IOException, SQLException, URISyntaxException {
 		if (engines != null && engines.containsKey(id)) {
 			engines.get(id).close();
 			engines.remove(id);
 		}
 	}
 
-	public static synchronized void closeAll() throws IOException, SQLException {
+	public static synchronized void closeAll() throws IOException, SQLException, URISyntaxException {
 		Set<String> keys = engines.keySet();
 		Iterator<String> it = keys.iterator();
 		while (it.hasNext()) {
@@ -533,7 +535,7 @@ public class MemoriesHandler implements HttpHandler {
 		}
 	}
 
-	public static ITmEngine getEngine(String id) throws IOException, SQLException {
+	public static ITmEngine getEngine(String id) throws IOException, SQLException, URISyntaxException {
 		if (memories == null) {
 			loadMemoriesList();
 		}

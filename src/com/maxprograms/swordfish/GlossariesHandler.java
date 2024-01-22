@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2023 Maxprograms.
+ * Copyright (c) 2007 - 2024 Maxprograms.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 1.0
@@ -245,7 +245,7 @@ public class GlossariesHandler implements HttpHandler {
 					JSONObject completed = new JSONObject();
 					completed.put(Constants.PROGRESS, Constants.COMPLETED);
 					openTasks.put(process, completed);
-				} catch (IOException | SQLException e) {
+				} catch (IOException | SQLException | URISyntaxException e) {
 					logger.log(Level.ERROR, e.getMessage(), e);
 					JSONObject error = new JSONObject();
 					error.put(Constants.REASON, e.getMessage());
@@ -311,7 +311,7 @@ public class GlossariesHandler implements HttpHandler {
 				JSONObject completed = new JSONObject();
 				completed.put(Constants.PROGRESS, Constants.COMPLETED);
 				openTasks.put(process, completed);
-			} catch (IOException | JSONException | SAXException | ParserConfigurationException | SQLException e) {
+			} catch (IOException | JSONException | SAXException | ParserConfigurationException | SQLException | URISyntaxException e) {
 				logger.log(Level.ERROR, e.getMessage(), e);
 				JSONObject error = new JSONObject();
 				error.put(Constants.REASON, e.getMessage());
@@ -322,14 +322,14 @@ public class GlossariesHandler implements HttpHandler {
 		return result;
 	}
 
-	public static synchronized void openGlossary(String id) throws IOException, SQLException {
+	public static synchronized void openGlossary(String id) throws IOException, SQLException, URISyntaxException {
 		if (glossaries == null) {
 			loadGlossariesList();
 		}
 		openGlossary(glossaries.get(id));
 	}
 
-	public static synchronized void openGlossary(Memory memory) throws IOException, SQLException {
+	public static synchronized void openGlossary(Memory memory) throws IOException, SQLException, URISyntaxException {
 		if (glossaries == null) {
 			loadGlossariesList();
 		}
@@ -338,7 +338,7 @@ public class GlossariesHandler implements HttpHandler {
 		engines.put(memory.getId(), engine);
 	}
 
-	public static ITmEngine getEngine(String id) throws IOException, SQLException {
+	public static ITmEngine getEngine(String id) throws IOException, SQLException, URISyntaxException {
 		if (glossaries == null) {
 			loadGlossariesList();
 		}
@@ -349,14 +349,14 @@ public class GlossariesHandler implements HttpHandler {
 
 	}
 
-	public static synchronized void closeGlossary(String id) throws IOException, SQLException {
+	public static synchronized void closeGlossary(String id) throws IOException, SQLException, URISyntaxException {
 		if (engines != null && engines.containsKey(id)) {
 			engines.get(id).close();
 			engines.remove(id);
 		}
 	}
 
-	public static synchronized void closeAll() throws IOException, SQLException {
+	public static synchronized void closeAll() throws IOException, SQLException, URISyntaxException {
 		Set<String> keys = engines.keySet();
 		Iterator<String> it = keys.iterator();
 		while (it.hasNext()) {
@@ -516,7 +516,7 @@ public class GlossariesHandler implements HttpHandler {
 			engine.storeTu(tu);
 			engine.commit();
 			closeGlossary(glossary);
-		} catch (IOException | SQLException e) {
+		} catch (IOException | SQLException | URISyntaxException e) {
 			logger.log(Level.ERROR, e);
 			result.put("result", Constants.ERROR);
 			result.put(Constants.REASON, e.getMessage());
@@ -543,7 +543,7 @@ public class GlossariesHandler implements HttpHandler {
 			closeGlossary(glossary);
 			result.put("count", matches.size());
 			result.put("html", generateHTML(matches));
-		} catch (IOException | SAXException | ParserConfigurationException | SQLException e) {
+		} catch (IOException | SAXException | ParserConfigurationException | SQLException | URISyntaxException e) {
 			logger.log(Level.ERROR, e);
 			result.put("result", Constants.ERROR);
 			result.put(Constants.REASON, e.getMessage());

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2023 Maxprograms.
+ * Copyright (c) 2007 - 2024 Maxprograms.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 1.0
@@ -45,6 +45,7 @@ import java.util.zip.DataFormatException;
 import javax.xml.parsers.ParserConfigurationException;
 
 import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 import org.jsoup.Jsoup;
 import org.xml.sax.SAXException;
@@ -61,7 +62,6 @@ import com.maxprograms.swordfish.MemoriesHandler;
 import com.maxprograms.swordfish.TmsServer;
 import com.maxprograms.swordfish.am.MatchAssembler;
 import com.maxprograms.swordfish.am.Term;
-import com.maxprograms.swordfish.mt.MT;
 import com.maxprograms.swordfish.tm.ITmEngine;
 import com.maxprograms.swordfish.tm.Match;
 import com.maxprograms.swordfish.tm.MatchQuality;
@@ -873,7 +873,10 @@ public class XliffStore {
         JSONObject json = TmsServer.getPreferences();
         acceptUnconfirmed = json.getBoolean("acceptUnconfirmed");
         caseSensitiveTermSearches = json.getBoolean("caseSensitiveSearches");
-        caseSensitiveMatches = json.has("caseSensitiveMatches") ? json.getBoolean("caseSensitiveMatches") : true;
+        caseSensitiveMatches =  true;
+        if (json.has("caseSensitiveMatches")) {
+            caseSensitiveMatches = json.getBoolean("caseSensitiveMatches");
+        }
         fuzzyTermSearches = json.getBoolean("fuzzyTermSearches");
         catalog = json.getString("catalog");
     }
@@ -964,7 +967,7 @@ public class XliffStore {
                     engine.storeTu(XliffUtils.toTu(key.toString(), source, target, tags, srcLang, tgtLang));
                     engine.commit();
                     MemoriesHandler.close(memory);
-                } catch (IOException | SQLException e) {
+                } catch (IOException | SQLException | URISyntaxException e) {
                     logger.log(Level.ERROR, e);
                 }
             }).start();
@@ -2231,42 +2234,8 @@ public class XliffStore {
         return glossary.getChildren().isEmpty() ? null : glossary;
     }
 
-    public JSONArray machineTranslate(JSONObject json, MT translator) throws SQLException, IOException,
-            InterruptedException, SAXException, ParserConfigurationException, DataFormatException {
-        String file = json.getString("file");
-        String unit = json.getString("unit");
-        String segment = json.getString("segment");
-
-        String sourceText = "";
-        getSource.setString(1, file);
-        getSource.setString(2, unit);
-        getSource.setString(3, segment);
-        try (ResultSet rs = getSource.executeQuery()) {
-            while (rs.next()) {
-                sourceText = TMUtils.getString(rs.getNCharacterStream(2));
-            }
-        }
-        Element source = XliffUtils.buildElement("<source>" + XMLUtils.cleanText(sourceText) + "</source>");
-        JSONObject tagsData = new JSONObject();
-        translator.setProjectSourceLanguage(srcLang);
-        translator.setProjectTargetLanguage(tgtLang);
-        List<JSONObject> translations = translator.translate(sourceText);
-        Iterator<JSONObject> it = translations.iterator();
-        while (it.hasNext()) {
-            JSONObject translation = it.next();
-            String origin = translation.getString("key");
-            source.setAttribute("xml:lang", translation.getString("srcLang"));
-            String targetText = "<target>" + XMLUtils.cleanText(translation.getString("target")) + "</target>";
-            Element target = XliffUtils.buildElement(targetText);
-            target.setAttribute("xml:lang", translation.getString("tgtLang"));
-            insertMatch(file, unit, segment, origin, Constants.MT, 0, source, target, tagsData);
-        }
-        conn.commit();
-        return getTaggedtMatches(json);
-    }
-
     public void assembleMatches(JSONObject json)
-            throws SAXException, IOException, ParserConfigurationException, SQLException {
+            throws SAXException, IOException, ParserConfigurationException, SQLException, URISyntaxException {
         String file = json.getString("file");
         String unit = json.getString("unit");
         String segment = json.getString("segment");
@@ -2305,7 +2274,7 @@ public class XliffStore {
     }
 
     public void assembleMatchesAll(JSONObject json)
-            throws IOException, SQLException, SAXException, ParserConfigurationException {
+            throws IOException, SQLException, SAXException, ParserConfigurationException, URISyntaxException {
 
         String memory = json.getString("memory");
         MemoriesHandler.open(memory);
@@ -2350,7 +2319,8 @@ public class XliffStore {
     }
 
     public JSONArray tmTranslate(JSONObject json)
-            throws SAXException, IOException, ParserConfigurationException, SQLException, DataFormatException {
+            throws SAXException, IOException, ParserConfigurationException, SQLException, DataFormatException,
+            URISyntaxException {
         String file = json.getString("file");
         String unit = json.getString("unit");
         String segment = json.getString("segment");
@@ -2390,7 +2360,7 @@ public class XliffStore {
     }
 
     public int tmTranslateAll(String memory, int penalization, Map<String, JSONObject> processes, String processId)
-            throws IOException, SQLException, SAXException, ParserConfigurationException {
+            throws IOException, SQLException, SAXException, ParserConfigurationException, URISyntaxException {
         String memoryName = MemoriesHandler.getName(memory);
         MemoriesHandler.open(memory);
         ITmEngine engine = MemoriesHandler.getEngine(memory);
@@ -2420,7 +2390,7 @@ public class XliffStore {
     }
 
     private synchronized int translateBatch(int offset, ITmEngine engine, String memoryName, int penalization)
-            throws IOException, SQLException, SAXException, ParserConfigurationException {
+            throws IOException, SQLException, SAXException, ParserConfigurationException, URISyntaxException {
         String sql = "SELECT file, unitId, segId, source, sourceText, target FROM segments WHERE type = 'S' AND state <> 'final' OFFSET ?";
         JSONObject params = new JSONObject();
         JSONArray array = new JSONArray();
@@ -2625,7 +2595,7 @@ public class XliffStore {
     }
 
     public void confirmAllTranslations(String memory)
-            throws SQLException, SAXException, IOException, ParserConfigurationException {
+            throws SQLException, SAXException, IOException, ParserConfigurationException, URISyntaxException {
         if (memory.equals(Constants.NONE)) {
             stmt.execute("UPDATE segments SET state='final' WHERE type='S' AND targetText<>'' AND translate='Y' ");
             conn.commit();
@@ -3361,32 +3331,47 @@ public class XliffStore {
         return target;
     }
 
-    public void applyMtAll(MT translator)
-            throws SQLException, SAXException, IOException, ParserConfigurationException, InterruptedException {
-        String sql = "SELECT file, unitId, segId, sourceText FROM segments WHERE type='S' AND (state='initial' OR targetText='') AND translate='Y' ";
-        try (ResultSet rs = stmt.executeQuery(sql)) {
-            while (rs.next()) {
-                String file = rs.getString(1);
-                String unit = rs.getString(2);
-                String segment = rs.getString(3);
-                String sourceText = TMUtils.getString(rs.getNCharacterStream(4));
+    public void applyMtAll(String projectId)
+            throws SQLException, SAXException, IOException, ParserConfigurationException {
+        File projectFolder = new File(TmsServer.getProjectsFolder(), projectId);
+        try (FileOutputStream out = new FileOutputStream(new File(projectFolder, "applymt.xlf"))) {
+            String oldFile = "";
+            String oldUnit = "";
+            out.write(("<xliff srcLang=\"" + this.srcLang + "\" tgtLang=\"" + this.tgtLang + "\">\n")
+                    .getBytes(StandardCharsets.UTF_8));
+            String sql = "SELECT file, unitId, segId, source FROM segments WHERE type='S' AND (state='initial' OR targetText='') AND translate='Y' ";
+            try (ResultSet rs = stmt.executeQuery(sql)) {
+                while (rs.next()) {
+                    String file = rs.getString(1);
+                    String unit = rs.getString(2);
+                    String segment = rs.getString(3);
+                    String sourceText = TMUtils.getString(rs.getNCharacterStream(4));
 
-                Element matchSource = XliffUtils
-                        .buildElement("<source>" + XMLUtils.cleanText(sourceText) + "</source>");
+                    Element matchSource = XliffUtils.buildElement(sourceText);
 
-                JSONObject tagsData = new JSONObject();
-                List<JSONObject> translations = translator.translate(sourceText);
-                Iterator<JSONObject> it = translations.iterator();
-                while (it.hasNext()) {
-                    JSONObject translation = it.next();
-                    String origin = translation.getString("key");
-                    matchSource.setAttribute("xml:lang", translation.getString("srcLang"));
-                    String targetText = "<target>" + XMLUtils.cleanText(translation.getString("target")) + "</target>";
-                    Element matchTarget = XliffUtils.buildElement(targetText);
-                    matchTarget.setAttribute("xml:lang", translation.getString("tgtLang"));
-                    insertMatch(file, unit, segment, origin, Constants.MT, 0, matchSource, matchTarget, tagsData);
+                    if (!oldFile.equals(file)) {
+                        if (!oldFile.isEmpty()) {
+                            out.write("</file>\n".getBytes(StandardCharsets.UTF_8));
+                        }
+                        oldFile = file;
+                        out.write(("<file id=\"" + file + "\">\n").getBytes(StandardCharsets.UTF_8));
+                    }
+                    if (!oldUnit.equals(unit)) {
+                        if (!oldUnit.isEmpty()) {
+                            out.write("</unit>\n".getBytes(StandardCharsets.UTF_8));
+                        }
+                        oldUnit = unit;
+                        out.write(("<unit id=\"" + unit + "\">\n").getBytes(StandardCharsets.UTF_8));
+                    }
+                    Element seg = new Element("segment");
+                    seg.setAttribute("id", segment);
+                    seg.addContent(matchSource);
+                    out.write(seg.toString().getBytes(StandardCharsets.UTF_8));
+                    out.write("\n".getBytes(StandardCharsets.UTF_8));
                 }
-                conn.commit();
+                out.write("</unit>\n".getBytes(StandardCharsets.UTF_8));
+                out.write("</file>\n".getBytes(StandardCharsets.UTF_8));
+                out.write(("</xliff>").getBytes(StandardCharsets.UTF_8));
             }
         }
     }
@@ -3451,7 +3436,7 @@ public class XliffStore {
     }
 
     public JSONArray getSegmentTerms(JSONObject json)
-            throws SQLException, IOException, SAXException, ParserConfigurationException {
+            throws SQLException, IOException, SAXException, ParserConfigurationException, URISyntaxException {
         JSONArray result = new JSONArray();
 
         getPreferences();
@@ -3527,7 +3512,7 @@ public class XliffStore {
     }
 
     public int getProjectTerms(String glossary)
-            throws IOException, SQLException, SAXException, ParserConfigurationException {
+            throws IOException, SQLException, SAXException, ParserConfigurationException, URISyntaxException {
         getPreferences();
         Language sourceLanguage = LanguageUtils.getLanguage(srcLang);
         int similarity = fuzzyTermSearches ? 70 : 100;
@@ -4422,5 +4407,39 @@ public class XliffStore {
             }
         }
         conn.commit();
+    }
+
+    public JSONObject getSegmentSource(JSONObject json)
+            throws JSONException, SQLException, SAXException, IOException, ParserConfigurationException {
+        getSource.setString(1, json.getString("file"));
+        getSource.setString(2, json.getString("unit"));
+        getSource.setString(3, json.getString("segment"));
+        String src = "";
+        try (ResultSet rs = getSource.executeQuery()) {
+            while (rs.next()) {
+                src = TMUtils.getString(rs.getNCharacterStream(1));
+            }
+        }
+        Element source = XliffUtils.buildElement(src);
+        String plainText = XliffUtils.pureText(source);
+        JSONObject result = new JSONObject();
+        result.put("source", source.toString());
+        result.put("plainText", "<source>" + plainText + "</source>");
+        return result;
+    }
+
+    public void setMTMatches(JSONObject json)
+            throws SQLException, IOException, JSONException, SAXException, ParserConfigurationException {
+        String file = json.getString("file");
+        String unit = json.getString("unit");
+        String segment = json.getString("segment");
+        JSONArray translations = json.getJSONArray("translations");
+        for (int i = 0; i < translations.length(); i++) {
+            JSONObject translation = translations.getJSONObject(i);
+            Element source = XliffUtils.buildElement(translation.getString("source"));
+            Element target = XliffUtils.buildElement(translation.getString("target"));
+            String origin = translation.getString("origin");
+            insertMatch(file, unit, segment, origin, Constants.MT, 0, source, target, new JSONObject());
+        }
     }
 }

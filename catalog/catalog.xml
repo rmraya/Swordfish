@@ -24,6 +24,7 @@
 	<system systemId="xliff-core-1.2-transitional.xsd" uri="xliff/xliff-core-1.2-transitional.xsd" />
 	<nextCatalog catalog="xliff2.0/catalog.xml" />
 	<nextCatalog catalog="xliff2.1/catalog.xml" />
+	<nextCatalog catalog="xliff2.2/catalog.xml" />
 
 	<uri name="urn:lisa-metrics-tags" uri="gmx-v/gmx-v.xsd" />
 	<system systemId="http://www.xml-intl.com/dtd/GMX-V.xsd" uri="gmx-v/gmx-v.xsd" />
@@ -89,11 +90,77 @@
 	<system systemId="http://www.w3.org/TR/xhtml-modularization/DTD/xhtml-inlstyle-1.mod" uri="xhtml1.1/xhtml11-model-1.mod" />
 	<uri name="http://www.w3.org/1999/xhtml" uri="xhtml1.1/xhtml11-flat.dtd" />
 	<system systemId="xhtml11.dtd" uri="xhtml1.1/xhtml11-flat.dtd" />
+	<public publicId="-//W3C//ENTITIES XHTML Modular Framework 1.0//EN" uri="xhtml1.1/xhtml-framework-1.mod" />
+	<uri name="http://www.w3.org/MarkUp/DTD/xhtml-framework-1.mod" uri="xhtml1.1/xhtml-framework-1.mod" />
+	<public publicId="-//W3C//ENTITIES XHTML Datatypes 1.0//EN" uri="xhtml1.1/xhtml-datatypes-1.mod" />
+	<uri name="http://www.w3.org/MarkUp/DTD/xhtml-datatypes-1.mod" uri="xhtml1.1/xhtml-datatypes-1.mod" />
+	<public publicId="-//W3C//ENTITIES XHTML Qualified Names 1.0//EN" uri="xhtml1.1/xhtml-qname-1.mod" />
+	<uri name="http://www.w3.org/MarkUp/DTD/xhtml-qname-1.mod" uri="xhtml1.1/xhtml-qname-1.mod" />
+	<public publicId="-//W3C//ENTITIES XHTML Common Attributes 1.0//EN" uri="xhtml1.1/xhtml-attribs-1.mod" />
+	<uri name="http://www.w3.org/MarkUp/DTD/xhtml-attribs-1.mod" uri="xhtml1.1/xhtml-attribs-1.mod" />
+	<public publicId="-//W3C//ENTITIES XHTML Intrinsic Events 1.0//EN" uri="xhtml1.1/xhtml-events-1.mod" />
+	<uri name="http://www.w3.org/MarkUp/DTD/xhtml-events-1.mod" uri="xhtml1.1/xhtml-events-1.mod" />
+	<public publicId="-//W3C//ENTITIES XHTML Character Entities 1.0//EN" uri="xhtml1.1/xhtml-charent-1.mod" />
+	<uri name="http://www.w3.org/MarkUp/DTD/xhtml-charent-1.mod" uri="xhtml1.1/xhtml-charent-1.mod" />
+	<public publicId="-//W3C//ELEMENTS XHTML Text 1.0//EN" uri="xhtml1.1/xhtml-text-1.mod" />
+	<uri name="http://www.w3.org/MarkUp/DTD/xhtml-text-1.mod" uri="xhtml1.1/xhtml-text-1.mod" />
+	<public publicId="-//W3C//ELEMENTS XHTML Inline Structural 1.0//EN" uri="xhtml1.1/xhtml-inlstruct-1.mod" />
+	<uri name="http://www.w3.org/MarkUp/DTD/xhtml-inlstruct-1.mod" uri="xhtml1.1/xhtml-inlstruct-1.mod" />
+	<public publicId="-//W3C//ELEMENTS XHTML Inline Phrasal 1.0//EN" uri="xhtml1.1/xhtml-inlphras-1.mod" />
+	<uri name="http://www.w3.org/MarkUp/DTD/xhtml-inlphras-1.mod" uri="xhtml1.1/xhtml-inlphras-1.mod" />
+	<public publicId="-//W3C//ELEMENTS XHTML Block Structural 1.0//EN" uri="xhtml1.1/xhtml-blkstruct-1.mod" />
+	<uri name="http://www.w3.org/MarkUp/DTD/xhtml-blkstruct-1.mod" uri="xhtml1.1/xhtml-blkstruct-1.mod" />
+	<public publicId="-//W3C//ELEMENTS XHTML Block Phrasal 1.0//EN" uri="xhtml1.1/xhtml-blkphras-1.mod" />
+	<uri name="http://www.w3.org/MarkUp/DTD/xhtml-blkphras-1.mod" uri="xhtml1.1/xhtml-blkphras-1.mod" />
+	<public publicId="-//W3C//ELEMENTS XHTML Hypertext 1.0//EN" uri="xhtml1.1/xhtml-hypertext-1.mod" />
+	<uri name="http://www.w3.org/MarkUp/DTD/xhtml-hypertext-1.mod" uri="xhtml1.1/xhtml-hypertext-1.mod" />
+	<public publicId="-//W3C//ELEMENTS XHTML Lists 1.0//EN" uri="xhtml1.1/xhtml-list-1.mod" />
+	<uri name="http://www.w3.org/MarkUp/DTD/xhtml-list-1.mod" uri="xhtml1.1/xhtml-list-1.mod" />
+	<public publicId="-//W3C//ELEMENTS XHTML Editing Markup 1.0//EN" uri="xhtml1.1/xhtml-edit-1.mod" />
+	<uri name="http://www.w3.org/MarkUp/DTD/xhtml-edit-1.mod" uri="xhtml1.1/xhtml-edit-1.mod" />
+	<public publicId="-//W3C//ELEMENTS XHTML BDO Element 1.0//EN" uri="xhtml1.1/xhtml-bdo-1.mod" />
+	<uri name="http://www.w3.org/MarkUp/DTD/xhtml-bdo-1.mod" uri="xhtml1.1/xhtml-bdo-1.mod" />
+	<public publicId="-//W3C//ELEMENTS XHTML Ruby 1.0//EN" uri="xhtml1.1/xhtml-ruby-1.mod" />
+	<uri name="http://www.w3.org/TR/ruby/xhtml-ruby-1.mod" uri="xhtml1.1/xhtml-ruby-1.mod" />
+	<public publicId="-//W3C//ELEMENTS XHTML Presentation 1.0//EN" uri="xhtml1.1/xhtml-pres-1.mod" />
+	<uri name="http://www.w3.org/MarkUp/DTD/xhtml-pres-1.mod" uri="xhtml1.1/xhtml-pres-1.mod" />
+	<public publicId="-//W3C//ELEMENTS XHTML Inline Presentation 1.0//EN" uri="xhtml1.1/xhtml-inlpres-1.mod" />
+	<uri name="http://www.w3.org/MarkUp/DTD/xhtml-inlpres-1.mod" uri="xhtml1.1/xhtml-inlpres-1.mod" />
+	<public publicId="-//W3C//ELEMENTS XHTML Block Presentation 1.0//EN" uri="xhtml1.1/xhtml-blkpres-1.mod" />
+	<uri name="http://www.w3.org/MarkUp/DTD/xhtml-blkpres-1.mod" uri="xhtml1.1/xhtml-blkpres-1.mod" />
+	<public publicId="-//W3C//ELEMENTS XHTML Link Element 1.0//EN" uri="xhtml1.1/xhtml-link-1.mod" />
+	<uri name="http://www.w3.org/MarkUp/DTD/xhtml-link-1.mod" uri="xhtml1.1/xhtml-link-1.mod" />
+	<public publicId="-//W3C//ELEMENTS XHTML Metainformation 1.0//EN" uri="xhtml1.1/xhtml-meta-1.mod" />
+	<uri name="http://www.w3.org/MarkUp/DTD/xhtml-meta-1.mod" uri="xhtml1.1/xhtml-meta-1.mod" />
+	<public publicId="-//W3C//ELEMENTS XHTML Base Element 1.0//EN" uri="xhtml1.1/xhtml-base-1.mod" />
+	<uri name="http://www.w3.org/MarkUp/DTD/xhtml-base-1.mod" uri="xhtml1.1/xhtml-base-1.mod" />
+	<public publicId="-//W3C//ELEMENTS XHTML Scripting 1.0//EN" uri="xhtml1.1/xhtml-script-1.mod" />
+	<uri name="http://www.w3.org/MarkUp/DTD/xhtml-script-1.mod" uri="xhtml1.1/xhtml-script-1.mod" />
+	<public publicId="-//W3C//DTD XHTML Style Sheets 1.0//EN" uri="xhtml1.1/xhtml-style-1.mod" />
+	<uri name="http://www.w3.org/MarkUp/DTD/xhtml-style-1.mod" uri="xhtml1.1/xhtml-style-1.mod" />
+	<public publicId="-//W3C//ELEMENTS XHTML Images 1.0//EN" uri="xhtml1.1/xhtml-image-1.mod" />
+	<uri name="http://www.w3.org/MarkUp/DTD/xhtml-image-1.mod" uri="xhtml1.1/xhtml-image-1.mod" />
+	<public publicId="-//W3C//ELEMENTS XHTML Client-side Image Maps 1.0//EN" uri="xhtml1.1//xhtml-csismap-1.mod" />
+	<uri name="http://www.w3.org/MarkUp/DTD/xhtml-csismap-1.mod" uri="xhtml1.1//xhtml-csismap-1.mod" />
+	<public publicId="-//W3C//ELEMENTS XHTML Server-side Image Maps 1.0//EN" uri="xhtml1.1/xhtml-ssismap-1.mod" />
+	<uri name="http://www.w3.org/MarkUp/DTD/xhtml-ssismap-1.mod" uri="xhtml1.1/xhtml-ssismap-1.mod" />
+	<public publicId="-//W3C//ELEMENTS XHTML Param Element 1.0//EN" uri="xhtml1.1/xhtml-param-1.mod" />
+	<uri name="http://www.w3.org/MarkUp/DTD/xhtml-param-1.mod" uri="xhtml1.1/xhtml-param-1.mod" />
+	<public publicId="-//W3C//ELEMENTS XHTML Embedded Object 1.0//EN" uri="xhtml1.1/xhtml-object-1.mod" />
+	<uri name="http://www.w3.org/MarkUp/DTD/xhtml-object-1.mod" uri="xhtml1.1/xhtml-object-1.mod" />
+	<public publicId="-//W3C//ELEMENTS XHTML Tables 1.0//EN" uri="xhtml1.1/xhtml-table-1.mod" />
+	<uri name="http://www.w3.org/MarkUp/DTD/xhtml-table-1.mod" uri="xhtml1.1/xhtml-table-1.mod" />
+	<public publicId="-//W3C//ELEMENTS XHTML Forms 1.0//EN" uri="xhtml1.1/xhtml-form-1.mod" />
+	<uri name="http://www.w3.org/MarkUp/DTD/xhtml-form-1.mod" uri="xhtml1.1/xhtml-form-1.mod" />
+	<public publicId="-//W3C//ELEMENTS XHTML Document Structure 1.0//EN" uri="xhtml1.1/xhtml-struct-1.mod" />
+	<uri name="http://www.w3.org/MarkUp/DTD/xhtml-struct-1.mod" uri="xhtml1.1/xhtml-struct-1.mod" />
+	<public publicId="-//W3C//NOTATIONS XHTML Notations 1.0//EN" uri="xhtml1.1/xhtml-notations-1.mod" />
+	<uri name="http://www.w3.org/MarkUp/DTD/xhtml-notations-1.mod" uri="xhtml1.1/xhtml-notations-1.mod" />
 
 	<public publicId="-//W3C//DTD SVG 1.0//EN" uri="svg/svg10.dtd" />
-	<system systemId="http://www.w3.org/TR/2001/REC-SVG-20010904/DTD/svg10.dtd" uri="svg/svg10.dtd" />
+	<uri name="http://www.w3.org/TR/2001/REC-SVG-20010904/DTD/svg10.dtd" uri="svg/svg10.dtd" />
 	<public publicId="-//W3C//DTD SVG 1.1//EN" uri="svg/svg11.dtd" />
-	<system systemId="http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd" uri="svg/svg11.dtd" />
+	<uri name="http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd" uri="svg/svg11.dtd" />
 
 	<public publicId="-//OpenOffice.org//DTD OfficeDocument 1.0//EN" uri="openoffice/office.dtd" />
 	<system systemId="office.dtd" uri="openoffice/office.dtd" />
@@ -124,6 +191,7 @@
 
 	<!--    DocBook    -->
 
+	<nextCatalog catalog="docbook5.2/catalog.xml" />
 	<nextCatalog catalog="docbook5.0/catalog.xml" />
 	<nextCatalog catalog="docbook4.5/catalog.xml" />
 	<nextCatalog catalog="docbook4.4/catalog.xml" />

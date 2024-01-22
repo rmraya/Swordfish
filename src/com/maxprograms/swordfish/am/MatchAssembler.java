@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2023 Maxprograms.
+ * Copyright (c) 2007 - 2024 Maxprograms.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 1.0
@@ -14,6 +14,7 @@ package com.maxprograms.swordfish.am;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
 import java.sql.SQLException;
 import java.util.Collections;
@@ -61,7 +62,8 @@ public class MatchAssembler {
     }
 
     public static Match assembleMatch(String textOnly, List<Match> tmMatches, ITmEngine glossEngine, String srcLang,
-            String tgtLang) throws IOException, ParserConfigurationException, SAXException, SQLException {
+            String tgtLang)
+            throws IOException, ParserConfigurationException, SAXException, SQLException, URISyntaxException {
         List<Match> result = new Vector<>();
 
         String pureText = clean(textOnly.trim());
@@ -103,15 +105,6 @@ public class MatchAssembler {
 
                     if (isNumeric(srcDiff) && isNumeric(tgtDiff)) {
                         // if difference is a numeric expression
-                        if (countInstances(pureTarget, tgtDiff) == 1 && countInstances(pureSource, tgtDiff) == 1) {
-                            pureSource = pureSource.replace(tgtDiff, "<mrk type=\"term\" id=\"mrk" + mrkId
-                                    + "\" value=\"auto-translation\">" + srcDiff + "</mrk>");
-                            pureTarget = pureTarget.replace(tgtDiff, "<mrk type=\"term\" id=\"mrk" + mrkId
-                                    + "\" value=\"auto-translation\">" + srcDiff + "</mrk>");
-                            mrkId++;
-                        }
-                    } else if (isEmail(srcDiff) && isEmail(tgtDiff)) {
-                        // if difference is an email address
                         if (countInstances(pureTarget, tgtDiff) == 1 && countInstances(pureSource, tgtDiff) == 1) {
                             pureSource = pureSource.replace(tgtDiff, "<mrk type=\"term\" id=\"mrk" + mrkId
                                     + "\" value=\"auto-translation\">" + srcDiff + "</mrk>");
@@ -265,10 +258,6 @@ public class MatchAssembler {
             }
         }
         return numeric;
-    }
-
-    public static boolean isEmail(String string) {
-        return string.matches("\\s*\\w+([-+.]\\w)*@\\w+([-.]\\w+)*\\.\\w+([-.]\\w+)*\\s*");
     }
 
     private static String clean(String string) {

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2023 Maxprograms.
+ * Copyright (c) 2007 - 2024 Maxprograms.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 1.0
@@ -10,7 +10,7 @@
  *     Maxprograms - initial API and implementation
  *******************************************************************************/
 
- package com.maxprograms.swordfish.tbx;
+package com.maxprograms.swordfish.tbx;
 
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -88,7 +88,7 @@ public class Tbx2Tmx {
         if ("langSet".equals(e.getName()) || "langSec".equals(e.getName())) {
             currentLang = e.getAttributeValue("xml:lang");
         }
-        if ("tig".equals(e.getName()) || "termSec".equals(e.getName())) {
+        if ("tig".equals(e.getName()) || "termGrp".equals(e.getName()) || "termSec".equals(e.getName())) {
             currentTUV = new Element("tuv");
             currentTUV.setAttribute("xml:lang", currentLang);
             currentTU.addContent(currentTUV);
@@ -147,8 +147,8 @@ public class Tbx2Tmx {
         while (it.hasNext()) {
             recurse(it.next());
         }
-        if ("tig".equals(e.getName()) || "termSec".equals(e.getName())) {
-           inTUV = false;
+        if ("tig".equals(e.getName()) || "termGrp".equals(e.getName()) || "termSec".equals(e.getName())) {
+            inTUV = false;
         }
     }
 }

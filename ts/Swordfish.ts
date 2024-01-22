@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2023 Maxprograms.
+ * Copyright (c) 2007 - 2024 Maxprograms.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 1.0
@@ -11,12 +11,13 @@
  *******************************************************************************/
 
 import { ChildProcessWithoutNullStreams, execFileSync, spawn } from "child_process";
-import { app, BrowserWindow, ClientRequest, clipboard, dialog, ipcMain, IpcMainEvent, Menu, MenuItem, nativeTheme, net, Rectangle, screen, session, shell, Size } from "electron";
+import { BrowserWindow, ClientRequest, IpcMainEvent, Menu, MenuItem, Rectangle, Size, app, clipboard, dialog, ipcMain, nativeTheme, net, screen, session, shell } from "electron";
 import { IncomingMessage } from "electron/main";
 import { appendFileSync, existsSync, lstatSync, mkdirSync, readFile, readFileSync, unlinkSync, writeFileSync } from "fs";
 import { Locations, Point } from "./locations";
+import { MTManager } from "./mtManager";
 
-class Swordfish {
+export class Swordfish {
 
     static path = require('path');
 
@@ -111,9 +112,9 @@ class Swordfish {
         chatGpt: {
             enabled: false,
             apiKey: '',
-            model: 'gpt-3.5-turbo-instruct',
+            model: 'gpt-3.5-turbo',
         },
-        myMemory: {
+        modernmt: {
             enabled: false,
             apiKey: '',
             srcLang: 'none',
@@ -168,19 +169,15 @@ class Swordfish {
     static locations: Locations;
 
     constructor() {
-
         if (!app.requestSingleInstanceLock()) {
             app.quit();
-        } else {
-            if (Swordfish.mainWindow) {
-                // Someone tried to run a second instance, we should focus our window.
-                if (Swordfish.mainWindow.isMinimized()) {
-                    Swordfish.mainWindow.restore();
-                }
-                Swordfish.mainWindow.focus();
+        } else if (Swordfish.mainWindow) {
+            // Someone tried to run a second instance, we should focus our window.
+            if (Swordfish.mainWindow.isMinimized()) {
+                Swordfish.mainWindow.restore();
             }
+            Swordfish.mainWindow.focus();
         }
-
         if (process.platform === 'darwin' && process.arch === 'arm64') {
             Swordfish.verticalPadding = 56;
         }
@@ -195,7 +192,6 @@ class Swordfish {
         }
 
         this.ls = spawn(this.javapath, ['-cp', 'lib/h2-1.4.200.jar', '--module-path', 'lib', '-m', 'swordfish/com.maxprograms.swordfish.TmsServer', '-port', '8070'], { cwd: app.getAppPath(), windowsHide: true });
-
         this.ls.stdout.on('data', (data) => {
             console.log(`stdout: ${data}`);
         });
@@ -1298,12 +1294,18 @@ class Swordfish {
                 let data: Buffer = readFileSync(preferencesFile);
                 let json: Preferences = JSON.parse(data.toString());
                 if (!json.hasOwnProperty('chatGpt')) {
-                    json.chatGpt = { enabled: false, apiKey: '', model: 'gpt-3.5-turbo-instruct' };
+                    json.chatGpt = { enabled: false, apiKey: '', model: 'gpt-3.5-turbo' };
                 }
-                // Davinci, Babbage and Curie models were deprecated, replacing with the only one supported at this moment
-                json.chatGpt.model = 'gpt-3.5-turbo-instruct';
                 if (!json.hasOwnProperty('caseSensitiveMatches')) {
                     json.caseSensitiveMatches = true;
+                }
+                if (!json.hasOwnProperty('modernmt')) {
+                    json.modernmt = {
+                        enabled: false,
+                        apiKey: '',
+                        srcLang: 'none',
+                        tgtLang: 'none'
+                    }
                 }
                 Swordfish.currentPreferences = json;
                 if (!Swordfish.currentPreferences.projectsFolder || !existsSync(Swordfish.currentPreferences.projectsFolder)) {
@@ -1853,14 +1855,8 @@ class Swordfish {
     }
 
     getMtLanguages(event: IpcMainEvent): void {
-        Swordfish.sendRequest('/services/getMTLanguages', {},
-            (data: any) => {
-                event.sender.send('set-mt-languages', data);
-            },
-            (reason: string) => {
-                Swordfish.showMessage({ type: 'error', message: reason });
-            }
-        );
+        let mtManager: MTManager = new MTManager(Swordfish.currentPreferences, '', '');
+        event.sender.send('set-mt-languages', mtManager.getMTLanguages());
     }
 
     static viewMemories(): void {
@@ -2299,13 +2295,11 @@ class Swordfish {
                             this.updatesWindow.on('close', () => {
                                 this.mainWindow.focus();
                             });
-                        } else {
-                            if (!silent) {
-                                Swordfish.showMessage({
-                                    type: 'info',
-                                    message: 'There are currently no updates available'
-                                });
-                            }
+                        } else if (!silent) {
+                            Swordfish.showMessage({
+                                type: 'info',
+                                message: 'There are currently no updates available'
+                            });
                         }
                     } catch (reason: any) {
                         if (!silent) {
@@ -3070,26 +3064,16 @@ class Swordfish {
     }
 
     static machineTranslate(arg: any): void {
-        Swordfish.mainWindow.webContents.send('start-waiting');
-        Swordfish.mainWindow.webContents.send('set-status', 'Getting Translations');
-        Swordfish.sendRequest('/projects/machineTranslate', arg,
-            (data: any) => {
-                Swordfish.mainWindow.webContents.send('end-waiting');
-                Swordfish.mainWindow.webContents.send('set-status', '');
-                if (data.status !== Swordfish.SUCCESS) {
-                    Swordfish.showMessage({ type: 'error', message: data.reason });
-                    return;
-                }
-                if (data.matches.length > 0) {
-                    Swordfish.mainWindow.webContents.send('set-matches', { project: arg.project, matches: data.matches });
-                }
-            },
-            (reason: string) => {
-                Swordfish.mainWindow.webContents.send('end-waiting');
-                Swordfish.mainWindow.webContents.send('set-status', '');
-                Swordfish.showMessage({ type: 'error', message: reason });
+        let mtManager: MTManager = new MTManager(Swordfish.currentPreferences, arg.srcLang, arg.tgtLang);
+        try {
+            mtManager.translateSegment(arg);
+        } catch (error: any) {
+            if (error instanceof Error) {
+                console.error(error.message);
+            } else {
+                console.error(JSON.stringify(error));
             }
-        );
+        }
     }
 
     static assembleMatches(arg: any): void {
@@ -4045,7 +4029,7 @@ class Swordfish {
     }
 
     static closeTagsWindow(): void {
-        if (this.tagsWindow && this.tagsWindow.isVisible()) {
+        if (this.tagsWindow?.isVisible()) {
             Swordfish.destroyWindow(Swordfish.tagsWindow);
         }
     }
@@ -4162,7 +4146,7 @@ class Swordfish {
         }).then((selection: Electron.MessageBoxReturnValue) => {
             if (selection.response === 0) {
                 Swordfish.mainWindow.webContents.send('start-waiting');
-                Swordfish.mainWindow.webContents.send('set-status', 'Applying MT');
+                Swordfish.mainWindow.webContents.send('set-status', 'Selecting segments...');
                 Swordfish.sendRequest('/projects/applyMtAll', arg,
                     (data: any) => {
                         if (data.status !== Swordfish.SUCCESS) {
@@ -4175,9 +4159,23 @@ class Swordfish {
                         let intervalObject = setInterval(() => {
                             if (Swordfish.currentStatus.progress) {
                                 if (Swordfish.currentStatus.progress === Swordfish.COMPLETED) {
+                                    clearInterval(intervalObject);
+                                    Swordfish.mainWindow.webContents.send('set-status', 'Translating...');
+
+                                    let exportedFile: string = Swordfish.path.join(Swordfish.appHome, 'projects', arg.project, 'applymt.xlf');
+                                    if (!existsSync(exportedFile)) {
+                                        Swordfish.mainWindow.webContents.send('end-waiting');
+                                        Swordfish.mainWindow.webContents.send('set-status', '');
+                                        Swordfish.showMessage({ type: 'error', message: 'Unable to find exported file' });
+                                        return;
+                                    }
+
+                                    let mtManager: MTManager = new MTManager(this.currentPreferences, arg.srcLang, arg.tgtLang);
+                                    mtManager.translateProject(arg.project, exportedFile);
+                                    unlinkSync(exportedFile);
+
                                     Swordfish.mainWindow.webContents.send('end-waiting');
                                     Swordfish.mainWindow.webContents.send('set-status', '');
-                                    clearInterval(intervalObject);
                                     Swordfish.mainWindow.webContents.send('reload-page', { project: arg.project });
                                     return;
                                 } else if (Swordfish.currentStatus.progress === Swordfish.PROCESSING) {

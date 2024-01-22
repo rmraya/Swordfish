@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2023 Maxprograms.
+ * Copyright (c) 2007 - 2024 Maxprograms.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 1.0
@@ -51,7 +51,6 @@ public class XliffUtils {
 	private static final String NOTSWORDFISH = "Selected file is not a Swordfish project";
 	private static int maxTag = 0;
 	private static JSONObject tags;
-	private static SAXBuilder builder;
 
 	private XliffUtils() {
 		// empty for security
@@ -184,7 +183,7 @@ public class XliffUtils {
 	}
 
 	public static String unquote(String string) {
-		return string.replaceAll("\"", "\u200B\u2033");
+		return string.replace("\"", "\u200B\u2033");
 	}
 
 	public static List<String[]> harvestTags(String source) {
@@ -330,9 +329,7 @@ public class XliffUtils {
 	public static JSONObject getProjectDetails(File xliffFile) throws IOException {
 		try {
 			JSONObject result = new JSONObject();
-			if (builder == null) {
-				builder = new SAXBuilder();
-			}
+			SAXBuilder builder = new SAXBuilder();
 			Document doc = builder.build(xliffFile);
 			Element xliff = doc.getRootElement();
 			if (!"xliff".equals(xliff.getName())) {
@@ -469,9 +466,7 @@ public class XliffUtils {
 	}
 
 	public static Element buildElement(String string) throws SAXException, IOException, ParserConfigurationException {
-		if (builder == null) {
-			builder = new SAXBuilder();
-		}
+		SAXBuilder builder = new SAXBuilder();
 		Document doc = builder.build(new ByteArrayInputStream(string.getBytes(StandardCharsets.UTF_8)));
 		return doc.getRootElement();
 	}

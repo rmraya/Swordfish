@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2023 Maxprograms.
+ * Copyright (c) 2007 - 2024 Maxprograms.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 1.0
@@ -21,6 +21,8 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
@@ -39,15 +41,16 @@ import java.util.zip.ZipOutputStream;
 import javax.net.ssl.HttpsURLConnection;
 import javax.xml.parsers.ParserConfigurationException;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+import org.xml.sax.SAXException;
+
 import com.maxprograms.swordfish.Constants;
 import com.maxprograms.swordfish.RemoteUtils;
 import com.maxprograms.swordfish.TmsServer;
 import com.maxprograms.xml.Element;
 import com.maxprograms.xml.SAXBuilder;
-
-import org.json.JSONArray;
-import org.json.JSONObject;
-import org.xml.sax.SAXException;
 
 public class RemoteDatabase implements ITmEngine {
 
@@ -56,7 +59,7 @@ public class RemoteDatabase implements ITmEngine {
     private String ticket;
     private SAXBuilder builder;
 
-    public RemoteDatabase(String server, String user, String password, String dbname) throws IOException {
+    public RemoteDatabase(String server, String user, String password, String dbname) throws IOException, URISyntaxException {
         if (server.endsWith("/")) {
             server = server.substring(0, server.length() - 1);
         }
@@ -67,9 +70,9 @@ public class RemoteDatabase implements ITmEngine {
         open();
     }
 
-    private JSONObject postMessage(String servlet, JSONObject json) throws IOException {
+    private JSONObject postMessage(String servlet, JSONObject json) throws IOException, URISyntaxException {
         byte[] bytes = json.toString(2).getBytes(StandardCharsets.UTF_8);
-        URL serverUrl = new URL(server + servlet);
+        URL serverUrl = new URI(server + servlet).toURL();
         HttpsURLConnection connection = (HttpsURLConnection) serverUrl.openConnection();
         connection.setRequestMethod("POST");
         connection.setRequestProperty("Session", ticket);
@@ -111,7 +114,7 @@ public class RemoteDatabase implements ITmEngine {
         return RemoteDatabase.class.getName();
     }
 
-    private void open() throws IOException {
+    private void open() throws IOException, URISyntaxException {
         JSONObject params = new JSONObject();
         params.put("command", "openMemory");
         params.put("memory", dbname);
@@ -119,7 +122,7 @@ public class RemoteDatabase implements ITmEngine {
     }
 
     @Override
-    public void close() throws IOException {
+    public void close() throws IOException, URISyntaxException {
         JSONObject params = new JSONObject();
         params.put("command", "closeMemory");
         params.put("memory", dbname);
@@ -132,7 +135,7 @@ public class RemoteDatabase implements ITmEngine {
     }
 
     @Override
-    public int storeTMX(String tmxFile, String project, String customer, String subject) throws IOException {
+    public int storeTMX(String tmxFile, String project, String customer, String subject) throws IOException, URISyntaxException {
         File zipFile = zip(tmxFile);
         String uploaded = upload(zipFile);
         JSONObject params = new JSONObject();
@@ -171,8 +174,8 @@ public class RemoteDatabase implements ITmEngine {
         }
     }
 
-    private String upload(File zipFile) throws IOException {
-        URL serverUrl = new URL(server + "/upload");
+    private String upload(File zipFile) throws IOException, URISyntaxException {
+        URL serverUrl = new URI(server + "/upload").toURL();
         HttpsURLConnection connection = (HttpsURLConnection) serverUrl.openConnection();
         connection.setRequestProperty("Session", ticket);
         connection.setRequestProperty("Accept", "application/json");
@@ -210,7 +213,7 @@ public class RemoteDatabase implements ITmEngine {
 
     @Override
     public void exportMemory(String tmxfile, Set<String> langs, String srcLang)
-            throws IOException, SAXException, ParserConfigurationException {
+            throws IOException, SAXException, ParserConfigurationException, JSONException, URISyntaxException {
         JSONObject params = new JSONObject();
         params.put("command", "exportMemory");
         params.put("memory", dbname);
@@ -227,9 +230,9 @@ public class RemoteDatabase implements ITmEngine {
         download(tmxfile, json.getString("file"));
     }
 
-    private void download(String tmxFile, String file) throws IOException {
-        URL serverUrl = new URL(server + "/download?session=" + URLEncoder.encode(ticket, StandardCharsets.UTF_8)
-                + "&file=" + URLEncoder.encode(file, StandardCharsets.UTF_8));
+    private void download(String tmxFile, String file) throws IOException, URISyntaxException {
+        URL serverUrl = new URI(server + "/download?session=" + URLEncoder.encode(ticket, StandardCharsets.UTF_8)
+                + "&file=" + URLEncoder.encode(file, StandardCharsets.UTF_8)).toURL();
         HttpsURLConnection connection = (HttpsURLConnection) serverUrl.openConnection();
         connection.setRequestMethod("GET");
         connection.connect();
@@ -245,7 +248,7 @@ public class RemoteDatabase implements ITmEngine {
     }
 
     @Override
-    public Set<String> getAllClients() throws IOException {
+    public Set<String> getAllClients() throws IOException, URISyntaxException {
         Set<String> result = new TreeSet<>();
         JSONObject params = new JSONObject();
         params.put("command", "memoryClients");
@@ -259,7 +262,7 @@ public class RemoteDatabase implements ITmEngine {
     }
 
     @Override
-    public Set<String> getAllLanguages() throws IOException {
+    public Set<String> getAllLanguages() throws IOException, URISyntaxException {
         Set<String> result = new TreeSet<>();
         JSONObject params = new JSONObject();
         params.put("command", "memoryLanguages");
@@ -273,7 +276,7 @@ public class RemoteDatabase implements ITmEngine {
     }
 
     @Override
-    public Set<String> getAllProjects() throws IOException {
+    public Set<String> getAllProjects() throws IOException, URISyntaxException {
         Set<String> result = new TreeSet<>();
         JSONObject params = new JSONObject();
         params.put("command", "memoryProjects");
@@ -287,7 +290,7 @@ public class RemoteDatabase implements ITmEngine {
     }
 
     @Override
-    public Set<String> getAllSubjects() throws IOException {
+    public Set<String> getAllSubjects() throws IOException, URISyntaxException {
         Set<String> result = new TreeSet<>();
         JSONObject params = new JSONObject();
         params.put("command", "memorySubjects");
@@ -302,7 +305,7 @@ public class RemoteDatabase implements ITmEngine {
 
     @Override
     public List<Match> searchTranslation(String searchStr, String srcLang, String tgtLang, int similarity,
-            boolean caseSensitive) throws IOException, SAXException, ParserConfigurationException {
+            boolean caseSensitive) throws IOException, SAXException, ParserConfigurationException, URISyntaxException {
         JSONObject params = new JSONObject();
         params.put("command", "searchTranslation");
         params.put("memory", dbname);
@@ -322,7 +325,7 @@ public class RemoteDatabase implements ITmEngine {
 
     @Override
     public List<Element> searchAll(String searchStr, String srcLang, int similarity, boolean caseSensitive)
-            throws IOException, SAXException, ParserConfigurationException {
+            throws IOException, SAXException, ParserConfigurationException, URISyntaxException {
         JSONObject params = new JSONObject();
         params.put("command", "searchAll");
         params.put("memory", dbname);
@@ -341,7 +344,7 @@ public class RemoteDatabase implements ITmEngine {
 
     @Override
     public List<Element> concordanceSearch(String searchStr, String srcLang, int limit, boolean isRegexp,
-            boolean caseSensitive) throws IOException, SAXException, ParserConfigurationException {
+            boolean caseSensitive) throws IOException, SAXException, ParserConfigurationException, URISyntaxException {
         JSONObject params = new JSONObject();
         params.put("command", "concordanceSearch");
         params.put("memory", dbname);
@@ -360,7 +363,7 @@ public class RemoteDatabase implements ITmEngine {
     }
 
     @Override
-    public void storeTu(Element tu) throws IOException {
+    public void storeTu(Element tu) throws IOException, URISyntaxException {
         JSONObject params = new JSONObject();
         params.put("command", "storeTu");
         params.put("memory", dbname);
@@ -369,7 +372,7 @@ public class RemoteDatabase implements ITmEngine {
     }
 
     @Override
-    public void commit() throws IOException {
+    public void commit() throws IOException, URISyntaxException {
         JSONObject params = new JSONObject();
         params.put("command", "commit");
         params.put("memory", dbname);
@@ -377,7 +380,7 @@ public class RemoteDatabase implements ITmEngine {
     }
 
     @Override
-    public Element getTu(String tuid) throws IOException, SAXException, ParserConfigurationException {
+    public Element getTu(String tuid) throws IOException, SAXException, ParserConfigurationException, URISyntaxException {
         JSONObject params = new JSONObject();
         params.put("command", "getTu");
         params.put("memory", dbname);
@@ -387,7 +390,7 @@ public class RemoteDatabase implements ITmEngine {
     }
 
     @Override
-    public void removeTu(String tuid) throws IOException, SAXException, ParserConfigurationException {
+    public void removeTu(String tuid) throws IOException, SAXException, ParserConfigurationException, URISyntaxException {
         JSONObject params = new JSONObject();
         params.put("command", "removeTu");
         params.put("memory", dbname);
@@ -396,7 +399,7 @@ public class RemoteDatabase implements ITmEngine {
     }
 
     @Override
-    public void deleteDatabase() throws IOException {
+    public void deleteDatabase() throws IOException, URISyntaxException {
         JSONObject params = new JSONObject();
         params.put("command", "removeMemory");
         params.put("memory", dbname);
@@ -426,7 +429,7 @@ public class RemoteDatabase implements ITmEngine {
     }
 
     @Override
-    public JSONArray batchTranslate(JSONObject params) throws IOException {
+    public JSONArray batchTranslate(JSONObject params) throws IOException, URISyntaxException {
         params.put("command", "batchTranslate");
         params.put("memory", dbname);
         JSONObject json = postMessage("/memories", params);

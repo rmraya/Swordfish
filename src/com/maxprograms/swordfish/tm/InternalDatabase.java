@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2023 Maxprograms.
+ * Copyright (c) 2007 - 2024 Maxprograms.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 1.0
@@ -202,7 +202,9 @@ public class InternalDatabase implements ITmEngine {
 		output = new FileOutputStream(tmxfile);
 		writeHeader(srcLang);
 		writeString("<body>\n");
-
+		if (conn.isClosed()) {
+			conn = DriverManager.getConnection(url);
+		}
 		try (PreparedStatement stmt = conn.prepareStatement("SELECT lang, seg FROM tuv WHERE tuid=?")) {
 			try (Statement tus = conn.createStatement()) {
 				try (ResultSet tuKeys = tus.executeQuery("SELECT DISTINCT TUID from TUV")) {
@@ -236,7 +238,6 @@ public class InternalDatabase implements ITmEngine {
 				}
 			}
 		}
-
 		writeString("</body>\n");
 		writeString("</tmx>\n");
 		output.close();
@@ -265,6 +266,9 @@ public class InternalDatabase implements ITmEngine {
 	@Override
 	public Set<String> getAllLanguages() throws SQLException {
 		Set<String> result = Collections.synchronizedSortedSet(new TreeSet<>());
+		if (conn.isClosed()) {
+			conn = DriverManager.getConnection(url);
+		}
 		try (Statement stmt = conn.createStatement()) {
 			try (ResultSet rs = stmt.executeQuery("SELECT DISTINCT lang FROM tuv")) {
 				while (rs.next()) {
@@ -305,6 +309,9 @@ public class InternalDatabase implements ITmEngine {
 
 		Hashtable<String, Integer> candidates = new Hashtable<>();
 
+		if (conn.isClosed()) {
+			conn = DriverManager.getConnection(url);
+		}
 		try (PreparedStatement stmt = conn.prepareStatement(
 				"SELECT puretext, seg, textlength FROM tuv WHERE lang=? AND tuid=? AND textlength>=? AND textlength<=?")) {
 			stmt.setString(1, srcLang);
@@ -386,6 +393,9 @@ public class InternalDatabase implements ITmEngine {
 			boolean caseSensitive) throws SQLException, SAXException, IOException, ParserConfigurationException {
 		List<Element> result = new Vector<>();
 		Vector<String> candidates = new Vector<>();
+		if (conn.isClosed()) {
+			conn = DriverManager.getConnection(url);
+		}
 		if (isRegexp) {
 			try (PreparedStatement stmt = conn
 					.prepareStatement("SELECT tuid, puretext FROM tuv WHERE lang=? AND puretext REGEXP ? LIMIT ?")) {
@@ -549,6 +559,9 @@ public class InternalDatabase implements ITmEngine {
 
 	public void setProject(String project) throws SQLException {
 		String query = "UPDATE databases SET project=? WHERE dbname=?";
+		if (conn.isClosed()) {
+			conn = DriverManager.getConnection(url);
+		}
 		try (PreparedStatement stmt = conn.prepareStatement(query)) {
 			stmt.setString(1, project);
 			stmt.setString(2, dbname);
@@ -558,6 +571,9 @@ public class InternalDatabase implements ITmEngine {
 
 	public void setCustomer(String customer) throws SQLException {
 		String query = "UPDATE databases SET client=? WHERE dbname=?";
+		if (conn.isClosed()) {
+			conn = DriverManager.getConnection(url);
+		}
 		try (PreparedStatement stmt = conn.prepareStatement(query)) {
 			stmt.setString(1, customer);
 			stmt.setString(2, dbname);
@@ -567,6 +583,9 @@ public class InternalDatabase implements ITmEngine {
 
 	public void setSubject(String subject) throws SQLException {
 		String query = "UPDATE databases SET subject=? WHERE dbname=?";
+		if (conn.isClosed()) {
+			conn = DriverManager.getConnection(url);
+		}
 		try (PreparedStatement stmt = conn.prepareStatement(query)) {
 			stmt.setString(1, subject);
 			stmt.setString(2, dbname);
@@ -581,6 +600,9 @@ public class InternalDatabase implements ITmEngine {
 	@Override
 	public Element getTu(String tuid) throws SQLException, SAXException, IOException, ParserConfigurationException {
 		Element tu = tuDb.getTu(tuid);
+		if (conn.isClosed()) {
+			conn = DriverManager.getConnection(url);
+		}
 		try (PreparedStatement stmt = conn.prepareStatement("SELECT lang, seg FROM tuv WHERE tuid=?")) {
 			stmt.setString(1, tuid);
 			try (ResultSet rs = stmt.executeQuery()) {
@@ -639,7 +661,9 @@ public class InternalDatabase implements ITmEngine {
 		int maxLength = searchStr.length() * (200 - similarity) / 100;
 
 		Map<String, Integer> candidates = new Hashtable<>();
-
+		if (conn.isClosed()) {
+			conn = DriverManager.getConnection(url);
+		}
 		try (PreparedStatement stmt = conn.prepareStatement(
 				"SELECT puretext FROM tuv WHERE lang=? AND tuid=? AND textlength>=? AND textlength<=?")) {
 			stmt.setString(1, srcLang);

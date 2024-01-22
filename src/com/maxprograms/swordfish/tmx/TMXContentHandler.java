@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2023 Maxprograms.
+ * Copyright (c) 2007 - 2024 Maxprograms.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 1.0
@@ -15,6 +15,7 @@ package com.maxprograms.swordfish.tmx;
 import java.io.IOException;
 import java.lang.System.Logger;
 import java.lang.System.Logger.Level;
+import java.net.URISyntaxException;
 import java.sql.SQLException;
 import java.util.Deque;
 import java.util.concurrent.ConcurrentLinkedDeque;
@@ -64,7 +65,7 @@ class TMXContentHandler implements IContentHandler {
 				if (count % 500 == 0) {
 					db.commit();
 				}
-			} catch (IOException | SQLException e) {
+			} catch (IOException | SQLException | URISyntaxException e) {
 				// ignore
 				logger.log(Level.WARNING, "Error storing " + current, e);
 			}

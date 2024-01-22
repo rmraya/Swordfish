@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2023 Maxprograms.
+ * Copyright (c) 2007 - 2024 Maxprograms.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 1.0
@@ -147,150 +147,121 @@ class TranslationView {
         this.container.addEventListener('keydown', (event: KeyboardEvent) => {
             if (event.key === 'PageDown' && !(event.ctrlKey || event.metaKey)) {
                 event.preventDefault();
-                event.cancelBubble = true;
                 this.gotoNext();
             }
             if (event.key === 'PageUp' && !(event.ctrlKey || event.metaKey)) {
                 event.preventDefault();
-                event.cancelBubble = true;
                 this.gotoPrevious();
             }
             if (event.key === 'PageDown' && (event.ctrlKey || event.metaKey) && !event.shiftKey) {
                 event.preventDefault();
-                event.cancelBubble = true;
                 this.nextPage();
             }
             if (event.key === 'PageUp' && (event.ctrlKey || event.metaKey) && !event.shiftKey) {
                 event.preventDefault();
-                event.cancelBubble = true;
                 this.previousPage();
             }
             if (event.key === 'PageDown' && (event.ctrlKey || event.metaKey) && event.shiftKey) {
                 event.preventDefault();
-                event.cancelBubble = true;
                 this.lastPage();
             }
             if (event.key === 'PageUp' && (event.ctrlKey || event.metaKey) && event.shiftKey) {
                 event.preventDefault();
-                event.cancelBubble = true;
                 this.firstPage();
             }
             if ((event.ctrlKey || event.metaKey) && (event.key === 'b' || event.key === 'B')) {
                 event.preventDefault();
-                event.cancelBubble = true;
                 this.addTerm();
             }
             if ((event.ctrlKey || event.metaKey) && (event.key === 'u' || event.key === 'U') && !event.shiftKey) {
                 event.preventDefault();
-                event.cancelBubble = true;
                 this.nextUntranslated();
             }
             if ((event.ctrlKey || event.metaKey) && (event.key === 'u' || event.key === 'U') && event.shiftKey) {
                 event.preventDefault();
-                event.cancelBubble = true;
                 this.nextUnconfirmed();
             }
 
             // Insert tags with numeric keypad
             if (event.code === 'Numpad1' && (event.ctrlKey || event.metaKey) && !event.altKey) {
                 event.preventDefault();
-                event.cancelBubble = true;
                 this.insertTag({ tag: 1 });
             }
             if (event.code === 'Numpad2' && (event.ctrlKey || event.metaKey) && !event.altKey) {
                 event.preventDefault();
-                event.cancelBubble = true;
                 this.insertTag({ tag: 2 });
             }
             if (event.code === 'Numpad3' && (event.ctrlKey || event.metaKey) && !event.altKey) {
                 event.preventDefault();
-                event.cancelBubble = true;
                 this.insertTag({ tag: 3 });
             }
             if (event.code === 'Numpad4' && (event.ctrlKey || event.metaKey) && !event.altKey) {
                 event.preventDefault();
-                event.cancelBubble = true;
                 this.insertTag({ tag: 4 });
             }
             if (event.code === 'Numpad5' && (event.ctrlKey || event.metaKey) && !event.altKey) {
                 event.preventDefault();
-                event.cancelBubble = true;
                 this.insertTag({ tag: 5 });
             }
             if (event.code === 'Numpad6' && (event.ctrlKey || event.metaKey) && !event.altKey) {
                 event.preventDefault();
-                event.cancelBubble = true;
                 this.insertTag({ tag: 6 });
             }
             if (event.code === 'Numpad7' && (event.ctrlKey || event.metaKey) && !event.altKey) {
                 event.preventDefault();
-                event.cancelBubble = true;
                 this.insertTag({ tag: 7 });
             }
             if (event.code === 'Numpad8' && (event.ctrlKey || event.metaKey) && !event.altKey) {
                 event.preventDefault();
-                event.cancelBubble = true;
                 this.insertTag({ tag: 8 });
             }
             if (event.code === 'Numpad9' && (event.ctrlKey || event.metaKey) && !event.altKey) {
                 event.preventDefault();
-                event.cancelBubble = true;
                 this.insertTag({ tag: 9 });
             }
             if (event.code === 'Numpad0' && (event.ctrlKey || event.metaKey) && !event.altKey) {
                 event.preventDefault();
-                event.cancelBubble = true;
                 this.insertTag({ tag: 10 });
             }
             // Insert terms with numeric keypad
             if (event.code === 'Numpad1' && (event.ctrlKey || event.metaKey) && event.altKey) {
                 event.preventDefault();
-                event.cancelBubble = true;
                 this.insertTerm({ term: 1 });
             }
             if (event.code === 'Numpad2' && (event.ctrlKey || event.metaKey) && event.altKey) {
                 event.preventDefault();
-                event.cancelBubble = true;
                 this.insertTerm({ term: 2 });
             }
             if (event.code === 'Numpad3' && (event.ctrlKey || event.metaKey) && event.altKey) {
                 event.preventDefault();
-                event.cancelBubble = true;
                 this.insertTerm({ term: 3 });
             }
             if (event.code === 'Numpad4' && (event.ctrlKey || event.metaKey) && event.altKey) {
                 event.preventDefault();
-                event.cancelBubble = true;
                 this.insertTerm({ term: 4 });
             }
             if (event.code === 'Numpad5' && (event.ctrlKey || event.metaKey) && event.altKey) {
                 event.preventDefault();
-                event.cancelBubble = true;
                 this.insertTerm({ term: 5 });
             }
             if (event.code === 'Numpad6' && (event.ctrlKey || event.metaKey) && event.altKey) {
                 event.preventDefault();
-                event.cancelBubble = true;
                 this.insertTerm({ term: 6 });
             }
             if (event.code === 'Numpad7' && (event.ctrlKey || event.metaKey) && event.altKey) {
                 event.preventDefault();
-                event.cancelBubble = true;
                 this.insertTerm({ term: 7 });
             }
             if (event.code === 'Numpad8' && (event.ctrlKey || event.metaKey) && event.altKey) {
                 event.preventDefault();
-                event.cancelBubble = true;
                 this.insertTerm({ term: 8 });
             }
             if (event.code === 'Numpad9' && (event.ctrlKey || event.metaKey) && event.altKey) {
                 event.preventDefault();
-                event.cancelBubble = true;
                 this.insertTerm({ term: 9 });
             }
             if (event.code === 'Numpad0' && (event.ctrlKey || event.metaKey) && event.altKey) {
                 event.preventDefault();
-                event.cancelBubble = true;
                 this.insertTerm({ term: 10 });
             }
         });
@@ -1173,16 +1144,18 @@ class TranslationView {
         this.saveEdit({ confirm: false, next: 'clicked', segment: clickedRow.rowIndex });
     }
 
-    getMachineTranslations() {
+    getMachineTranslations(): void {
         this.electron.ipcRenderer.send('machine-translate', {
             project: this.projectId,
             file: this.currentId.file,
             unit: this.currentId.unit,
-            segment: this.currentId.id
+            segment: this.currentId.id,
+            srcLang: this.srcLang,
+            tgtLang: this.tgtLang
         });
     }
 
-    getAssembledMatches() {
+    getAssembledMatches(): void {
         if (this.memSelect.value === 'none') {
             this.electron.ipcRenderer.send('show-message', { type: 'warning', message: 'Select memory' });
             return;
@@ -1201,7 +1174,7 @@ class TranslationView {
         });
     }
 
-    getTmMatches() {
+    getTmMatches(): void {
         if (this.memSelect.value === 'none') {
             this.electron.ipcRenderer.send('show-message', { type: 'warning', message: 'Select memory' });
             return;
@@ -1394,7 +1367,7 @@ class TranslationView {
         }
     }
 
-    selectRow(row: HTMLTableRowElement) {
+    selectRow(row: HTMLTableRowElement): void {
         if (this.currentRow) {
             this.currentRow.classList.remove('currentRow');
         }
@@ -1474,7 +1447,6 @@ class TranslationView {
             }
             if (event.key === 'Enter' && event.altKey) {
                 event.preventDefault();
-                event.cancelBubble = true;
                 this.saveSource(segmentId, source, originalSource);
                 this.currentCell.contentEditable = 'true';
                 this.currentCell.focus();
@@ -1864,7 +1836,7 @@ class TranslationView {
             unit: this.currentId.unit,
             segment: this.currentId.id
         }
-        this.electron.ipcRenderer.send('apply-mt-all', { project: this.projectId });
+        this.electron.ipcRenderer.send('apply-mt-all', { project: this.projectId, srcLang: this.srcLang, tgtLang: this.tgtLang });
     }
 
     assembleMatchesAll(): void {
@@ -2184,7 +2156,6 @@ class TranslationView {
         let allowedKeys: string[] = ['Escape', 'Enter', 'NumpadEnter', 'ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown', 'Alt'];
         if (!allowedKeys.includes(event.key)) {
             event.preventDefault();
-            event.cancelBubble = true;
             return;
         }
         if (event.key === 'Escape') {
@@ -2196,7 +2167,6 @@ class TranslationView {
 
         if (event.key === 'Enter' || event.key === 'NumpadEnter') {
             event.preventDefault();
-            event.cancelBubble = true;
             let selection: Selection = window.getSelection();
             if (selection.rangeCount !== 0) {
                 let source: HTMLTableCellElement = event.currentTarget as HTMLTableCellElement;

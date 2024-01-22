@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2023 Maxprograms.
+ * Copyright (c) 2007 - 2024 Maxprograms.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 1.0
@@ -61,10 +61,10 @@ class PreferencesDialog {
     chatGPTKey: HTMLInputElement;
     chatGPTModel: HTMLSelectElement;
 
-    enableMyMemory: HTMLInputElement;
-    myMemoryKey: HTMLInputElement;
-    myMemorySrcLang: HTMLSelectElement;
-    myMemoryTgtLang: HTMLSelectElement;
+    enableModernmt: HTMLInputElement;
+    modernmtKey: HTMLInputElement;
+    modernmtSrcLang: HTMLSelectElement;
+    modernmtTgtLang: HTMLSelectElement;
 
     defaultEnglish: HTMLSelectElement;
     defaultPortuguese: HTMLSelectElement;
@@ -252,17 +252,17 @@ class PreferencesDialog {
         this.chatGPTKey.value = preferences.chatGpt.apiKey;
         this.chatGPTModel.value = preferences.chatGpt.model;
 
-        this.enableMyMemory.checked = preferences.myMemory.enabled;
-        this.myMemoryKey.value = preferences.myMemory.apiKey;
-        this.myMemorySrcLang.value = preferences.myMemory.srcLang;
-        this.myMemoryTgtLang.value = preferences.myMemory.tgtLang;
-        this.myMemoryKey.disabled = !preferences.myMemory.enabled;
-        this.myMemorySrcLang.disabled = !preferences.myMemory.enabled;
-        this.myMemoryTgtLang.disabled = !preferences.myMemory.enabled;
-        this.enableMyMemory.addEventListener('change', () => {
-            this.myMemoryKey.disabled = !this.enableMyMemory.checked;
-            this.myMemorySrcLang.disabled = !this.enableMyMemory.checked;
-            this.myMemoryTgtLang.disabled = !this.enableMyMemory.checked;
+        this.enableModernmt.checked = preferences.modernmt.enabled;
+        this.modernmtKey.value = preferences.modernmt.apiKey;
+        this.modernmtSrcLang.value = preferences.modernmt.srcLang;
+        this.modernmtTgtLang.value = preferences.modernmt.tgtLang;
+        this.modernmtKey.disabled = !preferences.modernmt.enabled;
+        this.modernmtSrcLang.disabled = !preferences.modernmt.enabled;
+        this.modernmtTgtLang.disabled = !preferences.modernmt.enabled;
+        this.enableModernmt.addEventListener('change', () => {
+            this.modernmtKey.disabled = !this.enableModernmt.checked;
+            this.modernmtSrcLang.disabled = !this.enableModernmt.checked;
+            this.modernmtTgtLang.disabled = !this.enableModernmt.checked;
         });
 
         this.os = preferences.os;
@@ -275,9 +275,6 @@ class PreferencesDialog {
 
         this.srcLangSelect.innerHTML = languageOptions;
         this.tgtLangSelect.innerHTML = languageOptions;
-
-        this.myMemorySrcLang.innerHTML = languageOptions;
-        this.myMemoryTgtLang.innerHTML = languageOptions;
 
         this.electron.ipcRenderer.send('get-mt-languages');
     }
@@ -330,12 +327,12 @@ class PreferencesDialog {
             return;
         }
 
-        if (this.enableMyMemory.checked && this.myMemoryKey.value === '') {
-            this.electron.ipcRenderer.send('show-message', { type: 'warning', message: 'Enter MyMemory API key', parent: 'preferences' });
+        if (this.enableModernmt.checked && this.modernmtKey.value === '') {
+            this.electron.ipcRenderer.send('show-message', { type: 'warning', message: 'Enter ModernMT API key', parent: 'preferences' });
             return;
         }
-        if (this.enableMyMemory.checked && (this.myMemorySrcLang.value === 'none' || this.myMemoryTgtLang.value === 'none')) {
-            this.electron.ipcRenderer.send('show-message', { type: 'warning', message: 'Select MyMemory languages', parent: 'preferences' });
+        if (this.enableModernmt.checked && (this.modernmtSrcLang.value === 'none' || this.modernmtTgtLang.value === 'none')) {
+            this.electron.ipcRenderer.send('show-message', { type: 'warning', message: 'Select ModernMT languages', parent: 'preferences' });
             return;
         }
 
@@ -385,11 +382,11 @@ class PreferencesDialog {
                 apiKey: this.chatGPTKey.value,
                 model: this.chatGPTModel.value
             },
-            myMemory: {
-                enabled: this.enableMyMemory.checked,
-                apiKey: this.myMemoryKey.value,
-                srcLang: this.myMemorySrcLang.value,
-                tgtLang: this.myMemoryTgtLang.value
+            modernmt: {
+                enabled: this.enableModernmt.checked,
+                apiKey: this.modernmtKey.value,
+                srcLang: this.modernmtSrcLang.value,
+                tgtLang: this.modernmtTgtLang.value
             },
             spellchecker: {
                 defaultEnglish: 'en-US',
@@ -990,12 +987,12 @@ class PreferencesDialog {
         mtHolder.addTab(chatGptTab);
         this.populateChatGptTab(chatGptTab.getContainer());
 
-        let myMemoryTab: Tab = new Tab('myMemoryTab', 'MyMemory', false);
-        myMemoryTab.getLabelDiv().addEventListener('click', () => {
+        let modernmtTab: Tab = new Tab('modernmtTab', 'ModernMT', false);
+        modernmtTab.getLabelDiv().addEventListener('click', () => {
             this.electron.ipcRenderer.send('settings-height', { width: document.body.clientWidth, height: document.body.clientHeight });
         });
-        mtHolder.addTab(myMemoryTab);
-        this.populateMyMemoryTab(myMemoryTab.getContainer());
+        mtHolder.addTab(modernmtTab);
+        this.populateModernmtTab(modernmtTab.getContainer());
     }
 
     populateGoogleTab(container: HTMLDivElement): void {
@@ -1316,7 +1313,7 @@ class PreferencesDialog {
         td = document.createElement('td');
         td.classList.add('middle');
         td.classList.add('fill_width');
-        td.innerHTML = '<select id="chatGPTModel" class="table_select"><option value="gpt-3.5-turbo-instruct">gpt-3.5-turbo-instruct</option></select>';
+        td.innerHTML = '<select id="chatGPTModel" class="table_select"><option value="gpt-3.5-turbo">gpt-3.5-turbo</option><option value="gpt-4">gpt-4</option></select>';
         tr.appendChild(td);
 
         this.enableChatGPT = document.getElementById('enableChatGPT') as HTMLInputElement;
@@ -1324,15 +1321,15 @@ class PreferencesDialog {
         this.chatGPTModel = document.getElementById('chatGPTModel') as HTMLSelectElement;
     }
 
-    populateMyMemoryTab(container: HTMLDivElement): void {
+    populateModernmtTab(container: HTMLDivElement): void {
         container.style.paddingTop = '10px';
 
-        let myMemoryDiv: HTMLDivElement = document.createElement('div');
-        myMemoryDiv.classList.add('middle');
-        myMemoryDiv.classList.add('row');
-        myMemoryDiv.style.paddingLeft = '4px';
-        myMemoryDiv.innerHTML = '<input type="checkbox" id="enableMyMemory"><label for="enableMyMemory" style="padding-top:4px;">Enable MyMemory API</label>';
-        container.appendChild(myMemoryDiv);
+        let modernmtDiv: HTMLDivElement = document.createElement('div');
+        modernmtDiv.classList.add('middle');
+        modernmtDiv.classList.add('row');
+        modernmtDiv.style.paddingLeft = '4px';
+        modernmtDiv.innerHTML = '<input type="checkbox" id="enablemodernmt"><label for="enablemodernmt" style="padding-top:4px;">Enable ModernMT</label>';
+        container.appendChild(modernmtDiv);
 
         let langsTable: HTMLTableElement = document.createElement('table');
         langsTable.classList.add('fill_width');
@@ -1344,13 +1341,13 @@ class PreferencesDialog {
         let td: HTMLTableCellElement = document.createElement('td');
         td.classList.add('middle');
         td.classList.add('noWrap');
-        td.innerHTML = '<label for="myMemoryKey">API Key</label>'
+        td.innerHTML = '<label for="modernmtKey">API Key</label>'
         tr.appendChild(td);
 
         td = document.createElement('td');
         td.classList.add('middle');
         td.classList.add('fill_width');
-        td.innerHTML = '<input type="text" id="myMemoryKey" class="table_input"/>';
+        td.innerHTML = '<input type="text" id="modernmtKey" class="table_input"/>';
         tr.appendChild(td);
 
         tr = document.createElement('tr');
@@ -1359,13 +1356,13 @@ class PreferencesDialog {
         td = document.createElement('td');
         td.classList.add('middle');
         td.classList.add('noWrap');
-        td.innerHTML = '<label for="myMemorySrcLang">Source Language</label>';
+        td.innerHTML = '<label for="modernmtSrcLang">Source Language</label>';
         tr.appendChild(td);
 
         td = document.createElement('td');
         td.classList.add('middle');
         td.classList.add('fill_width');
-        td.innerHTML = '<select id="myMemorySrcLang" class="table_select"></select>';
+        td.innerHTML = '<select id="modernmtSrcLang" class="table_select"></select>';
         tr.appendChild(td);
 
         tr = document.createElement('tr');
@@ -1374,19 +1371,19 @@ class PreferencesDialog {
         td = document.createElement('td');
         td.classList.add('middle');
         td.classList.add('noWrap');
-        td.innerHTML = '<label for="myMemoryTgtLang">Target Language</label>';
+        td.innerHTML = '<label for="modernmtTgtLang">Target Language</label>';
         tr.appendChild(td);
 
         td = document.createElement('td');
         td.classList.add('middle');
         td.classList.add('fill_width');
-        td.innerHTML = '<select id="myMemoryTgtLang" class="table_select"></select>';
+        td.innerHTML = '<select id="modernmtTgtLang" class="table_select"></select>';
         tr.appendChild(td);
 
-        this.enableMyMemory = document.getElementById('enableMyMemory') as HTMLInputElement;
-        this.myMemoryKey = document.getElementById('myMemoryKey') as HTMLInputElement;
-        this.myMemorySrcLang = document.getElementById('myMemorySrcLang') as HTMLSelectElement;
-        this.myMemoryTgtLang = document.getElementById('myMemoryTgtLang') as HTMLSelectElement;
+        this.enableModernmt = document.getElementById('enablemodernmt') as HTMLInputElement;
+        this.modernmtKey = document.getElementById('modernmtKey') as HTMLInputElement;
+        this.modernmtSrcLang = document.getElementById('modernmtSrcLang') as HTMLSelectElement;
+        this.modernmtTgtLang = document.getElementById('modernmtTgtLang') as HTMLSelectElement;
     }
 
     setMtLanguages(arg: any): void {
@@ -1402,6 +1399,9 @@ class PreferencesDialog {
 
         this.deeplSrcLang.innerHTML = this.getOptions(arg.deepl.srcLangs);
         this.deeplTgtLang.innerHTML = this.getOptions(arg.deepl.tgtLangs);
+
+        this.modernmtSrcLang.innerHTML = this.getOptions(arg.modernmt.srcLangs);
+        this.modernmtTgtLang.innerHTML = this.getOptions(arg.modernmt.tgtLangs);
 
         this.electron.ipcRenderer.send('get-preferences');
 

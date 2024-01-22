@@ -48,15 +48,15 @@ Technical Support |  Peer support at [Groups.io](https://groups.io/g/maxprograms
 
 ## Requirements
 
-- JDK 17 or newer is required for compiling and building. Get it from [Adoptium](https://adoptium.net/).
+- JDK 21 or newer is required for compiling and building. Get it from [Adoptium](https://adoptium.net/).
 - Apache Ant 1.10.12 or newer. Get it from [https://ant.apache.org/](https://ant.apache.org/)
-- Node.js 18.16.0 LTS or newer. Get it from [https://nodejs.org/](https://nodejs.org/)
-- TypeScript 5.1.0 or newer, get it from [https://www.typescriptlang.org/](https://www.typescriptlang.org/)
+- Node.js 20.10.0 LTS or newer. Get it from [https://nodejs.org/](https://nodejs.org/)
+- TypeScript 5.3.3 or newer, get it from [https://www.typescriptlang.org/](https://www.typescriptlang.org/)
 
 ## Building
 
 - Checkout this repository.
-- Point your `JAVA_HOME` environment variable to JDK 17
+- Point your `JAVA_HOME` environment variable to JDK 21
 - Run `ant` to compile the Java code
 - Run `npm install` to download and install NodeJS dependencies
 - Run `npm start` to launch Swordfish

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2023 Maxprograms.
+ * Copyright (c) 2007 - 2024 Maxprograms.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 1.0
@@ -51,7 +51,6 @@ class ApplyTM {
             let numberKeys: string[] = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '0', 'Backspace', 'Delete', 'Escape', 'Enter', 'NumpadEnter'];
             if (!numberKeys.includes(event.key)) {
                 event.preventDefault();
-                event.cancelBubble = true;
             }
         });
         document.getElementById('applyTmButton').addEventListener('click', () => {

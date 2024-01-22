@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2023 Maxprograms.
+ * Copyright (c) 2007 - 2024 Maxprograms.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 1.0
@@ -23,6 +23,7 @@ import java.io.InputStreamReader;
 import java.lang.System.Logger;
 import java.lang.System.Logger.Level;
 import java.net.InetSocketAddress;
+import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.sql.SQLException;
@@ -132,7 +133,7 @@ public class TmsServer implements HttpHandler {
 			try (DataOutputStream stream = new DataOutputStream(t.getResponseBody())) {
 				stream.writeBytes(response);
 			}
-		} catch (IOException | SQLException e) {
+		} catch (IOException | SQLException | URISyntaxException e) {
 			logger.log(Level.ERROR, e);
 			obj.put(Constants.STATUS, Constants.ERROR);
 			obj.put(Constants.REASON, e.getMessage());
@@ -144,7 +145,7 @@ public class TmsServer implements HttpHandler {
 		}
 	}
 
-	private void closeAll() throws IOException, SQLException {
+	private void closeAll() throws IOException, SQLException, URISyntaxException {
 		MemoriesHandler.closeAll();
 		ProjectsHandler.closeAll();
 		GlossariesHandler.closeAll();
