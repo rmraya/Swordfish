@@ -49,7 +49,6 @@ class Preferences {
         apiKey: string;
         srcLang: string;
         tgtLang: string;
-        proPlan: boolean;
     };
     chatGpt: {
         enabled: boolean;

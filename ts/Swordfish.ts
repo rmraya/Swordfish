@@ -106,8 +106,7 @@ export class Swordfish {
             enabled: false,
             apiKey: '',
             srcLang: 'none',
-            tgtLang: 'none',
-            proPlan: true
+            tgtLang: 'none'
         },
         chatGpt: {
             enabled: false,

@@ -132,8 +132,6 @@ export class MTContentHandler implements ContentHandler {
 
     translate(segment: XMLElement): void {
         let source: XMLElement = segment.getChild('source');
-
         this.mtManager.translateElement(source, this.project, this.file, this.unit, this.segment);
-
     }
 }

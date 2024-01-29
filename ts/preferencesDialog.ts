@@ -52,8 +52,6 @@ class PreferencesDialog {
 
     enableDeepL: HTMLInputElement;
     deeplKey: HTMLInputElement;
-    deeplPro: HTMLInputElement;
-    deeplFree: HTMLInputElement;
     deeplSrcLang: HTMLSelectElement;
     deeplTgtLang: HTMLSelectElement;
 
@@ -243,10 +241,7 @@ class PreferencesDialog {
             this.deeplKey.disabled = !this.enableDeepL.checked;
             this.deeplSrcLang.disabled = !this.enableDeepL.checked;
             this.deeplTgtLang.disabled = !this.enableDeepL.checked;
-            this.deeplPro.disabled = !this.enableDeepL.checked;
-            this.deeplFree.disabled = !this.enableDeepL.checked;
         });
-        this.deeplPro.checked = preferences.deepl.proPlan;
 
         this.enableChatGPT.checked = preferences.chatGpt.enabled;
         this.chatGPTKey.value = preferences.chatGpt.apiKey;
@@ -374,8 +369,7 @@ class PreferencesDialog {
                 enabled: this.enableDeepL.checked,
                 apiKey: this.deeplKey.value,
                 srcLang: this.deeplSrcLang.value,
-                tgtLang: this.deeplTgtLang.value,
-                proPlan: this.deeplPro.checked
+                tgtLang: this.deeplTgtLang.value
             },
             chatGpt: {
                 enabled: this.enableChatGPT.checked,
@@ -1257,19 +1251,10 @@ class PreferencesDialog {
         td.innerHTML = '<select id="deeplTgtLang" class="table_select"></select>';
         tr.appendChild(td);
 
-        let deeplPlan: HTMLDivElement = document.createElement('div');
-        deeplPlan.classList.add('middle');
-        deeplPlan.classList.add('row');
-        deeplPlan.style.paddingLeft = '4px';
-        deeplPlan.innerHTML = '<input type="radio" id="deeplFree" name="deeplPlan" value="free" checked><label for="deeplFree" style="padding-top:4px;">Free Plan</label><input type="radio" id="deeplPro" name="deeplPlan" value="pro"><label for="deeplPro" style="padding-top:4px;">Pro Plan</label>';
-        container.appendChild(deeplPlan);
-
         this.enableDeepL = document.getElementById('enableDeepL') as HTMLInputElement;
         this.deeplKey = document.getElementById('deeplKey') as HTMLInputElement;
         this.deeplSrcLang = document.getElementById('deeplSrcLang') as HTMLSelectElement;
         this.deeplTgtLang = document.getElementById('deeplTgtLang') as HTMLSelectElement;
-        this.deeplFree = document.getElementById('deeplFree') as HTMLInputElement;
-        this.deeplPro = document.getElementById('deeplPro') as HTMLInputElement;
     }
 
     populateChatGptTab(container: HTMLDivElement): void {

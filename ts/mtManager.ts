@@ -70,7 +70,7 @@ export class MTManager {
             this.mtEngines.push(yandexTranslator);
         }
         if (preferences.deepl.enabled) {
-            let deeplTranslator: DeepLTranslator = new DeepLTranslator(preferences.deepl.apiKey, preferences.deepl.proPlan);
+            let deeplTranslator: DeepLTranslator = new DeepLTranslator(preferences.deepl.apiKey);
             deeplTranslator.setSourceLanguage(preferences.deepl.srcLang);
             deeplTranslator.setTargetLanguage(preferences.deepl.tgtLang);
             this.mtEngines.push(deeplTranslator);
