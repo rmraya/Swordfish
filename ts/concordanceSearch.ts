@@ -44,6 +44,14 @@ class ConcordanceSearch {
         this.electron.ipcRenderer.on('set-selected-text', (event: Electron.IpcRendererEvent, arg: any) => {
             this.setParams(arg);
         });
+        let regExp: HTMLInputElement = document.getElementById('regularExpression') as HTMLInputElement;
+        regExp.addEventListener('change', () => {
+            let caseSensitive: HTMLInputElement = document.getElementById('caseSensitive') as HTMLInputElement;
+            caseSensitive.disabled = regExp.checked;
+            if (regExp.checked) {
+                caseSensitive.checked = false;
+            }
+        });
         (document.getElementById('maxEntries') as HTMLSelectElement).value = '20';
         (document.getElementById('searchText') as HTMLInputElement).focus();
         document.getElementById('languagesSelect').addEventListener('change', () => {
@@ -51,6 +59,12 @@ class ConcordanceSearch {
             if (this.isBiDi(code)) {
                 (document.getElementById('searchText') as HTMLInputElement).dir = 'rtl';
             }
+        });
+        this.electron.ipcRenderer.on('start-waiting', (event: Electron.IpcRendererEvent, arg: any) => {
+            document.body.classList.add("wait");
+        });
+        this.electron.ipcRenderer.on('end-waiting', (event: Electron.IpcRendererEvent, arg: any) => {
+            document.body.classList.remove("wait");
         });
         this.electron.ipcRenderer.send('concordance-search-height', { width: document.body.clientWidth, height: document.body.clientHeight });
     }

@@ -18,6 +18,7 @@ import java.io.Reader;
 import java.lang.System.Logger;
 import java.lang.System.Logger.Level;
 import java.nio.charset.StandardCharsets;
+import java.text.MessageFormat;
 import java.util.Calendar;
 import java.util.Iterator;
 import java.util.List;
@@ -26,12 +27,12 @@ import java.util.TimeZone;
 
 import javax.xml.parsers.ParserConfigurationException;
 
+import org.xml.sax.SAXException;
+
 import com.maxprograms.xml.Element;
 import com.maxprograms.xml.SAXBuilder;
 import com.maxprograms.xml.TextNode;
 import com.maxprograms.xml.XMLNode;
-
-import org.xml.sax.SAXException;
 
 public class TMUtils {
 
@@ -94,7 +95,8 @@ public class TMUtils {
 			calendar.set(year, month, date, hour, minute, second);
 			return calendar.getTimeInMillis();
 		} catch (NumberFormatException e) {
-			logger.log(Level.WARNING, "Unsupported TMX date: " + tmxDate);
+			MessageFormat mf = new MessageFormat(Messages.getString("TMUtils.0"));
+			logger.log(Level.WARNING, mf.format(new String[] { tmxDate }));
 			return 0l;
 		}
 	}
@@ -179,13 +181,13 @@ public class TMUtils {
 	}
 
 	public static String getString(Reader reader) throws IOException {
-        StringBuilder sb = new StringBuilder();
-        char[] array = new char[1024];
-        int read = 0;
-        while ((read = reader.read(array)) != -1) {
-            sb.append(array, 0, read);
-        }
-        reader.close();
-        return sb.toString();
-    }
+		StringBuilder sb = new StringBuilder();
+		char[] array = new char[1024];
+		int read = 0;
+		while ((read = reader.read(array)) != -1) {
+			sb.append(array, 0, read);
+		}
+		reader.close();
+		return sb.toString();
+	}
 }

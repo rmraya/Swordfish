@@ -27,6 +27,7 @@ import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.sql.SQLException;
+import java.text.MessageFormat;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
@@ -54,7 +55,8 @@ public class TmsServer implements HttpHandler {
 		for (int i = 0; i < args.length; i++) {
 			String arg = args[i];
 			if (arg.equals("-version")) {
-				logger.log(Level.INFO, () -> "Version: " + Constants.VERSION + " Build: " + Constants.BUILD);
+				MessageFormat mf = new MessageFormat(Messages.getString("TmsServer.0"));
+				logger.log(Level.INFO, () -> mf.format(new String[] { Constants.VERSION, Constants.BUILD }));
 				return;
 			}
 			if (arg.equals("-port") && (i + 1) < args.length) {
@@ -68,7 +70,7 @@ public class TmsServer implements HttpHandler {
 			TmsServer instance = new TmsServer(Integer.valueOf(port));
 			instance.run();
 		} catch (Exception e) {
-			logger.log(Level.ERROR, "Server error", e);
+			logger.log(Level.ERROR, Messages.getString("TmsServer.1"), e);
 		}
 	}
 
@@ -81,7 +83,7 @@ public class TmsServer implements HttpHandler {
 		server.setExecutor(new ThreadPoolExecutor(4, 8, 30, TimeUnit.SECONDS, new ArrayBlockingQueue<>(100)));
 		server.start();
 		if (debug) {
-			logger.log(Level.INFO, "TMS server started");
+			logger.log(Level.INFO, Messages.getString("TmsServer.2"));
 		}
 	}
 
@@ -94,7 +96,7 @@ public class TmsServer implements HttpHandler {
 				request = readRequestBody(is);
 			}
 			if (request.isBlank()) {
-				throw new IOException("Empty request");
+				throw new IOException(Messages.getString("TmsServer.3"));
 			}
 			if (debug) {
 				logger.log(Level.INFO, request);
@@ -112,7 +114,7 @@ public class TmsServer implements HttpHandler {
 					break;
 				case "stop":
 					if (debug) {
-						logger.log(Level.INFO, "Stopping server");
+						logger.log(Level.INFO, Messages.getString("TmsServer.4"));
 					}
 					closeAll();
 					obj.put(Constants.STATUS, Constants.OK);
@@ -120,7 +122,8 @@ public class TmsServer implements HttpHandler {
 					break;
 				default:
 					obj.put(Constants.STATUS, Constants.ERROR);
-					obj.put(Constants.REASON, "Unknown command");
+					MessageFormat mf = new MessageFormat(Messages.getString("TmsServer.5"));
+					obj.put(Constants.REASON, mf.format(new String[] { command }));
 					obj.put("received", json.toString());
 					response = obj.toString();
 			}

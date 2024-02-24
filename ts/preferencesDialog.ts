@@ -246,6 +246,12 @@ class PreferencesDialog {
         this.enableChatGPT.checked = preferences.chatGpt.enabled;
         this.chatGPTKey.value = preferences.chatGpt.apiKey;
         this.chatGPTModel.value = preferences.chatGpt.model;
+        this.chatGPTKey.disabled = !preferences.chatGpt.enabled;
+        this.chatGPTModel.disabled = !preferences.chatGpt.enabled;
+        this.enableChatGPT.addEventListener('change', () => {
+            this.chatGPTKey.disabled = !this.enableChatGPT.checked;
+            this.chatGPTModel.disabled = !this.enableChatGPT.checked;
+        });
 
         this.enableModernmt.checked = preferences.modernmt.enabled;
         this.modernmtKey.value = preferences.modernmt.apiKey;
@@ -1298,7 +1304,7 @@ class PreferencesDialog {
         td = document.createElement('td');
         td.classList.add('middle');
         td.classList.add('fill_width');
-        td.innerHTML = '<select id="chatGPTModel" class="table_select"><option value="gpt-3.5-turbo">gpt-3.5-turbo</option><option value="gpt-4">gpt-4</option></select>';
+        td.innerHTML = '<select id="chatGPTModel" class="table_select"><option value="gpt-3.5-turbo">gpt-3.5-turbo</option><option value="gpt-4">gpt-4</option><option value="gpt-4-turbo-preview">gpt-4-turbo-preview</option></select>';
         tr.appendChild(td);
 
         this.enableChatGPT = document.getElementById('enableChatGPT') as HTMLInputElement;

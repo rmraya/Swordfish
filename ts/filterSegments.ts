@@ -34,6 +34,14 @@ class FilterSegments {
                 this.clearFilter();
             }
         });
+        let regExp: HTMLInputElement = document.getElementById('isRegExp') as HTMLInputElement;
+        regExp.addEventListener('change', () => {
+            let caseSensitive: HTMLInputElement = document.getElementById('caseSensitive') as HTMLInputElement;
+            caseSensitive.disabled = regExp.checked;
+            if (regExp.checked) {
+                caseSensitive.checked = false;
+            }
+        });
         (document.getElementById('filterSegments') as HTMLButtonElement).addEventListener('click', () => {
             this.filterSegments();
         });
@@ -91,8 +99,14 @@ class FilterSegments {
         (document.getElementById('filterText') as HTMLInputElement).value = arg.filterText;
         (document.getElementById('source') as HTMLInputElement).checked = (arg.filterLanguage === 'source');
         (document.getElementById('target') as HTMLInputElement).checked = (arg.filterLanguage === 'target');
-        (document.getElementById('caseSensitive') as HTMLInputElement).checked = arg.caseSensitiveFilter;
         (document.getElementById('isRegExp') as HTMLInputElement).checked = arg.regExp;
+        let caseSensitive: HTMLInputElement = document.getElementById('caseSensitive') as HTMLInputElement;
+        caseSensitive.disabled = arg.regExp;
+        if (arg.regExp) {
+            caseSensitive.checked = false;
+        } else {
+            caseSensitive.checked = arg.caseSensitiveFilter;
+        }
         (document.getElementById('showUntranslated') as HTMLInputElement).checked = arg.showUntranslated;
         (document.getElementById('showTranslated') as HTMLInputElement).checked = arg.showTranslated;
         (document.getElementById('showConfirmed') as HTMLInputElement).checked = arg.showConfirmed;

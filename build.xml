@@ -11,6 +11,7 @@
         <pathelement location="jars/openxliff.jar"/>
         <pathelement location="jars/xmljava.jar"/>
         <pathelement location="jars/h2-1.4.200.jar"/>
+        <pathelement location="jars/sqlite-jdbc-3.43.0.0.jar"/>
     </path>
     <condition property="isWindows"> 
         <os family="windows"/>

@@ -17,6 +17,7 @@ import java.lang.System.Logger;
 import java.lang.System.Logger.Level;
 import java.net.URISyntaxException;
 import java.sql.SQLException;
+import java.text.MessageFormat;
 import java.util.Deque;
 import java.util.concurrent.ConcurrentLinkedDeque;
 
@@ -39,7 +40,7 @@ class TMXContentHandler implements IContentHandler {
 	private boolean inCDATA = false;
 	private int count;
 	private ITmEngine db;
-	
+
 	public TMXContentHandler(ITmEngine tmEngine) {
 		db = tmEngine;
 		stack = new ConcurrentLinkedDeque<>();
@@ -67,7 +68,8 @@ class TMXContentHandler implements IContentHandler {
 				}
 			} catch (IOException | SQLException | URISyntaxException e) {
 				// ignore
-				logger.log(Level.WARNING, "Error storing " + current, e);
+				MessageFormat mf = new MessageFormat(Messages.getString("TMXContentHandler.0"));
+				logger.log(Level.WARNING, mf.format(new String[] { current.toString() }), e);
 			}
 			count++;
 			current = null;

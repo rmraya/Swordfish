@@ -26,6 +26,7 @@ import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.sql.SQLException;
+import java.text.MessageFormat;
 import java.util.Collections;
 import java.util.Hashtable;
 import java.util.Iterator;
@@ -47,8 +48,8 @@ import com.maxprograms.languages.Language;
 import com.maxprograms.swordfish.models.Memory;
 import com.maxprograms.swordfish.tbx.Tbx2Tmx;
 import com.maxprograms.swordfish.tm.ITmEngine;
-import com.maxprograms.swordfish.tm.InternalDatabase;
 import com.maxprograms.swordfish.tm.RemoteDatabase;
+import com.maxprograms.swordfish.tm.SqliteDatabase;
 import com.maxprograms.xml.Element;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
@@ -59,7 +60,7 @@ public class GlossariesHandler implements HttpHandler {
 
 	private static Map<String, Memory> glossaries;
 	private static Map<String, ITmEngine> engines;
-	private static Map<String, JSONObject> openTasks;
+	private static Map<String, JSONObject> openTasks = new Hashtable<>();
 
 	@Override
 	public void handle(HttpExchange exchange) throws IOException {
@@ -83,7 +84,8 @@ public class GlossariesHandler implements HttpHandler {
 				}
 			}
 		} catch (IOException e) {
-			logger.log(Level.ERROR, "Error processing glossary " + exchange.getRequestURI().toString(), e);
+			MessageFormat mf = new MessageFormat(Messages.getString("GlossariesHandler.0"));
+			logger.log(Level.ERROR, mf.format(new String[] { exchange.getRequestURI().toString() }), e);
 		}
 
 	}
@@ -111,7 +113,8 @@ public class GlossariesHandler implements HttpHandler {
 			} else if ("/glossaries/addTerm".equals(url)) {
 				response = addTerm(request);
 			} else {
-				response.put(Constants.REASON, "Unknown request");
+				MessageFormat mf = new MessageFormat(Messages.getString("GlossariesHandler.1"));
+				response.put(Constants.REASON, mf.format(new String[] { url }));
 			}
 
 			if (!response.has(Constants.REASON)) {
@@ -131,22 +134,20 @@ public class GlossariesHandler implements HttpHandler {
 		JSONObject json = new JSONObject(request);
 		if (!json.has("process")) {
 			JSONObject error = new JSONObject();
-			error.put(Constants.REASON, "Missing 'process' parameter");
+			error.put(Constants.REASON, Messages.getString("GlossariesHandler.2"));
 			return error;
 		}
 		String process = json.getString("process");
-		if (openTasks == null) {
-			openTasks = new Hashtable<>();
-		}
 		if (openTasks.containsKey(process)) {
 			return openTasks.get(process);
 		}
 		JSONObject error = new JSONObject();
-		error.put(Constants.REASON, "No such process: " + process);
+		MessageFormat mf = new MessageFormat(Messages.getString("GlossariesHandler.3"));
+		error.put(Constants.REASON, mf.format(new String[] { process }));
 		return error;
 	}
 
-	private static JSONObject createGlossary(String request) throws IOException, SQLException {
+	private static JSONObject createGlossary(String request) throws IOException, SQLException, URISyntaxException {
 		JSONObject result = new JSONObject();
 		JSONObject json = new JSONObject(request);
 		if (!json.has("id")) {
@@ -156,7 +157,7 @@ public class GlossariesHandler implements HttpHandler {
 			json.put("creationDate", System.currentTimeMillis());
 		}
 		Memory mem = new Memory(json);
-		InternalDatabase engine = new InternalDatabase(mem.getId(), getWorkFolder());
+		ITmEngine engine = new SqliteDatabase(mem.getId(), getWorkFolder());
 		engine.close();
 		if (glossaries == null) {
 			loadGlossariesList();
@@ -224,13 +225,10 @@ public class GlossariesHandler implements HttpHandler {
 		if (json.has("glossaries")) {
 			final String process = "" + System.currentTimeMillis();
 			result.put("process", process);
-			if (openTasks == null) {
-				openTasks = new Hashtable<>();
-			}
 			JSONObject obj = new JSONObject();
 			obj.put(Constants.PROGRESS, Constants.PROCESSING);
 			openTasks.put(process, obj);
-			new Thread(() -> {
+			Thread.ofVirtual().start(() -> {
 				try {
 					JSONArray array = json.getJSONArray("glossaries");
 					for (int i = 0; i < array.length(); i++) {
@@ -251,9 +249,9 @@ public class GlossariesHandler implements HttpHandler {
 					error.put(Constants.REASON, e.getMessage());
 					openTasks.put(process, error);
 				}
-			}).start();
+			});
 		} else {
-			result.put(Constants.REASON, "Missing 'glossaries' parameter");
+			result.put(Constants.REASON, Messages.getString("GlossariesHandler.4"));
 		}
 		return result;
 	}
@@ -263,7 +261,8 @@ public class GlossariesHandler implements HttpHandler {
 			File wfolder = new File(getWorkFolder(), id);
 			TmsServer.deleteFolder(wfolder);
 		} catch (IOException ioe) {
-			logger.log(Level.WARNING, "Folder '" + id + "' will be deleted on next start");
+			MessageFormat mf = new MessageFormat(Messages.getString("GlossariesHandler.5"));
+			logger.log(Level.WARNING, mf.format(new String[] { id }));
 		}
 	}
 
@@ -271,24 +270,21 @@ public class GlossariesHandler implements HttpHandler {
 		JSONObject result = new JSONObject();
 		final JSONObject json = new JSONObject(request);
 		if (!json.has("glossary")) {
-			result.put(Constants.REASON, "Missing 'glossary' parameter");
+			result.put(Constants.REASON, Messages.getString("GlossariesHandler.6"));
 			return result;
 		}
 		if (!json.has("file")) {
-			result.put(Constants.REASON, "Missing 'file' parameter");
+			result.put(Constants.REASON, Messages.getString("GlossariesHandler.7"));
 			return result;
 		}
 		if (!json.has("srcLang")) {
 			json.put("srcLang", "*all*");
 		}
 		final String process = "" + System.currentTimeMillis();
-		if (openTasks == null) {
-			openTasks = new Hashtable<>();
-		}
 		JSONObject obj = new JSONObject();
 		obj.put(Constants.PROGRESS, Constants.PROCESSING);
 		openTasks.put(process, obj);
-		new Thread(() -> {
+		Thread.ofVirtual().start(() -> {
 			try {
 				if (glossaries == null) {
 					loadGlossariesList();
@@ -311,13 +307,14 @@ public class GlossariesHandler implements HttpHandler {
 				JSONObject completed = new JSONObject();
 				completed.put(Constants.PROGRESS, Constants.COMPLETED);
 				openTasks.put(process, completed);
-			} catch (IOException | JSONException | SAXException | ParserConfigurationException | SQLException | URISyntaxException e) {
+			} catch (IOException | JSONException | SAXException | ParserConfigurationException | SQLException
+					| URISyntaxException e) {
 				logger.log(Level.ERROR, e.getMessage(), e);
 				JSONObject error = new JSONObject();
 				error.put(Constants.REASON, e.getMessage());
 				openTasks.put(process, error);
 			}
-		}).start();
+		});
 		result.put("process", process);
 		return result;
 	}
@@ -333,7 +330,7 @@ public class GlossariesHandler implements HttpHandler {
 		if (glossaries == null) {
 			loadGlossariesList();
 		}
-		ITmEngine engine = memory.getType().equals(Memory.LOCAL) ? new InternalDatabase(memory.getId(), getWorkFolder())
+		ITmEngine engine = memory.getType().equals(Memory.LOCAL) ? new SqliteDatabase(memory.getId(), getWorkFolder())
 				: new RemoteDatabase(memory.getServer(), memory.getUser(), memory.getPassword(), memory.getId());
 		engines.put(memory.getId(), engine);
 	}
@@ -364,7 +361,7 @@ public class GlossariesHandler implements HttpHandler {
 		}
 		engines.clear();
 		if (TmsServer.isDebug()) {
-			logger.log(Level.INFO, "Glossaries closed");
+			logger.log(Level.INFO, Messages.getString("GlossariesHandler.8"));
 		}
 	}
 
@@ -372,29 +369,25 @@ public class GlossariesHandler implements HttpHandler {
 		JSONObject result = new JSONObject();
 		JSONObject json = new JSONObject(request);
 		if (!json.has("glossary")) {
-			result.put(Constants.REASON, "Missing 'glossary' parameter");
+			result.put(Constants.REASON, Messages.getString("GlossariesHandler.9"));
 			return result;
 		}
 		String id = json.getString("glossary");
 
 		if (!json.has("file")) {
-			result.put(Constants.REASON, "Missing 'file' parameter");
+			result.put(Constants.REASON, Messages.getString("GlossariesHandler.10"));
 			return result;
 		}
 		File glossFile = new File(json.getString("file"));
 		if (!glossFile.exists()) {
-			result.put(Constants.REASON, "Glossary file does not exist");
+			result.put(Constants.REASON, Messages.getString("GlossariesHandler.11"));
 			return result;
 		}
-
 		final String process = "" + System.currentTimeMillis();
-		if (openTasks == null) {
-			openTasks = new Hashtable<>();
-		}
 		JSONObject obj = new JSONObject();
 		obj.put(Constants.PROGRESS, Constants.PROCESSING);
 		openTasks.put(process, obj);
-		new Thread(() -> {
+		Thread.ofVirtual().start(() -> {
 			try {
 				openGlossary(glossaries.get(id));
 				File tempFile = null;
@@ -410,7 +403,8 @@ public class GlossariesHandler implements HttpHandler {
 				String subject = json.has("subject") ? json.getString("subject") : "";
 				try {
 					int imported = engine.storeTMX(tmxFile, project, client, subject);
-					logger.log(Level.INFO, "Imported " + imported);
+					MessageFormat mf = new MessageFormat(Messages.getString("GlossariesHandler.12"));
+					logger.log(Level.INFO, mf.format(new String[] { "" + imported }));
 					JSONObject completed = new JSONObject();
 					completed.put("imported", imported);
 					completed.put(Constants.PROGRESS, Constants.COMPLETED);
@@ -431,7 +425,7 @@ public class GlossariesHandler implements HttpHandler {
 				error.put(Constants.REASON, e.getMessage());
 				openTasks.put(process, error);
 			}
-		}).start();
+		});
 		result.put("process", process);
 		return result;
 	}
@@ -467,7 +461,7 @@ public class GlossariesHandler implements HttpHandler {
 		byte[] array = new byte[40960];
 		try (FileInputStream input = new FileInputStream(file)) {
 			if (input.read(array) == -1) {
-				throw new IOException("Premature end of file");
+				throw new IOException(Messages.getString("GlossariesHandler.13"));
 			}
 		}
 		String string = "";
@@ -493,7 +487,7 @@ public class GlossariesHandler implements HttpHandler {
 		JSONObject result = new JSONObject();
 		JSONObject json = new JSONObject(request);
 		if (!json.has("glossary")) {
-			result.put(Constants.REASON, "Missing 'glossary' parameter");
+			result.put(Constants.REASON, Messages.getString("GlossariesHandler.14"));
 			return result;
 		}
 		try {
@@ -528,7 +522,7 @@ public class GlossariesHandler implements HttpHandler {
 		JSONObject result = new JSONObject();
 		JSONObject json = new JSONObject(request);
 		if (!json.has("glossary")) {
-			result.put(Constants.REASON, "Missing 'glossary' parameter");
+			result.put(Constants.REASON, Messages.getString("GlossariesHandler.14"));
 			return result;
 		}
 		String searchStr = json.getString("searchStr");

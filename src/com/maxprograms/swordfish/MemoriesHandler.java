@@ -24,6 +24,7 @@ import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.sql.SQLException;
+import java.text.MessageFormat;
 import java.util.Collections;
 import java.util.Hashtable;
 import java.util.Iterator;
@@ -47,8 +48,8 @@ import com.maxprograms.languages.Language;
 import com.maxprograms.languages.LanguageUtils;
 import com.maxprograms.swordfish.models.Memory;
 import com.maxprograms.swordfish.tm.ITmEngine;
-import com.maxprograms.swordfish.tm.InternalDatabase;
 import com.maxprograms.swordfish.tm.RemoteDatabase;
+import com.maxprograms.swordfish.tm.SqliteDatabase;
 import com.maxprograms.swordfish.xliff.XliffUtils;
 import com.maxprograms.xml.Element;
 import com.maxprograms.xml.TextNode;
@@ -62,7 +63,8 @@ public class MemoriesHandler implements HttpHandler {
 
 	private static Map<String, Memory> memories;
 	private static Map<String, ITmEngine> engines;
-	private static Map<String, JSONObject> openTasks;
+	private static Map<String, JSONObject> openTasks = new Hashtable<>();
+	private static Map<String, SqliteDatabase> localEngines = new Hashtable<>();
 
 	@Override
 	public void handle(HttpExchange exchange) {
@@ -86,7 +88,8 @@ public class MemoriesHandler implements HttpHandler {
 				}
 			}
 		} catch (IOException e) {
-			logger.log(Level.ERROR, "Error processing memory " + exchange.getRequestURI().toString(), e);
+			MessageFormat mf = new MessageFormat(Messages.getString("MemoriesHandler.0"));
+			logger.log(Level.ERROR, mf.format(new String[] { exchange.getRequestURI().toString() }), e);
 		}
 	}
 
@@ -113,9 +116,9 @@ public class MemoriesHandler implements HttpHandler {
 			} else if ("/memories/getLanguages".equals(url)) {
 				response = getLanguages(request);
 			} else {
-				response.put(Constants.REASON, "Unknown request");
+				MessageFormat mf = new MessageFormat(Messages.getString("MemoriesHandler.1"));
+				response.put(Constants.REASON, mf.format(new String[] { url }));
 			}
-
 			if (!response.has(Constants.REASON)) {
 				response.put(Constants.STATUS, Constants.SUCCESS);
 			} else {
@@ -133,17 +136,14 @@ public class MemoriesHandler implements HttpHandler {
 		JSONObject result = new JSONObject();
 		final JSONObject json = new JSONObject(request);
 		if (!json.has("memory")) {
-			result.put(Constants.REASON, "Missing 'memory' parameter");
+			result.put(Constants.REASON, Messages.getString("MemoriesHandler.2"));
 			return result;
 		}
 		final String process = "" + System.currentTimeMillis();
-		if (openTasks == null) {
-			openTasks = new Hashtable<>();
-		}
 		JSONObject obj = new JSONObject();
 		obj.put(Constants.PROGRESS, Constants.PROCESSING);
 		openTasks.put(process, obj);
-		new Thread(() -> {
+		Thread.ofVirtual().start(() -> {
 			try {
 				if (memories == null) {
 					loadMemoriesList();
@@ -165,7 +165,7 @@ public class MemoriesHandler implements HttpHandler {
 				error.put(Constants.REASON, e.getMessage());
 				openTasks.put(process, error);
 			}
-		}).start();
+		});
 		result.put("process", process);
 		return result;
 	}
@@ -174,18 +174,21 @@ public class MemoriesHandler implements HttpHandler {
 		JSONObject json = new JSONObject(request);
 		if (!json.has("process")) {
 			JSONObject error = new JSONObject();
-			error.put(Constants.REASON, "Missing 'process' parameter");
+			error.put(Constants.REASON, Messages.getString("MemoriesHandler.3"));
 			return error;
 		}
 		String process = json.getString("process");
-		if (openTasks == null) {
-			openTasks = new Hashtable<>();
-		}
 		if (openTasks.containsKey(process)) {
-			return openTasks.get(process);
+			JSONObject status = openTasks.get(process);
+			if (localEngines.containsKey(process)) {
+				SqliteDatabase engine = localEngines.get(process);
+				status.put("imported", engine.getCount());
+			}
+			return status;
 		}
 		JSONObject error = new JSONObject();
-		error.put(Constants.REASON, "No such process: " + process);
+		MessageFormat mf = new MessageFormat(Messages.getString("MemoriesHandler.4"));
+		error.put(Constants.REASON, mf.format(new String[] { process }));
 		return error;
 	}
 
@@ -193,7 +196,7 @@ public class MemoriesHandler implements HttpHandler {
 		JSONObject result = new JSONObject();
 		JSONObject json = new JSONObject(request);
 		if (!json.has("memories")) {
-			result.put(Constants.REASON, "Missing 'memories' parameter");
+			result.put(Constants.REASON, Messages.getString("MemoriesHandler.5"));
 			return result;
 		}
 		String searchStr = json.getString("searchStr");
@@ -203,19 +206,16 @@ public class MemoriesHandler implements HttpHandler {
 		int limit = json.getInt("limit");
 		JSONArray memoriesArray = json.getJSONArray("memories");
 		final String process = "" + System.currentTimeMillis();
-		if (openTasks == null) {
-			openTasks = new Hashtable<>();
-		}
 		JSONObject obj = new JSONObject();
 		obj.put(Constants.PROGRESS, Constants.PROCESSING);
 		openTasks.put(process, obj);
-		new Thread(() -> {
+		Thread.ofVirtual().start(() -> {
 			try {
 				if (isRegexp) {
 					try {
 						Pattern.compile(searchStr);
 					} catch (PatternSyntaxException e) {
-						throw new IOException("Invalid regular expression");
+						throw new IOException(Messages.getString("MemoriesHandler.6"));
 					}
 				}
 				List<Element> matches = new Vector<>();
@@ -236,7 +236,7 @@ public class MemoriesHandler implements HttpHandler {
 				error.put(Constants.REASON, e.getMessage());
 				openTasks.put(process, error);
 			}
-		}).start();
+		});
 		result.put("process", process);
 		return result;
 	}
@@ -245,38 +245,39 @@ public class MemoriesHandler implements HttpHandler {
 		JSONObject result = new JSONObject();
 		JSONObject json = new JSONObject(request);
 		if (!json.has("memory")) {
-			result.put(Constants.REASON, "Missing 'memory' parameter");
+			result.put(Constants.REASON, Messages.getString("MemoriesHandler.7"));
 			return result;
 		}
 		String memory = json.getString("memory");
 		if (!json.has("tmx")) {
-			result.put(Constants.REASON, "Missing 'tmx' parameter");
+			result.put(Constants.REASON, Messages.getString("MemoriesHandler.8"));
 			return result;
 		}
 		File tmx = new File(json.getString("tmx"));
 		if (!tmx.exists()) {
-			result.put(Constants.REASON, "TMX file does not exist");
+			result.put(Constants.REASON, Messages.getString("MemoriesHandler.9"));
 			return result;
 		}
 
 		final String process = "" + System.currentTimeMillis();
-		if (openTasks == null) {
-			openTasks = new Hashtable<>();
-		}
 		JSONObject obj = new JSONObject();
 		obj.put(Constants.PROGRESS, Constants.PROCESSING);
 		openTasks.put(process, obj);
-		new Thread(() -> {
+		Thread.ofVirtual().start(() -> {
 			try {
 				open(memory);
 				ITmEngine engine = getEngine(memory);
+				if (engine.getType().equals(SqliteDatabase.class.getName())) {
+					localEngines.put(process, (SqliteDatabase) engine);
+				}
 				String project = json.has("project") ? json.getString("project") : "";
 				String client = json.has("client") ? json.getString("client") : "";
 				String subject = json.has("subject") ? json.getString("subject") : "";
 				try {
 					int imported = engine.storeTMX(tmx.getAbsolutePath(), project, client, subject);
 					if (TmsServer.isDebug()) {
-						logger.log(Level.INFO, "Imported " + imported);
+						MessageFormat mf = new MessageFormat(Messages.getString("MemoriesHandler.10"));
+						logger.log(Level.INFO, mf.format(new String[] { "" + imported }));
 					}
 					JSONObject completed = new JSONObject();
 					completed.put("imported", imported);
@@ -288,6 +289,9 @@ public class MemoriesHandler implements HttpHandler {
 					openTasks.put(process, error);
 					logger.log(Level.ERROR, e.getMessage(), e);
 				}
+				if (engine.getType().equals(SqliteDatabase.class.getName())) {
+					localEngines.remove(process);
+				}
 				close(memory);
 			} catch (IOException | SQLException | URISyntaxException e) {
 				logger.log(Level.ERROR, e.getMessage(), e);
@@ -295,7 +299,7 @@ public class MemoriesHandler implements HttpHandler {
 				error.put(Constants.REASON, e.getMessage());
 				openTasks.put(process, error);
 			}
-		}).start();
+		});
 		result.put("process", process);
 		return result;
 	}
@@ -304,24 +308,21 @@ public class MemoriesHandler implements HttpHandler {
 		JSONObject result = new JSONObject();
 		final JSONObject json = new JSONObject(request);
 		if (!json.has("memory")) {
-			result.put(Constants.REASON, "Missing 'memory' parameter");
+			result.put(Constants.REASON, Messages.getString("MemoriesHandler.11"));
 			return result;
 		}
 		if (!json.has("tmx")) {
-			result.put(Constants.REASON, "Missing 'tmx' parameter");
+			result.put(Constants.REASON, Messages.getString("MemoriesHandler.12"));
 			return result;
 		}
 		if (!json.has("srcLang")) {
 			json.put("srcLang", "*all*");
 		}
 		final String process = "" + System.currentTimeMillis();
-		if (openTasks == null) {
-			openTasks = new Hashtable<>();
-		}
 		JSONObject obj = new JSONObject();
 		obj.put(Constants.PROGRESS, Constants.PROCESSING);
 		openTasks.put(process, obj);
-		new Thread(() -> {
+		Thread.ofVirtual().start(() -> {
 			try {
 				if (memories == null) {
 					loadMemoriesList();
@@ -344,13 +345,14 @@ public class MemoriesHandler implements HttpHandler {
 				JSONObject completed = new JSONObject();
 				completed.put(Constants.PROGRESS, Constants.COMPLETED);
 				openTasks.put(process, completed);
-			} catch (IOException | SAXException | ParserConfigurationException | SQLException | JSONException | URISyntaxException e) {
+			} catch (IOException | SAXException | ParserConfigurationException | SQLException | JSONException
+					| URISyntaxException e) {
 				logger.log(Level.ERROR, e.getMessage(), e);
 				JSONObject error = new JSONObject();
 				error.put(Constants.REASON, e.getMessage());
 				openTasks.put(process, error);
 			}
-		}).start();
+		});
 		result.put("process", process);
 		return result;
 	}
@@ -362,13 +364,10 @@ public class MemoriesHandler implements HttpHandler {
 		if (json.has("memories")) {
 			final String process = "" + System.currentTimeMillis();
 			result.put("process", process);
-			if (openTasks == null) {
-				openTasks = new Hashtable<>();
-			}
 			JSONObject obj = new JSONObject();
 			obj.put(Constants.PROGRESS, Constants.PROCESSING);
 			openTasks.put(process, obj);
-			new Thread(() -> {
+			Thread.ofVirtual().start(() -> {
 				try {
 					JSONArray array = json.getJSONArray("memories");
 					for (int i = 0; i < array.length(); i++) {
@@ -390,9 +389,9 @@ public class MemoriesHandler implements HttpHandler {
 					error.put(Constants.REASON, e.getMessage());
 					openTasks.put(process, error);
 				}
-			}).start();
+			});
 		} else {
-			result.put(Constants.REASON, "Missing 'memories' parameter");
+			result.put(Constants.REASON, Messages.getString("MemoriesHandler.13"));
 		}
 		return result;
 	}
@@ -402,7 +401,8 @@ public class MemoriesHandler implements HttpHandler {
 			File wfolder = new File(getWorkFolder(), id);
 			TmsServer.deleteFolder(wfolder);
 		} catch (IOException ioe) {
-			logger.log(Level.WARNING, "Folder '" + id + "' will be deleted on next start");
+			MessageFormat mf = new MessageFormat(Messages.getString("MemoriesHandler.14"));
+			logger.log(Level.WARNING, mf.format(new String[] { id }));
 		}
 	}
 
@@ -441,7 +441,7 @@ public class MemoriesHandler implements HttpHandler {
 		return result;
 	}
 
-	private static JSONObject createMemory(String request) throws IOException, SQLException {
+	private static JSONObject createMemory(String request) throws IOException, SQLException, URISyntaxException {
 		JSONObject result = new JSONObject();
 		JSONObject json = new JSONObject(request);
 		if (!json.has("id")) {
@@ -451,7 +451,7 @@ public class MemoriesHandler implements HttpHandler {
 			json.put("creationDate", System.currentTimeMillis());
 		}
 		Memory mem = new Memory(json);
-		InternalDatabase engine = new InternalDatabase(mem.getId(), getWorkFolder());
+		ITmEngine engine = new SqliteDatabase(mem.getId(), getWorkFolder());
 		engine.close();
 		if (memories == null) {
 			loadMemoriesList();
@@ -510,7 +510,7 @@ public class MemoriesHandler implements HttpHandler {
 		}
 		if (!engines.containsKey(id)) {
 			Memory memory = memories.get(id);
-			ITmEngine engine = memory.getType().equals(Memory.LOCAL) ? new InternalDatabase(id, getWorkFolder())
+			ITmEngine engine = memory.getType().equals(Memory.LOCAL) ? new SqliteDatabase(id, getWorkFolder())
 					: new RemoteDatabase(memory.getServer(), memory.getUser(), memory.getPassword(), id);
 			engines.put(id, engine);
 		}
@@ -531,7 +531,7 @@ public class MemoriesHandler implements HttpHandler {
 		}
 		engines.clear();
 		if (TmsServer.isDebug()) {
-			logger.log(Level.INFO, "Memories closed");
+			logger.log(Level.INFO, Messages.getString("MemoriesHandler.15"));
 		}
 	}
 

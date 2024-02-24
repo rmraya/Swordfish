@@ -48,7 +48,7 @@ public class Split {
         Document doc = builder.build(xliff);
         Element root = doc.getRootElement();
         if (!"xliff".equals(root.getName())) {
-            throw new IOException("Selected file is not an XLIFF document");
+            throw new IOException(Messages.getString("Split.0"));
         }
         File folder = new File(outputFolder);
         if (!folder.exists()) {
@@ -61,7 +61,7 @@ public class Split {
         while (it.hasNext()) {
             String original = it.next().getAttributeValue("original");
             if (original.isEmpty()) {
-                throw new IOException("<file> without \"original\" attribute");
+                throw new IOException(Messages.getString("Split.1"));
             }
             originals.add(original);
         }

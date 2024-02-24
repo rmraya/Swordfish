@@ -47,8 +47,8 @@ import com.maxprograms.xml.XMLNode;
 public class XliffUtils {
 
 	public static final String STYLE = "class='highlighted'";
-	private static final String NOTXLIFF = "Selected file is not an XLIFF document";
-	private static final String NOTSWORDFISH = "Selected file is not a Swordfish project";
+	private static final String NOTXLIFF = Messages.getString("XliffUtils.0");
+	private static final String NOTSWORDFISH = Messages.getString("XliffUtils.1");
 	private static int maxTag = 0;
 	private static JSONObject tags;
 

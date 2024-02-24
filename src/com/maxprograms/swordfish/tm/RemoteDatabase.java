@@ -199,8 +199,10 @@ public class RemoteDatabase implements ITmEngine {
             try (BufferedReader reader = new BufferedReader(new InputStreamReader(stream))) {
                 String line;
                 while ((line = reader.readLine()) != null) {
+                    if (!sb.isEmpty()) {
+                        sb.append('\n');
+                    }
                     sb.append(line);
-                    sb.append('\n');
                 }
             }
         }

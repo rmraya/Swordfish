@@ -477,7 +477,7 @@ export class Swordfish {
             Swordfish.destroyWindow(Swordfish.concordanceSearchWindow);
         });
         ipcMain.on('get-concordance', (event: IpcMainEvent, arg: any) => {
-            Swordfish.concordanceSearch(arg);
+            Swordfish.concordanceSearch(event, arg);
         });
         ipcMain.on('get-selection', (event: IpcMainEvent) => {
             Swordfish.selectionRequest = event;
@@ -2659,7 +2659,7 @@ export class Swordfish {
     static importTmxFile(arg: any): void {
         Swordfish.destroyWindow(Swordfish.importTmxWindow);
         Swordfish.mainWindow.webContents.send('start-waiting');
-        Swordfish.mainWindow.webContents.send('set-status', 'Importing TMX');
+        Swordfish.mainWindow.webContents.send('set-status', 'Importing TMX File');
         Swordfish.sendRequest('/memories/import', arg,
             (data: any) => {
                 if (data.status !== Swordfish.SUCCESS) {
@@ -2670,6 +2670,9 @@ export class Swordfish {
                 Swordfish.currentStatus = data;
                 let processId: string = data.process;
                 let intervalObject = setInterval(() => {
+                    if (Swordfish.currentStatus.imported) {
+                        Swordfish.mainWindow.webContents.send('set-status', 'Imported ' + Swordfish.currentStatus.imported + ' units');
+                    }
                     if (Swordfish.currentStatus.status === Swordfish.SUCCESS) {
                         if (Swordfish.currentStatus.progress === Swordfish.COMPLETED) {
                             Swordfish.mainWindow.webContents.send('end-waiting');
@@ -2687,7 +2690,7 @@ export class Swordfish {
                         return;
                     }
                     Swordfish.getMemoriesProgress(processId);
-                }, 500);
+                }, 2500);
             },
             (reason: string) => {
                 Swordfish.showMessage({ type: 'error', message: reason });
@@ -4320,10 +4323,12 @@ export class Swordfish {
         Swordfish.setLocation(this.concordanceSearchWindow, 'concordanceSearch.html');
     }
 
-    static concordanceSearch(arg: any): void {
+    static concordanceSearch(event: IpcMainEvent, arg: any): void {
+        event.sender.send('start-waiting');
         Swordfish.sendRequest('/memories/concordance', arg,
             (data: any) => {
                 if (data.status !== Swordfish.SUCCESS) {
+                    event.sender.send('end-waiting');
                     Swordfish.showMessage({ type: 'error', message: data.reason });
                     return;
                 }
@@ -4332,16 +4337,14 @@ export class Swordfish {
                 let intervalObject = setInterval(() => {
                     if (Swordfish.currentStatus.status === Swordfish.SUCCESS) {
                         if (Swordfish.currentStatus.progress === Swordfish.COMPLETED) {
-                            Swordfish.mainWindow.webContents.send('end-waiting');
-                            Swordfish.mainWindow.webContents.send('set-status', '');
                             clearInterval(intervalObject);
                             Swordfish.concordanceResults(Swordfish.currentStatus);
+                            event.sender.send('end-waiting');
                             return;
                         }
                     }
                     if (Swordfish.currentStatus.status === Swordfish.ERROR) {
-                        Swordfish.mainWindow.webContents.send('end-waiting');
-                        Swordfish.mainWindow.webContents.send('set-status', '');
+                        event.sender.send('end-waiting');
                         clearInterval(intervalObject);
                         Swordfish.showMessage({ type: 'error', message: Swordfish.currentStatus.reason });
                         return;
@@ -4350,6 +4353,7 @@ export class Swordfish {
                 }, 500);
             },
             (reason: string) => {
+                event.sender.send('end-waiting');
                 Swordfish.showMessage({ type: 'error', message: reason });
             }
         );
@@ -5287,7 +5291,6 @@ export class Swordfish {
 
     static startup(): void {
         Swordfish.spellCheckerLanguages = Swordfish.mainWindow.webContents.session.availableSpellCheckerLanguages;
-        Swordfish.checkUpdates(true);
         if (Swordfish.currentPreferences.srcLang === 'none') {
             Swordfish.getDefaultLanguages();
         }
@@ -5303,6 +5306,135 @@ export class Swordfish {
                 message: 'You are running a version for Macs with Intel processors on a Mac with Apple chipset.'
             });
         }
+        setTimeout(() => {
+            if (Swordfish.needsUpdate()) {
+                dialog.showMessageBox(Swordfish.mainWindow, {
+                    type: 'question',
+                    message: 'Swordfish needs to upgrade its databases. This may take several minutes. Do you want to proceed?',
+                    buttons: ['Yes', 'No']
+                }).then((selection: Electron.MessageBoxReturnValue) => {
+                    if (selection.response === 0) {
+                        Swordfish.updateDatabases();
+                        Swordfish.checkUpdates(true);
+                    } else {
+                        Swordfish.showMessage({
+                            type: 'warning',
+                            message: 'You can only work on new projects, memories, and glossaries until old databases are upgraded.'
+                        });
+                        Swordfish.checkUpdates(true);
+                    }
+                });
+            } else {
+                Swordfish.checkUpdates(true);
+            }
+        }, 2000);
+    }
+
+    static needsUpdate(): boolean {
+        let projectsFolder: string = Swordfish.path.join(app.getPath('appData'), app.name, 'projects');
+        if (existsSync(projectsFolder)) {
+            let projectsList: string = Swordfish.path.join(projectsFolder, 'projects.json');
+            if (existsSync(projectsList)) {
+                let projectsJson: any = JSON.parse(readFileSync(projectsList, 'utf8'));
+                let projects: any[] = projectsJson.projects;
+                for (let project of projects) {
+                    let projectFolder: string = Swordfish.path.join(projectsFolder, project.id);
+                    let dbFile: string = Swordfish.path.join(projectFolder, 'h2data');
+                    let sqlite: string = Swordfish.path.join(projectFolder, 'sqlite');
+                    if (!existsSync(sqlite) && existsSync(dbFile)) {
+                        return true;
+                    }
+                }
+            }
+        }
+        let memoriesFolder: string = Swordfish.path.join(app.getPath('appData'), app.name, 'memories');
+        if (existsSync(memoriesFolder)) {
+            let memoriesList: string = Swordfish.path.join(memoriesFolder, 'memories.json');
+            if (existsSync(memoriesList)) {
+                let memoriesJson: any = JSON.parse(readFileSync(memoriesList, 'utf8'));
+                let keys: string[] = Object.keys(memoriesJson);
+                keys.forEach((key: string) => {
+                    let memoryFolder: string = Swordfish.path.join(memoriesFolder, key);
+                    let dbFile: string = Swordfish.path.join(memoryFolder, 'db.mv.db');
+                    if (existsSync(dbFile)) {
+                        return true;
+                    }
+                });
+            }
+        }
+        let glossariesFolder: string = Swordfish.path.join(app.getPath('appData'), app.name, 'glossaries');
+        if (existsSync(glossariesFolder)) {
+            let glossariesList: string = Swordfish.path.join(glossariesFolder, 'glossaries.json');
+            if (existsSync(glossariesList)) {
+                let glossariesJson: any = JSON.parse(readFileSync(glossariesList, 'utf8'));
+                let keys: string[] = Object.keys(glossariesJson);
+                keys.forEach((key: string) => {
+                    let glossaryFolder: string = Swordfish.path.join(glossariesFolder, key);
+                    let dbFile: string = Swordfish.path.join(glossaryFolder, 'db.mv.db');
+                    if (existsSync(dbFile)) {
+                        return true;
+                    }
+                });
+            }
+        }
+        return false;
+    }
+
+    static updateDatabases(): void {
+        let javapath: string = Swordfish.path.join(app.getAppPath(), 'bin', 'java');
+        if (process.platform === 'win32') {
+            javapath = Swordfish.path.join(app.getAppPath(), 'bin', 'java.exe');
+        }
+        let projectsFolder: string = Swordfish.path.join(app.getPath('appData'), app.name, 'projects');
+        if (existsSync(projectsFolder)) {
+            let projectsList: string = Swordfish.path.join(projectsFolder, 'projects.json');
+            if (existsSync(projectsList)) {
+                let projectsJson: any = JSON.parse(readFileSync(projectsList, 'utf8'));
+                let projects: any[] = projectsJson.projects;
+                for (let project of projects) {
+                    let projectFolder: string = Swordfish.path.join(projectsFolder, project.id);
+                    let dbFile: string = Swordfish.path.join(projectFolder, 'h2data');
+                    let sqlite: string = Swordfish.path.join(projectFolder, 'sqlite');
+                    if (!existsSync(sqlite) && existsSync(dbFile)) {
+                        Swordfish.mainWindow.webContents.send('set-status', 'Upgrading project ' + project.description);
+                        execFileSync(javapath, ['-cp', 'lib/h2-1.4.200.jar', '--module-path', 'lib', '-m', 'swordfish/com.maxprograms.swordfish.DbUpgrade', '-project', projectFolder], { cwd: app.getAppPath(), windowsHide: true });
+                    }
+                }
+            }
+        }
+        let memoriesFolder: string = Swordfish.path.join(app.getPath('appData'), app.name, 'memories');
+        if (existsSync(memoriesFolder)) {
+            let memoriesList: string = Swordfish.path.join(memoriesFolder, 'memories.json');
+            if (existsSync(memoriesList)) {
+                let memoriesJson: any = JSON.parse(readFileSync(memoriesList, 'utf8'));
+                let keys: string[] = Object.keys(memoriesJson);
+                keys.forEach((key: string) => {
+                    let memoryFolder: string = Swordfish.path.join(memoriesFolder, key);
+                    let dbFile: string = Swordfish.path.join(memoryFolder, 'db.mv.db');
+                    if (existsSync(dbFile)) {
+                        Swordfish.mainWindow.webContents.send('set-status', 'Upgrading memory ' + memoriesJson[key].name);
+                        execFileSync(javapath, ['-cp', 'lib/h2-1.4.200.jar', '--module-path', 'lib', '-m', 'swordfish/com.maxprograms.swordfish.DbUpgrade', '-memory', memoryFolder], { cwd: app.getAppPath(), windowsHide: true });
+                    }
+                });
+            }
+        }
+        let glossariesFolder: string = Swordfish.path.join(app.getPath('appData'), app.name, 'glossaries');
+        if (existsSync(glossariesFolder)) {
+            let glossariesList: string = Swordfish.path.join(glossariesFolder, 'glossaries.json');
+            if (existsSync(glossariesList)) {
+                let glossariesJson: any = JSON.parse(readFileSync(glossariesList, 'utf8'));
+                let keys: string[] = Object.keys(glossariesJson);
+                keys.forEach((key: string) => {
+                    let glossaryFolder: string = Swordfish.path.join(glossariesFolder, key);
+                    let dbFile: string = Swordfish.path.join(glossaryFolder, 'db.mv.db');
+                    if (existsSync(dbFile)) {
+                        Swordfish.mainWindow.webContents.send('set-status', 'Upgrading glossary ' + glossariesJson[key].name);
+                        execFileSync(javapath, ['-cp', 'lib/h2-1.4.200.jar', '--module-path', 'lib', '-m', 'swordfish/com.maxprograms.swordfish.DbUpgrade', '-memory', glossaryFolder], { cwd: app.getAppPath(), windowsHide: true });
+                    }
+                });
+            }
+        }
+        Swordfish.mainWindow.webContents.send('set-status', '');
     }
 }
 
