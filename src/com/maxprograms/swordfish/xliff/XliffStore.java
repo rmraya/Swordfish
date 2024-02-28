@@ -2613,7 +2613,7 @@ public class XliffStore {
 		}
 		MemoriesHandler.open(memory);
 		ITmEngine engine = MemoriesHandler.getEngine(memory);
-		String sql = "SELECT file, unitId, segId, FROM segments WHERE state<>'final' AND type='S' AND targetText<>'' AND translate='Y'";
+		String sql = "SELECT file, unitId, segId FROM segments WHERE state<>'final' AND type='S' AND targetText<>'' AND translate='Y'";
 		try (ResultSet rs = stmt.executeQuery(sql)) {
 			try (PreparedStatement updateSegment = conn
 					.prepareStatement("UPDATE segments SET state='final' WHERE file=? AND unitId=? AND segId=?")) {
