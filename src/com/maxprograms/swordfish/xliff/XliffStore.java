@@ -1829,8 +1829,7 @@ public class XliffStore {
 		}
 		try (FileOutputStream out = new FileOutputStream(output)) {
 			writeTmxHeader(out);
-			String sql = "SELECT file, unitId, segId, source, target  FROM segments WHERE type='S' AND state='final' ORDER BY SELECT file, unitId, segId";
-
+			String sql = "SELECT file, unitId, segId, source, target FROM segments WHERE type='S' AND state='final' ORDER BY file, unitId, segId";
 			try (ResultSet rs = stmt.executeQuery(sql)) {
 				while (rs.next()) {
 					String file = rs.getString(1);

@@ -1,7 +1,7 @@
 {
     "name": "swordfish",
     "productName": "Swordfish",
-    "version": "5.0.1",
+    "version": "5.0.2",
     "description": "Swordfish Translation Editor",
     "main": "js/Swordfish.js",
     "scripts": {
@@ -24,8 +24,8 @@
         "typescript": "^5.3.3"
     },
     "dependencies": {
-        "mtengines": "^1.3.2",
-        "typesbcp47": "^1.2.0",
-        "typesxml": "^1.2.1"
+        "mtengines": "^1.3.3",        
+        "typesxml": "^1.3.0",
+        "typesbcp47": "^1.3.0"
     }
 }
