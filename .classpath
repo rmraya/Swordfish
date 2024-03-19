@@ -31,11 +31,30 @@
 			<attribute name="module" value="true"/>
 		</attributes>
 	</classpathentry>
-	<classpathentry kind="lib" path="jars/sqlite-jdbc-3.43.0.0.jar">
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER">
 		<attributes>
 			<attribute name="module" value="true"/>
 		</attributes>
 	</classpathentry>
-	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
+	<classpathentry kind="lib" path="jars/bcp47j.jar">
+		<attributes>
+			<attribute name="module" value="true"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="lib" path="jars/slf4j-api-2.0.9.jar">
+		<attributes>
+			<attribute name="module" value="true"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="lib" path="jars/slf4j-nop-2.0.9.jar">
+		<attributes>
+			<attribute name="module" value="true"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="lib" path="jars/sqlite-jdbc-3.45.1.0.jar">
+		<attributes>
+			<attribute name="module" value="true"/>
+		</attributes>
+	</classpathentry>
 	<classpathentry kind="output" path="out"/>
 </classpath>

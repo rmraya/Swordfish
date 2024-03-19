@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007-2022 Maxprograms.
+ * Copyright (c) 2007 - 2024 Maxprograms.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License 1.0 which accompanies this distribution,
@@ -24,9 +24,9 @@ module swordfish {
 	requires java.xml;
 	requires java.sql;
 	requires java.net.http;
-	requires jdk.security.auth;
-	requires jdk.crypto.cryptoki;
+	requires transitive javabcp47;
 	requires transitive openxliff;
+	requires transitive xmljava;
 	requires transitive jdk.httpserver;
 	requires transitive json;
 	requires java.logging;

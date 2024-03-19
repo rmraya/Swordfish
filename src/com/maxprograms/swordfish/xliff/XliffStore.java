@@ -1409,6 +1409,9 @@ public class XliffStore {
 					String key = e.getName() + e.getAttributeValue("id");
 					if (!tagsMap.containsKey(key)) {
 						String dataRef = e.getAttributeValue("dataRef");
+						if (dataRef.isEmpty()) {
+							dataRef = e.getAttributeValue("id");
+						}
 						XliffUtils.checkSVG(tag);
 						StringBuilder sb = new StringBuilder();
 						sb.append("<img data-ref='");

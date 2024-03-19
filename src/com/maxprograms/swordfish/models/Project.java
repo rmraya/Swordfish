@@ -211,11 +211,10 @@ public class Project implements Comparable<Project> {
 
 	@Override
 	public boolean equals(Object obj) {
-		if (!(obj instanceof Project)) {
-			return false;
+		if (obj instanceof Project p) {
+			return id.equals(p.getId());
 		}
-		Project p = (Project) obj;
-		return id.equals(p.getId());
+		return false;
 	}
 
 	@Override

@@ -77,11 +77,10 @@ public class SourceFile implements Comparable<SourceFile> {
 
 	@Override
 	public boolean equals(Object obj) {
-		if (!(obj instanceof SourceFile)) {
-			return false;
+		if (obj instanceof SourceFile s) {
+			return file.equals(s.getFile()) && type.equals(s.getType()) && encoding.equals(s.getEncoding());
 		}
-		SourceFile s = (SourceFile) obj;
-		return file.equals(s.getFile()) && type.equals(s.getType()) && encoding.equals(s.getEncoding());
+		return false;
 	}
 
 	@Override

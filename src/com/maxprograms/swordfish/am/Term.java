@@ -40,11 +40,10 @@ public class Term implements Comparable<Term> {
 
     @Override
     public boolean equals(Object o) {
-        if (!(o instanceof Term)) {
-            return false;
+        if (o instanceof Term t) {
+            return t.getSource().equals(source) && t.getTarget().equals(target);
         }
-        Term t = (Term) o;
-        return t.getSource().equals(source) && t.getTarget().equals(target);
+        return false;
     }
 
     @Override

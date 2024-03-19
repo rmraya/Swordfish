@@ -138,12 +138,11 @@ public class Match implements Comparable<Match> {
 
 	@Override
 	public boolean equals(Object obj) {
-		if (!(obj instanceof Match)) {
-			return false;
+		if (obj instanceof Match m) {
+			return source.equals(m.getSource()) && target.equals(m.getTarget()) && similarity == m.getSimilarity()
+					&& origin.equals(m.getOrigin()) && properties.equals(m.getProperties());
 		}
-		Match m = (Match) obj;
-		return source.equals(m.getSource()) && target.equals(m.getTarget()) && similarity == m.getSimilarity()
-				&& origin.equals(m.getOrigin()) && properties.equals(m.getProperties());
+		return false;
 	}
 
 	@Override
