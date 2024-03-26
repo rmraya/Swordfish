@@ -190,7 +190,7 @@ export class Swordfish {
             mkdirSync(Swordfish.appHome, { recursive: true });
         }
 
-        this.ls = spawn(this.javapath, ['-cp', 'lib/h2-1.4.200.jar', '--module-path', 'lib', '-m', 'swordfish/com.maxprograms.swordfish.TmsServer', '-port', '8070'], { cwd: app.getAppPath(), windowsHide: true });
+        this.ls = spawn(this.javapath, ['--module-path', 'lib', '-m', 'swordfish/com.maxprograms.swordfish.TmsServer', '-port', '8070'], { cwd: app.getAppPath(), windowsHide: true });
         this.ls.stdout.on('data', (data) => {
             console.log(`stdout: ${data}`);
         });
@@ -2058,7 +2058,7 @@ export class Swordfish {
             case 'Swordfish':
             case "OpenXLIFF":
             case "XMLJava":
-            case "H2":
+            case "BCP47J":
                 licenseFile = 'file://' + this.path.join(app.getAppPath(), 'html', 'licenses', 'EclipsePublicLicense1.0.html');
                 title = 'Eclipse Public License 1.0';
                 break;
@@ -5307,134 +5307,8 @@ export class Swordfish {
             });
         }
         setTimeout(() => {
-            if (Swordfish.needsUpdate()) {
-                dialog.showMessageBox(Swordfish.mainWindow, {
-                    type: 'question',
-                    message: 'Swordfish needs to upgrade its databases. This may take several minutes. Do you want to proceed?',
-                    buttons: ['Yes', 'No']
-                }).then((selection: Electron.MessageBoxReturnValue) => {
-                    if (selection.response === 0) {
-                        Swordfish.updateDatabases();
-                        Swordfish.checkUpdates(true);
-                    } else {
-                        Swordfish.showMessage({
-                            type: 'warning',
-                            message: 'You can only work on new projects, memories, and glossaries until old databases are upgraded.'
-                        });
-                        Swordfish.checkUpdates(true);
-                    }
-                });
-            } else {
-                Swordfish.checkUpdates(true);
-            }
+            Swordfish.checkUpdates(true);
         }, 2000);
-    }
-
-    static needsUpdate(): boolean {
-        let projectsFolder: string = Swordfish.path.join(app.getPath('appData'), app.name, 'projects');
-        if (existsSync(projectsFolder)) {
-            let projectsList: string = Swordfish.path.join(projectsFolder, 'projects.json');
-            if (existsSync(projectsList)) {
-                let projectsJson: any = JSON.parse(readFileSync(projectsList, 'utf8'));
-                let projects: any[] = projectsJson.projects;
-                for (let project of projects) {
-                    let projectFolder: string = Swordfish.path.join(projectsFolder, project.id);
-                    let dbFile: string = Swordfish.path.join(projectFolder, 'h2data');
-                    let sqlite: string = Swordfish.path.join(projectFolder, 'sqlite');
-                    if (!existsSync(sqlite) && existsSync(dbFile)) {
-                        return true;
-                    }
-                }
-            }
-        }
-        let memoriesFolder: string = Swordfish.path.join(app.getPath('appData'), app.name, 'memories');
-        if (existsSync(memoriesFolder)) {
-            let memoriesList: string = Swordfish.path.join(memoriesFolder, 'memories.json');
-            if (existsSync(memoriesList)) {
-                let memoriesJson: any = JSON.parse(readFileSync(memoriesList, 'utf8'));
-                let keys: string[] = Object.keys(memoriesJson);
-                keys.forEach((key: string) => {
-                    let memoryFolder: string = Swordfish.path.join(memoriesFolder, key);
-                    let dbFile: string = Swordfish.path.join(memoryFolder, 'db.mv.db');
-                    if (existsSync(dbFile)) {
-                        return true;
-                    }
-                });
-            }
-        }
-        let glossariesFolder: string = Swordfish.path.join(app.getPath('appData'), app.name, 'glossaries');
-        if (existsSync(glossariesFolder)) {
-            let glossariesList: string = Swordfish.path.join(glossariesFolder, 'glossaries.json');
-            if (existsSync(glossariesList)) {
-                let glossariesJson: any = JSON.parse(readFileSync(glossariesList, 'utf8'));
-                let keys: string[] = Object.keys(glossariesJson);
-                keys.forEach((key: string) => {
-                    let glossaryFolder: string = Swordfish.path.join(glossariesFolder, key);
-                    let dbFile: string = Swordfish.path.join(glossaryFolder, 'db.mv.db');
-                    if (existsSync(dbFile)) {
-                        return true;
-                    }
-                });
-            }
-        }
-        return false;
-    }
-
-    static updateDatabases(): void {
-        let javapath: string = Swordfish.path.join(app.getAppPath(), 'bin', 'java');
-        if (process.platform === 'win32') {
-            javapath = Swordfish.path.join(app.getAppPath(), 'bin', 'java.exe');
-        }
-        let projectsFolder: string = Swordfish.path.join(app.getPath('appData'), app.name, 'projects');
-        if (existsSync(projectsFolder)) {
-            let projectsList: string = Swordfish.path.join(projectsFolder, 'projects.json');
-            if (existsSync(projectsList)) {
-                let projectsJson: any = JSON.parse(readFileSync(projectsList, 'utf8'));
-                let projects: any[] = projectsJson.projects;
-                for (let project of projects) {
-                    let projectFolder: string = Swordfish.path.join(projectsFolder, project.id);
-                    let dbFile: string = Swordfish.path.join(projectFolder, 'h2data');
-                    let sqlite: string = Swordfish.path.join(projectFolder, 'sqlite');
-                    if (!existsSync(sqlite) && existsSync(dbFile)) {
-                        Swordfish.mainWindow.webContents.send('set-status', 'Upgrading project ' + project.description);
-                        execFileSync(javapath, ['-cp', 'lib/h2-1.4.200.jar', '--module-path', 'lib', '-m', 'swordfish/com.maxprograms.swordfish.DbUpgrade', '-project', projectFolder], { cwd: app.getAppPath(), windowsHide: true });
-                    }
-                }
-            }
-        }
-        let memoriesFolder: string = Swordfish.path.join(app.getPath('appData'), app.name, 'memories');
-        if (existsSync(memoriesFolder)) {
-            let memoriesList: string = Swordfish.path.join(memoriesFolder, 'memories.json');
-            if (existsSync(memoriesList)) {
-                let memoriesJson: any = JSON.parse(readFileSync(memoriesList, 'utf8'));
-                let keys: string[] = Object.keys(memoriesJson);
-                keys.forEach((key: string) => {
-                    let memoryFolder: string = Swordfish.path.join(memoriesFolder, key);
-                    let dbFile: string = Swordfish.path.join(memoryFolder, 'db.mv.db');
-                    if (existsSync(dbFile)) {
-                        Swordfish.mainWindow.webContents.send('set-status', 'Upgrading memory ' + memoriesJson[key].name);
-                        execFileSync(javapath, ['-cp', 'lib/h2-1.4.200.jar', '--module-path', 'lib', '-m', 'swordfish/com.maxprograms.swordfish.DbUpgrade', '-memory', memoryFolder], { cwd: app.getAppPath(), windowsHide: true });
-                    }
-                });
-            }
-        }
-        let glossariesFolder: string = Swordfish.path.join(app.getPath('appData'), app.name, 'glossaries');
-        if (existsSync(glossariesFolder)) {
-            let glossariesList: string = Swordfish.path.join(glossariesFolder, 'glossaries.json');
-            if (existsSync(glossariesList)) {
-                let glossariesJson: any = JSON.parse(readFileSync(glossariesList, 'utf8'));
-                let keys: string[] = Object.keys(glossariesJson);
-                keys.forEach((key: string) => {
-                    let glossaryFolder: string = Swordfish.path.join(glossariesFolder, key);
-                    let dbFile: string = Swordfish.path.join(glossaryFolder, 'db.mv.db');
-                    if (existsSync(dbFile)) {
-                        Swordfish.mainWindow.webContents.send('set-status', 'Upgrading glossary ' + glossariesJson[key].name);
-                        execFileSync(javapath, ['-cp', 'lib/h2-1.4.200.jar', '--module-path', 'lib', '-m', 'swordfish/com.maxprograms.swordfish.DbUpgrade', '-memory', glossaryFolder], { cwd: app.getAppPath(), windowsHide: true });
-                    }
-                });
-            }
-        }
-        Swordfish.mainWindow.webContents.send('set-status', '');
     }
 }
 

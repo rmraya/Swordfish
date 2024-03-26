@@ -86,7 +86,7 @@ public class SqliteDatabase implements ITmEngine {
         if (!databaseFolder.exists()) {
             Files.createDirectories(databaseFolder.toPath());
         }
-        if (new File(databaseFolder, "db.mv.db").exists()) {
+        if (new File(databaseFolder, "db.db").exists()) {
             MessageFormat mf = new MessageFormat(Messages.getString("SqliteDatabase.0"));
             throw new IOException(mf.format(new String[] { databaseFolder.getName() }));
         }

@@ -97,7 +97,6 @@ export class MTManager {
     }
 
     translateElement(source: XMLElement, project: string, file: string, unit: string, segment: string) {
-        console.log(source.toString());
         let promises: Promise<MTMatch>[] = [];
         for (let mtEngine of this.mtEngines) {
             if (mtEngine.handlesTags()) {
