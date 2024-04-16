@@ -48,6 +48,16 @@ public class TmsServer implements HttpHandler {
 
 	public TmsServer(Integer port) throws IOException {
 		server = HttpServer.create(new InetSocketAddress(port), 0);
+		Thread closeHook = new Thread(() -> {
+			try {
+				ProjectsHandler.closeAll();
+				MemoriesHandler.closeAll();
+				GlossariesHandler.closeAll();
+			} catch (SQLException | IOException | URISyntaxException e) {
+				logger.log(Level.ERROR, e);
+			}
+		});
+		Runtime.getRuntime().addShutdownHook(closeHook);
 	}
 
 	public static void main(String[] args) {
