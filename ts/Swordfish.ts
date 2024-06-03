@@ -4163,7 +4163,6 @@ export class Swordfish {
                                 if (Swordfish.currentStatus.progress === Swordfish.COMPLETED) {
                                     clearInterval(intervalObject);
                                     Swordfish.mainWindow.webContents.send('set-status', 'Translating...');
-
                                     let exportedFile: string = Swordfish.path.join(Swordfish.appHome, 'projects', arg.project, 'applymt.xlf');
                                     if (!existsSync(exportedFile)) {
                                         Swordfish.mainWindow.webContents.send('end-waiting');
@@ -4171,14 +4170,23 @@ export class Swordfish {
                                         Swordfish.showMessage({ type: 'error', message: 'Unable to find exported file' });
                                         return;
                                     }
-
-                                    let mtManager: MTManager = new MTManager(this.currentPreferences, arg.srcLang, arg.tgtLang);
-                                    mtManager.translateProject(arg.project, exportedFile);
-                                    unlinkSync(exportedFile);
-
-                                    Swordfish.mainWindow.webContents.send('end-waiting');
-                                    Swordfish.mainWindow.webContents.send('set-status', '');
-                                    Swordfish.mainWindow.webContents.send('reload-page', { project: arg.project });
+                                    try {
+                                        let mtManager: MTManager = new MTManager(this.currentPreferences, arg.srcLang, arg.tgtLang);
+                                        mtManager.translateProject(arg.project, exportedFile, arg.currentSegment);
+                                        unlinkSync(exportedFile);
+                                        Swordfish.mainWindow.webContents.send('end-waiting');
+                                        Swordfish.mainWindow.webContents.send('set-status', '');
+                                        Swordfish.mainWindow.webContents.send('reload-page', { project: arg.project });
+                                    } catch (e) {
+                                        Swordfish.mainWindow.webContents.send('end-waiting');
+                                        Swordfish.mainWindow.webContents.send('set-status', '');
+                                        if (e instanceof Error) {
+                                            Swordfish.showMessage({ type: 'error', message: e.message });
+                                        } else {
+                                            Swordfish.showMessage({ type: 'error', message: 'Unknown error applying MT' });
+                                            console.error(e);
+                                        }
+                                    }
                                     return;
                                 } else if (Swordfish.currentStatus.progress === Swordfish.PROCESSING) {
                                     // it's OK, keep waiting

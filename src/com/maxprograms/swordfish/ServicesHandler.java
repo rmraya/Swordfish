@@ -29,7 +29,6 @@ import java.nio.file.StandardCopyOption;
 import java.text.MessageFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.Iterator;
@@ -37,6 +36,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
+import java.util.Vector;
 
 import javax.xml.parsers.ParserConfigurationException;
 
@@ -218,7 +218,7 @@ public class ServicesHandler implements HttpHandler {
 		File appFolder = new File(json.getString("path"));
 		File xmlFiltersFolder = new File(appFolder, "xmlfilter");
 		JSONArray array = new JSONArray();
-		List<String> list = new ArrayList<>();
+		List<String> list = new Vector<>();
 		String[] files = xmlFiltersFolder.list();
 		for (int i = 0; i < files.length; i++) {
 			if (files[i].endsWith(".xml")) {
@@ -399,7 +399,7 @@ public class ServicesHandler implements HttpHandler {
 		Document doc = builder.build(configFile);
 		Element root = doc.getRootElement();
 		List<Element> tags = root.getChildren("tag");
-		List<Element> newList = new ArrayList<>();
+		List<Element> newList = new Vector<>();
 		Iterator<Element> it = tags.iterator();
 		while (it.hasNext()) {
 			Element tag = it.next();
@@ -592,7 +592,7 @@ public class ServicesHandler implements HttpHandler {
 
 	private static JSONArray insertString(String string, JSONArray array) {
 		JSONArray result = new JSONArray();
-		List<String> list = new ArrayList<>();
+		List<String> list = new Vector<>();
 		list.add(string);
 		for (int i = 0; i < array.length(); i++) {
 			list.add(array.getString(i));

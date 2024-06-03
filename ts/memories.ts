@@ -33,6 +33,11 @@ class MemoriesView {
     tbody: HTMLTableSectionElement;
     selected: Map<string, Memory>;
 
+    memories: Memory[]
+
+    memoriesSortFielD: string = 'name';
+    memoriesSortAscending: boolean = true;
+
     constructor(div: HTMLDivElement) {
         this.selected = new Map<string, Memory>();
         this.container = div;
@@ -108,22 +113,136 @@ class MemoriesView {
         memoriesTable.classList.add('discover');
         this.tableContainer.appendChild(memoriesTable);
 
-        memoriesTable.innerHTML =
-            '<thead><tr>' +
-            '<th>&nbsp;</th>' +
-            '<th style="padding-left:5px;padding-right:5px;">Name</th>' +
-            '<th style="padding-left:5px;padding-right:5px;">Type</th>' +
-            '<th style="padding-left:5px;padding-right:5px;">Project</th>' +
-            '<th style="padding-left:5px;padding-right:5px;">Client</th>' +
-            '<th style="padding-left:5px;padding-right:5px;">Subject</th>' +
-            '<th style="padding-left:5px;padding-right:5px;">Created</th>' +
-            '</tr></thead>';
+        let header: HTMLTableSectionElement = document.createElement('thead');
+        memoriesTable.appendChild(header);
+
+        let headerRow: HTMLTableRowElement = document.createElement('tr');
+        header.appendChild(headerRow);
+
+        let headerCell: HTMLTableCellElement = document.createElement('th');
+        headerCell.innerHTML = '&nbsp;';
+        headerRow.appendChild(headerCell);
+
+        headerCell = document.createElement('th');
+        headerCell.classList.add('noWrap');
+        headerCell.innerText = 'Name';
+        headerCell.id = 'memory-name';
+        headerCell.addEventListener('click', () => {
+            (document.getElementById('memory-' + this.memoriesSortFielD) as HTMLTableCellElement).classList.remove('arrow-down');
+            (document.getElementById('memory-' + this.memoriesSortFielD) as HTMLTableCellElement).classList.remove('arrow-up');
+            if (this.memoriesSortFielD === 'name') {
+                this.memoriesSortAscending = !this.memoriesSortAscending;
+            } else {
+                this.memoriesSortFielD = 'name';
+                this.memoriesSortAscending = true;
+            }
+            this.displayMemories();
+        });
+        headerCell.style.paddingLeft = '4px';
+        headerCell.style.paddingRight = '4px';
+        headerRow.appendChild(headerCell);
+
+        headerCell = document.createElement('th');
+        headerCell.classList.add('noWrap');
+        headerCell.innerText = 'Type';
+        headerCell.id = 'memory-type';
+        headerCell.addEventListener('click', () => {
+            (document.getElementById('memory-' + this.memoriesSortFielD) as HTMLTableCellElement).classList.remove('arrow-down');
+            (document.getElementById('memory-' + this.memoriesSortFielD) as HTMLTableCellElement).classList.remove('arrow-up');
+            if (this.memoriesSortFielD === 'type') {
+                this.memoriesSortAscending = !this.memoriesSortAscending;
+            } else {
+                this.memoriesSortFielD = 'type';
+                this.memoriesSortAscending = true;
+            }
+            this.displayMemories();
+        });
+        headerCell.style.paddingLeft = '4px';
+        headerCell.style.paddingRight = '4px';
+        headerRow.appendChild(headerCell);
+
+        headerCell = document.createElement('th');
+        headerCell.classList.add('noWrap');
+        headerCell.innerText = 'Project';
+        headerCell.id = 'memory-project';
+        headerCell.addEventListener('click', () => {
+            (document.getElementById('memory-' + this.memoriesSortFielD) as HTMLTableCellElement).classList.remove('arrow-down');
+            (document.getElementById('memory-' + this.memoriesSortFielD) as HTMLTableCellElement).classList.remove('arrow-up');
+            if (this.memoriesSortFielD === 'project') {
+                this.memoriesSortAscending = !this.memoriesSortAscending;
+            } else {
+                this.memoriesSortFielD = 'project';
+                this.memoriesSortAscending = true;
+            }
+            this.displayMemories();
+        });
+        headerCell.style.paddingLeft = '4px';
+        headerCell.style.paddingRight = '4px';
+        headerRow.appendChild(headerCell);
+
+        headerCell = document.createElement('th');
+        headerCell.classList.add('noWrap');
+        headerCell.innerText = 'Client';
+        headerCell.id = 'memory-client';
+        headerCell.addEventListener('click', () => {
+            (document.getElementById('memory-' + this.memoriesSortFielD) as HTMLTableCellElement).classList.remove('arrow-down');
+            (document.getElementById('memory-' + this.memoriesSortFielD) as HTMLTableCellElement).classList.remove('arrow-up');
+            if (this.memoriesSortFielD === 'client') {
+                this.memoriesSortAscending = !this.memoriesSortAscending;
+            } else {
+                this.memoriesSortFielD = 'client';
+                this.memoriesSortAscending = true;
+            }
+            this.displayMemories();
+        });
+        headerCell.style.paddingLeft = '4px';
+        headerCell.style.paddingRight = '4px';
+        headerRow.appendChild(headerCell);
+
+        headerCell = document.createElement('th');
+        headerCell.classList.add('noWrap');
+        headerCell.innerText = 'Subject';
+        headerCell.id = 'memory-subject';
+        headerCell.addEventListener('click', () => {
+            (document.getElementById('memory-' + this.memoriesSortFielD) as HTMLTableCellElement).classList.remove('arrow-down');
+            (document.getElementById('memory-' + this.memoriesSortFielD) as HTMLTableCellElement).classList.remove('arrow-up');
+            if (this.memoriesSortFielD === 'subject') {
+                this.memoriesSortAscending = !this.memoriesSortAscending;
+            } else {
+                this.memoriesSortFielD = 'subject';
+                this.memoriesSortAscending = true;
+            }
+            this.displayMemories();
+        });
+        headerCell.style.paddingLeft = '4px';
+        headerCell.style.paddingRight = '4px';
+        headerRow.appendChild(headerCell);
+
+        headerCell = document.createElement('th');
+        headerCell.classList.add('noWrap');
+        headerCell.innerText = 'Created';
+        headerCell.id = 'memory-created';
+        headerCell.addEventListener('click', () => {
+            (document.getElementById('memory-' + this.memoriesSortFielD) as HTMLTableCellElement).classList.remove('arrow-down');
+            (document.getElementById('memory-' + this.memoriesSortFielD) as HTMLTableCellElement).classList.remove('arrow-up');
+            if (this.memoriesSortFielD === 'created') {
+                this.memoriesSortAscending = !this.memoriesSortAscending;
+            } else {
+                this.memoriesSortFielD = 'created';
+                this.memoriesSortAscending = true;
+            }
+            this.displayMemories();
+        });
+        headerCell.style.paddingLeft = '4px';
+        headerCell.style.paddingRight = '4px';
+        headerRow.appendChild(headerCell);
 
         this.tbody = document.createElement('tbody');
         memoriesTable.appendChild(this.tbody);
 
         this.electron.ipcRenderer.on('set-memories', (event: Electron.IpcRendererEvent, arg: any) => {
-            this.displayMemories(arg);
+            this.memories = arg;
+            this.displayMemories();
         });
 
         this.loadMemories();
@@ -201,20 +320,81 @@ class MemoriesView {
         this.electron.ipcRenderer.send('export-memories', memories);
     }
 
-    displayMemories(memories: Memory[]) {
+    displayMemories() {
+        if (this.memoriesSortAscending) {
+            (document.getElementById('memory-' + this.memoriesSortFielD) as HTMLTableCellElement).classList.add('arrow-up');
+        } else {
+            (document.getElementById('memory-' + this.memoriesSortFielD) as HTMLTableCellElement).classList.add('arrow-down');
+        }
+        this.memories.sort((a: Memory, b: Memory) => {
+            if (this.memoriesSortFielD === 'name') {
+                if (a.name.toLocaleLowerCase() < b.name.toLocaleLowerCase()) {
+                    return this.memoriesSortAscending ? -1 : 1;
+                }
+                if (a.name.toLocaleLowerCase() > b.name.toLocaleLowerCase()) {
+                    return this.memoriesSortAscending ? 1 : -1;
+                }
+                return 0;
+            }
+            if (this.memoriesSortFielD === 'type') {
+                if (a.type < b.type) {
+                    return this.memoriesSortAscending ? -1 : 1;
+                }
+                if (a.type > b.type) {
+                    return this.memoriesSortAscending ? 1 : -1;
+                }
+                return 0;
+            }
+            if (this.memoriesSortFielD === 'project') {
+                if (a.project.toLocaleLowerCase() < b.project.toLocaleLowerCase()) {
+                    return this.memoriesSortAscending ? -1 : 1;
+                }
+                if (a.project.toLocaleLowerCase() > b.project.toLocaleLowerCase()) {
+                    return this.memoriesSortAscending ? 1 : -1;
+                }
+                return 0;
+            }
+            if (this.memoriesSortFielD === 'client') {
+                if (a.client.toLocaleLowerCase() < b.client.toLocaleLowerCase()) {
+                    return this.memoriesSortAscending ? -1 : 1;
+                }
+                if (a.client.toLocaleLowerCase() > b.client.toLocaleLowerCase()) {
+                    return this.memoriesSortAscending ? 1 : -1;
+                }
+                return 0;
+            }
+            if (this.memoriesSortFielD === 'subject') {
+                if (a.subject.toLocaleLowerCase() < b.subject.toLocaleLowerCase()) {
+                    return this.memoriesSortAscending ? -1 : 1;
+                }
+                if (a.subject.toLocaleLowerCase() > b.subject.toLocaleLowerCase()) {
+                    return this.memoriesSortAscending ? 1 : -1;
+                }
+                return 0;
+            }
+            if (this.memoriesSortFielD === 'created') {
+                if (a.creationDate < b.creationDate) {
+                    return this.memoriesSortAscending ? -1 : 1;
+                }
+                if (a.creationDate > b.creationDate) {
+                    return this.memoriesSortAscending ? 1 : -1;
+                }
+                return 0;
+            }
+        });
         this.tbody.innerHTML = '';
-        let length = memories.length;
+        let length = this.memories.length;
         for (let i = 0; i < length; i++) {
-            let p = memories[i];
+            let mem = this.memories[i];
 
             let checkBox: HTMLInputElement = document.createElement('input');
-            checkBox.id = 'ck_' + p.id;
+            checkBox.id = 'ck_' + mem.id;
             checkBox.type = 'checkbox';
 
             let tr: HTMLTableRowElement = document.createElement('tr');
-            tr.id = p.id;
+            tr.id = mem.id;
             tr.addEventListener('click', (event: MouseEvent) => {
-                this.clicked(tr, p, checkBox);
+                this.clicked(tr, mem, checkBox);
             });
             this.tbody.appendChild(tr);
 
@@ -228,21 +408,13 @@ class MemoriesView {
             td = document.createElement('td');
             td.classList.add('noWrap');
             td.classList.add('middle');
-            td.innerText = p.name;
+            td.innerText = mem.name;
             tr.append(td);
 
             td = document.createElement('td');
             td.classList.add('middle');
             td.classList.add('center');
-            td.innerText = p.type;
-            tr.append(td);
-
-            td = document.createElement('td');
-            td.classList.add('noWrap');
-            td.classList.add('middle');
-            td.classList.add('center');
-            td.style.minWidth = '170px';
-            td.innerText = p.project;
+            td.innerText = mem.type;
             tr.append(td);
 
             td = document.createElement('td');
@@ -250,7 +422,7 @@ class MemoriesView {
             td.classList.add('middle');
             td.classList.add('center');
             td.style.minWidth = '170px';
-            td.innerText = p.client;
+            td.innerText = mem.project;
             tr.append(td);
 
             td = document.createElement('td');
@@ -258,7 +430,7 @@ class MemoriesView {
             td.classList.add('middle');
             td.classList.add('center');
             td.style.minWidth = '170px';
-            td.innerText = p.subject;
+            td.innerText = mem.client;
             tr.append(td);
 
             td = document.createElement('td');
@@ -266,7 +438,15 @@ class MemoriesView {
             td.classList.add('middle');
             td.classList.add('center');
             td.style.minWidth = '170px';
-            td.innerText = p.creationString;
+            td.innerText = mem.subject;
+            tr.append(td);
+
+            td = document.createElement('td');
+            td.classList.add('noWrap');
+            td.classList.add('middle');
+            td.classList.add('center');
+            td.style.minWidth = '170px';
+            td.innerText = mem.creationString;
             tr.append(td);
         }
         this.selected.clear();

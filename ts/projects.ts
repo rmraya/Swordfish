@@ -44,6 +44,9 @@ class ProjectsView {
     projects: Project[];
     shouldOpen: string;
 
+    projectSortFielD: string = 'created';
+    projectSortAscending: boolean = false;
+
     constructor(div: HTMLDivElement) {
         this.shouldOpen = '';
         this.container = div;
@@ -151,16 +154,142 @@ class ProjectsView {
         projectsTable.classList.add('discover');
         this.tableContainer.appendChild(projectsTable);
 
-        projectsTable.innerHTML =
-            '<thead><tr>' +
-            '<th>&nbsp;</th>' +
-            '<th>Name</th><th>Status</th>' +
-            '<th style="padding-left:5px;padding-right:5px;">Src.Lang.</th>' +
-            '<th style="padding-left:5px;padding-right:5px;">Tgt.Lang.</th>' +
-            '<th style="padding-left:5px;padding-right:5px;">Created</th>' +
-            '<th style="padding-left:5px;padding-right:5px;">Client</th>' +
-            '<th style="padding-left:5px;padding-right:5px;">Subject</th>' +
-            '</tr></thead>';
+        let tableHeader: HTMLTableSectionElement = document.createElement('thead');
+        projectsTable.appendChild(tableHeader);
+        let headerRow: HTMLTableRowElement = document.createElement('tr');
+        tableHeader.appendChild(headerRow);
+
+        let th: HTMLTableCellElement = document.createElement('th');
+        th.innerHTML = '&nbsp;';
+        headerRow.appendChild(th);
+
+        th = document.createElement('th');
+        th.classList.add('noWrap');
+        th.innerHTML = 'Name';
+        th.id = 'project-name';
+        th.addEventListener('click', () => {
+            (document.getElementById('project-' + this.projectSortFielD) as HTMLTableCellElement).classList.remove('arrow-down');
+            (document.getElementById('project-' + this.projectSortFielD) as HTMLTableCellElement).classList.remove('arrow-up');
+            if (this.projectSortFielD === 'name') {
+                this.projectSortAscending = !this.projectSortAscending;
+            } else {
+                this.projectSortFielD = 'name';
+                this.projectSortAscending = true;
+            }
+            this.displayProjects();
+        });
+        headerRow.appendChild(th);
+
+        th = document.createElement('th');
+        th.classList.add('noWrap');
+        th.innerHTML = 'Status';
+        th.id = 'project-status';
+        th.addEventListener('click', () => {
+            (document.getElementById('project-' + this.projectSortFielD) as HTMLTableCellElement).classList.remove('arrow-down');
+            (document.getElementById('project-' + this.projectSortFielD) as HTMLTableCellElement).classList.remove('arrow-up');
+            if (this.projectSortFielD === 'status') {
+                this.projectSortAscending = !this.projectSortAscending;
+            } else {
+                this.projectSortFielD = 'status';
+                this.projectSortAscending = true;
+            }
+            this.displayProjects();
+        });
+        headerRow.appendChild(th);
+
+        th = document.createElement('th');
+        th.classList.add('noWrap');
+        th.innerHTML = 'Src.Lang.';
+        th.id = 'project-srcLang';
+        th.addEventListener('click', () => {
+            (document.getElementById('project-' + this.projectSortFielD) as HTMLTableCellElement).classList.remove('arrow-down');
+            (document.getElementById('project-' + this.projectSortFielD) as HTMLTableCellElement).classList.remove('arrow-up');
+            if (this.projectSortFielD === 'srcLang') {
+                this.projectSortAscending = !this.projectSortAscending;
+            } else {
+                this.projectSortFielD = 'srcLang';
+                this.projectSortAscending = true;
+            }
+            this.displayProjects();
+        });
+        th.style.paddingLeft = '4px';
+        th.style.paddingRight = '4px';
+        headerRow.appendChild(th);
+
+        th = document.createElement('th');
+        th.classList.add('noWrap');
+        th.innerHTML = 'Tgt.Lang.';
+        th.id = 'project-tgtLang';
+        th.addEventListener('click', () => {
+            (document.getElementById('project-' + this.projectSortFielD) as HTMLTableCellElement).classList.remove('arrow-down');
+            (document.getElementById('project-' + this.projectSortFielD) as HTMLTableCellElement).classList.remove('arrow-up');
+            if (this.projectSortFielD === 'tgtLang') {
+                this.projectSortAscending = !this.projectSortAscending;
+            } else {
+                this.projectSortFielD = 'tgtLang';
+                this.projectSortAscending = true;
+            }
+            this.displayProjects();
+        });
+        th.style.paddingLeft = '4px';
+        th.style.paddingRight = '4px';
+        headerRow.appendChild(th);
+
+        th = document.createElement('th');
+        th.classList.add('noWrap');
+        th.innerHTML = 'Created';
+        th.id = 'project-created';
+        th.addEventListener('click', () => {
+            (document.getElementById('project-' + this.projectSortFielD) as HTMLTableCellElement).classList.remove('arrow-down');
+            (document.getElementById('project-' + this.projectSortFielD) as HTMLTableCellElement).classList.remove('arrow-up');
+            if (this.projectSortFielD === 'created') {
+                this.projectSortAscending = !this.projectSortAscending;
+            } else {
+                this.projectSortFielD = 'created';
+                this.projectSortAscending = true;
+            }
+            this.displayProjects();
+        });
+        th.classList.add('arrow-down');
+        th.style.paddingLeft = '4px';
+        th.style.paddingRight = '4px';
+        headerRow.appendChild(th);
+
+        th = document.createElement('th');
+        th.innerHTML = 'Client';
+        th.id = 'project-client';
+        th.addEventListener('click', () => {
+            (document.getElementById('project-' + this.projectSortFielD) as HTMLTableCellElement).classList.remove('arrow-down');
+            (document.getElementById('project-' + this.projectSortFielD) as HTMLTableCellElement).classList.remove('arrow-up');
+            if (this.projectSortFielD === 'client') {
+                this.projectSortAscending = !this.projectSortAscending;
+            } else {
+                this.projectSortFielD = 'client';
+                this.projectSortAscending = true;
+            }
+            this.displayProjects();
+        });
+        th.style.paddingLeft = '4px';
+        th.style.paddingRight = '4px';
+        headerRow.appendChild(th);
+
+        th = document.createElement('th');
+        th.innerHTML = 'Subject';
+        th.id = 'project-subject';
+        th.addEventListener('click', () => {
+            (document.getElementById('project-' + this.projectSortFielD) as HTMLTableCellElement).classList.remove('arrow-down');
+            (document.getElementById('project-' + this.projectSortFielD) as HTMLTableCellElement).classList.remove('arrow-up');
+            if (this.projectSortFielD === 'subject') {
+                this.projectSortAscending = !this.projectSortAscending;
+            } else {
+                this.projectSortFielD = 'subject';
+                this.projectSortAscending = true;
+            }
+            this.displayProjects();
+        });
+        th.style.paddingLeft = '4px';
+        th.style.paddingRight = '4px';
+        headerRow.appendChild(th);
 
         this.tbody = document.createElement('tbody');
         projectsTable.appendChild(this.tbody);
@@ -372,6 +501,76 @@ class ProjectsView {
     }
 
     displayProjects() {
+        if (this.projectSortAscending) {
+            (document.getElementById('project-' + this.projectSortFielD) as HTMLTableCellElement).classList.add('arrow-up');
+        } else {
+            (document.getElementById('project-' + this.projectSortFielD) as HTMLTableCellElement).classList.add('arrow-down');
+        }
+        this.projects.sort((a: Project, b: Project) => {
+            if (this.projectSortFielD === 'name') {
+                if (a.description.toLocaleLowerCase() < b.description.toLocaleLowerCase()) {
+                    return this.projectSortAscending ? -1 : 1;
+                }
+                if (a.description.toLocaleLowerCase() > b.description.toLocaleLowerCase()) {
+                    return this.projectSortAscending ? 1 : -1;
+                }
+                return 0;
+            }
+            if (this.projectSortFielD === 'status') {
+                if (a.status < b.status) {
+                    return this.projectSortAscending ? -1 : 1;
+                }
+                if (a.status > b.status) {
+                    return this.projectSortAscending ? 1 : -1;
+                }
+                return 0;
+            }
+            if (this.projectSortFielD === 'srcLang') {
+                if (a.sourceLang < b.sourceLang) {
+                    return this.projectSortAscending ? -1 : 1;
+                }
+                if (a.sourceLang > b.sourceLang) {
+                    return this.projectSortAscending ? 1 : -1;
+                }
+                return 0;
+            }
+            if (this.projectSortFielD === 'tgtLang') {
+                if (a.targetLang < b.targetLang) {
+                    return this.projectSortAscending ? -1 : 1;
+                }
+                if (a.targetLang > b.targetLang) {
+                    return this.projectSortAscending ? 1 : -1;
+                }
+                return 0;
+            }
+            if (this.projectSortFielD === 'created') {
+                if (a.creationDate < b.creationDate) {
+                    return this.projectSortAscending ? -1 : 1;
+                }
+                if (a.creationDate > b.creationDate) {
+                    return this.projectSortAscending ? 1 : -1;
+                }
+                return 0;
+            }
+            if (this.projectSortFielD === 'client') {
+                if (a.client.toLocaleLowerCase() < b.client.toLocaleLowerCase()) {
+                    return this.projectSortAscending ? -1 : 1;
+                }
+                if (a.client.toLocaleLowerCase() > b.client.toLocaleLowerCase()) {
+                    return this.projectSortAscending ? 1 : -1;
+                }
+                return 0;
+            }
+            if (this.projectSortFielD === 'subject') {
+                if (a.subject.toLocaleLowerCase() < b.subject.toLocaleLowerCase()) {
+                    return this.projectSortAscending ? -1 : 1;
+                }
+                if (a.subject.toLocaleLowerCase() > b.subject.toLocaleLowerCase()) {
+                    return this.projectSortAscending ? 1 : -1;
+                }
+                return 0;
+            }
+        });
         this.tbody.innerHTML = '';
         let length = this.projects.length;
         for (let i = 0; i < length; i++) {

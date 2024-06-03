@@ -18,7 +18,6 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -187,10 +186,10 @@ public class XliffUtils {
 	}
 
 	public static List<String[]> harvestTags(String source) {
-		List<String[]> result = new ArrayList<>();
+		List<String[]> result = new Vector<>();
 		int index = source.indexOf("<img ");
 		int tagNumber = 1;
-		List<String> currentTags = new ArrayList<>();
+		List<String> currentTags = new Vector<>();
 		while (index >= 0) {
 			String start = source.substring(0, index);
 			String rest = source.substring(index + 1);

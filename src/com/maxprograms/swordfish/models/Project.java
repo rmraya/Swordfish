@@ -15,9 +15,9 @@ package com.maxprograms.swordfish.models;
 import java.io.File;
 import java.io.IOException;
 import java.time.LocalDate;
-import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Vector;
 
 import javax.xml.parsers.ParserConfigurationException;
 
@@ -79,7 +79,7 @@ public class Project implements Comparable<Project> {
 		client = json.has("client") ? json.getString("client") : "";
 		subject = json.has("subject") ? json.getString("subject") : "";
 		creationDate = LocalDate.parse(json.getString("creationDate"));
-		files = new ArrayList<>();
+		files = new Vector<>();
 		JSONArray filesArray = json.getJSONArray("files");
 		for (int i = 0; i < filesArray.length(); i++) {
 			SourceFile sourceFile = new SourceFile(filesArray.getJSONObject(i));
@@ -174,7 +174,7 @@ public class Project implements Comparable<Project> {
 	}
 
 	public void setFiles(JSONArray array) {
-		files = new ArrayList<>();
+		files = new Vector<>();
 		for (int i = 0; i < array.length(); i++) {
 			files.add(new SourceFile(array.getJSONObject(i)));
 		}

@@ -113,7 +113,7 @@ class TranslationView {
     memSelect: HTMLSelectElement;
     glossSelect: HTMLSelectElement;
 
-    returnTo: any = { file: '', unit: '', segment: '' };
+    returnTo: SegmentId = { file: '', unit: '', id: '' };
     returnNumber: number = -1;
 
     notesVisible: boolean = false;
@@ -984,7 +984,7 @@ class TranslationView {
             tr.addEventListener('click', (event: MouseEvent) => this.rowClickListener(event));
             this.tbody.appendChild(tr);
 
-            if (row.file === this.returnTo.file && row.unit === this.returnTo.unit && row.segment === this.returnTo.segment) {
+            if (row.file === this.returnTo.file && row.unit === this.returnTo.unit && row.segment === this.returnTo.id) {
                 returnRow = tr;
             }
 
@@ -1091,15 +1091,15 @@ class TranslationView {
 
         this.setColumnWidths();
 
-        let rows: HTMLCollection = this.tbody.rows;
+        let rows: HTMLCollectionOf<HTMLTableRowElement> = this.tbody.rows;
         this.currentId = { id: '', file: '', unit: '' };
         if (returnRow) {
             this.selectRow(returnRow);
-            this.returnTo = { file: '', unit: '', segment: '' };
+            this.returnTo = { file: '', unit: '', id: '' };
             this.returnNumber = -1;
             return;
         }
-        this.selectRow((rows[0] as HTMLTableRowElement));
+        this.selectRow(rows[0]);
     }
 
     static isBiDi(code: string): boolean {
@@ -1151,7 +1151,12 @@ class TranslationView {
             unit: this.currentId.unit,
             segment: this.currentId.id,
             srcLang: this.srcLang,
-            tgtLang: this.tgtLang
+            tgtLang: this.tgtLang,
+            currentSegment: {
+                file: this.currentId.file,
+                unit: this.currentId.unit,
+                id: this.currentId.id
+            }
         });
     }
 
@@ -1381,8 +1386,6 @@ class TranslationView {
         let file: string = this.currentRow.getAttribute('data-file');
         let unit: string = this.currentRow.getAttribute('data-unit');
 
-        let sameRow: boolean = (id === this.currentId.id && file === this.currentId.file && unit === this.currentId.unit);
-
         this.currentId = { id: id, file: file, unit: unit };
         let source: HTMLTableCellElement = this.currentRow.getElementsByClassName('source')[0] as HTMLTableCellElement;
         this.sourceTags = this.getTags(source);
@@ -1398,27 +1401,22 @@ class TranslationView {
             this.currentCell.classList.add('editing');
         }
 
-        if (!sameRow) {
-            this.tmMatches.clear();
-            this.mtMatches.clear();
-            this.termsPanel.clear();
+        this.tmMatches.clear();
+        this.mtMatches.clear();
+        this.termsPanel.clear();
 
-            this.electron.ipcRenderer.send('get-matches', {
-                project: this.projectId,
-                file: this.currentId.file,
-                unit: this.currentId.unit,
-                segment: this.currentId.id
-            });
-            this.electron.ipcRenderer.send('get-terms', {
-                project: this.projectId,
-                file: this.currentId.file,
-                unit: this.currentId.unit,
-                segment: this.currentId.id
-            });
-            if (this.notesVisible) {
-                this.showNotes();
-            }
+        let params: any = {
+            project: this.projectId,
+            file: this.currentId.file,
+            unit: this.currentId.unit,
+            segment: this.currentId.id
+        };
+        this.electron.ipcRenderer.send('get-matches', params);
+        this.electron.ipcRenderer.send('get-terms', params);
+        if (this.notesVisible) {
+            this.showNotes();
         }
+
         this.centerRow(this.currentRow);
         this.currentCell.focus();
     }
@@ -1704,7 +1702,7 @@ class TranslationView {
         this.returnTo = {
             file: this.currentId.file,
             unit: this.currentId.unit,
-            segment: this.currentId.id
+            id: this.currentId.id
         }
         this.electron.ipcRenderer.send('show-apply-tm', { project: this.projectId, memory: this.memSelect.value });
     }
@@ -1713,7 +1711,7 @@ class TranslationView {
         this.returnTo = {
             file: this.currentId.file,
             unit: this.currentId.unit,
-            segment: this.currentId.id
+            id: this.currentId.id
         }
         this.electron.ipcRenderer.send('remove-translations', { project: this.projectId });
     }
@@ -1722,7 +1720,7 @@ class TranslationView {
         this.returnTo = {
             file: this.currentId.file,
             unit: this.currentId.unit,
-            segment: this.currentId.id
+            id: this.currentId.id
         }
         this.electron.ipcRenderer.send('remove-all-matches', { project: this.projectId });
     }
@@ -1731,7 +1729,7 @@ class TranslationView {
         this.returnTo = {
             file: this.currentId.file,
             unit: this.currentId.unit,
-            segment: this.currentId.id
+            id: this.currentId.id
         }
         this.electron.ipcRenderer.send('remove-machine-translations', { project: this.projectId });
     }
@@ -1740,7 +1738,7 @@ class TranslationView {
         this.returnTo = {
             file: this.currentId.file,
             unit: this.currentId.unit,
-            segment: this.currentId.id
+            id: this.currentId.id
         }
         this.electron.ipcRenderer.send('unconfirm-translations', { project: this.projectId });
     }
@@ -1753,7 +1751,7 @@ class TranslationView {
         this.returnTo = {
             file: this.currentId.file,
             unit: this.currentId.unit,
-            segment: this.currentId.id
+            id: this.currentId.id
         }
         this.electron.ipcRenderer.send('copy-sources', { project: this.projectId });
     }
@@ -1762,7 +1760,7 @@ class TranslationView {
         this.returnTo = {
             file: this.currentId.file,
             unit: this.currentId.unit,
-            segment: this.currentId.id
+            id: this.currentId.id
         }
         this.electron.ipcRenderer.send('confirm-translations', { project: this.projectId, memory: this.memSelect.value });
     }
@@ -1771,7 +1769,7 @@ class TranslationView {
         this.returnTo = {
             file: this.currentId.file,
             unit: this.currentId.unit,
-            segment: this.currentId.id
+            id: this.currentId.id
         }
         this.electron.ipcRenderer.send('accept-100-matches', { project: this.projectId });
     }
@@ -1834,9 +1832,15 @@ class TranslationView {
         this.returnTo = {
             file: this.currentId.file,
             unit: this.currentId.unit,
-            segment: this.currentId.id
+            id: this.currentId.id
         }
-        this.electron.ipcRenderer.send('apply-mt-all', { project: this.projectId, srcLang: this.srcLang, tgtLang: this.tgtLang });
+        this.electron.ipcRenderer.send('apply-mt-all', {
+            project: this.projectId, srcLang: this.srcLang, tgtLang: this.tgtLang, currentSegment: {
+                file: this.currentId.file,
+                unit: this.currentId.unit,
+                id: this.currentId.id
+            }
+        });
     }
 
     assembleMatchesAll(): void {
@@ -1851,7 +1855,7 @@ class TranslationView {
         this.returnTo = {
             file: this.currentId.file,
             unit: this.currentId.unit,
-            segment: this.currentId.id
+            id: this.currentId.id
         }
         this.electron.ipcRenderer.send('assemble-matches-all', {
             project: this.projectId,
@@ -1868,7 +1872,7 @@ class TranslationView {
         this.returnTo = {
             file: this.currentId.file,
             unit: this.currentId.unit,
-            segment: this.currentId.id
+            id: this.currentId.id
         }
         this.electron.ipcRenderer.send('accept-mt-all', { project: this.projectId });
     }
@@ -1925,7 +1929,7 @@ class TranslationView {
         this.returnTo = {
             file: this.currentId.file,
             unit: this.currentId.unit,
-            segment: this.currentId.id
+            id: this.currentId.id
         }
         this.electron.ipcRenderer.send('get-project-terms', { project: this.projectId, glossary: this.glossSelect.value });
     }
@@ -2178,7 +2182,7 @@ class TranslationView {
                     this.returnTo = {
                         file: this.currentId.file,
                         unit: this.currentId.unit,
-                        segment: this.currentId.id + '-1'
+                        id: this.currentId.id + '-1'
                     }
                     this.electron.ipcRenderer.send('split-at', {
                         project: this.projectId,
@@ -2217,7 +2221,7 @@ class TranslationView {
                 this.returnTo = {
                     file: this.currentId.file,
                     unit: this.currentId.unit,
-                    segment: this.currentId.id
+                    id: this.currentId.id
                 }
                 this.electron.ipcRenderer.send('merge-at', {
                     project: this.projectId,

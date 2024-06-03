@@ -46,6 +46,7 @@ export class MTManager {
             tgtLangs: ["azb", "tk", "tl", "de", "ace", "azj", "li", "ti", "lg", "tg", "th", "tum", "bho", "te", "hne", "dz", "la", "ta", "lb", "tw", "lv", "min", "zsm", "ts", "lt", "tt", "tr", "lo", "ln", "tn", "bs", "bug", "dyu", "prs", "cs", "kk", "sk", "ki", "si", "kg", "sg", "sd", "cy", "ca", "sc", "ka", "sa", "da", "ky", "sv", "ast", "zh-TW", "sw", "st", "su", "sr", "ks", "ss", "sq", "kn", "sn", "ko", "so", "be", "ceb", "sl", "km", "sm", "nn", "bjn", "nl", "vi", "ne", "ga", "nb", "gd", "ilo", "khk", "ltg", "zh-CN", "ny", "mni", "uzn", "fj", "fi", "awa", "fo", "fr", "ml", "et", "mk", "uk", "mi", "ba", "cjk", "mg", "ug", "taq", "vec", "mos", "tpi", "ee", "my", "mt", "bg", "ckb", "el", "mr", "ur", "eo", "ms", "en", "es-ES", "mn", "knc", "pt-PT", "hy", "pl", "xh", "id", "ig", "pa", "hi", "hr", "ps", "ht", "hu", "wo", "az", "crh", "als", "ayr", "ha", "oc", "he", "gl", "gn", "or", "kmr", "plt", "gu", "ro", "rn", "kmb", "war", "rw", "ru", "zu", "jv", "af", "dik", "yo", "diq", "ja", "ydd", "is", "it", "kea", "pag", "es-419", "pap", "bm", "bn", "bo", "pbt", "ban", "ak", "tzm", "gaz", "pes", "am", "bem", "ar", "as", "umb", "pt-BR", "quy", "fon", "kas", "kam", "kab", "kac", "fur", "kbp", "fuv", "lij", "lmo", "es", "luo", "lus", "lua", "lvs", "nso", "sat", "mag", "mai", "scn", "shn", "szl", "nus", "zh", "pt"]
         }
     };
+    currentSegment: any;
 
     constructor(preferences: Preferences, srcLang: string, tgtLang: string) {
         this.mtEngines = [];
@@ -89,7 +90,8 @@ export class MTManager {
         }
     }
 
-    translateProject(project: string, exportedFile: string) {
+    translateProject(project: string, exportedFile: string, currentSegment: any) {
+        this.currentSegment = currentSegment;
         let parser: SAXParser = new SAXParser();
         let handler: MTContentHandler = new MTContentHandler(this, project);
         parser.setContentHandler(handler);
@@ -119,14 +121,21 @@ export class MTManager {
                 segment: segment,
                 srcLang: this.srcLang,
                 tgtLang: this.tgtLang,
-                translations: translations
+                translations: translations,
+                currentSegment: this.currentSegment
             });
+
         }, (reason: any) => {
             if (reason instanceof Error) {
-                console.log(reason.message);
+                console.error(reason.message);
                 throw reason;
             }
             throw new Error(reason);
+        }).catch((error: any) => {
+            if (error instanceof Error) {
+                console.error(error.message);
+                throw error;
+            }
         });
     }
 
@@ -148,6 +157,7 @@ export class MTManager {
                     translations.push(value);
                 }
                 params.translations = translations;
+                params.reload = true;
                 this.setMTMatches(params);
                 Swordfish.mainWindow.webContents.send('end-waiting');
                 Swordfish.mainWindow.webContents.send('set-status', '');
@@ -158,6 +168,13 @@ export class MTManager {
                     throw reason;
                 }
                 throw new Error(reason);
+            }).catch((error: any) => {
+                Swordfish.mainWindow.webContents.send('end-waiting');
+                Swordfish.mainWindow.webContents.send('set-status', '');
+                if (error instanceof Error) {
+                    throw error;
+                }
+                throw new Error(error);
             });
         }, (reason: any) => {
             Swordfish.mainWindow.webContents.send('end-waiting');
@@ -177,15 +194,14 @@ export class MTManager {
                 "Content-Type": "application/json"
             },
             body: JSON.stringify(params)
-        }).then((response: Response) => {
+        }).then(async (response: Response) => {
             if (response.ok) {
-                response.json().then((result: any) => {
-                    if (result.status === 'Success') {
-                        resolve(result);
-                        return;
-                    }
-                    reject(result.reason);
-                });
+                let result: any = await response.json();
+                if (result.status === 'Success') {
+                    resolve(result);
+                    return;
+                }
+                reject(result.reason);
             } else {
                 throw new Error("Error getting source segment");
             }
@@ -205,22 +221,26 @@ export class MTManager {
                 "Content-Type": "application/json"
             },
             body: JSON.stringify(params)
-        }).then((response: Response) => {
+        }).then(async (response: Response) => {
             if (response.ok) {
-                response.json().then((result: any) => {
-                    if (result.status === 'Success') {
+                let json: any = await response.json();
+                if (json.status !== 'Success') {
+                    console.error("Received " + JSON.stringify(json));
+                    throw new Error(json.reason);
+                }
+                if (params.currentSegment) {
+                    let current: any = params.currentSegment;
+                    if (current.file === params.file && current.unit === params.unit && current.id === params.segment) {
                         Swordfish.getMatches({
                             project: params.project,
                             file: params.file,
                             unit: params.unit,
                             segment: params.segment
                         });
-                    } else {
-                        throw new Error(result.reason);
                     }
-                });
+                }
             } else {
-                throw new Error("Error setting MT matches");
+                throw new Error("Error setting MT matches: " + response.statusText);
             }
         }).catch((error: any) => {
             if (error instanceof Error) {

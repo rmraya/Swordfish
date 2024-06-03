@@ -31,4 +31,5 @@ module swordfish {
 	requires transitive json;
 	requires java.logging;
 	requires org.xerial.sqlitejdbc;
+    requires org.slf4j.nop;
 }

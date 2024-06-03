@@ -16,13 +16,13 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.file.Files;
-import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
+import java.util.Vector;
 
 import javax.xml.parsers.ParserConfigurationException;
 
@@ -43,7 +43,7 @@ public class Split {
 
     public static List<String> split(String xliff, String outputFolder)
             throws SAXException, IOException, ParserConfigurationException {
-        List<String> result = new ArrayList<>();
+        List<String> result = new Vector<>();
         SAXBuilder builder = new SAXBuilder();
         Document doc = builder.build(xliff);
         Element root = doc.getRootElement();

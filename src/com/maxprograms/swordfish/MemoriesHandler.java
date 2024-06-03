@@ -61,7 +61,6 @@ public class MemoriesHandler implements HttpHandler {
 
 	private static Logger logger = System.getLogger(MemoriesHandler.class.getName());
 
-	private static Map<String, Memory> memories;
 	private static Map<String, ITmEngine> engines;
 	private static Map<String, JSONObject> openTasks = new Hashtable<>();
 	private static Map<String, SqliteDatabase> localEngines = new Hashtable<>();
@@ -145,9 +144,6 @@ public class MemoriesHandler implements HttpHandler {
 		openTasks.put(process, obj);
 		Thread.ofVirtual().start(() -> {
 			try {
-				if (memories == null) {
-					loadMemoriesList();
-				}
 				String memory = json.getString("memory");
 				open(memory);
 				ITmEngine engine = getEngine(memory);
@@ -324,9 +320,6 @@ public class MemoriesHandler implements HttpHandler {
 		openTasks.put(process, obj);
 		Thread.ofVirtual().start(() -> {
 			try {
-				if (memories == null) {
-					loadMemoriesList();
-				}
 				String memory = json.getString("memory");
 				open(memory);
 				ITmEngine engine = getEngine(memory);
@@ -360,7 +353,6 @@ public class MemoriesHandler implements HttpHandler {
 	private static JSONObject deleteMemory(String request) {
 		JSONObject result = new JSONObject();
 		final JSONObject json = new JSONObject(request);
-
 		if (json.has("memories")) {
 			final String process = "" + System.currentTimeMillis();
 			result.put("process", process);
@@ -369,6 +361,7 @@ public class MemoriesHandler implements HttpHandler {
 			openTasks.put(process, obj);
 			Thread.ofVirtual().start(() -> {
 				try {
+					Map<String, Memory> memories = getMemories();
 					JSONArray array = json.getJSONArray("memories");
 					for (int i = 0; i < array.length(); i++) {
 						String id = array.getString(i);
@@ -379,7 +372,7 @@ public class MemoriesHandler implements HttpHandler {
 						}
 						memories.remove(id);
 					}
-					saveMemoriesList();
+					saveMemoriesList(memories);
 					JSONObject completed = new JSONObject();
 					completed.put(Constants.PROGRESS, Constants.COMPLETED);
 					openTasks.put(process, completed);
@@ -406,27 +399,27 @@ public class MemoriesHandler implements HttpHandler {
 		}
 	}
 
-	private static JSONObject listMemories() throws IOException {
+	protected static JSONObject listMemories() throws IOException {
 		JSONObject result = new JSONObject();
-		loadMemoriesList();
 		JSONArray array = new JSONArray();
 		result.put("memories", array);
-		Vector<Memory> vector = new Vector<>();
-		vector.addAll(memories.values());
-		Collections.sort(vector);
-		Iterator<Memory> it = vector.iterator();
-		while (it.hasNext()) {
-			Memory m = it.next();
-			array.put(m.toJSON());
+		Map<String, Memory> memories = getMemories();
+		if (!memories.isEmpty()) {
+			Vector<Memory> vector = new Vector<>();
+			vector.addAll(memories.values());
+			Collections.sort(vector);
+			Iterator<Memory> it = vector.iterator();
+			while (it.hasNext()) {
+				Memory m = it.next();
+				array.put(m.toJSON());
+			}
 		}
 		return result;
 	}
 
-	public static JSONArray getMemories() throws IOException {
+	public static JSONArray getMemoriesList() throws IOException {
 		JSONArray result = new JSONArray();
-		if (memories == null) {
-			loadMemoriesList();
-		}
+		Map<String, Memory> memories = getMemories();
 		Vector<Memory> vector = new Vector<>();
 		vector.addAll(memories.values());
 		Collections.sort(vector);
@@ -453,24 +446,24 @@ public class MemoriesHandler implements HttpHandler {
 		Memory mem = new Memory(json);
 		ITmEngine engine = new SqliteDatabase(mem.getId(), getWorkFolder());
 		engine.close();
-		if (memories == null) {
-			loadMemoriesList();
-		}
+		Map<String, Memory> memories = getMemories();
 		memories.put(mem.getId(), mem);
 		ServicesHandler.addClient(json.getString("client"));
 		ServicesHandler.addSubject(json.getString("subject"));
 		ServicesHandler.addProject(json.getString("project"));
-		saveMemoriesList();
+		saveMemoriesList(memories);
 		return result;
 	}
 
-	private static synchronized void loadMemoriesList() throws IOException {
-		memories = new Hashtable<>();
+	private static synchronized Map<String, Memory> getMemories() throws IOException {
+		Map<String, Memory> memories = new Hashtable<>();
 		engines = new Hashtable<>();
 		File home = new File(getWorkFolder());
 		File list = new File(home, "memories.json");
 		if (!list.exists()) {
-			return;
+			JSONObject json = new JSONObject();
+			TmsServer.writeJSON(list, json);
+			return memories;
 		}
 		JSONObject json = TmsServer.readJSON(list);
 		Set<String> keys = json.keySet();
@@ -480,9 +473,10 @@ public class MemoriesHandler implements HttpHandler {
 			JSONObject obj = json.getJSONObject(key);
 			memories.put(key, new Memory(obj));
 		}
+		return memories;
 	}
 
-	private static synchronized void saveMemoriesList() throws IOException {
+	private static synchronized void saveMemoriesList(Map<String, Memory> memories) throws IOException {
 		JSONObject json = new JSONObject();
 		Set<String> keys = memories.keySet();
 		Iterator<String> it = keys.iterator();
@@ -505,10 +499,8 @@ public class MemoriesHandler implements HttpHandler {
 	}
 
 	public static synchronized void open(String id) throws IOException, SQLException, URISyntaxException {
-		if (memories == null) {
-			loadMemoriesList();
-		}
 		if (!engines.containsKey(id)) {
+			Map<String, Memory> memories = getMemories();
 			Memory memory = memories.get(id);
 			ITmEngine engine = memory.getType().equals(Memory.LOCAL) ? new SqliteDatabase(id, getWorkFolder())
 					: new RemoteDatabase(memory.getServer(), memory.getUser(), memory.getPassword(), id);
@@ -536,9 +528,6 @@ public class MemoriesHandler implements HttpHandler {
 	}
 
 	public static ITmEngine getEngine(String id) throws IOException, SQLException, URISyntaxException {
-		if (memories == null) {
-			loadMemoriesList();
-		}
 		if (!engines.containsKey(id)) {
 			open(id);
 		}
@@ -546,9 +535,7 @@ public class MemoriesHandler implements HttpHandler {
 	}
 
 	public static String getName(String id) throws IOException {
-		if (memories == null) {
-			loadMemoriesList();
-		}
+		Map<String, Memory> memories = getMemories();
 		return memories.get(id).getName();
 	}
 
@@ -685,10 +672,8 @@ public class MemoriesHandler implements HttpHandler {
 	}
 
 	protected static void addMemory(Memory memory) throws IOException {
-		if (memories == null) {
-			loadMemoriesList();
-		}
+		Map<String, Memory> memories = getMemories();
 		memories.put(memory.getId(), memory);
-		saveMemoriesList();
+		saveMemoriesList(memories);
 	}
 }

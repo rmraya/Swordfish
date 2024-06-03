@@ -38,6 +38,10 @@ export class Locations {
                     this.locations.set(key, new Point((value as any).x, (value as any).y));
                 }
             } catch (err: any) {
+                if (err instanceof Error    ) {
+                    console.error(err.message);
+                    return;
+                }
                 console.log(err);
             }
         }

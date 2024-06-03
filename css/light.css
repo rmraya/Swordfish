@@ -65,7 +65,7 @@ a:hover {
 	position: absolute;
 	top: 200px;
 	left: calc(40% - 100px);
-	width: 200px;
+	/* width: 200px; */
 	margin: auto;
 	background-color: var(--ClassicBlue80);
 	color: var(--white);
@@ -770,4 +770,18 @@ svg.stats {
 
 ::-webkit-scrollbar-button {
 	border-radius: inherit;
+}
+
+.arrow-down:after {
+	content: "\2193";
+	display: inline-block;
+	vertical-align: text-bottom;
+	margin-left: 4px;
+}
+
+.arrow-up:after {
+	content: "\2191";
+	display: inline-block;
+	vertical-align: text-bottom;
+	margin-left: 4px;
 }

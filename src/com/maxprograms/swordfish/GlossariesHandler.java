@@ -58,7 +58,6 @@ public class GlossariesHandler implements HttpHandler {
 
 	private static Logger logger = System.getLogger(GlossariesHandler.class.getName());
 
-	private static Map<String, Memory> glossaries;
 	private static Map<String, ITmEngine> engines;
 	private static Map<String, JSONObject> openTasks = new Hashtable<>();
 
@@ -159,24 +158,24 @@ public class GlossariesHandler implements HttpHandler {
 		Memory mem = new Memory(json);
 		ITmEngine engine = new SqliteDatabase(mem.getId(), getWorkFolder());
 		engine.close();
-		if (glossaries == null) {
-			loadGlossariesList();
-		}
+		Map<String, Memory> glossaries = getGlossaries();
 		glossaries.put(mem.getId(), mem);
 		ServicesHandler.addClient(json.getString("client"));
 		ServicesHandler.addSubject(json.getString("subject"));
 		ServicesHandler.addProject(json.getString("project"));
-		saveGlossariesList();
+		saveGlossariesList(glossaries);
 		return result;
 	}
 
-	private static void loadGlossariesList() throws IOException {
-		glossaries = new Hashtable<>();
+	private static Map<String, Memory> getGlossaries() throws IOException {
+		Map<String, Memory> glossaries = new Hashtable<>();
 		engines = new Hashtable<>();
 		File home = new File(getWorkFolder());
 		File list = new File(home, "glossaries.json");
 		if (!list.exists()) {
-			return;
+			JSONObject json = new JSONObject();
+			TmsServer.writeJSON(list, json);
+			return glossaries;
 		}
 		JSONObject json = TmsServer.readJSON(list);
 		Set<String> keys = json.keySet();
@@ -186,9 +185,10 @@ public class GlossariesHandler implements HttpHandler {
 			JSONObject obj = json.getJSONObject(key);
 			glossaries.put(key, new Memory(obj));
 		}
+		return glossaries;
 	}
 
-	private static void saveGlossariesList() throws IOException {
+	private static synchronized void saveGlossariesList(Map<String, Memory> glossaries) throws IOException {
 		JSONObject json = new JSONObject();
 		Set<String> keys = glossaries.keySet();
 		Iterator<String> it = keys.iterator();
@@ -204,16 +204,18 @@ public class GlossariesHandler implements HttpHandler {
 
 	private static JSONObject listGlossaries() throws IOException {
 		JSONObject result = new JSONObject();
-		loadGlossariesList();
 		JSONArray array = new JSONArray();
 		result.put("glossaries", array);
-		Vector<Memory> vector = new Vector<>();
-		vector.addAll(glossaries.values());
-		Collections.sort(vector);
-		Iterator<Memory> it = vector.iterator();
-		while (it.hasNext()) {
-			Memory m = it.next();
-			array.put(m.toJSON());
+		Map<String, Memory> glossaries = getGlossaries();
+		if (!glossaries.isEmpty()) {
+			Vector<Memory> vector = new Vector<>();
+			vector.addAll(glossaries.values());
+			Collections.sort(vector);
+			Iterator<Memory> it = vector.iterator();
+			while (it.hasNext()) {
+				Memory m = it.next();
+				array.put(m.toJSON());
+			}
 		}
 		return result;
 	}
@@ -221,7 +223,6 @@ public class GlossariesHandler implements HttpHandler {
 	private static JSONObject deleteGlossary(String request) {
 		JSONObject result = new JSONObject();
 		final JSONObject json = new JSONObject(request);
-
 		if (json.has("glossaries")) {
 			final String process = "" + System.currentTimeMillis();
 			result.put("process", process);
@@ -230,6 +231,7 @@ public class GlossariesHandler implements HttpHandler {
 			openTasks.put(process, obj);
 			Thread.ofVirtual().start(() -> {
 				try {
+					Map<String, Memory> glossaries = getGlossaries();
 					JSONArray array = json.getJSONArray("glossaries");
 					for (int i = 0; i < array.length(); i++) {
 						Memory mem = glossaries.get(array.getString(i));
@@ -239,7 +241,7 @@ public class GlossariesHandler implements HttpHandler {
 						}
 						glossaries.remove(mem.getId());
 					}
-					saveGlossariesList();
+					saveGlossariesList(glossaries);
 					JSONObject completed = new JSONObject();
 					completed.put(Constants.PROGRESS, Constants.COMPLETED);
 					openTasks.put(process, completed);
@@ -286,9 +288,7 @@ public class GlossariesHandler implements HttpHandler {
 		openTasks.put(process, obj);
 		Thread.ofVirtual().start(() -> {
 			try {
-				if (glossaries == null) {
-					loadGlossariesList();
-				}
+				Map<String, Memory> glossaries = getGlossaries();
 				Memory mem = glossaries.get(json.getString("glossary"));
 				openGlossary(mem);
 				ITmEngine engine = getEngine(mem.getId());
@@ -320,30 +320,21 @@ public class GlossariesHandler implements HttpHandler {
 	}
 
 	public static synchronized void openGlossary(String id) throws IOException, SQLException, URISyntaxException {
-		if (glossaries == null) {
-			loadGlossariesList();
-		}
+		Map<String, Memory> glossaries = getGlossaries();
 		openGlossary(glossaries.get(id));
 	}
 
 	public static synchronized void openGlossary(Memory memory) throws IOException, SQLException, URISyntaxException {
-		if (glossaries == null) {
-			loadGlossariesList();
-		}
 		ITmEngine engine = memory.getType().equals(Memory.LOCAL) ? new SqliteDatabase(memory.getId(), getWorkFolder())
 				: new RemoteDatabase(memory.getServer(), memory.getUser(), memory.getPassword(), memory.getId());
 		engines.put(memory.getId(), engine);
 	}
 
 	public static ITmEngine getEngine(String id) throws IOException, SQLException, URISyntaxException {
-		if (glossaries == null) {
-			loadGlossariesList();
-		}
 		if (!engines.containsKey(id)) {
 			openGlossary(id);
 		}
 		return engines.get(id);
-
 	}
 
 	public static synchronized void closeGlossary(String id) throws IOException, SQLException, URISyntaxException {
@@ -389,6 +380,7 @@ public class GlossariesHandler implements HttpHandler {
 		openTasks.put(process, obj);
 		Thread.ofVirtual().start(() -> {
 			try {
+				Map<String, Memory> glossaries = getGlossaries();
 				openGlossary(glossaries.get(id));
 				File tempFile = null;
 				String tmxFile = glossFile.getAbsolutePath();
@@ -430,21 +422,21 @@ public class GlossariesHandler implements HttpHandler {
 		return result;
 	}
 
-	public static JSONArray getGlossaries() throws IOException {
+	public static synchronized JSONArray getGlossariesList() throws IOException {
 		JSONArray result = new JSONArray();
-		if (glossaries == null) {
-			loadGlossariesList();
-		}
-		Vector<Memory> vector = new Vector<>();
-		vector.addAll(glossaries.values());
-		Collections.sort(vector);
-		Iterator<Memory> it = vector.iterator();
-		while (it.hasNext()) {
-			Memory m = it.next();
-			JSONArray array = new JSONArray();
-			array.put(m.getId());
-			array.put(m.getName());
-			result.put(array);
+		Map<String, Memory> glossaries = getGlossaries();
+		if (!glossaries.isEmpty()) {
+			Vector<Memory> vector = new Vector<>();
+			vector.addAll(glossaries.values());
+			Collections.sort(vector);
+			Iterator<Memory> it = vector.iterator();
+			while (it.hasNext()) {
+				Memory m = it.next();
+				JSONArray array = new JSONArray();
+				array.put(m.getId());
+				array.put(m.getName());
+				result.put(array);
+			}
 		}
 		return result;
 	}
@@ -505,6 +497,7 @@ public class GlossariesHandler implements HttpHandler {
 			Element tgtSeg = new Element("seg");
 			tgtSeg.setText(json.getString("targetTerm"));
 			tgtTuv.addContent(tgtSeg);
+			Map<String, Memory> glossaries = getGlossaries();
 			openGlossary(glossaries.get(glossary));
 			ITmEngine engine = getEngine(glossary);
 			engine.storeTu(tu);
@@ -532,6 +525,7 @@ public class GlossariesHandler implements HttpHandler {
 		String glossary = json.getString("glossary");
 		try {
 			List<Element> matches = new Vector<>();
+			Map<String, Memory> glossaries = getGlossaries();
 			openGlossary(glossaries.get(glossary));
 			matches.addAll(getEngine(glossary).searchAll(searchStr, srcLang, similarity, caseSensitive));
 			closeGlossary(glossary);
@@ -597,17 +591,13 @@ public class GlossariesHandler implements HttpHandler {
 	}
 
 	public static String getGlossaryName(String id) throws IOException {
-		if (glossaries == null) {
-			loadGlossariesList();
-		}
+		Map<String, Memory> glossaries = getGlossaries();
 		return glossaries.get(id).getName();
 	}
 
 	protected static void addGlossary(Memory memory) throws IOException {
-		if (glossaries == null) {
-			loadGlossariesList();
-		}
+		Map<String, Memory> glossaries = getGlossaries();
 		glossaries.put(memory.getId(), memory);
-		saveGlossariesList();
+		saveGlossariesList(glossaries);
 	}
 }

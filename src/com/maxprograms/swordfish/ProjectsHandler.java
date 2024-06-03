@@ -27,8 +27,6 @@ import java.nio.file.Files;
 import java.sql.SQLException;
 import java.text.MessageFormat;
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.Iterator;
@@ -37,6 +35,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
+import java.util.Vector;
 import java.util.zip.DataFormatException;
 
 import javax.xml.parsers.ParserConfigurationException;
@@ -65,9 +64,7 @@ import com.sun.net.httpserver.HttpHandler;
 public class ProjectsHandler implements HttpHandler {
 
 	private static Logger logger = System.getLogger(ProjectsHandler.class.getName());
-	private static Map<String, Project> projects = new Hashtable<>();
 	private static Map<String, JSONObject> processes = new Hashtable<>();
-	protected JSONObject projectsList;
 
 	private String srxFile;
 	private String catalogFile;
@@ -83,7 +80,6 @@ public class ProjectsHandler implements HttpHandler {
 			try (InputStream is = exchange.getRequestBody()) {
 				request = TmsServer.readRequestBody(is);
 			}
-			loadProjectsList();
 			JSONObject response = processRequest(uri.toString(), request);
 			byte[] bytes = response.toString().getBytes(StandardCharsets.UTF_8);
 			exchange.sendResponseHeaders(200, bytes.length);
@@ -97,7 +93,7 @@ public class ProjectsHandler implements HttpHandler {
 					}
 				}
 			}
-		} catch (IOException | JSONException | SAXException | ParserConfigurationException e) {
+		} catch (IOException | JSONException e) {
 			MessageFormat mf = new MessageFormat(Messages.getString("ProjectsHandler.0"));
 			logger.log(Level.ERROR, mf.format(new String[] { exchange.getRequestURI().toString() }), e);
 		}
@@ -238,29 +234,37 @@ public class ProjectsHandler implements HttpHandler {
 		JSONObject result = new JSONObject();
 		JSONObject json = new JSONObject(request);
 		String project = json.getString("project");
+		Map<String, Project> projects = getProjects();
 		if (!projects.containsKey(project)) {
-			result.put(Constants.REASON, Messages.getString("ProjectsHandler.2"));
+			MessageFormat mf = new MessageFormat(Messages.getString("ProjectsHandler.2"));
+			result.put(Constants.REASON, mf.format(new String[] { project }));
 			return result;
 		}
 		projectStores.get(project).setMTMatches(json);
 		return result;
 	}
 
-	private JSONObject getProject(String request) throws IOException, JSONException {
+	private JSONObject getProject(String request)
+			throws IOException, JSONException, SAXException, ParserConfigurationException {
 		JSONObject json = new JSONObject(request);
+		Map<String, Project> projects = getProjects();
 		if (!projects.containsKey(json.getString("project"))) {
 			JSONObject result = new JSONObject();
-			result.put(Constants.REASON, Messages.getString("ProjectsHandler.2"));
+			MessageFormat mf = new MessageFormat(Messages.getString("ProjectsHandler.2"));
+			result.put(Constants.REASON, mf.format(new String[] { json.getString("project") }));
 			return result;
 		}
 		return projects.get(json.getString("project")).toJSON();
 	}
 
-	private JSONObject getProjectFiles(String request) {
+	private JSONObject getProjectFiles(String request)
+			throws JSONException, IOException, SAXException, ParserConfigurationException {
 		JSONObject result = new JSONObject();
 		JSONObject json = new JSONObject(request);
+		Map<String, Project> projects = getProjects();
 		if (!projects.containsKey(json.getString("project"))) {
-			result.put(Constants.REASON, Messages.getString("ProjectsHandler.2"));
+			MessageFormat mf = new MessageFormat(Messages.getString("ProjectsHandler.2"));
+			result.put(Constants.REASON, mf.format(new String[] { json.getString("project") }));
 			return result;
 		}
 		Project project = projects.get(json.getString("project"));
@@ -292,6 +296,7 @@ public class ProjectsHandler implements HttpHandler {
 		String output = json.getString("output");
 		if (!projectStores.containsKey(project)) {
 			try {
+				Map<String, Project> projects = getProjects();
 				Project prj = projects.get(project);
 				XliffStore store = new XliffStore(prj.getXliff(), prj.getSourceLang().getCode(),
 						prj.getTargetLang().getCode());
@@ -334,6 +339,7 @@ public class ProjectsHandler implements HttpHandler {
 		String output = json.getString("output");
 		if (!projectStores.containsKey(project)) {
 			try {
+				Map<String, Project> projects = getProjects();
 				Project prj = projects.get(project);
 				XliffStore store = new XliffStore(prj.getXliff(), prj.getSourceLang().getCode(),
 						prj.getTargetLang().getCode());
@@ -376,6 +382,7 @@ public class ProjectsHandler implements HttpHandler {
 		String output = json.getString("output");
 		if (!projectStores.containsKey(project)) {
 			try {
+				Map<String, Project> projects = getProjects();
 				Project prj = projects.get(project);
 				XliffStore store = new XliffStore(prj.getXliff(), prj.getSourceLang().getCode(),
 						prj.getTargetLang().getCode());
@@ -394,6 +401,7 @@ public class ProjectsHandler implements HttpHandler {
 		try {
 			Thread.ofVirtual().start(() -> {
 				try {
+					Map<String, Project> projects = getProjects();
 					Project prj = projects.get(project);
 					projectStores.get(project).exportTMX(output, prj.getDescription(), prj.getClient(),
 							prj.getSubject());
@@ -419,6 +427,7 @@ public class ProjectsHandler implements HttpHandler {
 		try {
 			JSONObject json = new JSONObject(request);
 			JSONArray array = json.getJSONArray("projects");
+			Map<String, Project> projects = getProjects();
 			for (int i = 0; i < array.length(); i++) {
 				String project = array.getString(i);
 				if (projectStores.containsKey(project)) {
@@ -427,77 +436,65 @@ public class ProjectsHandler implements HttpHandler {
 					projectStores.remove(project);
 				}
 				TmsServer.deleteFolder(new File(getWorkFolder(), project));
-				removeFromList(project);
+				projects.remove(project);
 			}
-			saveProjectsList();
-		} catch (IOException | SQLException e) {
+			saveProjectsList(projects);
+		} catch (IOException | SQLException | JSONException | SAXException | ParserConfigurationException e) {
 			logger.log(Level.ERROR, e);
 			result.put(Constants.REASON, e.getMessage());
 		}
 		return result;
 	}
 
-	private void removeFromList(String id) {
-		JSONArray array = projectsList.getJSONArray("projects");
-		for (int i = 0; i < array.length(); i++) {
-			JSONObject project = array.getJSONObject(i);
-			if (project.get("id").equals(id)) {
-				array.remove(i);
-				break;
-			}
-		}
-	}
-
 	private JSONObject listProjects() throws IOException, JSONException, SAXException, ParserConfigurationException {
 		JSONObject result = new JSONObject();
-		loadProjectsList();
-		JSONArray array = projectsList.getJSONArray("projects");
-		for (int i = 0; i < array.length(); i++) {
-			int status = array.getJSONObject(i).getInt("status");
-			array.getJSONObject(i).put("svg", XliffUtils.makeSVG(status));
-		}
+		JSONArray array = new JSONArray();
 		result.put("projects", array);
+		Map<String, Project> projects = getProjects();
+		if (!projects.isEmpty()) {
+			Vector<Project> list = new Vector<>(projects.values());
+			for (int i = 0; i < list.size(); i++) {
+				Project project = list.get(i);
+				int status = project.getStatus();
+				JSONObject obj = project.toJSON();
+				obj.put("svg", XliffUtils.makeSVG(status));
+				array.put(obj);
+			}
+		}
 		return result;
 	}
 
-	private void loadProjectsList() throws IOException, JSONException, SAXException, ParserConfigurationException {
-		projects.clear();
+	private static synchronized Map<String, Project> getProjects()
+			throws IOException, JSONException, SAXException, ParserConfigurationException {
+		Map<String, Project> projects = new Hashtable<>();
 		File home = getWorkFolder();
 		File list = new File(home, "projects.json");
 		if (!list.exists()) {
 			JSONObject json = new JSONObject();
 			json.put("projects", new JSONArray());
 			TmsServer.writeJSON(list, json);
+			return projects;
 		}
-		projectsList = TmsServer.readJSON(list);
-		sortProjects();
-	}
-
-	private void sortProjects() throws IOException, JSONException, SAXException, ParserConfigurationException {
+		JSONObject projectsList = TmsServer.readJSON(list);
 		JSONArray array = projectsList.getJSONArray("projects");
-		List<Project> list = new ArrayList<>();
 		for (int i = 0; i < array.length(); i++) {
 			Project project = new Project(array.getJSONObject(i));
-			list.add(project);
-		}
-		Collections.sort(list, (o1, o2) -> {
-			Long long1 = Long.parseLong(o1.getId());
-			Long long2 = Long.parseLong(o2.getId());
-			return Long.compare(long2, long1);
-		});
-		array = new JSONArray();
-		for (int i = 0; i < list.size(); i++) {
-			Project project = list.get(i);
 			projects.put(project.getId(), project);
-			array.put(project.toJSON());
 		}
-		projectsList.put("projects", array);
+		return projects;
 	}
 
-	private synchronized void saveProjectsList() throws IOException {
+	private synchronized void saveProjectsList(Map<String, Project> projects) throws IOException {
+		JSONObject json = new JSONObject();
+		JSONArray array = new JSONArray();
+		Iterator<Project> it = projects.values().iterator();
+		while (it.hasNext()) {
+			array.put(it.next().toJSON());
+		}
+		json.put("projects", array);
 		File home = getWorkFolder();
 		File list = new File(home, "projects.json");
-		byte[] bytes = projectsList.toString(2).getBytes(StandardCharsets.UTF_8);
+		byte[] bytes = json.toString(2).getBytes(StandardCharsets.UTF_8);
 		try (FileOutputStream out = new FileOutputStream(list)) {
 			out.write(bytes);
 		}
@@ -514,6 +511,7 @@ public class ProjectsHandler implements HttpHandler {
 		}
 		if (!projectStores.containsKey(project)) {
 			try {
+				Map<String, Project> projects = getProjects();
 				Project prj = projects.get(project);
 				XliffStore store = new XliffStore(prj.getXliff(), prj.getSourceLang().getCode(),
 						prj.getTargetLang().getCode());
@@ -545,6 +543,7 @@ public class ProjectsHandler implements HttpHandler {
 
 		if (!projectStores.containsKey(project)) {
 			try {
+				Map<String, Project> projects = getProjects();
 				Project prj = projects.get(project);
 				XliffStore store = new XliffStore(prj.getXliff(), prj.getSourceLang().getCode(),
 						prj.getTargetLang().getCode());
@@ -593,6 +592,7 @@ public class ProjectsHandler implements HttpHandler {
 		String project = json.getString("project");
 		if (!projectStores.containsKey(project)) {
 			try {
+				Map<String, Project> projects = getProjects();
 				Project prj = projects.get(project);
 				XliffStore store = new XliffStore(prj.getXliff(), prj.getSourceLang().getCode(),
 						prj.getTargetLang().getCode());
@@ -649,10 +649,10 @@ public class ProjectsHandler implements HttpHandler {
 
 			File projectFolder = new File(getWorkFolder(), id);
 			Files.createDirectories(projectFolder.toPath());
-			List<SourceFile> sourceFiles = new ArrayList<>();
+			List<SourceFile> sourceFiles = new Vector<>();
 			Thread.ofVirtual().start(() -> {
 				try {
-					List<String> xliffs = new ArrayList<>();
+					List<String> xliffs = new Vector<>();
 					for (int i = 0; i < files.length(); i++) {
 						JSONObject file = files.getJSONObject(i);
 						String fullName = file.getString("file");
@@ -694,7 +694,7 @@ public class ProjectsHandler implements HttpHandler {
 						List<String> res = Convert.run(params);
 
 						if ("0".equals(res.get(0))) {
-							res = ToXliff2.run(xliff, catalogFile, "2.0");
+							res = ToXliff2.run(xliff, catalogFile, "2.1");
 							if (mustResegment && "0".equals(res.get(0))) {
 								res = Resegmenter.run(xliff.getAbsolutePath(), srxFile, json.getString("srcLang"),
 										new Catalog(catalogFile));
@@ -731,10 +731,9 @@ public class ProjectsHandler implements HttpHandler {
 						ServicesHandler.addProject(p.getDescription());
 					}
 					p.setFiles(sourceFiles);
+					Map<String, Project> projects = getProjects();
 					projects.put(id, p);
-					projectsList.getJSONArray("projects").put(p.toJSON());
-					sortProjects();
-					saveProjectsList();
+					saveProjectsList(projects);
 					if (applyTM) {
 						XliffStore store = new XliffStore(p.getXliff(), p.getSourceLang().getCode(),
 								p.getTargetLang().getCode());
@@ -780,10 +779,6 @@ public class ProjectsHandler implements HttpHandler {
 
 	private JSONObject closeProject(String request) {
 		JSONObject result = new JSONObject();
-		if (projects == null) {
-			result.put(Constants.REASON, Messages.getString("ProjectsHandler.12"));
-			return result;
-		}
 		if (projectStores == null) {
 			result.put(Constants.REASON, Messages.getString("ProjectsHandler.13"));
 			return result;
@@ -852,19 +847,14 @@ public class ProjectsHandler implements HttpHandler {
 		return result;
 	}
 
-	private void updateProjectStatus(String projectId, int status) throws IOException {
-		JSONArray array = projectsList.getJSONArray("projects");
-		for (int i = 0; i < array.length(); i++) {
-			JSONObject project = array.getJSONObject(i);
-			if (project.getString("id").equals(projectId)) {
-				int value = project.getInt("status");
-				if (value != status) {
-					array.getJSONObject(i).put("status", status);
-					projectsList.put("projects", array);
-					saveProjectsList();
-				}
-				break;
-			}
+	private void updateProjectStatus(String projectId, int status)
+			throws IOException, JSONException, SAXException, ParserConfigurationException {
+		Map<String, Project> projects = getProjects();
+		Project project = projects.get(projectId);
+		int value = project.getStatus();
+		if (value != status) {
+			project.setStatus(status);
+			saveProjectsList(projects);
 		}
 	}
 
@@ -924,6 +914,7 @@ public class ProjectsHandler implements HttpHandler {
 			String project = json.getString("project");
 
 			if (!projectStores.containsKey(project)) {
+				Map<String, Project> projects = getProjects();
 				Project prj = projects.get(project);
 				XliffStore store = new XliffStore(prj.getXliff(), prj.getSourceLang().getCode(),
 						prj.getTargetLang().getCode());
@@ -964,6 +955,7 @@ public class ProjectsHandler implements HttpHandler {
 			String memory = json.getString("memory");
 			int penalization = json.has("penalization") ? json.getInt("penalization") : 0;
 			if (!projectStores.containsKey(project)) {
+				Map<String, Project> projects = getProjects();
 				Project prj = projects.get(project);
 				XliffStore store = new XliffStore(prj.getXliff(), prj.getSourceLang().getCode(),
 						prj.getTargetLang().getCode());
@@ -996,13 +988,17 @@ public class ProjectsHandler implements HttpHandler {
 		return result;
 	}
 
-	private JSONObject getProjectMemories(String request) {
+	private JSONObject getProjectMemories(String request)
+			throws JSONException, IOException, SAXException, ParserConfigurationException {
 		JSONObject result = new JSONObject();
 		JSONObject json = new JSONObject(request);
+		String projectId = json.getString("project");
+		Map<String, Project> projects = getProjects();
+		Project project = projects.get(projectId);
+		String memory = project.getMemory();
+		result.put("default", memory);
 		try {
-			result.put("memories", MemoriesHandler.getMemories());
-			String memory = projects.get(json.getString("project")).getMemory();
-			result.put("default", memory != null ? memory : "");
+			result.put("memories", MemoriesHandler.getMemoriesList());
 		} catch (IOException e) {
 			logger.log(Level.ERROR, e);
 			result.put(Constants.REASON, e.getMessage());
@@ -1010,13 +1006,17 @@ public class ProjectsHandler implements HttpHandler {
 		return result;
 	}
 
-	private JSONObject getProjectGlossaries(String request) {
+	private JSONObject getProjectGlossaries(String request)
+			throws JSONException, IOException, SAXException, ParserConfigurationException {
 		JSONObject result = new JSONObject();
 		JSONObject json = new JSONObject(request);
+		String projectId = json.getString("project");
+		Map<String, Project> projects = getProjects();
+		Project project = projects.get(projectId);
+		String glossary = project.getGlossary();
+		result.put("default", glossary);
 		try {
-			result.put("glossaries", GlossariesHandler.getGlossaries());
-			String glossary = projects.get(json.getString("project")).getGlossary();
-			result.put("default", glossary != null ? glossary : "");
+			result.put("glossaries", GlossariesHandler.getGlossariesList());
 		} catch (IOException e) {
 			logger.log(Level.ERROR, e);
 			result.put(Constants.REASON, e.getMessage());
@@ -1024,22 +1024,16 @@ public class ProjectsHandler implements HttpHandler {
 		return result;
 	}
 
-	private JSONObject setProjectMemory(String request) {
+	private JSONObject setProjectMemory(String request)
+			throws JSONException, SAXException, ParserConfigurationException {
 		JSONObject result = new JSONObject();
 		try {
 			JSONObject json = new JSONObject(request);
 			String project = json.getString("project");
 			String memory = json.getString("memory");
+			Map<String, Project> projects = getProjects();
 			projects.get(project).setMemory(memory);
-			JSONArray list = projectsList.getJSONArray("projects");
-			for (int i = 0; i < list.length(); i++) {
-				JSONObject obj = list.getJSONObject(i);
-				if (project.equals(obj.getString("id"))) {
-					obj.put("memory", memory);
-					break;
-				}
-			}
-			saveProjectsList();
+			saveProjectsList(projects);
 		} catch (IOException e) {
 			logger.log(Level.ERROR, e);
 			result.put(Constants.REASON, e.getMessage());
@@ -1047,22 +1041,16 @@ public class ProjectsHandler implements HttpHandler {
 		return result;
 	}
 
-	private JSONObject setProjectGlossary(String request) {
+	private JSONObject setProjectGlossary(String request)
+			throws JSONException, SAXException, ParserConfigurationException {
 		JSONObject result = new JSONObject();
 		try {
 			JSONObject json = new JSONObject(request);
 			String project = json.getString("project");
 			String glossary = json.getString("glossary");
+			Map<String, Project> projects = getProjects();
 			projects.get(project).setMemory(glossary);
-			JSONArray list = projectsList.getJSONArray("projects");
-			for (int i = 0; i < list.length(); i++) {
-				JSONObject obj = list.getJSONObject(i);
-				if (project.equals(obj.getString("id"))) {
-					obj.put("glossary", glossary);
-					break;
-				}
-			}
-			saveProjectsList();
+			saveProjectsList(projects);
 		} catch (IOException e) {
 			logger.log(Level.ERROR, e);
 			result.put(Constants.REASON, e.getMessage());
@@ -1106,9 +1094,9 @@ public class ProjectsHandler implements HttpHandler {
 					p.setStatus(status.getInt("percentage"));
 					ServicesHandler.addClient(json.getString("client"));
 					ServicesHandler.addSubject(json.getString("subject"));
+					Map<String, Project> projects = getProjects();
 					projects.put(id, p);
-					projectsList.getJSONArray("projects").put(p.toJSON());
-					saveProjectsList();
+					saveProjectsList(projects);
 					obj.put(Constants.PROGRESS, Constants.COMPLETED);
 					processes.put(id, obj);
 				} catch (IOException | SAXException | ParserConfigurationException | URISyntaxException
@@ -1201,7 +1189,7 @@ public class ProjectsHandler implements HttpHandler {
 				result.put("statistics", status);
 				updateProjectStatus(project, status.getInt("percentage"));
 			}
-		} catch (SQLException | JSONException | IOException e) {
+		} catch (SQLException | JSONException | IOException | SAXException | ParserConfigurationException e) {
 			logger.log(Level.ERROR, e);
 			result.put(Constants.REASON, e.getMessage());
 		}
@@ -1305,6 +1293,7 @@ public class ProjectsHandler implements HttpHandler {
 			String project = json.getString("project");
 			if (!projectStores.containsKey(project)) {
 				try {
+					Map<String, Project> projects = getProjects();
 					Project prj = projects.get(project);
 					XliffStore store = new XliffStore(prj.getXliff(), prj.getSourceLang().getCode(),
 							prj.getTargetLang().getCode());
@@ -1331,6 +1320,7 @@ public class ProjectsHandler implements HttpHandler {
 		try {
 			JSONObject json = new JSONObject(request);
 			String project = json.getString("project");
+			Map<String, Project> projects = getProjects();
 			Project prj = projects.get(project);
 			if (!projectStores.containsKey(project)) {
 				try {
@@ -1459,6 +1449,7 @@ public class ProjectsHandler implements HttpHandler {
 				try {
 					String project = json.getString("project");
 					if (!projectStores.containsKey(project)) {
+						Map<String, Project> projects = getProjects();
 						Project prj = projects.get(project);
 						XliffStore store = new XliffStore(prj.getXliff(), prj.getSourceLang().getCode(),
 								prj.getTargetLang().getCode());

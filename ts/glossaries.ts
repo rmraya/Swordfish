@@ -20,6 +20,11 @@ class GlossariesView {
     tableContainer: HTMLDivElement;
     selected: Map<string, Memory>;
 
+    glossaries: Memory[]
+
+    glossariesSortFielD: string = 'name';
+    glossariesSortAscending: boolean = true;
+
     constructor(div: HTMLDivElement) {
         this.selected = new Map<string, Memory>();
         this.container = div;
@@ -103,22 +108,136 @@ class GlossariesView {
         glossariesTable.classList.add('discover');
         this.tableContainer.appendChild(glossariesTable);
 
-        glossariesTable.innerHTML =
-            '<thead><tr>' +
-            '<th>&nbsp;</th>' +
-            '<th style="padding-left:5px;padding-right:5px;">Name</th>' +
-            '<th style="padding-left:5px;padding-right:5px;">Type</th>' +
-            '<th style="padding-left:5px;padding-right:5px;">Project</th>' +
-            '<th style="padding-left:5px;padding-right:5px;">Client</th>' +
-            '<th style="padding-left:5px;padding-right:5px;">Subject</th>' +
-            '<th style="padding-left:5px;padding-right:5px;">Created</th>' +
-            '</tr></thead>';
+        let header: HTMLTableSectionElement = document.createElement('thead');
+        glossariesTable.appendChild(header);
+
+        let headerRow: HTMLTableRowElement = document.createElement('tr');
+        header.appendChild(headerRow);
+
+        let headerCell: HTMLTableCellElement = document.createElement('th');
+        headerCell.innerHTML = '&nbsp;';
+        headerRow.appendChild(headerCell);
+
+        headerCell = document.createElement('th');
+        headerCell.classList.add('noWrap');
+        headerCell.innerText = 'Name';
+        headerCell.id = 'glossary-name';
+        headerCell.addEventListener('click', () => {
+            (document.getElementById('glossary-' + this.glossariesSortFielD) as HTMLTableCellElement).classList.remove('arrow-down');
+            (document.getElementById('glossary-' + this.glossariesSortFielD) as HTMLTableCellElement).classList.remove('arrow-up');
+            if (this.glossariesSortFielD === 'name') {
+                this.glossariesSortAscending = !this.glossariesSortAscending;
+            } else {
+                this.glossariesSortFielD = 'name';
+                this.glossariesSortAscending = true;
+            }
+            this.displayGlossaries();
+        });
+        headerCell.style.paddingLeft = '4px';
+        headerCell.style.paddingRight = '4px';
+        headerRow.appendChild(headerCell);
+
+        headerCell = document.createElement('th');
+        headerCell.classList.add('noWrap');
+        headerCell.innerText = 'Type';
+        headerCell.id = 'glossary-type';
+        headerCell.addEventListener('click', () => {
+            (document.getElementById('glossary-' + this.glossariesSortFielD) as HTMLTableCellElement).classList.remove('arrow-down');
+            (document.getElementById('glossary-' + this.glossariesSortFielD) as HTMLTableCellElement).classList.remove('arrow-up');
+            if (this.glossariesSortFielD === 'type') {
+                this.glossariesSortAscending = !this.glossariesSortAscending;
+            } else {
+                this.glossariesSortFielD = 'type';
+                this.glossariesSortAscending = true;
+            }
+            this.displayGlossaries();
+        });
+        headerCell.style.paddingLeft = '4px';
+        headerCell.style.paddingRight = '4px';
+        headerRow.appendChild(headerCell);
+
+        headerCell = document.createElement('th');
+        headerCell.classList.add('noWrap');
+        headerCell.innerText = 'Project';
+        headerCell.id = 'glossary-project';
+        headerCell.addEventListener('click', () => {
+            (document.getElementById('glossary-' + this.glossariesSortFielD) as HTMLTableCellElement).classList.remove('arrow-down');
+            (document.getElementById('glossary-' + this.glossariesSortFielD) as HTMLTableCellElement).classList.remove('arrow-up');
+            if (this.glossariesSortFielD === 'project') {
+                this.glossariesSortAscending = !this.glossariesSortAscending;
+            } else {
+                this.glossariesSortFielD = 'project';
+                this.glossariesSortAscending = true;
+            }
+            this.displayGlossaries();
+        });
+        headerCell.style.paddingLeft = '4px';
+        headerCell.style.paddingRight = '4px';
+        headerRow.appendChild(headerCell);
+
+        headerCell = document.createElement('th');
+        headerCell.classList.add('noWrap');
+        headerCell.innerText = 'Client';
+        headerCell.id = 'glossary-client';
+        headerCell.addEventListener('click', () => {
+            (document.getElementById('glossary-' + this.glossariesSortFielD) as HTMLTableCellElement).classList.remove('arrow-down');
+            (document.getElementById('glossary-' + this.glossariesSortFielD) as HTMLTableCellElement).classList.remove('arrow-up');
+            if (this.glossariesSortFielD === 'client') {
+                this.glossariesSortAscending = !this.glossariesSortAscending;
+            } else {
+                this.glossariesSortFielD = 'client';
+                this.glossariesSortAscending = true;
+            }
+            this.displayGlossaries();
+        });
+        headerCell.style.paddingLeft = '4px';
+        headerCell.style.paddingRight = '4px';
+        headerRow.appendChild(headerCell);
+
+        headerCell = document.createElement('th');
+        headerCell.classList.add('noWrap');
+        headerCell.innerText = 'Subject';
+        headerCell.id = 'glossary-subject';
+        headerCell.addEventListener('click', () => {
+            (document.getElementById('glossary-' + this.glossariesSortFielD) as HTMLTableCellElement).classList.remove('arrow-down');
+            (document.getElementById('glossary-' + this.glossariesSortFielD) as HTMLTableCellElement).classList.remove('arrow-up');
+            if (this.glossariesSortFielD === 'subject') {
+                this.glossariesSortAscending = !this.glossariesSortAscending;
+            } else {
+                this.glossariesSortFielD = 'subject';
+                this.glossariesSortAscending = true;
+            }
+            this.displayGlossaries();
+        });
+        headerCell.style.paddingLeft = '4px';
+        headerCell.style.paddingRight = '4px';
+        headerRow.appendChild(headerCell);
+
+        headerCell = document.createElement('th');
+        headerCell.classList.add('noWrap');
+        headerCell.innerText = 'Created';
+        headerCell.id = 'glossary-created';
+        headerCell.addEventListener('click', () => {
+            (document.getElementById('glossary-' + this.glossariesSortFielD) as HTMLTableCellElement).classList.remove('arrow-down');
+            (document.getElementById('glossary-' + this.glossariesSortFielD) as HTMLTableCellElement).classList.remove('arrow-up');
+            if (this.glossariesSortFielD === 'created') {
+                this.glossariesSortAscending = !this.glossariesSortAscending;
+            } else {
+                this.glossariesSortFielD = 'created';
+                this.glossariesSortAscending = true;
+            }
+            this.displayGlossaries();
+        });
+        headerCell.style.paddingLeft = '4px';
+        headerCell.style.paddingRight = '4px';
+        headerRow.appendChild(headerCell);
 
         this.tbody = document.createElement('tbody');
         glossariesTable.appendChild(this.tbody);
 
         this.electron.ipcRenderer.on('set-glossaries', (event: Electron.IpcRendererEvent, arg: any) => {
-            this.displayGlossaries(arg);
+            this.glossaries = arg;
+            this.displayGlossaries();
         });
 
         this.loadGlossaries();
@@ -196,20 +315,81 @@ class GlossariesView {
         this.electron.ipcRenderer.send('get-glossaries');
     }
 
-    displayGlossaries(glossaries: Memory[]) {
+    displayGlossaries() {
+        if (this.glossariesSortAscending) {
+            (document.getElementById('glossary-' + this.glossariesSortFielD) as HTMLTableCellElement).classList.add('arrow-up');
+        } else {
+            (document.getElementById('glossary-' + this.glossariesSortFielD) as HTMLTableCellElement).classList.add('arrow-down');
+        }
+        this.glossaries.sort((a: Memory, b: Memory) => {
+            if (this.glossariesSortFielD === 'name') {
+                if (a.name.toLocaleLowerCase() < b.name.toLocaleLowerCase()) {
+                    return this.glossariesSortAscending ? -1 : 1;
+                }
+                if (a.name.toLocaleLowerCase() > b.name.toLocaleLowerCase()) {
+                    return this.glossariesSortAscending ? 1 : -1;
+                }
+                return 0;
+            }
+            if (this.glossariesSortFielD === 'type') {
+                if (a.type < b.type) {
+                    return this.glossariesSortAscending ? -1 : 1;
+                }
+                if (a.type > b.type) {
+                    return this.glossariesSortAscending ? 1 : -1;
+                }
+                return 0;
+            }
+            if (this.glossariesSortFielD === 'project') {
+                if (a.project.toLocaleLowerCase() < b.project.toLocaleLowerCase()) {
+                    return this.glossariesSortAscending ? -1 : 1;
+                }
+                if (a.project.toLocaleLowerCase() > b.project.toLocaleLowerCase()) {
+                    return this.glossariesSortAscending ? 1 : -1;
+                }
+                return 0;
+            }
+            if (this.glossariesSortFielD === 'client') {
+                if (a.client.toLocaleLowerCase() < b.client.toLocaleLowerCase()) {
+                    return this.glossariesSortAscending ? -1 : 1;
+                }
+                if (a.client.toLocaleLowerCase() > b.client.toLocaleLowerCase()) {
+                    return this.glossariesSortAscending ? 1 : -1;
+                }
+                return 0;
+            }
+            if (this.glossariesSortFielD === 'subject') {
+                if (a.subject.toLocaleLowerCase() < b.subject.toLocaleLowerCase()) {
+                    return this.glossariesSortAscending ? -1 : 1;
+                }
+                if (a.subject.toLocaleLowerCase() > b.subject.toLocaleLowerCase()) {
+                    return this.glossariesSortAscending ? 1 : -1;
+                }
+                return 0;
+            }
+            if (this.glossariesSortFielD === 'created') {
+                if (a.creationDate < b.creationDate) {
+                    return this.glossariesSortAscending ? -1 : 1;
+                }
+                if (a.creationDate > b.creationDate) {
+                    return this.glossariesSortAscending ? 1 : -1;
+                }
+                return 0;
+            }
+        });
         this.tbody.innerHTML = '';
-        let length = glossaries.length;
+        let length = this.glossaries.length;
         for (let i = 0; i < length; i++) {
-            let p: Memory = glossaries[i];
+            let gloss: Memory = this.glossaries[i];
 
             let checkBox: HTMLInputElement = document.createElement('input');
-            checkBox.id = 'ck_' + p.id;
+            checkBox.id = 'ck_' + gloss.id;
             checkBox.type = 'checkbox';
 
             let tr: HTMLTableRowElement = document.createElement('tr');
-            tr.id = p.id;
+            tr.id = gloss.id;
             tr.addEventListener('click', (event: MouseEvent) => {
-                this.clicked(tr, p, checkBox);
+                this.clicked(tr, gloss, checkBox);
             });
             this.tbody.appendChild(tr);
 
@@ -223,21 +403,13 @@ class GlossariesView {
             td = document.createElement('td');
             td.classList.add('noWrap');
             td.classList.add('middle');
-            td.innerText = p.name;
+            td.innerText = gloss.name;
             tr.append(td);
 
             td = document.createElement('td');
             td.classList.add('middle');
             td.classList.add('center');
-            td.innerText = p.type;
-            tr.append(td);
-
-            td = document.createElement('td');
-            td.classList.add('noWrap');
-            td.classList.add('middle');
-            td.classList.add('center');
-            td.style.minWidth = '170px';
-            td.innerText = p.project;
+            td.innerText = gloss.type;
             tr.append(td);
 
             td = document.createElement('td');
@@ -245,7 +417,7 @@ class GlossariesView {
             td.classList.add('middle');
             td.classList.add('center');
             td.style.minWidth = '170px';
-            td.innerText = p.client;
+            td.innerText = gloss.project;
             tr.append(td);
 
             td = document.createElement('td');
@@ -253,7 +425,7 @@ class GlossariesView {
             td.classList.add('middle');
             td.classList.add('center');
             td.style.minWidth = '170px';
-            td.innerText = p.subject;
+            td.innerText = gloss.client;
             tr.append(td);
 
             td = document.createElement('td');
@@ -261,7 +433,15 @@ class GlossariesView {
             td.classList.add('middle');
             td.classList.add('center');
             td.style.minWidth = '170px';
-            td.innerText = p.creationString;
+            td.innerText = gloss.subject;
+            tr.append(td);
+
+            td = document.createElement('td');
+            td.classList.add('noWrap');
+            td.classList.add('middle');
+            td.classList.add('center');
+            td.style.minWidth = '170px';
+            td.innerText = gloss.creationString;
             tr.append(td);
         }
         this.selected.clear();

@@ -90,7 +90,7 @@ public class TmsServer implements HttpHandler {
 		server.createContext("/glossaries", new GlossariesHandler());
 		server.createContext("/services", new ServicesHandler());
 		server.createContext("/", this);
-		server.setExecutor(new ThreadPoolExecutor(4, 8, 30, TimeUnit.SECONDS, new ArrayBlockingQueue<>(100)));
+		server.setExecutor(new ThreadPoolExecutor(4, 20, 2, TimeUnit.HOURS, new ArrayBlockingQueue<>(200)));
 		server.start();
 		if (debug) {
 			logger.log(Level.INFO, Messages.getString("TmsServer.2"));
