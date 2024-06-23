@@ -63,10 +63,6 @@ public class ServicesHandler implements HttpHandler {
 
 	private static Logger logger = System.getLogger(ServicesHandler.class.getName());
 
-	private static JSONObject clients;
-	private static JSONObject subjects;
-	private static JSONObject projects;
-
 	@Override
 	public void handle(HttpExchange exchange) throws IOException {
 		try {
@@ -110,7 +106,7 @@ public class ServicesHandler implements HttpHandler {
 			} else if ("/services/getSubjects".equals(url)) {
 				result = getSubjects();
 			} else if ("/services/getProjects".equals(url)) {
-				result = getProjects();
+				result = getProjectNames();
 			} else if ("/services/getSpellingLanguages".equals(url)) {
 				result = getSpellingLanguages(request);
 			} else if ("/services/remoteDatabases".equals(url)) {
@@ -478,30 +474,30 @@ public class ServicesHandler implements HttpHandler {
 	}
 
 	private static JSONObject getClients() throws IOException {
-		if (clients != null) {
-			return clients;
-		}
 		File clientsFile = new File(TmsServer.getWorkFolder(), "clients.json");
 		if (!clientsFile.exists()) {
-			clients = new JSONObject();
+			JSONObject clients = new JSONObject();
 			clients.put("clients", new JSONArray());
+			try (FileOutputStream out = new FileOutputStream(clientsFile)) {
+				out.write(clients.toString(2).getBytes(StandardCharsets.UTF_8));
+			}
 			return clients;
 		}
-		clients = TmsServer.readJSON(clientsFile);
+		JSONObject clients = TmsServer.readJSON(clientsFile);
 		return clients;
 	}
 
 	private static JSONObject getSubjects() throws IOException {
-		if (subjects != null) {
-			return subjects;
-		}
 		File subjectsFile = new File(TmsServer.getWorkFolder(), "subjects.json");
 		if (!subjectsFile.exists()) {
-			subjects = new JSONObject();
+			JSONObject subjects = new JSONObject();
 			subjects.put("subjects", new JSONArray());
+			try (FileOutputStream out = new FileOutputStream(subjectsFile)) {
+				out.write(subjects.toString(2).getBytes(StandardCharsets.UTF_8));
+			}
 			return subjects;
 		}
-		subjects = TmsServer.readJSON(subjectsFile);
+		JSONObject subjects = TmsServer.readJSON(subjectsFile);
 		return subjects;
 	}
 
@@ -519,20 +515,17 @@ public class ServicesHandler implements HttpHandler {
 		return result;
 	}
 
-	private static JSONObject getProjects() throws IOException {
-		if (projects != null) {
-			return projects;
-		}
+	private static JSONObject getProjectNames() throws IOException {
 		File projectsFile = new File(TmsServer.getWorkFolder(), "projects.json");
 		if (!projectsFile.exists()) {
-			projects = new JSONObject();
+			JSONObject projects = new JSONObject();
 			projects.put("projects", new JSONArray());
 			try (FileOutputStream out = new FileOutputStream(projectsFile)) {
-				out.write(projects.toString().getBytes(StandardCharsets.UTF_8));
+				out.write(projects.toString(2).getBytes(StandardCharsets.UTF_8));
 			}
 			return projects;
 		}
-		projects = TmsServer.readJSON(projectsFile);
+		JSONObject projects = TmsServer.readJSON(projectsFile);
 		return projects;
 	}
 
@@ -540,7 +533,7 @@ public class ServicesHandler implements HttpHandler {
 		if (client == null || client.isEmpty()) {
 			return;
 		}
-		getClients();
+		JSONObject clients = getClients();
 		JSONArray array = clients.getJSONArray("clients");
 		for (int i = 0; i < array.length(); i++) {
 			if (client.equals(array.getString(i))) {
@@ -550,7 +543,7 @@ public class ServicesHandler implements HttpHandler {
 		clients.put("clients", insertString(client, array));
 		File clientsFile = new File(TmsServer.getWorkFolder(), "clients.json");
 		try (FileOutputStream out = new FileOutputStream(clientsFile)) {
-			out.write(clients.toString().getBytes(StandardCharsets.UTF_8));
+			out.write(clients.toString(2).getBytes(StandardCharsets.UTF_8));
 		}
 	}
 
@@ -558,7 +551,7 @@ public class ServicesHandler implements HttpHandler {
 		if (subject == null || subject.isEmpty()) {
 			return;
 		}
-		getSubjects();
+		JSONObject subjects = getSubjects();
 		JSONArray array = subjects.getJSONArray("subjects");
 		for (int i = 0; i < array.length(); i++) {
 			if (subject.equals(array.getString(i))) {
@@ -568,15 +561,15 @@ public class ServicesHandler implements HttpHandler {
 		subjects.put("subjects", insertString(subject, array));
 		File subjectsFile = new File(TmsServer.getWorkFolder(), "subjects.json");
 		try (FileOutputStream out = new FileOutputStream(subjectsFile)) {
-			out.write(subjects.toString().getBytes(StandardCharsets.UTF_8));
+			out.write(subjects.toString(2).getBytes(StandardCharsets.UTF_8));
 		}
 	}
 
-	public static void addProject(String project) throws IOException {
+	public static void addProjectName(String project) throws IOException {
 		if (project == null || project.isEmpty()) {
 			return;
 		}
-		getProjects();
+		JSONObject projects = getProjectNames();
 		JSONArray array = projects.getJSONArray("projects");
 		for (int i = 0; i < array.length(); i++) {
 			if (project.equals(array.getString(i))) {
@@ -584,20 +577,20 @@ public class ServicesHandler implements HttpHandler {
 			}
 		}
 		projects.put("projects", insertString(project, array));
-		File projectsFile = new File(TmsServer.getProjectsFolder(), "projects.json");
+		File projectsFile = new File(TmsServer.getWorkFolder(), "projects.json");
 		try (FileOutputStream out = new FileOutputStream(projectsFile)) {
-			out.write(projects.toString().getBytes(StandardCharsets.UTF_8));
+			out.write(projects.toString(2).getBytes(StandardCharsets.UTF_8));
 		}
 	}
 
-	private static JSONArray insertString(String string, JSONArray array) {
+	private static JSONArray insertString(String projectName, JSONArray array) {
 		JSONArray result = new JSONArray();
 		List<String> list = new Vector<>();
-		list.add(string);
+		list.add(projectName);
 		for (int i = 0; i < array.length(); i++) {
 			list.add(array.getString(i));
 		}
-		Collections.sort(list);
+		Collections.sort(list, (o1, o2) -> o1.toLowerCase().compareTo(o2.toLowerCase()));
 		Iterator<String> it = list.iterator();
 		while (it.hasNext()) {
 			result.put(it.next());

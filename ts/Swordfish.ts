@@ -1584,41 +1584,41 @@ export class Swordfish {
     }
 
     static addFile(): void {
-        let anyFile: string[] = [];
+        let filters: any[] = [
+            { name: 'Any File', extensions: [] },
+            { name: 'Adobe InDesign Interchange', extensions: ['inx'] },
+            { name: 'Adobe InCopy ICML', extensions: ['icml'] },
+            { name: 'Adobe InDesign IDML', extensions: ['idml'] },
+            { name: 'DITA Map', extensions: ['ditamap', 'dita', 'xml'] },
+            { name: 'HTML Page', extensions: ['html', 'htm'] },
+            { name: 'JavaScript', extensions: ['js'] },
+            { name: 'Java Properties', extensions: ['properties'] },
+            { name: 'JSON', extensions: ['json'] },
+            { name: 'MIF (Maker Interchange Format)', extensions: ['mif'] },
+            { name: 'Microsoft Office 2007 Document', extensions: ['docx', 'xlsx', 'pptx'] },
+            { name: 'OpenOffice 1.x Document', extensions: ['sxw', 'sxc', 'sxi', 'sxd'] },
+            { name: 'OpenOffice 2.x Document', extensions: ['odt', 'ods', 'odp', 'odg'] },
+            { name: 'Plain Text', extensions: ['txt'] },
+            { name: 'PO (Portable Objects)', extensions: ['po', 'pot'] },
+            { name: 'RC (Windows C/C++ Resources)', extensions: ['rc'] },
+            { name: 'ResX (Windows .NET Resources)', extensions: ['resx'] },
+            { name: 'SDLXLIFF Document', extensions: ['sdlxliff'] },
+            { name: 'SRT Subtitle', extensions: ['srt'] },
+            { name: 'SVG (Scalable Vector Graphics)', extensions: ['svg'] },
+            { name: 'Trados Studio Package', extensions: ['sdlppx'] },
+            { name: 'TS (Qt Linguist translation source)', extensions: ['ts'] },
+            { name: 'TXML Document', extensions: ['txml'] },
+            { name: 'Visio XML Drawing', extensions: ['vsdx'] },
+            { name: 'XLIFF', extensions: ['xlf', 'xliff', 'mqxliff', 'txlf'] },
+            { name: 'XML Document', extensions: ['xml'] }
+        ];
         if (process.platform === 'linux') {
-            anyFile = ['*'];
+            filters.splice(0, 1);
+            filters.push({ name: 'Any File', extensions: ['*'] });
         }
         dialog.showOpenDialog({
             properties: ['openFile'],
-
-            filters: [
-                { name: 'Any File', extensions: anyFile },
-                { name: 'Adobe InDesign Interchange', extensions: ['inx'] },
-                { name: 'Adobe InCopy ICML', extensions: ['icml'] },
-                { name: 'Adobe InDesign IDML', extensions: ['idml'] },
-                { name: 'DITA Map', extensions: ['ditamap', 'dita', 'xml'] },
-                { name: 'HTML Page', extensions: ['html', 'htm'] },
-                { name: 'JavaScript', extensions: ['js'] },
-                { name: 'Java Properties', extensions: ['properties'] },
-                { name: 'JSON', extensions: ['json'] },
-                { name: 'MIF (Maker Interchange Format)', extensions: ['mif'] },
-                { name: 'Microsoft Office 2007 Document', extensions: ['docx', 'xlsx', 'pptx'] },
-                { name: 'OpenOffice 1.x Document', extensions: ['sxw', 'sxc', 'sxi', 'sxd'] },
-                { name: 'OpenOffice 2.x Document', extensions: ['odt', 'ods', 'odp', 'odg'] },
-                { name: 'Plain Text', extensions: ['txt'] },
-                { name: 'PO (Portable Objects)', extensions: ['po', 'pot'] },
-                { name: 'RC (Windows C/C++ Resources)', extensions: ['rc'] },
-                { name: 'ResX (Windows .NET Resources)', extensions: ['resx'] },
-                { name: 'SDLXLIFF Document', extensions: ['sdlxliff'] },
-                { name: 'SRT Subtitle', extensions: ['srt'] },
-                { name: 'SVG (Scalable Vector Graphics)', extensions: ['svg'] },
-                { name: 'Trados Studio Package', extensions: ['sdlppx'] },
-                { name: 'TS (Qt Linguist translation source)', extensions: ['ts'] },
-                { name: 'TXML Document', extensions: ['txml'] },
-                { name: 'Visio XML Drawing', extensions: ['vsdx'] },
-                { name: 'XLIFF', extensions: ['xlf', 'xliff', 'mqxliff', 'txlf'] },
-                { name: 'XML Document', extensions: ['xml'] }
-            ]
+            filters: filters
         }).then((value: Electron.OpenDialogReturnValue) => {
             if (!value.canceled) {
                 Swordfish.selectedFile = value.filePaths[0];
@@ -1786,40 +1786,41 @@ export class Swordfish {
     }
 
     selectSourceFiles(event: IpcMainEvent): void {
-        let anyFile: string[] = [];
+        let filters: any[] = [
+            { name: 'Any File', extensions: [] },
+            { name: 'Adobe InDesign Interchange', extensions: ['inx'] },
+            { name: 'Adobe InCopy ICML', extensions: ['icml'] },
+            { name: 'Adobe InDesign IDML', extensions: ['idml'] },
+            { name: 'DITA Map', extensions: ['ditamap', 'dita', 'xml'] },
+            { name: 'HTML Page', extensions: ['html', 'htm'] },
+            { name: 'JavaScript', extensions: ['js'] },
+            { name: 'Java Properties', extensions: ['properties'] },
+            { name: 'JSON', extensions: ['json'] },
+            { name: 'MIF (Maker Interchange Format)', extensions: ['mif'] },
+            { name: 'Microsoft Office 2007 Document', extensions: ['docx', 'xlsx', 'pptx'] },
+            { name: 'OpenOffice 1.x Document', extensions: ['sxw', 'sxc', 'sxi', 'sxd'] },
+            { name: 'OpenOffice 2.x Document', extensions: ['odt', 'ods', 'odp', 'odg'] },
+            { name: 'Plain Text', extensions: ['txt'] },
+            { name: 'PO (Portable Objects)', extensions: ['po', 'pot'] },
+            { name: 'RC (Windows C/C++ Resources)', extensions: ['rc'] },
+            { name: 'ResX (Windows .NET Resources)', extensions: ['resx'] },
+            { name: 'SDLXLIFF Document', extensions: ['sdlxliff'] },
+            { name: 'SRT Subtitle', extensions: ['srt'] },
+            { name: 'SVG (Scalable Vector Graphics)', extensions: ['svg'] },
+            { name: 'Trados Studio Package', extensions: ['sdlppx'] },
+            { name: 'TS (Qt Linguist translation source)', extensions: ['ts'] },
+            { name: 'TXML Document', extensions: ['txml'] },
+            { name: 'Visio XML Drawing', extensions: ['vsdx'] },
+            { name: 'XLIFF', extensions: ['xlf', 'xliff', 'mqxliff', 'txlf'] },
+            { name: 'XML Document', extensions: ['xml'] }
+        ];
         if (process.platform === 'linux') {
-            anyFile = ['*'];
+            filters.splice(0, 1);
+            filters.push({ name: 'Any File', extensions: ['*'] });
         }
         dialog.showOpenDialog({
             properties: ['openFile', 'multiSelections'],
-            filters: [
-                { name: 'Any File', extensions: anyFile },
-                { name: 'Adobe InDesign Interchange', extensions: ['inx'] },
-                { name: 'Adobe InCopy ICML', extensions: ['icml'] },
-                { name: 'Adobe InDesign IDML', extensions: ['idml'] },
-                { name: 'DITA Map', extensions: ['ditamap', 'dita', 'xml'] },
-                { name: 'HTML Page', extensions: ['html', 'htm'] },
-                { name: 'JavaScript', extensions: ['js'] },
-                { name: 'Java Properties', extensions: ['properties'] },
-                { name: 'JSON', extensions: ['json'] },
-                { name: 'MIF (Maker Interchange Format)', extensions: ['mif'] },
-                { name: 'Microsoft Office 2007 Document', extensions: ['docx', 'xlsx', 'pptx'] },
-                { name: 'OpenOffice 1.x Document', extensions: ['sxw', 'sxc', 'sxi', 'sxd'] },
-                { name: 'OpenOffice 2.x Document', extensions: ['odt', 'ods', 'odp', 'odg'] },
-                { name: 'Plain Text', extensions: ['txt'] },
-                { name: 'PO (Portable Objects)', extensions: ['po', 'pot'] },
-                { name: 'RC (Windows C/C++ Resources)', extensions: ['rc'] },
-                { name: 'ResX (Windows .NET Resources)', extensions: ['resx'] },
-                { name: 'SDLXLIFF Document', extensions: ['sdlxliff'] },
-                { name: 'SRT Subtitle', extensions: ['srt'] },
-                { name: 'SVG (Scalable Vector Graphics)', extensions: ['svg'] },
-                { name: 'Trados Studio Package', extensions: ['sdlppx'] },
-                { name: 'TS (Qt Linguist translation source)', extensions: ['ts'] },
-                { name: 'TXML Document', extensions: ['txml'] },
-                { name: 'Visio XML Drawing', extensions: ['vsdx'] },
-                { name: 'XLIFF', extensions: ['xlf', 'xliff', 'mqxliff', 'txlf'] },
-                { name: 'XML Document', extensions: ['xml'] }
-            ]
+            filters: filters
         }).then((value: Electron.OpenDialogReturnValue) => {
             if (!value.canceled) {
                 Swordfish.getFileType(event, value.filePaths);

@@ -283,7 +283,7 @@ export class MTManager {
         let result: Language[] = [];
         for (let lang of langs) {
             try {
-                result.push(LanguageUtils.getLanguage(lang));
+                result.push(LanguageUtils.getLanguage(lang, 'en'));
             } catch (error) {
                 // ignore unsupported tags
                 // console.log('unsupported tag', lang);

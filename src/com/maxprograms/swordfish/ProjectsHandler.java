@@ -728,7 +728,7 @@ public class ProjectsHandler implements HttpHandler {
 					ServicesHandler.addClient(json.getString("client"));
 					ServicesHandler.addSubject(json.getString("subject"));
 					if (!p.getDescription().endsWith(sourceFiles.get(0).getFile())) {
-						ServicesHandler.addProject(p.getDescription());
+						ServicesHandler.addProjectName(p.getDescription());
 					}
 					p.setFiles(sourceFiles);
 					Map<String, Project> projects = getProjects();

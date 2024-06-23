@@ -2,13 +2,13 @@
 <xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
     elementFormDefault="qualified"
     xmlns:val="urn:oasis:names:tc:xliff:validation:2.0"
-    xmlns:xlf="urn:oasis:names:tc:xliff:document:2.0"
+    xmlns:xlf="urn:oasis:names:tc:xliff:document:2.2"
     targetNamespace="urn:oasis:names:tc:xliff:validation:2.0">
 
   <!-- Import -->
 
-  <xs:import namespace="urn:oasis:names:tc:xliff:document:2.0"
-      schemaLocation="xliff_core_2.0.xsd"/>
+  <xs:import namespace="urn:oasis:names:tc:xliff:document:2.2"
+      schemaLocation="xliff_core_2.2.xsd"/>
 
   <!-- Attribute Types -->
 

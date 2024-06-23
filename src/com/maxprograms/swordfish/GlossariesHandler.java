@@ -162,7 +162,7 @@ public class GlossariesHandler implements HttpHandler {
 		glossaries.put(mem.getId(), mem);
 		ServicesHandler.addClient(json.getString("client"));
 		ServicesHandler.addSubject(json.getString("subject"));
-		ServicesHandler.addProject(json.getString("project"));
+		ServicesHandler.addProjectName(json.getString("project"));
 		saveGlossariesList(glossaries);
 		return result;
 	}
