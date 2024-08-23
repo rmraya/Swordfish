@@ -21,7 +21,6 @@ class TermSearch {
         this.electron.ipcRenderer.on('set-theme', (event: Electron.IpcRendererEvent, arg: any) => {
             (document.getElementById('theme') as HTMLLinkElement).href = arg;
         });
-        document.addEventListener('keydown', (event: KeyboardEvent) => { KeyboardHandler.keyListener(event); });
         document.addEventListener('keydown', (event: KeyboardEvent) => {
             if (event.code === 'Enter' || event.code === 'NumpadEnter') {
                 this.search();
@@ -52,7 +51,9 @@ class TermSearch {
                 (document.getElementById('searchText') as HTMLInputElement).dir = 'rtl';
             }
         });
-        this.electron.ipcRenderer.send('term-search-height', { width: document.body.clientWidth, height: document.body.clientHeight });
+        setTimeout(() => {
+            this.electron.ipcRenderer.send('set-height', { window: 'termSearch', width: document.body.clientWidth, height: document.body.clientHeight });
+        }, 200);
     }
 
     setLanguages(arg: any): void {

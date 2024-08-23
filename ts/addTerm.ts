@@ -21,7 +21,6 @@ class AddTerm {
         this.electron.ipcRenderer.on('set-theme', (event: Electron.IpcRendererEvent, arg: any) => {
             (document.getElementById('theme') as HTMLLinkElement).href = arg;
         });
-        document.addEventListener('keydown', (event: KeyboardEvent) => { KeyboardHandler.keyListener(event); });
         document.addEventListener('keydown', (event: KeyboardEvent) => {
             if (event.code === 'Enter' || event.code === 'NumpadEnter') {
                 this.addTerm();
@@ -57,7 +56,9 @@ class AddTerm {
             this.addTerm();
         });
         (document.getElementById('source') as HTMLInputElement).focus();
-        this.electron.ipcRenderer.send('add-term-height', { width: document.body.clientWidth, height: document.body.clientHeight });
+        setTimeout(() => {
+            this.electron.ipcRenderer.send('set-height', { window: 'addTerm', width: document.body.clientWidth, height: document.body.clientHeight });
+        }, 200);
     }
 
     addTerm(): void {

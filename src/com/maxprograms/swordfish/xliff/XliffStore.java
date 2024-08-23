@@ -73,8 +73,10 @@ import com.maxprograms.xml.Catalog;
 import com.maxprograms.xml.Document;
 import com.maxprograms.xml.Element;
 import com.maxprograms.xml.Indenter;
+import com.maxprograms.xml.PI;
 import com.maxprograms.xml.SAXBuilder;
 import com.maxprograms.xml.TextNode;
+import com.maxprograms.xml.XMLDeclaration;
 import com.maxprograms.xml.XMLNode;
 import com.maxprograms.xml.XMLOutputter;
 import com.maxprograms.xml.XMLUtils;
@@ -178,17 +180,14 @@ public class XliffStore {
 			protected void xFunc() throws SQLException {
 				String expression = value_text(0);
 				String value = value_text(1);
-				if (value == null)
+				if (value == null) {
 					value = "";
-
+				}
 				Pattern pat = Pattern.compile(expression);
 				result(pat.matcher(value).find() ? 1 : 0);
 			}
 		});
 		if (needsLoading) {
-			if (TmsServer.isDebug()) {
-				logger.log(Level.INFO, Messages.getString("XliffStore.1"));
-			}
 			createTables();
 		}
 
@@ -860,9 +859,6 @@ public class XliffStore {
 		stmt.close();
 		conn.commit();
 		conn.close();
-		if (TmsServer.isDebug()) {
-			logger.log(Level.INFO, Messages.getString("XliffStore.2"));
-		}
 	}
 
 	public String getSrcLang() {
@@ -956,7 +952,7 @@ public class XliffStore {
 		result.put("spaceErrors", spaceErrors);
 
 		if (!memory.equals(Constants.NONE) && !pureTarget.isBlank() && confirm) {
-			Thread.ofVirtual().start(() -> {
+			new Thread(() -> {
 				try {
 					StringBuilder key = new StringBuilder();
 					key.append(xliffFile.hashCode());
@@ -974,7 +970,7 @@ public class XliffStore {
 				} catch (IOException | SQLException | URISyntaxException e) {
 					logger.log(Level.ERROR, e);
 				}
-			});
+			}).start();
 		}
 		return result;
 	}
@@ -1813,6 +1809,43 @@ public class XliffStore {
 		TmsServer.deleteFolder(tempFolder);
 	}
 
+	public void importXliff(String input) throws SAXException, IOException, ParserConfigurationException, SQLException {
+		Document doc = builder.build(input);
+		recurseImporting(doc.getRootElement());
+	}
+
+	private void recurseImporting(Element e) throws SQLException {
+		if ("file".equals(e.getName())) {
+			String original = e.getAttributeValue("original");
+			String sql = "SELECT id FROM files WHERE name=?";
+			try (PreparedStatement st = conn.prepareStatement(sql)) {
+				st.setString(1, original);
+				try (ResultSet rs = st.executeQuery()) {
+					if (rs.next()) {
+						currentFile = rs.getString(1);
+					}
+				}
+			}
+		}
+		if ("unit".equals(e.getName())) {
+			currentUnit = e.getAttributeValue("id");
+		}
+		if ("segment".equals(e.getName())) {
+			String id = e.getAttributeValue("id");
+			Element target = e.getChild("target");
+			if (target != null) {
+				state = e.getAttributeValue("state");
+				String pureTarget = XliffUtils.pureText(target);
+				updateTarget(currentFile, currentUnit, id, target, pureTarget, Constants.FINAL.equals(state));
+			}
+		}
+		List<Element> children = e.getChildren();
+		Iterator<Element> it = children.iterator();
+		while (it.hasNext()) {
+			recurseImporting(it.next());
+		}
+	}
+
 	public void exportTMX(String output, String description, String client, String subject)
 			throws SQLException, SAXException, IOException, ParserConfigurationException {
 		Element d = new Element("prop");
@@ -1869,6 +1902,136 @@ public class XliffStore {
 			}
 			writeString(out, "</body>\n");
 			writeString(out, "</tmx>\n");
+		}
+	}
+
+	public void exportMatches(String output, String description, String client, String subject)
+			throws SQLException, SAXException, IOException, ParserConfigurationException {
+		Element d = new Element("prop");
+		d.setAttribute("type", "project");
+		d.setText(description);
+		Element c = null;
+		if (!client.isBlank()) {
+			c = new Element("prop");
+			c.setAttribute("type", "customer");
+			c.setText(client);
+		}
+		Element s = null;
+		if (!subject.isBlank()) {
+			s = new Element("prop");
+			s.setAttribute("type", "subject");
+			s.setText(subject);
+		}
+		try (FileOutputStream out = new FileOutputStream(output)) {
+			writeTmxHeader(out);
+			String sql = "SELECT file, unitId, segId, source, target FROM matches WHERE type='tm' ORDER BY file, unitId, segId";
+			try (ResultSet rs = stmt.executeQuery(sql)) {
+				while (rs.next()) {
+					String file = rs.getString(1);
+					String unit = rs.getString(2);
+					String segment = rs.getString(3);
+
+					StringBuilder key = new StringBuilder();
+					key.append(xliffFile.hashCode());
+					key.append('-');
+					key.append(file);
+					key.append('-');
+					key.append(unit);
+					key.append('-');
+					key.append(segment);
+
+					String src = rs.getString(4);
+					Element source = XliffUtils.buildElement(src);
+					String tgt = rs.getString(5);
+					Element target = XliffUtils.buildElement(tgt);
+
+					Map<String, String> tags = getTags(source);
+
+					Element tuv = XliffUtils.toTu(key.toString(), source, target, tags, srcLang, tgtLang);
+					tuv.getContent().add(0, d);
+					if (c != null) {
+						tuv.getContent().add(0, c);
+					}
+					if (s != null) {
+						tuv.getContent().add(0, s);
+					}
+					Indenter.indent(tuv, 2);
+					writeString(out, tuv.toString());
+				}
+			}
+			writeString(out, "</body>\n");
+			writeString(out, "</tmx>\n");
+		}
+	}
+
+	public void exportTerms(String output, String description, String subject)
+			throws SQLException, IOException, ParserConfigurationException {
+		Element descrip = null;
+		if (!subject.isBlank()) {
+			descrip = new Element("descrip");
+			descrip.setAttribute("type", "subjectField");
+			descrip.setText(subject);
+		}
+		try (FileOutputStream out = new FileOutputStream(output)) {
+			XMLDeclaration decl = new XMLDeclaration("1.0", "UTF-8", null);
+			writeString(out, decl.toString() + "\n");
+			PI model = new PI("xml-model",
+					"href=\"urn:iso:std:iso:30042:ed-2\" schematypens=\"http://relaxng.org/ns/structure/1.0\"");
+			writeString(out, model.toString() + "\n");
+			Element tbx = new Element("tbx");
+			tbx.setAttribute("type", "TBX-Basic");
+			tbx.setAttribute("style", "dca");
+			tbx.setAttribute("xml:lang", srcLang);
+			tbx.setAttribute("xmlns", "urn:iso:std:iso:30042:ed-2");
+			writeString(out, tbx.getHead() + "\n");
+			Element tbxHeader = new Element("tbxHeader");
+			Element fileDesc = new Element("fileDesc");
+			tbxHeader.addContent(fileDesc);
+			Element sourceDesc = new Element("sourceDesc");
+			fileDesc.addContent(sourceDesc);
+			Element p = new Element("p");
+			p.setText(description);
+			sourceDesc.addContent(p);
+			Indenter.indent(tbxHeader, 2);
+			writeString(out, tbxHeader.toString() + "\n");
+			Element text = new Element("text");
+			writeString(out, text.getHead() + "\n");
+			Element body = new Element("body");
+			writeString(out, body.getHead() + "\n");
+
+			String sql = "SELECT DISTINCT source, target FROM terms";
+			long now = System.currentTimeMillis();
+			try (ResultSet rs = stmt.executeQuery(sql)) {
+				while (rs.next()) {
+					Element conceptEntry = new Element("conceptEntry");
+					conceptEntry.setAttribute("id", "c" + now++);
+					if (descrip != null) {
+						conceptEntry.addContent(descrip);
+					}
+					Element langSec = new Element("langSec");
+					langSec.setAttribute("xml:lang", srcLang);
+					conceptEntry.addContent(langSec);
+					Element termSec = new Element("termSec");
+					langSec.addContent(termSec);
+					Element term = new Element("term");
+					term.setText(rs.getString(1));
+					termSec.addContent(term);
+
+					Element langSec2 = new Element("langSec");
+					langSec2.setAttribute("xml:lang", tgtLang);
+					conceptEntry.addContent(langSec2);
+					Element termSec2 = new Element("termSec");
+					langSec2.addContent(termSec2);
+					Element term2 = new Element("term");
+					term2.setText(rs.getString(2));
+					termSec2.addContent(term2);
+					Indenter.indent(conceptEntry, 2);
+					writeString(out, conceptEntry.toString() + "\n");
+				}
+			}
+			writeString(out, body.getTail() + "\n");
+			writeString(out, text.getTail() + "\n");
+			writeString(out, tbx.getTail());
 		}
 	}
 

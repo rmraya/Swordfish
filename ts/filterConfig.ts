@@ -37,7 +37,9 @@ class FilterConfig {
         document.getElementById('add').addEventListener('click', () => { this.addElement(); });
         document.getElementById('edit').addEventListener('click', () => { this.editElement(); });
         document.getElementById('remove').addEventListener('click', () => { this.removeElements(); });
-        this.electron.ipcRenderer.send('filterConfig-height', { width: document.body.clientWidth, height: document.body.clientHeight });
+        setTimeout(() => {
+            this.electron.ipcRenderer.send('set-height', { window: 'editXmlFilter', width: document.body.clientWidth, height: document.body.clientHeight });
+        }, 200);
     }
 
     populateTable(arg: any): void {
@@ -127,7 +129,7 @@ class FilterConfig {
             return;
         }
         let elements: string[] = [];
-        this.selected.forEach((value: any, key:string) => {
+        this.selected.forEach((value: any, key: string) => {
             elements.push(key);
         });
         this.electron.ipcRenderer.send('remove-elements', { filter: this.filterName, elements: elements });

@@ -30,15 +30,8 @@ class Preferences {
         apiKey: string;
         srcLang: string;
         tgtLang: string;
-        neural: boolean;
     };
     azure: {
-        enabled: boolean;
-        apiKey: string;
-        srcLang: string;
-        tgtLang: string;
-    };
-    yandex: {
         enabled: boolean;
         apiKey: string;
         srcLang: string;

@@ -100,9 +100,6 @@ public class ProjectsHandler implements HttpHandler {
 	}
 
 	private JSONObject processRequest(String url, String request) {
-		if (TmsServer.isDebug()) {
-			logger.log(Level.INFO, url);
-		}
 		JSONObject response = new JSONObject();
 		try {
 			if ("/projects/create".equals(url)) {
@@ -117,6 +114,10 @@ public class ProjectsHandler implements HttpHandler {
 				response = exportTranslations(request);
 			} else if ("/projects/export".equals(url)) {
 				response = export(request);
+			} else if ("/projects/exportReview".equals(url)) {
+				response = exportReview(request);
+			} else if ("/projects/importReview".equals(url)) {
+				response = importReview(request);
 			} else if ("/projects/import".equals(url)) {
 				response = importXliff(request);
 			} else if ("/projects/status".equals(url)) {
@@ -155,6 +156,10 @@ public class ProjectsHandler implements HttpHandler {
 				response = setProjectMemory(request);
 			} else if ("/projects/exportTmx".equals(url)) {
 				response = exportTMX(request);
+			} else if ("/projects/exportMatches".equals((url))) {
+				response = exportMatches(request);
+			} else if ("/projects/exportTerms".equals((url))) {
+				response = exportTerms(request);
 			} else if ("/projects/removeTranslations".equals(url)) {
 				response = removeTranslations(request);
 			} else if ("/projects/unconfirmTranslations".equals(url)) {
@@ -375,6 +380,112 @@ public class ProjectsHandler implements HttpHandler {
 		return result;
 	}
 
+	private JSONObject importReview(String request) {
+		JSONObject result = new JSONObject();
+		JSONObject json = new JSONObject(request);
+		String xliff = json.getString("xliff");
+		File file = new File(xliff);
+		if (!file.exists()) {
+			result.put(Constants.STATUS, Constants.ERROR);
+			result.put(Constants.REASON, Messages.getString("ProjectsHandler.17"));
+			return result;
+		}
+		try {
+			String project = XliffUtils.getProjectId(file);
+			if (!project.isEmpty()) {
+				if (!projectStores.containsKey(project)) {
+					try {
+						Map<String, Project> projects = getProjects();
+						Project prj = projects.get(project);
+						XliffStore store = new XliffStore(prj.getXliff(), prj.getSourceLang().getCode(),
+								prj.getTargetLang().getCode());
+						projectStores.put(project, store);
+					} catch (SAXException | IOException | ParserConfigurationException | URISyntaxException
+							| SQLException e) {
+						logger.log(Level.ERROR, Messages.getString("ProjectsHandler.5"), e);
+						result.put(Constants.REASON, e.getMessage());
+						return result;
+					}
+				}
+				String id = "" + System.currentTimeMillis();
+				result.put("process", id);
+				JSONObject obj = new JSONObject();
+				obj.put(Constants.PROGRESS, Constants.PROCESSING);
+				processes.put(id, obj);
+				try {
+					Thread.ofVirtual().start(() -> {
+						try {
+							projectStores.get(project).importXliff(xliff);
+							obj.put(Constants.PROGRESS, Constants.COMPLETED);
+							processes.put(id, obj);
+						} catch (IOException | SAXException | ParserConfigurationException | SQLException e) {
+							logger.log(Level.ERROR, e);
+							obj.put(Constants.PROGRESS, Constants.ERROR);
+							obj.put(Constants.REASON, e.getMessage());
+							processes.put(id, obj);
+						}
+					});
+				} catch (Exception e) {
+					logger.log(Level.ERROR, Messages.getString("ProjectsHandler.4"), e);
+					result.put(Constants.REASON, e.getMessage());
+				}
+			} else {
+				result.put(Constants.STATUS, Constants.ERROR);
+				result.put(Constants.REASON, Messages.getString("ProjectsHandler.18"));
+				return result;
+			}
+		} catch (Exception e) {
+			logger.log(Level.ERROR, e);
+			result.put(Constants.STATUS, Constants.ERROR);
+			result.put(Constants.REASON, e.getMessage());
+		}
+		return result;
+	}
+
+	private JSONObject exportReview(String request) {
+		JSONObject result = new JSONObject();
+		JSONObject json = new JSONObject(request);
+		String project = json.getString("project");
+		String output = json.getString("output");
+		if (!projectStores.containsKey(project)) {
+			try {
+				Map<String, Project> projects = getProjects();
+				Project prj = projects.get(project);
+				XliffStore store = new XliffStore(prj.getXliff(), prj.getSourceLang().getCode(),
+						prj.getTargetLang().getCode());
+				projectStores.put(project, store);
+			} catch (SAXException | IOException | ParserConfigurationException | URISyntaxException | SQLException e) {
+				logger.log(Level.ERROR, Messages.getString("ProjectsHandler.5"), e);
+				result.put(Constants.REASON, e.getMessage());
+				return result;
+			}
+		}
+		String id = "" + System.currentTimeMillis();
+		result.put("process", id);
+		JSONObject obj = new JSONObject();
+		obj.put(Constants.PROGRESS, Constants.PROCESSING);
+		processes.put(id, obj);
+		try {
+			Thread.ofVirtual().start(() -> {
+				try {
+					projectStores.get(project).exportXliff(output);
+					XliffUtils.removeSkeleton(output, project);
+					obj.put(Constants.PROGRESS, Constants.COMPLETED);
+					processes.put(id, obj);
+				} catch (IOException | SAXException | ParserConfigurationException | SQLException e) {
+					logger.log(Level.ERROR, e);
+					obj.put(Constants.PROGRESS, Constants.ERROR);
+					obj.put(Constants.REASON, e.getMessage());
+					processes.put(id, obj);
+				}
+			});
+		} catch (Exception e) {
+			logger.log(Level.ERROR, Messages.getString("ProjectsHandler.4"), e);
+			result.put(Constants.REASON, e.getMessage());
+		}
+		return result;
+	}
+
 	private JSONObject exportTMX(String request) {
 		JSONObject result = new JSONObject();
 		JSONObject json = new JSONObject(request);
@@ -399,7 +510,7 @@ public class ProjectsHandler implements HttpHandler {
 		obj.put(Constants.PROGRESS, Constants.PROCESSING);
 		processes.put(id, obj);
 		try {
-			Thread.ofVirtual().start(() -> {
+			new Thread(() -> {
 				try {
 					Map<String, Project> projects = getProjects();
 					Project prj = projects.get(project);
@@ -413,8 +524,98 @@ public class ProjectsHandler implements HttpHandler {
 					obj.put(Constants.REASON, e.getMessage());
 					processes.put(id, obj);
 				}
-			});
+			}).start();
+		} catch (Exception e) {
+			logger.log(Level.ERROR, Messages.getString("ProjectsHandler.6"), e);
+			result.put(Constants.REASON, e.getMessage());
+		}
+		return result;
+	}
 
+	private JSONObject exportMatches(String request) {
+		JSONObject result = new JSONObject();
+		JSONObject json = new JSONObject(request);
+		String project = json.getString("project");
+		String output = json.getString("output");
+		if (!projectStores.containsKey(project)) {
+			try {
+				Map<String, Project> projects = getProjects();
+				Project prj = projects.get(project);
+				XliffStore store = new XliffStore(prj.getXliff(), prj.getSourceLang().getCode(),
+						prj.getTargetLang().getCode());
+				projectStores.put(project, store);
+			} catch (SAXException | IOException | ParserConfigurationException | URISyntaxException | SQLException e) {
+				logger.log(Level.ERROR, Messages.getString("ProjectsHandler.3"), e);
+				result.put(Constants.REASON, e.getMessage());
+				return result;
+			}
+		}
+		String id = "" + System.currentTimeMillis();
+		result.put("process", id);
+		JSONObject obj = new JSONObject();
+		obj.put(Constants.PROGRESS, Constants.PROCESSING);
+		processes.put(id, obj);
+		try {
+			new Thread(() -> {
+				try {
+					Map<String, Project> projects = getProjects();
+					Project prj = projects.get(project);
+					projectStores.get(project).exportMatches(output, prj.getDescription(), prj.getClient(),
+							prj.getSubject());
+					obj.put(Constants.PROGRESS, Constants.COMPLETED);
+					processes.put(id, obj);
+				} catch (IOException | SAXException | ParserConfigurationException | SQLException e) {
+					logger.log(Level.ERROR, e);
+					obj.put(Constants.PROGRESS, Constants.ERROR);
+					obj.put(Constants.REASON, e.getMessage());
+					processes.put(id, obj);
+				}
+			}).start();
+		} catch (Exception e) {
+			logger.log(Level.ERROR, Messages.getString("ProjectsHandler.6"), e);
+			result.put(Constants.REASON, e.getMessage());
+		}
+		return result;
+	}
+
+	private JSONObject exportTerms(String request) {
+		JSONObject result = new JSONObject();
+		JSONObject json = new JSONObject(request);
+		String project = json.getString("project");
+		String output = json.getString("output");
+		if (!projectStores.containsKey(project)) {
+			try {
+				Map<String, Project> projects = getProjects();
+				Project prj = projects.get(project);
+				XliffStore store = new XliffStore(prj.getXliff(), prj.getSourceLang().getCode(),
+						prj.getTargetLang().getCode());
+				projectStores.put(project, store);
+			} catch (SAXException | IOException | ParserConfigurationException | URISyntaxException | SQLException e) {
+				logger.log(Level.ERROR, Messages.getString("ProjectsHandler.3"), e);
+				result.put(Constants.REASON, e.getMessage());
+				return result;
+			}
+		}
+		String id = "" + System.currentTimeMillis();
+		result.put("process", id);
+		JSONObject obj = new JSONObject();
+		obj.put(Constants.PROGRESS, Constants.PROCESSING);
+		processes.put(id, obj);
+		try {
+			new Thread(() -> {
+				try {
+					Map<String, Project> projects = getProjects();
+					Project prj = projects.get(project);
+					projectStores.get(project).exportTerms(output, prj.getDescription(), prj.getSubject());
+					obj.put(Constants.PROGRESS, Constants.COMPLETED);
+					processes.put(id, obj);
+				} catch (IOException | SAXException | ParserConfigurationException | SQLException e) {
+					logger.log(Level.ERROR, e);
+					obj.put(Constants.PROGRESS, Constants.ERROR);
+					obj.put(Constants.REASON, e.getMessage());
+					processes.put(id, obj);
+				}
+			}).start();
 		} catch (Exception e) {
 			logger.log(Level.ERROR, Messages.getString("ProjectsHandler.6"), e);
 			result.put(Constants.REASON, e.getMessage());
@@ -650,7 +851,7 @@ public class ProjectsHandler implements HttpHandler {
 			File projectFolder = new File(getWorkFolder(), id);
 			Files.createDirectories(projectFolder.toPath());
 			List<SourceFile> sourceFiles = new Vector<>();
-			Thread.ofVirtual().start(() -> {
+			new Thread(() -> {
 				try {
 					List<String> xliffs = new Vector<>();
 					for (int i = 0; i < files.length(); i++) {
@@ -701,10 +902,6 @@ public class ProjectsHandler implements HttpHandler {
 							}
 						}
 						if (!"0".equals(res.get(0))) {
-							if (TmsServer.isDebug()) {
-								MessageFormat mf = new MessageFormat(Messages.getString("ProjectsHandler.11"));
-								logger.log(Level.INFO, mf.format(new String[] { file.toString(2) }));
-							}
 							try {
 								TmsServer.deleteFolder(projectFolder);
 							} catch (IOException e) {
@@ -738,11 +935,13 @@ public class ProjectsHandler implements HttpHandler {
 						XliffStore store = new XliffStore(p.getXliff(), p.getSourceLang().getCode(),
 								p.getTargetLang().getCode());
 						store.tmTranslateAll(memory, 0, processes, id);
+						store.close();
 					}
 					if (searchTerms) {
 						XliffStore store = new XliffStore(p.getXliff(), p.getSourceLang().getCode(),
 								p.getTargetLang().getCode());
 						store.getProjectTerms(glossary);
+						store.close();
 					}
 					obj.put(Constants.PROGRESS, Constants.COMPLETED);
 					processes.put(id, obj);
@@ -752,7 +951,7 @@ public class ProjectsHandler implements HttpHandler {
 					obj.put(Constants.REASON, e.getMessage());
 					processes.put(id, obj);
 				}
-			});
+			}).start();
 			result.put(Constants.STATUS, Constants.SUCCESS);
 		} catch (IOException | JSONException | SAXException | ParserConfigurationException e) {
 			logger.log(Level.ERROR, e);
@@ -802,9 +1001,6 @@ public class ProjectsHandler implements HttpHandler {
 
 	public static synchronized void closeAll() throws SQLException {
 		if (projectStores == null) {
-			if (TmsServer.isDebug()) {
-				logger.log(Level.INFO, Messages.getString("ProjectsHandler.15"));
-			}
 			return;
 		}
 		Set<String> keys = projectStores.keySet();
@@ -813,9 +1009,6 @@ public class ProjectsHandler implements HttpHandler {
 			projectStores.get(it.next()).close();
 		}
 		projectStores.clear();
-		if (TmsServer.isDebug()) {
-			logger.log(Level.INFO, Messages.getString("ProjectsHandler.16"));
-		}
 	}
 
 	private JSONObject save(String request) {
@@ -1072,7 +1265,7 @@ public class ProjectsHandler implements HttpHandler {
 			if (!xliffFile.exists()) {
 				throw new IOException(Messages.getString("ProjectsHandler.17"));
 			}
-			Thread.ofVirtual().start(() -> {
+			new Thread(() -> {
 				try {
 					JSONObject details = XliffUtils.getProjectDetails(xliffFile);
 					Project p = new Project(id, description, Project.NEW,
@@ -1106,7 +1299,7 @@ public class ProjectsHandler implements HttpHandler {
 					obj.put(Constants.REASON, e.getMessage());
 					processes.put(id, obj);
 				}
-			});
+			}).start();
 		} catch (IOException e) {
 			logger.log(Level.ERROR, e);
 			result.put(Constants.STATUS, Constants.ERROR);
@@ -1240,7 +1433,7 @@ public class ProjectsHandler implements HttpHandler {
 			JSONObject obj = new JSONObject();
 			obj.put(Constants.PROGRESS, Constants.PROCESSING);
 			processes.put(id, obj);
-			Thread.ofVirtual().start(() -> {
+			new Thread(() -> {
 				try {
 					JSONObject json = new JSONObject(request);
 					String project = json.getString("project");
@@ -1260,7 +1453,7 @@ public class ProjectsHandler implements HttpHandler {
 					obj.put(Constants.REASON, e.getMessage());
 					processes.put(id, obj);
 				}
-			});
+			}).start();
 		} catch (JSONException e) {
 			logger.log(Level.ERROR, e);
 			result.put(Constants.REASON, e.getMessage());
@@ -1445,7 +1638,7 @@ public class ProjectsHandler implements HttpHandler {
 		obj.put(Constants.PROGRESS, Constants.PROCESSING);
 		processes.put(id, obj);
 		try {
-			Thread.ofVirtual().start(() -> {
+			new Thread(() -> {
 				try {
 					String project = json.getString("project");
 					if (!projectStores.containsKey(project)) {
@@ -1463,7 +1656,7 @@ public class ProjectsHandler implements HttpHandler {
 					logger.log(Level.ERROR, e);
 					result.put(Constants.REASON, e.getMessage());
 				}
-			});
+			}).start();
 		} catch (JSONException e) {
 			result.put(Constants.REASON, e.getMessage());
 		}

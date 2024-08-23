@@ -19,8 +19,6 @@ class AddXmlFilterConfiguration {
         this.electron.ipcRenderer.on('set-theme', (event: Electron.IpcRendererEvent, arg: any) => {
             (document.getElementById('theme') as HTMLLinkElement).href = arg;
         });
-        this.electron.ipcRenderer.send('addXmlConfiguration-height', { width: document.body.clientWidth, height: document.body.clientHeight });
-        document.addEventListener('keydown', (event: KeyboardEvent) => { KeyboardHandler.keyListener(event); });
         document.addEventListener('keydown', (event: KeyboardEvent) => {
             if (event.code === 'Escape') {
                 this.electron.ipcRenderer.send('close-addXmlConfiguration');
@@ -31,6 +29,9 @@ class AddXmlFilterConfiguration {
         });
         document.getElementById('add').addEventListener('click', () => { this.addConfiguration(); });
         (document.getElementById('rootName') as HTMLInputElement).focus();
+        setTimeout(() => {
+            this.electron.ipcRenderer.send('set-height', { window: 'addXmlConfiguration', width: document.body.clientWidth, height: document.body.clientHeight });
+        }, 200);
     }
 
     addConfiguration(): void {

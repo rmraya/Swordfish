@@ -35,7 +35,9 @@ class DefaultLanguages {
             }
         });
         (document.getElementById('srcLangSelect') as HTMLSelectElement).focus();
-        this.electron.ipcRenderer.send('languages-height', { width: document.body.clientWidth, height: document.body.clientHeight });
+        setTimeout(() => {
+            this.electron.ipcRenderer.send('set-height', { window: 'defaultLangs', width: document.body.clientWidth, height: document.body.clientHeight });
+        }, 200);
     }
 
     setLanguages(arg: any): void {

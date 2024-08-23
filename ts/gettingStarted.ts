@@ -19,7 +19,6 @@ class GettingStarted {
         this.electron.ipcRenderer.on('set-theme', (event: Electron.IpcRendererEvent, arg: any) => {
             (document.getElementById('theme') as HTMLLinkElement).href = arg;
         });
-        document.addEventListener('keydown', (event: KeyboardEvent) => { KeyboardHandler.keyListener(event); });
         document.addEventListener('keydown', (event: KeyboardEvent) => {
             if (event.code === 'Escape') {
                 this.electron.ipcRenderer.send('close-getting-started');
@@ -36,7 +35,9 @@ class GettingStarted {
         this.electron.ipcRenderer.on('set-show guide', (event: Electron.IpcRendererEvent, arg: any) => {
             showWindow.checked = arg.showGuide;
         });
-        this.electron.ipcRenderer.send('getting-started-height', { width: document.body.clientWidth, height: document.body.clientHeight });
         document.getElementById('container').focus();
+        setTimeout(() => {
+            this.electron.ipcRenderer.send('set-height', { window: 'gettingStarted', width: document.body.clientWidth, height: document.body.clientHeight });
+        }, 200);
     }
 }

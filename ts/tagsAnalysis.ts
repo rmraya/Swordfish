@@ -37,7 +37,9 @@ class TagAnalysis {
             this.electron.ipcRenderer.send('get-tagsErrors');
         });
         this.electron.ipcRenderer.send('get-tagsErrors');
-        this.electron.ipcRenderer.send('tagsAnalysis-height', { width: document.body.clientWidth, height: document.body.clientHeight });
+        setTimeout(() => {
+            this.electron.ipcRenderer.send('set-height', { window: 'tagsAnalysis', width: document.body.clientWidth, height: document.body.clientHeight });
+        }, 200);
     }
 
     gotoSegment(): void {

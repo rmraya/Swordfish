@@ -23,9 +23,10 @@ class Updates {
         this.electron.ipcRenderer.on('set-versions', (event: Electron.IpcRendererEvent, arg: any) => {
             document.getElementById('current').innerText = arg.current;
             document.getElementById('latest').innerText = arg.latest;
-            this.electron.ipcRenderer.send('updates-height', { width: document.body.clientWidth, height: document.body.clientHeight });
+            setTimeout(() => {
+                this.electron.ipcRenderer.send('set-height', { window: 'updates', width: document.body.clientWidth, height: document.body.clientHeight });
+            }, 200);
         });
-        document.addEventListener('keydown', (event: KeyboardEvent) => { KeyboardHandler.keyListener(event); });
         document.addEventListener('keydown', (event: KeyboardEvent) => {
             if (event.code === 'Enter' || event.code === 'NumpadEnter') {
                 this.electron.ipcRenderer.send('download-latest');

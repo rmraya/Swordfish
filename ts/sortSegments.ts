@@ -23,7 +23,6 @@ class SortSegments {
         this.electron.ipcRenderer.on('set-params', (event: Electron.IpcRendererEvent, arg: any) => {
             this.setParams(arg);
         });
-        document.addEventListener('keydown', (event: KeyboardEvent) => { KeyboardHandler.keyListener(event); });
         document.addEventListener('keydown', (event: KeyboardEvent) => {
             if (event.code === 'Enter' || event.code === 'NumpadEnter') {
                 this.sortSegments();
@@ -46,7 +45,9 @@ class SortSegments {
             (document.getElementById('source') as HTMLInputElement).disabled = true;
             (document.getElementById('target') as HTMLInputElement).disabled = true;
         });
-        this.electron.ipcRenderer.send('sort-segments-height', { width: document.body.clientWidth, height: document.body.clientHeight });
+        setTimeout(() => {
+            this.electron.ipcRenderer.send('set-height', { window: 'sortSegments', width: document.body.clientWidth, height: document.body.clientHeight });
+        }, 200);
     }
 
     setParams(arg: any): void {

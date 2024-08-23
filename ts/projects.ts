@@ -111,6 +111,25 @@ class ProjectsView {
         });
         this.topBar.appendChild(htmlExportButton);
 
+        let exportXliffButton = document.createElement('a');
+        exportXliffButton.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" enable-background="new 0 0 24 24" height="24" viewBox="0 0 24 24" width="24"><g><path d="M19,12v7H5v-7H3v7c0,1.1,0.9,2,2,2h14c1.1,0,2-0.9,2-2v-7H19z"/><polygon points="14.1,4.9 14.1,3 21,3 21,9.9 19.1,9.9 19.1,6.3 9.4,16 8,14.4 17.7,4.9 "/></g></svg>' +
+            '<span class="tooltiptext bottomTooltip">Export as XLIFF 2.0</span>';
+        exportXliffButton.className = 'tooltip';
+        exportXliffButton.addEventListener('click', () => {
+            this.exportXLIFF();
+        });
+        exportXliffButton.style.marginLeft = '20px';
+        this.topBar.appendChild(exportXliffButton);
+
+        let importXliffButton = document.createElement('a');
+        importXliffButton.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" enable-background="new 0 0 24 24" height="24" viewBox="0 0 24 24" width="24"><g><path d="M19,12v7H5v-7H3v7c0,1.1,0.9,2,2,2h14c1.1,0,2-0.9,2-2v-7H19z"/><polygon points="9,14.1 9,16 15.9,16 15.9,9.1 14,9.1 14,12.7 4.3,3 3,4.6 12.6,14.1 "/></g></svg>' +
+            '<span class="tooltiptext bottomTooltip">Update from XLIFF File</span>';
+        importXliffButton.className = 'tooltip';
+        importXliffButton.addEventListener('click', () => {
+            this.electron.ipcRenderer.send('import-xliff-review');
+        });
+        this.topBar.appendChild(importXliffButton);
+
         let removeButton = document.createElement('a');
         removeButton.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 0 24 24" width="24"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM8 9h8v10H8V9zm7.5-5l-1-1h-5l-1 1H5v2h14V4h-3.5z"/></svg>' +
             '<span class="tooltiptext bottomTooltip">Remove Project</span>';
@@ -376,10 +395,9 @@ class ProjectsView {
     getSelectedProjects(): Map<string, Project> {
         let selected: Map<string, Project> = new Map<string, Project>();
         let checkboxes: HTMLCollectionOf<Element> = document.getElementsByClassName('projectSelection');
-        for (let i: number = 0; i < checkboxes.length; i++) {
-            let checkbox: HTMLInputElement = checkboxes[i] as HTMLInputElement;
-            let id: string = checkbox.id.substring('ck_'.length);
-            if (checkbox.checked) {
+        for (let check of checkboxes) {
+            let id: string = check.id.substring('ck_'.length);
+            if ((check as HTMLInputElement).checked) {
                 selected.set(id, this.getProject(id));
             } else {
                 document.getElementById(id).classList.remove('selected');
@@ -400,10 +418,9 @@ class ProjectsView {
 
     clearSelection(): void {
         let checkboxes: HTMLCollectionOf<Element> = document.getElementsByClassName('projectSelection');
-        for (let i: number = 0; i < checkboxes.length; i++) {
-            let checkbox: HTMLInputElement = checkboxes[i] as HTMLInputElement;
-            checkbox.checked = false;
-            let id: string = checkbox.id.substring('ck_'.length);
+        for (let check of checkboxes) {
+            (check as HTMLInputElement).checked = false;
+            let id: string = check.id.substring('ck_'.length);
             document.getElementById(id).classList.remove('selected');
         }
     }
@@ -468,6 +485,22 @@ class ProjectsView {
         this.electron.ipcRenderer.send('remove-projects', { projects: projects });
     }
 
+    exportXLIFF(): void {
+        let selected = this.getSelectedProjects();
+        if (selected.size === 0) {
+            this.electron.ipcRenderer.send('show-message', { type: 'warning', message: 'Select project' });
+            return;
+        }
+        if (selected.size > 1) {
+            this.electron.ipcRenderer.send('show-message', { type: 'warning', message: 'Select one project' });
+            return;
+        }
+        for (let key of selected.keys()) {
+            let project: Project = selected.get(key);
+            this.electron.ipcRenderer.send('export-xliff-review', { projectId: key, description: project.description });
+        }
+    }
+
     exportProject(): void {
         let selected = this.getSelectedProjects();
         if (selected.size === 0) {
@@ -497,6 +530,38 @@ class ProjectsView {
         for (let key of selected.keys()) {
             let project: Project = selected.get(key);
             this.electron.ipcRenderer.send('export-tmx-file', { projectId: key, description: project.description });
+        }
+    }
+
+    exportMatches(): void {
+        let selected = this.getSelectedProjects();
+        if (selected.size === 0) {
+            this.electron.ipcRenderer.send('show-message', { type: 'warning', message: 'Select project' });
+            return;
+        }
+        if (selected.size > 1) {
+            this.electron.ipcRenderer.send('show-message', { type: 'warning', message: 'Select one project' });
+            return;
+        }
+        for (let key of selected.keys()) {
+            let project: Project = selected.get(key);
+            this.electron.ipcRenderer.send('export-tm-matches', { projectId: key, description: project.description });
+        }
+    }
+    
+    exportTerms(): void {
+        let selected = this.getSelectedProjects();
+        if (selected.size === 0) {
+            this.electron.ipcRenderer.send('show-message', { type: 'warning', message: 'Select project' });
+            return;
+        }
+        if (selected.size > 1) {
+            this.electron.ipcRenderer.send('show-message', { type: 'warning', message: 'Select one project' });
+            return;
+        }
+        for (let key of selected.keys()) {
+            let project: Project = selected.get(key);
+            this.electron.ipcRenderer.send('export-terms', { projectId: key, description: project.description });
         }
     }
 

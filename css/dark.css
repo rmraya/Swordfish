@@ -789,3 +789,8 @@ svg.stats {
 	vertical-align: text-bottom;
 	margin-left: 4px;
 }
+
+.dialogBody {
+	padding: 8px 0px 16px 8px;
+	overflow-y: hidden;
+}

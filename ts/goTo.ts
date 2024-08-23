@@ -29,8 +29,9 @@ class GoTo {
             this.goToSegment();
         });
         document.getElementById('segInput').focus();
-
-        this.electron.ipcRenderer.send('go-to-height', { width: document.body.clientWidth, height: document.body.clientHeight });
+        setTimeout(() => {
+            this.electron.ipcRenderer.send('set-height', { window: 'goTo', width: document.body.clientWidth, height: document.body.clientHeight });
+        }, 200);
     }
 
     parseKey(event: KeyboardEvent): void {

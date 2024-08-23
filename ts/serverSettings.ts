@@ -19,7 +19,6 @@ class ServerSettings {
         this.electron.ipcRenderer.on('set-theme', (event: Electron.IpcRendererEvent, arg: any) => {
             (document.getElementById('theme') as HTMLLinkElement).href = arg;
         });
-        document.addEventListener('keydown', (event: KeyboardEvent) => { KeyboardHandler.keyListener(event); });
         document.addEventListener('keydown', (event: KeyboardEvent) => {
             if (event.code === 'Enter' || event.code === 'NumpadEnter') {
                 this.browseServer();
@@ -29,7 +28,9 @@ class ServerSettings {
             }
         });
         document.getElementById('browseButton').addEventListener('click', () => { this.browseServer(); });
-        this.electron.ipcRenderer.send('serverSettings-height', { width: document.body.clientWidth, height: document.body.clientHeight });
+        setTimeout(() => {
+            this.electron.ipcRenderer.send('set-height', { window: 'serverSettings', width: document.body.clientWidth, height: document.body.clientHeight });
+        }, 200);
     }
 
     browseServer(): void {

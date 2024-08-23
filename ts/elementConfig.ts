@@ -34,7 +34,9 @@ class ElementConfig {
         this.electron.ipcRenderer.on('set-elementConfig', (event: Electron.IpcRendererEvent, arg: any) => {
             this.setValues(arg);
         })
-        this.electron.ipcRenderer.send('elementConfig-height', { width: document.body.clientWidth, height: document.body.clientHeight });
+        setTimeout(() => {
+            this.electron.ipcRenderer.send('set-height', { window: 'configElement', width: document.body.clientWidth, height: document.body.clientHeight });
+        }, 200);
     }
 
     setValues(arg: any) {

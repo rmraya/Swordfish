@@ -35,7 +35,6 @@ class Messages {
                 this.electron.ipcRenderer.send('close-messages');
             }
         });
-        this.electron.ipcRenderer.send('messages-height', { width: document.body.clientWidth, height: document.body.clientHeight });
     }
 
     setMessage(arg: any): void {
@@ -53,6 +52,8 @@ class Messages {
             document.getElementById('title').innerText = arg.title;
         }
         document.getElementById('message').innerHTML = arg.message;
-        this.electron.ipcRenderer.send('messages-height', { width: document.body.clientWidth, height: document.body.clientHeight });
+        setTimeout(() => {
+            this.electron.ipcRenderer.send('set-height', { window: 'messages', width: document.body.clientWidth, height: document.body.clientHeight });
+        }, 200);
     }
 }

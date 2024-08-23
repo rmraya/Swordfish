@@ -54,7 +54,9 @@ class Licenses {
                 this.electron.ipcRenderer.send('close-licenses');
             }
         });
-        this.electron.ipcRenderer.send('licenses-height', { width: document.body.clientWidth, height: document.body.clientHeight });
+        setTimeout(() => {
+            this.electron.ipcRenderer.send('set-height', { window: 'licenses', width: document.body.clientWidth, height: document.body.clientHeight });
+        }, 200);
     }
 
     openLicense(type: string) {

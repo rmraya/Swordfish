@@ -21,10 +21,10 @@ class AddNote {
         this.electron.ipcRenderer.on('set-theme', (event: Electron.IpcRendererEvent, arg: any) => {
             (document.getElementById('theme') as HTMLLinkElement).href = arg;
         });
+        this.electron.ipcRenderer.send('get-note-params');
         this.electron.ipcRenderer.on('note-params', (event: Electron.IpcRendererEvent, arg: any) => {
             this.segmentData = arg;
         });
-        document.addEventListener('keydown', (event: KeyboardEvent) => { KeyboardHandler.keyListener(event); });
         document.addEventListener('keydown', (event: KeyboardEvent) => {
             if (event.code === 'Escape') {
                 this.electron.ipcRenderer.send('close-add-note');
@@ -34,7 +34,9 @@ class AddNote {
             this.addNote();
         });
         (document.getElementById('area') as HTMLTextAreaElement).focus();
-        this.electron.ipcRenderer.send('add-note-height', { width: document.body.clientWidth, height: document.body.clientHeight });
+        setTimeout(() => {
+            this.electron.ipcRenderer.send('set-height', { window: 'addNote', width: document.body.clientWidth, height: document.body.clientHeight });
+        }, 200);
     }
 
     addNote(): void {

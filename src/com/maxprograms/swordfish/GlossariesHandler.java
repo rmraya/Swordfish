@@ -59,6 +59,7 @@ public class GlossariesHandler implements HttpHandler {
 	private static Logger logger = System.getLogger(GlossariesHandler.class.getName());
 
 	private static Map<String, ITmEngine> engines;
+	private static Map<String, Integer> openCount = new Hashtable<>();
 	private static Map<String, JSONObject> openTasks = new Hashtable<>();
 
 	@Override
@@ -90,9 +91,6 @@ public class GlossariesHandler implements HttpHandler {
 	}
 
 	private JSONObject processRequest(String url, String request) {
-		if (TmsServer.isDebug()) {
-			logger.log(Level.INFO, url);
-		}
 		JSONObject response = new JSONObject();
 		try {
 			if ("/glossaries/create".equals(url)) {
@@ -229,7 +227,7 @@ public class GlossariesHandler implements HttpHandler {
 			JSONObject obj = new JSONObject();
 			obj.put(Constants.PROGRESS, Constants.PROCESSING);
 			openTasks.put(process, obj);
-			Thread.ofVirtual().start(() -> {
+			new Thread(() -> {
 				try {
 					Map<String, Memory> glossaries = getGlossaries();
 					JSONArray array = json.getJSONArray("glossaries");
@@ -251,7 +249,7 @@ public class GlossariesHandler implements HttpHandler {
 					error.put(Constants.REASON, e.getMessage());
 					openTasks.put(process, error);
 				}
-			});
+			}).start();
 		} else {
 			result.put(Constants.REASON, Messages.getString("GlossariesHandler.4"));
 		}
@@ -286,7 +284,7 @@ public class GlossariesHandler implements HttpHandler {
 		JSONObject obj = new JSONObject();
 		obj.put(Constants.PROGRESS, Constants.PROCESSING);
 		openTasks.put(process, obj);
-		Thread.ofVirtual().start(() -> {
+		new Thread(() -> {
 			try {
 				Map<String, Memory> glossaries = getGlossaries();
 				Memory mem = glossaries.get(json.getString("glossary"));
@@ -314,7 +312,7 @@ public class GlossariesHandler implements HttpHandler {
 				error.put(Constants.REASON, e.getMessage());
 				openTasks.put(process, error);
 			}
-		});
+		}).start();
 		result.put("process", process);
 		return result;
 	}
@@ -325,9 +323,15 @@ public class GlossariesHandler implements HttpHandler {
 	}
 
 	public static synchronized void openGlossary(Memory memory) throws IOException, SQLException, URISyntaxException {
-		ITmEngine engine = memory.getType().equals(Memory.LOCAL) ? new SqliteDatabase(memory.getId(), getWorkFolder())
-				: new RemoteDatabase(memory.getServer(), memory.getUser(), memory.getPassword(), memory.getId());
-		engines.put(memory.getId(), engine);
+		if (!engines.containsKey(memory.getId())) {
+			ITmEngine engine = memory.getType().equals(Memory.LOCAL)
+					? new SqliteDatabase(memory.getId(), getWorkFolder())
+					: new RemoteDatabase(memory.getServer(), memory.getUser(), memory.getPassword(), memory.getId());
+			engines.put(memory.getId(), engine);
+			openCount.put(memory.getId(), 0);
+		}
+		int count = openCount.get(memory.getId());
+		openCount.put(memory.getId(), count + 1);
 	}
 
 	public static ITmEngine getEngine(String id) throws IOException, SQLException, URISyntaxException {
@@ -339,8 +343,14 @@ public class GlossariesHandler implements HttpHandler {
 
 	public static synchronized void closeGlossary(String id) throws IOException, SQLException, URISyntaxException {
 		if (engines != null && engines.containsKey(id)) {
+			int count = openCount.get(id);
+			if (count > 1) {
+				openCount.put(id, count - 1);
+				return;
+			}
 			engines.get(id).close();
 			engines.remove(id);
+			openCount.remove(id);
 		}
 	}
 
@@ -351,9 +361,6 @@ public class GlossariesHandler implements HttpHandler {
 			engines.get(it.next()).close();
 		}
 		engines.clear();
-		if (TmsServer.isDebug()) {
-			logger.log(Level.INFO, Messages.getString("GlossariesHandler.8"));
-		}
 	}
 
 	private JSONObject importGlossary(String request) {
@@ -378,7 +385,7 @@ public class GlossariesHandler implements HttpHandler {
 		JSONObject obj = new JSONObject();
 		obj.put(Constants.PROGRESS, Constants.PROCESSING);
 		openTasks.put(process, obj);
-		Thread.ofVirtual().start(() -> {
+		new Thread(() -> {
 			try {
 				Map<String, Memory> glossaries = getGlossaries();
 				openGlossary(glossaries.get(id));
@@ -417,7 +424,7 @@ public class GlossariesHandler implements HttpHandler {
 				error.put(Constants.REASON, e.getMessage());
 				openTasks.put(process, error);
 			}
-		});
+		}).start();
 		result.put("process", process);
 		return result;
 	}

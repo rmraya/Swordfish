@@ -38,7 +38,6 @@ class BrowseDatabases {
         this.electron.ipcRenderer.on('set-databases', (event: Electron.IpcRendererEvent, arg: any) => {
             this.setDatabases(arg);
         });
-        document.addEventListener('keydown', (event: KeyboardEvent) => { KeyboardHandler.keyListener(event); });
         document.addEventListener('keydown', (event: KeyboardEvent) => {
             if (event.code === 'Enter' || event.code === 'NumpadEnter') {
                 this.addSelected();
@@ -50,7 +49,9 @@ class BrowseDatabases {
         document.getElementById('addButton').addEventListener('click', () => {
             this.addSelected();
         });
-        this.electron.ipcRenderer.send('browseDatabases-height', { width: document.body.clientWidth, height: document.body.clientHeight });
+        setTimeout(() => {
+            this.electron.ipcRenderer.send('set-height', { window: 'browseDatabases', width: document.body.clientWidth, height: document.body.clientHeight });
+        }, 200);
     }
 
     setDatabases(arg: any) {

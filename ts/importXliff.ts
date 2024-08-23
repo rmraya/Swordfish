@@ -41,7 +41,6 @@ class ImportXLIFF {
         this.electron.ipcRenderer.on('set-glossaries', (event: Electron.IpcRendererEvent, arg: any) => {
             this.setGlossaries(arg);
         });
-        document.addEventListener('keydown', (event: KeyboardEvent) => { KeyboardHandler.keyListener(event); });
         document.addEventListener('keydown', (event: KeyboardEvent) => {
             if (event.code === 'Escape') {
                 this.electron.ipcRenderer.send('close-importXliff');
@@ -61,7 +60,9 @@ class ImportXLIFF {
             this.importXLIFF();
         });
         (document.getElementById('projectInput') as HTMLInputElement).focus();
-        this.electron.ipcRenderer.send('import-xliff-height', { width: document.body.clientWidth, height: document.body.clientHeight });
+        setTimeout(() => {
+            this.electron.ipcRenderer.send('set-height', { window: 'importXliff', width: document.body.clientWidth, height: document.body.clientHeight });
+        }, 200);
     }
 
     setClients(clients: string[]): void {

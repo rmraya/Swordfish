@@ -30,7 +30,9 @@ class ChangeCase {
         });
         document.getElementById('changeCase').addEventListener('click', () => { this.changeCase(); });
         document.getElementById('uppercase').focus();
-        this.electron.ipcRenderer.send('change-case-height', { width: document.body.clientWidth, height: document.body.clientHeight });
+        setTimeout(() => {
+            this.electron.ipcRenderer.send('set-height', { window: 'changeCase', width: document.body.clientWidth, height: document.body.clientHeight });
+        }, 200);
     }
 
     changeCase(): void {

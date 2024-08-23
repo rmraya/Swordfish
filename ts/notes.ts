@@ -29,7 +29,6 @@ class Notes {
         this.electron.ipcRenderer.on('note-params', (event: Electron.IpcRendererEvent, arg: any) => {
             this.segmentData = arg;
         });
-        document.addEventListener('keydown', (event: KeyboardEvent) => { KeyboardHandler.keyListener(event); });
         document.getElementById('addNote').addEventListener('click', () => {
             this.addNote();
         });
@@ -60,6 +59,9 @@ class Notes {
             tab.getContainer().style.padding = '8px';
             this.tabHolder.addTab(tab);
         }
+        setTimeout(() => {
+            this.electron.ipcRenderer.send('set-height', { window: 'notes', width: document.body.clientWidth, height: document.body.clientHeight });
+        }, 200);
     }
 
     addNote(): void {

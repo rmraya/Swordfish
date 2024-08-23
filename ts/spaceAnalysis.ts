@@ -37,7 +37,9 @@ class SpaceAnalysis {
             this.electron.ipcRenderer.send('get-spaceErrors');
         });
         this.electron.ipcRenderer.send('get-spaceErrors');
-        this.electron.ipcRenderer.send('spaceAnalysis-height', { width: document.body.clientWidth, height: document.body.clientHeight });
+        setTimeout(() => {
+            this.electron.ipcRenderer.send('set-height', { window: 'spaceAnalysis', width: document.body.clientWidth, height: document.body.clientHeight });
+        }, 200);
     }
 
     gotoSegment(): void {

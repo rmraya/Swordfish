@@ -57,7 +57,6 @@ class AddFile {
         this.electron.ipcRenderer.on('set-glossaries', (event: Electron.IpcRendererEvent, arg: any) => {
             this.setGlossaries(arg);
         });
-        document.addEventListener('keydown', (event: KeyboardEvent) => { KeyboardHandler.keyListener(event); });
         document.addEventListener('keydown', (event: KeyboardEvent) => {
             if (event.code === 'Enter' || event.code === 'NumpadEnter') {
                 this.addProject();
@@ -76,7 +75,9 @@ class AddFile {
         this.electron.ipcRenderer.on('set-home', (event: Electron.IpcRendererEvent, arg: any) => {
             this.homeFolder = arg;
         });
-         this.electron.ipcRenderer.send('add-file-height', { width: document.body.clientWidth, height: document.body.clientHeight });
+        setTimeout(() => {
+            this.electron.ipcRenderer.send('set-height', { window: 'addFile', width: document.body.clientWidth, height: document.body.clientHeight });
+        }, 200);
     }
 
     setClients(clients: string[]): void {

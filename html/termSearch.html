@@ -7,7 +7,7 @@
     <link rel="stylesheet" type="text/css" href="../css/fonts.css">
 </head>
 
-<body onload="new TermSearch();">
+<body class="dialogBody" onload="new TermSearch();">
     <table class="fill_width">
         <tr>
             <td class="middle noWrap">
@@ -22,7 +22,7 @@
                 <label for="languagesSelect">Language</label>
             </td>
             <td class="fill_width middle">
-                <select id="languagesSelect" class="fill_width">
+                <select id="languagesSelect" class="table_select">
 
                 </select>
             </td>
@@ -57,7 +57,6 @@
         <button id="searchButton">Search Term</button>
     </div>
 
-    <script src="../js/keyboardHandler.js"></script>
     <script src="../js/termSearch.js"></script>
 </body>
 

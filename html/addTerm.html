@@ -7,53 +7,39 @@
     <link rel="stylesheet" type="text/css" href="../css/fonts.css">
 </head>
 
-<body onload="new AddTerm();">
+<body class="dialogBody" onload="new AddTerm();">
 
-    <table style="margin:0;">
+    <table class="fill_width">
         <tr>
-            <td style="width:45%; padding:0px;">
-                <table>
-                    <tr>
-                        <td class="middle noWrap">
-                            <label for="source">Source Term</label>
-                        </td>
-                        <td class="fill_width middle">
-                            <input id="source" class="fill_width" />
-                        </td>
-                    </tr>
-                    <tr>
-                        <td class="middle noWrap">
-                            <label for="target">Target Term</label>
-                        </td>
-                        <td class="fill_width middle">
-                            <input id="target" class="fill_width" />
-                        </td>
-                    </tr>
-                </table>
+            <td class="middle noWrap" >
+                <label for="source">Source Term</label>
             </td>
-            <td style="width:55%; padding:0px;">
-                <table>
-                    <tr>
-                        <td class="middle noWrap">
-                            <label for="srcLangSelect">Source Language</label>
-                        </td>
-                        <td class="fill_width middle">
-                            <select id="srcLangSelect" class="fill_width">
+            <td class="middle"  style="width: 40%;">
+                <input id="source" class="table_input" />
+            </td>
+            <td class="middle noWrap">
+                <label for="srcLangSelect">Source Language</label>
+            </td>
+            <td class="middle"  style="width: 40%;">
+                <select id="srcLangSelect" class="table_select">
 
-                            </select>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td class="middle noWrap">
-                            <label for="tgtLangSelect">Target Language</label>
-                        </td>
-                        <td class="fill_width middle">
-                            <select id="tgtLangSelect" class="fill_width">
+                </select>
+            </td>
+        </tr>
+        <tr>
+            <td class="middle noWrap">
+                <label for="target">Target Term</label>
+            </td>
+            <td class="middle"  style="width: 40%;">
+                <input id="target" class="table_input" />
+            </td>
+            <td class="middle noWrap">
+                <label for="tgtLangSelect">Target Language</label>
+            </td>
+            <td class="middle"  style="width: 40%;">
+                <select id="tgtLangSelect" class="table_select">
 
-                            </select>
-                        </td>
-                    </tr>
-                </table>
+                </select>
             </td>
         </tr>
     </table>
@@ -62,7 +48,6 @@
         <button id="addTermButton">Add Term</button>
     </div>
 
-    <script src="../js/keyboardHandler.js"></script>
     <script src="../js/addTerm.js"></script>
 </body>
 

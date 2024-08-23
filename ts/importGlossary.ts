@@ -33,7 +33,6 @@ class ImportGlossary {
         this.electron.ipcRenderer.on('set-subjects', (event: Electron.IpcRendererEvent, arg: any) => {
             this.setSubjects(arg);
         });
-        document.addEventListener('keydown', (event: KeyboardEvent) => { KeyboardHandler.keyListener(event); });
         document.addEventListener('keydown', (event: KeyboardEvent) => {
             if (event.code === 'Escape') {
                 this.electron.ipcRenderer.send('close-importGlossary');
@@ -57,7 +56,9 @@ class ImportGlossary {
             this.importGlossary();
         });
         (document.getElementById('file') as HTMLInputElement).focus();
-        this.electron.ipcRenderer.send('import-glossary-height', { width: document.body.clientWidth, height: document.body.clientHeight });
+        setTimeout(() => {
+            this.electron.ipcRenderer.send('set-height', { window: 'importGlossary', width: document.body.clientWidth, height: document.body.clientHeight });
+        }, 200);
     }
 
     setProjectNames(projects: string[]): void {

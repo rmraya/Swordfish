@@ -37,18 +37,11 @@ class PreferencesDialog {
     googleKey: HTMLInputElement;
     googleSrcLang: HTMLSelectElement;
     googleTgtLang: HTMLSelectElement;
-    googleNeural: HTMLInputElement;
 
     enableAzure: HTMLInputElement;
     azureKey: HTMLInputElement;
     azureSrcLang: HTMLSelectElement;
     azureTgtLang: HTMLSelectElement;
-
-    enableYandex: HTMLInputElement;
-    yandexKey: HTMLInputElement;
-    yandexSrcLang: HTMLSelectElement;
-    yandexTgtLang: HTMLSelectElement;
-    yandexDirections: string[];
 
     enableDeepL: HTMLInputElement;
     deeplKey: HTMLInputElement;
@@ -79,27 +72,35 @@ class PreferencesDialog {
 
         let basicTab: Tab = new Tab('basicTab', 'Basic', false);
         basicTab.getLabelDiv().addEventListener('click', () => {
-            this.electron.ipcRenderer.send('settings-height', { width: document.body.clientWidth, height: document.body.clientHeight });
+            setTimeout(() => {
+                this.electron.ipcRenderer.send('set-height', { window: 'settings', width: document.body.clientWidth, height: document.body.clientHeight });
+            }, 200);
         });
         this.tabHolder.addTab(basicTab);
         this.populateBasicTab(basicTab.getContainer());
 
         let mtTab: Tab = new Tab('mtTab', 'Machine Translation', false);
         mtTab.getLabelDiv().addEventListener('click', () => {
-            this.electron.ipcRenderer.send('settings-height', { width: document.body.clientWidth, height: document.body.clientHeight });
+            setTimeout(() => {
+                this.electron.ipcRenderer.send('set-height', { window: 'settings', width: document.body.clientWidth, height: document.body.clientHeight });
+            }, 200);
         });
         this.tabHolder.addTab(mtTab);
         this.populateMtTab(mtTab.getContainer());
 
         this.spellcheckTab = new Tab('spellcheckTab', 'Spellchecker', false);
         this.spellcheckTab.getLabelDiv().addEventListener('click', () => {
-            this.electron.ipcRenderer.send('settings-height', { width: document.body.clientWidth, height: document.body.clientHeight });
+            setTimeout(() => {
+                this.electron.ipcRenderer.send('set-height', { window: 'settings', width: document.body.clientWidth, height: document.body.clientHeight });
+            }, 200);
         });
         this.tabHolder.addTab(this.spellcheckTab);
 
         let advancedTab: Tab = new Tab('advancedTab', 'Advanced', false);
         advancedTab.getLabelDiv().addEventListener('click', () => {
-            this.electron.ipcRenderer.send('settings-height', { width: document.body.clientWidth, height: document.body.clientHeight });
+            setTimeout(() => {
+                this.electron.ipcRenderer.send('set-height', { window: 'settings', width: document.body.clientWidth, height: document.body.clientHeight });
+            }, 200);
         });
         this.tabHolder.addTab(advancedTab);
         this.populateAdvancedTab(advancedTab.getContainer());
@@ -122,7 +123,6 @@ class PreferencesDialog {
         this.electron.ipcRenderer.on('set-preferences', (event: Electron.IpcRendererEvent, preferences: any) => {
             this.setPreferences(preferences);
         });
-        document.addEventListener('keydown', (event: KeyboardEvent) => { KeyboardHandler.keyListener(event); });
         document.getElementById('browseProjects').addEventListener('click', () => {
             this.electron.ipcRenderer.send('browse-projects');
         });
@@ -140,9 +140,6 @@ class PreferencesDialog {
         });
         document.getElementById('save').addEventListener('click', () => {
             this.savePreferences();
-        });
-        this.electron.ipcRenderer.on('get-height', () => {
-            this.electron.ipcRenderer.send('settings-height', { width: document.body.clientWidth, height: document.body.clientHeight });
         });
         this.electron.ipcRenderer.on('set-srx', (event: Electron.IpcRendererEvent, arg: string) => {
             this.defaultSRX.value = arg;
@@ -169,7 +166,9 @@ class PreferencesDialog {
         this.electron.ipcRenderer.on('xmlFilters', (event: Electron.IpcRendererEvent, arg: any) => {
             this.setFilters(arg);
         });
-        this.electron.ipcRenderer.send('settings-height', { width: document.body.clientWidth, height: document.body.clientHeight });
+        setTimeout(() => {
+            this.electron.ipcRenderer.send('set-height', { window: 'settings', width: document.body.clientWidth, height: document.body.clientHeight });
+        }, 200);
     }
 
     setPreferences(preferences: Preferences): void {
@@ -192,16 +191,13 @@ class PreferencesDialog {
         this.googleKey.value = preferences.google.apiKey;
         this.googleSrcLang.value = preferences.google.srcLang;
         this.googleTgtLang.value = preferences.google.tgtLang;
-        this.googleNeural.checked = preferences.google.neural;
         this.googleKey.disabled = !preferences.google.enabled;
         this.googleSrcLang.disabled = !preferences.google.enabled;
         this.googleTgtLang.disabled = !preferences.google.enabled;
-        this.googleNeural.disabled = !preferences.google.enabled;
         this.enableGoogle.addEventListener('change', () => {
             this.googleKey.disabled = !this.enableGoogle.checked;
             this.googleSrcLang.disabled = !this.enableGoogle.checked;
             this.googleTgtLang.disabled = !this.enableGoogle.checked;
-            this.googleNeural.disabled = !this.enableGoogle.checked;
         });
 
         this.enableAzure.checked = preferences.azure.enabled;
@@ -215,19 +211,6 @@ class PreferencesDialog {
             this.azureKey.disabled = !this.enableAzure.checked;
             this.azureSrcLang.disabled = !this.enableAzure.checked;
             this.azureTgtLang.disabled = !this.enableAzure.checked;
-        });
-
-        this.enableYandex.checked = preferences.yandex.enabled;
-        this.yandexKey.value = preferences.yandex.apiKey;
-        this.yandexSrcLang.value = preferences.yandex.srcLang;
-        this.yandexTgtLang.value = preferences.yandex.tgtLang;
-        this.yandexKey.disabled = !preferences.yandex.enabled;
-        this.yandexSrcLang.disabled = !preferences.yandex.enabled;
-        this.yandexTgtLang.disabled = !preferences.yandex.enabled;
-        this.enableYandex.addEventListener('change', () => {
-            this.yandexKey.disabled = !this.enableYandex.checked;
-            this.yandexSrcLang.disabled = !this.enableYandex.checked;
-            this.yandexTgtLang.disabled = !this.enableYandex.checked;
         });
 
         this.enableDeepL.checked = preferences.deepl.enabled;
@@ -298,22 +281,6 @@ class PreferencesDialog {
             this.electron.ipcRenderer.send('show-message', { type: 'warning', message: 'Select Azure languages', parent: 'preferences' });
             return;
         }
-
-        if (this.enableYandex.checked && this.yandexKey.value === '') {
-            this.electron.ipcRenderer.send('show-message', { type: 'warning', message: 'Enter Yandex API key', parent: 'preferences' });
-            return;
-        }
-        if (this.enableYandex.checked && (this.yandexSrcLang.value === 'none' || this.yandexTgtLang.value === 'none')) {
-            this.electron.ipcRenderer.send('show-message', { type: 'warning', message: 'Select Yandex languages', parent: 'preferences' });
-            return;
-        }
-        if (this.enableYandex.checked) {
-            let direction = this.yandexSrcLang.value + '-' + this.yandexTgtLang.value;
-            if (!this.yandexDirections.includes(direction)) {
-                this.electron.ipcRenderer.send('show-message', { type: 'warning', message: 'Translation direction not supported by Yandex', parent: 'preferences' });
-                return;
-            }
-        }
         if (this.enableDeepL.checked && this.deeplKey.value === '') {
             this.electron.ipcRenderer.send('show-message', { type: 'warning', message: 'Enter DeepL API key', parent: 'preferences' });
             return;
@@ -356,20 +323,13 @@ class PreferencesDialog {
                 enabled: this.enableGoogle.checked,
                 apiKey: this.googleKey.value,
                 srcLang: this.googleSrcLang.value,
-                tgtLang: this.googleTgtLang.value,
-                neural: this.googleNeural.checked
+                tgtLang: this.googleTgtLang.value
             },
             azure: {
                 enabled: this.enableAzure.checked,
                 apiKey: this.azureKey.value,
                 srcLang: this.azureSrcLang.value,
                 tgtLang: this.azureTgtLang.value
-            },
-            yandex: {
-                enabled: this.enableYandex.checked,
-                apiKey: this.yandexKey.value,
-                srcLang: this.yandexSrcLang.value,
-                tgtLang: this.yandexTgtLang.value
             },
             deepl: {
                 enabled: this.enableDeepL.checked,
@@ -635,14 +595,18 @@ class PreferencesDialog {
 
         let generalTab: Tab = new Tab('generalTab', 'General', false);
         generalTab.getLabelDiv().addEventListener('click', () => {
-            this.electron.ipcRenderer.send('settings-height', { width: document.body.clientWidth, height: document.body.clientHeight });
+            setTimeout(() => {
+                this.electron.ipcRenderer.send('set-height', { window: 'settings', width: document.body.clientWidth, height: document.body.clientHeight });
+            }, 200);
         });
         advHolder.addTab(generalTab);
         this.populateAdvGeneralTab(generalTab.getContainer());
 
         let xmlTab: Tab = new Tab('xmlTab', 'XML Filter', false);
         xmlTab.getLabelDiv().addEventListener('click', () => {
-            this.electron.ipcRenderer.send('settings-height', { width: document.body.clientWidth, height: document.body.clientHeight });
+            setTimeout(() => {
+                this.electron.ipcRenderer.send('set-height', { window: 'settings', width: document.body.clientWidth, height: document.body.clientHeight });
+            }, 200);
         });
         advHolder.addTab(xmlTab);
         this.populateXmlFilterTab(xmlTab.getContainer());
@@ -954,42 +918,45 @@ class PreferencesDialog {
 
         let googleTab: Tab = new Tab('googleTab', 'Google', false);
         googleTab.getLabelDiv().addEventListener('click', () => {
-            this.electron.ipcRenderer.send('settings-height', { width: document.body.clientWidth, height: document.body.clientHeight });
+            setTimeout(() => {
+                this.electron.ipcRenderer.send('set-height', { window: 'settings', width: document.body.clientWidth, height: document.body.clientHeight });
+            }, 200);
         });
         mtHolder.addTab(googleTab);
         this.populateGoogleTab(googleTab.getContainer());
 
         let azureTab: Tab = new Tab('azureTab', 'Microsoft Azure', false);
         azureTab.getLabelDiv().addEventListener('click', () => {
-            this.electron.ipcRenderer.send('settings-height', { width: document.body.clientWidth, height: document.body.clientHeight });
+            setTimeout(() => {
+                this.electron.ipcRenderer.send('set-height', { window: 'settings', width: document.body.clientWidth, height: document.body.clientHeight });
+            }, 200);
         });
         mtHolder.addTab(azureTab);
         this.populateAzureTab(azureTab.getContainer());
 
-        let yandexTab: Tab = new Tab('yandexTab', 'Yandex', false);
-        yandexTab.getLabelDiv().addEventListener('click', () => {
-            this.electron.ipcRenderer.send('settings-height', { width: document.body.clientWidth, height: document.body.clientHeight });
-        });
-        mtHolder.addTab(yandexTab);
-        this.populateYandexTab(yandexTab.getContainer());
-
         let deeplTab: Tab = new Tab('deeplTab', 'DeepL', false);
         deeplTab.getLabelDiv().addEventListener('click', () => {
-            this.electron.ipcRenderer.send('settings-height', { width: document.body.clientWidth, height: document.body.clientHeight });
+            setTimeout(() => {
+                this.electron.ipcRenderer.send('set-height', { window: 'settings', width: document.body.clientWidth, height: document.body.clientHeight });
+            }, 200);
         });
         mtHolder.addTab(deeplTab);
         this.populateDeeplTab(deeplTab.getContainer());
 
         let chatGptTab: Tab = new Tab('chatGptTab', 'ChatGPT', false);
         chatGptTab.getLabelDiv().addEventListener('click', () => {
-            this.electron.ipcRenderer.send('settings-height', { width: document.body.clientWidth, height: document.body.clientHeight });
+            setTimeout(() => {
+                this.electron.ipcRenderer.send('set-height', { window: 'settings', width: document.body.clientWidth, height: document.body.clientHeight });
+            }, 200);
         });
         mtHolder.addTab(chatGptTab);
         this.populateChatGptTab(chatGptTab.getContainer());
 
         let modernmtTab: Tab = new Tab('modernmtTab', 'ModernMT', false);
         modernmtTab.getLabelDiv().addEventListener('click', () => {
-            this.electron.ipcRenderer.send('settings-height', { width: document.body.clientWidth, height: document.body.clientHeight });
+            setTimeout(() => {
+                this.electron.ipcRenderer.send('set-height', { window: 'settings', width: document.body.clientWidth, height: document.body.clientHeight });
+            }, 200);
         });
         mtHolder.addTab(modernmtTab);
         this.populateModernmtTab(modernmtTab.getContainer());
@@ -1054,18 +1021,10 @@ class PreferencesDialog {
         td.innerHTML = '<select id="googleTgtLang" class="table_select"></select>';
         tr.appendChild(td);
 
-        let neuralDiv: HTMLDivElement = document.createElement('div');
-        neuralDiv.classList.add('middle');
-        neuralDiv.classList.add('row');
-        neuralDiv.style.paddingLeft = '4px';
-        neuralDiv.innerHTML = '<input type="checkbox" id="googleNeural"><label for="googleNeural" style="padding-top:4px;">Use Neural Machine Translation (NMT)</label>';
-        container.appendChild(neuralDiv);
-
         this.enableGoogle = document.getElementById('enableGoogle') as HTMLInputElement;
         this.googleKey = document.getElementById('googleKey') as HTMLInputElement;
         this.googleSrcLang = document.getElementById('googleSrcLang') as HTMLSelectElement;
         this.googleTgtLang = document.getElementById('googleTgtLang') as HTMLSelectElement;
-        this.googleNeural = document.getElementById('googleNeural') as HTMLInputElement;
     }
 
     populateAzureTab(container: HTMLDivElement): void {
@@ -1131,71 +1090,6 @@ class PreferencesDialog {
         this.azureKey = document.getElementById('azureKey') as HTMLInputElement;
         this.azureSrcLang = document.getElementById('azureSrcLang') as HTMLSelectElement;
         this.azureTgtLang = document.getElementById('azureTgtLang') as HTMLSelectElement;
-    }
-
-    populateYandexTab(container: HTMLDivElement): void {
-        container.style.paddingTop = '10px';
-
-        let yandexDiv: HTMLDivElement = document.createElement('div');
-        yandexDiv.classList.add('middle');
-        yandexDiv.classList.add('row');
-        yandexDiv.style.paddingLeft = '4px';
-        yandexDiv.innerHTML = '<input type="checkbox" id="enableYandex"><label for="enableYandex" style="padding-top:4px;">Enable Yandex Translate API</label>';
-        container.appendChild(yandexDiv);
-
-        let langsTable: HTMLTableElement = document.createElement('table');
-        langsTable.classList.add('fill_width');
-        container.appendChild(langsTable);
-
-        let tr: HTMLTableRowElement = document.createElement('tr');
-        langsTable.appendChild(tr);
-
-        let td: HTMLTableCellElement = document.createElement('td');
-        td.classList.add('middle');
-        td.classList.add('noWrap');
-        td.innerHTML = '<label for="yandexKey">API Key</label>'
-        tr.appendChild(td);
-
-        td = document.createElement('td');
-        td.classList.add('middle');
-        td.classList.add('fill_width');
-        td.innerHTML = '<input type="text" id="yandexKey" class="table_input"/>';
-        tr.appendChild(td);
-
-        tr = document.createElement('tr');
-        langsTable.appendChild(tr);
-
-        td = document.createElement('td');
-        td.classList.add('middle');
-        td.classList.add('noWrap');
-        td.innerHTML = '<label for="yandexSrcLang">Source Language</label>';
-        tr.appendChild(td);
-
-        td = document.createElement('td');
-        td.classList.add('middle');
-        td.classList.add('fill_width');
-        td.innerHTML = '<select id="yandexSrcLang" class="table_select"></select>';
-        tr.appendChild(td);
-
-        tr = document.createElement('tr');
-        langsTable.appendChild(tr);
-
-        td = document.createElement('td');
-        td.classList.add('middle');
-        td.classList.add('noWrap');
-        td.innerHTML = '<label for="yandexTgtLang">Target Language</label>';
-        tr.appendChild(td);
-
-        td = document.createElement('td');
-        td.classList.add('middle');
-        td.classList.add('fill_width');
-        td.innerHTML = '<select id="yandexTgtLang" class="table_select"></select>';
-        tr.appendChild(td);
-
-        this.enableYandex = document.getElementById('enableYandex') as HTMLInputElement;
-        this.yandexKey = document.getElementById('yandexKey') as HTMLInputElement;
-        this.yandexSrcLang = document.getElementById('yandexSrcLang') as HTMLSelectElement;
-        this.yandexTgtLang = document.getElementById('yandexTgtLang') as HTMLSelectElement;
     }
 
     populateDeeplTab(container: HTMLDivElement): void {
@@ -1304,7 +1198,14 @@ class PreferencesDialog {
         td = document.createElement('td');
         td.classList.add('middle');
         td.classList.add('fill_width');
-        td.innerHTML = '<select id="chatGPTModel" class="table_select"><option value="gpt-3.5-turbo">gpt-3.5-turbo</option><option value="gpt-4">gpt-4</option><option value="gpt-4-turbo-preview">gpt-4-turbo-preview</option></select>';
+
+        td.innerHTML = '<select id="chatGPTModel" class="table_select">' +
+            '<option value="gpt-4o">gpt-4o</option>' +
+            '<option value="gpt-4o-mini">gpt-4o-mini</option>' +
+            '<option value="gpt-4">gpt-4</option>' +
+            '<option value="gpt-4-turbo">gpt-4-turbo</option>' +
+            '<option value="gpt-3.5-turbo">gpt-3.5-turbo</option>' +
+            '</select>';
         tr.appendChild(td);
 
         this.enableChatGPT = document.getElementById('enableChatGPT') as HTMLInputElement;
@@ -1384,31 +1285,16 @@ class PreferencesDialog {
         this.azureSrcLang.innerHTML = this.getOptions(arg.azure.srcLangs);
         this.azureTgtLang.innerHTML = this.getOptions(arg.azure.tgtLangs);
 
-        this.yandexSrcLang.innerHTML = this.getOptions(arg.yandex.srcLangs);
-        this.yandexTgtLang.innerHTML = this.getOptions(arg.yandex.tgtLangs);
-        this.yandexDirections = arg.yandex.directions;
-
         this.deeplSrcLang.innerHTML = this.getOptions(arg.deepl.srcLangs);
         this.deeplTgtLang.innerHTML = this.getOptions(arg.deepl.tgtLangs);
 
         this.modernmtSrcLang.innerHTML = this.getOptions(arg.modernmt.srcLangs);
         this.modernmtTgtLang.innerHTML = this.getOptions(arg.modernmt.tgtLangs);
 
-        this.electron.ipcRenderer.send('get-preferences');
+        this.googleSrcLang.innerHTML = this.getOptions(arg.google.srcLangs);
+        this.googleTgtLang.innerHTML = this.getOptions(arg.google.tgtLangs);
 
-        this.googleNeural.addEventListener('change', (event: InputEvent) => {
-            let src = this.googleSrcLang.value;
-            let tgt = this.googleTgtLang.value;
-            if (this.googleNeural.checked) {
-                this.googleSrcLang.innerHTML = this.getOptions(arg.google.nmtSrcLangs);
-                this.googleTgtLang.innerHTML = this.getOptions(arg.google.nmtTgtLangs);
-            } else {
-                this.googleSrcLang.innerHTML = this.getOptions(arg.google.srcLangs);
-                this.googleTgtLang.innerHTML = this.getOptions(arg.google.tgtLangs);
-            }
-            this.googleSrcLang.value = src;
-            this.googleTgtLang.value = tgt;
-        });
+        this.electron.ipcRenderer.send('get-preferences');
     }
 
     getOptions(array: any[]): string {

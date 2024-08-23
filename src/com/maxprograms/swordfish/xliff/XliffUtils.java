@@ -39,15 +39,18 @@ import com.maxprograms.swordfish.tm.TMUtils;
 import com.maxprograms.xml.Attribute;
 import com.maxprograms.xml.Document;
 import com.maxprograms.xml.Element;
+import com.maxprograms.xml.Indenter;
 import com.maxprograms.xml.SAXBuilder;
 import com.maxprograms.xml.TextNode;
 import com.maxprograms.xml.XMLNode;
+import com.maxprograms.xml.XMLOutputter;
 
 public class XliffUtils {
 
 	public static final String STYLE = "class='highlighted'";
 	private static final String NOTXLIFF = Messages.getString("XliffUtils.0");
 	private static final String NOTSWORDFISH = Messages.getString("XliffUtils.1");
+	private static final String NOTSHARED = Messages.getString("XliffUtils.2");
 	private static int maxTag = 0;
 	private static JSONObject tags;
 
@@ -325,6 +328,58 @@ public class XliffUtils {
 		return result;
 	}
 
+	public static String getProjectId(File xliffFile) throws IOException {
+		try {
+			String projectId = "";
+			SAXBuilder builder = new SAXBuilder();
+			Document doc = builder.build(xliffFile);
+			Element xliff = doc.getRootElement();
+			if (!"xliff".equals(xliff.getName())) {
+				throw new IOException(NOTXLIFF);
+			}
+			if (!xliff.getAttributeValue("version").startsWith("2.")) {
+				throw new IOException(NOTSHARED);
+			}
+			Element file = xliff.getChild("file");
+			Element metadata = file.getChild("mda:metadata");
+			if (metadata == null) {
+				throw new IOException(NOTSHARED);
+			}
+			boolean isOpenXLIFF = false;
+			List<Element> groups = metadata.getChildren("mda:metaGroup");
+			Iterator<Element> gt = groups.iterator();
+			while (gt.hasNext()) {
+				Element group = gt.next();
+				if ("tool".equals(group.getAttributeValue("category"))) {
+					List<Element> metaList = group.getChildren("mda:meta");
+					Iterator<Element> mt = metaList.iterator();
+					while (mt.hasNext()) {
+						Element meta = mt.next();
+						if ("tool-id".equals(meta.getAttributeValue("type"))) {
+							isOpenXLIFF = com.maxprograms.converters.Constants.TOOLID.equals(meta.getText());
+						}
+					}
+				}
+				if ("project".equals(group.getAttributeValue("category"))) {
+					List<Element> metaList = group.getChildren("mda:meta");
+					Iterator<Element> mt = metaList.iterator();
+					while (mt.hasNext()) {
+						Element meta = mt.next();
+						if ("id".equals(meta.getAttributeValue("type"))) {
+							projectId = meta.getText();
+						}
+					}
+				}
+			}
+			if (!isOpenXLIFF) {
+				throw new IOException(NOTSHARED);
+			}
+			return projectId;
+		} catch (SAXException | ParserConfigurationException e) {
+			throw new IOException(NOTXLIFF);
+		}
+	}
+
 	public static JSONObject getProjectDetails(File xliffFile) throws IOException {
 		try {
 			JSONObject result = new JSONObject();
@@ -334,7 +389,7 @@ public class XliffUtils {
 			if (!"xliff".equals(xliff.getName())) {
 				throw new IOException(NOTXLIFF);
 			}
-			if (!"2.0".equals(xliff.getAttributeValue("version"))) {
+			if (!xliff.getAttributeValue("version").startsWith("2.")) {
 				throw new IOException(NOTSWORDFISH);
 			}
 			Set<String> originals = new HashSet<>();
@@ -387,6 +442,16 @@ public class XliffUtils {
 								Element meta = mt.next();
 								if ("encoding".equals(meta.getAttributeValue("type"))) {
 									fileObject.put("encoding", meta.getText());
+								}
+							}
+						}
+						if ("project".equals(group.getAttributeValue("category"))) {
+							List<Element> metaList = group.getChildren("mda:meta");
+							Iterator<Element> mt = metaList.iterator();
+							while (mt.hasNext()) {
+								Element meta = mt.next();
+								if ("id".equals(meta.getAttributeValue("type"))) {
+									fileObject.put("project", meta.getText());
 								}
 							}
 						}
@@ -468,5 +533,43 @@ public class XliffUtils {
 		SAXBuilder builder = new SAXBuilder();
 		Document doc = builder.build(new ByteArrayInputStream(string.getBytes(StandardCharsets.UTF_8)));
 		return doc.getRootElement();
+	}
+
+	public static void removeSkeleton(String output, String project)
+			throws IOException, SAXException, ParserConfigurationException {
+		SAXBuilder builder = new SAXBuilder();
+		Document doc = builder.build(new File(output));
+		Element root = doc.getRootElement();
+		recurseRemoving(root, project);
+		try (FileOutputStream out = new FileOutputStream(new File(output))) {
+			XMLOutputter outputter = new XMLOutputter();
+			outputter.preserveSpace(true);
+			outputter.output(doc, out);
+		}
+	}
+
+	private static void recurseRemoving(Element e, String project) {
+		if ("xliff".equals(e.getName())) {
+			e.setAttribute("version", "2.0");
+		}
+		if ("file".equals(e.getName())) {
+			e.removeChild("skeleton");
+			e.setAttribute("canResegment", "no");
+			Element metaData = e.getChild("mda:metadata");
+			Element metaGroup = new Element("mda:metaGroup");
+			metaGroup.setAttribute("category", "project");
+			Element meta = new Element("mda:meta");
+			meta.setAttribute("type", "id");
+			meta.setText(project);
+			metaGroup.addContent(meta);
+			metaData.addContent(metaGroup);
+			Indenter.indent(e, 2);
+			return;
+		}
+		List<Element> children = e.getChildren();
+		Iterator<Element> it = children.iterator();
+		while (it.hasNext()) {
+			recurseRemoving(it.next(), project);
+		}
 	}
 }

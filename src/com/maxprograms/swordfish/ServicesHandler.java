@@ -483,8 +483,7 @@ public class ServicesHandler implements HttpHandler {
 			}
 			return clients;
 		}
-		JSONObject clients = TmsServer.readJSON(clientsFile);
-		return clients;
+		return TmsServer.readJSON(clientsFile);
 	}
 
 	private static JSONObject getSubjects() throws IOException {
@@ -497,8 +496,7 @@ public class ServicesHandler implements HttpHandler {
 			}
 			return subjects;
 		}
-		JSONObject subjects = TmsServer.readJSON(subjectsFile);
-		return subjects;
+		return TmsServer.readJSON(subjectsFile);
 	}
 
 	private static JSONObject getSystemInformation() {
@@ -525,8 +523,7 @@ public class ServicesHandler implements HttpHandler {
 			}
 			return projects;
 		}
-		JSONObject projects = TmsServer.readJSON(projectsFile);
-		return projects;
+		return TmsServer.readJSON(projectsFile);
 	}
 
 	public static void addClient(String client) throws IOException {

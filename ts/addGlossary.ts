@@ -31,7 +31,6 @@ class AddGlossary {
         this.electron.ipcRenderer.on('set-subjects', (event: Electron.IpcRendererEvent, arg: any) => {
             this.setSubjects(arg);
         });
-        document.addEventListener('keydown', (event: KeyboardEvent) => { KeyboardHandler.keyListener(event); });
         document.addEventListener('keydown', (event: KeyboardEvent) => {
             if (event.code === 'Enter' || event.code === 'NumpadEnter') {
                 this.addGlossary();
@@ -44,7 +43,9 @@ class AddGlossary {
             this.addGlossary();
         });
         (document.getElementById('nameInput') as HTMLInputElement).focus();
-        this.electron.ipcRenderer.send('add-glossary-height', { width: document.body.clientWidth, height: document.body.clientHeight });
+        setTimeout(() => {
+            this.electron.ipcRenderer.send('set-height', { window: 'addGlossary', width: document.body.clientWidth, height: document.body.clientHeight });
+        }, 200);
     }
 
     addGlossary(): void {

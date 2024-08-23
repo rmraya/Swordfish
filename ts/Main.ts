@@ -24,6 +24,8 @@ class Main {
     memoriesView: MemoriesView;
     glossariesView: GlossariesView;
 
+    clipboardText: string = '';
+
     constructor() {
         Main.translationViews = new Map<string, TranslationView>();
         this.mainContainer = document.getElementById('mainContainer') as HTMLDivElement;
@@ -87,6 +89,9 @@ class Main {
         Main.electron.ipcRenderer.on('request-projects', (event: Electron.IpcRendererEvent, arg: any) => {
             this.projectsView.loadProjects(arg);
         });
+        Main.electron.ipcRenderer.on('export-xliff-review', () => {
+            this.projectsView.exportXLIFF();
+        });
         Main.electron.ipcRenderer.on('remove-projects', () => {
             this.projectsView.removeProjects();
         });
@@ -98,6 +103,12 @@ class Main {
         });
         Main.electron.ipcRenderer.on('export-translations-tmx', () => {
             this.projectsView.exportTMX();
+        });
+        Main.electron.ipcRenderer.on('export-matches', () => {
+            this.projectsView.exportMatches();
+        });
+        Main.electron.ipcRenderer.on('export-terminology-all', () => {
+            this.projectsView.exportTerms();
         });
         Main.electron.ipcRenderer.on('split-segment', () => {
             this.splitSegment();
@@ -378,9 +389,6 @@ class Main {
         Main.electron.ipcRenderer.on('edit-source', () => {
             this.editSource();
         });
-        Main.electron.ipcRenderer.on('get-selection', () => {
-            Main.electron.ipcRenderer.send('set-selection', window.getSelection().toString())
-        });
         let config: MutationObserverInit = { attributes: true, childList: false, subtree: false };
         let observer = new MutationObserver((mutationsList) => {
             for (let mutation of mutationsList) {
@@ -391,6 +399,23 @@ class Main {
             }
         });
         observer.observe(this.mainContainer, config);
+
+        document.addEventListener('copy', (event) => {
+            const selection = document.getSelection();
+            this.clipboardText = selection.toString();
+        });
+        document.addEventListener('cut', (event) => {
+            const selection = document.getSelection();
+            this.clipboardText = selection.toString();
+        });
+        document.addEventListener('paste', (event) => {
+            let clipboardData = event.clipboardData;
+            if (clipboardData.getData('text') != this.clipboardText) {
+                event.preventDefault();
+                const text = event.clipboardData.getData('text/plain');
+                document.execCommand('insertHTML', false, text);
+            }
+        });
 
         setTimeout(() => {
             this.resizePanels();

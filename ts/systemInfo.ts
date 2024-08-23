@@ -29,7 +29,9 @@ class SystemInformation {
                 this.electron.ipcRenderer.send('close-systemInfo');
             }
         });
-        this.electron.ipcRenderer.send('systemInfo-height', { width: document.body.clientWidth, height: (document.body.clientHeight + 20) });
+        setTimeout(() => {
+            this.electron.ipcRenderer.send('set-height', { window: 'systemInfo', width: document.body.clientWidth, height: document.body.clientHeight });
+        }, 200);
     }
 
     setInfo(info: any) {

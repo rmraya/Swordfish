@@ -43,7 +43,6 @@ public class TmsServer implements HttpHandler {
 
 	private static Logger logger = System.getLogger(TmsServer.class.getName());
 	private HttpServer server;
-	private static boolean debug;
 	private static File workDir;
 
 	public TmsServer(Integer port) throws IOException {
@@ -72,9 +71,6 @@ public class TmsServer implements HttpHandler {
 			if (arg.equals("-port") && (i + 1) < args.length) {
 				port = args[i + 1];
 			}
-			if (arg.equals("-debug")) {
-				debug = true;
-			}
 		}
 		try {
 			TmsServer instance = new TmsServer(Integer.valueOf(port));
@@ -92,9 +88,6 @@ public class TmsServer implements HttpHandler {
 		server.createContext("/", this);
 		server.setExecutor(new ThreadPoolExecutor(4, 20, 2, TimeUnit.HOURS, new ArrayBlockingQueue<>(200)));
 		server.start();
-		if (debug) {
-			logger.log(Level.INFO, Messages.getString("TmsServer.2"));
-		}
 	}
 
 	@Override
@@ -108,9 +101,6 @@ public class TmsServer implements HttpHandler {
 			if (request.isBlank()) {
 				throw new IOException(Messages.getString("TmsServer.3"));
 			}
-			if (debug) {
-				logger.log(Level.INFO, request);
-			}
 			String response = "";
 			JSONObject json = new JSONObject(request);
 			String command = json.getString("command");
@@ -123,9 +113,6 @@ public class TmsServer implements HttpHandler {
 					response = obj.toString();
 					break;
 				case "stop":
-					if (debug) {
-						logger.log(Level.INFO, Messages.getString("TmsServer.4"));
-					}
 					closeAll();
 					obj.put(Constants.STATUS, Constants.OK);
 					response = obj.toString();
@@ -136,9 +123,6 @@ public class TmsServer implements HttpHandler {
 					obj.put(Constants.REASON, mf.format(new String[] { command }));
 					obj.put("received", json.toString());
 					response = obj.toString();
-			}
-			if (debug) {
-				logger.log(Level.INFO, response);
 			}
 			t.getResponseHeaders().add("content-type", "application/json; charset=utf-8");
 			byte[] bytes = response.getBytes(StandardCharsets.UTF_8);
@@ -203,10 +187,6 @@ public class TmsServer implements HttpHandler {
 			}
 		}
 		Files.deleteIfExists(folder.toPath());
-	}
-
-	public static boolean isDebug() {
-		return debug;
 	}
 
 	public static String getCatalogFile() throws IOException, JSONException {

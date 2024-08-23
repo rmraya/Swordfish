@@ -484,6 +484,7 @@ public class SqliteDatabase implements ITmEngine {
                     int count = candidates.get(tuid);
                     if (count >= min && count <= max) {
                         stmt.setString(2, tuid);
+                        stmt2.setString(1, tuid);
                         try (ResultSet rs = stmt.executeQuery()) {
                             while (rs.next()) {
                                 String pure = rs.getString(1);
@@ -495,8 +496,6 @@ public class SqliteDatabase implements ITmEngine {
                                     distance = MatchQuality.similarity(searchStr.toLowerCase(), pure.toLowerCase());
                                 }
                                 if (distance >= similarity) {
-                                    stmt2.setString(1, tuid);
-                                    stmt2.setString(2, tgtLang);
                                     boolean tgtFound = false;
                                     Element target = null;
                                     try (ResultSet rs2 = stmt2.executeQuery()) {
@@ -676,6 +675,6 @@ public class SqliteDatabase implements ITmEngine {
         if (reader != null) {
             return reader.getCount();
         }
-       return 0;
+        return 0;
     }
 }

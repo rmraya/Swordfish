@@ -28,7 +28,10 @@ class SpellcheckerLanguages {
                 this.electron.ipcRenderer.send('close-spellingLangs');
             }
         });
-        this.electron.ipcRenderer.send('set-spellchecker-height', { width: document.body.clientWidth, height: 400 });
+        (document.getElementById('tableContainer') as HTMLDivElement).style.height = '400px';
+        setTimeout(() => {
+            this.electron.ipcRenderer.send('set-height', { window: 'spellingLangs', width: document.body.clientWidth, height: document.body.clientHeight });
+        }, 200);
     }
 
     setLanguages(languages: any[]): void {
