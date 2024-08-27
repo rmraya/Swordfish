@@ -917,8 +917,8 @@ export class Swordfish {
             new MenuItem({ type: 'separator' }),
             { label: 'Cut', accelerator: 'CmdOrCtrl+X', click: () => { BrowserWindow.getFocusedWindow().webContents.cut(); } },
             { label: 'Copy', accelerator: 'CmdOrCtrl+C', click: () => { BrowserWindow.getFocusedWindow().webContents.copy(); } },
-            { label: 'Paste', accelerator: 'CmdOrCtrl+V', click: () => {BrowserWindow.getFocusedWindow().webContents.paste(); } },
-            { label: 'Select All', accelerator: 'CmdOrCtrl+A', click: () => {BrowserWindow.getFocusedWindow().webContents.selectAll(); } },
+            { label: 'Paste', accelerator: 'CmdOrCtrl+V', click: () => { BrowserWindow.getFocusedWindow().webContents.paste(); } },
+            { label: 'Select All', accelerator: 'CmdOrCtrl+A', click: () => { BrowserWindow.getFocusedWindow().webContents.selectAll(); } },
             new MenuItem({ type: 'separator' }),
             { label: 'Edit Previous Segment', accelerator: 'PageUp', click: () => { Swordfish.mainWindow.webContents.send('previous-segment'); } },
             { label: 'Edit Next Segment', accelerator: 'PageDown', click: () => { Swordfish.mainWindow.webContents.send('next-segment'); } },
@@ -2134,7 +2134,7 @@ export class Swordfish {
         this.settingsWindow = new BrowserWindow({
             parent: this.mainWindow,
             width: 640,
-            height:340,
+            height: 340,
             minimizable: false,
             maximizable: false,
             resizable: false,
@@ -3281,7 +3281,8 @@ export class Swordfish {
     static showSpellCheckerLangs(): void {
         Swordfish.spellingLangsWindow = new BrowserWindow({
             parent: this.settingsWindow,
-            width: 660,
+            width: 790,
+            height: 530,
             minimizable: false,
             maximizable: false,
             resizable: false,
@@ -4120,7 +4121,7 @@ export class Swordfish {
         this.tagsWindow = new BrowserWindow({
             parent: this.mainWindow,
             width: 190,
-            height:150,
+            height: 150,
             minimizable: false,
             maximizable: false,
             resizable: false,
@@ -4300,7 +4301,7 @@ export class Swordfish {
                                 if (Swordfish.currentStatus.progress === Swordfish.COMPLETED) {
                                     clearInterval(intervalObject);
                                     Swordfish.mainWindow.webContents.send('set-status', 'Translating...');
-                                    let exportedFile: string = Swordfish.path.join(Swordfish.appHome, 'projects', arg.project, 'applymt.xlf');
+                                    let exportedFile: string = Swordfish.path.join(Swordfish.currentPreferences.projectsFolder, arg.project, 'applymt.xlf');
                                     if (!existsSync(exportedFile)) {
                                         Swordfish.mainWindow.webContents.send('end-waiting');
                                         Swordfish.mainWindow.webContents.send('set-status', '');
