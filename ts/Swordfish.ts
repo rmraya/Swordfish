@@ -13,7 +13,7 @@
 import { ChildProcessWithoutNullStreams, execFileSync, spawn } from "child_process";
 import { BrowserWindow, ClientRequest, IpcMainEvent, Menu, MenuItem, Rectangle, Size, app, clipboard, dialog, ipcMain, nativeTheme, net, screen, session, shell } from "electron";
 import { IncomingMessage } from "electron/main";
-import { appendFileSync, existsSync, lstatSync, mkdirSync, readFile, readFileSync, unlinkSync, writeFileSync } from "fs";
+import { appendFileSync, existsSync, lstatSync, mkdirSync, readFile, readFileSync, readdirSync, unlinkSync, writeFileSync } from "fs";
 import { Locations, Point } from "./locations";
 import { MTManager } from "./mtManager";
 
@@ -122,7 +122,7 @@ export class Swordfish {
     static currentCss: string;
     static currentStatus: any;
 
-    static selectedFile: string;
+    static selectedFiles: string[];
     static sortParams: any;
     static filterParams: any;
     static memoryParam: string;
@@ -332,6 +332,9 @@ export class Swordfish {
         });
         ipcMain.on('licenses-clicked', () => {
             Swordfish.showLicenses({ from: 'about' });
+        });
+        ipcMain.on('get-source-files', (event: IpcMainEvent) => {
+            Swordfish.getSelectedFiles(event);
         });
         ipcMain.on('create-project', (event: IpcMainEvent, arg: any) => {
             Swordfish.createProject(arg);
@@ -664,8 +667,8 @@ export class Swordfish {
         ipcMain.on('import-xliff-file', (event: IpcMainEvent, arg: any) => {
             Swordfish.importXLIFF(arg);
         });
-        ipcMain.on('files-dropped', (event: IpcMainEvent, arg: any) => {
-            Swordfish.filesDropped(arg);
+        ipcMain.on('files-dropped', (event: IpcMainEvent, files: string[]) => {
+            Swordfish.filesDropped(files);
         });
         ipcMain.on('remove-translations', (event: IpcMainEvent, arg: any) => {
             Swordfish.removeTranslations(arg);
@@ -1629,7 +1632,7 @@ export class Swordfish {
             filters: filters
         }).then((value: Electron.OpenDialogReturnValue) => {
             if (!value.canceled) {
-                Swordfish.selectedFile = value.filePaths[0];
+                Swordfish.selectedFiles = value.filePaths;
                 this.addFileWindow = new BrowserWindow({
                     parent: this.mainWindow,
                     width: 900,
@@ -1659,9 +1662,11 @@ export class Swordfish {
     }
 
     static setSelectedFile(event: IpcMainEvent): void {
-        if (Swordfish.selectedFile) {
-            Swordfish.getFileType(event, [Swordfish.selectedFile]);
-            Swordfish.selectedFile = undefined;
+        if (Swordfish.selectedFiles) {
+            Swordfish.getFileType(event, Swordfish.selectedFiles);
+            Swordfish.selectedFiles = undefined;
+        } else {
+            Swordfish.showMessage({ type: 'error', message: 'No file selected' });
         }
     }
 
@@ -1838,10 +1843,17 @@ export class Swordfish {
         });
     }
 
+    static getSelectedFiles(event: IpcMainEvent): void {
+        if (Swordfish.selectedFiles.length > 0) {
+            Swordfish.getFileType(event, Swordfish.selectedFiles);
+            Swordfish.selectedFiles = [];
+        }
+    }
+
     static getFileType(event: IpcMainEvent, files: string[]): void {
         Swordfish.sendRequest('/services/getFileType', { files: files },
             (data: any) => {
-                event.sender.send('add-source-files', data);
+                event.sender.send('add-source-files', data.files);
             },
             (reason: string) => {
                 Swordfish.showMessage({ type: 'error', message: reason });
@@ -2160,6 +2172,7 @@ export class Swordfish {
         this.systemInfoWindow = new BrowserWindow({
             parent: Swordfish.aboutWindow,
             width: 430,
+            height: 240,
             minimizable: false,
             maximizable: false,
             resizable: false,
@@ -3140,6 +3153,7 @@ export class Swordfish {
         this.applyTmWindow = new BrowserWindow({
             parent: this.mainWindow,
             width: 450,
+            height: 190,
             minimizable: false,
             maximizable: false,
             resizable: false,
@@ -3752,10 +3766,10 @@ export class Swordfish {
         );
     }
 
-    static filesDropped(arg: any): void {
-        let files: string[] = arg.files;
+    static filesDropped(files: string[]): void {
         if (files.length === 1 && !(existsSync(files[0]) && lstatSync(files[0]).isDirectory())) {
             // single file
+            Swordfish.selectedFiles = files;
             this.addFileWindow = new BrowserWindow({
                 parent: this.mainWindow,
                 width: 900,
@@ -3772,7 +3786,6 @@ export class Swordfish {
             this.addFileWindow.setMenu(null);
             this.addFileWindow.loadURL('file://' + this.path.join(app.getAppPath(), 'html', 'addFile.html'));
             this.addFileWindow.once('ready-to-show', () => {
-                Swordfish.selectedFile = files[0];
                 this.addFileWindow.show();
             });
             this.addFileWindow.on('close', () => {
@@ -3780,9 +3793,39 @@ export class Swordfish {
             });
             Swordfish.setLocation(this.addFileWindow, 'addFile.html');
         } else {
-            // TODO multiple files/folders
-            console.log(JSON.stringify(arg));
+            let filesList: string[] = [];
+            files.forEach((file: string) => {
+                if (existsSync(file)) {
+                    if (lstatSync(file).isDirectory()) {
+                        let recursed: string[] = Swordfish.recurseFolder(file);
+                        recursed.forEach((recursedFile: string) => {
+                            filesList.push(recursedFile);
+                        });
+                    } else {
+                        filesList.push(file);
+                    }
+                }
+            });
+            Swordfish.selectedFiles = filesList;
+            Swordfish.addProject();
         }
+    }
+
+    static recurseFolder(file: string): string[] {
+        let filesList: string[] = [];
+        let dirFiles: string[] = readdirSync(file);
+        dirFiles.forEach((dirFile: string) => {
+            let child: string = this.path.join(file, dirFile)
+            if (lstatSync(child).isDirectory()) {
+                let recursed: string[] = Swordfish.recurseFolder(child);
+                recursed.forEach((recursedFile: string) => {
+                    filesList.push(recursedFile);
+                });
+            } else {
+                filesList.push(child);
+            }
+        });
+        return filesList;
     }
 
     static sortOptions(arg: any): void {

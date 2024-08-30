@@ -355,10 +355,12 @@ class ProjectsView {
         event.stopPropagation();
         let filesList: string[] = [];
         for (const f of event.dataTransfer.files) {
-            filesList.push(f.path);
+            if (f.path) {
+                filesList.push(f.path);
+            }
         }
         if (filesList.length > 0) {
-            this.electron.ipcRenderer.send('files-dropped', { files: filesList });
+            this.electron.ipcRenderer.send('files-dropped', filesList);
         }
         container.style.opacity = '1';
     }
@@ -548,7 +550,7 @@ class ProjectsView {
             this.electron.ipcRenderer.send('export-tm-matches', { projectId: key, description: project.description });
         }
     }
-    
+
     exportTerms(): void {
         let selected = this.getSelectedProjects();
         if (selected.size === 0) {

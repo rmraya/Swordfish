@@ -13,7 +13,7 @@
 class AddProject {
 
     electron = require('electron');
-    addedFiles: Map<number, any>;
+    addedFiles: Map<number, FileInfo>;
 
     charsetOptions: string;
     typesOption: string;
@@ -27,7 +27,7 @@ class AddProject {
         this.memSelect = document.getElementById('memorySelect') as HTMLSelectElement;
         this.glossSelect = document.getElementById('glossarySelect') as HTMLSelectElement;
 
-        this.addedFiles = new Map<number, any>();
+        this.addedFiles = new Map<number, FileInfo>();
         this.electron.ipcRenderer.send('get-theme');
         this.electron.ipcRenderer.on('set-theme', (event: Electron.IpcRendererEvent, arg: any) => {
             (document.getElementById('theme') as HTMLLinkElement).href = arg;
@@ -44,8 +44,9 @@ class AddProject {
         this.electron.ipcRenderer.on('set-languages', (event: Electron.IpcRendererEvent, arg: any) => {
             this.setLanguages(arg);
         });
-        this.electron.ipcRenderer.on('add-source-files', (event: Electron.IpcRendererEvent, arg: any) => {
-            this.addFiles(arg);
+        this.electron.ipcRenderer.send('get-source-files');
+        this.electron.ipcRenderer.on('add-source-files', (event: Electron.IpcRendererEvent, files: FileInfo[]) => {
+            this.addFiles(files);
         });
         this.electron.ipcRenderer.send('get-types');
         this.electron.ipcRenderer.on('set-types', (event: Electron.IpcRendererEvent, arg: any) => {
@@ -139,7 +140,7 @@ class AddProject {
             return;
         }
 
-        let array: any[] = [];
+        let array: FileInfo[] = [];
         this.addedFiles.forEach((a) => {
             array.push(a)
         });
@@ -189,15 +190,14 @@ class AddProject {
         (document.getElementById('tgtLangSelect') as HTMLSelectElement).value = arg.tgtLang;
     }
 
-    addFiles(arg: any): void {
-        let files: any[] = arg.files;
+    addFiles(files: FileInfo[]): void {
         let length = files.length;
         let tableBody: HTMLElement = document.getElementById('tableBody');
         if (this.addedFiles.size === 0) {
             tableBody.innerHTML = '';
         }
         for (let i = 0; i < length; i++) {
-            let file: any = files[i];
+            let file: FileInfo = files[i];
             let hash = this.hashCode(file.file);
             if (!this.addedFiles.has(hash)) {
                 this.addedFiles.set(hash, file);

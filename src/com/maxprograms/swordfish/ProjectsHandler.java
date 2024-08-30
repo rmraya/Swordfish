@@ -902,12 +902,14 @@ public class ProjectsHandler implements HttpHandler {
 							}
 						}
 						if (!"0".equals(res.get(0))) {
+							MessageFormat mf = new MessageFormat(Messages.getString("ProjectsHandler.11"));
+							logger.log(Level.ERROR, mf.format(new String[] { source.getAbsolutePath() }));
 							try {
 								TmsServer.deleteFolder(projectFolder);
 							} catch (IOException e) {
 								logger.log(Level.ERROR, e);
 							}
-							throw new IOException(res.get(1));
+							throw new IOException(mf.format(new String[] { source.getAbsolutePath() }));
 						}
 						xliffs.add(xliff.getAbsolutePath());
 					}

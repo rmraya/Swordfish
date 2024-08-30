@@ -65,8 +65,8 @@ class AddFile {
                 this.electron.ipcRenderer.send('close-addFile');
             }
         });
-        this.electron.ipcRenderer.on('add-source-files', (event: Electron.IpcRendererEvent, arg: any) => {
-            this.addFile(arg);
+        this.electron.ipcRenderer.on('add-source-files', (event: Electron.IpcRendererEvent, files: FileInfo[]) => {
+            this.addFile(files[0]);
         });
         document.getElementById('addProjectButton').addEventListener('click', () => {
             this.addProject();
@@ -120,17 +120,16 @@ class AddFile {
     }
 
     setCharsets(arg: any): void {
-        this.electron.ipcRenderer.send('get-selected-file');
         this.charsetOptions = '<option value="none" class="error">Select Charset</option>';
         let length: number = arg.charsets.length;
         for (let i = 0; i < length; i++) {
             this.charsetOptions = this.charsetOptions + '<option value="' + arg.charsets[i].code + '">' + arg.charsets[i].description + '</option>';
         }
         document.getElementById('charsetSelect').innerHTML = this.charsetOptions;
+        this.electron.ipcRenderer.send('get-selected-file');
     }
 
-    addFile(arg: any): void {
-        let file: any = arg.files[0];
+    addFile(file: FileInfo): void {
         this.selectedFile = file.file;
         if (file.file.length > 90 && (file.file.indexOf('/') != -1 || file.file.indexOf('\\') != -1)) {
             let f: string = file.file.replace(this.homeFolder, '~');
@@ -190,7 +189,7 @@ class AddFile {
             return;
         }
 
-        let array: any[] = [{ file: this.selectedFile, type: type, encoding: charset }];
+        let array: FileInfo[] = [{ file: this.selectedFile, type: type, encoding: charset }];
         let params: any = {
             description: this.selectedFile,
             files: array,
