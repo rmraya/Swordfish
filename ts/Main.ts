@@ -24,7 +24,6 @@ class Main {
     memoriesView: MemoriesView;
     glossariesView: GlossariesView;
 
-    clipboardText: string = '';
 
     constructor() {
         Main.translationViews = new Map<string, TranslationView>();
@@ -400,26 +399,46 @@ class Main {
         });
         observer.observe(this.mainContainer, config);
 
-        document.addEventListener('copy', (event) => {
-            const selection = document.getSelection();
-            this.clipboardText = selection.toString();
-        });
-        document.addEventListener('cut', (event) => {
-            const selection = document.getSelection();
-            this.clipboardText = selection.toString();
-        });
         document.addEventListener('paste', (event) => {
             let clipboardData = event.clipboardData;
-            if (clipboardData.getData('text') != this.clipboardText) {
-                event.preventDefault();
-                const text = event.clipboardData.getData('text/plain');
-                document.execCommand('insertHTML', false, text);
-            }
+            let text: string = clipboardData.getData('text/html');
+            event.preventDefault();
+            this.parseClipboardHtml(text);
         });
 
         setTimeout(() => {
             this.resizePanels();
         }, 200);
+    }
+
+    parseClipboardHtml(html: string): void {
+        let container: HTMLDivElement = document.createElement('div');
+        container.innerHTML = html;
+        console.log(html);
+        let text: string = this.recurseNodes(container);
+        document.execCommand('insertHTML', false, text);
+    }
+
+    recurseNodes(node: Node): string {
+        let result: string = '';
+        if (node.nodeName === 'IMG' && this.isTag(node)) {
+            return (node as HTMLImageElement).outerHTML;
+        }
+        if (node.nodeType === Node.TEXT_NODE) {
+            result += node.textContent.replace(/\n/g, '');
+        }
+        node.childNodes.forEach((child) => {
+            result += this.recurseNodes(child);
+        });
+        return result;
+    }
+
+    isTag(node: Node): boolean {
+        let img: HTMLImageElement = node as HTMLImageElement;
+        if (img.getAttribute('data-ref') && img.getAttribute('src').endsWith('.svg')) {
+            return true;
+        }
+        return false;
     }
 
     setStatus(arg: any): void {

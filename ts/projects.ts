@@ -355,9 +355,7 @@ class ProjectsView {
         event.stopPropagation();
         let filesList: string[] = [];
         for (const f of event.dataTransfer.files) {
-            if (f.path) {
-                filesList.push(f.path);
-            }
+            filesList.push(this.electron.webUtils.getPathForFile(f));
         }
         if (filesList.length > 0) {
             this.electron.ipcRenderer.send('files-dropped', filesList);
