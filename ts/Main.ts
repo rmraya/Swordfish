@@ -401,9 +401,11 @@ class Main {
 
         document.addEventListener('paste', (event) => {
             let clipboardData = event.clipboardData;
-            let text: string = clipboardData.getData('text/html');
-            event.preventDefault();
-            this.parseClipboardHtml(text);
+            let html: string = clipboardData.getData('text/html');
+            if (html.length !== 0) {
+                event.preventDefault();
+                this.parseClipboardHtml(html);
+            }
         });
 
         setTimeout(() => {
@@ -414,9 +416,24 @@ class Main {
     parseClipboardHtml(html: string): void {
         let container: HTMLDivElement = document.createElement('div');
         container.innerHTML = html;
-        console.log(html);
         let text: string = this.recurseNodes(container);
+        container.innerHTML = text;
+        text = this.trimSpaces(container);
         document.execCommand('insertHTML', false, text);
+    }
+
+    trimSpaces(node: Node): string {
+        let result: string = '';
+        if (node.nodeType === Node.TEXT_NODE) {
+            result = node.textContent.replace(/\s\s+/g, ' ');
+        }
+        if (node.nodeName === 'IMG' && this.isTag(node)) {
+            return (node as HTMLImageElement).outerHTML;
+        }
+        node.childNodes.forEach((child) => {
+            result += this.trimSpaces(child);
+        });
+        return result;
     }
 
     recurseNodes(node: Node): string {
@@ -424,8 +441,14 @@ class Main {
         if (node.nodeName === 'IMG' && this.isTag(node)) {
             return (node as HTMLImageElement).outerHTML;
         }
+        if (node.nodeType === Node.COMMENT_NODE || node.nodeName === 'META' || node.nodeName === 'STYLE'
+            || node.nodeName === 'SCRIPT' || node.nodeName === 'LINK') {
+            return '';
+        }
         if (node.nodeType === Node.TEXT_NODE) {
-            result += node.textContent.replace(/\n/g, '');
+            let content = node.textContent.replace(/\n/g, ' ');
+            result += content;
+            result = result.replace(/\s\s+/g, ' ');
         }
         node.childNodes.forEach((child) => {
             result += this.recurseNodes(child);
