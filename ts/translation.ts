@@ -1527,7 +1527,8 @@ class TranslationView {
                 if (targetTags.has(tag)) {
                     this.removeTag(tag);
                 }
-                this.electron.ipcRenderer.send('paste-tag', this.sourceTags.get(tag));
+                let svg: string = this.sourceTags.get(tag)
+                document.execCommand('insertHTML', false, svg);
             }
         } else {
             this.electron.ipcRenderer.send('show-tag-window');
@@ -1797,17 +1798,15 @@ class TranslationView {
             }
         }
         if (tags !== '') {
-            this.electron.ipcRenderer.send('paste-tag', tags);
+            document.execCommand('insertHTML', false, tags);
         }
     }
 
     removeTags(): void {
         let target: HTMLTableCellElement = this.currentRow.getElementsByClassName('target')[0] as HTMLTableCellElement;
-        let targetTags = this.getTags(target);
-        for (let key of this.sourceTags.keys()) {
-            if (targetTags.has(key)) {
-                this.removeTag(key.valueOf());
-            }
+        let tags: NodeListOf<Element> = target.querySelectorAll('img');
+        for (let i = 0; i < tags.length; i++) {
+            target.removeChild(tags[i]);
         }
     }
 

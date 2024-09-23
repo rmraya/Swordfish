@@ -404,13 +404,34 @@ class Main {
             let html: string = clipboardData.getData('text/html');
             if (html.length !== 0) {
                 event.preventDefault();
-                this.parseClipboardHtml(html);
+                if (this.hasTags(html)) {
+                    this.parseClipboardHtml(html);
+                } else {
+                    let text = clipboardData.getData('text/plain').replace(/\r/g, '');
+                    text = text.replace(/\n\n/g, '\n');
+                    document.execCommand('insertHTML', false, text);
+                }
             }
         });
 
         setTimeout(() => {
             this.resizePanels();
         }, 200);
+    }
+
+    hasTags(html: string): boolean {
+        let container: HTMLDivElement = document.createElement('div');
+        container.innerHTML = html;
+        let tags: NodeListOf<Element> = container.querySelectorAll('img');
+        if (tags.length > 0) {
+            for (let i = 0; i < tags.length; i++) {
+                let img: HTMLImageElement = tags[i] as HTMLImageElement;
+                if (img.getAttribute('data-ref') && img.getAttribute('src').endsWith('.svg')) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
     parseClipboardHtml(html: string): void {
@@ -446,13 +467,15 @@ class Main {
             return '';
         }
         if (node.nodeType === Node.TEXT_NODE) {
-            let content = node.textContent.replace(/\n/g, ' ');
-            result += content;
-            result = result.replace(/\s\s+/g, ' ');
+            let content = node.textContent.replace(/\n/g, '');
+            return content;
         }
         node.childNodes.forEach((child) => {
             result += this.recurseNodes(child);
         });
+        if (node.nodeName === 'DIV') {
+            return result.trim();
+        }
         return result;
     }
 

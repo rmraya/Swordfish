@@ -523,10 +523,6 @@ export class Swordfish {
         ipcMain.on('get-segments', (event: IpcMainEvent, arg: any) => {
             Swordfish.getSegmenst(event, arg);
         });
-        ipcMain.on('paste-tag', (event: IpcMainEvent, arg: any) => {
-            clipboard.writeHTML(arg);
-            Swordfish.mainWindow.webContents.paste();
-        });
         ipcMain.on('paste-text', (event: IpcMainEvent, arg: any) => {
             clipboard.writeText(arg);
             Swordfish.mainWindow.webContents.paste();
@@ -1844,7 +1840,7 @@ export class Swordfish {
     }
 
     static getSelectedFiles(event: IpcMainEvent): void {
-        if (Swordfish.selectedFiles.length > 0) {
+        if (Swordfish.selectedFiles?.length > 0) {
             Swordfish.getFileType(event, Swordfish.selectedFiles);
             Swordfish.selectedFiles = [];
         }
