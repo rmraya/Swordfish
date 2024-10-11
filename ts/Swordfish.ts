@@ -5156,9 +5156,9 @@ export class Swordfish {
                     shell.showItemInFolder(file);
                 }
             });
-            response.on('error', (reason: string) => {
+            response.on('error', (error: Error) => {
                 Swordfish.mainWindow.webContents.send('set-status', '');
-                dialog.showErrorBox('Error', reason);
+                dialog.showErrorBox('Error', error.message);
                 if (process.platform === 'win32' || process.platform === 'darwin') {
                     Swordfish.mainWindow.setProgressBar(0);
                 }
