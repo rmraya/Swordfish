@@ -496,7 +496,7 @@ class TranslationView {
         tagsAnalysisButton.className = 'tooltip';
         tagsAnalysisButton.style.marginLeft = '20px';
         tagsAnalysisButton.addEventListener('click', () => {
-            Main.electron.ipcRenderer.send('analyze-tags', { project: this.projectId });
+            Main.electron.ipcRenderer.send('analyze-tags', this.projectId);
         });
         this.topBar.appendChild(tagsAnalysisButton);
 
@@ -505,7 +505,7 @@ class TranslationView {
             '<span class="tooltiptext bottomTooltip">Check Initial/Trailing Spaces</span>';
         spaceAnalysisButton.className = 'tooltip';
         spaceAnalysisButton.addEventListener('click', () => {
-            Main.electron.ipcRenderer.send('analyze-spaces', { project: this.projectId });
+            Main.electron.ipcRenderer.send('analyze-spaces', this.projectId);
         });
         this.topBar.appendChild(spaceAnalysisButton);
 
@@ -1812,12 +1812,10 @@ class TranslationView {
 
     removeTag(tag: string): void {
         let target: HTMLTableCellElement = this.currentRow.getElementsByClassName('target')[0] as HTMLTableCellElement;
-        let children: HTMLCollectionOf<HTMLImageElement> = target.getElementsByTagName('img');
-        let length: number = children.length;
-        for (let i = 0; i < length; i++) {
-            let child: HTMLElement = children[i];
-            if (tag === child.getAttribute('data-id')) {
-                target.removeChild(child);
+        let images: HTMLCollectionOf<HTMLImageElement> = target.getElementsByTagName('img');
+        for (let img of images) {
+            if (tag === img.getAttribute('data-id')) {
+                target.removeChild(img);
                 return;
             }
         }

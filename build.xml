@@ -11,9 +11,7 @@
         <pathelement location="jars/mapdb.jar" />
         <pathelement location="jars/openxliff.jar" />
         <pathelement location="jars/xmljava.jar" />
-        <pathelement location="jars/slf4j-api-2.0.13.jar" />
-        <pathelement location="jars/slf4j-nop-2.0.13.jar" />
-        <pathelement location="jars/sqlite-jdbc-3.45.3.0.jar" />
+        <pathelement location="jars/sqlite-jdbc-3.47.0.1-20241024.015404-1.jar" />
     </path>
     <condition property="isWindows"> 
         <os family="windows"/>

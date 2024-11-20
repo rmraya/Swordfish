@@ -34,7 +34,6 @@ class Project {
 }
 
 class ProjectsView {
-
     electron = require('electron');
 
     container: HTMLDivElement;
@@ -72,6 +71,15 @@ class ProjectsView {
             this.addProject();
         });
         this.topBar.appendChild(addProjectButton);
+
+        let editProjectButton = document.createElement('a');
+        editProjectButton.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" ><path d="M200-200h57l391-391-57-57-391 391v57Zm-80 80v-170l528-527q12-11 26.5-17t30.5-6q16 0 31 6t26 18l55 56q12 11 17.5 26t5.5 30q0 16-5.5 30.5T817-647L290-120H120Zm640-584-56-56 56 56Zm-141 85-28-29 57 57-29-28Z"/></svg>' +
+            '<span class="tooltiptext bottomTooltip">Edit Project</span>';
+        editProjectButton.className = 'tooltip';
+        editProjectButton.addEventListener('click', () => {
+            this.editProject();
+        });
+        this.topBar.appendChild(editProjectButton);
 
         let translateButton = document.createElement('a');
         translateButton.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 0 24 24" width="24"><path d="M12.87 15.07l-2.54-2.51.03-.03c1.74-1.94 2.98-4.17 3.71-6.53H17V4h-7V2H8v2H1v1.99h11.17C11.5 7.92 10.44 9.75 9 11.35 8.07 10.32 7.3 9.19 6.69 8h-2c.73 1.63 1.73 3.17 2.98 4.56l-5.09 5.02L4 19l5-5 3.11 3.11.76-2.04zM18.5 10h-2L12 22h2l1.12-3h4.75L21 22h2l-4.5-12zm-2.62 7l1.62-4.33L19.12 17h-3.24z"/></svg>' +
@@ -392,6 +400,22 @@ class ProjectsView {
         this.electron.ipcRenderer.send('show-add-project');
     }
 
+    editProject() {
+        let selected: Map<string, Project> = this.getSelectedProjects();
+        if (selected.size === 0) {
+            this.electron.ipcRenderer.send('show-message', { type: 'warning', message: 'Select project' });
+            return;
+        }
+        if (selected.size > 1) {
+            this.electron.ipcRenderer.send('show-message', { type: 'warning', message: 'Select one project' });
+            return;
+        }
+        for (let key of selected.keys()) {
+            let project: Project = selected.get(key);
+            this.electron.ipcRenderer.send('show-edit-project', project);
+        }
+    }
+
     getSelectedProjects(): Map<string, Project> {
         let selected: Map<string, Project> = new Map<string, Project>();
         let checkboxes: HTMLCollectionOf<Element> = document.getElementsByClassName('projectSelection');
@@ -566,6 +590,7 @@ class ProjectsView {
     }
 
     displayProjects() {
+        let maxChars: number = this.calcChars();
         if (this.projectSortAscending) {
             (document.getElementById('project-' + this.projectSortFielD) as HTMLTableCellElement).classList.add('arrow-up');
         } else {
@@ -676,8 +701,8 @@ class ProjectsView {
 
             td = document.createElement('td');
             td.classList.add('list');
-            if (p.description.length > 90 && (p.description.indexOf('/') != -1 || p.description.indexOf('\\') != -1)) {
-                td.innerText = p.description.substring(0, 30) + ' ... ' + p.description.substring(p.description.length - 50);
+            if (p.description.length > maxChars && (p.description.indexOf('/') != -1 || p.description.indexOf('\\') != -1)) {
+                td.innerText = p.description.substring(0, 30) + ' ... ' + p.description.substring(p.description.length - maxChars);
                 td.title = p.description;
             } else {
                 td.innerText = p.description;
@@ -729,6 +754,26 @@ class ProjectsView {
             this.openProjects();
             this.shouldOpen = '';
         }
+    }
+
+    calcChars(): number {
+        let sectionWidth = this.tableContainer.clientWidth * 0.35;
+        if (sectionWidth > 350) {
+            sectionWidth = 350;
+        }
+        let canvas = document.createElement('canvas');
+        canvas.style.font = this.tbody.style.font;
+        let context = canvas.getContext('2d');
+        if (!context) {
+            console.log('no context');
+            return 50;
+        }
+        let longString: string = '';
+        for (let i = 0; i < 100; i++) {
+            longString += 'M';
+        }
+        let width = context.measureText(longString).width;
+        return Math.floor(sectionWidth / width * 100) - 5;
     }
 
     dblclicked(tr: HTMLTableRowElement, checkbox: HTMLInputElement): void {

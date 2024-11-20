@@ -91,6 +91,9 @@ class Main {
         Main.electron.ipcRenderer.on('export-xliff-review', () => {
             this.projectsView.exportXLIFF();
         });
+        Main.electron.ipcRenderer.on('edit-project', () => {
+            this.projectsView.editProject();
+        });
         Main.electron.ipcRenderer.on('remove-projects', () => {
             this.projectsView.removeProjects();
         });
@@ -316,8 +319,8 @@ class Main {
         Main.electron.ipcRenderer.on('set-project-glossaries', (event: Electron.IpcRendererEvent, arg: any) => {
             this.setProjectGlossaries(arg);
         });
-        Main.electron.ipcRenderer.on('reload-page', (event: Electron.IpcRendererEvent, arg: any) => {
-            this.reloadPage(arg);
+        Main.electron.ipcRenderer.on('reload-page', (event: Electron.IpcRendererEvent, projectId: string) => {
+            this.reloadPage(projectId);
         });
         Main.electron.ipcRenderer.on('request-statistics', () => {
             this.requestStatistics();
@@ -422,11 +425,10 @@ class Main {
     hasTags(html: string): boolean {
         let container: HTMLDivElement = document.createElement('div');
         container.innerHTML = html;
-        let tags: NodeListOf<Element> = container.querySelectorAll('img');
-        if (tags.length > 0) {
-            for (let i = 0; i < tags.length; i++) {
-                let img: HTMLImageElement = tags[i] as HTMLImageElement;
-                if (img.getAttribute('data-ref') && img.getAttribute('src').endsWith('.svg')) {
+        let images: NodeListOf<HTMLImageElement> = container.querySelectorAll('img');
+        if (images.length > 0) {
+            for (let tag of images) {
+                if (tag.getAttribute('data-ref') && tag.getAttribute('src').endsWith('.svg')) {
                     return true;
                 }
             }
@@ -812,10 +814,9 @@ class Main {
         }
     }
 
-    reloadPage(arg: any): void {
-        let project: string = arg.project;
-        if (Main.translationViews.has(project)) {
-            Main.translationViews.get(project).getSegments();
+    reloadPage(projectId: string): void {
+        if (Main.translationViews.has(projectId)) {
+            Main.translationViews.get(projectId).getSegments();
         }
     }
 
@@ -936,23 +937,23 @@ class Main {
     }
 
     unlockSegments(): void {
-        let selected = Main.tabHolder.getSelected();
-        if (Main.translationViews.has(selected)) {
-            Main.electron.ipcRenderer.send('unlock-all', { project: selected });
+        let projectId: string = Main.tabHolder.getSelected();
+        if (Main.translationViews.has(projectId)) {
+            Main.electron.ipcRenderer.send('unlock-all', projectId);
         }
     }
 
     tagsAnalysis(): void {
-        let selected = Main.tabHolder.getSelected();
-        if (Main.translationViews.has(selected)) {
-            Main.electron.ipcRenderer.send('analyze-tags', { project: selected });
+        let projectId: string = Main.tabHolder.getSelected();
+        if (Main.translationViews.has(projectId)) {
+            Main.electron.ipcRenderer.send('analyze-tags', projectId);
         }
     }
 
     spacesAnalysis(): void {
-        let selected = Main.tabHolder.getSelected();
-        if (Main.translationViews.has(selected)) {
-            Main.electron.ipcRenderer.send('analyze-spaces', { project: selected });
+        let projectId: string = Main.tabHolder.getSelected();
+        if (Main.translationViews.has(projectId)) {
+            Main.electron.ipcRenderer.send('analyze-spaces', projectId);
         }
     }
 

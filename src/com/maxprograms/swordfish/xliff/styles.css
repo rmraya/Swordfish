@@ -1,0 +1,43 @@
+
+* {
+    font-family: Arial,Helvetica,sans-serif;
+}
+body {
+    padding: 20px;
+}
+h1 {
+    font-size: 1.5em;
+    font-weight: lighter;
+}
+table {
+    width:100%;
+    border: 1px solid #aaaaaa;
+    border-collapse: collapse;
+    border-radius: 4px;
+}
+td {
+    border: 1px solid #aaaaaa;
+    text-align:right;
+    padding:4px
+}
+th {
+    font-weight: lighter;
+    background:#2066A3;
+    border: 1px solid #eeeeee;
+    color:white;
+    text-align:center;
+    padding:4px
+}
+.left {
+    text-align:left;
+}
+.total {
+    font-weight: bolder;
+    background: #efefef;
+}
+.center {
+    text-align:center;
+}
+.right {
+    text-align:right;
+}

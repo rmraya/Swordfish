@@ -12,9 +12,12 @@
 
 package com.maxprograms.swordfish.xliff;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.lang.System.Logger;
 import java.lang.System.Logger.Level;
 import java.net.URISyntaxException;
@@ -191,6 +194,44 @@ public class XliffStore {
 			createTables();
 		}
 
+		// check if chars column exists in segments table
+
+		String sql = "PRAGMA table_info(segments);";
+		boolean charsExists = false;
+		try (Statement st = conn.createStatement()) {
+			try (ResultSet rs = st.executeQuery(sql)) {
+				while (rs.next()) {
+					if ("chars".equals(rs.getString(2))) {
+						charsExists = true;
+						break;
+					}
+				}
+			}
+		}
+		if (!charsExists) {
+			sql = "ALTER TABLE segments ADD COLUMN chars INTEGER DEFAULT 0;";
+			try (Statement st = conn.createStatement()) {
+				st.execute(sql);
+			}
+			conn.commit();
+			sql = "UPDATE segments SET chars = ? WHERE sourceText = ?;";
+			try (PreparedStatement prep = conn.prepareStatement(sql)) {
+				sql = "SELECT sourceText FROM segments WHERE type='S';";
+				try (Statement st = conn.createStatement()) {
+					try (ResultSet rs = st.executeQuery(sql)) {
+						while (rs.next()) {
+							String sourceText = rs.getString(1);
+							int chars = sourceText.length() - spaces(sourceText);
+							prep.setInt(1, chars);
+							prep.setString(2, sourceText);
+							prep.execute();
+						}
+					}
+				}
+			}
+			conn.commit();
+		}
+
 		getUnitData = conn.prepareStatement("SELECT data, compressed FROM units WHERE file=? AND unitId=?");
 		getSource = conn.prepareStatement(
 				"SELECT source, sourceText, state, translate FROM segments WHERE file=? AND unitId=? AND segId=?");
@@ -307,7 +348,7 @@ public class XliffStore {
 		insertFile = conn.prepareStatement("INSERT INTO files (id, name) VALUES (?,?)");
 		insertUnit = conn.prepareStatement("INSERT INTO units (file, unitId, data, compressed) VALUES (?,?,?,?)");
 		insertSegmentStmt = conn.prepareStatement(
-				"INSERT INTO segments (file, unitId, segId, type, state, child, translate, tags, space, source, sourceText, target, targetText, words) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)");
+				"INSERT INTO segments (file, unitId, segId, type, state, child, translate, tags, space, source, sourceText, target, targetText, words, chars) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)");
 		insertNoteStmt = conn
 				.prepareStatement("INSERT INTO notes (file, unitId, segId, noteId, note) values (?,?,?,?,?)");
 		recurse(document.getRootElement());
@@ -500,7 +541,18 @@ public class XliffStore {
 		insertSegmentStmt.setString(12, (target != null ? target.toString() : ""));
 		insertSegmentStmt.setString(13, (target != null ? XliffUtils.pureText(target) : ""));
 		insertSegmentStmt.setInt(14, type.equals("S") ? RepetitionAnalysis.wordCount(pureSource, srcLang) : 0);
+		insertSegmentStmt.setInt(15, type.equals("S") ? (pureSource.length() - spaces(pureSource)) : 0);
 		insertSegmentStmt.execute();
+	}
+
+	private int spaces(String text) {
+		int count = 0;
+		for (int i = 0; i < text.length(); i++) {
+			if (Character.isWhitespace(text.charAt(i))) {
+				count++;
+			}
+		}
+		return count;
 	}
 
 	private void insertMatch(String file, String unit, Element match) throws SQLException {
@@ -1964,8 +2016,7 @@ public class XliffStore {
 		}
 	}
 
-	public void exportTerms(String output, String description, String subject)
-			throws SQLException, IOException, ParserConfigurationException {
+	public void exportTerms(String output, String description, String subject) throws SQLException, IOException {
 		Element descrip = null;
 		if (!subject.isBlank()) {
 			descrip = new Element("descrip");
@@ -2856,7 +2907,7 @@ public class XliffStore {
 		}
 	}
 
-	public String generateStatistics()
+	public String generateStatistics(String projectName)
 			throws SQLException, SAXException, IOException, ParserConfigurationException, URISyntaxException {
 		getPreferences();
 		updateXliff();
@@ -2865,15 +2916,17 @@ public class XliffStore {
 		Map<String, JSONObject> map = new HashMap<>();
 		Map<String, Set<String>> filesMap = new HashMap<>();
 
-		String sql = "SELECT file, SUM(words), COUNT(*) FROM segments WHERE type='S' GROUP BY file";
+		String sql = "SELECT file, SUM(words), SUM(chars), COUNT(*) FROM segments WHERE type='S' GROUP BY file";
 		try (ResultSet rs = stmt.executeQuery(sql)) {
 			while (rs.next()) {
 				String fileId = rs.getString(1);
 				JSONObject json = new JSONObject();
 				int words = rs.getInt(2);
-				int segments = rs.getInt(3);
+				int chars = rs.getInt(3);
+				int segments = rs.getInt(4);
 				json.put("file", fileId);
 				json.put("words", words);
+				json.put("chars", chars);
 				json.put("segments", segments);
 				map.put(fileId, json);
 			}
@@ -2897,35 +2950,41 @@ public class XliffStore {
 			}
 		}
 
-		sql = "SELECT file, SUM(words), COUNT(*) FROM segments WHERE type = 'S' AND targettext = '' GROUP BY file";
+		sql = "SELECT file, SUM(words), SUM(chars), COUNT(*) FROM segments WHERE type = 'S' AND targettext = '' GROUP BY file";
 		try (ResultSet rs = stmt.executeQuery(sql)) {
 			while (rs.next()) {
 				String fileId = rs.getString(1);
 				int untranslated = rs.getInt(2);
-				int untranslatedSegments = rs.getInt(3);
+				int untranslatedChars = rs.getInt(3);
+				int untranslatedSegments = rs.getInt(4);
 				map.get(fileId).put("untranslated", untranslated);
+				map.get(fileId).put("untranslatedChars", untranslatedChars);
 				map.get(fileId).put("untranslatedSegments", untranslatedSegments);
 			}
 		}
 
-		sql = "SELECT file, SUM(words), COUNT(*) FROM segments WHERE type = 'S' AND targettext <> '' GROUP BY file";
+		sql = "SELECT file, SUM(words), SUM(chars), COUNT(*) FROM segments WHERE type = 'S' AND targettext <> '' GROUP BY file";
 		try (ResultSet rs = stmt.executeQuery(sql)) {
 			while (rs.next()) {
 				String fileId = rs.getString(1);
 				int translated = rs.getInt(2);
-				int translatedSegments = rs.getInt(3);
+				int translatedChars = rs.getInt(3);
+				int translatedSegments = rs.getInt(4);
 				map.get(fileId).put("translated", translated);
+				map.get(fileId).put("translatedChars", translatedChars);
 				map.get(fileId).put("translatedSegments", translatedSegments);
 			}
 		}
 
-		sql = "SELECT file, SUM(words), COUNT(*) FROM segments WHERE type = 'S' AND state = 'final' GROUP BY file";
+		sql = "SELECT file, SUM(words), SUM(chars), COUNT(*) FROM segments WHERE type = 'S' AND state = 'final' GROUP BY file";
 		try (ResultSet rs = stmt.executeQuery(sql)) {
 			while (rs.next()) {
 				String fileId = rs.getString(1);
 				int confirmed = rs.getInt(2);
-				int confirmedSegments = rs.getInt(3);
+				int confirmedChars = rs.getInt(3);
+				int confirmedSegments = rs.getInt(4);
 				map.get(fileId).put("confirmed", confirmed);
+				map.get(fileId).put("confirmedChars", confirmedChars);
 				map.get(fileId).put("confirmedSegments", confirmedSegments);
 			}
 		}
@@ -3020,13 +3079,15 @@ public class XliffStore {
 			}
 		}
 
-		sql = "SELECT file, SUM(words), COUNT(*) FROM segments WHERE type = 'S' AND translate = 'N' GROUP BY file";
+		sql = "SELECT file, SUM(words), SUM(chars), COUNT(*) FROM segments WHERE type = 'S' AND translate = 'N' GROUP BY file";
 		try (ResultSet rs = stmt.executeQuery(sql)) {
 			while (rs.next()) {
 				String fileId = rs.getString(1);
-				int confirmed = rs.getInt(2);
-				int confirmedSegments = rs.getInt(3);
-				map.get(fileId).put("locked", confirmed);
+				int locked = rs.getInt(2);
+				int lockedChars = rs.getInt(3);
+				int confirmedSegments = rs.getInt(4);
+				map.get(fileId).put("locked", locked);
+				map.get(fileId).put("lockedChars", lockedChars);
 				map.get(fileId).put("lockedSegments", confirmedSegments);
 			}
 		}
@@ -3044,8 +3105,16 @@ public class XliffStore {
 				json.put("translated", 0);
 				map.put(key, json);
 			}
+			if (!json.has("translatedChars")) {
+				json.put("translatedChars", 0);
+				map.put(key, json);
+			}
 			if (!json.has("confirmed")) {
 				json.put("confirmed", 0);
+				map.put(key, json);
+			}
+			if (!json.has("confirmedChars")) {
+				json.put("confirmedChars", 0);
 				map.put(key, json);
 			}
 			if (!json.has("translatedSegments")) {
@@ -3056,6 +3125,10 @@ public class XliffStore {
 				json.put("untranslatedSegments", 0);
 				map.put(key, json);
 			}
+			if (!json.has("untranslatedChars")) {
+				json.put("untranslatedChars", 0);
+				map.put(key, json);
+			}
 			if (!json.has("confirmedSegments")) {
 				json.put("confirmedSegments", 0);
 				map.put(key, json);
@@ -3064,10 +3137,31 @@ public class XliffStore {
 				json.put("locked", 0);
 				map.put(key, json);
 			}
+			if (!json.has("lockedChars")) {
+				json.put("lockedChars", 0);
+				map.put(key, json);
+			}
 			if (!json.has("lockedSegments")) {
 				json.put("lockedSegments", 0);
 				map.put(key, json);
 			}
+		}
+
+		String css = "";
+		try (InputStream is = XliffStore.class.getResourceAsStream("styles.css")) {
+			StringBuffer sb = new StringBuffer();
+			try (InputStreamReader reader = new InputStreamReader(is, StandardCharsets.UTF_8)) {
+				try (BufferedReader br = new BufferedReader(reader)) {
+					String line;
+					while ((line = br.readLine()) != null) {
+						if (!sb.isEmpty()) {
+							sb.append("\n");
+						}
+						sb.append(line);
+					}
+				}
+			}
+			css = sb.toString();
 		}
 
 		File log = new File(file.getAbsolutePath() + ".log.html");
@@ -3079,49 +3173,12 @@ public class XliffStore {
 			writeString(out, "  <meta http-equiv=\"Content-Type\" content=\"text/html; charset=utf-8\" />\n");
 			writeString(out, "  <title>Project Statistics</title>\n");
 			writeString(out, "  <style type=\"text/css\">\n");
-			writeString(out, "   * {\n");
-			writeString(out, "       font-family: Arial,Helvetica,sans-serif;\n");
-			writeString(out, "   }\n");
-			writeString(out, "   body {\n");
-			writeString(out, "       padding: 20px;\n");
-			writeString(out, "   }\n");
-			writeString(out, "   table {\n");
-			writeString(out, "       width:100%;\n");
-			writeString(out, "       border: 1px solid #aaaaaa;\n");
-			writeString(out, "       border-collapse: collapse;\n");
-			writeString(out, "       border-radius: 4px;\n");
-			writeString(out, "   }\n");
-			writeString(out, "   td {\n");
-			writeString(out, "       border: 1px solid #aaaaaa;\n");
-			writeString(out, "       text-align:right;\n");
-			writeString(out, "       padding:4px\n");
-			writeString(out, "   }\n");
-			writeString(out, "   th {\n");
-			writeString(out, "       font-weight: lighter;\n");
-			writeString(out, "       background:#2066A3;\n");
-			writeString(out, "       border: 1px solid #eeeeee;\n");
-			writeString(out, "       color:white;\n");
-			writeString(out, "       text-align:center;\n");
-			writeString(out, "       padding:4px\n");
-			writeString(out, "   }\n");
-			writeString(out, "   .left {\n");
-			writeString(out, "       text-align:left;\n");
-			writeString(out, "   }\n");
-			writeString(out, "   .total {\n");
-			writeString(out, "       font-weight: bolder;\n");
-			writeString(out, "       background: #efefef;\n");
-			writeString(out, "   }\n");
-			writeString(out, "   .center {\n");
-			writeString(out, "       text-align:center;\n");
-			writeString(out, "   }\n");
-			writeString(out, "   .right {\n");
-			writeString(out, "       text-align:right;\n");
-			writeString(out, "   }\n");
+			writeString(out, css);
 			writeString(out, "  </style>\n");
 			writeString(out, "</head>\n");
 			writeString(out, "<body>\n");
 
-			writeString(out, "<h2>" + XMLUtils.cleanText(file.getName()) + "</h2>\n");
+			writeString(out, "<h1>" + XMLUtils.cleanText(projectName) + "</h1>\n");
 
 			Set<String> files = new TreeSet<>();
 			files.addAll(filesMap.keySet());
@@ -3144,7 +3201,7 @@ public class XliffStore {
 			writeString(out, "<table>\n");
 			writeString(out, "<tr><th>#</th><th>" + Messages.getString("XliffStore.8") + "</th><th>"
 					+ Messages.getString("XliffStore.9")
-					+ "</th><th>100%</th><th>95%&nbsp;-&nbsp;99%</th><th>85%&nbsp;-&nbsp;95%</th><th>75%&nbsp;-&nbsp;84%</th><th>50%&nbsp;-&nbsp;84%</th><th>"
+					+ "</th><th>100%</th><th>95%&nbsp;-&nbsp;99%</th><th>85%&nbsp;-&nbsp;94%</th><th>75%&nbsp;-&nbsp;84%</th><th>50%&nbsp;-&nbsp;74%</th><th>"
 					+ Messages.getString("XliffStore.10") + "</th><th>" + Messages.getString("XliffStore.11")
 					+ "</th><th>" + Messages.getString("XliffStore.12") + "</th></tr>\n");
 			while (it.hasNext()) {
@@ -3229,7 +3286,7 @@ public class XliffStore {
 			writeString(out, "<table>\n");
 			writeString(out, "<tr><th>#</th><th>" + Messages.getString("XliffStore.8") + "</th><th>"
 					+ Messages.getString("XliffStore.9")
-					+ "</th><th>100%</th><th>95%&nbsp;-&nbsp;99%</th><th>85%&nbsp;-&nbsp;95%</th><th>75%&nbsp;-&nbsp;84%</th><th>50%&nbsp;-&nbsp;84%</th><th>"
+					+ "</th><th>100%</th><th>95%&nbsp;-&nbsp;99%</th><th>85%&nbsp;-&nbsp;94%</th><th>75%&nbsp;-&nbsp;84%</th><th>50%&nbsp;-&nbsp;74%</th><th>"
 					+ "Int.&nbsp;Rep." + "</th><th>" + Messages.getString("XliffStore.16") + "</th><th>"
 					+ Messages.getString("XliffStore.17") + "</th><th>" + Messages.getString("XliffStore.12")
 					+ "</th></tr>\n");
@@ -3411,6 +3468,63 @@ public class XliffStore {
 				writeString(out, "<td class='total'>" + fileWords + "</td>");
 				writeString(out, "</tr>\n");
 				projectWords += fileWords;
+				projectTranslated += fileTranslated;
+				projectUntranslated += fileUntranslated;
+				projectConfirmed += fileConfirmed;
+			}
+			writeString(out, "<tr>");
+			writeString(out, "<td class='total'>&nbsp;</td>");
+			writeString(out, "<td class='center total'>Total</td>");
+			writeString(out, "<td class='total'>" + projectUntranslated + "</td>");
+			writeString(out, "<td class='total'>" + projectTranslated + "</td>");
+			writeString(out, "<td class='total'>" + (projectWords - projectConfirmed) + "</td>");
+			writeString(out, "<td class='total'>" + projectConfirmed + "</td>");
+			writeString(out, "<td class='total'>" + projectWords + "</td>");
+			writeString(out, "</tr>\n");
+			writeString(out, "</table>\n");
+
+			writeString(out, "<h3>" + Messages.getString("XliffStore.46") + "</h3>\n");
+
+			count = 1;
+			projectWords = 0;
+			projectTranslated = 0;
+			projectUntranslated = 0;
+			projectConfirmed = 0;
+
+			writeString(out, "<table>\n");
+			writeString(out,
+					"<tr><th>#</th><th>" + Messages.getString("XliffStore.8") + "</th><th>"
+							+ Messages.getString("XliffStore.25") + "</th><th>" + Messages.getString("XliffStore.26")
+							+ "</th><th>" + Messages.getString("XliffStore.27") + "</th><th>"
+							+ Messages.getString("XliffStore.28") + "</th><th>" + Messages.getString("XliffStore.12")
+							+ "</th></tr>\n");
+			it = files.iterator();
+			while (it.hasNext()) {
+				String fileName = it.next();
+				Set<String> set = filesMap.get(fileName);
+				Iterator<String> st = set.iterator();
+				int fileChars = 0;
+				int fileUntranslated = 0;
+				int fileTranslated = 0;
+				int fileConfirmed = 0;
+				while (st.hasNext()) {
+					String key = st.next();
+					JSONObject json = map.get(key);
+					fileChars += json.getInt("chars");
+					fileTranslated += json.getInt("translatedChars");
+					fileUntranslated += json.getInt("untranslatedChars");
+					fileConfirmed += json.getInt("confirmedChars");
+				}
+				writeString(out, "<tr>");
+				writeString(out, "<td class='center'>" + count++ + "</td>");
+				writeString(out, "<td class='left'>" + XMLUtils.cleanText(fileName) + "</td>");
+				writeString(out, "<td>" + fileUntranslated + "</td>");
+				writeString(out, "<td>" + fileTranslated + "</td>");
+				writeString(out, "<td>" + (fileChars - fileConfirmed) + "</td>");
+				writeString(out, "<td>" + fileConfirmed + "</td>");
+				writeString(out, "<td class='total'>" + fileChars + "</td>");
+				writeString(out, "</tr>\n");
+				projectWords += fileChars;
 				projectTranslated += fileTranslated;
 				projectUntranslated += fileUntranslated;
 				projectConfirmed += fileConfirmed;
@@ -4625,6 +4739,17 @@ public class XliffStore {
 			Element target = XliffUtils.buildElement(translation.getString("target"));
 			String origin = translation.getString("origin");
 			insertMatch(file, unit, segment, origin, Constants.MT, 0, source, target, new JSONObject());
+		}
+	}
+
+	public void updateProject(JSONObject json) throws SAXException, IOException, ParserConfigurationException {
+		if (!srcLang.equals(json.getString("srcLang")) || !tgtLang.equals(json.getString("tgtLang"))) {
+			srcLang = json.getString("srcLang");
+			tgtLang = json.getString("tgtLang");
+			document = builder.build(xliffFile);
+			document.getRootElement().setAttribute("srcLang", srcLang);
+			document.getRootElement().setAttribute("trgLang", tgtLang);
+			saveXliff();
 		}
 	}
 }

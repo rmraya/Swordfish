@@ -104,6 +104,8 @@ public class ProjectsHandler implements HttpHandler {
 		try {
 			if ("/projects/create".equals(url)) {
 				response = createProject(request);
+			} else if ("/projects/update".equals(url)) {
+				response = updateProject(request);
 			} else if ("/projects/list".equals(url)) {
 				response = listProjects();
 			} else if ("/projects/get".equals(url)) {
@@ -815,6 +817,40 @@ public class ProjectsHandler implements HttpHandler {
 		return result;
 	}
 
+	private JSONObject updateProject(String request) {
+		JSONObject result = new JSONObject();
+		JSONObject json = new JSONObject(request);
+		String projectId = json.getString("project");
+		if (!projectStores.containsKey(projectId)) {
+			try {
+				Map<String, Project> projects = getProjects();
+				Project prj = projects.get(projectId);
+				XliffStore store = new XliffStore(prj.getXliff(), prj.getSourceLang().getCode(),
+						prj.getTargetLang().getCode());
+				projectStores.put(projectId, store);
+			} catch (SAXException | IOException | ParserConfigurationException | URISyntaxException | SQLException e) {
+				logger.log(Level.ERROR, Messages.getString("ProjectsHandler.3"), e);
+				result.put(Constants.REASON, e.getMessage());
+				return result;
+			}
+		}
+		try {
+			projectStores.get(json.getString("project")).updateProject(json);
+			Map<String, Project> projects = getProjects();
+			Project project = projects.get(json.getString("project"));
+			project.setDescription(json.getString("description"));
+			project.setSourceLang(LanguageUtils.getLanguage(json.getString("srcLang")));
+			project.setTargetLang(LanguageUtils.getLanguage(json.getString("tgtLang")));
+			project.setClient(json.getString("client"));
+			project.setSubject(json.getString("subject"));
+			saveProjectsList(projects);
+		} catch (IOException | SAXException | ParserConfigurationException e) {
+			logger.log(Level.ERROR, e);
+			result.put(Constants.REASON, e.getMessage());
+		}
+		return result;
+	}
+
 	private JSONObject createProject(String request) {
 		JSONObject result = new JSONObject();
 		JSONObject json = new JSONObject(request);
@@ -1486,9 +1522,9 @@ public class ProjectsHandler implements HttpHandler {
 		try {
 			JSONObject json = new JSONObject(request);
 			String project = json.getString("project");
+			Map<String, Project> projects = getProjects();
 			if (!projectStores.containsKey(project)) {
 				try {
-					Map<String, Project> projects = getProjects();
 					Project prj = projects.get(project);
 					XliffStore store = new XliffStore(prj.getXliff(), prj.getSourceLang().getCode(),
 							prj.getTargetLang().getCode());
@@ -1500,7 +1536,7 @@ public class ProjectsHandler implements HttpHandler {
 					return result;
 				}
 			}
-			String analysis = projectStores.get(project).generateStatistics();
+			String analysis = projectStores.get(project).generateStatistics(projects.get(project).getDescription());
 			result.put("analysis", analysis);
 		} catch (SQLException | JSONException | SAXException | IOException | ParserConfigurationException
 				| URISyntaxException e) {

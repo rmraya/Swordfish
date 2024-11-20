@@ -29,11 +29,11 @@ export class Swordfish {
     static importTmxWindow: BrowserWindow;
     static importXliffWindow: BrowserWindow;
     static addProjectWindow: BrowserWindow;
+    static editProjectWindow: BrowserWindow;
     static addFileWindow: BrowserWindow;
     static defaultLangsWindow: BrowserWindow;
     static spellingLangsWindow: BrowserWindow;
     static filterSegmentsWindow: BrowserWindow;
-    static messagesWindow: BrowserWindow;
     static tagsWindow: BrowserWindow;
     static replaceTextWindow: BrowserWindow;
     static addGlossaryWindow: BrowserWindow;
@@ -136,6 +136,7 @@ export class Swordfish {
     static typeParam: string;
     static xmlFilter: string;
     static filterElement: any;
+    static editedProject: Project;
     static activeProject: string;
 
     static htmlContent: string;
@@ -243,7 +244,10 @@ export class Swordfish {
             Swordfish.addFile();
         });
         ipcMain.on('show-add-project', () => {
-            Swordfish.addProject();
+            Swordfish.showAddProject();
+        });
+        ipcMain.on('show-edit-project', (event: IpcMainEvent, project: Project) => {
+            Swordfish.showEditProject(project);
         });
         ipcMain.on('export-translations', (event: IpcMainEvent, arg: any) => {
             Swordfish.exportProjectTranslations(arg);
@@ -290,6 +294,9 @@ export class Swordfish {
         ipcMain.on('close-addProject', () => {
             Swordfish.destroyWindow(Swordfish.addProjectWindow);
         });
+        ipcMain.on('close-editProject', () => {
+            Swordfish.destroyWindow(Swordfish.editProjectWindow);
+        });
         ipcMain.on('close-addFile', () => {
             Swordfish.destroyWindow(Swordfish.addFileWindow);
         });
@@ -335,6 +342,12 @@ export class Swordfish {
         });
         ipcMain.on('get-source-files', (event: IpcMainEvent) => {
             Swordfish.getSelectedFiles(event);
+        });
+        ipcMain.on('get-project-data', (event: IpcMainEvent) => {
+            event.sender.send('project-data', Swordfish.editedProject);
+        });
+        ipcMain.on('update-project', (event: IpcMainEvent, arg: any) => {
+            Swordfish.updateProject(arg);
         });
         ipcMain.on('create-project', (event: IpcMainEvent, arg: any) => {
             Swordfish.createProject(arg);
@@ -630,9 +643,6 @@ export class Swordfish {
         ipcMain.on('filter-options', (event: IpcMainEvent, arg: any) => {
             Swordfish.filterOptions(arg);
         });
-        ipcMain.on('close-messages', () => {
-            Swordfish.destroyWindow(Swordfish.messagesWindow);
-        });
         ipcMain.on('export-xliff-review', (event: IpcMainEvent, arg: any) => {
             Swordfish.exportXLIFF(arg);
         });
@@ -717,17 +727,17 @@ export class Swordfish {
         ipcMain.on('lock-duplicates', (event: IpcMainEvent, arg: any) => {
             Swordfish.lockDuplicates(arg);
         });
-        ipcMain.on('unlock-all', (event: IpcMainEvent, arg: any) => {
-            Swordfish.unlockAll(arg);
+        ipcMain.on('unlock-all', (event: IpcMainEvent, projectId: string) => {
+            Swordfish.unlockAll(projectId);
         });
         ipcMain.on('get-zoom', () => {
             Swordfish.mainWindow.webContents.send('set-zoom', { zoom: Swordfish.currentPreferences.zoomFactor });
         });
-        ipcMain.on('analyze-spaces', (event: IpcMainEvent, arg: any) => {
-            Swordfish.analyzeSpaces(arg);
+        ipcMain.on('analyze-spaces', (event: IpcMainEvent, projectId: string) => {
+            Swordfish.analyzeSpaces(projectId);
         });
-        ipcMain.on('analyze-tags', (event: IpcMainEvent, arg: any) => {
-            Swordfish.analyzeTags(arg);
+        ipcMain.on('analyze-tags', (event: IpcMainEvent, projectId: string) => {
+            Swordfish.analyzeTags(projectId);
         });
         ipcMain.on('export-project-html', (event: IpcMainEvent, arg: any) => {
             Swordfish.exportHTML(arg);
@@ -855,12 +865,10 @@ export class Swordfish {
     } // end constructor
 
     static createWindow(): void {
-
         if (Swordfish.currentDefaults === undefined) {
             let size: Size = screen.getPrimaryDisplay().workAreaSize;
-            Swordfish.currentDefaults = { width: Math.round(size.width * 0.9), height: Math.round(size.height * 0.9), x: 0, y: 0 };
+            Swordfish.currentDefaults = { width: Math.round(size.width * 0.95), height: Math.round(size.height * 0.95), x: 0, y: 0 };
         }
-
         this.mainWindow = new BrowserWindow({
             title: app.name,
             width: this.currentDefaults.width,
@@ -874,7 +882,6 @@ export class Swordfish {
             show: false,
             icon: this.iconPath
         });
-
         this.mainWindow.webContents.on('context-menu', (event: Electron.Event, params: any) => {
             const menu = new Menu();
             // Add each spelling suggestion
@@ -979,7 +986,8 @@ export class Swordfish {
             viewMenu.append(new MenuItem({ label: 'Open Development Tools', accelerator: 'F12', click: () => { Swordfish.mainWindow.webContents.openDevTools() } }));
         }
         let projectsMenu: Menu = Menu.buildFromTemplate([
-            { label: 'New Project', accelerator: 'CmdOrCtrl+N', click: () => { Swordfish.addProject(); } },
+            { label: 'New Project', accelerator: 'CmdOrCtrl+N', click: () => { Swordfish.showAddProject(); } },
+            { label: 'Edit Project', click: () => { Swordfish.editProject(); } },
             { label: 'Translate Projects', click: () => { Swordfish.translateProjects(); } },
             { label: 'Export Translations', accelerator: 'CmdOrCtrl+Alt+S', click: () => { Swordfish.mainWindow.webContents.send('export-translations'); } },
             { label: 'Export Translations as TMX File', click: () => { Swordfish.mainWindow.webContents.send('export-translations-tmx'); } },
@@ -1197,6 +1205,9 @@ export class Swordfish {
         if ('addProject' === arg.window) {
             Swordfish.addProjectWindow.setContentSize(arg.width, arg.height, true);
         }
+        if ('editProject' === arg.window) {
+            Swordfish.editProjectWindow.setContentSize(arg.width, arg.height, true);
+        }
         if ('addFile' === arg.window) {
             Swordfish.addFileWindow.setContentSize(arg.width, arg.height, true);
         }
@@ -1250,9 +1261,6 @@ export class Swordfish {
         }
         if ('filterSegments' === arg.window) {
             Swordfish.filterSegmentsWindow.setContentSize(arg.width, arg.height, true);
-        }
-        if ('messages' === arg.window) {
-            Swordfish.messagesWindow.setContentSize(arg.width, arg.height, true);
         }
         if ('importXliff' === arg.window) {
             Swordfish.importXliffWindow.setContentSize(arg.width, arg.height, true);
@@ -1382,7 +1390,8 @@ export class Swordfish {
     static showSortSegments(params: any): void {
         this.sortSegmentsWindow = new BrowserWindow({
             parent: this.mainWindow,
-            width: 400,
+            width: 420,
+            height: 305,
             minimizable: false,
             maximizable: false,
             resizable: false,
@@ -1441,7 +1450,11 @@ export class Swordfish {
         Swordfish.mainWindow.webContents.send('close-tab');
     }
 
-    static addProject(): void {
+    static editProject(): void {
+        Swordfish.mainWindow.webContents.send('edit-project');
+    }
+
+    static showAddProject(): void {
         this.addProjectWindow = new BrowserWindow({
             parent: this.mainWindow,
             width: 920,
@@ -1464,8 +1477,34 @@ export class Swordfish {
         this.addProjectWindow.on('close', () => {
             this.mainWindow.focus();
         });
-
         Swordfish.setLocation(this.addProjectWindow, 'addProject.html');
+    }
+
+    static showEditProject(project: Project): void {
+        Swordfish.editedProject = project;
+        this.editProjectWindow = new BrowserWindow({
+            parent: this.mainWindow,
+            width: 920,
+            height: 240,
+            minimizable: false,
+            maximizable: false,
+            resizable: false,
+            show: false,
+            icon: this.iconPath,
+            webPreferences: {
+                nodeIntegration: true,
+                contextIsolation: false
+            }
+        });
+        this.editProjectWindow.setMenu(null);
+        this.editProjectWindow.loadURL('file://' + this.path.join(app.getAppPath(), 'html', 'editProject.html'));
+        this.editProjectWindow.once('ready-to-show', () => {
+            this.editProjectWindow.show();
+        });
+        this.editProjectWindow.on('close', () => {
+            this.mainWindow.focus();
+        });
+        Swordfish.setLocation(this.editProjectWindow, 'editProject.html');
     }
 
     static exportOpenProject(arg: any): void {
@@ -1631,7 +1670,8 @@ export class Swordfish {
                 Swordfish.selectedFiles = value.filePaths;
                 this.addFileWindow = new BrowserWindow({
                     parent: this.mainWindow,
-                    width: 900,
+                    width: 890,
+                    height: 360,
                     minimizable: false,
                     maximizable: false,
                     resizable: false,
@@ -1668,6 +1708,22 @@ export class Swordfish {
 
     static translateProjects(): void {
         Swordfish.mainWindow.webContents.send('translate-projects');
+    }
+
+    static updateProject(data: any) {
+        Swordfish.sendRequest('/projects/update', data,
+            (data: any) => {
+                if (data.status === Swordfish.SUCCESS) {
+                    Swordfish.mainWindow.webContents.send('request-projects', {});
+                    Swordfish.destroyWindow(Swordfish.editProjectWindow);
+                } else {
+                    Swordfish.showMessage({ type: 'error', message: data.reason });
+                }
+            },
+            (reason: string) => {
+                Swordfish.showMessage({ type: 'error', message: reason });
+            }
+        );
     }
 
     static createProject(arg: any): void {
@@ -1882,7 +1938,8 @@ export class Swordfish {
     static showServerSettings(type: string): void {
         this.serverSettingsWindow = new BrowserWindow({
             parent: this.mainWindow,
-            width: 450,
+            width: 440,
+            height: 240,
             minimizable: false,
             maximizable: false,
             resizable: false,
@@ -1908,7 +1965,8 @@ export class Swordfish {
     static showBrowseDatabases() {
         this.browseDatabasesWindow = new BrowserWindow({
             parent: this.mainWindow,
-            width: 650,
+            width: 635,
+            height: 355,
             minimizable: false,
             maximizable: false,
             resizable: false,
@@ -1975,7 +2033,8 @@ export class Swordfish {
     static showAddMemory(): void {
         this.addMemoryWindow = new BrowserWindow({
             parent: this.mainWindow,
-            width: 450,
+            width: 435,
+            height: 290,
             minimizable: false,
             maximizable: false,
             resizable: false,
@@ -2500,6 +2559,7 @@ export class Swordfish {
         this.defaultLangsWindow = new BrowserWindow({
             parent: this.mainWindow,
             width: 600,
+            height: 190,
             minimizable: false,
             maximizable: false,
             resizable: false,
@@ -2629,6 +2689,7 @@ export class Swordfish {
         this.importTmxWindow = new BrowserWindow({
             parent: this.mainWindow,
             width: 600,
+            height: 290,
             minimizable: false,
             maximizable: false,
             resizable: false,
@@ -2655,6 +2716,7 @@ export class Swordfish {
         this.importGlossaryWindow = new BrowserWindow({
             parent: this.mainWindow,
             width: 600,
+            height: 290,
             minimizable: false,
             maximizable: false,
             resizable: false,
@@ -3195,7 +3257,7 @@ export class Swordfish {
                             Swordfish.mainWindow.webContents.send('end-waiting');
                             Swordfish.mainWindow.webContents.send('set-status', '');
                             clearInterval(intervalObject);
-                            Swordfish.mainWindow.webContents.send('reload-page', { project: arg.project });
+                            Swordfish.mainWindow.webContents.send('reload-page', arg.project);
                             Swordfish.showMessage({ type: 'info', message: 'Added translations to ' + Swordfish.currentStatus.translated + ' segments' });
                             return;
                         } else if (Swordfish.currentStatus.progress === Swordfish.PROCESSING) {
@@ -3406,29 +3468,11 @@ export class Swordfish {
                 default: parent = Swordfish.mainWindow;
             }
         }
-        Swordfish.messagesWindow = new BrowserWindow({
-            parent: parent,
-            width: 570,
-            height: 180,
-            minimizable: false,
-            maximizable: false,
-            resizable: false,
-            modal: true,
-            show: false,
+        dialog.showMessageBox(parent, {
             icon: this.iconPath,
-            webPreferences: {
-                nodeIntegration: true,
-                contextIsolation: false
-            }
-        });
-        Swordfish.messageParam = arg;
-        Swordfish.messagesWindow.setMenu(null);
-        Swordfish.messagesWindow.loadURL('file://' + this.path.join(app.getAppPath(), 'html', 'messages.html'));
-        Swordfish.messagesWindow.once('ready-to-show', () => {
-            Swordfish.messagesWindow.show();
-        });
-        Swordfish.messagesWindow.on('close', () => {
-            parent.focus();
+            type: arg.type,
+            message: arg.message,
+            buttons: ['OK']
         });
     }
 
@@ -3647,7 +3691,8 @@ export class Swordfish {
     static showAddGlossary(): void {
         this.addGlossaryWindow = new BrowserWindow({
             parent: this.mainWindow,
-            width: 450,
+            width: 435,
+            height: 290,
             minimizable: false,
             maximizable: false,
             resizable: false,
@@ -3769,6 +3814,7 @@ export class Swordfish {
             this.addFileWindow = new BrowserWindow({
                 parent: this.mainWindow,
                 width: 900,
+                height: 355,
                 minimizable: false,
                 maximizable: false,
                 resizable: false,
@@ -3803,7 +3849,7 @@ export class Swordfish {
                 }
             });
             Swordfish.selectedFiles = filesList;
-            Swordfish.addProject();
+            Swordfish.showAddProject();
         }
     }
 
@@ -3851,7 +3897,7 @@ export class Swordfish {
                             Swordfish.showMessage({ type: 'error', message: data.reason });
                             return;
                         }
-                        Swordfish.mainWindow.webContents.send('reload-page', { project: arg.project });
+                        Swordfish.mainWindow.webContents.send('reload-page', arg.project);
                         Swordfish.mainWindow.webContents.send('set-statistics', { project: arg.project, statistics: data.statistics });
                     },
                     (reason: string) => {
@@ -3881,7 +3927,7 @@ export class Swordfish {
                             Swordfish.showMessage({ type: 'error', message: data.reason });
                             return;
                         }
-                        Swordfish.mainWindow.webContents.send('reload-page', { project: arg.project });
+                        Swordfish.mainWindow.webContents.send('reload-page', arg.project);
                     },
                     (reason: string) => {
                         Swordfish.mainWindow.webContents.send('end-waiting');
@@ -3910,7 +3956,7 @@ export class Swordfish {
                             Swordfish.showMessage({ type: 'error', message: data.reason });
                             return;
                         }
-                        Swordfish.mainWindow.webContents.send('reload-page', { project: arg.project });
+                        Swordfish.mainWindow.webContents.send('reload-page', arg.project);
                     },
                     (reason: string) => {
                         Swordfish.mainWindow.webContents.send('end-waiting');
@@ -3939,7 +3985,7 @@ export class Swordfish {
                             Swordfish.showMessage({ type: 'error', message: data.reason });
                             return;
                         }
-                        Swordfish.mainWindow.webContents.send('reload-page', { project: arg.project });
+                        Swordfish.mainWindow.webContents.send('reload-page', arg.project);
                     },
                     (reason: string) => {
                         Swordfish.mainWindow.webContents.send('end-waiting');
@@ -3968,7 +4014,7 @@ export class Swordfish {
                             Swordfish.showMessage({ type: 'error', message: data.reason });
                             return;
                         }
-                        Swordfish.mainWindow.webContents.send('reload-page', { project: arg.project });
+                        Swordfish.mainWindow.webContents.send('reload-page', arg.project);
                         Swordfish.mainWindow.webContents.send('set-statistics', { project: arg.project, statistics: data.statistics });
                     },
                     (reason: string) => {
@@ -3998,7 +4044,7 @@ export class Swordfish {
                             Swordfish.showMessage({ type: 'error', message: data.reason });
                             return;
                         }
-                        Swordfish.mainWindow.webContents.send('reload-page', { project: arg.project });
+                        Swordfish.mainWindow.webContents.send('reload-page', arg.project);
                         Swordfish.mainWindow.webContents.send('set-statistics', { project: arg.project, statistics: data.statistics });
                     },
                     (reason: string) => {
@@ -4028,7 +4074,7 @@ export class Swordfish {
                             Swordfish.showMessage({ type: 'error', message: data.reason });
                             return;
                         }
-                        Swordfish.mainWindow.webContents.send('reload-page', { project: arg.project });
+                        Swordfish.mainWindow.webContents.send('reload-page', arg.project);
                         Swordfish.mainWindow.webContents.send('set-statistics', { project: arg.project, statistics: data.statistics });
                     },
                     (reason: string) => {
@@ -4066,7 +4112,7 @@ export class Swordfish {
                                     Swordfish.mainWindow.webContents.send('end-waiting');
                                     Swordfish.mainWindow.webContents.send('set-status', '');
                                     clearInterval(intervalObject);
-                                    Swordfish.mainWindow.webContents.send('reload-page', { project: arg.project });
+                                    Swordfish.mainWindow.webContents.send('reload-page', arg.project);
                                     Swordfish.mainWindow.webContents.send('set-statistics', { project: arg.project, statistics: data.statistics });
                                     return;
                                 } else if (Swordfish.currentStatus.progress === Swordfish.PROCESSING) {
@@ -4115,7 +4161,7 @@ export class Swordfish {
                             Swordfish.showMessage({ type: 'error', message: data.reason });
                             return;
                         }
-                        Swordfish.mainWindow.webContents.send('reload-page', { project: arg.project });
+                        Swordfish.mainWindow.webContents.send('reload-page', arg.project);
                         Swordfish.mainWindow.webContents.send('set-statistics', { project: arg.project, statistics: data.statistics });
                     },
                     (reason: string) => {
@@ -4185,7 +4231,8 @@ export class Swordfish {
     static showGoToWindow(): void {
         this.goToWindow = new BrowserWindow({
             parent: this.mainWindow,
-            width: 260,
+            width: 250,
+            height: 150,
             minimizable: false,
             maximizable: false,
             resizable: false,
@@ -4217,6 +4264,7 @@ export class Swordfish {
         this.replaceTextWindow = new BrowserWindow({
             parent: this.mainWindow,
             width: 450,
+            height: 265,
             minimizable: false,
             maximizable: false,
             resizable: false,
@@ -4251,7 +4299,7 @@ export class Swordfish {
                     return;
                 }
                 Swordfish.destroyWindow(Swordfish.replaceTextWindow);
-                Swordfish.mainWindow.webContents.send('reload-page', { project: arg.project });
+                Swordfish.mainWindow.webContents.send('reload-page', arg.project);
                 Swordfish.mainWindow.webContents.send('set-statistics', { project: arg.project, statistics: data.statistics });
             },
             (reason: string) => {
@@ -4286,7 +4334,7 @@ export class Swordfish {
                                     Swordfish.mainWindow.webContents.send('end-waiting');
                                     Swordfish.mainWindow.webContents.send('set-status', '');
                                     clearInterval(intervalObject);
-                                    Swordfish.mainWindow.webContents.send('reload-page', { project: arg.project });
+                                    Swordfish.mainWindow.webContents.send('reload-page', arg.project);
                                     return;
                                 } else if (Swordfish.currentStatus.progress === Swordfish.PROCESSING) {
                                     // it's OK, keep waiting
@@ -4353,7 +4401,7 @@ export class Swordfish {
                                         unlinkSync(exportedFile);
                                         Swordfish.mainWindow.webContents.send('end-waiting');
                                         Swordfish.mainWindow.webContents.send('set-status', '');
-                                        Swordfish.mainWindow.webContents.send('reload-page', { project: arg.project });
+                                        Swordfish.mainWindow.webContents.send('reload-page', arg.project);
                                     } catch (e) {
                                         Swordfish.mainWindow.webContents.send('end-waiting');
                                         Swordfish.mainWindow.webContents.send('set-status', '');
@@ -4430,7 +4478,7 @@ export class Swordfish {
                             Swordfish.showMessage({ type: 'error', message: data.reason });
                             return;
                         }
-                        Swordfish.mainWindow.webContents.send('reload-page', { project: arg.project });
+                        Swordfish.mainWindow.webContents.send('reload-page', arg.project);
                         Swordfish.mainWindow.webContents.send('set-statistics', { project: arg.project, statistics: data.statistics });
                     },
                     (reason: string) => {
@@ -4583,6 +4631,7 @@ export class Swordfish {
         this.termSearchWindow = new BrowserWindow({
             parent: this.mainWindow,
             width: 500,
+            height: 280,
             minimizable: false,
             maximizable: false,
             resizable: false,
@@ -4733,7 +4782,7 @@ export class Swordfish {
                                     Swordfish.mainWindow.webContents.send('set-status', '');
                                     clearInterval(intervalObject);
                                     if (Swordfish.currentStatus.segments > 0) {
-                                        Swordfish.mainWindow.webContents.send('reload-page', { project: arg.project });
+                                        Swordfish.mainWindow.webContents.send('reload-page', arg.project);
                                         Swordfish.showMessage({ type: 'info', message: 'Added terms to ' + Swordfish.currentStatus.segments + ' segments' });
                                         return;
                                     }
@@ -4786,7 +4835,7 @@ export class Swordfish {
                     Swordfish.showMessage({ type: 'error', message: data.reason });
                     return;
                 }
-                Swordfish.mainWindow.webContents.send('reload-page', { project: arg.project });
+                Swordfish.mainWindow.webContents.send('reload-page', arg.project);
             },
             (reason: string) => {
                 Swordfish.showMessage({ type: 'error', message: reason });
@@ -4794,14 +4843,14 @@ export class Swordfish {
         );
     }
 
-    static unlockAll(arg: any) {
-        Swordfish.sendRequest('/projects/unlockAll', arg,
+    static unlockAll(projectId: string) {
+        Swordfish.sendRequest('/projects/unlockAll', projectId,
             (data: any) => {
                 if (data.status !== Swordfish.SUCCESS) {
                     Swordfish.showMessage({ type: 'error', message: data.reason });
                     return;
                 }
-                Swordfish.mainWindow.webContents.send('reload-page', { project: arg.project });
+                Swordfish.mainWindow.webContents.send('reload-page', projectId);
             },
             (reason: string) => {
                 Swordfish.showMessage({ type: 'error', message: reason });
@@ -4809,11 +4858,12 @@ export class Swordfish {
         );
     }
 
-    static analyzeSpaces(arg: any): void {
-        Swordfish.activeProject = arg.project;
+    static analyzeSpaces(projectId: string): void {
+        Swordfish.activeProject = projectId;
         Swordfish.spaceAnalysisWindow = new BrowserWindow({
             parent: this.mainWindow,
             width: 400,
+            height: 350,
             minimizable: false,
             maximizable: false,
             resizable: false,
@@ -4835,11 +4885,12 @@ export class Swordfish {
         Swordfish.setLocation(Swordfish.spaceAnalysisWindow, 'spaceAnalysis.html');
     }
 
-    static analyzeTags(arg: any): void {
-        Swordfish.activeProject = arg.project;
+    static analyzeTags(projectId: string): void {
+        Swordfish.activeProject = projectId;
         Swordfish.tagsAnalysisWindow = new BrowserWindow({
             parent: this.mainWindow,
             width: 400,
+            height: 350,
             minimizable: false,
             maximizable: false,
             resizable: false,
@@ -4923,6 +4974,7 @@ export class Swordfish {
         this.changeCaseWindow = new BrowserWindow({
             parent: this.mainWindow,
             width: 250,
+            height: 350,
             minimizable: false,
             maximizable: false,
             resizable: false,
@@ -5052,6 +5104,7 @@ export class Swordfish {
         Swordfish.addNoteWindow = new BrowserWindow({
             parent: Swordfish.notesWindow,
             width: 350,
+            height: 180,
             minimizable: false,
             maximizable: false,
             resizable: true,
@@ -5214,6 +5267,7 @@ export class Swordfish {
         Swordfish.editXmlFilterWindow = new BrowserWindow({
             parent: Swordfish.settingsWindow,
             width: 800,
+            height: 405,
             minimizable: false,
             maximizable: false,
             resizable: true,
@@ -5409,6 +5463,7 @@ export class Swordfish {
         Swordfish.addXmlConfigurationWindow = new BrowserWindow({
             parent: Swordfish.settingsWindow,
             width: 450,
+            height: 150,
             minimizable: false,
             maximizable: false,
             resizable: false,

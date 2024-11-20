@@ -51,7 +51,8 @@ class AddProject {
         this.electron.ipcRenderer.send('get-types');
         this.electron.ipcRenderer.on('set-types', (event: Electron.IpcRendererEvent, arg: any) => {
             this.setTypes(arg);
-        }); this.electron.ipcRenderer.send('get-charsets');
+        });
+        this.electron.ipcRenderer.send('get-charsets');
         this.electron.ipcRenderer.on('set-charsets', (event: Electron.IpcRendererEvent, arg: any) => {
             this.setCharsets(arg);
         });
