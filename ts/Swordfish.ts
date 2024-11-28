@@ -2150,10 +2150,6 @@ export class Swordfish {
                 licenseFile = 'file://' + this.path.join(app.getAppPath(), 'html', 'licenses', 'java.html');
                 title = 'GPL2 with Classpath Exception';
                 break;
-            case "JSON":
-                licenseFile = 'file://' + this.path.join(app.getAppPath(), 'html', 'licenses', 'json.txt');
-                title = 'JSON.org License';
-                break;
             case "jsoup":
                 licenseFile = 'file://' + this.path.join(app.getAppPath(), 'html', 'licenses', 'jsoup.txt');
                 title = 'MIT License';
@@ -3468,7 +3464,7 @@ export class Swordfish {
                 default: parent = Swordfish.mainWindow;
             }
         }
-        dialog.showMessageBox(parent, {
+        dialog.showMessageBoxSync(parent, {
             icon: this.iconPath,
             type: arg.type,
             message: arg.message,

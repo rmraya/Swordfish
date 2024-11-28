@@ -37,9 +37,6 @@ class Licenses {
         document.getElementById('BCP47J').addEventListener('click', () => {
             this.openLicense('BCP47J');
         });
-        document.getElementById('JSON').addEventListener('click', () => {
-            this.openLicense('JSON');
-        });
         document.getElementById('MapDB').addEventListener('click', () => {
             this.openLicense('MapDB');
         });

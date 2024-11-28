@@ -45,6 +45,14 @@ class TranslationView {
     static SVG_WARNING: string = "<svg xmlns='http://www.w3.org/2000/svg' height='24' viewBox='0 0 24 24' width='24'><path d='M11 15h2v2h-2v-2zm0-8h2v6h-2V7zm.99-5C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8z'/></svg>";
     static SVG_NOTE: string = "<svg xmlns='http://www.w3.org/2000/svg' height='24' viewBox='0 0 24 24' width='24'><path d='M20 2H4c-1.1 0-1.99.9-1.99 2L2 22l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm0 14H5.17l-.59.59-.58.58V4h16v12zm-9-4h2v2h-2zm0-6h2v4h-2z'/></svg>";
 
+    static LOCK_SPAN: string = "<span class='iconTooltip'>" + this.SVG_LOCK + " <small class='tooltiptext'>Locked segment</small></span>";
+    static FINAL_SPAN: string = "<span class='iconTooltip'>" + this.SVG_FINAL + " <small class='tooltiptext'>Confirmed</small></span>";
+    static TRANSLATED_SPAN: string = "<span class='iconTooltip'>" + this.SVG_TRANSLATED + " <small class='tooltiptext'>Draft</small></span>";
+    static NOTES_SPAN: string = "<span class='iconTooltip'>" + this.SVG_NOTE + " <small class='tooltiptext'>Segment has notes</small></span>";
+    static SPACE_WARNING: string = "<span class='iconTooltip'>" + this.SVG_WARNING + " <small class='tooltiptext'>Space errors</small></span>";
+    static TAG_WARNING: string = "<span class='iconTooltip'>" + this.SVG_WARNING + " <small class='tooltiptext'>Tag errors</small></span>";
+    static SPACE_TAG_WARNING: string = "<span class='iconTooltip'>" + this.SVG_WARNING + " <small class='tooltiptext'>Tag and space errors</small></span>";
+
     static LOCK_FRAGMENT: string = 'M18 8h-1V6c0-2.76-2';
     static NOTE_FRAGMENT: string = 'M20 2H4c-1.1 0-1.99';
 
@@ -1026,20 +1034,19 @@ class TranslationView {
             td.classList.add('middle');
             td.classList.add('center');
             td.classList.add('translate');
-            td.innerHTML = row.translate ? TranslationView.SVG_BLANK : TranslationView.SVG_LOCK;
-            if ((row.tagErrors || row.spaceErrors) && row.translate) {
-                let title = '';
+            td.innerHTML = TranslationView.SVG_BLANK;
+            if (!row.translate) {
+                td.innerHTML = TranslationView.LOCK_SPAN;
+            } else if (row.tagErrors || row.spaceErrors) {
                 if (row.tagErrors) {
-                    title = 'Tag errors';
+                    td.innerHTML = TranslationView.TAG_WARNING;
                 }
                 if (row.spaceErrors) {
-                    title = 'Space errors';
+                    td.innerHTML = TranslationView.SPACE_WARNING;
                 }
                 if (row.tagErrors && row.spaceErrors) {
-                    title = 'Tags and space errors';
+                    td.innerHTML = TranslationView.SPACE_TAG_WARNING;
                 }
-                td.classList.add('tooltip');
-                td.innerHTML = TranslationView.SVG_WARNING + '<span class="tooltiptext">' + title + '</span>';
             }
             tr.appendChild(td);
 
@@ -1060,13 +1067,13 @@ class TranslationView {
                 td.innerHTML = TranslationView.SVG_BLANK;
             }
             if (row.state === 'translated') {
-                td.innerHTML = TranslationView.SVG_TRANSLATED;
+                td.innerHTML = TranslationView.TRANSLATED_SPAN;
             }
             if (row.state === 'final') {
-                td.innerHTML = TranslationView.SVG_FINAL;
+                td.innerHTML = TranslationView.FINAL_SPAN;
             }
             if (row.hasNotes) {
-                td.innerHTML = td.innerHTML + TranslationView.SVG_NOTE;
+                td.innerHTML = td.innerHTML + TranslationView.NOTES_SPAN;
             }
             tr.appendChild(td);
 
@@ -1215,12 +1222,12 @@ class TranslationView {
                 this.currentState.classList.remove('final');
                 if (translation === '') {
                     this.currentState.classList.add('initial');
-                    this.currentState.innerHTML = hasNotes ? TranslationView.SVG_NOTE : TranslationView.SVG_BLANK;
+                    this.currentState.innerHTML = hasNotes ? TranslationView.NOTES_SPAN : TranslationView.SVG_BLANK;
                 } else {
                     this.currentState.classList.add('translated');
-                    this.currentState.innerHTML = TranslationView.SVG_TRANSLATED;
+                    this.currentState.innerHTML = TranslationView.TRANSLATED_SPAN;
                     if (hasNotes) {
-                        this.currentState.innerHTML = this.currentState.innerHTML + TranslationView.SVG_NOTE;
+                        this.currentState.innerHTML = this.currentState.innerHTML + TranslationView.NOTES_SPAN;
                     }
                 }
             }
@@ -1228,23 +1235,23 @@ class TranslationView {
                 this.currentState.classList.remove('initial');
                 this.currentState.classList.remove('translated');
                 this.currentState.classList.add('final');
-                this.currentState.innerHTML = TranslationView.SVG_FINAL;
+                this.currentState.innerHTML = TranslationView.FINAL_SPAN;
                 if (hasNotes) {
-                    this.currentState.innerHTML = this.currentState.innerHTML + TranslationView.SVG_NOTE;
+                    this.currentState.innerHTML = this.currentState.innerHTML + TranslationView.NOTES_SPAN;
                 }
             } else {
                 if (translation === '') {
                     this.currentState.classList.remove('final');
                     this.currentState.classList.remove('translated');
                     this.currentState.classList.add('initial');
-                    this.currentState.innerHTML = hasNotes ? TranslationView.SVG_NOTE : TranslationView.SVG_BLANK;
+                    this.currentState.innerHTML = hasNotes ? TranslationView.NOTES_SPAN : TranslationView.SVG_BLANK;
                 } else {
                     this.currentState.classList.remove('final');
                     this.currentState.classList.remove('initial');
                     this.currentState.classList.add('translated');
-                    this.currentState.innerHTML = TranslationView.SVG_TRANSLATED;
+                    this.currentState.innerHTML = TranslationView.TRANSLATED_SPAN;
                     if (hasNotes) {
-                        this.currentState.innerHTML = this.currentState.innerHTML + TranslationView.SVG_NOTE;
+                        this.currentState.innerHTML = this.currentState.innerHTML + TranslationView.NOTES_SPAN;
                     }
                 }
             }
@@ -1368,7 +1375,7 @@ class TranslationView {
             this.currentState.innerHTML = TranslationView.SVG_BLANK;
         } else {
             this.currentState.classList.add('translated');
-            this.currentState.innerHTML = TranslationView.SVG_TRANSLATED;
+            this.currentState.innerHTML = TranslationView.TRANSLATED_SPAN;
         }
     }
 
@@ -1502,12 +1509,12 @@ class TranslationView {
         this.currentState.classList.remove('final');
         if (source.innerHTML === '') {
             this.currentState.classList.add('initial');
-            this.currentState.innerHTML = hasNotes ? TranslationView.SVG_NOTE : TranslationView.SVG_BLANK;
+            this.currentState.innerHTML = hasNotes ? TranslationView.NOTES_SPAN : TranslationView.SVG_BLANK;
         } else {
             this.currentState.classList.add('translated');
-            this.currentState.innerHTML = TranslationView.SVG_TRANSLATED;
+            this.currentState.innerHTML = TranslationView.TRANSLATED_SPAN;
             if (hasNotes) {
-                this.currentState.innerHTML = this.currentState.innerHTML + TranslationView.SVG_NOTE;
+                this.currentState.innerHTML = this.currentState.innerHTML + TranslationView.NOTES_SPAN;
             }
         }
         this.currentCell.focus();
@@ -1598,7 +1605,7 @@ class TranslationView {
             this.currentState.innerHTML = TranslationView.SVG_BLANK;
         } else {
             this.currentState.classList.add('translated');
-            this.currentState.innerHTML = TranslationView.SVG_TRANSLATED;
+            this.currentState.innerHTML = TranslationView.TRANSLATED_SPAN;
         }
         this.currentCell.focus();
     }
@@ -1970,7 +1977,7 @@ class TranslationView {
                 segment: this.currentId.id
             });
             let isLocked: boolean = this.currentTranslate.innerHTML.includes(TranslationView.LOCK_FRAGMENT);
-            this.currentTranslate.innerHTML = isLocked ? TranslationView.SVG_BLANK : TranslationView.SVG_LOCK;
+            this.currentTranslate.innerHTML = isLocked ? TranslationView.SVG_BLANK : TranslationView.LOCK_SPAN;
             this.selectRow(this.currentRow);
             return;
         }
@@ -2240,18 +2247,15 @@ class TranslationView {
             if (row.getAttribute('data-file') === arg.file && row.getAttribute('data-unit') === arg.unit
                 && row.getAttribute('data-id') === arg.segment) {
                 let td: HTMLTableCellElement = row.getElementsByClassName('translate')[0] as HTMLTableCellElement;
-                let title = '';
                 if (arg.tagErrors) {
-                    title = 'Tag errors';
+                    td.innerHTML = TranslationView.TAG_WARNING;
                 }
                 if (arg.spaceErrors) {
-                    title = 'Space errors';
+                    td.innerHTML = TranslationView.SPACE_WARNING;
                 }
                 if (arg.tagErrors && arg.spaceErrors) {
-                    title = 'Tags and space errors';
+                    td.innerHTML = TranslationView.SPACE_TAG_WARNING;
                 }
-                td.classList.add('tooltip');
-                td.innerHTML = TranslationView.SVG_WARNING + '<span class="tooltiptext">' + title + '</span>';
                 break;
             }
         }
@@ -2289,13 +2293,13 @@ class TranslationView {
     notesRemoved(arg: any): void {
         if (this.currentState.innerHTML.includes(TranslationView.NOTE_FRAGMENT)) {
             if (this.currentState.classList.contains('final')) {
-                this.currentState.innerHTML = TranslationView.SVG_FINAL;
+                this.currentState.innerHTML = TranslationView.FINAL_SPAN;
             }
             if (this.currentState.classList.contains('initial')) {
                 this.currentState.innerHTML = TranslationView.SVG_BLANK;
             }
             if (this.currentState.classList.contains('translated')) {
-                this.currentState.innerHTML = TranslationView.SVG_TRANSLATED;
+                this.currentState.innerHTML = TranslationView.TRANSLATED_SPAN;
             }
         }
     }
@@ -2303,13 +2307,13 @@ class TranslationView {
     notesAdded(arg: any): void {
         if (!this.currentState.innerHTML.includes(TranslationView.NOTE_FRAGMENT)) {
             if (this.currentState.classList.contains('final')) {
-                this.currentState.innerHTML = TranslationView.SVG_FINAL + TranslationView.SVG_NOTE;
+                this.currentState.innerHTML = TranslationView.FINAL_SPAN + TranslationView.NOTES_SPAN;
             }
             if (this.currentState.classList.contains('initial')) {
-                this.currentState.innerHTML = TranslationView.SVG_BLANK + TranslationView.SVG_NOTE;
+                this.currentState.innerHTML = TranslationView.SVG_BLANK + TranslationView.NOTES_SPAN;
             }
             if (this.currentState.classList.contains('translated')) {
-                this.currentState.innerHTML = TranslationView.SVG_TRANSLATED + TranslationView.SVG_NOTE;
+                this.currentState.innerHTML = TranslationView.TRANSLATED_SPAN + TranslationView.NOTES_SPAN;
             }
         }
     }

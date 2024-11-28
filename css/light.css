@@ -606,6 +606,27 @@ th svg {
 	visibility: visible;
 }
 
+.iconTooltip {
+	position: relative;
+	display: inline-block;
+}
+
+.iconTooltip .tooltiptext {
+	background-color: var(--gray40);
+	color: var(--black);
+	visibility: hidden;
+	padding: 4px;
+	border-radius: 4px;
+	white-space: nowrap;
+	/* Position the tooltip */
+	position: absolute;
+	z-index: 100;
+}
+
+.iconTooltip:hover .tooltiptext {
+	visibility: visible;
+}
+
 .highlight {
 	color: var(--gray40);
 }
