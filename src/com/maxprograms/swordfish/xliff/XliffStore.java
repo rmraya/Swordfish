@@ -133,6 +133,7 @@ public class XliffStore {
 	private static boolean fuzzyTermSearches;
 	private static boolean caseSensitiveTermSearches;
 	private static boolean caseSensitiveMatches;
+	private static boolean autoConfirm;
 
 	private int index;
 	private int nextId;
@@ -930,6 +931,11 @@ public class XliffStore {
 			caseSensitiveMatches = json.getBoolean("caseSensitiveMatches");
 		}
 		fuzzyTermSearches = json.getBoolean("fuzzyTermSearches");
+		if (json.has("autoConfirm")) {
+			autoConfirm = json.getBoolean("autoConfirm");
+		} else {
+			autoConfirm = false;
+		}
 		catalog = json.getString("catalog");
 	}
 
@@ -1176,6 +1182,7 @@ public class XliffStore {
 						tag = 1;
 						String translation = addHtmlTags(target, "", false, false, tagsData, true);
 						row.put("target", translation);
+						row.put("status", autoConfirm ? Constants.FINAL : Constants.TRANSLATED);
 						result.put(row);
 
 						Element translated = XliffUtils.buildElement("<target>" + translation + "</target>");
@@ -1184,7 +1191,7 @@ public class XliffStore {
 						if (!translated.getChildren().isEmpty()) {
 							translated = fixTags(sourceElement, source, target);
 						}
-						updateTarget(file, unit, segment, translated, XliffUtils.pureText(translated), false);
+						updateTarget(file, unit, segment, translated, XliffUtils.pureText(translated), autoConfirm);
 					}
 					insertMatch(file, unit, segment, "Self", Constants.TM, similarity, source, target, tagsData);
 					conn.commit();

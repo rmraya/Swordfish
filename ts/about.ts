@@ -38,7 +38,7 @@ class About {
         });
         setTimeout(() => {
             this.electron.ipcRenderer.send('set-height', { window: 'about', width: document.body.clientWidth, height: document.body.clientHeight });
-        }, 200);
+        }, 150);
         document.getElementById('system').blur();
     }
 

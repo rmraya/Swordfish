@@ -126,11 +126,12 @@ class TranslationView {
 
     notesVisible: boolean = false;
 
-    constructor(tab: Tab, projectId: string, sourceLang: string, targetLang: string) {
+    constructor(tab: Tab, projectId: string, sourceLang: string, targetLang: string, rows: number) {
         this.container = tab.getContainer();
         this.projectId = projectId;
         this.srcLang = sourceLang;
         this.tgtLang = targetLang;
+        this.rowsPage = rows;
 
         this.sourceTags = new Map<string, string>();
         this.topBar = document.createElement('div');
@@ -1558,9 +1559,16 @@ class TranslationView {
                 && row.getAttribute('data-id') === data.segment) {
                 (row.getElementsByClassName('match')[0] as HTMLTableCellElement).innerHTML = data.match + '%';
                 if (data.target) {
+                    let status : string = data.status;
                     (row.getElementsByClassName('state')[0] as HTMLTableCellElement).classList.remove('initial');
-                    (row.getElementsByClassName('state')[0] as HTMLTableCellElement).classList.add('translated');
+                    (row.getElementsByClassName('state')[0] as HTMLTableCellElement).classList.add(status);
                     (row.getElementsByClassName('target')[0] as HTMLTableCellElement).innerHTML = data.target;
+                    if (data.status === 'translated') {
+                        (row.getElementsByClassName('state')[0] as HTMLTableCellElement).innerHTML = TranslationView.TRANSLATED_SPAN;
+                    }
+                    if (data.status === 'final') {
+                        (row.getElementsByClassName('state')[0] as HTMLTableCellElement).innerHTML = TranslationView.FINAL_SPAN;
+                    }
                 }
                 break;
             }

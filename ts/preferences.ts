@@ -25,6 +25,7 @@ class Preferences {
     fuzzyTermSearches: boolean;
     caseSensitiveSearches: boolean;
     caseSensitiveMatches: boolean;
+    autoConfirm: boolean;
     google: {
         enabled: boolean;
         apiKey: string;
@@ -61,4 +62,5 @@ class Preferences {
     };
     os: string;
     showGuide: boolean;
+    pageRows: number;
 }

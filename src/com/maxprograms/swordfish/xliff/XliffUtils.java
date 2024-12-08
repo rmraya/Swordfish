@@ -124,9 +124,26 @@ public class XliffUtils {
 		File folder = new File(TmsServer.getWorkFolder(), "images");
 		if (!folder.exists()) {
 			Files.createDirectories(folder.toPath());
+			File tagColors = new File(folder, "tagColors.json");
+			JSONObject colors = new JSONObject();
+			colors.put("background", "#009688");
+			colors.put("foreground", "#ffffff");
+			try (FileOutputStream out = new FileOutputStream(tagColors)) {
+				out.write(colors.toString(2).getBytes(StandardCharsets.UTF_8));
+			}
 		}
 		File f = new File(folder, tag + ".svg");
 		if (!f.exists()) {
+			File colorsFile = new File(folder, "tagColors.json");
+			if (!colorsFile.exists()) {
+				JSONObject colors = new JSONObject();
+				colors.put("background", "#009688");
+				colors.put("foreground", "#ffffff");
+				try (FileOutputStream out = new FileOutputStream(colorsFile)) {
+					out.write(colors.toString(2).getBytes(StandardCharsets.UTF_8));
+				}
+			}
+			JSONObject colors = TmsServer.readJSON(colorsFile);
 			int width = 16;
 			if (tag >= 10) {
 				width = 22;
@@ -136,9 +153,11 @@ public class XliffUtils {
 			}
 			String svg = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>"
 					+ "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"" + (width + 1)
-					+ "px\" height=\"17px\" version=\"1.1\"><g><rect style=\"fill:#009688\" width=\"" + width
+					+ "px\" height=\"17px\" version=\"1.1\"><g><rect style=\"fill:" + colors.getString("background")
+					+ "\" width=\"" + width
 					+ "px\" height=\"16px\" x=\"1\" y=\"1\" rx=\"3\" ry=\"3\" />"
-					+ "<text style=\"font-size:12px;font-style:normal;font-weight:normal;text-align:center;font-family:sans-serif;\" x=\"6\" y=\"14\" fill=\"#ffffff\" fill-opacity=\"1\">\n"
+					+ "<text style=\"font-size:12px;font-style:normal;font-weight:normal;text-align:center;font-family:sans-serif;\" x=\"6\" y=\"14\" fill=\""
+					+ colors.getString("foreground") + "\" fill-opacity=\"1\">\n"
 					+ "<tspan>" + tag + "</tspan></text></g></svg>";
 			try (FileOutputStream out = new FileOutputStream(f)) {
 				out.write(svg.getBytes(StandardCharsets.UTF_8));

@@ -13,7 +13,7 @@
 import { ChildProcessWithoutNullStreams, execFileSync, spawn } from "child_process";
 import { BrowserWindow, ClientRequest, IpcMainEvent, Menu, MenuItem, Rectangle, Size, app, clipboard, dialog, ipcMain, nativeTheme, net, screen, session, shell } from "electron";
 import { IncomingMessage } from "electron/main";
-import { appendFileSync, existsSync, lstatSync, mkdirSync, readFile, readFileSync, readdirSync, unlinkSync, writeFileSync } from "fs";
+import { appendFileSync, existsSync, lstatSync, mkdirSync, readFile, readFileSync, readdirSync, rmSync, unlinkSync, writeFileSync } from "fs";
 import { Locations, Point } from "./locations";
 import { MTManager } from "./mtManager";
 
@@ -22,7 +22,7 @@ export class Swordfish {
     static readonly path = require('path');
 
     static mainWindow: BrowserWindow;
-    static settingsWindow: BrowserWindow;
+    static preferencesWindow: BrowserWindow;
     static aboutWindow: BrowserWindow;
     static licensesWindow: BrowserWindow;
     static addMemoryWindow: BrowserWindow;
@@ -82,6 +82,7 @@ export class Swordfish {
         fuzzyTermSearches: false,
         caseSensitiveSearches: false,
         caseSensitiveMatches: true,
+        autoConfirm: false,
         google: {
             enabled: false,
             apiKey: '',
@@ -117,8 +118,10 @@ export class Swordfish {
             defaultSpanish: 'es'
         },
         os: process.platform,
-        showGuide: true
+        showGuide: true,
+        pageRows: 500
     }
+
     static currentCss: string;
     static currentStatus: any;
 
@@ -222,17 +225,33 @@ export class Swordfish {
         });
 
         nativeTheme.on('updated', () => {
+            let oldCss: string = Swordfish.currentCss;
+            let dark: string = 'file://' + Swordfish.path.join(app.getAppPath(), 'css', 'dark.css');
+            let light: string = 'file://' + Swordfish.path.join(app.getAppPath(), 'css', 'light.css');
+            let highcontrast: string = 'file://' + Swordfish.path.join(app.getAppPath(), 'css', 'highcontrast.css');
             if (Swordfish.currentPreferences.theme === 'system') {
                 if (nativeTheme.shouldUseDarkColors) {
-                    Swordfish.currentCss = 'file://' + Swordfish.path.join(app.getAppPath(), 'css', 'dark.css');
+                    Swordfish.currentCss = dark;
                 } else {
-                    Swordfish.currentCss = 'file://' + Swordfish.path.join(app.getAppPath(), 'css', 'light.css');
+                    Swordfish.currentCss = light;
+                }
+                if (nativeTheme.shouldUseHighContrastColors) {
+                    Swordfish.currentCss = highcontrast;
                 }
                 let windows: BrowserWindow[] = BrowserWindow.getAllWindows();
                 for (let window of windows) {
                     window.webContents.send('set-theme', Swordfish.currentCss);
                 }
             }
+            if ((oldCss === dark || oldCss === light) && Swordfish.currentCss === highcontrast) {
+                Swordfish.deleteAllTags('#C5E1A5', '#000000');
+            }
+            if ((oldCss === highcontrast) && (Swordfish.currentCss === dark || Swordfish.currentCss === light)) {
+                Swordfish.deleteAllTags('#009688', '#ffffff');
+            }
+        });
+        ipcMain.on('get-rows-page', (event: IpcMainEvent) => {
+            event.sender.send('set-rows-page', Swordfish.currentPreferences.pageRows);
         });
         ipcMain.on('get-projects', (event: IpcMainEvent) => {
             Swordfish.getProjects(event);
@@ -492,13 +511,17 @@ export class Swordfish {
             event.sender.send('set-version', app.name + ' ' + app.getVersion());
         });
         ipcMain.on('close-preferences', () => {
-            Swordfish.destroyWindow(Swordfish.settingsWindow);
+            Swordfish.destroyWindow(Swordfish.preferencesWindow);
         });
         ipcMain.on('close-defaultLangs', () => {
             Swordfish.destroyWindow(Swordfish.defaultLangsWindow);
         });
         ipcMain.on('get-preferences', (event: IpcMainEvent) => {
             event.sender.send('set-preferences', Swordfish.currentPreferences);
+        });
+        ipcMain.on('preferences-set', () => {
+            Swordfish.preferencesWindow.show();
+            Swordfish.mainWindow.webContents.send('end-waiting');
         });
         ipcMain.on('browse-projects', (event: IpcMainEvent) => {
             this.browseProjects(event);
@@ -864,6 +887,19 @@ export class Swordfish {
         });
     } // end constructor
 
+    static deleteAllTags(background: string, foreground: string): void {
+        let tagsFolder: string = Swordfish.path.join(app.getPath('userData'), 'images');
+        if (existsSync(tagsFolder)) {
+            rmSync(tagsFolder, { recursive: true, force: true });
+        }
+        mkdirSync(tagsFolder);
+        let colors: any = { background: background, foreground: foreground };
+        writeFileSync(Swordfish.path.join(app.getPath('userData'), 'images', 'tagColors.json'), JSON.stringify(colors, null, 2));
+        if (app.isReady()) {
+            Swordfish.mainWindow.webContents.send('tags-deleted');
+        }
+    }
+
     static createWindow(): void {
         if (Swordfish.currentDefaults === undefined) {
             let size: Size = screen.getPrimaryDisplay().workAreaSize;
@@ -1118,7 +1154,7 @@ export class Swordfish {
                 new MenuItem({ label: 'About...', click: () => { this.showAbout(); } }),
                 new MenuItem({
                     label: 'Preferences...', submenu: [
-                        { label: 'Settings', accelerator: 'Cmd+,', click: () => { this.showSettings(); } }
+                        { label: 'Settings', accelerator: 'Cmd+,', click: () => { this.showPreferences(); } }
                     ]
                 }),
                 new MenuItem({ type: 'separator' }),
@@ -1135,7 +1171,7 @@ export class Swordfish {
             let help: MenuItem = template.pop();
             template.push(new MenuItem({
                 label: '&Settings', submenu: [
-                    { label: 'Preferences', click: () => { this.showSettings(); } }
+                    { label: 'Preferences', click: () => { this.showPreferences(); } }
                 ]
             }));
             template.push(help);
@@ -1244,8 +1280,8 @@ export class Swordfish {
         if ('termSearch' === arg.window) {
             Swordfish.termSearchWindow.setContentSize(arg.width, arg.height, true);
         }
-        if ('settings' === arg.window) {
-            Swordfish.settingsWindow.setContentSize(arg.width, arg.height, true);
+        if ('preferences' === arg.window) {
+            Swordfish.preferencesWindow.setContentSize(arg.width, arg.height, true);
         }
         if ('defaultLangs' === arg.window) {
             Swordfish.defaultLangsWindow.setContentSize(arg.width, arg.height, true);
@@ -1300,7 +1336,9 @@ export class Swordfish {
     static loadPreferences(): void {
         let dark: string = 'file://' + Swordfish.path.join(app.getAppPath(), 'css', 'dark.css');
         let light: string = 'file://' + Swordfish.path.join(app.getAppPath(), 'css', 'light.css');
+        let highContrast = 'file://' + Swordfish.path.join(app.getAppPath(), 'css', 'highcontrast.css');
         let preferencesFile = Swordfish.path.join(app.getPath('appData'), app.name, 'preferences.json');
+        let oldCss = Swordfish.currentCss;
         if (existsSync(preferencesFile)) {
             try {
                 let data: Buffer = readFileSync(preferencesFile);
@@ -1318,6 +1356,12 @@ export class Swordfish {
                         srcLang: 'none',
                         tgtLang: 'none'
                     }
+                }
+                if (!json.hasOwnProperty('pageRows')) {
+                    json.pageRows = 500;
+                }
+                if (!json.hasOwnProperty('autoConfirm')) {
+                    json.autoConfirm = false;
                 }
                 Swordfish.currentPreferences = json;
                 if (!Swordfish.currentPreferences.projectsFolder || !existsSync(Swordfish.currentPreferences.projectsFolder)) {
@@ -1340,6 +1384,9 @@ export class Swordfish {
                     Swordfish.currentPreferences.srx = Swordfish.path.join(app.getAppPath(), 'srx', 'default.srx');
                     writeFileSync(Swordfish.path.join(app.getPath('appData'), app.name, 'preferences.json'), JSON.stringify(Swordfish.currentPreferences, null, 2));
                 }
+                if (Swordfish.mainWindow) {
+                    Swordfish.mainWindow.webContents.send('set-rows-page', Swordfish.currentPreferences.pageRows);
+                }
             } catch (err) {
                 console.error(err);
             }
@@ -1352,12 +1399,24 @@ export class Swordfish {
             } else {
                 Swordfish.currentCss = light;
             }
+            if (nativeTheme.shouldUseHighContrastColors) {
+                Swordfish.currentCss = highContrast;
+            }
         }
         if (Swordfish.currentPreferences.theme === 'dark') {
             Swordfish.currentCss = dark;
         }
         if (Swordfish.currentPreferences.theme === 'light') {
             Swordfish.currentCss = light;
+        }
+        if (Swordfish.currentPreferences.theme === 'highcontrast') {
+            Swordfish.currentCss = highContrast;
+        }
+        if ((oldCss === dark || oldCss === light) && Swordfish.currentCss === highContrast) {
+            Swordfish.deleteAllTags('#C5E1A5', '#000000');
+        }
+        if (oldCss === highContrast && (Swordfish.currentCss === light || Swordfish.currentCss === dark)) {
+            Swordfish.deleteAllTags('#009688', '#ffffff');
         }
         if (!Swordfish.currentPreferences.zoomFactor) {
             Swordfish.currentPreferences.zoomFactor = '1.0';
@@ -1368,7 +1427,7 @@ export class Swordfish {
     }
 
     static savePreferences(preferences: Preferences): void {
-        Swordfish.destroyWindow(Swordfish.settingsWindow);
+        Swordfish.destroyWindow(Swordfish.preferencesWindow);
         let reloadProjects: boolean = this.currentPreferences.projectsFolder !== preferences.projectsFolder;
         let reloadMemories: boolean = this.currentPreferences.memoriesFolder !== preferences.memoriesFolder;
         let reloadGlossaries: boolean = this.currentPreferences.glossariesFolder !== preferences.glossariesFolder;
@@ -2193,8 +2252,9 @@ export class Swordfish {
         });
     }
 
-    static showSettings(): void {
-        this.settingsWindow = new BrowserWindow({
+    static showPreferences(): void {
+        this.mainWindow.webContents.send('start-waiting');
+        this.preferencesWindow = new BrowserWindow({
             parent: this.mainWindow,
             width: 640,
             height: 340,
@@ -2208,15 +2268,17 @@ export class Swordfish {
                 contextIsolation: false
             }
         });
-        this.settingsWindow.setMenu(null);
-        this.settingsWindow.loadURL('file://' + this.path.join(app.getAppPath(), 'html', 'preferencesDialog.html'));
-        this.settingsWindow.once('ready-to-show', () => {
-            this.settingsWindow.show();
+        this.preferencesWindow.setMenu(null);
+        this.preferencesWindow.loadURL('file://' + this.path.join(app.getAppPath(), 'html', 'preferencesDialog.html'));
+        this.preferencesWindow.once('ready-to-show', () => {
+            let mtManager: MTManager = new MTManager(Swordfish.currentPreferences, '', '');
+            this.preferencesWindow.webContents.send('set-mt-languages', mtManager.getMTLanguages());
+            this.preferencesWindow.show();
         });
-        this.settingsWindow.on('close', () => {
+        this.preferencesWindow.on('close', () => {
             this.mainWindow.focus();
         });
-        Swordfish.setLocation(this.settingsWindow, 'preferencesDialog.html');
+        Swordfish.setLocation(this.preferencesWindow, 'preferencesDialog.html');
     }
 
     static showSystemInfo() {
@@ -3348,7 +3410,7 @@ export class Swordfish {
 
     static showSpellCheckerLangs(): void {
         Swordfish.spellingLangsWindow = new BrowserWindow({
-            parent: this.settingsWindow,
+            parent: this.preferencesWindow,
             width: 790,
             height: 530,
             minimizable: false,
@@ -3367,7 +3429,7 @@ export class Swordfish {
             Swordfish.spellingLangsWindow.show();
         });
         this.spellingLangsWindow.on('close', () => {
-            this.settingsWindow.focus();
+            this.preferencesWindow.focus();
         });
         Swordfish.setLocation(this.spellingLangsWindow, 'spellingLangs.html');
     }
@@ -3437,7 +3499,7 @@ export class Swordfish {
                     break;
                 case 'importXliff': parent = Swordfish.importXliffWindow;
                     break;
-                case 'preferences': parent = Swordfish.settingsWindow;
+                case 'preferences': parent = Swordfish.preferencesWindow;
                     break;
                 case 'replaceText': parent = Swordfish.replaceTextWindow;
                     break;
@@ -5261,7 +5323,7 @@ export class Swordfish {
     static editXmlFilter(arg: any): void {
         Swordfish.xmlFilter = arg.file;
         Swordfish.editXmlFilterWindow = new BrowserWindow({
-            parent: Swordfish.settingsWindow,
+            parent: Swordfish.preferencesWindow,
             width: 800,
             height: 405,
             minimizable: false,
@@ -5281,7 +5343,7 @@ export class Swordfish {
             Swordfish.editXmlFilterWindow.show();
         });
         this.editXmlFilterWindow.on('close', () => {
-            this.settingsWindow.focus();
+            this.preferencesWindow.focus();
         });
         Swordfish.setLocation(this.editXmlFilterWindow, 'filterConfig.html');
     }
@@ -5398,7 +5460,7 @@ export class Swordfish {
                     }
                 );
             } else {
-                Swordfish.settingsWindow.focus();
+                Swordfish.preferencesWindow.focus();
             }
         }).catch((error: Error) => {
             console.error(error.message);
@@ -5447,7 +5509,7 @@ export class Swordfish {
                     }
                 );
             } else {
-                Swordfish.settingsWindow.focus();
+                Swordfish.preferencesWindow.focus();
             }
         }).catch((error: Error) => {
             console.error(error.message);
@@ -5457,7 +5519,7 @@ export class Swordfish {
     static showAddXmlConfiguration(event: IpcMainEvent): void {
         Swordfish.addConfigurationEvent = event;
         Swordfish.addXmlConfigurationWindow = new BrowserWindow({
-            parent: Swordfish.settingsWindow,
+            parent: Swordfish.preferencesWindow,
             width: 450,
             height: 150,
             minimizable: false,
@@ -5477,7 +5539,7 @@ export class Swordfish {
             Swordfish.addXmlConfigurationWindow.show();
         });
         this.addXmlConfigurationWindow.on('close', () => {
-            this.settingsWindow.focus();
+            this.preferencesWindow.focus();
         });
         Swordfish.setLocation(this.addXmlConfigurationWindow, 'addXmlConfiguration.html');
     }
@@ -5490,7 +5552,7 @@ export class Swordfish {
                     Swordfish.showMessage({ type: 'info', message: 'Configuration added' });
                     Swordfish.getXMLFilters(Swordfish.addConfigurationEvent);
                     Swordfish.destroyWindow(Swordfish.addXmlConfigurationWindow);
-                    Swordfish.settingsWindow.focus();
+                    Swordfish.preferencesWindow.focus();
                 } else {
                     Swordfish.showMessage({ type: 'error', message: data.reason, parent: 'addConfiguration' });
                 }

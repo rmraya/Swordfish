@@ -41,7 +41,7 @@
 			<attribute name="module" value="true"/>
 		</attributes>
 	</classpathentry>
-	<classpathentry kind="lib" path="jars/sqlite-jdbc-3.47.0.1-20241024.015404-1.jar">
+	<classpathentry kind="lib" path="jars/sqlite-jdbc-3.47.1.0.jar">
 		<attributes>
 			<attribute name="module" value="true"/>
 		</attributes>

@@ -14,6 +14,8 @@ class PreferencesDialog {
 
     electron = require('electron');
 
+    static readonly defaultWidth: number = 640;
+
     tabHolder: TabHolder;
     spellcheckTab: Tab;
 
@@ -32,6 +34,7 @@ class PreferencesDialog {
     fuzzyTermSearches: HTMLInputElement;
     caseSensitiveTermSearches: HTMLInputElement;
     caseSensitiveMatches: HTMLInputElement;
+    autoConfirm: HTMLInputElement;
 
     enableGoogle: HTMLInputElement;
     googleKey: HTMLInputElement;
@@ -64,16 +67,21 @@ class PreferencesDialog {
     os: string;
     showGuide: boolean;
 
+    pageRows: HTMLInputElement;
+
     filtersTable: HTMLTableElement;
     selected: Map<string, string>;
 
     constructor() {
+
+        document.body.classList.add("wait");
+
         this.tabHolder = new TabHolder(document.getElementById('main') as HTMLDivElement, "preferencesHolder");
 
         let basicTab: Tab = new Tab('basicTab', 'Basic', false);
         basicTab.getLabelDiv().addEventListener('click', () => {
             setTimeout(() => {
-                this.electron.ipcRenderer.send('set-height', { window: 'settings', width: document.body.clientWidth, height: document.body.clientHeight });
+                this.electron.ipcRenderer.send('set-height', { window: 'preferences', width: PreferencesDialog.defaultWidth, height: document.body.clientHeight });
             }, 200);
         });
         this.tabHolder.addTab(basicTab);
@@ -82,7 +90,7 @@ class PreferencesDialog {
         let mtTab: Tab = new Tab('mtTab', 'Machine Translation', false);
         mtTab.getLabelDiv().addEventListener('click', () => {
             setTimeout(() => {
-                this.electron.ipcRenderer.send('set-height', { window: 'settings', width: document.body.clientWidth, height: document.body.clientHeight });
+                this.electron.ipcRenderer.send('set-height', { window: 'preferences', width: PreferencesDialog.defaultWidth, height: document.body.clientHeight });
             }, 200);
         });
         this.tabHolder.addTab(mtTab);
@@ -91,7 +99,7 @@ class PreferencesDialog {
         this.spellcheckTab = new Tab('spellcheckTab', 'Spellchecker', false);
         this.spellcheckTab.getLabelDiv().addEventListener('click', () => {
             setTimeout(() => {
-                this.electron.ipcRenderer.send('set-height', { window: 'settings', width: document.body.clientWidth, height: document.body.clientHeight });
+                this.electron.ipcRenderer.send('set-height', { window: 'preferences', width: PreferencesDialog.defaultWidth, height: document.body.clientHeight });
             }, 200);
         });
         this.tabHolder.addTab(this.spellcheckTab);
@@ -99,7 +107,7 @@ class PreferencesDialog {
         let advancedTab: Tab = new Tab('advancedTab', 'Advanced', false);
         advancedTab.getLabelDiv().addEventListener('click', () => {
             setTimeout(() => {
-                this.electron.ipcRenderer.send('set-height', { window: 'settings', width: document.body.clientWidth, height: document.body.clientHeight });
+                this.electron.ipcRenderer.send('set-height', { window: 'preferences', width: PreferencesDialog.defaultWidth, height: document.body.clientHeight });
             }, 200);
         });
         this.tabHolder.addTab(advancedTab);
@@ -108,7 +116,6 @@ class PreferencesDialog {
         this.tabHolder.selectTab('basicTab');
 
         this.electron.ipcRenderer.send('get-theme');
-        this.electron.ipcRenderer.send('get-languages');
         this.electron.ipcRenderer.on('set-languages', (event: Electron.IpcRendererEvent, arg: any) => {
             this.setLanguages(arg);
         });
@@ -167,7 +174,7 @@ class PreferencesDialog {
             this.setFilters(arg);
         });
         setTimeout(() => {
-            this.electron.ipcRenderer.send('set-height', { window: 'settings', width: document.body.clientWidth, height: document.body.clientHeight });
+            this.electron.ipcRenderer.send('set-height', { window: 'preferences', width: PreferencesDialog.defaultWidth, height: document.body.clientHeight });
         }, 200);
     }
 
@@ -186,6 +193,7 @@ class PreferencesDialog {
         this.fuzzyTermSearches.checked = preferences.fuzzyTermSearches;
         this.caseSensitiveTermSearches.checked = preferences.caseSensitiveSearches;
         this.caseSensitiveMatches.checked = preferences.caseSensitiveMatches;
+        this.autoConfirm.checked = preferences.autoConfirm;
 
         this.enableGoogle.checked = preferences.google.enabled;
         this.googleKey.value = preferences.google.apiKey;
@@ -251,7 +259,10 @@ class PreferencesDialog {
 
         this.os = preferences.os;
         this.showGuide = preferences.showGuide;
+        this.pageRows.value = preferences.pageRows.toString();
         this.populateSpellcheckTab(this.spellcheckTab.getContainer(), preferences.spellchecker);
+
+        this.electron.ipcRenderer.send('preferences-set');
     }
 
     setLanguages(arg: any): void {
@@ -260,10 +271,14 @@ class PreferencesDialog {
         this.srcLangSelect.innerHTML = languageOptions;
         this.tgtLangSelect.innerHTML = languageOptions;
 
-        this.electron.ipcRenderer.send('get-mt-languages');
+        this.electron.ipcRenderer.send('get-preferences');
     }
 
     savePreferences(): void {
+        if (this.pageRows.valueAsNumber < 100 || this.pageRows.valueAsNumber > 2000) {
+            this.electron.ipcRenderer.send('show-message', { type: 'warning', message: 'Set a number of rows per page between 100 and 2000', parent: 'preferences' });
+            return;
+        }
         if (this.enableGoogle.checked && this.googleKey.value === '') {
             this.electron.ipcRenderer.send('show-message', { type: 'warning', message: 'Enter Google API key', parent: 'preferences' });
             return;
@@ -319,6 +334,7 @@ class PreferencesDialog {
             fuzzyTermSearches: this.fuzzyTermSearches.checked,
             caseSensitiveSearches: this.caseSensitiveTermSearches.checked,
             caseSensitiveMatches: this.caseSensitiveMatches.checked,
+            autoConfirm: this.autoConfirm.checked,
             google: {
                 enabled: this.enableGoogle.checked,
                 apiKey: this.googleKey.value,
@@ -354,7 +370,8 @@ class PreferencesDialog {
                 defaultSpanish: 'es'
             },
             os: this.os,
-            showGuide: this.showGuide
+            showGuide: this.showGuide,
+            pageRows: this.pageRows.valueAsNumber
         }
         if (this.os !== 'darwin') {
             prefs.spellchecker = {
@@ -438,7 +455,8 @@ class PreferencesDialog {
         this.themeColor.id = 'themeColor';
         this.themeColor.innerHTML = '<option value="system">System Default</option>' +
             '<option value="dark">Dark</option>' +
-            '<option value="light">Light</option>'
+            '<option value="light">Light</option>' +
+            '<option value="highcontrast">High Contrast</option>';
         td.appendChild(this.themeColor);
 
         tr = document.createElement('tr');
@@ -465,8 +483,35 @@ class PreferencesDialog {
             '<option value="1.0">Medium</option>' +
             '<option value="1.2">Large</option>' +
             '<option value="1.4">Very Large</option>' +
-            '<option value="1.8">Extra Large</option>'
+            '<option value="1.8">Extra Large</option>';
         td.appendChild(this.zoomFactor);
+
+        tr = document.createElement('tr');
+        langsTable.appendChild(tr);
+
+        td = document.createElement('td');
+        td.classList.add('middle');
+        td.classList.add('noWrap');
+        tr.appendChild(td);
+
+        let rowsLabel: HTMLLabelElement = document.createElement('label');
+        rowsLabel.setAttribute('for', 'pageRows');
+        rowsLabel.innerText = 'Rows per Page';
+        td.appendChild(rowsLabel);
+
+        td = document.createElement('td');
+        td.classList.add('middle');
+        tr.appendChild(td);
+
+        this.pageRows = document.createElement('input');
+        this.pageRows.id = 'pageRows';
+        this.pageRows.type = 'number';
+        this.pageRows.min = '100';
+        this.pageRows.max = '2000';
+        this.pageRows.step = '100';
+        this.pageRows.style.width = this.zoomFactor.clientWidth + 'px';
+        td.appendChild(this.pageRows);
+
     }
 
     populateSpellcheckTab(container: HTMLDivElement, spellchecker: any): void {
@@ -596,7 +641,7 @@ class PreferencesDialog {
         let generalTab: Tab = new Tab('generalTab', 'General', false);
         generalTab.getLabelDiv().addEventListener('click', () => {
             setTimeout(() => {
-                this.electron.ipcRenderer.send('set-height', { window: 'settings', width: document.body.clientWidth, height: document.body.clientHeight });
+                this.electron.ipcRenderer.send('set-height', { window: 'preferences', width: PreferencesDialog.defaultWidth, height: document.body.clientHeight });
             }, 200);
         });
         advHolder.addTab(generalTab);
@@ -605,7 +650,7 @@ class PreferencesDialog {
         let xmlTab: Tab = new Tab('xmlTab', 'XML Filter', false);
         xmlTab.getLabelDiv().addEventListener('click', () => {
             setTimeout(() => {
-                this.electron.ipcRenderer.send('set-height', { window: 'settings', width: document.body.clientWidth, height: document.body.clientHeight });
+                this.electron.ipcRenderer.send('set-height', { window: 'preferences', width: PreferencesDialog.defaultWidth, height: document.body.clientHeight });
             }, 200);
         });
         advHolder.addTab(xmlTab);
@@ -812,6 +857,23 @@ class PreferencesDialog {
         caseSensitiveMatchesLabel.setAttribute('for', 'caseSensitiveMatches');
         caseSensitiveMatchesLabel.style.marginTop = '4px';
         row5.appendChild(caseSensitiveMatchesLabel);
+
+        let row6: HTMLDivElement = document.createElement('div');
+        row6.classList.add('row');
+        row6.classList.add('middle');
+        container.appendChild(row6);
+
+        this.autoConfirm = document.createElement('input');
+        this.autoConfirm.type = 'checkbox';
+        this.autoConfirm.id = 'autoConfirm';
+        row6.appendChild(this.autoConfirm);
+
+        let autoConfirmLabel: HTMLLabelElement = document.createElement('label');
+        autoConfirmLabel.innerText = 'Automatically Confirm Propagated Segments';
+        autoConfirmLabel.setAttribute('for', 'autoConfirm');
+        autoConfirmLabel.style.marginTop = '4px';
+        row6.appendChild(autoConfirmLabel);
+
     }
 
     populateXmlFilterTab(container: HTMLDivElement): void {
@@ -919,7 +981,7 @@ class PreferencesDialog {
         let googleTab: Tab = new Tab('googleTab', 'Google', false);
         googleTab.getLabelDiv().addEventListener('click', () => {
             setTimeout(() => {
-                this.electron.ipcRenderer.send('set-height', { window: 'settings', width: document.body.clientWidth, height: document.body.clientHeight });
+                this.electron.ipcRenderer.send('set-height', { window: 'preferences', width: PreferencesDialog.defaultWidth, height: document.body.clientHeight });
             }, 200);
         });
         mtHolder.addTab(googleTab);
@@ -928,7 +990,7 @@ class PreferencesDialog {
         let azureTab: Tab = new Tab('azureTab', 'Microsoft Azure', false);
         azureTab.getLabelDiv().addEventListener('click', () => {
             setTimeout(() => {
-                this.electron.ipcRenderer.send('set-height', { window: 'settings', width: document.body.clientWidth, height: document.body.clientHeight });
+                this.electron.ipcRenderer.send('set-height', { window: 'preferences', width: PreferencesDialog.defaultWidth, height: document.body.clientHeight });
             }, 200);
         });
         mtHolder.addTab(azureTab);
@@ -937,7 +999,7 @@ class PreferencesDialog {
         let deeplTab: Tab = new Tab('deeplTab', 'DeepL', false);
         deeplTab.getLabelDiv().addEventListener('click', () => {
             setTimeout(() => {
-                this.electron.ipcRenderer.send('set-height', { window: 'settings', width: document.body.clientWidth, height: document.body.clientHeight });
+                this.electron.ipcRenderer.send('set-height', { window: 'preferences', width: PreferencesDialog.defaultWidth, height: document.body.clientHeight });
             }, 200);
         });
         mtHolder.addTab(deeplTab);
@@ -946,7 +1008,7 @@ class PreferencesDialog {
         let chatGptTab: Tab = new Tab('chatGptTab', 'ChatGPT', false);
         chatGptTab.getLabelDiv().addEventListener('click', () => {
             setTimeout(() => {
-                this.electron.ipcRenderer.send('set-height', { window: 'settings', width: document.body.clientWidth, height: document.body.clientHeight });
+                this.electron.ipcRenderer.send('set-height', { window: 'preferences', width: PreferencesDialog.defaultWidth, height: document.body.clientHeight });
             }, 200);
         });
         mtHolder.addTab(chatGptTab);
@@ -955,7 +1017,7 @@ class PreferencesDialog {
         let modernmtTab: Tab = new Tab('modernmtTab', 'ModernMT', false);
         modernmtTab.getLabelDiv().addEventListener('click', () => {
             setTimeout(() => {
-                this.electron.ipcRenderer.send('set-height', { window: 'settings', width: document.body.clientWidth, height: document.body.clientHeight });
+                this.electron.ipcRenderer.send('set-height', { window: 'preferences', width: PreferencesDialog.defaultWidth, height: document.body.clientHeight });
             }, 200);
         });
         mtHolder.addTab(modernmtTab);
@@ -1294,7 +1356,8 @@ class PreferencesDialog {
         this.googleSrcLang.innerHTML = this.getOptions(arg.google.srcLangs);
         this.googleTgtLang.innerHTML = this.getOptions(arg.google.tgtLangs);
 
-        this.electron.ipcRenderer.send('get-preferences');
+        this.electron.ipcRenderer.send('get-languages');
+        document.body.classList.remove("wait");
     }
 
     getOptions(array: any[]): string {

@@ -24,6 +24,7 @@ class Main {
     memoriesView: MemoriesView;
     glossariesView: GlossariesView;
 
+    static rowsPage: number;
 
     constructor() {
         Main.translationViews = new Map<string, TranslationView>();
@@ -75,6 +76,10 @@ class Main {
         Main.electron.ipcRenderer.send('get-theme');
         Main.electron.ipcRenderer.on('set-theme', (event: Electron.IpcRendererEvent, arg: any) => {
             (document.getElementById('theme') as HTMLLinkElement).href = arg;
+        });
+        Main.electron.ipcRenderer.send('get-rows-page');
+        Main.electron.ipcRenderer.on('set-rows-page', (event: Electron.IpcRendererEvent, rows:number) => {
+            Main.rowsPage = rows;
         });
         Main.electron.ipcRenderer.on('request-theme', () => {
             Main.electron.ipcRenderer.send('get-theme');
@@ -391,6 +396,14 @@ class Main {
         Main.electron.ipcRenderer.on('edit-source', () => {
             this.editSource();
         });
+        Main.electron.ipcRenderer.on('tags-deleted', () => {
+            if (Main.translationViews.size > 0) {
+                Main.electron.ipcRenderer.send('show-message', {
+                    type: 'info',
+                    message: 'Tag colors will be adjusted on application restart.'
+                });
+            }
+        });
         let config: MutationObserverInit = { attributes: true, childList: false, subtree: false };
         let observer = new MutationObserver((mutationsList) => {
             for (let mutation of mutationsList) {
@@ -499,20 +512,20 @@ class Main {
         }
     }
 
-    addTab(arg: Project): void {
-        if (Main.tabHolder.has(arg.id)) {
-            Main.tabHolder.selectTab(arg.id);
+    addTab(project: Project): void {
+        if (Main.tabHolder.has(project.id)) {
+            Main.tabHolder.selectTab(project.id);
             return;
         }
-        let tab = new Tab(arg.id, arg.description, true);
-        let view: TranslationView = new TranslationView(tab, arg.id, arg.sourceLang, arg.targetLang);
+        let tab = new Tab(project.id, project.description, true);
+        let view: TranslationView = new TranslationView(tab, project.id, project.sourceLang, project.targetLang, Main.rowsPage);
         Main.tabHolder.addTab(tab);
-        Main.tabHolder.selectTab(arg.id);
+        Main.tabHolder.selectTab(project.id);
         tab.getLabelDiv().addEventListener('click', () => {
             view.setSize();
             view.setSpellChecker();
         });
-        Main.translationViews.set(arg.id, view);
+        Main.translationViews.set(project.id, view);
     }
 
     closeTab(): void {

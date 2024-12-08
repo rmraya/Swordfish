@@ -97,6 +97,7 @@ class TabHolder {
     tabs: Map<string, Tab>;
     closeable: Map<string, boolean>;
     tabsHolder: HTMLDivElement;
+    filler: HTMLDivElement;
     contentHolder: HTMLDivElement;
 
     tabsList: string[] = [];
@@ -109,6 +110,10 @@ class TabHolder {
 
         this.tabsHolder = document.createElement('div');
         this.tabsHolder.classList.add('tabHolder');
+        this.filler = document.createElement('div');
+        this.filler.style.flex = '1';
+        this.filler.classList.add('tab');
+        this.tabsHolder.appendChild(this.filler);
         parent.appendChild(this.tabsHolder);
 
         this.contentHolder = document.createElement('div');
@@ -137,7 +142,7 @@ class TabHolder {
 
     addTab(tab: Tab): void {
         tab.setParent(this);
-        this.tabsHolder.appendChild(tab.getLabelDiv());
+        this.tabsHolder.insertBefore(tab.getLabelDiv(), this.filler);
         this.labels.set(tab.getId(), tab.getLabelDiv());
         this.contentHolder.appendChild(tab.getContainer());
         this.tabs.set(tab.getId(), tab);
