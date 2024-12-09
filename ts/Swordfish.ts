@@ -1690,7 +1690,7 @@ export class Swordfish {
 
     static addFile(): void {
         let filters: any[] = [
-            { name: 'Any File', extensions: [] },
+            { name: 'Any File', extensions: ['*'] },
             { name: 'Adobe InDesign Interchange', extensions: ['inx'] },
             { name: 'Adobe InCopy ICML', extensions: ['icml'] },
             { name: 'Adobe InDesign IDML', extensions: ['idml'] },
@@ -1717,11 +1717,11 @@ export class Swordfish {
             { name: 'XLIFF', extensions: ['xlf', 'xliff', 'mqxliff', 'txlf'] },
             { name: 'XML Document', extensions: ['xml'] }
         ];
-        if (process.platform === 'linux') {
+        if (process.platform === 'linux' || process.platform === 'win32') {
             filters.splice(0, 1);
             filters.push({ name: 'Any File', extensions: ['*'] });
         }
-        dialog.showOpenDialog({
+        dialog.showOpenDialog(Swordfish.mainWindow, {
             properties: ['openFile'],
             filters: filters
         }).then((value: Electron.OpenDialogReturnValue) => {
@@ -1911,7 +1911,7 @@ export class Swordfish {
 
     selectSourceFiles(event: IpcMainEvent): void {
         let filters: any[] = [
-            { name: 'Any File', extensions: [] },
+            { name: 'Any File', extensions: ['*'] },
             { name: 'Adobe InDesign Interchange', extensions: ['inx'] },
             { name: 'Adobe InCopy ICML', extensions: ['icml'] },
             { name: 'Adobe InDesign IDML', extensions: ['idml'] },
@@ -1938,7 +1938,7 @@ export class Swordfish {
             { name: 'XLIFF', extensions: ['xlf', 'xliff', 'mqxliff', 'txlf'] },
             { name: 'XML Document', extensions: ['xml'] }
         ];
-        if (process.platform === 'linux') {
+        if (process.platform === 'linux' || process.platform === 'win32') {
             filters.splice(0, 1);
             filters.push({ name: 'Any File', extensions: ['*'] });
         }
@@ -2862,15 +2862,11 @@ export class Swordfish {
     }
 
     getTmxFile(event: IpcMainEvent): void {
-        let anyFile: string[] = [];
-        if (process.platform === 'linux') {
-            anyFile = ['*'];
-        }
         dialog.showOpenDialog({
             properties: ['openFile'],
             filters: [
                 { name: 'TMX File', extensions: ['tmx'] },
-                { name: 'Any File', extensions: anyFile }
+                { name: 'Any File', extensions: ['*'] }
             ]
         }).then((value: Electron.OpenDialogReturnValue) => {
             if (!value.canceled) {
@@ -2880,15 +2876,11 @@ export class Swordfish {
     }
 
     static getGlossaryFile(event: IpcMainEvent): void {
-        let anyFile: string[] = [];
-        if (process.platform === 'linux') {
-            anyFile = ['*'];
-        }
         dialog.showOpenDialog({
             properties: ['openFile'],
             filters: [
                 { name: 'TMX/TBX File', extensions: ['tmx', 'tbx'] },
-                { name: 'Any File', extensions: anyFile }
+                { name: 'Any File', extensions: ['*'] }
             ]
         }).then((value: Electron.OpenDialogReturnValue) => {
             if (!value.canceled) {
