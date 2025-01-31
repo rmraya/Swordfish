@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007 - 2024 Maxprograms.
+ * Copyright (c) 2007 - 2025 Maxprograms.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 1.0
@@ -285,13 +285,25 @@ public class XliffUtils {
 	}
 
 	public static Element toTu(String key, Element source, Element target, Map<String, String> tags, String srcLang,
-			String tgtLang) {
+			String tgtLang, String[] context) {
 		String creationDate = TMUtils.creationDate();
 		Element tu = new Element("tu");
 		tu.setAttribute("tuid", key);
 		tu.setAttribute("creationtool", Constants.APPNAME);
 		tu.setAttribute("creationtoolversion", Constants.VERSION);
 		tu.setAttribute("creationdate", creationDate);
+		if (context[0] != null) {
+			Element prop = new Element("prop");
+			prop.setAttribute("type", "prev-" + srcLang + "-" + tgtLang);
+			prop.setText(context[0]);
+			tu.addContent(prop);
+		}
+		if (context[1] != null) {
+			Element prop = new Element("prop");
+			prop.setAttribute("type", "next-" + srcLang + "-" + tgtLang);
+			prop.setText(context[1]);
+			tu.addContent(prop);
+		}
 		Element tuv = new Element("tuv");
 		tuv.setAttribute("xml:lang", srcLang);
 		tuv.setAttribute("creationdate", creationDate);

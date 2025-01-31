@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007 - 2024 Maxprograms.
+ * Copyright (c) 2007 - 2025 Maxprograms.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 1.0
@@ -50,7 +50,7 @@ import com.maxprograms.languages.Language;
 import com.maxprograms.languages.LanguageUtils;
 import com.maxprograms.swordfish.models.Memory;
 import com.maxprograms.xml.Attribute;
-import com.maxprograms.xml.Catalog;
+import com.maxprograms.xml.CatalogBuilder;
 import com.maxprograms.xml.Document;
 import com.maxprograms.xml.Element;
 import com.maxprograms.xml.Indenter;
@@ -238,7 +238,7 @@ public class ServicesHandler implements HttpHandler {
 		File targetFile = new File(xmlFiltersFolder, file.getName());
 		try {
 			SAXBuilder builder = new SAXBuilder();
-			builder.setEntityResolver(new Catalog(TmsServer.getCatalogFile()));
+			builder.setEntityResolver(CatalogBuilder.getCatalog(TmsServer.getCatalogFile()));
 			Document doc = builder.build(file);
 			if (!"ini-file".equals(doc.getRootElement().getName())) {
 				throw new IOException(Messages.getString("ServicesHandler.2"));
@@ -307,7 +307,7 @@ public class ServicesHandler implements HttpHandler {
 		File xmlFiltersFolder = new File(appFolder, "xmlfilter");
 		File configFile = new File(xmlFiltersFolder, json.getString("file"));
 		SAXBuilder builder = new SAXBuilder();
-		builder.setEntityResolver(new Catalog(TmsServer.getCatalogFile()));
+		builder.setEntityResolver(CatalogBuilder.getCatalog(TmsServer.getCatalogFile()));
 		Document doc = builder.build(configFile);
 		return toJSON(doc.getRootElement());
 	}
@@ -320,7 +320,7 @@ public class ServicesHandler implements HttpHandler {
 		File xmlFiltersFolder = new File(appFolder, "xmlfilter");
 		File configFile = new File(xmlFiltersFolder, json.getString("filter"));
 		SAXBuilder builder = new SAXBuilder();
-		builder.setEntityResolver(new Catalog(TmsServer.getCatalogFile()));
+		builder.setEntityResolver(CatalogBuilder.getCatalog(TmsServer.getCatalogFile()));
 		Document doc = builder.build(configFile);
 		Element root = doc.getRootElement();
 		List<Element> tags = root.getChildren("tag");
@@ -391,7 +391,7 @@ public class ServicesHandler implements HttpHandler {
 		File xmlFiltersFolder = new File(appFolder, "xmlfilter");
 		File configFile = new File(xmlFiltersFolder, json.getString("filter"));
 		SAXBuilder builder = new SAXBuilder();
-		builder.setEntityResolver(new Catalog(TmsServer.getCatalogFile()));
+		builder.setEntityResolver(CatalogBuilder.getCatalog(TmsServer.getCatalogFile()));
 		Document doc = builder.build(configFile);
 		Element root = doc.getRootElement();
 		List<Element> tags = root.getChildren("tag");

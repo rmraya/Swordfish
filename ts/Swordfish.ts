@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007 - 2024 Maxprograms.
+ * Copyright (c) 2007 - 2025 Maxprograms.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 1.0
@@ -11,7 +11,7 @@
  *******************************************************************************/
 
 import { ChildProcessWithoutNullStreams, execFileSync, spawn } from "child_process";
-import { BrowserWindow, ClientRequest, IpcMainEvent, Menu, MenuItem, Rectangle, Size, app, clipboard, dialog, ipcMain, nativeTheme, net, screen, session, shell } from "electron";
+import { BrowserWindow, ClientRequest, IpcMainEvent, Menu, MenuItem, Notification, Rectangle, Size, app, clipboard, dialog, ipcMain, nativeTheme, net, screen, session, shell } from "electron";
 import { IncomingMessage } from "electron/main";
 import { appendFileSync, existsSync, lstatSync, mkdirSync, readFile, readFileSync, readdirSync, rmSync, unlinkSync, writeFileSync } from "fs";
 import { Locations, Point } from "./locations";
@@ -549,6 +549,9 @@ export class Swordfish {
         });
         ipcMain.on('show-message', (event: IpcMainEvent, arg: any) => {
             Swordfish.showMessage(arg);
+        });
+        ipcMain.on('show-notification', (event: IpcMainEvent, message: string) => {
+            Swordfish.showNotification(message);
         });
         ipcMain.on('add-tab', (event: IpcMainEvent, arg: Project) => {
             Swordfish.mainWindow.webContents.send('add-tab', arg);
@@ -3124,6 +3127,15 @@ export class Swordfish {
                     });
                 }
                 Swordfish.mainWindow.webContents.send('set-statistics', { project: arg.project, statistics: data.statistics });
+                if (arg.translation !== data.target) {
+                    Swordfish.mainWindow.webContents.send('update-target', {
+                        project: arg.project,
+                        file: arg.file,
+                        unit: arg.unit,
+                        segment: arg.segment,
+                        target: data.target
+                    });
+                }
             },
             (reason: string) => {
                 Swordfish.showMessage({ type: 'error', message: reason });
@@ -3524,6 +3536,15 @@ export class Swordfish {
             message: arg.message,
             buttons: ['OK']
         });
+    }
+
+    static showNotification(message: string): void {
+        let notification: Notification = new Notification({
+            title: app.name,
+            body: message,
+            icon: this.iconPath
+        });
+        notification.show();
     }
 
     static importReviewedXLIFF(): void {

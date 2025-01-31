@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007 - 2024 Maxprograms.
+ * Copyright (c) 2007 - 2025 Maxprograms.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 1.0
@@ -72,7 +72,7 @@ import com.maxprograms.swordfish.tm.MatchQuality;
 import com.maxprograms.swordfish.tm.NGrams;
 import com.maxprograms.swordfish.tm.TMUtils;
 import com.maxprograms.xliff2.FromXliff2;
-import com.maxprograms.xml.Catalog;
+import com.maxprograms.xml.CatalogBuilder;
 import com.maxprograms.xml.Document;
 import com.maxprograms.xml.Element;
 import com.maxprograms.xml.Indenter;
@@ -124,6 +124,8 @@ public class XliffStore {
 	private PreparedStatement getNotesStmt;
 	private PreparedStatement insertNoteStmt;
 	private PreparedStatement getSegment;
+	private PreparedStatement getChild;
+	private PreparedStatement getContext;
 
 	private Statement stmt;
 	private boolean preserve;
@@ -173,7 +175,7 @@ public class XliffStore {
 		}
 		getPreferences();
 		builder = new SAXBuilder();
-		builder.setEntityResolver(new Catalog(catalog));
+		builder.setEntityResolver(CatalogBuilder.getCatalog(catalog));
 
 		DriverManager.registerDriver(new org.sqlite.JDBC());
 		conn = DriverManager
@@ -256,6 +258,8 @@ public class XliffStore {
 				.prepareStatement("SELECT target FROM terms WHERE file=? AND unitId=? AND segId=? AND termid=?");
 		getNotesStmt = conn.prepareStatement("SELECT noteId, note FROM notes WHERE file=? AND unitId=? AND segId=?");
 		getSegment = conn.prepareStatement("SELECT source, target FROM segments WHERE file=? AND unitId=? AND segId=?");
+		getChild = conn.prepareStatement("SELECT child FROM segments WHERE file=? AND unitId=? AND segId=?");
+		getContext = conn.prepareStatement("SELECT unitId, segId FROM segments WHERE file=? AND child=?");
 		stmt = conn.createStatement();
 		if (needsLoading) {
 			document = builder.build(xliffFile);
@@ -909,6 +913,8 @@ public class XliffStore {
 		checkTerm.close();
 		getNotesStmt.close();
 		getSegment.close();
+		getChild.close();
+		getContext.close();
 		stmt.close();
 		conn.commit();
 		conn.close();
@@ -1008,7 +1014,12 @@ public class XliffStore {
 
 		result.put("tagErrors", tagErrors);
 		result.put("spaceErrors", spaceErrors);
-
+		
+		JSONObject originalData = getUnitData(file, unit);
+		tag = 1;
+		tagsMap = new Hashtable<>();
+		result.put("target", addHtmlTags(target, originalData));
+		
 		if (!memory.equals(Constants.NONE) && !pureTarget.isBlank() && confirm) {
 			new Thread(() -> {
 				try {
@@ -1020,9 +1031,10 @@ public class XliffStore {
 					key.append(unit);
 					key.append('-');
 					key.append(segment);
+					String[] context = getSurroundingSegments(file, unit, segment);
 					MemoriesHandler.open(memory);
 					ITmEngine engine = MemoriesHandler.getEngine(memory);
-					engine.storeTu(XliffUtils.toTu(key.toString(), source, target, tags, srcLang, tgtLang));
+					engine.storeTu(XliffUtils.toTu(key.toString(), source, target, tags, srcLang, tgtLang, context));
 					engine.commit();
 					MemoriesHandler.close(memory);
 				} catch (IOException | SQLException | URISyntaxException e) {
@@ -1033,9 +1045,67 @@ public class XliffStore {
 		return result;
 	}
 
+	private String[] getSurroundingSegments(String file, String unit, String segment) throws SQLException {
+		String[] result = new String[2];
+		int child = -1;
+		getChild.setString(1, file);
+		getChild.setString(2, unit);
+		getChild.setString(3, segment);
+		try (ResultSet rs = getChild.executeQuery()) {
+			while (rs.next()) {
+				child = rs.getInt(1);
+			}
+		}
+		if (child == -1) {
+			return result;	
+		}
+		if (child > 0) {
+			String prevUnitId = "";
+			String prevSegId = "";
+			getContext.setString(1, file);
+			getContext.setInt(2, child - 1);
+			try (ResultSet rs = getContext.executeQuery()) {
+				while (rs.next()) {
+					prevUnitId = rs.getString(1);
+					prevSegId = rs.getString(2);
+				}
+			}
+			StringBuilder key = new StringBuilder();
+			key.append(xliffFile.hashCode());
+			key.append('-');
+			key.append(file);
+			key.append('-');
+			key.append(prevUnitId);
+			key.append('-');
+			key.append(prevSegId);
+			result[0] = key.toString();
+		}
+		String nextUnitId = "";
+		String nextSegId = "";
+		getContext.setString(1, file);
+		getContext.setInt(2, child + 1);
+		try (ResultSet rs = getContext.executeQuery()) {
+			while (rs.next()) {
+				nextUnitId = rs.getString(1);
+				nextSegId = rs.getString(2);
+			}
+		}
+		if (!nextUnitId.isEmpty()) {
+			StringBuilder key = new StringBuilder();
+			key.append(xliffFile.hashCode());
+			key.append('-');
+			key.append(file);
+			key.append('-');
+			key.append(nextUnitId);
+			key.append('-');
+			key.append(nextSegId);
+			result[1] = key.toString();
+		}
+		return result;
+	}
+
 	public synchronized void saveSource(JSONObject json)
 			throws IOException, SQLException, SAXException, ParserConfigurationException {
-
 		String file = json.getString("file");
 		String unit = json.getString("unit");
 		String segment = json.getString("segment");
@@ -1946,8 +2016,9 @@ public class XliffStore {
 					Element target = XliffUtils.buildElement(tgt);
 
 					Map<String, String> tags = getTags(source);
+					String[] context = getSurroundingSegments(file, unit, segment);
 
-					Element tuv = XliffUtils.toTu(key.toString(), source, target, tags, srcLang, tgtLang);
+					Element tuv = XliffUtils.toTu(key.toString(), source, target, tags, srcLang, tgtLang, context);
 					tuv.getContent().add(0, d);
 					if (c != null) {
 						tuv.getContent().add(0, c);
@@ -2005,8 +2076,9 @@ public class XliffStore {
 					Element target = XliffUtils.buildElement(tgt);
 
 					Map<String, String> tags = getTags(source);
+					String[] context = getSurroundingSegments(file, unit, segment);
 
-					Element tuv = XliffUtils.toTu(key.toString(), source, target, tags, srcLang, tgtLang);
+					Element tuv = XliffUtils.toTu(key.toString(), source, target, tags, srcLang, tgtLang, context);
 					tuv.getContent().add(0, d);
 					if (c != null) {
 						tuv.getContent().add(0, c);
@@ -2860,6 +2932,7 @@ public class XliffStore {
 							Element source = XliffUtils.buildElement(rs2.getString(1));
 							Element target = XliffUtils.buildElement(rs2.getString(2));
 							Map<String, String> tags = getTags(source);
+							String[] context = getSurroundingSegments(file, unit, segment);
 							StringBuilder key = new StringBuilder();
 							key.append(xliffFile.hashCode());
 							key.append('-');
@@ -2868,7 +2941,8 @@ public class XliffStore {
 							key.append(unit);
 							key.append('-');
 							key.append(segment);
-							engine.storeTu(XliffUtils.toTu(key.toString(), source, target, tags, srcLang, tgtLang));
+							engine.storeTu(
+									XliffUtils.toTu(key.toString(), source, target, tags, srcLang, tgtLang, context));
 						}
 					}
 				}

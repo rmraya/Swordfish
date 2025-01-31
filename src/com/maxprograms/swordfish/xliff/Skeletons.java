@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007 - 2024 Maxprograms.
+ * Copyright (c) 2007 - 2025 Maxprograms.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 1.0
@@ -22,15 +22,15 @@ import java.util.Vector;
 
 import javax.xml.parsers.ParserConfigurationException;
 
+import org.xml.sax.SAXException;
+
 import com.maxprograms.converters.Utils;
 import com.maxprograms.swordfish.TmsServer;
-import com.maxprograms.xml.Catalog;
+import com.maxprograms.xml.CatalogBuilder;
 import com.maxprograms.xml.Document;
 import com.maxprograms.xml.Element;
 import com.maxprograms.xml.SAXBuilder;
 import com.maxprograms.xml.XMLOutputter;
-
-import org.xml.sax.SAXException;
 
 public class Skeletons {
 
@@ -42,7 +42,7 @@ public class Skeletons {
             ParserConfigurationException, URISyntaxException {
         File xliffParent = outputFile.getParentFile();
         SAXBuilder builder = new SAXBuilder();
-        builder.setEntityResolver(new Catalog(TmsServer.getPreferences().getString("catalog")));
+        builder.setEntityResolver(CatalogBuilder.getCatalog(TmsServer.getPreferences().getString("catalog")));
         Document doc = builder.build(xliffFile);
         Element xliff = doc.getRootElement();
         List<Element> files = xliff.getChildren("file");

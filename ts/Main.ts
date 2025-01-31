@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007 - 2024 Maxprograms.
+ * Copyright (c) 2007 - 2025 Maxprograms.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 1.0
@@ -380,6 +380,9 @@ class Main {
         });
         Main.electron.ipcRenderer.on('clear-errors', (event: Electron.IpcRendererEvent, arg: any) => {
             this.clearErrors(arg);
+        });
+        Main.electron.ipcRenderer.on('update-target', (event: Electron.IpcRendererEvent, arg: any) => {
+            this.updateTarget(arg);
         });
         Main.electron.ipcRenderer.on('notes-requested', () => {
             this.notesRequested();
@@ -1104,6 +1107,13 @@ class Main {
         let selected = Main.tabHolder.getSelected();
         if (Main.translationViews.has(selected)) {
             Main.translationViews.get(selected).clearErrors(arg);
+        }
+    }
+
+    updateTarget(arg: any): void {
+        let selected = Main.tabHolder.getSelected();
+        if (Main.translationViews.has(selected)) {
+            Main.translationViews.get(selected).updateTarget(arg);
         }
     }
 

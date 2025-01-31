@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007 - 2024 Maxprograms.
+ * Copyright (c) 2007 - 2025 Maxprograms.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 1.0
@@ -25,7 +25,7 @@ import org.xml.sax.SAXException;
 
 import com.maxprograms.swordfish.Constants;
 import com.maxprograms.swordfish.TmsServer;
-import com.maxprograms.xml.Catalog;
+import com.maxprograms.xml.CatalogBuilder;
 import com.maxprograms.xml.Document;
 import com.maxprograms.xml.Element;
 import com.maxprograms.xml.Indenter;
@@ -66,7 +66,7 @@ public class Tbx2Tmx {
     public static void convert(String source, String output)
             throws SAXException, IOException, ParserConfigurationException, URISyntaxException {
         SAXBuilder builder = new SAXBuilder();
-        builder.setEntityResolver(new Catalog(TmsServer.getCatalogFile()));
+        builder.setEntityResolver(CatalogBuilder.getCatalog(TmsServer.getCatalogFile()));
         Document tbx = builder.build(source);
 
         Tbx2Tmx converter = new Tbx2Tmx();

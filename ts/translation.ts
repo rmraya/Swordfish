@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007 - 2024 Maxprograms.
+ * Copyright (c) 2007 - 2025 Maxprograms.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 1.0
@@ -1559,7 +1559,7 @@ class TranslationView {
                 && row.getAttribute('data-id') === data.segment) {
                 (row.getElementsByClassName('match')[0] as HTMLTableCellElement).innerHTML = data.match + '%';
                 if (data.target) {
-                    let status : string = data.status;
+                    let status: string = data.status;
                     (row.getElementsByClassName('state')[0] as HTMLTableCellElement).classList.remove('initial');
                     (row.getElementsByClassName('state')[0] as HTMLTableCellElement).classList.add(status);
                     (row.getElementsByClassName('target')[0] as HTMLTableCellElement).innerHTML = data.target;
@@ -2325,4 +2325,24 @@ class TranslationView {
             }
         }
     }
+
+    updateTarget(arg: any) {
+        let rows: HTMLCollectionOf<HTMLTableRowElement> = this.tbody.getElementsByTagName('tr');
+        let length: number = rows.length;
+        for (let i: number = 0; i < length; i++) {
+            let row: HTMLTableRowElement = rows[i];
+            if (row.getAttribute('data-file') === arg.file && row.getAttribute('data-unit') === arg.unit
+                && row.getAttribute('data-id') === arg.segment) {
+                let td: HTMLTableCellElement = row.getElementsByClassName('target')[0] as HTMLTableCellElement;
+                let oldTags: number = td.getElementsByTagName('img').length;
+                td.innerHTML = arg.target;
+                let newTags: number = td.getElementsByTagName('img').length;
+                if (oldTags !== newTags) {
+                   this.electron.ipcRenderer.send('show-notification', 'Extra tags were removed' );
+                }
+                break;
+            }
+        }
+    }
+
 }

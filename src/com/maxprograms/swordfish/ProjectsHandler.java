@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007 - 2024 Maxprograms.
+ * Copyright (c) 2007 - 2025 Maxprograms.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 1.0
@@ -57,7 +57,7 @@ import com.maxprograms.swordfish.xliff.XliffStore;
 import com.maxprograms.swordfish.xliff.XliffUtils;
 import com.maxprograms.xliff2.Resegmenter;
 import com.maxprograms.xliff2.ToXliff2;
-import com.maxprograms.xml.Catalog;
+import com.maxprograms.xml.CatalogBuilder;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 
@@ -934,7 +934,7 @@ public class ProjectsHandler implements HttpHandler {
 							res = ToXliff2.run(xliff, catalogFile, "2.1");
 							if (mustResegment && "0".equals(res.get(0))) {
 								res = Resegmenter.run(xliff.getAbsolutePath(), srxFile, json.getString("srcLang"),
-										new Catalog(catalogFile));
+										CatalogBuilder.getCatalog(catalogFile));
 							}
 						}
 						if (!"0".equals(res.get(0))) {
