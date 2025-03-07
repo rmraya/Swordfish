@@ -42,27 +42,6 @@ public class TMUtils {
 		// private for security
 	}
 
-	public static String pureText(Element seg) {
-		List<XMLNode> l = seg.getContent();
-		Iterator<XMLNode> i = l.iterator();
-		StringBuilder text = new StringBuilder();
-		while (i.hasNext()) {
-			XMLNode o = i.next();
-			if (o.getNodeType() == XMLNode.TEXT_NODE) {
-				text.append(((TextNode) o).getText());
-			} else if (o.getNodeType() == XMLNode.ELEMENT_NODE) {
-				String type = ((Element) o).getName();
-				// discard all inline elements
-				// except <mrk> and <hi>
-				if (type.equals("sub") || type.equals("hi")) {
-					Element e = (Element) o;
-					text.append(pureText(e));
-				}
-			}
-		}
-		return text.toString();
-	}
-
 	public static String createId() throws InterruptedException {
 		long lng = System.currentTimeMillis();
 		// wait until we are in the next millisecond

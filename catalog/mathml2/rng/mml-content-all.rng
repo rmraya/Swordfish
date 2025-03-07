@@ -1,0 +1,52 @@
+<?xml version="1.0" ?>
+
+<!-- Content constructs: all -->
+
+<!--
+
+RELAX NG Schema on MathML 2.0
+
+See COPYING for the status of this software.
+Yutaka Furubayashi (Poka-Poka Dream Factory) <info@yupotan.sppd.ne.jp>
+
+-->
+
+<grammar xmlns="http://relaxng.org/ns/structure/1.0">
+
+<define name="mml.Content">
+ <choice>
+  <ref name="mml.ctoken"/>
+  <ref name="mml.cspecial"/>
+  <ref name="mml.cother"/>
+  <ref name="mml.csemantics"/>
+  <ref name="mml.c0ary"/>
+  <ref name="mml.cconstructor"/>
+  <ref name="mml.cquantifier"/>
+  <ref name="mml.cop1ary"/>
+  <ref name="mml.cop2ary"/>
+  <ref name="mml.copnary"/>
+  <ref name="mml.copmisc"/>
+  <ref name="mml.crel2ary"/>
+  <ref name="mml.crelnary"/>
+ </choice>
+</define>
+
+<!-- Content constructs for substitution in presentation structures -->
+
+<define name="mml.ContInPres">
+ <choice>
+  <ref name="mml.ci.qname"/>
+  <ref name="mml.csymbol.qname"/>
+  <ref name="mml.cn.qname"/>
+  <ref name="mml.c0ary"/>
+  <ref name="mml.apply.qname"/>
+  <ref name="mml.fn.qname"/>
+  <ref name="mml.lambda.qname"/>
+  <ref name="mml.reln.qname"/>
+  <ref name="mml.cconstructor"/>
+  <ref name="mml.semantics.qname"/>
+  <ref name="mml.declare.qname"/>
+ </choice>
+</define>
+
+</grammar>

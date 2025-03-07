@@ -6,8 +6,7 @@
 
   <!-- Import -->
 
-  <xs:import namespace="http://www.w3.org/XML/1998/namespace"
-    schemaLocation="informativeCopiesOf3rdPartySchemas/w3c/xml.xsd"/>
+  <xs:import namespace="http://www.w3.org/XML/1998/namespace" schemaLocation="http://www.w3.org/2001/xml.xsd"/>
 
   <!-- Attribute Types -->
 

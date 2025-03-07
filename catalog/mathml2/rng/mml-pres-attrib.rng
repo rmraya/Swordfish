@@ -1,0 +1,733 @@
+<?xml version="1.0"?>
+
+<!-- Attribute definitions for presentation elements -->
+
+<!--
+
+RELAX NG Schema on MathML 2.0
+
+See COPYING for the status of this software.
+Yutaka Furubayashi (Poka-Poka Dream Factory) <info@yupotan.sppd.ne.jp>
+
+-->
+
+<grammar xmlns="http://relaxng.org/ns/structure/1.0">
+
+<!-- fonts -->
+
+<define name="mml.att-fontsize">
+ <optional>
+  <attribute name="fontsize">
+   <ref name="mml.length.datatype"/>
+  </attribute>
+ </optional>
+</define>
+
+<define name="mml.att-fontweight">
+ <optional>
+  <attribute name="fontweight">
+   <choice>
+    <value>normal</value>
+    <value>bold</value>
+   </choice>
+  </attribute>
+ </optional>
+</define>
+
+<define name="mml.att-fontstyle">
+ <optional>
+  <attribute name="fontstyle">
+   <choice>
+    <value>normal</value>
+    <value>italic</value>
+   </choice>
+  </attribute>
+ </optional>
+</define>
+
+<define name="mml.att-fontfamily">
+ <optional>
+  <attribute name="fontfamily">
+   <text/>
+  </attribute>
+ </optional>
+</define>
+
+<define name="mml.att-color">
+ <optional>
+  <attribute name="color">
+   <ref name="mml.color.datatype"/>
+  </attribute>
+ </optional>
+</define>
+
+<!-- MathML2 typographically-distinguished symbol attributes -->
+
+<define name="mml.att-mathvariant">
+ <optional>
+  <attribute name="mathvariant">
+   <choice>
+    <value>normal</value>
+    <value>bold</value>
+    <value>italic</value>
+    <value>bold-italic</value>
+    <value>double-struck</value>
+    <value>bold-fraktur</value>
+    <value>script</value>
+    <value>bold-script</value>
+    <value>fraktur</value>
+    <value>sans-serif</value>
+    <value>bold-sans-serif</value>
+    <value>sans-serif-italic</value>
+    <value>sans-serif-bold-italic</value>
+    <value>monospace</value>
+   </choice>
+  </attribute>
+ </optional>
+</define>
+
+<define name="mml.att-mathsize">
+ <optional>
+  <attribute name="mathsize">
+   <choice>
+    <value>small</value>
+    <value>normal</value>
+    <value>big</value>
+    <ref name="mml.length.datatype"/>
+   </choice>
+  </attribute>
+ </optional>
+</define>
+
+<define name="mml.att-mathcolor">
+ <optional>
+  <attribute name="mathcolor">
+   <ref name="mml.color.datatype"/>
+  </attribute>
+ </optional>
+</define>
+
+<define name="mml.att-mathbackground">
+ <optional>
+  <attribute name="mathbackground">
+   <ref name="mml.color.datatype"/>
+  </attribute>
+ </optional>
+</define>
+
+<define name="mml.att-fontinfo" combine="interleave">
+ <ref name="mml.att-fontsize"/>
+ <ref name="mml.att-fontweight"/>
+ <ref name="mml.att-fontstyle"/>
+ <ref name="mml.att-fontfamily"/>
+ <ref name="mml.att-color"/>
+ <ref name="mml.att-mathvariant"/>
+ <ref name="mml.att-mathsize"/>
+ <ref name="mml.att-mathcolor"/>
+ <ref name="mml.att-mathbackground"/>
+</define>
+
+<define name="mml.att-form">
+ <optional>
+  <attribute name="form">
+   <choice>
+    <value>prefix</value>
+    <value>infix</value>
+    <value>postfix</value>
+   </choice>
+  </attribute>
+ </optional>
+</define>
+
+<define name="mml.att-fence">
+ <optional>
+  <attribute name="fence">
+   <choice>
+    <value>true</value>
+    <value>false</value>
+   </choice>
+  </attribute>
+ </optional>
+</define>
+
+<define name="mml.att-separator">
+ <optional>
+  <attribute name="separator">
+   <choice>
+    <value>true</value>
+    <value>false</value>
+   </choice>
+  </attribute>
+ </optional>
+</define>
+
+<define name="mml.att-lspace">
+ <optional>
+  <attribute name="lspace">
+   <ref name="mml.namedspace.datatype"/>
+  </attribute>
+ </optional>
+</define>
+
+<define name="mml.att-rspace">
+ <optional>
+  <attribute name="rspace">
+   <ref name="mml.namedspace.datatype"/>
+  </attribute>
+ </optional>
+</define>
+
+<define name="mml.att-stretchy">
+ <optional>
+  <attribute name="stretchy">
+   <choice>
+    <value>true</value>
+    <value>false</value>
+   </choice>
+  </attribute>
+ </optional>
+</define>
+
+<define name="mml.att-symmetric">
+ <optional>
+  <attribute name="symmetric">
+   <choice>
+    <value>true</value>
+    <value>false</value>
+   </choice>
+  </attribute>
+ </optional>
+</define>
+
+<define name="mml.att-maxsize">
+ <optional>
+  <attribute name="maxsize">
+   <choice>
+    <ref name="mml.namedspace.datatype"/>
+    <value>infinity</value>
+   </choice>
+  </attribute>
+ </optional>
+</define>
+
+<define name="mml.att-minsize">
+ <optional>
+  <attribute name="minsize">
+   <ref name="mml.namedspace.datatype"/>
+  </attribute>
+ </optional>
+</define>
+
+<define name="mml.att-largeop">
+ <optional>
+  <attribute name="largeop">
+   <choice>
+    <value>true</value>
+    <value>false</value>
+   </choice>
+  </attribute>
+ </optional>
+</define>
+
+<define name="mml.att-movablelimits">
+ <optional>
+  <attribute name="movablelimits">
+   <choice>
+    <value>true</value>
+    <value>false</value>
+   </choice>
+  </attribute>
+ </optional>
+</define>
+
+<define name="mml.att-accent">
+ <optional>
+  <attribute name="accent">
+   <choice>
+    <value>true</value>
+    <value>false</value>
+   </choice>
+  </attribute>
+ </optional>
+</define>
+
+<define name="mml.att-opinfo" combine="interleave">
+ <ref name="mml.att-form"/>
+ <ref name="mml.att-fence"/>
+ <ref name="mml.att-separator"/>
+ <ref name="mml.att-lspace"/>
+ <ref name="mml.att-rspace"/>
+ <ref name="mml.att-stretchy"/>
+ <ref name="mml.att-symmetric"/>
+ <ref name="mml.att-maxsize"/>
+ <ref name="mml.att-minsize"/>
+ <ref name="mml.att-largeop"/>
+ <ref name="mml.att-movablelimits"/>
+ <ref name="mml.att-accent"/>
+</define>
+
+<define name="mml.att-width">
+ <optional>
+  <attribute name="width">
+   <ref name="mml.namedspace.datatype"/>
+  </attribute>
+ </optional>
+</define>
+
+<define name="mml.att-height">
+ <optional>
+  <attribute name="height">
+   <ref name="mml.length.datatype"/>
+  </attribute>
+ </optional>
+</define>
+
+<define name="mml.att-depth">
+ <optional>
+  <attribute name="depth">
+   <ref name="mml.length.datatype"/>
+  </attribute>
+ </optional>
+</define>
+
+<define name="mml.att-linebreak">
+ <optional>
+  <attribute name="linebreak">
+   <choice>
+    <value>auto</value>
+    <value>newline</value>
+    <value>indentingnewline</value>
+    <value>nobreak</value>
+    <value>goodbreak</value>
+    <value>badbreak</value>
+   </choice>
+  </attribute>
+ </optional>
+</define>
+
+<define name="mml.att-sizeinfo" combine="interleave">
+ <ref name="mml.att-width"/>
+ <ref name="mml.att-height"/>
+ <ref name="mml.att-depth"/>
+</define>
+
+<define name="mml.att-lquote">
+ <optional>
+  <attribute name="lquote">
+   <text/>
+  </attribute>
+ </optional>
+</define>
+
+<define name="mml.att-rquote">
+ <optional>
+  <attribute name="rquote">
+   <text/>
+  </attribute>
+ </optional>
+</define>
+
+<define name="mml.att-linethickness">
+ <optional>
+  <attribute name="linethickness">
+   <choice>
+    <ref name="mml.length.datatype"/>
+    <value>thin</value>
+    <value>medium</value>
+    <value>thick</value>
+   </choice>
+  </attribute>
+ </optional>
+</define>
+
+<define name="mml.att-scriptlevel">
+ <optional>
+  <attribute name="scriptlevel">
+   <ref name="mml.number.datatype"/>
+  </attribute>
+ </optional>
+</define>
+
+<define name="mml.att-displaystyle">
+ <optional>
+  <attribute name="displaystyle">
+   <choice>
+    <value>true</value>
+    <value>false</value>
+   </choice>
+  </attribute>
+ </optional>
+</define>
+
+<define name="mml.att-scriptsizemultiplier">
+ <optional>
+  <attribute name="scriptsizemultiplier">
+   <ref name="mml.nonnegativefloat.datatype"/>
+  </attribute>
+ </optional>
+</define>
+
+<define name="mml.att-scriptminsize">
+ <optional>
+  <attribute name="scriptminsize">
+   <ref name="mml.length.datatype"/>
+  </attribute>
+ </optional>
+</define>
+
+<define name="mml.att-background">
+ <optional>
+  <attribute name="background">
+   <ref name="mml.color.datatype"/>
+  </attribute>
+ </optional>
+</define>
+
+<define name="mml.att-veryverythinmathspace">
+ <optional>
+  <attribute name="veryverythinmathspace">
+   <ref name="mml.length.datatype"/>
+  </attribute>
+ </optional>
+</define>
+
+<define name="mml.att-verythinmathspace">
+ <optional>
+  <attribute name="verythinmathspace">
+   <ref name="mml.length.datatype"/>
+  </attribute>
+ </optional>
+</define>
+
+<define name="mml.att-thinmathspace">
+ <optional>
+  <attribute name="thinmathspace">
+   <ref name="mml.length.datatype"/>
+  </attribute>
+ </optional>
+</define>
+
+<define name="mml.att-mediummathspace">
+ <optional>
+  <attribute name="mediummathspace">
+   <ref name="mml.length.datatype"/>
+  </attribute>
+ </optional>
+</define>
+
+<define name="mml.att-thickmathspace">
+ <optional>
+  <attribute name="thickmathspace">
+   <ref name="mml.length.datatype"/>
+  </attribute>
+ </optional>
+</define>
+
+<define name="mml.att-verythickmathspace">
+ <optional>
+  <attribute name="verythickmathspace">
+   <ref name="mml.length.datatype"/>
+  </attribute>
+ </optional>
+</define>
+
+<define name="mml.att-veryverythickmathspace">
+ <optional>
+  <attribute name="veryverythickmathspace">
+   <ref name="mml.length.datatype"/>
+  </attribute>
+ </optional>
+</define>
+
+<define name="mml.att-open">
+ <optional>
+  <attribute name="open">
+   <text/>
+  </attribute>
+ </optional>
+</define>
+
+<define name="mml.att-close">
+ <optional>
+  <attribute name="close">
+   <text/>
+  </attribute>
+ </optional>
+</define>
+
+<define name="mml.att-separators">
+ <optional>
+  <attribute name="separators">
+   <text/>
+  </attribute>
+ </optional>
+</define>
+
+<define name="mml.att-subscriptshift">
+ <optional>
+  <attribute name="subscriptshift">
+   <ref name="mml.length.datatype"/>
+  </attribute>
+ </optional>
+</define>
+
+<define name="mml.att-superscriptshift">
+ <optional>
+  <attribute name="superscriptshift">
+   <ref name="mml.length.datatype"/>
+  </attribute>
+ </optional>
+</define>
+
+<define name="mml.att-accentunder">
+ <optional>
+  <attribute name="accentunder">
+   <choice>
+    <value>true</value>
+    <value>false</value>
+   </choice>
+  </attribute>
+ </optional>
+</define>
+
+<define name="mml.att-align">
+ <optional>
+  <attribute name="align">
+   <ref name="mml.align.datatype"/>
+  </attribute>
+ </optional>
+</define>
+
+<define name="mml.att-rowalign">
+ <optional>
+  <attribute name="rowalign">
+   <ref name="mml.rowalign.datatype"/>
+  </attribute>
+ </optional>
+</define>
+
+<define name="mml.att-columnalign">
+ <optional>
+  <attribute name="columnalign">
+   <ref name="mml.columnalign.datatype"/>
+  </attribute>
+ </optional>
+</define>
+
+<define name="mml.att-columnwidth">
+ <optional>
+  <attribute name="columnwidth">
+   <ref name="mml.columnwidth.datatype"/>
+  </attribute>
+ </optional>
+</define>
+
+<define name="mml.att-groupalign">
+ <optional>
+  <attribute name="groupalign">
+   <ref name="mml.groupalign.datatype"/>
+  </attribute>
+ </optional>
+</define>
+
+<define name="mml.att-alignmentscope">
+ <optional>
+  <attribute name="alignmentscope">
+   <ref name="mml.alignmentscope.datatype"/>
+  </attribute>
+ </optional>
+</define>
+
+<define name="mml.att-rowspacing">
+ <optional>
+  <attribute name="rowspacing">
+   <ref name="mml.rowspacing.datatype"/>
+  </attribute>
+ </optional>
+</define>
+
+<define name="mml.att-columnspacing">
+ <optional>
+  <attribute name="columnspacing">
+   <ref name="mml.columnspacing.datatype"/>
+  </attribute>
+ </optional>
+</define>
+
+<define name="mml.att-rowlines">
+ <optional>
+  <attribute name="rowlines">
+   <ref name="mml.lines.datatype"/>
+  </attribute>
+ </optional>
+</define>
+
+<define name="mml.att-columnlines">
+ <optional>
+  <attribute name="columnlines">
+   <ref name="mml.lines.datatype"/>
+  </attribute>
+ </optional>
+</define>
+
+<define name="mml.att-frame">
+ <optional>
+  <attribute name="frame">
+   <choice>
+    <value>none</value>
+    <value>solid</value>
+    <value>dashed</value>
+   </choice>
+  </attribute>
+ </optional>
+</define>
+
+<define name="mml.att-framespacing">
+ <optional>
+  <attribute name="framespacing">
+   <ref name="mml.framespacing.datatype"/>
+  </attribute>
+ </optional>
+</define>
+
+<define name="mml.att-equalrows">
+ <optional>
+  <attribute name="equalrows">
+   <choice>
+    <value>true</value>
+    <value>false</value>
+   </choice>
+  </attribute>
+ </optional>
+</define>
+
+<define name="mml.att-equalcolumns">
+ <optional>
+  <attribute name="equalcolumns">
+   <choice>
+    <value>true</value>
+    <value>false</value>
+   </choice>
+  </attribute>
+ </optional>
+</define>
+
+<define name="mml.att-tableinfo" combine="interleave">
+ <ref name="mml.att-align"/>
+ <ref name="mml.att-rowalign"/>
+ <ref name="mml.att-columnalign"/>
+ <ref name="mml.att-columnwidth"/>
+ <ref name="mml.att-groupalign"/>
+ <ref name="mml.att-alignmentscope"/>
+ <ref name="mml.att-rowspacing"/>
+ <ref name="mml.att-columnspacing"/>
+ <ref name="mml.att-rowlines"/>
+ <ref name="mml.att-columnlines"/>
+ <ref name="mml.att-frame"/>
+ <ref name="mml.att-framespacing"/>
+ <ref name="mml.att-equalrows"/>
+ <ref name="mml.att-equalcolumns"/>
+ <ref name="mml.att-displaystyle"/>
+</define>
+
+<define name="mml.att-rowspan">
+ <optional>
+  <attribute name="rowspan">
+   <choice>
+    <value>top</value>
+    <value>bottom</value>
+    <value>center</value>
+    <value>baseline</value>
+    <value>axis </value>
+   </choice>
+  </attribute>
+ </optional>
+</define>
+
+<define name="mml.att-columnspan">
+ <optional>
+  <attribute name="columnspan">
+   <ref name="mml.columnspan.datatype"/>
+  </attribute>
+ </optional>
+</define>
+
+<define name="mml.att-edge">
+ <optional>
+  <attribute name="edge">
+   <choice>
+    <value>left</value>
+    <value>right</value>
+   </choice>
+  </attribute>
+ </optional>
+</define>
+
+<!-- actiontypes -->
+
+<define name="mml.att-actiontype">
+ <optional>
+  <choice>
+   <group>
+    <attribute name="actiontype"><value>toggle</value></attribute>
+    <attribute name="selection"><ref name="mml.positiveinteger.datatype"/></attribute>
+   </group>
+   <attribute name="actiontype"><value>statusline</value></attribute>
+   <attribute name="actiontype"><value>tooltip</value></attribute>
+   <group>
+    <attribute name="actiontype"><value>highlight</value></attribute>
+    <zeroOrMore>
+     <attribute>
+      <anyName>
+       <except><nsName/><nsName ns=""/><nsName ns="http://www.w3.org/1999/xlink"/></except>
+      </anyName>
+      <ref name="mml.color.datatype"/>
+     </attribute>
+    </zeroOrMore>
+   </group>
+   <group>
+    <attribute name="actiontype"><value>menu</value></attribute>
+    <attribute name="selection"><ref name="mml.positiveinteger.datatype"/></attribute>
+   </group>
+  </choice>
+ </optional>
+</define>
+
+
+<define name="mml.att-name">
+ <optional>
+  <attribute name="name">
+   <text/>
+  </attribute>
+ </optional>
+</define>
+
+<define name="mml.att-alt">
+ <optional>
+  <attribute name="alt">
+   <text/>
+  </attribute>
+ </optional>
+</define>
+
+<define name="mml.att-index">
+ <optional>
+  <attribute name="index">
+   <ref name="mml.number.datatype"/>
+  </attribute>
+ </optional>
+</define>
+
+
+<define name="mml.att-bevelled">
+ <optional>
+  <attribute name="bevelled">
+   <choice>
+    <value>true</value>
+    <value>false</value>
+   </choice>
+  </attribute>
+ </optional>
+</define>
+
+</grammar>

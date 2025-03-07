@@ -1,0 +1,99 @@
+<?xml version="1.0"?>
+
+<!-- Content elements: constructors -->
+
+<!--
+
+RELAX NG Schema on MathML 2.0
+
+See COPYING for the status of this software.
+Yutaka Furubayashi (Poka-Poka Dream Factory) <info@yupotan.sppd.ne.jp>
+
+-->
+
+<grammar xmlns="http://relaxng.org/ns/structure/1.0">
+
+<define name="mml.cconstructor">
+ <choice>
+  <ref name="mml.interval.qname"/>
+  <ref name="mml.list.qname"/>
+  <ref name="mml.matrix.qname"/>
+  <ref name="mml.matrixrow.qname"/>
+  <ref name="mml.set.qname"/>
+  <ref name="mml.vector.qname"/>
+  <ref name="mml.piecewise.qname"/>
+ </choice>
+</define>
+
+<define name="mml.interval.qname">
+ <element name="interval">
+  <ref name="mml.ContentExpression"/>
+  <ref name="mml.Common.attrib"/>
+  <ref name="mml.att-closure"/>
+ </element>
+</define>
+
+<define name="mml.set.qname">
+ <element name="set">
+  <ref name="mml.ContentExpression"/>
+  <ref name="mml.Common.attrib"/>
+  <ref name="mml.att-type"/>
+ </element>
+</define>
+
+<define name="mml.list.qname">
+ <element name="list">
+  <ref name="mml.ContentExpression"/>
+  <ref name="mml.Common.attrib"/>
+  <ref name="mml.att-order"/>
+ </element>
+</define>
+
+<define name="mml.vector.qname">
+ <element name="vector">
+  <ref name="mml.ContentExpression"/>
+  <ref name="mml.Common.attrib"/>
+ </element>
+</define>
+
+<define name="mml.matrix.qname">
+ <element name="matrix">
+  <ref name="mml.ContentExpression"/>
+  <ref name="mml.Common.attrib"/>
+ </element>
+</define>
+
+<define name="mml.matrixrow.qname">
+ <element name="matrixrow">
+  <ref name="mml.ContentExpression"/>
+  <ref name="mml.Common.attrib"/>
+ </element>
+</define>
+
+<define name="mml.piecewise.qname">
+ <element name="piecewise">
+  <zeroOrMore>
+   <ref name="mml.piece.qname"/>
+  </zeroOrMore>
+  <optional>
+   <ref name="mml.otherwise.qname"/>
+  </optional>
+  <ref name="mml.Common.attrib"/>
+ </element>
+</define>
+
+<define name="mml.piece.qname">
+ <element name="piece">
+  <ref name="mml.ContentExpression"/>
+  <ref name="mml.Common.attrib"/>
+ </element>
+</define>
+
+<define name="mml.otherwise.qname">
+ <element name="otherwise">
+  <ref name="mml.ContentExpression"/>
+  <ref name="mml.Common.attrib"/>
+ </element>
+</define>
+
+</grammar>

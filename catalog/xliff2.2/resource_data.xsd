@@ -9,8 +9,7 @@
 
   <xs:import namespace="urn:oasis:names:tc:xliff:document:2.2"
       schemaLocation="xliff_core_2.2.xsd"/>
-  <xs:import namespace="http://www.w3.org/XML/1998/namespace"
-    schemaLocation="informativeCopiesOf3rdPartySchemas/w3c/xml.xsd"/>
+  <xs:import namespace="http://www.w3.org/XML/1998/namespace" schemaLocation="http://www.w3.org/2001/xml.xsd"/>
   
   <!-- Elements -->
 

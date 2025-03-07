@@ -1,0 +1,73 @@
+<?xml version="1.0" ?>
+
+<!-- Presentation layout: tables -->
+
+<!--
+
+RELAX NG Schema on MathML 2.0
+
+See COPYING for the status of this software.
+Yutaka Furubayashi (Poka-Poka Dream Factory) <info@yupotan.sppd.ne.jp>
+
+-->
+
+<grammar xmlns="http://relaxng.org/ns/structure/1.0">
+
+<define name="mml.ptabschema">
+ <choice>
+  <ref name="mml.mtable.qname"/>
+  <ref name="mml.mtr.qname"/>
+  <ref name="mml.mlabeledtr.qname"/>
+  <ref name="mml.mtd.qname"/>
+ </choice>
+</define>
+
+<define name="mml.mtable.qname">
+ <element name="mtable">
+  <ref name="mml.PresExpression"/>
+  <ref name="mml.Common.attrib"/>
+  <ref name="mml.att-tableinfo"/>
+ </element>
+</define>
+
+<define name="mml.mtr.qname">
+ <element name="mtr">
+  <ref name="mml.PresExpression"/>
+  <ref name="mml.Common.attrib"/>
+  <ref name="mml.att-rowalign"/>
+  <ref name="mml.att-columnalign"/>
+  <ref name="mml.att-groupalign"/>
+ </element>
+</define>
+
+<define name="mml.mlabeledtr.qname">
+ <element name="mlabeledtr">
+  <ref name="mml.PresExpression"/>
+  <ref name="mml.Common.attrib"/>
+  <ref name="mml.att-rowalign"/>
+  <ref name="mml.att-columnalign"/>
+  <ref name="mml.att-groupalign"/>
+ </element>
+</define>
+
+<define name="mml.mtd.qname">
+ <element name="mtd">
+  <ref name="mml.PresExpression"/>
+  <ref name="mml.Common.attrib"/>
+  <ref name="mml.att-rowalign"/>
+  <ref name="mml.att-columnalign"/>
+  <ref name="mml.att-groupalign"/>
+  <ref name="mml.att-rowspan"/>
+  <ref name="mml.att-columnspan"/>
+ </element>
+</define>
+
+<define name="mml.plschema">
+ <choice>
+  <ref name="mml.pgenschema"/>
+  <ref name="mml.pscrschema"/>
+  <ref name="mml.ptabschema"/>
+ </choice>
+</define>
+
+</grammar>

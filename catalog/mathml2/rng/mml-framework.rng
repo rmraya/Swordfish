@@ -1,0 +1,87 @@
+<?xml version="1.0" ?>
+
+<!-- MathML2 Framework -->
+
+<!--
+
+RELAX NG Schema on MathML 2.0
+
+See COPYING for the status of this software.
+Yutaka Furubayashi (Poka-Poka Dream Factory) <info@yupotan.sppd.ne.jp>
+
+-->
+
+<grammar xmlns="http://relaxng.org/ns/structure/1.0" xmlns:xlink="http://www.w3.org/1999/xlink">
+
+<define name="mml.ContentExpression">
+ <zeroOrMore>
+  <choice>
+  <ref name="mml.Content"/>
+  <ref name="mml.PresInCont"/>
+  </choice>
+ </zeroOrMore>
+</define>
+
+<define name="mml.PresExpression">
+ <zeroOrMore>
+  <choice>
+  <ref name="mml.Presentation"/>
+  <ref name="mml.ContInPres"/>
+  </choice>
+ </zeroOrMore>
+</define>
+
+<define name="mml.MathExpression">
+ <zeroOrMore>
+  <choice>
+  <ref name="mml.PresInCont"/>
+  <ref name="mml.ContInPres"/>
+  </choice>
+ </zeroOrMore>
+</define>
+
+<!-- PCDATA or MathML character elements -->
+
+<define name="mml.MathMLCharacters">
+ <choice>
+  <ref name="mml.mglyph.qname"/>
+  <text/>
+ </choice>
+</define>
+
+<!-- Common Attributes -->
+
+<define name="mml.Common.attrib" combine="interleave">
+ <optional>
+  <attribute name="xlink:href">
+   <ref name="mml.uri.datatype"/>
+  </attribute>
+ </optional>
+ <optional>
+  <attribute name="class">
+   <text/>
+  </attribute>
+ </optional>
+ <optional>
+  <attribute name="style">
+   <text/>
+  </attribute>
+ </optional>
+ <optional>
+  <attribute name="id">
+   <ref name="mml.id.datatype"/>
+  </attribute>
+ </optional>
+ <optional>
+  <attribute name="xref">
+   <ref name="mml.idref.datatype"/>
+  </attribute>
+ </optional>
+ <optional>
+  <attribute name="other">
+   <text/>
+  </attribute>
+ </optional>
+</define>
+
+</grammar>

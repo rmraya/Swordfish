@@ -1,0 +1,27 @@
+<?xml version="1.0" ?>
+
+<!-- Presentation entity: all presentation constructs -->
+
+<!--
+
+RELAX NG Schema on MathML 2.0
+
+See COPYING for the status of this software.
+Yutaka Furubayashi (Poka-Poka Dream Factory) <info@yupotan.sppd.ne.jp>
+
+-->
+
+<grammar xmlns="http://relaxng.org/ns/structure/1.0">
+
+<define name="mml.Presentation">
+ <choice>
+  <ref name="mml.ptoken"/>
+  <ref name="mml.petoken"/>
+  <ref name="mml.pscreschema"/>
+  <ref name="mml.plschema"/>
+  <ref name="mml.peschema"/>
+  <ref name="mml.pactions"/>
+ </choice>
+</define>
+
+</grammar>

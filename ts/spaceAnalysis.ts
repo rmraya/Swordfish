@@ -33,6 +33,9 @@ class SpaceAnalysis {
         document.getElementById('goTo').addEventListener('click', () => {
             this.gotoSegment();
         });
+        document.getElementById('fixAll').addEventListener('click', () => {
+            this.electron.ipcRenderer.send('fix-spaceErrors');
+        });
         document.getElementById('refresh').addEventListener('click', () => {
             this.electron.ipcRenderer.send('get-spaceErrors');
         });

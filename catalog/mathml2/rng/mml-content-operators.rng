@@ -1,0 +1,886 @@
+<?xml version="1.0" ?>
+
+<!-- Content elements: operators -->
+
+<!--
+
+RELAX NG Schema on MathML 2.0
+
+See COPYING for the status of this software.
+Yutaka Furubayashi (Poka-Poka Dream Factory) <info@yupotan.sppd.ne.jp>
+
+-->
+
+<grammar xmlns="http://relaxng.org/ns/structure/1.0">
+
+<define name="mml.operators.common.attrib" combine="interleave">
+ <ref name="mml.Common.attrib"/>
+ <ref name="mml.att-definition"/>
+ <ref name="mml.att-encoding"/>
+</define>
+
+<define name="mml.cfuncop1ary">
+ <choice>
+  <ref name="mml.inverse.qname"/>
+  <ref name="mml.ident.qname"/>
+  <ref name="mml.domain.qname"/>
+  <ref name="mml.codomain.qname"/>
+  <ref name="mml.image.qname"/>
+ </choice>
+</define>
+
+<define name="mml.inverse.qname">
+ <element name="inverse">
+  <empty/>
+  <ref name="mml.operators.common.attrib"/>
+ </element>
+</define>
+
+<define name="mml.domain.qname">
+ <element name="domain">
+  <empty/>
+  <ref name="mml.operators.common.attrib"/>
+ </element>
+</define>
+
+<define name="mml.codomain.qname">
+ <element name="codomain">
+  <empty/>
+  <ref name="mml.operators.common.attrib"/>
+ </element>
+</define>
+
+<define name="mml.image.qname">
+ <element name="image">
+  <empty/>
+  <ref name="mml.operators.common.attrib"/>
+ </element>
+</define>
+
+<define name="mml.cfuncopnary">
+ <choice>
+  <ref name="mml.fn.qname"/>
+  <ref name="mml.compose.qname"/>
+ </choice>
+</define>
+
+<define name="mml.fn.qname">
+ <element name="fn">
+  <ref name="mml.ContentExpression"/>
+  <ref name="mml.operators.common.attrib"/>
+ </element>
+</define>
+
+<define name="mml.ident.qname">
+ <element name="ident">
+  <empty/>
+  <ref name="mml.operators.common.attrib"/>
+ </element>
+</define>
+
+<define name="mml.compose.qname">
+ <element name="compose">
+  <empty/>
+  <ref name="mml.operators.common.attrib"/>
+ </element>
+</define>
+
+<define name="mml.carithop1ary">
+ <choice>
+  <ref name="mml.abs.qname"/>
+  <ref name="mml.conjugate.qname"/>
+  <ref name="mml.exp.qname"/>
+  <ref name="mml.factorial.qname"/>
+  <ref name="mml.arg.qname"/>
+  <ref name="mml.real.qname"/>
+  <ref name="mml.imaginary.qname"/>
+  <ref name="mml.floor.qname"/>
+  <ref name="mml.ceiling.qname"/>
+ </choice>
+</define>
+
+<define name="mml.exp.qname">
+ <element name="exp">
+  <empty/>
+  <ref name="mml.operators.common.attrib"/>
+ </element>
+</define>
+
+<define name="mml.abs.qname">
+ <element name="abs">
+  <empty/>
+  <ref name="mml.operators.common.attrib"/>
+ </element>
+</define>
+
+<define name="mml.arg.qname">
+ <element name="arg">
+  <empty/>
+  <ref name="mml.operators.common.attrib"/>
+ </element>
+</define>
+
+<define name="mml.real.qname">
+ <element name="real">
+  <empty/>
+  <ref name="mml.operators.common.attrib"/>
+ </element>
+</define>
+
+<define name="mml.imaginary.qname">
+ <element name="imaginary">
+  <empty/>
+  <ref name="mml.operators.common.attrib"/>
+ </element>
+</define>
+
+<define name="mml.conjugate.qname">
+ <element name="conjugate">
+  <empty/>
+  <ref name="mml.operators.common.attrib"/>
+ </element>
+</define>
+
+<define name="mml.factorial.qname">
+ <element name="factorial">
+  <empty/>
+  <ref name="mml.operators.common.attrib"/>
+ </element>
+</define>
+
+<define name="mml.floor.qname">
+ <element name="floor">
+  <empty/>
+  <ref name="mml.operators.common.attrib"/>
+ </element>
+</define>
+
+<define name="mml.ceiling.qname">
+ <element name="ceiling">
+  <empty/>
+  <ref name="mml.operators.common.attrib"/>
+ </element>
+</define>
+
+<define name="mml.carithop1or2ary">
+ <choice>
+  <ref name="mml.minus.qname"/>
+ </choice>
+</define>
+
+<define name="mml.minus.qname">
+ <element name="minus">
+  <empty/>
+  <ref name="mml.operators.common.attrib"/>
+ </element>
+</define>
+
+<define name="mml.carithop2ary">
+ <choice>
+  <ref name="mml.quotient.qname"/>
+  <ref name="mml.divide.qname"/>
+  <ref name="mml.power.qname"/>
+  <ref name="mml.rem.qname"/>
+ </choice>
+</define>
+
+<define name="mml.quotient.qname">
+ <element name="quotient">
+  <empty/>
+  <ref name="mml.operators.common.attrib"/>
+ </element>
+</define>
+
+<define name="mml.divide.qname">
+ <element name="divide">
+  <empty/>
+  <ref name="mml.operators.common.attrib"/>
+ </element>
+</define>
+
+<define name="mml.power.qname">
+ <element name="power">
+  <empty/>
+  <ref name="mml.operators.common.attrib"/>
+ </element>
+</define>
+
+<define name="mml.rem.qname">
+ <element name="rem">
+  <empty/>
+  <ref name="mml.operators.common.attrib"/>
+ </element>
+</define>
+
+<define name="mml.carithopnary">
+ <choice>
+  <ref name="mml.plus.qname"/>
+  <ref name="mml.times.qname"/>
+  <ref name="mml.max.qname"/>
+  <ref name="mml.min.qname"/>
+  <ref name="mml.gcd.qname"/>
+  <ref name="mml.lcm.qname"/>
+ </choice>
+</define>
+
+<define name="mml.plus.qname">
+ <element name="plus">
+  <empty/>
+  <ref name="mml.operators.common.attrib"/>
+ </element>
+</define>
+
+<define name="mml.max.qname">
+ <element name="max">
+  <empty/>
+  <ref name="mml.operators.common.attrib"/>
+ </element>
+</define>
+
+<define name="mml.min.qname">
+ <element name="min">
+  <empty/>
+  <ref name="mml.operators.common.attrib"/>
+ </element>
+</define>
+
+<define name="mml.times.qname">
+ <element name="times">
+  <empty/>
+  <ref name="mml.operators.common.attrib"/>
+ </element>
+</define>
+
+<define name="mml.gcd.qname">
+ <element name="gcd">
+  <empty/>
+  <ref name="mml.operators.common.attrib"/>
+ </element>
+</define>
+
+<define name="mml.lcm.qname">
+ <element name="lcm">
+  <empty/>
+  <ref name="mml.operators.common.attrib"/>
+ </element>
+</define>
+
+<define name="mml.carithoproot">
+ <choice>
+  <ref name="mml.root.qname"/>
+ </choice>
+</define>
+
+<define name="mml.root.qname">
+ <element name="root">
+  <empty/>
+  <ref name="mml.operators.common.attrib"/>
+ </element>
+</define>
+
+<define name="mml.clogicopquant">
+ <choice>
+  <ref name="mml.exists.qname"/>
+  <ref name="mml.forall.qname"/>
+ </choice>
+</define>
+
+<define name="mml.exists.qname">
+ <element name="exists">
+  <empty/>
+  <ref name="mml.operators.common.attrib"/>
+ </element>
+</define>
+
+<define name="mml.forall.qname">
+ <element name="forall">
+  <empty/>
+  <ref name="mml.operators.common.attrib"/>
+ </element>
+</define>
+
+<define name="mml.clogicopnary">
+ <choice>
+  <ref name="mml.and.qname"/>
+  <ref name="mml.or.qname"/>
+  <ref name="mml.xor.qname"/>
+ </choice>
+</define>
+
+<define name="mml.and.qname">
+ <element name="and">
+  <empty/>
+  <ref name="mml.operators.common.attrib"/>
+ </element>
+</define>
+
+<define name="mml.or.qname">
+ <element name="or">
+  <empty/>
+  <ref name="mml.operators.common.attrib"/>
+ </element>
+</define>
+
+<define name="mml.xor.qname">
+ <element name="xor">
+  <empty/>
+  <ref name="mml.operators.common.attrib"/>
+ </element>
+</define>
+
+<define name="mml.clogicop1ary">
+ <choice>
+  <ref name="mml.not.qname"/>
+ </choice>
+</define>
+
+<define name="mml.not.qname">
+ <element name="not">
+  <empty/>
+  <ref name="mml.operators.common.attrib"/>
+ </element>
+</define>
+
+<define name="mml.clogicop2ary">
+ <choice>
+  <ref name="mml.implies.qname"/>
+ </choice>
+</define>
+
+<define name="mml.implies.qname">
+ <element name="implies">
+  <empty/>
+  <ref name="mml.operators.common.attrib"/>
+ </element>
+</define>
+
+<define name="mml.ccalcop">
+ <choice>
+  <ref name="mml.log.qname"/>
+  <ref name="mml.int.qname"/>
+  <ref name="mml.diff.qname"/>
+  <ref name="mml.partialdiff.qname"/>
+  <ref name="mml.divergence.qname"/>
+  <ref name="mml.grad.qname"/>
+  <ref name="mml.curl.qname"/>
+  <ref name="mml.laplacian.qname"/>
+ </choice>
+</define>
+
+<define name="mml.divergence.qname">
+ <element name="divergence">
+  <empty/>
+  <ref name="mml.operators.common.attrib"/>
+ </element>
+</define>
+
+<define name="mml.grad.qname">
+ <element name="grad">
+  <empty/>
+  <ref name="mml.operators.common.attrib"/>
+ </element>
+</define>
+
+<define name="mml.curl.qname">
+ <element name="curl">
+  <empty/>
+  <ref name="mml.operators.common.attrib"/>
+ </element>
+</define>
+
+<define name="mml.laplacian.qname">
+ <element name="laplacian">
+  <empty/>
+  <ref name="mml.operators.common.attrib"/>
+ </element>
+</define>
+
+<define name="mml.log.qname">
+ <element name="log">
+  <empty/>
+  <ref name="mml.operators.common.attrib"/>
+ </element>
+</define>
+
+<define name="mml.int.qname">
+ <element name="int">
+  <empty/>
+  <ref name="mml.operators.common.attrib"/>
+ </element>
+</define>
+
+<define name="mml.diff.qname">
+ <element name="diff">
+  <empty/>
+  <ref name="mml.operators.common.attrib"/>
+ </element>
+</define>
+
+<define name="mml.partialdiff.qname">
+ <element name="partialdiff">
+  <empty/>
+  <ref name="mml.operators.common.attrib"/>
+ </element>
+</define>
+
+<define name="mml.ccalcop1ary">
+ <choice>
+  <ref name="mml.ln.qname"/>
+ </choice>
+</define>
+
+<define name="mml.ln.qname">
+ <element name="ln">
+  <empty/>
+  <ref name="mml.operators.common.attrib"/>
+ </element>
+</define>
+
+<define name="mml.csetop1ary">
+ <choice>
+  <ref name="mml.card.qname"/>
+ </choice>
+</define>
+
+<define name="mml.card.qname">
+ <element name="card">
+  <empty/>
+  <ref name="mml.operators.common.attrib"/>
+ </element>
+</define>
+
+<define name="mml.csetop2ary">
+ <choice>
+  <ref name="mml.setdiff.qname"/>
+ </choice>
+</define>
+
+<define name="mml.setdiff.qname">
+ <element name="setdiff">
+  <empty/>
+  <ref name="mml.operators.common.attrib"/>
+ </element>
+</define>
+
+<define name="mml.csetopnary">
+ <choice>
+  <ref name="mml.union.qname"/>
+  <ref name="mml.intersect.qname"/>
+  <ref name="mml.cartesianproduct.qname"/>
+ </choice>
+</define>
+
+<define name="mml.union.qname">
+ <element name="union">
+  <empty/>
+  <ref name="mml.operators.common.attrib"/>
+ </element>
+</define>
+
+<define name="mml.intersect.qname">
+ <element name="intersect">
+  <empty/>
+  <ref name="mml.operators.common.attrib"/>
+ </element>
+</define>
+
+<define name="mml.cartesianproduct.qname">
+ <element name="cartesianproduct">
+  <empty/>
+  <ref name="mml.operators.common.attrib"/>
+ </element>
+</define>
+
+<define name="mml.cseqop">
+ <choice>
+  <ref name="mml.sum.qname"/>
+  <ref name="mml.product.qname"/>
+  <ref name="mml.limit.qname"/>
+ </choice>
+</define>
+
+<define name="mml.sum.qname">
+ <element name="sum">
+  <empty/>
+  <ref name="mml.operators.common.attrib"/>
+ </element>
+</define>
+
+<define name="mml.product.qname">
+ <element name="product">
+  <empty/>
+  <ref name="mml.operators.common.attrib"/>
+ </element>
+</define>
+
+<define name="mml.limit.qname">
+ <element name="limit">
+  <empty/>
+  <ref name="mml.operators.common.attrib"/>
+ </element>
+</define>
+
+<define name="mml.ctrigop">
+ <choice>
+  <ref name="mml.sin.qname"/>
+  <ref name="mml.cos.qname"/>
+  <ref name="mml.tan.qname"/>
+  <ref name="mml.sec.qname"/>
+  <ref name="mml.csc.qname"/>
+  <ref name="mml.cot.qname"/>
+  <ref name="mml.sinh.qname"/>
+  <ref name="mml.cosh.qname"/>
+  <ref name="mml.tanh.qname"/>
+  <ref name="mml.sech.qname"/>
+  <ref name="mml.csch.qname"/>
+  <ref name="mml.coth.qname"/>
+  <ref name="mml.arcsin.qname"/>
+  <ref name="mml.arccos.qname"/>
+  <ref name="mml.arctan.qname"/>
+  <ref name="mml.arccosh.qname"/>
+  <ref name="mml.arccot.qname"/>
+  <ref name="mml.arccoth.qname"/>
+  <ref name="mml.arccsc.qname"/>
+  <ref name="mml.arccsch.qname"/>
+  <ref name="mml.arcsec.qname"/>
+  <ref name="mml.arcsech.qname"/>
+  <ref name="mml.arcsinh.qname"/>
+  <ref name="mml.arctanh.qname"/>
+ </choice>
+</define>
+
+<define name="mml.sin.qname">
+ <element name="sin">
+  <empty/>
+  <ref name="mml.operators.common.attrib"/>
+ </element>
+</define>
+
+<define name="mml.cos.qname">
+ <element name="cos">
+  <empty/>
+  <ref name="mml.operators.common.attrib"/>
+ </element>
+</define>
+
+<define name="mml.tan.qname">
+ <element name="tan">
+  <empty/>
+  <ref name="mml.operators.common.attrib"/>
+ </element>
+</define>
+
+<define name="mml.sec.qname">
+ <element name="sec">
+  <empty/>
+  <ref name="mml.operators.common.attrib"/>
+ </element>
+</define>
+
+<define name="mml.csc.qname">
+ <element name="csc">
+  <empty/>
+  <ref name="mml.operators.common.attrib"/>
+ </element>
+</define>
+
+<define name="mml.cot.qname">
+ <element name="cot">
+  <empty/>
+  <ref name="mml.operators.common.attrib"/>
+ </element>
+</define>
+
+<define name="mml.sinh.qname">
+ <element name="sinh">
+  <empty/>
+  <ref name="mml.operators.common.attrib"/>
+ </element>
+</define>
+
+<define name="mml.cosh.qname">
+ <element name="cosh">
+  <empty/>
+  <ref name="mml.operators.common.attrib"/>
+ </element>
+</define>
+
+<define name="mml.tanh.qname">
+ <element name="tanh">
+  <empty/>
+  <ref name="mml.operators.common.attrib"/>
+ </element>
+</define>
+
+<define name="mml.sech.qname">
+ <element name="sech">
+  <empty/>
+  <ref name="mml.operators.common.attrib"/>
+ </element>
+</define>
+
+<define name="mml.csch.qname">
+ <element name="csch">
+  <empty/>
+  <ref name="mml.operators.common.attrib"/>
+ </element>
+</define>
+
+<define name="mml.coth.qname">
+ <element name="coth">
+  <empty/>
+  <ref name="mml.operators.common.attrib"/>
+ </element>
+</define>
+
+<define name="mml.arcsin.qname">
+ <element name="arcsin">
+  <empty/>
+  <ref name="mml.operators.common.attrib"/>
+ </element>
+</define>
+
+<define name="mml.arccos.qname">
+ <element name="arccos">
+  <empty/>
+  <ref name="mml.operators.common.attrib"/>
+ </element>
+</define>
+
+<define name="mml.arctan.qname">
+ <element name="arctan">
+  <empty/>
+  <ref name="mml.operators.common.attrib"/>
+ </element>
+</define>
+
+<define name="mml.arccosh.qname">
+ <element name="arccosh">
+  <empty/>
+  <ref name="mml.operators.common.attrib"/>
+ </element>
+</define>
+
+<define name="mml.arccot.qname">
+ <element name="arccot">
+  <empty/>
+  <ref name="mml.operators.common.attrib"/>
+ </element>
+</define>
+
+<define name="mml.arccoth.qname">
+ <element name="arccoth">
+  <empty/>
+  <ref name="mml.operators.common.attrib"/>
+ </element>
+</define>
+
+<define name="mml.arccsc.qname">
+ <element name="arccsc">
+  <empty/>
+  <ref name="mml.operators.common.attrib"/>
+ </element>
+</define>
+
+<define name="mml.arccsch.qname">
+ <element name="arccsch">
+  <empty/>
+  <ref name="mml.operators.common.attrib"/>
+ </element>
+</define>
+
+<define name="mml.arcsec.qname">
+ <element name="arcsec">
+  <empty/>
+  <ref name="mml.operators.common.attrib"/>
+ </element>
+</define>
+
+<define name="mml.arcsech.qname">
+ <element name="arcsech">
+  <empty/>
+  <ref name="mml.operators.common.attrib"/>
+ </element>
+</define>
+
+<define name="mml.arcsinh.qname">
+ <element name="arcsinh">
+  <empty/>
+  <ref name="mml.operators.common.attrib"/>
+ </element>
+</define>
+
+<define name="mml.arctanh.qname">
+ <element name="arctanh">
+  <empty/>
+  <ref name="mml.operators.common.attrib"/>
+ </element>
+</define>
+
+<define name="mml.cstatopnary">
+ <choice>
+  <ref name="mml.mean.qname"/>
+  <ref name="mml.sdev.qname"/>
+  <ref name="mml.variance.qname"/>
+  <ref name="mml.median.qname"/>
+  <ref name="mml.mode.qname"/>
+ </choice>
+</define>
+
+<define name="mml.mean.qname">
+ <element name="mean">
+  <empty/>
+  <ref name="mml.operators.common.attrib"/>
+ </element>
+</define>
+
+<define name="mml.sdev.qname">
+ <element name="sdev">
+  <empty/>
+  <ref name="mml.operators.common.attrib"/>
+ </element>
+</define>
+
+<define name="mml.variance.qname">
+ <element name="variance">
+  <empty/>
+  <ref name="mml.operators.common.attrib"/>
+ </element>
+</define>
+
+<define name="mml.median.qname">
+ <element name="median">
+  <empty/>
+  <ref name="mml.operators.common.attrib"/>
+ </element>
+</define>
+
+<define name="mml.mode.qname">
+ <element name="mode">
+  <empty/>
+  <ref name="mml.operators.common.attrib"/>
+ </element>
+</define>
+
+<define name="mml.cstatopmoment">
+ <choice>
+  <ref name="mml.moment.qname"/>
+ </choice>
+</define>
+
+<define name="mml.moment.qname">
+ <element name="moment">
+  <empty/>
+  <ref name="mml.operators.common.attrib"/>
+ </element>
+</define>
+
+<define name="mml.clalgop1ary">
+ <choice>
+  <ref name="mml.determinant.qname"/>
+  <ref name="mml.transpose.qname"/>
+ </choice>
+</define>
+
+<define name="mml.determinant.qname">
+ <element name="determinant">
+  <empty/>
+  <ref name="mml.operators.common.attrib"/>
+ </element>
+</define>
+
+<define name="mml.transpose.qname">
+ <element name="transpose">
+  <empty/>
+  <ref name="mml.operators.common.attrib"/>
+ </element>
+</define>
+
+<define name="mml.clalgop2ary">
+ <choice>
+  <ref name="mml.vectorproduct.qname"/>
+  <ref name="mml.scalarproduct.qname"/>
+  <ref name="mml.outerproduct.qname"/>
+ </choice>
+</define>
+
+<define name="mml.vectorproduct.qname">
+ <element name="vectorproduct">
+  <empty/>
+  <ref name="mml.operators.common.attrib"/>
+ </element>
+</define>
+
+<define name="mml.scalarproduct.qname">
+ <element name="scalarproduct">
+  <empty/>
+  <ref name="mml.operators.common.attrib"/>
+ </element>
+</define>
+
+<define name="mml.outerproduct.qname">
+ <element name="outerproduct">
+  <empty/>
+  <ref name="mml.operators.common.attrib"/>
+ </element>
+</define>
+
+<define name="mml.clalgopnary">
+ <choice>
+  <ref name="mml.selector.qname"/>
+ </choice>
+</define>
+
+<define name="mml.selector.qname">
+ <element name="selector">
+  <empty/>
+  <ref name="mml.operators.common.attrib"/>
+ </element>
+</define>
+
+<!-- Operator groups -->
+
+<define name="mml.cop1ary">
+ <choice>
+  <ref name="mml.cfuncop1ary"/>
+  <ref name="mml.carithop1ary"/>
+  <ref name="mml.clogicop1ary"/>
+  <ref name="mml.ccalcop1ary"/>
+  <ref name="mml.ctrigop"/>
+  <ref name="mml.clalgop1ary"/>
+  <ref name="mml.csetop1ary"/>
+ </choice>
+</define>
+
+<define name="mml.cop2ary">
+ <choice>
+  <ref name="mml.carithop2ary"/>
+  <ref name="mml.clogicop2ary"/>
+  <ref name="mml.clalgop2ary"/>
+  <ref name="mml.csetop2ary"/>
+ </choice>
+</define>
+
+<define name="mml.copnary">
+ <choice>
+  <ref name="mml.cfuncopnary"/>
+  <ref name="mml.carithopnary"/>
+  <ref name="mml.clogicopnary"/>
+  <ref name="mml.csetopnary"/>
+  <ref name="mml.cstatopnary"/>
+  <ref name="mml.clalgopnary"/>
+ </choice>
+</define>
+
+<define name="mml.copmisc">
+ <choice>
+  <ref name="mml.carithoproot"/>
+  <ref name="mml.carithop1or2ary"/>
+  <ref name="mml.ccalcop"/>
+  <ref name="mml.cseqop"/>
+  <ref name="mml.cstatopmoment"/>
+  <ref name="mml.clogicopquant"/>
+ </choice>
+</define>
+
+</grammar>

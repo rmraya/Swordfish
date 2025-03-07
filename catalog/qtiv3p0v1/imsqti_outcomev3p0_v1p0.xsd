@@ -1,0 +1,1894 @@
+<?xml version = "1.0" encoding = "UTF-8"?>
+<xs:schema xmlns="http://www.imsglobal.org/xsd/imsqtiasi_v3p0"
+     targetNamespace="http://www.imsglobal.org/xsd/imsqtiasi_v3p0"
+     xmlns:xi="http://www.w3.org/2001/XInclude"
+     xmlns:m3="http://www.w3.org/1998/Math/MathML"
+     xmlns:ssml11="http://www.w3.org/2001/10/synthesis"
+     xmlns:xs="http://www.w3.org/2001/XMLSchema"
+     xmlns:sch="http://purl.oclc.org/dsdl/schematron"
+     version="IMS QTI OUTCOME DECLARATION 3.0"
+     elementFormDefault="qualified"
+     attributeFormDefault="unqualified">
+    <xs:import namespace="http://www.w3.org/XML/1998/namespace" schemaLocation="https://purl.imsglobal.org/spec/w3/2001/schema/xsd/xml.xsd" />
+    <xs:import namespace="http://www.w3.org/2001/XInclude" schemaLocation="https://purl.imsglobal.org/spec/w3/2001/schema/xsd/XInclude.xsd" />
+    <xs:import namespace="http://www.w3.org/1998/Math/MathML" schemaLocation="https://purl.imsglobal.org/spec/mathml/v3p0/schema/xsd/mathml3.xsd" />
+    <xs:import namespace="http://www.w3.org/2001/10/synthesis" schemaLocation="https://purl.imsglobal.org/spec/ssml/v1p1/schema/xsd/ssmlv1p1-core.xsd" />
+
+    <xs:annotation>
+        <xs:documentation>
+            XSD Data File Information
+            =========================
+            Author:         Colin Smythe (IMS Global) and Tom Hoffmann (IMS Global)
+            Date:           1st May 2022
+            Version:        1.0
+            Status:         Final Release
+            Description:    This is the QTI OutcomeDeclaration-Only profile of the full QTI 3.0 specification.
+
+            History:        First release of the IMS QTI Outcome Declaration 3.0 Profile
+
+            PROFILE:        This is the "OutcomeDeclaration-Only". THIS IS A PROFILE OF THE BASE SPECIFICATION.
+                            The changes to the base specification are:
+                            * The schema version has been changed to "IMS QTI OUTCOME DECLARATION 3.0".
+                            * The "A" class/complexType and set of XML attributes have been deleted;
+                            * The "Adaptive" class/complexType and set of XML attributes have been deleted;
+                            * The "AdaptiveHref" class/complexType and set of XML attributes have been deleted;
+                            * The "AdaptiveSelection" class/complexType and set of XML attributes have been deleted;
+                            * The "AnyN" class/complexType and set of XML attributes have been deleted;
+                            * The "AreaMapEntry" class/complexType and set of XML attributes have been deleted;
+                            * The "AreaMapping" class/complexType and set of XML attributes have been deleted;
+                            * The "ARIABase" class/complexType and set of XML attributes have been deleted;
+                            * The "ARIABaseEmpty" class/complexType and set of XML attributes have been deleted;
+                            * The "AssessmentItem" class/complexType and set of XML attributes have been deleted;
+                            * The "AssessmentItemRef" class/complexType and set of XML attributes have been deleted;
+                            * The "AssessmentSection" class/complexType and set of XML attributes have been deleted;
+                            * The "AssessmentSectionRef" class/complexType and set of XML attributes have been deleted;
+                            * The "AssessmentStimulus" class/complexType and set of XML attributes have been deleted;
+                            * The "AssessmentStimulusRef" class/complexType and set of XML attributes have been deleted;
+                            * The "AssessmentTest" class/complexType and set of XML attributes have been deleted;
+                            * The "AssociableHotspot" class/complexType and set of XML attributes have been deleted;
+                            * The "AssociateInteraction" class/complexType and set of XML attributes have been deleted;
+                            * The "Audio" class/complexType and set of XML attributes have been deleted;
+                            * The "BaseHTML5Flow" class/complexType and set of XML attributes have been deleted;
+                            * The "BaseHTML5Phrasing" class/complexType and set of XML attributes have been deleted;
+                            * The "BasePromptInteraction" class/complexType and set of XML attributes have been deleted;
+                            * The "BaseSequence" class/complexType and set of XML attributes have been deleted;
+                            * The "BaseSequenceEmpty" class/complexType and set of XML attributes have been deleted;
+                            * The "BaseSequenceFull" class/complexType and set of XML attributes have been deleted;
+                            * The "BaseSequenceRIdent" class/complexType and set of XML attributes have been deleted;
+                            * The "BaseSequenceXBase" class/complexType and set of XML attributes have been deleted;
+                            * The "BaseSequenceXBaseEmpty" class/complexType and set of XML attributes have been deleted;
+                            * The "BaseValue" class/complexType and set of XML attributes have been deleted;
+                            * The "BDI" class/complexType and set of XML attributes have been deleted;
+                            * The "BDO" class/complexType and set of XML attributes have been deleted;
+                            * The "BlockContentModel" class/complexType and set of XML attributes have been deleted;
+                            * The "BlockGroup" class/complexType and set of XML attributes have been deleted;
+                            * The "BlockQuote" class/complexType and set of XML attributes have been deleted;
+                            * The "BR" class/complexType and set of XML attributes have been deleted;
+                            * The "BranchRule" class/complexType and set of XML attributes have been deleted;
+                            * The "Calculator" class/complexType and set of XML attributes have been deleted;
+                            * The "Caption" class/complexType and set of XML attributes have been deleted;
+                            * The "Card" class/complexType and set of XML attributes have been deleted;
+                            * The "CardEntry" class/complexType and set of XML attributes have been deleted;
+                            * The "Catalog" class/complexType and set of XML attributes have been deleted;
+                            * The "CatalogInfo" class/complexType and set of XML attributes have been deleted;
+                            * The "ChoiceInteraction" class/complexType and set of XML attributes have been deleted;
+                            * The "Col" class/complexType and set of XML attributes have been deleted;
+                            * The "ColGroup" class/complexType and set of XML attributes have been deleted;
+                            * The "CompanionMaterialsInfo" class/complexType and set of XML attributes have been deleted;
+                            * The "ContextDeclaration" class/complexType and set of XML attributes have been deleted;
+                            * The "ContextUniqueIDRef" class/complexType and set of XML attributes have been deleted;
+                            * The "Correct" class/complexType and set of XML attributes have been deleted;
+                            * The "CorrectResponse" class/complexType and set of XML attributes have been deleted;
+                            * The "CustomInteraction" class/complexType and set of XML attributes have been deleted;
+                            * The "CustomOperator" class/complexType and set of XML attributes have been deleted;
+                            * The "DD" class/complexType and set of XML attributes have been deleted;
+                            * The "Default" class/complexType and set of XML attributes have been deleted;
+                            * The "Div" class/complexType and set of XML attributes have been deleted;
+                            * The "DL" class/complexType and set of XML attributes have been deleted;
+                            * The "DrawingInteraction" class/complexType and set of XML attributes have been deleted;
+                            * The "DT" class/complexType and set of XML attributes have been deleted;
+                            * The "EncVariableString" class/complexType and set of XML attributes have been deleted;
+                            * The "EndAttemptInteraction" class/complexType and set of XML attributes have been deleted;
+                            * The "Equal" class/complexType and set of XML attributes have been deleted;
+                            * The "EqualRounded" class/complexType and set of XML attributes have been deleted;
+                            * The "ExpressionGroup" class/complexType and set of XML attributes have been deleted;
+                            * The "ExtendedTextInteraction" class/complexType and set of XML attributes have been deleted;
+                            * The "FeedbackBlock" class/complexType and set of XML attributes have been deleted;
+                            * The "FeedbackContentBody" class/complexType and set of XML attributes have been deleted;
+                            * The "FeedbackFlowContentBody" class/complexType and set of XML attributes have been deleted;
+                            * The "FeedbackInline" class/complexType and set of XML attributes have been deleted;
+                            * The "FieldValue" class/complexType and set of XML attributes have been deleted;
+                            * The "Figure" class/complexType and set of XML attributes have been deleted;
+                            * The "FileHref" class/complexType and set of XML attributes have been deleted;
+                            * The "FileHrefCard" class/complexType and set of XML attributes have been deleted;
+                            * The "FlowContentModel" class/complexType and set of XML attributes have been deleted;
+                            * The "FlowStaticGroup" class/complexType and set of XML attributes have been deleted;
+                            * The "Gap" class/complexType and set of XML attributes have been deleted;
+                            * The "GapChoice" class/complexType and set of XML attributes have been deleted;
+                            * The "GapImg" class/complexType and set of XML attributes have been deleted;
+                            * The "GapMatchInteraction" class/complexType and set of XML attributes have been deleted;
+                            * The "GapText" class/complexType and set of XML attributes have been deleted;
+                            * The "GraphicAssociateInteraction" class/complexType and set of XML attributes have been deleted;
+                            * The "GraphicGapMatchInteraction" class/complexType and set of XML attributes have been deleted;
+                            * The "GraphicOrderInteraction" class/complexType and set of XML attributes have been deleted;
+                            * The "HotspotChoice" class/complexType and set of XML attributes have been deleted;
+                            * The "HotspotInteraction" class/complexType and set of XML attributes have been deleted;
+                            * The "HotText" class/complexType and set of XML attributes have been deleted;
+                            * The "HotTextInteraction" class/complexType and set of XML attributes have been deleted;
+                            * The "HR" class/complexType and set of XML attributes have been deleted;
+                            * The "HTMLContent" class/complexType and set of XML attributes have been deleted;
+                            * The "HTMLText" class/complexType and set of XML attributes have been deleted;
+                            * The "Img" class/complexType and set of XML attributes have been deleted;
+                            * The "IncrementSI" class/complexType and set of XML attributes have been deleted;
+                            * The "IncrementUS" class/complexType and set of XML attributes have been deleted;
+                            * The "Index" class/complexType and set of XML attributes have been deleted;
+                            * The "InlineChoice" class/complexType and set of XML attributes have been deleted;
+                            * The "InlineChoiceInteraction" class/complexType and set of XML attributes have been deleted;
+                            * The "InlineContentModel" class/complexType and set of XML attributes have been deleted;
+                            * The "InlineGroup" class/complexType and set of XML attributes have been deleted;
+                            * The "Inside" class/complexType and set of XML attributes have been deleted;
+                            * The "InteractionMarkup" class/complexType and set of XML attributes have been deleted;
+                            * The "InteractionModule" class/complexType and set of XML attributes have been deleted;
+                            * The "InteractionModules" class/complexType and set of XML attributes have been deleted;
+                            * The "ItemBody" class/complexType and set of XML attributes have been deleted;
+                            * The "ItemBodySelect" class/complexType and set of XML attributes have been deleted;
+                            * The "ItemFileInfo" class/complexType and set of XML attributes have been deleted;
+                            * The "ItemSessionControl" class/complexType and set of XML attributes have been deleted;
+                            * The "Label" class/complexType and set of XML attributes have been deleted;
+                            * The "LI" class/complexType and set of XML attributes have been deleted;
+                            * The "Logic0toMany" class/complexType and set of XML attributes have been deleted;
+                            * The "Logic1toMany" class/complexType and set of XML attributes have been deleted;
+                            * The "LogicPair" class/complexType and set of XML attributes have been deleted;
+                            * The "LogicSingle" class/complexType and set of XML attributes have been deleted;
+                            * The "LookupOutcomeValue" class/complexType and set of XML attributes have been deleted;
+                            * The "MapEntry" class/complexType and set of XML attributes have been deleted;
+                            * The "Mapping" class/complexType and set of XML attributes have been deleted;
+                            * The "MapResponse" class/complexType and set of XML attributes have been deleted;
+                            * The "MatchInteraction" class/complexType and set of XML attributes have been deleted;
+                            * The "MathConstant" class/complexType and set of XML attributes have been deleted;
+                            * The "MathOperator" class/complexType and set of XML attributes have been deleted;
+                            * The "MediaInteraction" class/complexType and set of XML attributes have been deleted;
+                            * The "ModalFeedback" class/complexType and set of XML attributes have been deleted;
+                            * The "Number" class/complexType and set of XML attributes have been deleted;
+                            * The "NumericExpressionGroup" class/complexType and set of XML attributes have been deleted;
+                            * The "NumericLogic1toMany" class/complexType and set of XML attributes have been deleted;
+                            * The "Object" class/complexType and set of XML attributes have been deleted;
+                            * The "ObjectFlowGroup" class/complexType and set of XML attributes have been deleted;
+                            * The "Ordering" class/complexType and set of XML attributes have been deleted;
+                            * The "OrderInteraction" class/complexType and set of XML attributes have been deleted;
+                            * The "OUL" class/complexType and set of XML attributes have been deleted;
+                            * The "OutcomeCondition" class/complexType and set of XML attributes have been deleted;
+                            * The "OutcomeElse" class/complexType and set of XML attributes have been deleted;
+                            * The "OutcomeIf" class/complexType and set of XML attributes have been deleted;
+                            * The "OutcomeMinMax" class/complexType and set of XML attributes have been deleted;
+                            * The "OutcomeProcessing" class/complexType and set of XML attributes have been deleted;
+                            * The "OutcomeProcessingFragment" class/complexType and set of XML attributes have been deleted;
+                            * The "Param" class/complexType and set of XML attributes have been deleted;
+                            * The "PatternMatch" class/complexType and set of XML attributes have been deleted;
+                            * The "PhrasingContentModelHTML5" class/complexType and set of XML attributes have been deleted;
+                            * The "Picture" class/complexType and set of XML attributes have been deleted;
+                            * The "PortableCustomInteraction" class/complexType and set of XML attributes have been deleted;
+                            * The "PositionObjectInteraction" class/complexType and set of XML attributes have been deleted;
+                            * The "PositionObjectStage" class/complexType and set of XML attributes have been deleted;
+                            * The "PrintedVariable" class/complexType and set of XML attributes have been deleted;
+                            * The "Prompt" class/complexType and set of XML attributes have been deleted;
+                            * The "PromptStaticGroup" class/complexType and set of XML attributes have been deleted;
+                            * The "Protractor" class/complexType and set of XML attributes have been deleted;
+                            * The "Q" class/complexType and set of XML attributes have been deleted;
+                            * The "RadialSIValue" class/complexType and set of XML attributes have been deleted;
+                            * The "RadialUSValue" class/complexType and set of XML attributes have been deleted;
+                            * The "RandomFloat" class/complexType and set of XML attributes have been deleted;
+                            * The "RandomInteger" class/complexType and set of XML attributes have been deleted;
+                            * The "Repeat" class/complexType and set of XML attributes have been deleted;
+                            * The "ResponseCondition" class/complexType and set of XML attributes have been deleted;
+                            * The "ResponseDeclaration" class/complexType and set of XML attributes have been deleted;
+                            * The "ResponseElse" class/complexType and set of XML attributes have been deleted;
+                            * The "ResponseIf" class/complexType and set of XML attributes have been deleted;
+                            * The "ResponseProcessing" class/complexType and set of XML attributes have been deleted;
+                            * The "ResponseProcessingFragment" class/complexType and set of XML attributes have been deleted;
+                            * The "RoundTo" class/complexType and set of XML attributes have been deleted;
+                            * The "RTC" class/complexType and set of XML attributes have been deleted;
+                            * The "RubricBlock" class/complexType and set of XML attributes have been deleted;
+                            * The "RubricBlockContentBody" class/complexType and set of XML attributes have been deleted;
+                            * The "RubricBlockTemplateBlock" class/complexType and set of XML attributes have been deleted;
+                            * The "RubricBlockTemplateBlockContentBody" class/complexType and set of XML attributes have been deleted;
+                            * The "RubricBlockTemplateInline" class/complexType and set of XML attributes have been deleted;
+                            * The "Ruby" class/complexType and set of XML attributes have been deleted;
+                            * The "Rule" class/complexType and set of XML attributes have been deleted;
+                            * The "Selection" class/complexType and set of XML attributes have been deleted;
+                            * The "SelectPointInteraction" class/complexType and set of XML attributes have been deleted;
+                            * The "SelectStimulusBody" class/complexType and set of XML attributes have been deleted;
+                            * The "SetValue" class/complexType and set of XML attributes have been deleted;
+                            * The "SILinearValue" class/complexType and set of XML attributes have been deleted;
+                            * The "SimpleAssociableChoice" class/complexType and set of XML attributes have been deleted;
+                            * The "SimpleChoice" class/complexType and set of XML attributes have been deleted;
+                            * The "SimpleMatchSet" class/complexType and set of XML attributes have been deleted;
+                            * The "SIRuleSystem" class/complexType and set of XML attributes have been deleted;
+                            * The "SliderInteraction" class/complexType and set of XML attributes have been deleted;
+                            * The "Source" class/complexType and set of XML attributes have been deleted;
+                            * The "StatsOperator" class/complexType and set of XML attributes have been deleted;
+                            * The "StimulusBody" class/complexType and set of XML attributes have been deleted;
+                            * The "StringMatch" class/complexType and set of XML attributes have been deleted;
+                            * The "StyleSheet" class/complexType and set of XML attributes have been deleted;
+                            * The "Substring" class/complexType and set of XML attributes have been deleted;
+                            * The "SupportExtString" class/complexType and set of XML attributes have been deleted;
+                            * The "Table" class/complexType and set of XML attributes have been deleted;
+                            * The "TablePart" class/complexType and set of XML attributes have been deleted;
+                            * The "TDH" class/complexType and set of XML attributes have been deleted;
+                            * The "Template" class/complexType and set of XML attributes have been deleted;
+                            * The "TemplateBlock" class/complexType and set of XML attributes have been deleted;
+                            * The "TemplateBlockContent" class/complexType and set of XML attributes have been deleted;
+                            * The "TemplateBlockContentBody" class/complexType and set of XML attributes have been deleted;
+                            * The "TemplateBlockFeedbackBlock" class/complexType and set of XML attributes have been deleted;
+                            * The "TemplateCondition" class/complexType and set of XML attributes have been deleted;
+                            * The "TemplateConstraint" class/complexType and set of XML attributes have been deleted;
+                            * The "TemplateDeclaration" class/complexType and set of XML attributes have been deleted;
+                            * The "TemplateDefault" class/complexType and set of XML attributes have been deleted;
+                            * The "TemplateElse" class/complexType and set of XML attributes have been deleted;
+                            * The "TemplateIf" class/complexType and set of XML attributes have been deleted;
+                            * The "TemplateInline" class/complexType and set of XML attributes have been deleted;
+                            * The "TemplateProcessing" class/complexType and set of XML attributes have been deleted;
+                            * The "TemplateUniqueIDRef" class/complexType and set of XML attributes have been deleted;
+                            * The "TestFeedback" class/complexType and set of XML attributes have been deleted;
+                            * The "TestFeedbackFlowContentBody" class/complexType and set of XML attributes have been deleted;
+                            * The "TestPart" class/complexType and set of XML attributes have been deleted;
+                            * The "TestRubricBlock" class/complexType and set of XML attributes have been deleted;
+                            * The "TestRubricBlockContentBody" class/complexType and set of XML attributes have been deleted;
+                            * The "TestRubricBlockContentModel" class/complexType and set of XML attributes have been deleted;
+                            * The "TestVariables" class/complexType and set of XML attributes have been deleted;
+                            * The "TextEntryInteraction" class/complexType and set of XML attributes have been deleted;
+                            * The "TimeLimits" class/complexType and set of XML attributes have been deleted;
+                            * The "TR" class/complexType and set of XML attributes have been deleted;
+                            * The "Track" class/complexType and set of XML attributes have been deleted;
+                            * The "UploadInteraction" class/complexType and set of XML attributes have been deleted;
+                            * The "UseExtensionString" class/complexType and set of XML attributes have been deleted;
+                            * The "USLinearValue" class/complexType and set of XML attributes have been deleted;
+                            * The "USRuleSystem" class/complexType and set of XML attributes have been deleted;
+                            * The "Variable" class/complexType and set of XML attributes have been deleted;
+                            * The "VariableMapping" class/complexType and set of XML attributes have been deleted;
+                            * The "VariableString" class/complexType and set of XML attributes have been deleted;
+                            * The "Video" class/complexType and set of XML attributes have been deleted;
+                            * The "Weight" class/complexType and set of XML attributes have been deleted;
+            
+            License:        IPR and Distribution Notices
+            
+                            This machine readable file is derived from the IMS Question and Test Interoperability (QTI): Outcome Declaration Model Version 3.0
+                            found at http://www.imsglobal.org/qti and the original IMS Global schema binding or code base
+                            http://www.imsglobal.org/qti.
+            
+                            Recipients of this document are requested to submit, with their comments, notification of any relevant 
+                            patent claims or other intellectual property rights of which they may be aware that might be infringed by
+                            any implementation of the specification set forth in this document, and to provide supporting documentation.
+            
+                            IMS takes no position regarding the validity or scope of any intellectual property or other rights that might
+                            be claimed to pertain to the implementation or use of the technology described in this document or the extent 
+                            to which any license under such rights might or might not be available; neither does it represent that it has 
+                            made any effort to identify any such rights. Information on IMS procedures with respect to rights in IMS 
+                            specifications can be found at the IMS Global Intellectual Property Rights web page: http://www.imsglobal.org/ipr/imsipr_policyFinal.pdf.
+            
+                            Copyright (c) IMS Global Learning Consortium 1999-2022. All Rights Reserved.
+            
+                            Use of this specification to develop products or services is governed by the license with IMS found on the IMS website: http://www.imsglobal.org/license.html.
+            
+                            Permission is granted to all parties to use excerpts from this document as needed in producing requests for proposals.
+            
+                            The limited permissions granted above are perpetual and will not be revoked by IMS or its successors or assigns.
+            
+                            THIS SPECIFICATION IS BEING OFFERED WITHOUT ANY WARRANTY WHATSOEVER, AND IN PARTICULAR, ANY WARRANTY OF NONINFRINGEMENT IS
+                            EXPRESSLY DISCLAIMED. ANY USE OF THIS SPECIFICATION SHALL BE MADE ENTIRELY AT THE IMPLEMENTERS OWN RISK, AND NEITHER THE CONSORTIUM
+                            NOR ANY OF ITS MEMBERS OR SUBMITTERS, SHALL HAVE ANY LIABILITY WHATSOEVER TO ANY IMPLEMENTER OR THIRD PARTY FOR ANY DAMAGES OF
+                            ANY NATURE WHATSOEVER, DIRECTLY OR INDIRECTLY, ARISING FROM THE USE OF THIS SPECIFICATION.
+            
+            Source UML File Information
+            ===========================
+            The source file information must be supplied as an XMI file (without diagram layout information).
+            The supported UML authoring tools are:
+            (a) Poseidon - v6 (and later)
+            (b) Papyrus - v1.1.3 (and later)
+            
+            Source XSLT File Information
+            ============================
+            XSL Generator:    Specificationv1p0_GenerationToolv1.xsl
+            XSLT Processor:   Saxon
+            Release:          1.0
+            Date:             31st January, 2021
+            Autogen Engineer: Colin Smythe (IMS Global, UK)
+            Autogen Date:     2022-05-09
+            
+            IMS Global Auto-generation Binding Tool-kit (I-BAT)
+            ===================================================
+            This file was auto-generated using the IMS Global Binding Auto-generation Tool-kit (I-BAT).  While every
+            attempt has been made to ensure that this tool auto-generates the files correctly, users should be aware
+            that this is an experimental tool.  Permission is given to make use of this tool.  IMS Global makes no
+            claim on the materials created by third party users of this tool.  Details on how to use this tool
+            are contained in the IMS Global "I-BAT" documentation available at the IMS Global web-site:
+            http://www.imsglobal.org.
+            
+            Tool Copyright:  2012-2022  (c) IMS Global Learning Consortium Inc.  All Rights Reserved.
+        </xs:documentation>
+    </xs:annotation>
+
+    <xs:annotation>
+        <xs:documentation>
+            Schematron Namespace Declaration
+            =================================
+            The set of namespaces used by the schematron rules.
+        </xs:documentation>
+        <xs:appinfo>
+            <sch:ns uri="http://www.imsglobal.org/xsd/imsqtiasi_v3p0" prefix="qti" />
+        </xs:appinfo>
+    </xs:annotation>
+
+    <xs:annotation>
+        <xs:documentation>
+            Schematron Strict Selection Validation Rules
+            ============================================
+            This is the set of Schematron rules that have been created to enforce the use of the "Unordered" stereotype.
+            These rules ensure that the number of entries in an unordered complexType of an element obey the multiplicity constraints.
+            This is required so that any-order/any-multiplicity complexTypes can be constructed and validated.
+        </xs:documentation>
+        <xs:appinfo>
+            <sch:title>Schematron validation rules for the enforcement of the Unordered stereotype.</sch:title>
+
+        </xs:appinfo>
+    </xs:annotation>
+
+    <xs:annotation>
+        <xs:documentation>
+            Schematron Extension Validation Rules
+            =====================================
+            This is the set of Schematron rules that have been created to enforce the validation constraints on namespaced extensions.
+            These rules ensure that the names of the extension features conform to defined naming convention (expressed using a REGEX).
+            At present these rules are limited to permitted names for the proprietary XML attributes.
+        </xs:documentation>
+        <xs:appinfo>
+            <sch:title>Schematron validation rules for the enforcement naming constraints on XML attribute provided as proprietary extensions.</sch:title>
+
+        </xs:appinfo>
+    </xs:annotation>
+
+    <xs:annotation>
+        <xs:documentation>
+            Definition of Schematron Validation Rules
+            =========================================
+            Author:         Colin Smythe (IMS Global, UK)
+            Date:           1st May 2022
+            Version:        1.0
+            Status:         Final Release
+
+            Description:    This is the set of Schematron Rules to further enforce the QTI v3.0 Information Model. The rule sets that have been defined are:
+
+                            [RULE_SET_ARIA_ROLES_1] Enforce the correct use of the ARIA Role attribute.
+                            [RULE_SET_GENERAL_1] Ensure that certain expressions are NOT used for Response Processing.
+                            [RULE_SET_INTERACTION-RELATED_1] Enforce the correct use of the GapText attributes.
+                            [RULE_SET_INTERACTION-RELATED_2] Enforce the correct use of the GapImg attributes.
+                            [RULE_SET_INTERACTION-RELATED_3] Enforce the correct use of the AssociableHotspot attributes.
+                            [RULE_SET_INTERACTION-RELATED_4] Enforce the correct use of the SimpleAssociableChoice attributes.
+                            [RULE_SET_INTERACTION_01A] Enforce the prohibiting of nested interactions within the TextEntryInteraction.
+                            [RULE_SET_INTERACTION_01B] Enforce the correct use of the TextEntryInteraction attributes.
+                            [RULE_SET_INTERACTION_02A] Enforce the prohibiting of nested interactions within ChoiceInteraction and InlineChoiceInteraction.
+                            [RULE_SET_INTERACTION_02B] Enforce the correct use of the ChoiceInteraction and InlineChoiceInteraction attributes.
+                            [RULE_SET_INTERACTION_03A] Enforce the prohibiting of nested interactions within the ExtendedTextEntryInteraction.
+                            [RULE_SET_INTERACTION_03B] Enforce the correct use of the ExtendedTextInteraction attributes.
+                            [RULE_SET_INTERACTION_04A] Enforce the prohibiting of nested interactions within the HotspotInteraction.
+                            [RULE_SET_INTERACTION_04B] Enforce the correct use of the HotspotInteraction attributes.
+                            [RULE_SET_INTERACTION_05A] Enforce the prohibiting of nested interactions within the GraphicOrderInteraction.
+                            [RULE_SET_INTERACTION_05B] Enforce the correct use of the GraphicOrderInteraction attributes.
+                            [RULE_SET_INTERACTION_06A] Enforce the prohibiting of nested interactions within the PositionObjectInteraction.
+                            [RULE_SET_INTERACTION_06B] Enforce the correct use of the PositionObjectInteraction attributes.
+                            [RULE_SET_INTERACTION_07A] Enforce the prohibiting of nested interactions within the SelectPointInteraction.
+                            [RULE_SET_INTERACTION_07B] Enforce the correct use of the SelectPointInteraction attributes.
+                            [RULE_SET_INTERACTION_08A] Enforce the prohibiting of nested interactions within the OrderInteraction.
+                            [RULE_SET_INTERACTION_08B] Enforce the correct use of the OrderInteraction attributes.
+                            [RULE_SET_INTERACTION_09A] Enforce the prohibiting of nested interactions within the HotTextInteraction.
+                            [RULE_SET_INTERACTION_09B] Enforce the correct use of the HotTextInteraction attributes.
+                            [RULE_SET_INTERACTION_10A] Enforce the prohibiting of nested interactions within the GraphicAssociateInteraction.
+                            [RULE_SET_INTERACTION_10B] Enforce the correct use of the GraphicAssociateInteraction attributes.
+                            [RULE_SET_INTERACTION_11A] Enforce the prohibiting of nested interactions within the MatchInteraction.
+                            [RULE_SET_INTERACTION_11B] Enforce the correct use of the MatchInteraction attributes.
+                            [RULE_SET_INTERACTION_12A] Enforce the prohibiting of nested interactions within the AssociateInteraction.
+                            [RULE_SET_INTERACTION_12B] Enforce the correct use of the AssociateInteraction attributes.
+                            [RULE_SET_INTERACTION_13A] Enforce the prohibiting of nested interactions within the MediaInteraction.
+                            [RULE_SET_INTERACTION_13B] Enforce the correct use of the MediaInteraction attributes.
+                            [RULE_SET_INTERACTION_14A] Enforce the prohibiting of nested interactions within the SliderInteraction.
+                            [RULE_SET_INTERACTION_14B] Enforce the correct use of the SliderInteraction attributes.
+                            [RULE_SET_INTERACTION_15A] Enforce the prohibiting of nested interactions within the DrawingInteraction.
+                            [RULE_SET_INTERACTION_15B] Enforce the correct use of the DrawingInteraction attributes.
+                            [RULE_SET_INTERACTION_16A] Enforce the prohibiting of nested interactions within the UploadInteraction.
+                            [RULE_SET_INTERACTION_16B] Enforce the correct use of the UploadInteraction attributes.
+                            [RULE_SET_INTERACTION_17A] Enforce the prohibiting of nested interactions within the EndAttemptInteraction.
+                            [RULE_SET_INTERACTION_17B] Enforce the correct use of the EndAttemptInteraction attributes.
+                            [RULE_SET_INTERACTION_18A] Enforce the prohibiting of nested interactions within the GapMatchInteraction.
+                            [RULE_SET_INTERACTION_18B] Enforce the correct use of the GapMatchInteraction attributes.
+                            [RULE_SET_INTERACTION_19A] Enforce the prohibiting of nested interactions within the GraphicGapMatchInteraction.
+                            [RULE_SET_INTERACTION_19B] Enforce the correct use of the GraphicGapMatchInteraction attributes.
+                            [RULE_SET_INTERACTION_20A] Enforce the prohibiting of nested interactions within CustomInteracion and PortableCustomInteraction.
+                            [RULE_SET_INTERACTION_20B] Enforce the correct use of the PortableCustomInteraction attributes.
+                            [RULE_SET_RUBRICBLOCK] Ensure that the constraints on the use of Rubric Blocks are imposed.
+                            [RULE_SET_SPECIFIC_CLASS_OUTCOMEDEC] Enforce the correct use of the OutcomeDeclaration attributes.
+                            [RULE_SET_SPECIFIC_CLASS_RESPONSEDEC] Enforce the correct use of the ResponseDeclaration attributes.
+
+                            RULE_SET_ARIA_ROLES_1: Enforce the correct use of the ARIA Role attribute. The set of rules are:-
+                            * RULE ARIA ROLE 1a-Assertion 1 :- The 'source' tag must not have an ARIA role attribute.
+                            * RULE ARIA ROLE 1b-Assertion 1 :- The 'h1' tag may have an ARIA role value of 'heading' or 'tab' or 'presentation' only.
+
+                            RULE_SET_GENERAL_1: Ensure that certain expressions are NOT used for Response Processing. The set of rules are:-
+                            * RULE GENERAL 1a-Assertion 1 :- The expression qti-outcome-minimum must NOT be used in ResponseProcessing.
+                            * RULE GENERAL 1a-Assertion 2 :- The expression qti-outcome-maximum must NOT be used in ResponseProcessing.
+                            * RULE GENERAL 1a-Assertion 3 :- The expression qti-test-variables must NOT be used in ResponseProcessing.
+
+                            RULE_SET_INTERACTION-RELATED_1: Enforce the correct use of the GapText attributes. The set of rules are:-
+                            * RULE INTERACTION-RELATED 1a-Assertion 1 :- The match-max attribute value, provided it is not 0, must not be less than the match-min value.
+
+                            RULE_SET_INTERACTION-RELATED_2: Enforce the correct use of the GapImg attributes. The set of rules are:-
+                            * RULE INTERACTION-RELATED 2a-Assertion 1 :- The match-max attribute value, provided it is not 0, must not be less than the match-min value.
+
+                            RULE_SET_INTERACTION-RELATED_3: Enforce the correct use of the AssociableHotspot attributes. The set of rules are:-
+                            * RULE INTERACTION-RELATED 3a-Assertion 1 :- The match-max attribute value, provided it is not 0, must not be less than the match-min value.
+
+                            RULE_SET_INTERACTION-RELATED_4: Enforce the correct use of the SimpleAssociableChoice attributes. The set of rules are:-
+                            * RULE INTERACTION-RELATED 4a-Assertion 1 :- The match-max attribute value, provided it is not 0, must not be less than the match-min value.
+
+                            RULE_SET_INTERACTION_01A: Enforce the prohibiting of nested interactions within the TextEntryInteraction. The set of rules are:-
+                            * RULE INTERACTION 1Aa-Assertion 01 :- A TextEntryInteraction MUST NOT contain a TextEntryInteraction.
+                            * RULE INTERACTION 1Aa-Assertion 02 :- A TextEntryInteraction MUST NOT contain a ChoiceInteraction.
+                            * RULE INTERACTION 1Aa-Assertion 03 :- A TextEntryInteraction MUST NOT contain a AssociateInteraction.
+                            * RULE INTERACTION 1Aa-Assertion 04 :- A TextEntryInteraction MUST NOT contain a CustomInteraction.
+                            * RULE INTERACTION 1Aa-Assertion 05 :- A TextEntryInteraction MUST NOT contain a DrawingInteraction.
+                            * RULE INTERACTION 1Aa-Assertion 06 :- A TextEntryInteraction MUST NOT contain a EndAttemptInteraction.
+                            * RULE INTERACTION 1Aa-Assertion 07 :- A TextEntryInteraction MUST NOT contain an ExtendedTextInteraction.
+                            * RULE INTERACTION 1Aa-Assertion 08 :- A TextEntryInteraction MUST NOT contain a GapMatchInteraction.
+                            * RULE INTERACTION 1Aa-Assertion 09 :- A TextEntryInteraction MUST NOT contain a GraphicAssociateInteraction.
+                            * RULE INTERACTION 1Aa-Assertion 10 :- A TextEntryInteraction MUST NOT contain a GraphicGapMatchInteraction.
+                            * RULE INTERACTION 1Aa-Assertion 11 :- A TextEntryInteraction MUST NOT contain a GraphicOrderInteraction.
+                            * RULE INTERACTION 1Aa-Assertion 12 :- A TextEntryInteraction MUST NOT contain a HotspotInteraction.
+                            * RULE INTERACTION 1Aa-Assertion 13 :- A TextEntryInteraction MUST NOT contain a HottextInteraction.
+                            * RULE INTERACTION 1Aa-Assertion 14 :- A TextEntryInteraction MUST NOT contain an InlineChoiceInteraction.
+                            * RULE INTERACTION 1Aa-Assertion 15 :- A TextEntryInteraction MUST NOT contain a MatchInteraction.
+                            * RULE INTERACTION 1Aa-Assertion 16 :- A TextEntryInteraction MUST NOT contain a MediaInteraction.
+                            * RULE INTERACTION 1Aa-Assertion 17 :- A TextEntryInteraction MUST NOT contain an OrderInteraction.
+                            * RULE INTERACTION 1Aa-Assertion 18 :- A TextEntryInteraction MUST NOT contain a PortableCustomInteraction.
+                            * RULE INTERACTION 1Aa-Assertion 19 :- A TextEntryInteraction MUST NOT contain a PositionObjectInteraction.
+                            * RULE INTERACTION 1Aa-Assertion 20 :- A TextEntryInteraction MUST NOT contain a SelectPointInteraction.
+                            * RULE INTERACTION 1Aa-Assertion 21 :- A TextEntryInteraction MUST NOT contain a SliderInteraction.
+                            * RULE INTERACTION 1Aa-Assertion 22 :- A TextEntryInteraction MUST NOT contain an UploadInteraction.
+
+                            RULE_SET_INTERACTION_01B: Enforce the correct use of the TextEntryInteraction attributes. The set of rules are:-
+                            * RULE INTERACTION 1Ba-Assertion 1 :- The String-Identifier and Response-Identifier attribute values must not be the same.
+                            * RULE INTERACTION 1Bb-Assertion 1 :- The base-type must have a value of either string, float or integer.
+
+                            RULE_SET_INTERACTION_02A: Enforce the prohibiting of nested interactions within ChoiceInteraction and InlineChoiceInteraction. The set of rules are:-
+                            * RULE INTERACTION 2Aa-Assertion 01 :- A ChoiceInteraction MUST NOT contain a ChoiceInteraction.
+                            * RULE INTERACTION 2Aa-Assertion 02 :- A ChoiceInteraction MUST NOT contain a AssociateInteraction.
+                            * RULE INTERACTION 2Aa-Assertion 03 :- A ChoiceInteraction MUST NOT contain a CustomInteraction.
+                            * RULE INTERACTION 2Aa-Assertion 04 :- A ChoiceInteraction MUST NOT contain a DrawingInteraction.
+                            * RULE INTERACTION 2Aa-Assertion 05 :- A ChoiceInteraction MUST NOT contain an EndAttemptInteraction.
+                            * RULE INTERACTION 2Aa-Assertion 06 :- A ChoiceInteraction MUST NOT contain an ExtendedText.
+                            * RULE INTERACTION 2Aa-Assertion 07 :- A ChoiceInteraction MUST NOT contain a GapMatchInteraction.
+                            * RULE INTERACTION 2Aa-Assertion 08 :- A ChoiceInteraction MUST NOT contain a GraphicAssocciateInteraction.
+                            * RULE INTERACTION 2Aa-Assertion 09 :- A ChoiceInteraction MUST NOT contain a GraphicGapMatchInteraction.
+                            * RULE INTERACTION 2Aa-Assertion 10 :- A ChoiceInteraction MUST NOT contain a GraphicOrderInteraction.
+                            * RULE INTERACTION 2Aa-Assertion 11 :- A ChoiceInteraction MUST NOT contain a HotspotInteraction.
+                            * RULE INTERACTION 2Aa-Assertion 12 :- A ChoiceInteraction MUST NOT contain a HottextInteraction.
+                            * RULE INTERACTION 2Aa-Assertion 13 :- A ChoiceInteraction MUST NOT contain an InlineChoiceInteraction.
+                            * RULE INTERACTION 2Aa-Assertion 14 :- A ChoiceInteraction MUST NOT contain a MatchInteraction.
+                            * RULE INTERACTION 2Aa-Assertion 15 :- A ChoiceInteraction MUST NOT contain a MediaInteraction.
+                            * RULE INTERACTION 2Aa-Assertion 16 :- A ChoiceInteraction MUST NOT contain a OrderInteraction.
+                            * RULE INTERACTION 2Aa-Assertion 17 :- A ChoiceInteraction MUST NOT contain a PortableCustomInteraction.
+                            * RULE INTERACTION 2Aa-Assertion 18 :- A ChoiceInteraction MUST NOT contain a PositionObjectInteraction.
+                            * RULE INTERACTION 2Aa-Assertion 19 :- A ChoiceInteraction MUST NOT contain a SelectPointInteraction.
+                            * RULE INTERACTION 2Aa-Assertion 20 :- A ChoiceInteraction MUST NOT contain a SliderInteraction.
+                            * RULE INTERACTION 2Aa-Assertion 21 :- A ChoiceInteraction MUST NOT contain a TextEnryInteraction.
+                            * RULE INTERACTION 2Aa-Assertion 22 :- A ChoiceInteraction MUST NOT contain a UploadInteraction.
+                            * RULE INTERACTION 2Ab-Assertion 01 :- An InlineChoiceInteraction MUST NOT contain an InlineChoiceInteraction.
+                            * RULE INTERACTION 2Ab-Assertion 02 :- An InlineChoiceInteraction MUST NOT contain an AssociateInteraction.
+                            * RULE INTERACTION 2Ab-Assertion 03 :- An InlineChoiceInteraction MUST NOT contain a ChoiceInteraction.
+                            * RULE INTERACTION 2Ab-Assertion 04 :- An InlineChoiceInteraction MUST NOT contain a CustomInteraction.
+                            * RULE INTERACTION 2Ab-Assertion 05 :- An InlineChoiceInteraction MUST NOT contain a DrawingInteraction.
+                            * RULE INTERACTION 2Ab-Assertion 06 :- An InlineChoiceInteraction MUST NOT contain an EndAttemptInteraction.
+                            * RULE INTERACTION 2Ab-Assertion 07 :- An InlineChoiceInteraction MUST NOT contain an ExtendedTextInteraction.
+                            * RULE INTERACTION 2Ab-Assertion 08 :- An InlineChoiceInteraction MUST NOT contain a GapMatchInteraction.
+                            * RULE INTERACTION 2Ab-Assertion 09 :- An InlineChoiceInteraction MUST NOT contain a GraphicAssociateInteraction.
+                            * RULE INTERACTION 2Ab-Assertion 10 :- An InlineChoiceInteraction MUST NOT contain a GraphicGapMatchInteraction.
+                            * RULE INTERACTION 2Ab-Assertion 11 :- An InlineChoiceInteraction MUST NOT contain a GraphicOrderInteraction.
+                            * RULE INTERACTION 2Ab-Assertion 12 :- An InlineChoiceInteraction MUST NOT contain a HotspotInteraction.
+                            * RULE INTERACTION 2Ab-Assertion 13 :- An InlineChoiceInteraction MUST NOT contain a HottextInteraction.
+                            * RULE INTERACTION 2Ab-Assertion 14 :- An InlineChoiceInteraction MUST NOT contain a MatchInteraction.
+                            * RULE INTERACTION 2Ab-Assertion 15 :- An InlineChoiceInteraction MUST NOT contain a MediaInteraction.
+                            * RULE INTERACTION 2Ab-Assertion 16 :- An InlineChoiceInteraction MUST NOT contain an OrderInteraction.
+                            * RULE INTERACTION 2Ab-Assertion 17 :- An InlineChoiceInteraction MUST NOT contain a PortableCustomInteraction.
+                            * RULE INTERACTION 2Ab-Assertion 18 :- An InlineChoiceInteraction MUST NOT contain a PositionObjectInteraction.
+                            * RULE INTERACTION 2Ab-Assertion 19 :- An InlineChoiceInteraction MUST NOT contain a SelectPointInteraction.
+                            * RULE INTERACTION 2Ab-Assertion 20 :- An InlineChoiceInteraction MUST NOT contain a SliderInteraction.
+                            * RULE INTERACTION 2Ab-Assertion 21 :- An InlineChoiceInteraction MUST NOT contain a TextEntryInteraction.
+                            * RULE INTERACTION 2Ab-Assertion 22 :- An InlineChoiceInteraction MUST NOT contain an UploadInteraction.
+
+                            RULE_SET_INTERACTION_02B: Enforce the correct use of the ChoiceInteraction and InlineChoiceInteraction attributes. The set of rules are:-
+                            * RULE INTERACTION 2Ba-Assertion 1 :- The  max-choices attribute value, provided it is not 0, must not be less than the Min-Choices value.
+
+                            RULE_SET_INTERACTION_03A: Enforce the prohibiting of nested interactions within the ExtendedTextEntryInteraction. The set of rules are:-
+                            * RULE INTERACTION 3Aa-Assertion 01 :- An ExtendedTextInteraction MUST NOT contain an ExtendedTextInteraction.
+                            * RULE INTERACTION 3Aa-Assertion 02 :- An ExtendedTextInteraction MUST NOT contain an AssociateTextInteraction.
+                            * RULE INTERACTION 3Aa-Assertion 03 :- An ExtendedTextInteraction MUST NOT contain an ChoiceTextInteraction.
+                            * RULE INTERACTION 3Aa-Assertion 04 :- An ExtendedTextInteraction MUST NOT contain an CustomInteraction.
+                            * RULE INTERACTION 3Aa-Assertion 05 :- An ExtendedTextInteraction MUST NOT contain an DrawingInteraction.
+                            * RULE INTERACTION 3Aa-Assertion 06 :- An ExtendedTextInteraction MUST NOT contain an EndAttemptInteraction.
+                            * RULE INTERACTION 3Aa-Assertion 07 :- An ExtendedTextInteraction MUST NOT contain an GapMatchInteraction.
+                            * RULE INTERACTION 3Aa-Assertion 08 :- An ExtendedTextInteraction MUST NOT contain an GraphicAssociateInteraction.
+                            * RULE INTERACTION 3Aa-Assertion 09 :- An ExtendedTextInteraction MUST NOT contain an GraphicGapMatchInteraction.
+                            * RULE INTERACTION 3Aa-Assertion 10 :- An ExtendedTextInteraction MUST NOT contain a GraphicOrderInteraction.
+                            * RULE INTERACTION 3Aa-Assertion 11 :- An ExtendedTextInteraction MUST NOT contain a HotspotInteraction.
+                            * RULE INTERACTION 3Aa-Assertion 12 :- An ExtendedTextInteraction MUST NOT contain a HottextInteraction.
+                            * RULE INTERACTION 3Aa-Assertion 13 :- An ExtendedTextInteraction MUST NOT contain an InlineChoiceInteraction.
+                            * RULE INTERACTION 3Aa-Assertion 14 :- An ExtendedTextInteraction MUST NOT contain a MatchInteraction.
+                            * RULE INTERACTION 3Aa-Assertion 15 :- An ExtendedTextInteraction MUST NOT contain a MediaInteraction.
+                            * RULE INTERACTION 3Aa-Assertion 16 :- An ExtendedTextInteraction MUST NOT contain an OrderInteraction.
+                            * RULE INTERACTION 3Aa-Assertion 17 :- An ExtendedTextInteraction MUST NOT contain a PortableCustomInteraction.
+                            * RULE INTERACTION 3Aa-Assertion 18 :- An ExtendedTextInteraction MUST NOT contain a PositionObjectInteraction.
+                            * RULE INTERACTION 3Aa-Assertion 19 :- An ExtendedTextInteraction MUST NOT contain a SelectPointInteraction.
+                            * RULE INTERACTION 3Aa-Assertion 20 :- An ExtendedTextInteraction MUST NOT contain a SliderInteraction.
+                            * RULE INTERACTION 3Aa-Assertion 21 :- An ExtendedTextInteraction MUST NOT contain a TextEntryInteraction.
+                            * RULE INTERACTION 3Aa-Assertion 22 :- An ExtendedTextInteraction MUST NOT contain an UploadInteraction.
+
+                            RULE_SET_INTERACTION_03B: Enforce the correct use of the ExtendedTextInteraction attributes. The set of rules are:-
+                            * RULE INTERACTION 3Ba-Assertion 1 :- The string-identifier and response-identifier attribute values must not be the same.
+
+                            RULE_SET_INTERACTION_04A: Enforce the prohibiting of nested interactions within the HotspotInteraction. The set of rules are:-
+                            * RULE INTERACTION 4Aa-Assertion 01 :- A HotspotInteraction MUST NOT contain a HotspotInteraction.
+                            * RULE INTERACTION 4Aa-Assertion 02 :- A HotspotInteraction MUST NOT contain an AssociateInteraction.
+                            * RULE INTERACTION 4Aa-Assertion 03 :- A HotspotInteraction MUST NOT contain a ChoiceInteraction.
+                            * RULE INTERACTION 4Aa-Assertion 04 :- A HotspotInteraction MUST NOT contain a CustomInteraction.
+                            * RULE INTERACTION 4Aa-Assertion 05 :- A HotspotInteraction MUST NOT contain a DrawingInteraction.
+                            * RULE INTERACTION 4Aa-Assertion 06 :- A HotspotInteraction MUST NOT contain a EndAttemptInteraction.
+                            * RULE INTERACTION 4Aa-Assertion 07 :- A HotspotInteraction MUST NOT contain a ExtendedTextInteraction.
+                            * RULE INTERACTION 4Aa-Assertion 08 :- A HotspotInteraction MUST NOT contain a GraphMatchInteraction.
+                            * RULE INTERACTION 4Aa-Assertion 09 :- A HotspotInteraction MUST NOT contain a GraphicAssociateInteraction.
+                            * RULE INTERACTION 4Aa-Assertion 10 :- A HotspotInteraction MUST NOT contain a GraphicGapMatchInteraction.
+                            * RULE INTERACTION 4Aa-Assertion 11 :- A HotspotInteraction MUST NOT contain a GraphicOrderInteraction.
+                            * RULE INTERACTION 4Aa-Assertion 12 :- A HotspotInteraction MUST NOT contain a HottextInteraction.
+                            * RULE INTERACTION 4Aa-Assertion 13 :- A HotspotInteraction MUST NOT contain an InlineChoiceInteraction.
+                            * RULE INTERACTION 4Aa-Assertion 14 :- A HotspotInteraction MUST NOT contain a MatchInteraction.
+                            * RULE INTERACTION 4Aa-Assertion 15 :- A HotspotInteraction MUST NOT contain a MediaInteraction.
+                            * RULE INTERACTION 4Aa-Assertion 16 :- A HotspotInteraction MUST NOT contain an OrderInteraction.
+                            * RULE INTERACTION 4Aa-Assertion 17 :- A HotspotInteraction MUST NOT contain a PortableCustomInteraction.
+                            * RULE INTERACTION 4Aa-Assertion 18 :- A HotspotInteraction MUST NOT contain a PositionObjectInteraction.
+                            * RULE INTERACTION 4Aa-Assertion 19 :- A HotspotInteraction MUST NOT contain a SelectPointInteraction.
+                            * RULE INTERACTION 4Aa-Assertion 20 :- A HotspotInteraction MUST NOT contain a SliderInteraction.
+                            * RULE INTERACTION 4Aa-Assertion 21 :- A HotspotInteraction MUST NOT contain a TextEntryInteraction.
+                            * RULE INTERACTION 4Aa-Assertion 22 :- A HotspotInteraction MUST NOT contain an UploadInteraction.
+
+                            RULE_SET_INTERACTION_04B: Enforce the correct use of the HotspotInteraction attributes. The set of rules are:-
+                            * RULE INTERACTION 4Ba-Assertion 1 :- The max-choices attribute value, provided it is not 0, must not be less than the min-choices value.
+
+                            RULE_SET_INTERACTION_05A: Enforce the prohibiting of nested interactions within the GraphicOrderInteraction. The set of rules are:-
+                            * RULE INTERACTION 5Aa-Assertion 01 :- A GraphicOrderInteraction MUST NOT contain a GraphicOrderInteraction.
+                            * RULE INTERACTION 5Aa-Assertion 02 :- A GraphicOrderInteraction MUST NOT contain an AssociateInteraction.
+                            * RULE INTERACTION 5Aa-Assertion 03 :- A GraphicOrderInteraction MUST NOT contain a ChoiceInteraction.
+                            * RULE INTERACTION 5Aa-Assertion 04 :- A GraphicOrderInteraction MUST NOT contain a CustomInteraction.
+                            * RULE INTERACTION 5Aa-Assertion 05 :- A GraphicOrderInteraction MUST NOT contain a DrawingInteraction.
+                            * RULE INTERACTION 5Aa-Assertion 06 :- A GraphicOrderInteraction MUST NOT contain an EndAttemptInteraction.
+                            * RULE INTERACTION 5Aa-Assertion 07 :- A GraphicOrderInteraction MUST NOT contain an ExtendedTextInteraction.
+                            * RULE INTERACTION 5Aa-Assertion 08 :- A GraphicOrderInteraction MUST NOT contain a GapMatchInteraction.
+                            * RULE INTERACTION 5Aa-Assertion 09 :- A GraphicOrderInteraction MUST NOT contain a GraphicAssocciateInteraction.
+                            * RULE INTERACTION 5Aa-Assertion 10 :- A GraphicOrderInteraction MUST NOT contain a GraphicGapMatchInteraction.
+                            * RULE INTERACTION 5Aa-Assertion 11 :- A GraphicOrderInteraction MUST NOT contain a HotspotInteraction.
+                            * RULE INTERACTION 5Aa-Assertion 12 :- A GraphicOrderInteraction MUST NOT contain a HottextInteraction.
+                            * RULE INTERACTION 5Aa-Assertion 13 :- A GraphicOrderInteraction MUST NOT contain an InlineChoiceInteraction.
+                            * RULE INTERACTION 5Aa-Assertion 14 :- A GraphicOrderInteraction MUST NOT contain a MatchInteraction.
+                            * RULE INTERACTION 5Aa-Assertion 15 :- A GraphicOrderInteraction MUST NOT contain a MediaInteraction.
+                            * RULE INTERACTION 5Aa-Assertion 16 :- A GraphicOrderInteraction MUST NOT contain an OrderInteraction.
+                            * RULE INTERACTION 5Aa-Assertion 17 :- A GraphicOrderInteraction MUST NOT contain a PortableCustomInteraction.
+                            * RULE INTERACTION 5Aa-Assertion 18 :- A GraphicOrderInteraction MUST NOT contain a PositionObjectInteraction.
+                            * RULE INTERACTION 5Aa-Assertion 19 :- A GraphicOrderInteraction MUST NOT contain a SelectPointInteraction.
+                            * RULE INTERACTION 5Aa-Assertion 20 :- A GraphicOrderInteraction MUST NOT contain a SliderInteraction.
+                            * RULE INTERACTION 5Aa-Assertion 21 :- A GraphicOrderInteraction MUST NOT contain a TextEntryInteraction.
+                            * RULE INTERACTION 5Aa-Assertion 22 :- A GraphicOrderInteraction MUST NOT contain an UploadInteraction.
+
+                            RULE_SET_INTERACTION_05B: Enforce the correct use of the GraphicOrderInteraction attributes. The set of rules are:-
+                            * RULE INTERACTION 5Ba-Assertion 1 :- The max-choices attribute value, provided it is not 0, must not be less than the min-choices value.
+
+                            RULE_SET_INTERACTION_06A: Enforce the prohibiting of nested interactions within the PositionObjectInteraction. The set of rules are:-
+                            * RULE INTERACTION 6Aa-Assertion 01 :- A PositionObjectInteraction MUST NOT contain a PositionObjectInteraction.
+                            * RULE INTERACTION 6Aa-Assertion 02 :- A PositionObjectInteraction MUST NOT contain a AssociateInteraction.
+                            * RULE INTERACTION 6Aa-Assertion 03 :- A PositionObjectInteraction MUST NOT contain a ChoiceInteraction.
+                            * RULE INTERACTION 6Aa-Assertion 04 :- A PositionObjectInteraction MUST NOT contain a CustomInteraction.
+                            * RULE INTERACTION 6Aa-Assertion 07 :- A PositionObjectInteraction MUST NOT contain an ExtendedTextInteraction.
+                            * RULE INTERACTION 6Aa-Assertion 08 :- A PositionObjectInteraction MUST NOT contain a GapMatchInteraction.
+                            * RULE INTERACTION 6Aa-Assertion 09 :- A PositionObjectInteraction MUST NOT contain a GraphicAssociateInteraction.
+                            * RULE INTERACTION 6Aa-Assertion 10 :- A PositionObjectInteraction MUST NOT contain a GraphicGapMatchInteraction.
+                            * RULE INTERACTION 6Aa-Assertion 11 :- A PositionObjectInteraction MUST NOT contain a GraphicOrderInteraction.
+                            * RULE INTERACTION 6Aa-Assertion 12 :- A PositionObjectInteraction MUST NOT contain a HotspotInteraction.
+                            * RULE INTERACTION 6Aa-Assertion 13 :- A PositionObjectInteraction MUST NOT contain a HottextInteraction.
+                            * RULE INTERACTION 6Aa-Assertion 14 :- A PositionObjectInteraction MUST NOT contain an InlineChoiceInteraction.
+                            * RULE INTERACTION 6Aa-Assertion 15 :- A PositionObjectInteraction MUST NOT contain a MatchInteraction.
+                            * RULE INTERACTION 6Aa-Assertion 16 :- A PositionObjectInteraction MUST NOT contain a MediaInteraction.
+                            * RULE INTERACTION 6Aa-Assertion 17 :- A PositionObjectInteraction MUST NOT contain an OrderInteraction.
+                            * RULE INTERACTION 6Aa-Assertion 18 :- A PositionObjectInteraction MUST NOT contain a PortableCustomInteraction.
+                            * RULE INTERACTION 6Aa-Assertion 19 :- A PositionObjectInteraction MUST NOT contain a SelectPointInteraction.
+                            * RULE INTERACTION 6Aa-Assertion 20 :- A PositionObjectInteraction MUST NOT contain a SliderInteraction.
+                            * RULE INTERACTION 6Aa-Assertion 21 :- A PositionObjectInteraction MUST NOT contain a TextEntryInteraction.
+                            * RULE INTERACTION 6Aa-Assertion 22 :- A PositionObjectInteraction MUST NOT contain an UploadInteraction.
+
+                            RULE_SET_INTERACTION_06B: Enforce the correct use of the PositionObjectInteraction attributes. The set of rules are:-
+                            * RULE INTERACTION 6Ba-Assertion 1 :- The max-choices attribute value, provided it is not 0, must not be less than the min-choices value.
+
+                            RULE_SET_INTERACTION_07A: Enforce the prohibiting of nested interactions within the SelectPointInteraction. The set of rules are:-
+                            * RULE INTERACTION 7Aa-Assertion 01 :- A SelectPointInteraction MUST NOT contain a SelectPointInteraction.
+                            * RULE INTERACTION 7Aa-Assertion 02 :- A SelectPointInteraction MUST NOT contain an AssociateInteraction.
+                            * RULE INTERACTION 7Aa-Assertion 03 :- A SelectPointInteraction MUST NOT contain a ChoiceInteraction.
+                            * RULE INTERACTION 7Aa-Assertion 04 :- A SelectPointInteraction MUST NOT contain a CustomInteraction.
+                            * RULE INTERACTION 7Aa-Assertion 05 :- A SelectPointInteraction MUST NOT contain a DrawingInteraction.
+                            * RULE INTERACTION 7Aa-Assertion 06 :- A SelectPointInteraction MUST NOT contain an EndAttemptInteraction.
+                            * RULE INTERACTION 7Aa-Assertion 07 :- A SelectPointInteraction MUST NOT contain an ExtendedTextInteraction.
+                            * RULE INTERACTION 7Aa-Assertion 08 :- A SelectPointInteraction MUST NOT contain a GapMatchInteraction.
+                            * RULE INTERACTION 7Aa-Assertion 09 :- A SelectPointInteraction MUST NOT contain a GraphicAssociateInteraction.
+                            * RULE INTERACTION 7Aa-Assertion 11 :- A SelectPointInteraction MUST NOT contain a GraphicOrderInteraction.
+                            * RULE INTERACTION 7Aa-Assertion 12 :- A SelectPointInteraction MUST NOT contain a HotspotInteraction.
+                            * RULE INTERACTION 7Aa-Assertion 13 :- A SelectPointInteraction MUST NOT contain a HottextInteraction.
+                            * RULE INTERACTION 7Aa-Assertion 14 :- A SelectPointInteraction MUST NOT contain an InlineChoiceInteraction.
+                            * RULE INTERACTION 7Aa-Assertion 15 :- A SelectPointInteraction MUST NOT contain a MatchInteraction.
+                            * RULE INTERACTION 7Aa-Assertion 16 :- A SelectPointInteraction MUST NOT contain a MediaInteraction.
+                            * RULE INTERACTION 7Aa-Assertion 17 :- A SelectPointInteraction MUST NOT contain an OrderInteraction.
+                            * RULE INTERACTION 7Aa-Assertion 18 :- A SelectPointInteraction MUST NOT contain a PortableInteraction.
+                            * RULE INTERACTION 7Aa-Assertion 19 :- A SelectPointInteraction MUST NOT contain a PositionObjectInteraction.
+                            * RULE INTERACTION 7Aa-Assertion 20 :- A SelectPointInteraction MUST NOT contain a SliderInteraction.
+                            * RULE INTERACTION 7Aa-Assertion 21 :- A SelectPointInteraction MUST NOT contain a TextEntryInteraction.
+                            * RULE INTERACTION 7Aa-Assertion 22 :- A SelectPointInteraction MUST NOT contain an UploadInteraction.
+
+                            RULE_SET_INTERACTION_07B: Enforce the correct use of the SelectPointInteraction attributes. The set of rules are:-
+                            * RULE INTERACTION 7Ba-Assertion 1 :- The max-choices attribute value, provided it is not 0, must not be less than the min-choices value.
+
+                            RULE_SET_INTERACTION_08A: Enforce the prohibiting of nested interactions within the OrderInteraction. The set of rules are:-
+                            * RULE INTERACTION 8Aa-Assertion 01 :- An OrderInteraction MUST NOT contain an OrderInteraction.
+                            * RULE INTERACTION 8Aa-Assertion 02 :- An OrderInteraction MUST NOT contain an AssociateInteraction.
+                            * RULE INTERACTION 8Aa-Assertion 03 :- An OrderInteraction MUST NOT contain a ChoiceInteraction.
+                            * RULE INTERACTION 8Aa-Assertion 04 :- An OrderInteraction MUST NOT contain a CustomInteraction.
+                            * RULE INTERACTION 8Aa-Assertion 05 :- An OrderInteraction MUST NOT contain a DrawingInteraction.
+                            * RULE INTERACTION 8Aa-Assertion 06 :- An OrderInteraction MUST NOT contain an EndAttemptInteraction.
+                            * RULE INTERACTION 8Aa-Assertion 07 :- An OrderInteraction MUST NOT contain an ExtendedTextInteraction.
+                            * RULE INTERACTION 8Aa-Assertion 08 :- An OrderInteraction MUST NOT contain a GraphicAssociateInteraction.
+                            * RULE INTERACTION 8Aa-Assertion 09 :- An OrderInteraction MUST NOT contain a GraphicGapMatchInteraction.
+                            * RULE INTERACTION 8Aa-Assertion 10 :- An OrderInteraction MUST NOT contain a GraphicOrderInteraction.
+                            * RULE INTERACTION 8Aa-Assertion 11 :- An OrderInteraction MUST NOT contain a HotspotInteraction.
+                            * RULE INTERACTION 8Aa-Assertion 12 :- An OrderInteraction MUST NOT contain a HottextInteraction.
+                            * RULE INTERACTION 8Aa-Assertion 13 :- An OrderInteraction MUST NOT contain an InlineChoiceInteraction.
+                            * RULE INTERACTION 8Aa-Assertion 14 :- An OrderInteraction MUST NOT contain a MatchInteraction.
+                            * RULE INTERACTION 8Aa-Assertion 15 :- An OrderInteraction MUST NOT contain a MediaInteraction.
+                            * RULE INTERACTION 8Aa-Assertion 16 :- An OrderInteraction MUST NOT contain a GapMatchInteraction.
+                            * RULE INTERACTION 8Aa-Assertion 17 :- An OrderInteraction MUST NOT contain a PortableCustomInteraction.
+                            * RULE INTERACTION 8Aa-Assertion 18 :- An OrderInteraction MUST NOT contain a PositionObjectInteraction.
+                            * RULE INTERACTION 8Aa-Assertion 19 :- An OrderInteraction MUST NOT contain a SelectPointInteraction.
+                            * RULE INTERACTION 8Aa-Assertion 20 :- An OrderInteraction MUST NOT contain a SliderInteraction.
+                            * RULE INTERACTION 8Aa-Assertion 21 :- An OrderInteraction MUST NOT contain a TextEntryInteraction.
+                            * RULE INTERACTION 8Aa-Assertion 22 :- An OrderInteraction MUST NOT contain a UploadInteraction.
+
+                            RULE_SET_INTERACTION_08B: Enforce the correct use of the OrderInteraction attributes. The set of rules are:-
+                            * RULE INTERACTION 8Ba-Assertion 1 :- The max-choices attribute value, provided it is not 0, must not be less than the min-choices value.
+
+                            RULE_SET_INTERACTION_09A: Enforce the prohibiting of nested interactions within the HotTextInteraction. The set of rules are:-
+                            * RULE INTERACTION 9Aa-Assertion 01 :- A HottextInteraction MUST NOT contain a HottextInteraction.
+                            * RULE INTERACTION 9Aa-Assertion 02 :- A HottextInteraction MUST NOT contain an AssociateInteraction.
+                            * RULE INTERACTION 9Aa-Assertion 03 :- A HottextInteraction MUST NOT contain a ChoiceInteraction.
+                            * RULE INTERACTION 9Aa-Assertion 04 :- A HottextInteraction MUST NOT contain a CustomInteraction.
+                            * RULE INTERACTION 9Aa-Assertion 05 :- A HottextInteraction MUST NOT contain a DrawingInteraction.
+                            * RULE INTERACTION 9Aa-Assertion 06 :- A HottextInteraction MUST NOT contain an EndAttemptInteraction.
+                            * RULE INTERACTION 9Aa-Assertion 07 :- A HottextInteraction MUST NOT contain an ExtendedTextInteraction.
+                            * RULE INTERACTION 9Aa-Assertion 08 :- A HottextInteraction MUST NOT contain a GapMatchInteraction.
+                            * RULE INTERACTION 9Aa-Assertion 09 :- A HottextInteraction MUST NOT contain a GraphicAssociateInteraction.
+                            * RULE INTERACTION 9Aa-Assertion 10 :- A HottextInteraction MUST NOT contain a GraphicGapMatchInteraction.
+                            * RULE INTERACTION 9Aa-Assertion 11 :- A HottextInteraction MUST NOT contain a GraphicOrderInteraction.
+                            * RULE INTERACTION 9Aa-Assertion 12 :- A HottextInteraction MUST NOT contain a HotspotInteraction.
+                            * RULE INTERACTION 9Aa-Assertion 13 :- A HottextInteraction MUST NOT contain an InlineChoiceInteraction.
+                            * RULE INTERACTION 9Aa-Assertion 14 :- A HottextInteraction MUST NOT contain a MatchInteraction.
+                            * RULE INTERACTION 9Aa-Assertion 15 :- A HottextInteraction MUST NOT contain a MediaInteraction.
+                            * RULE INTERACTION 9Aa-Assertion 16 :- A HottextInteraction MUST NOT contain an OrderInteraction.
+                            * RULE INTERACTION 9Aa-Assertion 17 :- A HottextInteraction MUST NOT contain an PortableCustomInteraction.
+                            * RULE INTERACTION 9Aa-Assertion 18 :- A HottextInteraction MUST NOT contain a PositionObjectInteraction.
+                            * RULE INTERACTION 9Aa-Assertion 19 :- A HottextInteraction MUST NOT contain a SelectPointInteraction.A
+                            * RULE INTERACTION 9Aa-Assertion 20 :- A HottextInteraction MUST NOT contain a SliderInteraction.
+                            * RULE INTERACTION 9Aa-Assertion 21 :- A HottextInteraction MUST NOT contain a TextEntryInteraction.
+                            * RULE INTERACTION 9Aa-Assertion 22 :- A HottextInteraction MUST NOT contain an UploadInteraction.
+
+                            RULE_SET_INTERACTION_09B: Enforce the correct use of the HotTextInteraction attributes. The set of rules are:-
+                            * RULE INTERACTION 9Ba-Assertion 1 :- The max-choices attribute value, provided it is not 0, must not be less than the min-choices value.
+
+                            RULE_SET_INTERACTION_10A: Enforce the prohibiting of nested interactions within the GraphicAssociateInteraction. The set of rules are:-
+                            * RULE INTERACTION 10Aa-Assertion 01 :- A GraphicAssociateInteraction MUST NOT contain a GraphicAssociateInteraction.
+                            * RULE INTERACTION 10Aa-Assertion 02 :- A GraphicAssociateInteraction MUST NOT contain an AssociateInteraction.
+                            * RULE INTERACTION 10Aa-Assertion 03 :- A GraphicAssociateInteraction MUST NOT contain a ChoiceInteraction.
+                            * RULE INTERACTION 10Aa-Assertion 04 :- A GraphicAssociateInteraction MUST NOT contain a CustomInteraction.
+                            * RULE INTERACTION 10Aa-Assertion 05 :- A GraphicAssociateInteraction MUST NOT contain a DrawingInteraction.
+                            * RULE INTERACTION 10Aa-Assertion 06 :- A GraphicAssociateInteraction MUST NOT contain an EndAttemptInteraction.
+                            * RULE INTERACTION 10Aa-Assertion 07 :- A GraphicAssociateInteraction MUST NOT contain an ExtendedTextInteraction.
+                            * RULE INTERACTION 10Aa-Assertion 08 :- A GraphicAssociateInteraction MUST NOT contain a GapMatchInteraction.
+                            * RULE INTERACTION 10Aa-Assertion 09 :- A GraphicAssociateInteraction MUST NOT contain a GraphicGapMatchInteraction.
+                            * RULE INTERACTION 10Aa-Assertion 10 :- A GraphicAssociateInteraction MUST NOT contain a GraphicOrderInteraction.
+                            * RULE INTERACTION 10Aa-Assertion 11 :- A GraphicAssociateInteraction MUST NOT contain a HotspotInteraction.
+                            * RULE INTERACTION 10Aa-Assertion 12 :- A GraphicAssociateInteraction MUST NOT contain a HottextInteraction.
+                            * RULE INTERACTION 10Aa-Assertion 13 :- A GraphicAssociateInteraction MUST NOT contain an InlineChoiceInteraction.
+                            * RULE INTERACTION 10Aa-Assertion 14 :- A GraphicAssociateInteraction MUST NOT contain a MatchInteraction.
+                            * RULE INTERACTION 10Aa-Assertion 15 :- A GraphicAssociateInteraction MUST NOT contain a MediaInteraction.
+                            * RULE INTERACTION 10Aa-Assertion 16 :- A GraphicAssociateInteraction MUST NOT contain a OrderInteraction.
+                            * RULE INTERACTION 10Aa-Assertion 17 :- A GraphicAssociateInteraction MUST NOT contain a PortableCustomInteraction.
+                            * RULE INTERACTION 10Aa-Assertion 18 :- A GraphicAssociateInteraction MUST NOT contain a PositionObjectInteraction.
+                            * RULE INTERACTION 10Aa-Assertion 19 :- A GraphicAssociateInteraction MUST NOT contain a SelectPointInteraction.
+                            * RULE INTERACTION 10Aa-Assertion 20 :- A GraphicAssociateInteraction MUST NOT contain a SliderInteraction.
+                            * RULE INTERACTION 10Aa-Assertion 21 :- A GraphicAssociateInteraction MUST NOT contain a TextEntryInteraction.
+                            * RULE INTERACTION 10Aa-Assertion 22 :- A GraphicAssociateInteraction MUST NOT contain an UploadInteraction.
+
+                            RULE_SET_INTERACTION_10B: Enforce the correct use of the GraphicAssociateInteraction attributes. The set of rules are:-
+                            * RULE INTERACTION 10Ba-Assertion 1 :- The max-associations attribute value, provided it is not 0, must not be less than the min-associations value.
+
+                            RULE_SET_INTERACTION_11A: Enforce the prohibiting of nested interactions within the MatchInteraction. The set of rules are:-
+                            * RULE INTERACTION 11Aa-Assertion 01 :- A MatchInteraction MUST NOT contain a MatchInteraction.
+                            * RULE INTERACTION 11Aa-Assertion 02 :- A MatchInteraction MUST NOT contain an AssociateInteraction.
+                            * RULE INTERACTION 11Aa-Assertion 03 :- A MatchInteraction MUST NOT contain a ChoiceInteraction.
+                            * RULE INTERACTION 11Aa-Assertion 04 :- A MatchInteraction MUST NOT contain a CustomInteraction.
+                            * RULE INTERACTION 11Aa-Assertion 05 :- A MatchInteraction MUST NOT contain a DrawingInteraction.
+                            * RULE INTERACTION 11Aa-Assertion 06 :- A MatchInteraction MUST NOT contain an EndAttemptInteraction.
+                            * RULE INTERACTION 11Aa-Assertion 07 :- A MatchInteraction MUST NOT contain an ExtendedTextInteraction.
+                            * RULE INTERACTION 11Aa-Assertion 08 :- A MatchInteraction MUST NOT contain a GapMatchInteraction.
+                            * RULE INTERACTION 11Aa-Assertion 09 :- A MatchInteraction MUST NOT contain a GraphicAsssociateInteraction.
+                            * RULE INTERACTION 11Aa-Assertion 10 :- A MatchInteraction MUST NOT contain a GraphicGapMatchInteraction.
+                            * RULE INTERACTION 11Aa-Assertion 11 :- A MatchInteraction MUST NOT contain a GraphicOrderInteraction.
+                            * RULE INTERACTION 11Aa-Assertion 12 :- A MatchInteraction MUST NOT contain a HotspotInteraction.
+                            * RULE INTERACTION 11Aa-Assertion 13 :- A MatchInteraction MUST NOT contain a HottextInteraction.
+                            * RULE INTERACTION 11Aa-Assertion 14 :- A MatchInteraction MUST NOT contain a InlineChoiceInteraction.
+                            * RULE INTERACTION 11Aa-Assertion 15 :- A MatchInteraction MUST NOT contain a MatchInteraction.
+                            * RULE INTERACTION 11Aa-Assertion 16 :- A MatchInteraction MUST NOT contain an OrderInteraction.
+                            * RULE INTERACTION 11Aa-Assertion 17 :- A MatchInteraction MUST NOT contain a PortableCustomInteraction.
+                            * RULE INTERACTION 11Aa-Assertion 18 :- A MatchInteraction MUST NOT contain a PositionObjecInteraction.
+                            * RULE INTERACTION 11Aa-Assertion 19 :- A MatchInteraction MUST NOT contain a SelectPointInteraction.
+                            * RULE INTERACTION 11Aa-Assertion 20 :- A MatchInteraction MUST NOT contain a SliderInteraction.
+                            * RULE INTERACTION 11Aa-Assertion 21 :- A MatchInteraction MUST NOT contain a TextEntryInteraction.
+                            * RULE INTERACTION 11Aa-Assertion 22 :- A MatchInteraction MUST NOT contain an UploadInteraction.
+
+                            RULE_SET_INTERACTION_11B: Enforce the correct use of the MatchInteraction attributes. The set of rules are:-
+                            * RULE INTERACTION 11Ba-Assertion 1 :- The max-associations attribute value, provided it is not 0, must not be less than the min-associations value.
+
+                            RULE_SET_INTERACTION_12A: Enforce the prohibiting of nested interactions within the AssociateInteraction. The set of rules are:-
+                            * RULE INTERACTION 12Aa-Assertion 01 :- An AssociateInteraction MUST NOT contain an AssociateInteraction.
+                            * RULE INTERACTION 12Aa-Assertion 02 :- An AssociateInteraction MUST NOT contain a ChoiceInteraction.
+                            * RULE INTERACTION 12Aa-Assertion 03 :- An AssociateInteraction MUST NOT contain a CustomInteraction.
+                            * RULE INTERACTION 12Aa-Assertion 04 :- An AssociateInteraction MUST NOT contain a DrawingInteraction.
+                            * RULE INTERACTION 12Aa-Assertion 05 :- An AssociateInteraction MUST NOT contain an EndAtemptInteraction.
+                            * RULE INTERACTION 12Aa-Assertion 06 :- An AssociateInteraction MUST NOT contain an ExtendedTextInteraction.
+                            * RULE INTERACTION 12Aa-Assertion 07 :- An AssociateInteraction MUST NOT contain a GapMatchInteraction.
+                            * RULE INTERACTION 12Aa-Assertion 08 :- An AssociateInteraction MUST NOT contain a GraphicAssociateInteraction.
+                            * RULE INTERACTION 12Aa-Assertion 09 :- An AssociateInteraction MUST NOT contain a GraphicGapMatchInteraction.
+                            * RULE INTERACTION 12Aa-Assertion 10 :- An AssociateInteraction MUST NOT contain a GraphicOrderInteraction.
+                            * RULE INTERACTION 12Aa-Assertion 11 :- An AssociateInteraction MUST NOT contain a HotspotInteraction.
+                            * RULE INTERACTION 12Aa-Assertion 12 :- An AssociateInteraction MUST NOT contain a HottextInteraction.
+                            * RULE INTERACTION 12Aa-Assertion 13 :- An AssociateInteraction MUST NOT contain an InlineChoiceInteraction.
+                            * RULE INTERACTION 12Aa-Assertion 14 :- An AssociateInteraction MUST NOT contain a MatchInteraction.
+                            * RULE INTERACTION 12Aa-Assertion 15 :- An AssociateInteraction MUST NOT contain a MediaInteraction.
+                            * RULE INTERACTION 12Aa-Assertion 16 :- An AssociateInteraction MUST NOT contain an OrderInteraction.
+                            * RULE INTERACTION 12Aa-Assertion 17 :- An AssociateInteraction MUST NOT contain a PortableCustomInteraction.
+                            * RULE INTERACTION 12Aa-Assertion 18 :- An AssociateInteraction MUST NOT contain a PositionObjectInteraction.
+                            * RULE INTERACTION 12Aa-Assertion 19 :- An AssociateInteraction MUST NOT contain a SelectPointInteraction.
+                            * RULE INTERACTION 12Aa-Assertion 20 :- An AssociateInteraction MUST NOT contain a SliderInteraction.
+                            * RULE INTERACTION 12Aa-Assertion 21 :- An AssociateInteraction MUST NOT contain a TextEntryInteraction.
+                            * RULE INTERACTION 12Aa-Assertion 22 :- An AssociateInteraction MUST NOT contain a UploadInteraction.
+
+                            RULE_SET_INTERACTION_12B: Enforce the correct use of the AssociateInteraction attributes. The set of rules are:-
+                            * RULE INTERACTION 12Ba-Assertion 1 :- The max-associations attribute value, provided it is not 0, must not be less than the min-associations value.
+
+                            RULE_SET_INTERACTION_13A: Enforce the prohibiting of nested interactions within the MediaInteraction. The set of rules are:-
+                            * RULE INTERACTION 13Aa-Assertion 01 :- A MediaInteraction MUST NOT contain a MediaInteraction.
+                            * RULE INTERACTION 13Aa-Assertion 02 :- A MediaInteraction MUST NOT contain an AssociateInteraction.
+                            * RULE INTERACTION 13Aa-Assertion 03 :- A MediaInteraction MUST NOT contain a ChoiceInteraction.
+                            * RULE INTERACTION 13Aa-Assertion 04 :- A MediaInteraction MUST NOT contain a CustomInteraction.
+                            * RULE INTERACTION 13Aa-Assertion 05 :- A MediaInteraction MUST NOT contain a DrawingInteraction.
+                            * RULE INTERACTION 13Aa-Assertion 06 :- A MediaInteraction MUST NOT contain an EndAttemptInteraction.
+                            * RULE INTERACTION 13Aa-Assertion 07 :- A MediaInteraction MUST NOT contain an ExtendedTextInteraction.
+                            * RULE INTERACTION 13Aa-Assertion 08 :- A MediaInteraction MUST NOT contain a GapMatchInteraction.
+                            * RULE INTERACTION 13Aa-Assertion 09 :- A MediaInteraction MUST NOT contain a GraphicAssociateInteraction.
+                            * RULE INTERACTION 13Aa-Assertion 10 :- A MediaInteraction MUST NOT contain a GraphicGapMatchInteraction.
+                            * RULE INTERACTION 13Aa-Assertion 11 :- A MediaInteraction MUST NOT contain a GraphicOrderInteraction.
+                            * RULE INTERACTION 13Aa-Assertion 12 :- A MediaInteraction MUST NOT contain a HotspotInteraction.
+                            * RULE INTERACTION 13Aa-Assertion 13 :- A MediaInteraction MUST NOT contain a HottextInteraction.
+                            * RULE INTERACTION 13Aa-Assertion 14 :- A MediaInteraction MUST NOT contain an InlineChoiceInteraction.
+                            * RULE INTERACTION 13Aa-Assertion 15 :- A MediaInteraction MUST NOT contain a MatchInteraction.
+                            * RULE INTERACTION 13Aa-Assertion 16 :- A MediaInteraction MUST NOT contain an OrderInteraction.
+                            * RULE INTERACTION 13Aa-Assertion 17 :- A MediaInteraction MUST NOT contain a PortableCustomInteraction.
+                            * RULE INTERACTION 13Aa-Assertion 18 :- A MediaInteraction MUST NOT contain a PositionObjectInteraction.
+                            * RULE INTERACTION 13Aa-Assertion 19 :- A MediaInteraction MUST NOT contain a SelectPointInteraction.
+                            * RULE INTERACTION 13Aa-Assertion 20 :- A MediaInteraction MUST NOT contain a SliderInteraction.
+                            * RULE INTERACTION 13Aa-Assertion 21 :- A MediaInteraction MUST NOT contain a TextEntryInteraction.
+                            * RULE INTERACTION 13Aa-Assertion 22 :- A MediaInteraction MUST NOT contain an UploadInteraction.
+
+                            RULE_SET_INTERACTION_13B: Enforce the correct use of the MediaInteraction attributes. The set of rules are:-
+                            * RULE INTERACTION 13Ba-Assertion 1 :- The max-plays attribute value must not be less than the min-plays value.
+
+                            RULE_SET_INTERACTION_14A: Enforce the prohibiting of nested interactions within the SliderInteraction. The set of rules are:-
+                            * RULE INTERACTION 14Aa-Assertion 01 :- A SliderInteraction MUST NOT contain a SliderInteraction.
+                            * RULE INTERACTION 14Aa-Assertion 02 :- A SliderInteraction MUST NOT contain an AssociateInteraction.
+                            * RULE INTERACTION 14Aa-Assertion 03 :- A SliderInteraction MUST NOT contain a ChoiceInteraction.
+                            * RULE INTERACTION 14Aa-Assertion 04 :- A SliderInteraction MUST NOT contain a CustomInteraction.
+                            * RULE INTERACTION 14Aa-Assertion 05 :- A SliderInteraction MUST NOT contain a DrawingInteraction.
+                            * RULE INTERACTION 14Aa-Assertion 06 :- A SliderInteraction MUST NOT contain an EndAttemptInteraction.
+                            * RULE INTERACTION 14Aa-Assertion 07 :- A SliderInteraction MUST NOT contain an ExtendedTextInteraction.
+                            * RULE INTERACTION 14Aa-Assertion 08 :- A SliderInteraction MUST NOT contain a GapMatchInteraction.
+                            * RULE INTERACTION 14Aa-Assertion 09 :- A SliderInteraction MUST NOT contain a GraphicAssociateInteraction.
+                            * RULE INTERACTION 14Aa-Assertion 10 :- A SliderInteraction MUST NOT contain a GraphicGapMatchInteraction.
+                            * RULE INTERACTION 14Aa-Assertion 11 :- A SliderInteraction MUST NOT contain a GraphicOrderInteraction.
+                            * RULE INTERACTION 14Aa-Assertion 12 :- A SliderInteraction MUST NOT contain a HotspotInteraction.
+                            * RULE INTERACTION 14Aa-Assertion 13 :- A SliderInteraction MUST NOT contain a HottextInteraction.
+                            * RULE INTERACTION 14Aa-Assertion 14 :- A SliderInteraction MUST NOT contain an InlineChoiceInteraction.
+                            * RULE INTERACTION 14Aa-Assertion 15 :- A SliderInteraction MUST NOT contain a MatchInteraction.
+                            * RULE INTERACTION 14Aa-Assertion 16 :- A SliderInteraction MUST NOT contain a MediaInteraction.
+                            * RULE INTERACTION 14Aa-Assertion 17 :- A SliderInteraction MUST NOT contain an OrderInteraction.
+                            * RULE INTERACTION 14Aa-Assertion 18 :- A SliderInteraction MUST NOT contain a PortableCustomInteraction.
+                            * RULE INTERACTION 14Aa-Assertion 19 :- A SliderInteraction MUST NOT contain a PositionObjectInteraction.
+                            * RULE INTERACTION 14Aa-Assertion 20 :- A SliderInteraction MUST NOT contain a SelectPointInteraction.
+                            * RULE INTERACTION 14Aa-Assertion 21 :- A SliderInteraction MUST NOT contain a TextEntryInteraction.
+                            * RULE INTERACTION 14Aa-Assertion 22 :- A SliderInteraction MUST NOT contain an UploadInteraction.
+
+                            RULE_SET_INTERACTION_14B: Enforce the correct use of the SliderInteraction attributes. The set of rules are:-
+                            * RULE INTERACTION 14Ba-Assertion 1 :- The upper-bound attribute value must not be less than the lower-bound value.
+
+                            RULE_SET_INTERACTION_15A: Enforce the prohibiting of nested interactions within the DrawingInteraction. The set of rules are:-
+                            * RULE INTERACTION 15Aa-Assertion 01 :- A DrawingInteraction MUST NOT contain a DrawingInteraction.
+                            * RULE INTERACTION 15Aa-Assertion 02 :- A DrawingInteraction MUST NOT contain an AssociateInteraction.
+                            * RULE INTERACTION 15Aa-Assertion 03 :- A DrawingInteraction MUST NOT contain a ChoiceInteraction.
+                            * RULE INTERACTION 15Aa-Assertion 04 :- A DrawingInteraction MUST NOT contain a CustomInteraction.
+                            * RULE INTERACTION 15Aa-Assertion 05 :- A DrawingInteraction MUST NOT contain an EndAttemptInteraction.
+                            * RULE INTERACTION 15Aa-Assertion 06 :- A DrawingInteraction MUST NOT contain an ExtendedTextInteraction.
+                            * RULE INTERACTION 15Aa-Assertion 07 :- A DrawingInteraction MUST NOT contain a GapMatchInteraction.
+                            * RULE INTERACTION 15Aa-Assertion 08 :- A DrawingInteraction MUST NOT contain a GraphicAssociateInteraction.
+                            * RULE INTERACTION 15Aa-Assertion 09 :- A DrawingInteraction MUST NOT contain a GraphicGapMatcheInteraction.
+                            * RULE INTERACTION 15Aa-Assertion 10 :- A DrawingInteraction MUST NOT contain a GraphicOrderInteraction.
+                            * RULE INTERACTION 15Aa-Assertion 11 :- A DrawingInteraction MUST NOT contain a HotspotInteraction.
+                            * RULE INTERACTION 15Aa-Assertion 12 :- A DrawingInteraction MUST NOT contain a HottextInteraction.
+                            * RULE INTERACTION 15Aa-Assertion 13 :- A DrawingInteraction MUST NOT contain an InlineChoiceInteraction.
+                            * RULE INTERACTION 15Aa-Assertion 14 :- A DrawingInteraction MUST NOT contain a MatchInteraction.
+                            * RULE INTERACTION 15Aa-Assertion 15 :- A DrawingInteraction MUST NOT contain a MediaInteraction.
+                            * RULE INTERACTION 15Aa-Assertion 16 :- A DrawingInteraction MUST NOT contain an OrderInteraction.
+                            * RULE INTERACTION 15Aa-Assertion 17 :- A DrawingInteraction MUST NOT contain a PortableCustomInteraction.
+                            * RULE INTERACTION 15Aa-Assertion 18 :- A DrawingInteraction MUST NOT contain a PositionObjectInteraction.
+                            * RULE INTERACTION 15Aa-Assertion 19 :- A DrawingInteraction MUST NOT contain a SelectPointInteraction.
+                            * RULE INTERACTION 15Aa-Assertion 20 :- A DrawingInteraction MUST NOT contain a SliderInteraction.
+                            * RULE INTERACTION 15Aa-Assertion 21 :- A DrawingInteraction MUST NOT contain a TextEntryInteraction.
+                            * RULE INTERACTION 15Aa-Assertion 22 :- A DrawingInteraction MUST NOT contain an UploadInteraction.
+
+                            RULE_SET_INTERACTION_15B: Enforce the correct use of the DrawingInteraction attributes. The set of rules are:-
+                            * RULE INTERACTION 15Ba-Assertion 1 :- The base-type must have a value of file.
+
+                            RULE_SET_INTERACTION_16A: Enforce the prohibiting of nested interactions within the UploadInteraction. The set of rules are:-
+                            * RULE INTERACTION 16Aa-Assertion 01 :- An UploadInteraction MUST NOT contain an UploadInteraction.
+                            * RULE INTERACTION 16Aa-Assertion 02 :- An UploadInteraction MUST NOT contain an AssociateInteraction.
+                            * RULE INTERACTION 16Aa-Assertion 03 :- An UploadInteraction MUST NOT contain a ChoiceInteraction.
+                            * RULE INTERACTION 16Aa-Assertion 04 :- An UploadInteraction MUST NOT contain a CustomInteraction.
+                            * RULE INTERACTION 16Aa-Assertion 05 :- An UploadInteraction MUST NOT contain a DrawingInteraction.
+                            * RULE INTERACTION 16Aa-Assertion 06 :- An UploadInteraction MUST NOT contain an EndAttemptInteraction.
+                            * RULE INTERACTION 16Aa-Assertion 07 :- An UploadInteraction MUST NOT contain a ExtendedTextInteraction.
+                            * RULE INTERACTION 16Aa-Assertion 08 :- An UploadInteraction MUST NOT contain a GapMatchInteraction.
+                            * RULE INTERACTION 16Aa-Assertion 09 :- An UploadInteraction MUST NOT contain a GraphicAssociateInteraction.
+                            * RULE INTERACTION 16Aa-Assertion 11 :- An UploadInteraction MUST NOT contain a GraphicOrderInteraction.
+                            * RULE INTERACTION 16Aa-Assertion 12 :- An UploadInteraction MUST NOT contain a HotspotInteraction.
+                            * RULE INTERACTION 16Aa-Assertion 13 :- An UploadInteraction MUST NOT contain a HottextInteraction.
+                            * RULE INTERACTION 16Aa-Assertion 14 :- An UploadInteraction MUST NOT contain an InlineChoiceInteraction.
+                            * RULE INTERACTION 16Aa-Assertion 15 :- An UploadInteraction MUST NOT contain a MatchInteraction.
+                            * RULE INTERACTION 16Aa-Assertion 16 :- An UploadInteraction MUST NOT contain a MediaInteraction.
+                            * RULE INTERACTION 16Aa-Assertion 17 :- An UploadInteraction MUST NOT contain an OrderInteraction.
+                            * RULE INTERACTION 16Aa-Assertion 18 :- An UploadInteraction MUST NOT contain a PortableCustomInteraction.
+                            * RULE INTERACTION 16Aa-Assertion 19 :- An UploadInteraction MUST NOT contain a PositionObjectInteraction.
+                            * RULE INTERACTION 16Aa-Assertion 20 :- An UploadInteraction MUST NOT contain a SelectPointInteraction.
+                            * RULE INTERACTION 16Aa-Assertion 21 :- An UploadInteraction MUST NOT contain a SliderInteraction.
+                            * RULE INTERACTION 16Aa-Assertion 22 :- An UploadInteraction MUST NOT contain a TextEntryInteraction.
+
+                            RULE_SET_INTERACTION_16B: Enforce the correct use of the UploadInteraction attributes. The set of rules are:-
+                            * RULE INTERACTION 16Ba-Assertion 1 :- The base-type must have a value of file.
+
+                            RULE_SET_INTERACTION_17A: Enforce the prohibiting of nested interactions within the EndAttemptInteraction. The set of rules are:-
+                            * RULE INTERACTION 17Aa-Assertion 01 :- An EndAttempInteraction MUST NOT contain an EndAttemptInteraction.
+                            * RULE INTERACTION 17Aa-Assertion 02 :- An EndAttempInteraction MUST NOT contain an AssociateInteraction.
+                            * RULE INTERACTION 17Aa-Assertion 03 :- An EndAttempInteraction MUST NOT contain a ChoiceInteraction.
+                            * RULE INTERACTION 17Aa-Assertion 04 :- An EndAttempInteraction MUST NOT contain a CusomInteraction.
+                            * RULE INTERACTION 17Aa-Assertion 05 :- An EndAttempInteraction MUST NOT contain a DrawingInteraction.
+                            * RULE INTERACTION 17Aa-Assertion 06 :- An EndAttempInteraction MUST NOT contain an ExtendedTextInteraction.
+                            * RULE INTERACTION 17Aa-Assertion 07 :- An EndAttempInteraction MUST NOT contain a GapMatchInteraction.
+                            * RULE INTERACTION 17Aa-Assertion 08 :- An EndAttempInteraction MUST NOT contain a GraphicAssociateInteraction.
+                            * RULE INTERACTION 17Aa-Assertion 09 :- An EndAttempInteraction MUST NOT contain a GraphicGapMatchInteraction.
+                            * RULE INTERACTION 17Aa-Assertion 10 :- An EndAttempInteraction MUST NOT contain a GraphicOrderInteraction.
+                            * RULE INTERACTION 17Aa-Assertion 11 :- An EndAttempInteraction MUST NOT contain a HotspotInteraction.
+                            * RULE INTERACTION 17Aa-Assertion 12 :- An EndAttempInteraction MUST NOT contain a HottextInteraction.
+                            * RULE INTERACTION 17Aa-Assertion 13 :- An EndAttempInteraction MUST NOT contain an InlineChoiceInteraction.
+                            * RULE INTERACTION 17Aa-Assertion 14 :- An EndAttempInteraction MUST NOT contain a MatchInteraction.
+                            * RULE INTERACTION 17Aa-Assertion 15 :- An EndAttempInteraction MUST NOT contain a MediaInteraction.
+                            * RULE INTERACTION 17Aa-Assertion 16 :- An EndAttempInteraction MUST NOT contain an OrderInteraction.
+                            * RULE INTERACTION 17Aa-Assertion 17 :- An EndAttempInteraction MUST NOT contain a PortableCustomInteraction.
+                            * RULE INTERACTION 17Aa-Assertion 18 :- An EndAttempInteraction MUST NOT contain a PositionObjectnteraction.
+                            * RULE INTERACTION 17Aa-Assertion 19 :- An EndAttempInteraction MUST NOT contain a SelectPointInteraction.
+                            * RULE INTERACTION 17Aa-Assertion 20 :- An EndAttempInteraction MUST NOT contain a SliderInteraction.
+                            * RULE INTERACTION 17Aa-Assertion 21 :- An EndAttempInteraction MUST NOT contain a TextEntryInteraction.
+                            * RULE INTERACTION 17Aa-Assertion 22 :- An EndAttempInteraction MUST NOT contain an UploadInteraction.
+
+                            RULE_SET_INTERACTION_17B: Enforce the correct use of the EndAttemptInteraction attributes. The set of rules are:-
+                            * RULE INTERACTION 17Ba-Assertion 1 :- The base-type must have a value of boolean.
+
+                            RULE_SET_INTERACTION_18A: Enforce the prohibiting of nested interactions within the GapMatchInteraction. The set of rules are:-
+                            * RULE INTERACTION 18Aa-Assertion 01 :- A GapMatchInteraction MUST NOT contain a GapMatchInteraction.
+                            * RULE INTERACTION 18Aa-Assertion 02 :- A GapMatchInteraction MUST NOT contain an AssociateInteraction.
+                            * RULE INTERACTION 18Aa-Assertion 03 :- A GapMatchInteraction MUST NOT contain a ChoiceInteraction.
+                            * RULE INTERACTION 18Aa-Assertion 04 :- A GapMatchInteraction MUST NOT contain a CustomInteraction.
+                            * RULE INTERACTION 18Aa-Assertion 05 :- A GapMatchInteraction MUST NOT contain a DrawingInteraction.
+                            * RULE INTERACTION 18Aa-Assertion 06 :- A GapMatchInteraction MUST NOT contain an EndAttempInteraction.
+                            * RULE INTERACTION 18Aa-Assertion 07 :- A GapMatchInteraction MUST NOT contain an ExtendedTextInteraction.
+                            * RULE INTERACTION 18Aa-Assertion 08 :- A GapMatchInteraction MUST NOT contain a GraphicAssociateInteraction.
+                            * RULE INTERACTION 18Aa-Assertion 09 :- A GapMatchInteraction MUST NOT contain a GraphicGapMatchInteraction.
+                            * RULE INTERACTION 18Aa-Assertion 10 :- A GapMatchInteraction MUST NOT contain a GraphicOrderInteraction.
+                            * RULE INTERACTION 18Aa-Assertion 11 :- A GapMatchInteraction MUST NOT contain a HotspotInteraction.
+                            * RULE INTERACTION 18Aa-Assertion 12 :- A GapMatchInteraction MUST NOT contain a HottextInteraction.
+                            * RULE INTERACTION 18Aa-Assertion 13 :- A GapMatchInteraction MUST NOT contain an InlineChoiceInteraction.
+                            * RULE INTERACTION 18Aa-Assertion 14 :- A GapMatchInteraction MUST NOT contain a MatchInteraction.
+                            * RULE INTERACTION 18Aa-Assertion 15 :- A GapMatchInteraction MUST NOT contain a MediaInteraction.
+                            * RULE INTERACTION 18Aa-Assertion 16 :- A GapMatchInteraction MUST NOT contain an OrderInteraction.
+                            * RULE INTERACTION 18Aa-Assertion 17 :- A GapMatchInteraction MUST NOT contain a PorableCustomInteraction.
+                            * RULE INTERACTION 18Aa-Assertion 18 :- A GapMatchInteraction MUST NOT contain a PositionObjectInteraction.
+                            * RULE INTERACTION 18Aa-Assertion 19 :- A GapMatchInteraction MUST NOT contain a SelectPointInteraction.
+                            * RULE INTERACTION 18Aa-Assertion 20 :- A GapMatchInteraction MUST NOT contain a SliderInteraction.
+                            * RULE INTERACTION 18Aa-Assertion 21 :- A GapMatchInteraction MUST NOT contain a TextEntryInteraction.
+                            * RULE INTERACTION 18Aa-Assertion 22 :- A GapMatchInteraction MUST NOT contain an UploadInteraction.
+
+                            RULE_SET_INTERACTION_18B: Enforce the correct use of the GapMatchInteraction attributes. The set of rules are:-
+                            * RULE INTERACTION 18Ba-Assertion 1 :- The base-type must have a value of directedPair.
+                            * RULE INTERACTION 18Ba-Assertion 2 :- The max-associations attribute value, provided it is not 0, must not be less than the min-associations value.
+
+                            RULE_SET_INTERACTION_19A: Enforce the prohibiting of nested interactions within the GraphicGapMatchInteraction. The set of rules are:-
+                            * RULE INTERACTION 19Aa-Assertion 01 :- A GraphicGapMatchInteraction MUST NOT contain a GraphicGapMatchInteraction.
+                            * RULE INTERACTION 19Aa-Assertion 02 :- A GraphicGapMatchInteraction MUST NOT contain an AssociateInteraction.
+                            * RULE INTERACTION 19Aa-Assertion 03 :- A GraphicGapMatchInteraction MUST NOT contain a ChoiceInteraction.
+                            * RULE INTERACTION 19Aa-Assertion 04 :- A GraphicGapMatchInteraction MUST NOT contain a CustomInteraction.
+                            * RULE INTERACTION 19Aa-Assertion 05 :- A GraphicGapMatchInteraction MUST NOT contain a DrawingInteraction.
+                            * RULE INTERACTION 19Aa-Assertion 06 :- A GraphicGapMatchInteraction MUST NOT contain an EndAttemptInteraction.
+                            * RULE INTERACTION 19Aa-Assertion 07 :- A GraphicGapMatchInteraction MUST NOT contain an ExtendedTextInteraction.
+                            * RULE INTERACTION 19Aa-Assertion 08 :- A GraphicGapMatchInteraction MUST NOT contain a GapMatchInteraction.
+                            * RULE INTERACTION 19Aa-Assertion 09 :- A GraphicGapMatchInteraction MUST NOT contain a GraphicAssociateInteraction.
+                            * RULE INTERACTION 19Aa-Assertion 10 :- A GraphicGapMatchInteraction MUST NOT contain a GraphicOrderInteraction.
+                            * RULE INTERACTION 19Aa-Assertion 11 :- A GraphicGapMatchInteraction MUST NOT contain a HotspotInteraction.
+                            * RULE INTERACTION 19Aa-Assertion 12 :- A GraphicGapMatchInteraction MUST NOT contain a HottextInteraction.
+                            * RULE INTERACTION 19Aa-Assertion 13 :- A GraphicGapMatchInteraction MUST NOT contain an InlineChoiceInteraction.
+                            * RULE INTERACTION 19Aa-Assertion 14 :- A GraphicGapMatchInteraction MUST NOT contain a MatchInteraction.
+                            * RULE INTERACTION 19Aa-Assertion 15 :- A GraphicGapMatchInteraction MUST NOT contain a MediaInteraction.
+                            * RULE INTERACTION 19Aa-Assertion 16 :- A GraphicGapMatchInteraction MUST NOT contain an OrderInteraction.
+                            * RULE INTERACTION 19Aa-Assertion 17 :- A GraphicGapMatchInteraction MUST NOT contain a PortableCustomInteraction.
+                            * RULE INTERACTION 19Aa-Assertion 18 :- A GraphicGapMatchInteraction MUST NOT contain a PositionObjectInteraction.
+                            * RULE INTERACTION 19Aa-Assertion 19 :- A GraphicGapMatchInteraction MUST NOT contain a SelectPointInteraction.
+                            * RULE INTERACTION 19Aa-Assertion 20 :- A GraphicGapMatchInteraction MUST NOT contain a SliderInteraction.
+                            * RULE INTERACTION 19Aa-Assertion 21 :- A GraphicGapMatchInteraction MUST NOT contain a TextEntryInteraction.
+                            * RULE INTERACTION 19Aa-Assertion 22 :- A GraphicGapMatchInteraction MUST NOT contain an UploadInteraction.
+
+                            RULE_SET_INTERACTION_19B: Enforce the correct use of the GraphicGapMatchInteraction attributes. The set of rules are:-
+                            * RULE INTERACTION 19Ba-Assertion 1 :- The base-type must have a value of directedPair.
+
+                            RULE_SET_INTERACTION_20A: Enforce the prohibiting of nested interactions within CustomInteracion and PortableCustomInteraction. The set of rules are:-
+                            * RULE INTERACTION 20Aa-Assertion 01 :- A CustomInteraction MUST NOT contain a CustomInteraction.
+                            * RULE INTERACTION 20Aa-Assertion 02 :- A CustomInteraction MUST NOT contain an AssociateInteraction.
+                            * RULE INTERACTION 20Aa-Assertion 03 :- A CustomInteraction MUST NOT contain a ChoiceInteraction.
+                            * RULE INTERACTION 20Aa-Assertion 04 :- A CustomInteraction MUST NOT contain a DrawingInteraction.
+                            * RULE INTERACTION 20Aa-Assertion 05 :- A CustomInteraction MUST NOT contain an EndAttemptInteraction.
+                            * RULE INTERACTION 20Aa-Assertion 06 :- A CustomInteraction MUST NOT contain an ExtendedTextInteraction.
+                            * RULE INTERACTION 20Aa-Assertion 07 :- A CustomInteraction MUST NOT contain a GapMatchInteraction.
+                            * RULE INTERACTION 20Aa-Assertion 08 :- A CustomInteraction MUST NOT contain a GraphicAssociateInteraction.
+                            * RULE INTERACTION 20Aa-Assertion 09 :- A CustomInteraction MUST NOT contain a GraphicGapMatchInteraction.
+                            * RULE INTERACTION 20Aa-Assertion 10 :- A CustomInteraction MUST NOT contain a GraphicOrderInteraction.
+                            * RULE INTERACTION 20Aa-Assertion 11 :- A CustomInteraction MUST NOT contain a HotspotInteraction.
+                            * RULE INTERACTION 20Aa-Assertion 12 :- A CustomInteraction MUST NOT contain a HottextInteraction.
+                            * RULE INTERACTION 20Aa-Assertion 13 :- A CustomInteraction MUST NOT contain an InlineChoiceInteraction.
+                            * RULE INTERACTION 20Aa-Assertion 14 :- A CustomInteraction MUST NOT contain a MatchInteraction.
+                            * RULE INTERACTION 20Aa-Assertion 15 :- A CustomInteraction MUST NOT contain a MediaInteraction.
+                            * RULE INTERACTION 20Aa-Assertion 16 :- A CustomInteraction MUST NOT contain an OrderInteraction.
+                            * RULE INTERACTION 20Aa-Assertion 17 :- A CustomInteraction MUST NOT contain a PortableCustomInteraction.
+                            * RULE INTERACTION 20Aa-Assertion 18 :- A CustomInteraction MUST NOT contain a PositionObjectInteraction.
+                            * RULE INTERACTION 20Aa-Assertion 19 :- A CustomInteraction MUST NOT contain a SelectPointInteraction.
+                            * RULE INTERACTION 20Aa-Assertion 20 :- A CustomInteraction MUST NOT contain a SliderInteraction.
+                            * RULE INTERACTION 20Aa-Assertion 21 :- A CustomInteraction MUST NOT contain a TextEntryInteraction.
+                            * RULE INTERACTION 20Aa-Assertion 22 :- A CustomInteraction MUST NOT contain an UploadInteraction.
+                            * RULE INTERACTION 20Ab-Assertion 01 :- A PortableCustomInteraction MUST NOT contain a PortableCustomInteraction.
+                            * RULE INTERACTION 20Ab-Assertion 02 :- A PortableCustomInteraction MUST NOT contain an AssociateInteraction.
+                            * RULE INTERACTION 20Ab-Assertion 03 :- A PortableCustomInteraction MUST NOT contain a ChoiceInteraction.
+                            * RULE INTERACTION 20Ab-Assertion 04 :- A PortableCustomInteraction MUST NOT contain a CustomInteraction.
+                            * RULE INTERACTION 20Ab-Assertion 05 :- A PortableCustomInteraction MUST NOT contain a DrawingInteraction.
+                            * RULE INTERACTION 20Ab-Assertion 06 :- A PortableCustomInteraction MUST NOT contain an EndAttemptInteraction.
+                            * RULE INTERACTION 20Ab-Assertion 07 :- A PortableCustomInteraction MUST NOT contain an ExtendedTextInteraction.
+                            * RULE INTERACTION 20Ab-Assertion 08 :- A PortableCustomInteraction MUST NOT contain a GapMatchInteraction.
+                            * RULE INTERACTION 20Ab-Assertion 09 :- A PortableCustomInteraction MUST NOT contain a GraphicAssociateInteraction.
+                            * RULE INTERACTION 20Ab-Assertion 10 :- A PortableCustomInteraction MUST NOT contain a GraphicGapMatchInteraction.
+                            * RULE INTERACTION 20Ab-Assertion 11 :- A PortableCustomInteraction MUST NOT contain a GraphicOrderInteraction.
+                            * RULE INTERACTION 20Ab-Assertion 12 :- A PortableCustomInteraction MUST NOT contain a HotspotInteraction.
+                            * RULE INTERACTION 20Ab-Assertion 13 :- A PortableCustomInteraction MUST NOT contain a HottextInteraction.
+                            * RULE INTERACTION 20Ab-Assertion 14 :- A PortableCustomInteraction MUST NOT contain an InlineChoiceInteraction.
+                            * RULE INTERACTION 20Ab-Assertion 15 :- A PortableCustomInteraction MUST NOT contain a MatchInteraction.
+                            * RULE INTERACTION 20Ab-Assertion 16 :- A PortableCustomInteraction MUST NOT contain a MediaInteraction.
+                            * RULE INTERACTION 20Ab-Assertion 17 :- A PortableCustomInteraction MUST NOT contain an OrderInteraction.
+                            * RULE INTERACTION 20Ab-Assertion 18 :- A PortableCustomInteraction MUST NOT contain a PositionObjectInteraction.
+                            * RULE INTERACTION 20Ab-Assertion 19 :- A PortableCustomInteraction MUST NOT contain a SelectPointInteraction.
+                            * RULE INTERACTION 20Ab-Assertion 20 :- A PortableCustomInteraction MUST NOT contain a SliderInteraction.
+                            * RULE INTERACTION 20Ab-Assertion 21 :- A PortableCustomInteraction MUST NOT contain a TextEntryInteraction.
+                            * RULE INTERACTION 20Ab-Assertion 22 :- A PortableCustomInteraction MUST NOT contain an UploadInteraction.
+
+                            RULE_SET_INTERACTION_20B: Enforce the correct use of the PortableCustomInteraction attributes. The set of rules are:-
+                            * RULE INTERACTION 20Ba-Assertion 1 :- The 'qti-context-variable' does NOT have a value defined by a 'qti-context-declaration' in the parent AssessmentItem.
+                            * RULE INTERACTION 20Bb-Assertion 1 :- The 'qti-template-variable' does NOT have a value defined by a 'qti-template-declaration' in the parent AssessmentItem.
+
+                            RULE_SET_RUBRICBLOCK: Ensure that the constraints on the use of Rubric Blocks are imposed. The set of rules are:-
+                            * RULE RUBRICBLOCK 1-Assertion 1 :- The property qti-rubric-block MUST NOT be a child of a qti-rubric-block property i.e. nesting of rubric blocks is not permitted.
+
+                            RULE_SET_SPECIFIC_CLASS_OUTCOMEDEC: Enforce the correct use of the OutcomeDeclaration attributes. The set of rules are:-
+                            * RULE SPECIFIC CLASS OUTCOMEDEC 1-Assertion 1 :- The mastery-value attribute value must not be less than the normal-minimum value.
+                            * RULE SPECIFIC CLASS OUTCOMEDEC 1-Assertion 2 :- The mastery-value attribute value must not be greater than the normal-maximum value.
+
+                            RULE_SET_SPECIFIC_CLASS_RESPONSEDEC: Enforce the correct use of the ResponseDeclaration attributes. The set of rules are:-
+                            * RULE 1 SPECIFIC CLASS RESPONSEDEC-Assertion 1 :- The response variable has an invalid cardinality attribute value (this MUST be single) with respect to the associated InlineChoiceInteraction.
+                            * RULE 2 SPECIFIC CLASS RESPONSEDEC-Assertion 1 :- The value of the cardinality attribute for the response variable is inconsistent with the value of the max-choices attribute for the associated ChoiceInteraction.
+
+            History:        Version 1.0: The first set of schematron rules for the IMS Global QTI v3.0 specification.
+
+        </xs:documentation>
+
+        <xs:appinfo>
+            <sch:title>Schematron Validation Rules for QTI 3.0 Specification.</sch:title>
+
+            <!-- RULESET ******************************************************************* -->
+            <sch:pattern abstract="false" id="RULE_SET_ARIA_ROLES_1">
+                <sch:title>Enforce the correct use of the ARIA Role attribute.</sch:title>
+
+                    <!-- The rule for the ["//qti:source"] context has been removed in this profile -->
+
+                    <!-- The rule for the ["//qti:h1"] context has been removed in this profile -->
+
+            </sch:pattern>
+            <!-- *************************************************************************** -->
+
+            <!-- RULESET ******************************************************************* -->
+            <sch:pattern abstract="false" id="RULE_SET_GENERAL_1">
+                <sch:title>Ensure that certain expressions are NOT used for Response Processing.</sch:title>
+
+                    <!-- The rule for the ["//qti:qti-assessment-item/qti:qti-response-processing"] context has been removed in this profile -->
+
+            </sch:pattern>
+            <!-- *************************************************************************** -->
+
+            <!-- RULESET ******************************************************************* -->
+            <sch:pattern abstract="false" id="RULE_SET_INTERACTION-RELATED_1">
+                <sch:title>Enforce the correct use of the GapText attributes.</sch:title>
+
+                    <!-- The rule for the ["//qti:qti-gap-text"] context has been removed in this profile -->
+
+            </sch:pattern>
+            <!-- *************************************************************************** -->
+
+            <!-- RULESET ******************************************************************* -->
+            <sch:pattern abstract="false" id="RULE_SET_INTERACTION-RELATED_2">
+                <sch:title>Enforce the correct use of the GapImg attributes.</sch:title>
+
+                    <!-- The rule for the ["//qti:qti-gap-img"] context has been removed in this profile -->
+
+            </sch:pattern>
+            <!-- *************************************************************************** -->
+
+            <!-- RULESET ******************************************************************* -->
+            <sch:pattern abstract="false" id="RULE_SET_INTERACTION-RELATED_3">
+                <sch:title>Enforce the correct use of the AssociableHotspot attributes.</sch:title>
+
+                    <!-- The rule for the ["//qti:qti-associable-hotspot"] context has been removed in this profile -->
+
+            </sch:pattern>
+            <!-- *************************************************************************** -->
+
+            <!-- RULESET ******************************************************************* -->
+            <sch:pattern abstract="false" id="RULE_SET_INTERACTION-RELATED_4">
+                <sch:title>Enforce the correct use of the SimpleAssociableChoice attributes.</sch:title>
+
+                    <!-- The rule for the ["//qti:qti-simple-associable-choice"] context has been removed in this profile -->
+
+            </sch:pattern>
+            <!-- *************************************************************************** -->
+
+            <!-- RULESET ******************************************************************* -->
+            <sch:pattern abstract="false" id="RULE_SET_INTERACTION_01A">
+                <sch:title>Enforce the prohibiting of nested interactions within the TextEntryInteraction.</sch:title>
+
+                    <!-- The rule for the ["//qti:qti-text-entry-interaction"] context has been removed in this profile -->
+
+            </sch:pattern>
+            <!-- *************************************************************************** -->
+
+            <!-- RULESET ******************************************************************* -->
+            <sch:pattern abstract="false" id="RULE_SET_INTERACTION_01B">
+                <sch:title>Enforce the correct use of the TextEntryInteraction attributes.</sch:title>
+
+                    <!-- The rule for the ["//qti:qti-text-entry-interaction"] context has been removed in this profile -->
+
+                    <!-- The rule for the ["//qti:qti-text-entry-interaction[@response-identifier=//qti:qti-response-declaration/@identifier]"] context has been removed in this profile -->
+
+            </sch:pattern>
+            <!-- *************************************************************************** -->
+
+            <!-- RULESET ******************************************************************* -->
+            <sch:pattern abstract="false" id="RULE_SET_INTERACTION_02A">
+                <sch:title>Enforce the prohibiting of nested interactions within ChoiceInteraction and InlineChoiceInteraction.</sch:title>
+
+                    <!-- The rule for the ["//qti:qti-choice-interaction"] context has been removed in this profile -->
+
+                    <!-- The rule for the ["//qti:qti-inline-choice-interaction"] context has been removed in this profile -->
+
+            </sch:pattern>
+            <!-- *************************************************************************** -->
+
+            <!-- RULESET ******************************************************************* -->
+            <sch:pattern abstract="false" id="RULE_SET_INTERACTION_02B">
+                <sch:title>Enforce the correct use of the ChoiceInteraction and InlineChoiceInteraction attributes.</sch:title>
+
+                    <!-- The rule for the ["//qti:qti-choice-interaction"] context has been removed in this profile -->
+
+            </sch:pattern>
+            <!-- *************************************************************************** -->
+
+            <!-- RULESET ******************************************************************* -->
+            <sch:pattern abstract="false" id="RULE_SET_INTERACTION_03A">
+                <sch:title>Enforce the prohibiting of nested interactions within the ExtendedTextEntryInteraction.</sch:title>
+
+                    <!-- The rule for the ["//qti:qti-extended-text-interaction"] context has been removed in this profile -->
+
+            </sch:pattern>
+            <!-- *************************************************************************** -->
+
+            <!-- RULESET ******************************************************************* -->
+            <sch:pattern abstract="false" id="RULE_SET_INTERACTION_03B">
+                <sch:title>Enforce the correct use of the ExtendedTextInteraction attributes.</sch:title>
+
+                    <!-- The rule for the ["//qti:qti-extended-text-interaction"] context has been removed in this profile -->
+
+            </sch:pattern>
+            <!-- *************************************************************************** -->
+
+            <!-- RULESET ******************************************************************* -->
+            <sch:pattern abstract="false" id="RULE_SET_INTERACTION_04A">
+                <sch:title>Enforce the prohibiting of nested interactions within the HotspotInteraction.</sch:title>
+
+                    <!-- The rule for the ["//qti:qti-hotspot-interaction"] context has been removed in this profile -->
+
+            </sch:pattern>
+            <!-- *************************************************************************** -->
+
+            <!-- RULESET ******************************************************************* -->
+            <sch:pattern abstract="false" id="RULE_SET_INTERACTION_04B">
+                <sch:title>Enforce the correct use of the HotspotInteraction attributes.</sch:title>
+
+                    <!-- The rule for the ["//qti:qti-hotspot-interaction"] context has been removed in this profile -->
+
+            </sch:pattern>
+            <!-- *************************************************************************** -->
+
+            <!-- RULESET ******************************************************************* -->
+            <sch:pattern abstract="false" id="RULE_SET_INTERACTION_05A">
+                <sch:title>Enforce the prohibiting of nested interactions within the GraphicOrderInteraction.</sch:title>
+
+                    <!-- The rule for the ["//qti:qti-graphic-order-interaction"] context has been removed in this profile -->
+
+            </sch:pattern>
+            <!-- *************************************************************************** -->
+
+            <!-- RULESET ******************************************************************* -->
+            <sch:pattern abstract="false" id="RULE_SET_INTERACTION_05B">
+                <sch:title>Enforce the correct use of the GraphicOrderInteraction attributes.</sch:title>
+
+                    <!-- The rule for the ["//qti:qti-graphic-order-interaction"] context has been removed in this profile -->
+
+            </sch:pattern>
+            <!-- *************************************************************************** -->
+
+            <!-- RULESET ******************************************************************* -->
+            <sch:pattern abstract="false" id="RULE_SET_INTERACTION_06A">
+                <sch:title>Enforce the prohibiting of nested interactions within the PositionObjectInteraction.</sch:title>
+
+                    <!-- The rule for the ["//qti:qti-position-object-interaction"] context has been removed in this profile -->
+
+            </sch:pattern>
+            <!-- *************************************************************************** -->
+
+            <!-- RULESET ******************************************************************* -->
+            <sch:pattern abstract="false" id="RULE_SET_INTERACTION_06B">
+                <sch:title>Enforce the correct use of the PositionObjectInteraction attributes.</sch:title>
+
+                    <!-- The rule for the ["//qti:qti-position-object-interaction"] context has been removed in this profile -->
+
+            </sch:pattern>
+            <!-- *************************************************************************** -->
+
+            <!-- RULESET ******************************************************************* -->
+            <sch:pattern abstract="false" id="RULE_SET_INTERACTION_07A">
+                <sch:title>Enforce the prohibiting of nested interactions within the SelectPointInteraction.</sch:title>
+
+                    <!-- The rule for the ["//qti:qti-select-point-interaction"] context has been removed in this profile -->
+
+            </sch:pattern>
+            <!-- *************************************************************************** -->
+
+            <!-- RULESET ******************************************************************* -->
+            <sch:pattern abstract="false" id="RULE_SET_INTERACTION_07B">
+                <sch:title>Enforce the correct use of the SelectPointInteraction attributes.</sch:title>
+
+                    <!-- The rule for the ["//qti:qti-select-point-interaction"] context has been removed in this profile -->
+
+            </sch:pattern>
+            <!-- *************************************************************************** -->
+
+            <!-- RULESET ******************************************************************* -->
+            <sch:pattern abstract="false" id="RULE_SET_INTERACTION_08A">
+                <sch:title>Enforce the prohibiting of nested interactions within the OrderInteraction.</sch:title>
+
+                    <!-- The rule for the ["//qti:qti-order-interaction"] context has been removed in this profile -->
+
+            </sch:pattern>
+            <!-- *************************************************************************** -->
+
+            <!-- RULESET ******************************************************************* -->
+            <sch:pattern abstract="false" id="RULE_SET_INTERACTION_08B">
+                <sch:title>Enforce the correct use of the OrderInteraction attributes.</sch:title>
+
+                    <!-- The rule for the ["//qti:qti-order-interaction"] context has been removed in this profile -->
+
+            </sch:pattern>
+            <!-- *************************************************************************** -->
+
+            <!-- RULESET ******************************************************************* -->
+            <sch:pattern abstract="false" id="RULE_SET_INTERACTION_09A">
+                <sch:title>Enforce the prohibiting of nested interactions within the HotTextInteraction.</sch:title>
+
+                    <!-- The rule for the ["//qti:qti-hottext-interaction"] context has been removed in this profile -->
+
+            </sch:pattern>
+            <!-- *************************************************************************** -->
+
+            <!-- RULESET ******************************************************************* -->
+            <sch:pattern abstract="false" id="RULE_SET_INTERACTION_09B">
+                <sch:title>Enforce the correct use of the HotTextInteraction attributes.</sch:title>
+
+                    <!-- The rule for the ["//qti:qti-hottext-interaction"] context has been removed in this profile -->
+
+            </sch:pattern>
+            <!-- *************************************************************************** -->
+
+            <!-- RULESET ******************************************************************* -->
+            <sch:pattern abstract="false" id="RULE_SET_INTERACTION_10A">
+                <sch:title>Enforce the prohibiting of nested interactions within the GraphicAssociateInteraction.</sch:title>
+
+                    <!-- The rule for the ["//qti:qti-graphic-associate-interaction"] context has been removed in this profile -->
+
+            </sch:pattern>
+            <!-- *************************************************************************** -->
+
+            <!-- RULESET ******************************************************************* -->
+            <sch:pattern abstract="false" id="RULE_SET_INTERACTION_10B">
+                <sch:title>Enforce the correct use of the GraphicAssociateInteraction attributes.</sch:title>
+
+                    <!-- The rule for the ["//qti:qti-graphic-associate-interaction"] context has been removed in this profile -->
+
+            </sch:pattern>
+            <!-- *************************************************************************** -->
+
+            <!-- RULESET ******************************************************************* -->
+            <sch:pattern abstract="false" id="RULE_SET_INTERACTION_11A">
+                <sch:title>Enforce the prohibiting of nested interactions within the MatchInteraction.</sch:title>
+
+                    <!-- The rule for the ["//qti:qti-match-interaction"] context has been removed in this profile -->
+
+            </sch:pattern>
+            <!-- *************************************************************************** -->
+
+            <!-- RULESET ******************************************************************* -->
+            <sch:pattern abstract="false" id="RULE_SET_INTERACTION_11B">
+                <sch:title>Enforce the correct use of the MatchInteraction attributes.</sch:title>
+
+                    <!-- The rule for the ["//qti:qti-match-interaction"] context has been removed in this profile -->
+
+            </sch:pattern>
+            <!-- *************************************************************************** -->
+
+            <!-- RULESET ******************************************************************* -->
+            <sch:pattern abstract="false" id="RULE_SET_INTERACTION_12A">
+                <sch:title>Enforce the prohibiting of nested interactions within the AssociateInteraction.</sch:title>
+
+                    <!-- The rule for the ["//qti:qti-associate-interaction"] context has been removed in this profile -->
+
+            </sch:pattern>
+            <!-- *************************************************************************** -->
+
+            <!-- RULESET ******************************************************************* -->
+            <sch:pattern abstract="false" id="RULE_SET_INTERACTION_12B">
+                <sch:title>Enforce the correct use of the AssociateInteraction attributes.</sch:title>
+
+                    <!-- The rule for the ["//qti:qti-associate-interaction"] context has been removed in this profile -->
+
+            </sch:pattern>
+            <!-- *************************************************************************** -->
+
+            <!-- RULESET ******************************************************************* -->
+            <sch:pattern abstract="false" id="RULE_SET_INTERACTION_13A">
+                <sch:title>Enforce the prohibiting of nested interactions within the MediaInteraction.</sch:title>
+
+                    <!-- The rule for the ["//qti:qti-media-interaction"] context has been removed in this profile -->
+
+            </sch:pattern>
+            <!-- *************************************************************************** -->
+
+            <!-- RULESET ******************************************************************* -->
+            <sch:pattern abstract="false" id="RULE_SET_INTERACTION_13B">
+                <sch:title>Enforce the correct use of the MediaInteraction attributes.</sch:title>
+
+                    <!-- The rule for the ["//qti:qti-media-interaction"] context has been removed in this profile -->
+
+            </sch:pattern>
+            <!-- *************************************************************************** -->
+
+            <!-- RULESET ******************************************************************* -->
+            <sch:pattern abstract="false" id="RULE_SET_INTERACTION_14A">
+                <sch:title>Enforce the prohibiting of nested interactions within the SliderInteraction.</sch:title>
+
+                    <!-- The rule for the ["//qti:qti-slider-interaction"] context has been removed in this profile -->
+
+            </sch:pattern>
+            <!-- *************************************************************************** -->
+
+            <!-- RULESET ******************************************************************* -->
+            <sch:pattern abstract="false" id="RULE_SET_INTERACTION_14B">
+                <sch:title>Enforce the correct use of the SliderInteraction attributes.</sch:title>
+
+                    <!-- The rule for the ["//qti:qti-slider-interaction"] context has been removed in this profile -->
+
+            </sch:pattern>
+            <!-- *************************************************************************** -->
+
+            <!-- RULESET ******************************************************************* -->
+            <sch:pattern abstract="false" id="RULE_SET_INTERACTION_15A">
+                <sch:title>Enforce the prohibiting of nested interactions within the DrawingInteraction.</sch:title>
+
+                    <!-- The rule for the ["//qti:qti-drawing-interaction"] context has been removed in this profile -->
+
+            </sch:pattern>
+            <!-- *************************************************************************** -->
+
+            <!-- RULESET ******************************************************************* -->
+            <sch:pattern abstract="false" id="RULE_SET_INTERACTION_15B">
+                <sch:title>Enforce the correct use of the DrawingInteraction attributes.</sch:title>
+
+                    <!-- The rule for the ["//qti:qti-drawing-interaction"] context has been removed in this profile -->
+
+            </sch:pattern>
+            <!-- *************************************************************************** -->
+
+            <!-- RULESET ******************************************************************* -->
+            <sch:pattern abstract="false" id="RULE_SET_INTERACTION_16A">
+                <sch:title>Enforce the prohibiting of nested interactions within the UploadInteraction.</sch:title>
+
+                    <!-- The rule for the ["//qti:qti-upload-interaction"] context has been removed in this profile -->
+
+            </sch:pattern>
+            <!-- *************************************************************************** -->
+
+            <!-- RULESET ******************************************************************* -->
+            <sch:pattern abstract="false" id="RULE_SET_INTERACTION_16B">
+                <sch:title>Enforce the correct use of the UploadInteraction attributes.</sch:title>
+
+                    <!-- The rule for the ["//qti:qti-upload-interaction"] context has been removed in this profile -->
+
+            </sch:pattern>
+            <!-- *************************************************************************** -->
+
+            <!-- RULESET ******************************************************************* -->
+            <sch:pattern abstract="false" id="RULE_SET_INTERACTION_17A">
+                <sch:title>Enforce the prohibiting of nested interactions within the EndAttemptInteraction.</sch:title>
+
+                    <!-- The rule for the ["//qti:qti-end-attempt-interaction"] context has been removed in this profile -->
+
+            </sch:pattern>
+            <!-- *************************************************************************** -->
+
+            <!-- RULESET ******************************************************************* -->
+            <sch:pattern abstract="false" id="RULE_SET_INTERACTION_17B">
+                <sch:title>Enforce the correct use of the EndAttemptInteraction attributes.</sch:title>
+
+                    <!-- The rule for the ["//qti:qti-end-attempt-interaction"] context has been removed in this profile -->
+
+            </sch:pattern>
+            <!-- *************************************************************************** -->
+
+            <!-- RULESET ******************************************************************* -->
+            <sch:pattern abstract="false" id="RULE_SET_INTERACTION_18A">
+                <sch:title>Enforce the prohibiting of nested interactions within the GapMatchInteraction.</sch:title>
+
+                    <!-- The rule for the ["//qti:qti-gap-match-interaction"] context has been removed in this profile -->
+
+            </sch:pattern>
+            <!-- *************************************************************************** -->
+
+            <!-- RULESET ******************************************************************* -->
+            <sch:pattern abstract="false" id="RULE_SET_INTERACTION_18B">
+                <sch:title>Enforce the correct use of the GapMatchInteraction attributes.</sch:title>
+
+                    <!-- The rule for the ["//qti:qti-gap-match-interaction"] context has been removed in this profile -->
+
+            </sch:pattern>
+            <!-- *************************************************************************** -->
+
+            <!-- RULESET ******************************************************************* -->
+            <sch:pattern abstract="false" id="RULE_SET_INTERACTION_19A">
+                <sch:title>Enforce the prohibiting of nested interactions within the GraphicGapMatchInteraction.</sch:title>
+
+                    <!-- The rule for the ["//qti:qti-graphic-gap-match-interaction"] context has been removed in this profile -->
+
+            </sch:pattern>
+            <!-- *************************************************************************** -->
+
+            <!-- RULESET ******************************************************************* -->
+            <sch:pattern abstract="false" id="RULE_SET_INTERACTION_19B">
+                <sch:title>Enforce the correct use of the GraphicGapMatchInteraction attributes.</sch:title>
+
+                    <!-- The rule for the ["//qti:qti-graphic-gap-match-interaction"] context has been removed in this profile -->
+
+            </sch:pattern>
+            <!-- *************************************************************************** -->
+
+            <!-- RULESET ******************************************************************* -->
+            <sch:pattern abstract="false" id="RULE_SET_INTERACTION_20A">
+                <sch:title>Enforce the prohibiting of nested interactions within CustomInteracion and PortableCustomInteraction.</sch:title>
+
+                    <!-- The rule for the ["//qti:qti-custom-interation"] context has been removed in this profile -->
+
+                    <!-- The rule for the ["//qti:qti-portable-custom-interaction"] context has been removed in this profile -->
+
+            </sch:pattern>
+            <!-- *************************************************************************** -->
+
+            <!-- RULESET ******************************************************************* -->
+            <sch:pattern abstract="false" id="RULE_SET_INTERACTION_20B">
+                <sch:title>Enforce the correct use of the PortableCustomInteraction attributes.</sch:title>
+
+                    <!-- The rule for the ["//qti:qti-portable-custom-interaction/qti:qti-context-variable"] context has been removed in this profile -->
+
+                    <!-- The rule for the ["//qti:qti-portable-custom-interaction/qti:qti-template-variable"] context has been removed in this profile -->
+
+            </sch:pattern>
+            <!-- *************************************************************************** -->
+
+            <!-- RULESET ******************************************************************* -->
+            <sch:pattern abstract="false" id="RULE_SET_RUBRICBLOCK">
+                <sch:title>Ensure that the constraints on the use of Rubric Blocks are imposed.</sch:title>
+
+                <sch:rule abstract="false" context="//qti:qti-rubric-block">
+                    <sch:assert test="count(descendant::qti:qti-rubric-block) = 0">
+                        [RULE RUBRICBLOCK 1: Assertion 1] The property qti-rubric-block MUST NOT be a child of a qti-rubric-block property i.e. nesting of rubric blocks is not permitted.<sch:value-of select="concat('The identifier for the parent object is: ', ../@identifier)" />
+                    </sch:assert>
+                </sch:rule>
+
+            </sch:pattern>
+            <!-- *************************************************************************** -->
+
+            <!-- RULESET ******************************************************************* -->
+            <sch:pattern abstract="false" id="RULE_SET_SPECIFIC_CLASS_OUTCOMEDEC">
+                <sch:title>Enforce the correct use of the OutcomeDeclaration attributes.</sch:title>
+
+                <sch:rule abstract="false" context="//qti:qti-outcome-declaration">
+                    <sch:assert test="not(@mastery-value &lt; @normal-minimum)">
+                        [RULE SPECIFIC CLASS OUTCOMEDEC 1: Assertion 1] The mastery-value attribute value must not be less than the normal-minimum value.<sch:value-of select="concat('The mastery-value value is:', @mastery-value)" />
+                    </sch:assert>
+                    <sch:assert test="not(@mastery-value &gt; @normal-maximum)">
+                        [RULE SPECIFIC CLASS OUTCOMEDEC 1: Assertion 2] The mastery-value attribute value must not be greater than the normal-maximum value.<sch:value-of select="concat('The mastery-value value is:', @mastery-value)" />
+                    </sch:assert>
+                </sch:rule>
+
+            </sch:pattern>
+            <!-- *************************************************************************** -->
+
+            <!-- RULESET ******************************************************************* -->
+            <sch:pattern abstract="false" id="RULE_SET_SPECIFIC_CLASS_RESPONSEDEC">
+                <sch:title>Enforce the correct use of the ResponseDeclaration attributes.</sch:title>
+
+                    <!-- The rule for the ["//qti:qti-inline-choice-interaction"] context has been removed in this profile -->
+
+                    <!-- The rule for the ["//qti:qti-choice-interaction"] context has been removed in this profile -->
+
+            </sch:pattern>
+            <!-- *************************************************************************** -->
+
+        </xs:appinfo>
+    </xs:annotation>
+
+    <!-- Generate Global Attributes (non-assigned) ******************************************************** -->
+
+    <!-- ================================================================================================== -->
+
+    <!-- Generate Global Attributes *********************************************************************** -->
+
+    <!-- ================================================================================================== -->
+
+    <!-- Generate Global List Types *********************************************************************** -->
+
+        <!-- The global list "IdentifierListDType" has been deleted, by deduction, in this profile  ************* -->
+
+        <!-- The global list "IntegerListDType" has been deleted, by deduction, in this profile  ************* -->
+
+        <!-- The global list "MimeTypeListDType" has been deleted, by deduction, in this profile  ************* -->
+
+        <!-- The global list "StringListDType" has been deleted, by deduction, in this profile  ************* -->
+
+        <!-- The global list "ToleranceListDType" has been deleted, by deduction, in this profile  ************* -->
+
+        <!-- The global enumerated list "ARIARelevantListDType" has been deleted, by deduction, in this profile  ************* -->
+
+    <xs:simpleType name="ViewEnumDType">
+        <xs:restriction base="xs:string">
+            <xs:enumeration value="author" />
+            <xs:enumeration value="candidate" />
+            <xs:enumeration value="proctor" />
+            <xs:enumeration value="scorer" />
+            <xs:enumeration value="testConstructor" />
+            <xs:enumeration value="tutor" />
+        </xs:restriction>
+    </xs:simpleType>
+
+    <!-- ================================================================================================== -->
+
+    <!-- Generate Namespaced extension Group  ************************************************************* -->
+
+        <!-- The Strict-Namespaced extension Group declaration has been deleted in this profile  ********** -->
+
+        <!-- The Lax-Namespaced extension Group declaration has been deleted in this profile  ************* -->
+
+        <!-- The AnyType Lax-Namespaced extension Group declaration has been deleted in this profile  ************* -->
+
+    <!-- ================================================================================================== -->
+
+    <!-- Generate Special DataTypes  ********************************************************************** -->
+
+    <xs:complexType name="EmptyPrimitiveTypeDType">
+        <xs:complexContent>
+            <xs:restriction base="xs:anyType" />
+        </xs:complexContent>
+    </xs:complexType>
+
+    <!-- ================================================================================================== -->
+
+    <!-- Generate the enumerated simpleType declarations ************************************************** -->
+
+    <!-- ================================================================================================== -->
+
+    <!-- Generate the simpleType elements based on IMS data-types (Parameter) ***************************** -->
+
+    <!-- ================================================================================================== -->
+
+    <!-- Generate the simpleType elements based on IMS data-types (Derived) ******************************* -->
+
+    <!-- ================================================================================================== -->
+
+    <!-- Generate the simpleType elements based on IMS data-types (Union) ********************************* -->
+
+    <!-- ================================================================================================== -->
+
+    <!-- Generate the simpleType elements based on IMS data-types (Complex) ******************************* -->
+
+    <!-- ================================================================================================== -->
+
+    <!-- Generate the derived data-type elements based upon simpleType ************************************ -->
+
+        <!-- The simpleType-based DerivedType "ARIALevelIntegerDType" has been deleted, by deduction, in this profile  ************* -->
+
+        <!-- The simpleType-based DerivedType "CoordsDType" has been deleted, by deduction, in this profile  ************* -->
+
+        <!-- The simpleType-based DerivedType "DataHTML5ExtensionDType" has been deleted, by deduction, in this profile  ************* -->
+
+    <xs:simpleType name="IdentifierDType">
+        <xs:restriction base="xs:NCName" />
+    </xs:simpleType>
+
+        <!-- The simpleType-based DerivedType "LengthDType" has been deleted, by deduction, in this profile  ************* -->
+
+    <xs:simpleType name="MimeTypeDType">
+        <xs:restriction base="xs:normalizedString">
+            <xs:pattern value="[\p{IsBasicLatin}-[()&lt;&gt;@,;:\\&quot;/\[\]?=]]+/[\p{IsBasicLatin}-[()&lt;&gt;@,;:\\&quot;/\[\]?=]]+" />
+        </xs:restriction>
+    </xs:simpleType>
+
+    <xs:simpleType name="NonNegativeDoubleDType">
+        <xs:restriction base="xs:double">
+            <xs:minInclusive value="0.0" />
+        </xs:restriction>
+    </xs:simpleType>
+
+        <!-- The simpleType-based DerivedType "URLDType" has been deleted, by deduction, in this profile  ************* -->
+
+        <!-- The simpleType-based DerivedType "UniqueIdentifierDType" has been deleted, by deduction, in this profile  ************* -->
+
+    <xs:simpleType name="UniqueIdentifierRefDType">
+        <xs:restriction base="xs:IDREF" />
+    </xs:simpleType>
+
+    <!-- ================================================================================================== -->
+
+    <!-- Generate the derived data-type elements based upon derived simpleType **************************** -->
+
+    <!-- ================================================================================================== -->
+
+    <!-- Generate the ComplexTypes ************************************************************************ -->
+
+    <xs:complexType name="DefaultValueDType" abstract="false" mixed="false">
+        <xs:annotation>
+            <xs:documentation source="documentation">
+                Defines the default value of the associated response, outcome and template variable.      
+            </xs:documentation>
+        </xs:annotation>
+        <xs:sequence>
+            <xs:element name="qti-value" type="ValueDType" minOccurs="1" maxOccurs="unbounded" />
+        </xs:sequence>
+        <xs:attribute name="interpretation" use="optional" type="xs:normalizedString" />
+    </xs:complexType>
+
+    <xs:complexType name="DetailsDType" abstract="false" mixed="false">
+        <xs:annotation>
+            <xs:documentation source="documentation">
+                This provides the functionality of the HTML 'details' tag (a new tag added in HTML5). This
+                tag creates a disclosure widget in which information is visible only when the widget is t-
+                oggled into an 'open' state.                                                              
+            </xs:documentation>
+        </xs:annotation>
+        <xs:complexContent>
+            <xs:extension base="BaseSequenceDType">
+                <xs:sequence>
+                </xs:sequence>
+                <xs:attribute name="open" use="optional" type="xs:boolean" />
+            </xs:extension>
+        </xs:complexContent>
+    </xs:complexType>
+
+    <xs:complexType name="InterpolationTableDType" abstract="false" mixed="false">
+        <xs:annotation>
+            <xs:documentation source="documentation">
+                An interpolationTable transforms a source float (or integer) by finding the first interpo-
+                lationTableEntry with a sourceValue that is less than or equal to (subject to includeBoun-
+                dary) the source value. For example, an interpolation table can be used to map a raw nume-
+                ric score onto an identifier representing a grade. It may also be used to implement numer-
+                ic transformations such as those from a simple raw score to a value on a calibrated scale.
+            </xs:documentation>
+        </xs:annotation>
+        <xs:sequence>
+            <xs:element name="qti-interpolation-table-entry" type="InterpolationTableEntryDType" minOccurs="1" maxOccurs="unbounded" />
+        </xs:sequence>
+        <xs:attribute name="default-value" use="optional" type="xs:string" />
+    </xs:complexType>
+
+    <xs:complexType name="MatchTableDType" abstract="false" mixed="false">
+        <xs:annotation>
+            <xs:documentation source="documentation">
+                A matchTable transforms a source integer by finding the first qti-match-table-entry with  
+                an exact match to the source.                                                             
+            </xs:documentation>
+        </xs:annotation>
+        <xs:sequence>
+            <xs:element name="qti-match-table-entry" type="MatchTableEntryDType" minOccurs="1" maxOccurs="unbounded" />
+        </xs:sequence>
+        <xs:attribute name="default-value" use="optional" type="xs:string" />
+    </xs:complexType>
+
+    <xs:complexType name="OutcomeDeclarationDType" abstract="false" mixed="false">
+        <xs:annotation>
+            <xs:documentation source="documentation">
+                Outcome variables are declared by outcome declarations. Their value is set either from a  
+                default given in the declaration itself or by a responseRule during responseProcessing. I-
+                tems that declare a numeric outcome variable representing the candidate's overall perform-
+                ance on the item should use the outcome name 'SCORE' for the variable. SCORE needs to be a
+                float. Items that declare a maximum score (in multiple response choice interactions, for  
+                example) should do so by declaring the 'MAXSCORE' variable. MAXSCORE needs to be a float. 
+                Items or tests that want to make the fact that the candidate scored above a predefined th-
+                reshold available as a variable should use the 'PASSED' variable. PASSED needs to be a bo-
+                olean. At runtime, outcome variables are instantiated as part of an item session. Their v-
+                alues may be initialized with a default value and/or set during responseProcessing. If no 
+                default value is given in the declaration then the outcome variable is initialized to NULL
+                unless the outcome is of a numeric type (integer or float) in which case it is initialized
+                to 0. Declared outcomes with numeric types should indicate their range of possible values 
+                using normalMaximum and normalMinimum, especially if this range differs from [0,1].       
+            </xs:documentation>
+        </xs:annotation>
+        <xs:sequence>
+            <xs:element name="qti-default-value" type="DefaultValueDType" minOccurs="0" maxOccurs="1" />
+            <xs:choice minOccurs="0" maxOccurs="1">
+                <xs:element name="qti-match-table" type="MatchTableDType" minOccurs="1" maxOccurs="1"/>
+                <xs:element name="qti-interpolation-table" type="InterpolationTableDType" minOccurs="1" maxOccurs="1"/>
+            </xs:choice>
+        </xs:sequence>
+        <xs:attribute name="identifier" use="required" type="IdentifierDType" />
+        <xs:attribute name="cardinality" use="required">
+            <xs:simpleType>
+                <xs:annotation>
+                    <xs:documentation source="documentation">
+                        Contains the permitted set of cardinality values. The cardinality is used in the context  
+                        of the associated variable.                                                               
+                    </xs:documentation>
+                </xs:annotation>
+                <xs:restriction base="xs:string">
+                    <xs:enumeration value="multiple" />
+                    <xs:enumeration value="ordered" />
+                    <xs:enumeration value="record" />
+                    <xs:enumeration value="single" />
+                </xs:restriction>
+            </xs:simpleType>
+        </xs:attribute>
+        <xs:attribute name="base-type" use="optional">
+            <xs:simpleType>
+                <xs:annotation>
+                    <xs:documentation source="documentation">
+                        A base-type is simply a description of a set of atomic values (atomic to this specificati-
+                        on). Note that several of the base-types used to define the runtime data model have ident-
+                        ical definitions to those of the basic data types used to define the values for attributes
+                        in the specification itself. The use of an enumeration to define the set of base-types us-
+                        ed in the runtime model, as opposed to the use of classes with similar names, is designed 
+                        to help distinguish between these two distinct levels of modelling.                       
+                    </xs:documentation>
+                </xs:annotation>
+                <xs:restriction base="xs:string">
+                    <xs:enumeration value="boolean" />
+                    <xs:enumeration value="directedPair" />
+                    <xs:enumeration value="duration" />
+                    <xs:enumeration value="file" />
+                    <xs:enumeration value="float" />
+                    <xs:enumeration value="identifier" />
+                    <xs:enumeration value="integer" />
+                    <xs:enumeration value="pair" />
+                    <xs:enumeration value="point" />
+                    <xs:enumeration value="string" />
+                    <xs:enumeration value="uri" />
+                </xs:restriction>
+            </xs:simpleType>
+        </xs:attribute>
+        <xs:attribute name="view" use="optional">
+            <xs:simpleType>
+                <xs:list itemType="ViewEnumDType" />
+            </xs:simpleType>
+        </xs:attribute>
+        <xs:attribute name="interpretation" use="optional" type="xs:string" />
+        <xs:attribute name="long-interpretation" use="optional" type="xs:anyURI" />
+        <xs:attribute name="normal-maximum" use="optional" type="NonNegativeDoubleDType" />
+        <xs:attribute name="normal-minimum" use="optional" type="xs:double" />
+        <xs:attribute name="mastery-value" use="optional" type="xs:double" />
+        <xs:attribute name="external-scored" use="optional">
+            <xs:simpleType>
+                <xs:annotation>
+                    <xs:documentation source="documentation">
+                        Identifies the set of modes for the exernal scoring of the Item.                          
+                    </xs:documentation>
+                </xs:annotation>
+                <xs:restriction base="xs:string">
+                    <xs:enumeration value="externalMachine" />
+                    <xs:enumeration value="human" />
+                </xs:restriction>
+            </xs:simpleType>
+        </xs:attribute>
+        <xs:attribute name="variable-identifier-ref" use="optional" type="UniqueIdentifierRefDType" />
+    </xs:complexType>
+
+    <!-- ================================================================================================== -->
+
+    <!-- Generate the SOAP Binding ComplexTypes *********************************************************** -->
+
+    <!-- ================================================================================================== -->
+
+    <!-- Generate the derived ComplexTypes **************************************************************** -->
+
+    <xs:complexType name="InterpolationTableEntryDType" abstract="false" mixed="false">
+        <xs:annotation>
+            <xs:documentation source="documentation">
+                Provides an interpolation table entry in the associated interpolation table.              
+            </xs:documentation>
+        </xs:annotation>
+        <xs:complexContent>
+            <xs:extension base="EmptyPrimitiveTypeDType">
+                <xs:attribute name="source-value" use="required" type="xs:double" />
+                <xs:attribute name="include-boundary" use="optional" default="true" type="xs:boolean" />
+                <xs:attribute name="target-value" use="required" type="xs:string" />
+            </xs:extension>
+        </xs:complexContent>
+    </xs:complexType>
+
+    <xs:complexType name="MatchTableEntryDType" abstract="false" mixed="false">
+        <xs:annotation>
+            <xs:documentation source="documentation">
+                A qti-match-table transforms a source integer by finding the first qti-match-table-entry  
+                with an exact match to the source. The qti-match-table-entry allows the definition of each
+                entry in the table.                                                                       
+            </xs:documentation>
+        </xs:annotation>
+        <xs:complexContent>
+            <xs:extension base="EmptyPrimitiveTypeDType">
+                <xs:attribute name="source-value" use="required" type="xs:int" />
+                <xs:attribute name="target-value" use="required">
+                    <xs:simpleType>
+                        <xs:annotation>
+                            <xs:documentation source="documentation">
+                                A base-type is simply a description of a set of atomic values (atomic to this specificati-
+                                on). Note that several of the base-types used to define the runtime data model have ident-
+                                ical definitions to those of the basic data types used to define the values for attributes
+                                in the specification itself. The use of an enumeration to define the set of base-types us-
+                                ed in the runtime model, as opposed to the use of classes with similar names, is designed 
+                                to help distinguish between these two distinct levels of modelling.                       
+                            </xs:documentation>
+                        </xs:annotation>
+                        <xs:restriction base="xs:string">
+                            <xs:enumeration value="boolean" />
+                            <xs:enumeration value="directedPair" />
+                            <xs:enumeration value="duration" />
+                            <xs:enumeration value="file" />
+                            <xs:enumeration value="float" />
+                            <xs:enumeration value="identifier" />
+                            <xs:enumeration value="integer" />
+                            <xs:enumeration value="pair" />
+                            <xs:enumeration value="point" />
+                            <xs:enumeration value="string" />
+                            <xs:enumeration value="uri" />
+                        </xs:restriction>
+                    </xs:simpleType>
+                </xs:attribute>
+            </xs:extension>
+        </xs:complexContent>
+    </xs:complexType>
+
+    <xs:complexType name="ValueDType" abstract="false" mixed="false">
+        <xs:annotation>
+            <xs:documentation source="documentation">
+                A class that can represent a single value of any base-type in variable declarations and r-
+                esult reports. The base-type is defined by the 'base-type' attribute of the declaration e-
+                xcept in the case of variables with record cardinality.                                   
+            </xs:documentation>
+        </xs:annotation>
+        <xs:simpleContent>
+            <xs:extension base="xs:normalizedString">
+                <xs:attribute name="field-identifier" use="optional" type="IdentifierDType" />
+                <xs:attribute name="base-type" use="optional">
+                    <xs:simpleType>
+                        <xs:annotation>
+                            <xs:documentation source="documentation">
+                                A base-type is simply a description of a set of atomic values (atomic to this specificati-
+                                on). Note that several of the base-types used to define the runtime data model have ident-
+                                ical definitions to those of the basic data types used to define the values for attributes
+                                in the specification itself. The use of an enumeration to define the set of base-types us-
+                                ed in the runtime model, as opposed to the use of classes with similar names, is designed 
+                                to help distinguish between these two distinct levels of modelling.                       
+                            </xs:documentation>
+                        </xs:annotation>
+                        <xs:restriction base="xs:string">
+                            <xs:enumeration value="boolean" />
+                            <xs:enumeration value="directedPair" />
+                            <xs:enumeration value="duration" />
+                            <xs:enumeration value="file" />
+                            <xs:enumeration value="float" />
+                            <xs:enumeration value="identifier" />
+                            <xs:enumeration value="integer" />
+                            <xs:enumeration value="pair" />
+                            <xs:enumeration value="point" />
+                            <xs:enumeration value="string" />
+                            <xs:enumeration value="uri" />
+                        </xs:restriction>
+                    </xs:simpleType>
+                </xs:attribute>
+            </xs:extension>
+        </xs:simpleContent>
+    </xs:complexType>
+
+    <!-- ================================================================================================== -->
+
+    <!-- Declaration of the elements (Complex) ************************************************************ -->
+
+    <!-- ================================================================================================== -->
+
+    <!-- Declaration of the elements (Derived) ************************************************************ -->
+
+    <!-- ================================================================================================== -->
+
+    <!-- Declaration of the root element(s) *************************************************************** -->
+
+    <xs:element name="qti-outcome-declaration" type="OutcomeDeclarationDType" />
+
+    <!-- ================================================================================================== -->
+
+</xs:schema>

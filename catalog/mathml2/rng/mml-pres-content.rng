@@ -1,0 +1,94 @@
+<?xml version="1.0" ?>
+
+<!-- Presentation schemata with content -->
+
+<!--
+
+RELAX NG Schema on MathML 2.0
+
+See COPYING for the status of this software.
+Yutaka Furubayashi (Poka-Poka Dream Factory) <info@yupotan.sppd.ne.jp>
+
+-->
+
+<grammar xmlns="http://relaxng.org/ns/structure/1.0">
+
+<define name="mml.ptoken">
+ <choice>
+  <ref name="mml.mi.qname"/>
+  <ref name="mml.mn.qname"/>
+  <ref name="mml.mo.qname"/>
+  <ref name="mml.mtext.qname"/>
+  <ref name="mml.ms.qname"/>
+ </choice>
+</define>
+
+<define name="mml.mi.qname">
+ <element name="mi">
+  <zeroOrMore>
+   <choice>
+    <ref name="mml.MathMLCharacters"/>
+    <ref name="mml.malignmark.qname"/>
+   </choice>
+  </zeroOrMore>
+  <ref name="mml.Common.attrib"/>
+  <ref name="mml.att-fontinfo"/>
+ </element>
+</define>
+
+<define name="mml.mn.qname">
+ <element name="mn">
+  <zeroOrMore>
+   <choice>
+    <ref name="mml.MathMLCharacters"/>
+    <ref name="mml.malignmark.qname"/>
+   </choice>
+  </zeroOrMore>
+  <ref name="mml.Common.attrib"/>
+  <ref name="mml.att-fontinfo"/>
+ </element>
+</define>
+
+<define name="mml.mo.qname">
+ <element name="mo">
+  <zeroOrMore>
+   <choice>
+    <ref name="mml.MathMLCharacters"/>
+    <ref name="mml.malignmark.qname"/>
+   </choice>
+  </zeroOrMore>
+  <ref name="mml.Common.attrib"/>
+  <ref name="mml.att-fontinfo"/>
+  <ref name="mml.att-opinfo"/>
+ </element>
+</define>
+
+<define name="mml.mtext.qname">
+ <element name="mtext">
+  <zeroOrMore>
+   <choice>
+    <ref name="mml.MathMLCharacters"/>
+    <ref name="mml.malignmark.qname"/>
+   </choice>
+  </zeroOrMore>
+  <ref name="mml.Common.attrib"/>
+  <ref name="mml.att-fontinfo"/>
+ </element>
+</define>
+
+<define name="mml.ms.qname">
+ <element name="ms">
+  <zeroOrMore>
+   <choice>
+    <ref name="mml.MathMLCharacters"/>
+    <ref name="mml.malignmark.qname"/>
+   </choice>
+  </zeroOrMore>
+  <ref name="mml.Common.attrib"/>
+  <ref name="mml.att-fontinfo"/>
+  <ref name="mml.att-lquote"/>
+  <ref name="mml.att-rquote"/>
+ </element>
+</define>
+
+</grammar>

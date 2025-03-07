@@ -182,7 +182,8 @@
 	<!--    MathML    -->
 
 	<nextCatalog catalog="mathml2/catalog.xml" />
-
+	<nextCatalog catalog="mathml3/catalog.xml" />
+	
 	<!--    ST4    -->
 
 	<system systemId="ST4.dtd" uri="st4/ST4.dtd" />
@@ -210,6 +211,13 @@
 	<nextCatalog catalog="dita1.1/catalog-dita.xml"/> 	
 	<nextCatalog catalog="dita1.0/catalog-dita.xml"/> 	
      -->
+
+	<!-- QTI -->
+
+	<nextCatalog catalog="qtiv2p1/catalog.xml" />
+	<nextCatalog catalog="qtiv2p2/catalog.xml" />
+	<nextCatalog catalog="qtiv3p0v1/catalog.xml" />
+	<nextCatalog catalog="qti-mathml/catalog.xml" />
 
 	<!--    Novell's version of DocBook    -->
 
@@ -292,4 +300,16 @@
 	<uri name="http://schemas.openxmlformats.org/drawingml/2006/3/wordprocessingDrawing" uri="openxml/dml-wordprocessingdrawing.xsd" />
 	<uri name="http://schemas.openxmlformats.org/drawingml/2006/3/main" uri="openxml/dml-shapeeffects.xsd" />
 	
+
+	<!-- Speech Synthesis ML -->
+
+	<uri name="http://www.w3.org/2001/10/synthesis" uri="ssml1.1/synthesis.xsd" />
+	<system systemId="synthesis-nonamespace.xsd" uri="ssml1.1/synthesis-nonamespace.xsd" />
+	<system systemId="synthesis-nonamespace-extended.xsd" uri="ssml1.1/synthesis-nonamespace-extended.xsd" />
+	<system systemId="synthesis-extended.xsd" uri="ssml1.1/synthesis-extended.xsd" />
+
+	<!-- XLInk -->
+
+	<uri name="http://www.w3.org/1999/xlink" uri="xlink/xlink.xsd" />
+
 </catalog>

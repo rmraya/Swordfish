@@ -2,13 +2,52 @@
     <public publicId="-//OpenOffice.org//DTD Modified W3C MathML 1.01//EN" uri="dtd/office_mathml2.dtd"/>
     <public publicId="-//W3C//DTD MathML 2.0//EN" uri="dtd/mathml2.dtd"/>        
     <system systemId="mathml2.dtd" uri="dtd/mathml2.dtd"/>
-    <system systemId="math.dtd" uri="dtd/office_mathml2.dtd"/>
-    <system systemId="mathml2-qname-1.mod" uri="dtd/mathml2-qname-1.mod"/>
-    <system systemId="mmlalias.ent" uri="dtd/mathml/mmlalias.ent"/>
-    <system systemId="mmlextra.ent" uri="dtd/mathml/mmlextra.ent"/>
-    <system systemId="isomfrk.ent" uri="dtd/iso9573-13/isomfrk.ent"/>
-    <system systemId="isomopf.ent" uri="dtd/iso9573-13/isomopf.ent"/>
-    <system systemId="isomscr.ent" uri="dtd/iso9573-13/isomscr.ent"/>
-    <system systemId="isotech.ent" uri="dtd/iso9573-13/isotech.ent"/>
+    <rewriteSystem systemIdStartString="http://www.w3.org/Math/DTD/mathml2/" rewritePrefix="dtd/"/>
+    <rewriteSystem systemIdStartString="http://www.w3.org/TR/MathML2/dtd/" rewritePrefix="dtd/"/>
+    
+    
+    <system systemId="mathml2.dtd" uri="dtd/mathml2.dtd"/>
+    
+    <uri name="http://www.w3.org/Math/XMLSchema/mathml2/mathml2.xsd" uri="xsd/mathml2.xsd"/>
+    <system systemId="http://www.w3.org/Math/XMLSchema/mathml2/mathml2.xsd" uri="xsd/mathml2.xsd"/>
+    
     <system systemId="http://www.w3.org/2002/04/xhtml-math-svg/xhtml-math-svg.dtd" uri="dtd/xhtml-math-svg.dtd"/>    
+
+
+    <!-- Addded for QTI-->
+
+    <system systemId="common/common-attribs.xsd" uri="xsd/common/common-attribs.xsd" />
+    <system systemId="common/math.xsd" uri="xsd/common/math.xsd" />
+    <system systemId="common/xlink-href.xsd" uri="xsd/common/xlink-href.xsd" />
+    <system systemId="xlink-href.xsd" uri="xsd/common/xlink-href.xsd" />
+
+    <system systemId="content/arith.xsd" uri="xsd/content/arith.xsd" />
+    <system systemId="content/calculus.xsd" uri="xsd/content/calculus.xsd" />
+    <system systemId="content/common-attrib.xsd" uri="xsd/content/common-attrib.xsd" />
+    <system systemId="content/constants.xsd" uri="xsd/content/constants.xsd" />
+    <system systemId="content/constructs.xsd" uri="xsd/content/constructs.xsd" />
+    <system systemId="content/constants.xsd" uri="xsd/content/constants.xsd" />
+    <system systemId="content/elementary-functions.xsd" uri="xsd/content/elementary-functions.xsd" />
+    <system systemId="content/functions.xsd" uri="xsd/content/functions.xsd" />
+    <system systemId="content/functions.xsd" uri="xsd/content/functions.xsd" />
+    <system systemId="content/linear-algebra.xsd" uri="xsd/content/linear-algebra.xsd" />
+    <system systemId="content/logic.xsd" uri="xsd/content/logic.xsd" />
+    <system systemId="content/relations.xsd" uri="xsd/content/relations.xsd" />
+    <system systemId="content/semantics.xsd" uri="xsd/content/semantics.xsd" />
+    <system systemId="content/sets.xsd" uri="xsd/content/sets.xsd" />
+    <system systemId="content/statistics.xsd" uri="xsd/content/statistics.xsd" />
+    <system systemId="content/tokens.xsd" uri="xsd/content/tokens.xsd" />
+    <system systemId="content/vector-calculus.xsd" uri="xsd/content/vector-calculus.xsd" />
+
+    <system systemId="presentation/action.xsd" uri="xsd/presentation/action.xsd" />
+    <system systemId="presentation/characters.xsd" uri="xsd/presentation/characters.xsd" />
+    <system systemId="presentation/common-attribs.xsd" uri="xsd/presentation/common-attribs.xsd" />
+    <system systemId="presentation/common-types.xsd" uri="xsd/presentation/common-types.xsd" />
+    <system systemId="presentation/error.xsd" uri="xsd/presentation/error.xsd" />
+    <system systemId="presentation/layout.xsd" uri="xsd/presentation/layout.xsd" />
+    <system systemId="presentation/scripts.xsd" uri="xsd/presentation/scripts.xsd" />
+    <system systemId="presentation/space.xsd" uri="xsd/presentation/space.xsd" />
+    <system systemId="presentation/style.xsd" uri="xsd/presentation/style.xsd" />
+    <system systemId="presentation/table.xsd" uri="xsd/presentation/table.xsd" />
+    <system systemId="presentation/tokens.xsd" uri="xsd/presentation/tokens.xsd" />
 </catalog>

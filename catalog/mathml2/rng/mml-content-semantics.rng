@@ -1,0 +1,49 @@
+<?xml version="1.0" ?>
+
+<!-- Content elements: semantic mapping -->
+
+<!--
+
+RELAX NG Schema on MathML 2.0
+
+See COPYING for the status of this software.
+Yutaka Furubayashi (Poka-Poka Dream Factory) <info@yupotan.sppd.ne.jp>
+
+-->
+
+<grammar xmlns="http://relaxng.org/ns/structure/1.0">
+
+<define name="mml.csemantics">
+ <choice>
+  <ref name="mml.semantics.qname"/>
+  <ref name="mml.annotation.qname"/>
+  <ref name="mml.annotation-xml.qname"/>
+ </choice>
+</define>
+
+<define name="mml.semantics.qname">
+ <element name="semantics">
+  <ref name="mml.ContentExpression"/>
+  <ref name="mml.Common.attrib"/>
+  <ref name="mml.att-definition"/>
+  <ref name="mml.att-encoding"/>
+ </element>
+</define>
+
+<define name="mml.annotation.qname">
+ <element name="annotation">
+  <ref name="mml.Annotation.datatype"/>
+  <ref name="mml.Common.attrib"/>
+  <ref name="mml.att-encoding"/>
+ </element>
+</define>
+
+<define name="mml.annotation-xml.qname">
+ <element name="annotation-xml">
+  <ref name="mml.Annotation-xml.datatype"/>
+  <ref name="mml.Common.attrib"/>
+  <ref name="mml.att-encoding"/>
+ </element>
+</define>
+
+</grammar>

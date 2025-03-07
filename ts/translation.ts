@@ -1723,6 +1723,14 @@ class TranslationView {
         this.electron.ipcRenderer.send('show-apply-tm', { project: this.projectId, memory: this.memSelect.value });
     }
 
+    rememberSegment(): void {
+        this.returnTo = {
+            file: this.currentId.file,
+            unit: this.currentId.unit,
+            id: this.currentId.id
+        }
+    }
+    
     removeAllTranslations(): void {
         this.returnTo = {
             file: this.currentId.file,
@@ -2338,7 +2346,7 @@ class TranslationView {
                 td.innerHTML = arg.target;
                 let newTags: number = td.getElementsByTagName('img').length;
                 if (oldTags !== newTags) {
-                   this.electron.ipcRenderer.send('show-notification', 'Extra tags were removed' );
+                    this.electron.ipcRenderer.send('show-notification', 'Extra tags were removed');
                 }
                 break;
             }

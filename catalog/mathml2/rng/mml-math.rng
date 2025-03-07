@@ -1,0 +1,119 @@
+<?xml version="1.0" ?>
+
+<!-- Browser interface definition  ............................... -->
+
+<!-- Root Element (math) -->
+
+<!--
+
+RELAX NG Schema on MathML 2.0
+
+See COPYING for the status of this software.
+Yutaka Furubayashi (Poka-Poka Dream Factory) <info@yupotan.sppd.ne.jp>
+
+-->
+
+<grammar xmlns="http://relaxng.org/ns/structure/1.0">
+
+<start combine="choice">
+ <ref name="mml.math.qname"/>
+</start>
+
+<!-- Attributes for top-level element "math" -->
+
+<define name="mml.att-macros">
+ <optional>
+  <attribute name="macros">
+   <text/>
+  </attribute>
+ </optional>
+</define>
+
+<define name="mml.att-mode">
+ <optional>
+  <attribute name="mode">
+   <text/>
+  </attribute>
+ </optional>
+</define>
+
+<define name="mml.att-display">
+ <optional>
+  <attribute name="display">
+   <text/>
+  </attribute>
+ </optional>
+</define>
+
+<define name="mml.att-topinfo" combine="interleave">
+ <ref name="mml.Common.attrib"/>
+ <ref name="mml.att-macros"/>
+ <ref name="mml.att-mode"/>
+ <ref name="mml.att-display"/>
+</define>
+
+<!-- Attributes for browser interface element -->
+
+<define name="mml.att-baseline">
+ <optional>
+  <attribute name="baseline">
+   <text/>
+  </attribute>
+ </optional>
+</define>
+
+<define name="mml.att-overflow">
+ <optional>
+  <attribute name="overflow">
+   <choice>
+    <value>scroll</value>
+    <value>elide</value>
+    <value>truncate</value>
+    <value>scale</value>
+   </choice>
+  </attribute>
+ </optional>
+</define>
+
+<define name="mml.att-altimg">
+ <optional>
+  <attribute name="altimg">
+   <ref name="mml.uri.datatype"/>
+  </attribute>
+ </optional>
+</define>
+
+<define name="mml.att-alttext">
+ <optional>
+  <attribute name="alttext">
+   <text/>
+  </attribute>
+ </optional>
+</define>
+
+<define name="mml.att-browif" combine="interleave">
+ <ref name="mml.att-type"/>
+ <ref name="mml.att-name"/>
+ <ref name="mml.att-height"/>
+ <ref name="mml.att-width"/>
+ <ref name="mml.att-baseline"/>
+ <ref name="mml.att-overflow"/>
+ <ref name="mml.att-altimg"/>
+ <ref name="mml.att-alttext"/>
+</define>
+
+<!-- ............................................................. -->
+<!-- The top-level element "math" contains MathML encoded
+     mathematics. The "math" element has the browser info
+     attributes if it is also the browser interface element.
+-->
+
+<define name="mml.math.qname">
+ <element name="math">
+  <ref name="mml.MathExpression"/>
+  <ref name="mml.att-topinfo"/>
+  <ref name="mml.att-browif"/>
+ </element>
+</define>
+
+</grammar>

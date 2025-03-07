@@ -1,0 +1,144 @@
+<?xml version="1.0" ?>
+
+<!-- Presentation: general layout -->
+
+<!--
+
+RELAX NG Schema on MathML 2.0
+
+See COPYING for the status of this software.
+Yutaka Furubayashi (Poka-Poka Dream Factory) <info@yupotan.sppd.ne.jp>
+
+-->
+
+<grammar xmlns="http://relaxng.org/ns/structure/1.0">
+
+<define name="mml.pgenschema">
+ <choice>
+  <ref name="mml.mrow.qname"/>
+  <ref name="mml.mfrac.qname"/>
+  <ref name="mml.msqrt.qname"/>
+  <ref name="mml.mroot.qname"/>
+  <ref name="mml.menclose.qname"/>
+  <ref name="mml.mstyle.qname"/>
+  <ref name="mml.merror.qname"/>
+  <ref name="mml.mpadded.qname"/>
+  <ref name="mml.mphantom.qname"/>
+  <ref name="mml.mfenced.qname"/>
+ </choice>
+</define>
+
+<define name="mml.mrow.qname">
+ <element name="mrow">
+  <ref name="mml.PresExpression"/>
+  <ref name="mml.Common.attrib"/>
+ </element>
+</define>
+
+<define name="mml.mfrac.qname">
+ <element name="mfrac">
+  <ref name="mml.PresExpression"/>
+  <ref name="mml.Common.attrib"/>
+  <ref name="mml.att-bevelled"/>
+  <ref name="mml.att-linethickness"/>
+ </element>
+</define>
+
+<define name="mml.msqrt.qname">
+ <element name="msqrt">
+  <ref name="mml.PresExpression"/>
+  <ref name="mml.Common.attrib"/>
+ </element>
+</define>
+
+<define name="mml.menclose.qname">
+ <element name="menclose">
+  <ref name="mml.PresExpression"/>
+  <ref name="mml.Common.attrib"/>
+  <optional>
+   <attribute name="notation">
+    <choice>
+     <value>longdiv</value>
+     <value>actuarial</value>
+     <value>radical</value>
+    </choice>
+   </attribute>
+  </optional>
+ </element>
+</define>
+
+<define name="mml.mroot.qname">
+ <element name="mroot">
+  <ref name="mml.PresExpression"/>
+  <ref name="mml.Common.attrib"/>
+ </element>
+</define>
+
+<define name="mml.mstyle.qname">
+ <element name="mstyle">
+  <ref name="mml.PresExpression"/>
+  <ref name="mml.Common.attrib"/>
+  <ref name="mml.att-fontinfo"/>
+  <ref name="mml.att-opinfo"/>
+  <ref name="mml.att-lquote"/>
+  <ref name="mml.att-rquote"/>
+  <ref name="mml.att-linethickness"/>
+  <ref name="mml.att-scriptlevel"/>
+  <ref name="mml.att-scriptsizemultiplier"/>
+  <ref name="mml.att-scriptminsize"/>
+  <ref name="mml.att-background"/>
+  <ref name="mml.att-veryverythinmathspace"/>
+  <ref name="mml.att-verythinmathspace"/>
+  <ref name="mml.att-thinmathspace"/>
+  <ref name="mml.att-mediummathspace"/>
+  <ref name="mml.att-thickmathspace"/>
+  <ref name="mml.att-verythickmathspace"/>
+  <ref name="mml.att-veryverythickmathspace"/>
+  <ref name="mml.att-open"/>
+  <ref name="mml.att-close"/>
+  <ref name="mml.att-separators"/>
+  <ref name="mml.att-subscriptshift"/>
+  <ref name="mml.att-superscriptshift"/>
+  <ref name="mml.att-accentunder"/>
+  <ref name="mml.att-tableinfo"/>
+  <ref name="mml.att-rowspan"/>
+  <ref name="mml.att-columnspan"/>
+  <ref name="mml.att-edge"/>
+  <ref name="mml.att-actiontype"/>
+ </element>
+</define>
+
+<define name="mml.merror.qname">
+ <element name="merror">
+  <ref name="mml.PresExpression"/>
+  <ref name="mml.Common.attrib"/>
+ </element>
+</define>
+
+<define name="mml.mpadded.qname">
+ <element name="mpadded">
+  <ref name="mml.PresExpression"/>
+  <ref name="mml.Common.attrib"/>
+  <ref name="mml.att-sizeinfo"/>
+  <ref name="mml.att-lspace"/>
+ </element>
+</define>
+
+<define name="mml.mphantom.qname">
+ <element name="mphantom">
+  <ref name="mml.PresExpression"/>
+  <ref name="mml.Common.attrib"/>
+ </element>
+</define>
+
+<define name="mml.mfenced.qname">
+ <element name="mfenced">
+  <ref name="mml.PresExpression"/>
+  <ref name="mml.Common.attrib"/>
+  <ref name="mml.att-open"/>
+  <ref name="mml.att-close"/>
+  <ref name="mml.att-separators"/>
+ </element>
+</define>
+
+</grammar>

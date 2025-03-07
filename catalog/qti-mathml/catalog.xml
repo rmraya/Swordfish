@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<catalog xmlns="urn:oasis:names:tc:entity:xmlns:xml:catalog">
+    <system systemId="http://www.w3.org/2010/Math/MathML" uri="mathml3.xsd" />
+    <system systemId="http://www.imsglobal.org/xsd/w3/Math/XMLSchema/mathml3/mathml3.xsd" uri="mathml3.xsd" />
+    <system systemId="mathml3-common.xsd" uri="mathml3-common.xsd" />
+    <system systemId="mathml3-content.xsd" uri="mathml3-content.xsd" />
+    <system systemId="mathml3-presentation.xsd" uri="mathml3-presentation.xsd" />
+    <system systemId="mathml3-strict-content.xsd" uri="mathml3-strict-content.xsd" />
+    
+</catalog>

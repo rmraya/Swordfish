@@ -1,0 +1,291 @@
+<?xml version="1.0"?>
+
+<!-- Definition of Common Datatypes for MathML 2.0 -->
+
+<!--
+
+RELAX NG Schema on MathML 2.0
+
+See COPYING for the status of this software.
+Yutaka Furubayashi (Poka-Poka Dream Factory) <info@yupotan.sppd.ne.jp>
+
+-->
+
+<grammar xmlns="http://relaxng.org/ns/structure/1.0" datatypeLibrary="http://www.w3.org/2001/XMLSchema-datatypes">
+
+<define name="mml.id.datatype">
+ <data type="ID"/>
+</define>
+
+<define name="mml.idref.datatype">
+ <data type="IDREF"/>
+</define>
+
+<define name="mml.number.datatype">
+ <data type="integer"/>
+</define>
+
+<define name="mml.positiveinteger.datatype">
+ <data type="positiveInteger"/>
+</define>
+
+<define name="mml.uri.datatype">
+ <data type="anyURI"/>
+</define>
+
+<define name="mml.nonnegativefloat.datatype">
+ <data type="float">
+  <param name="minInclusive">0</param>
+ </data>
+</define>
+
+<define name="mml.length.datatype">
+ <data type="normalizedString">
+  <param name="pattern">-?([0-9]+|[0-9]*\.[0-9]+)*(em|ex|px|in|cm|mm|pt|pc|%)?</param>
+ </data>
+</define>
+
+<define name="mml.color.datatype">
+ <choice>
+  <data type="normalizedString">
+   <param name="pattern">#[0-9A-Fa-f]{6}</param>
+  </data>
+  <data type="normalizedString">
+   <param name="pattern">#[0-9A-Fa-f]{3}</param>
+  </data>
+  <value>transparent</value>
+ </choice>
+</define>
+
+<!-- Annotation datatypes -->
+
+<define name="mml.Annotation.datatype">
+ <text/> <!-- It depends on the encoding format -->
+</define>
+
+<define name="mml.Annotation-xml.datatype">
+ <mixed>
+  <zeroOrMore>
+   <element>
+    <anyName>
+     <except>
+      <nsName ns="http://docbook.org/ns/docbook"/>
+      <nsName ns="http://www.w3.org/1999/xhtml"/>
+      <nsName ns="http://www.w3.org/1998/Math/MathML"/>
+      <nsName ns="http://www.w3.org/2000/svg"/>
+     </except>
+    </anyName>
+    <zeroOrMore>
+     <attribute>
+      <anyName/>
+      <text/>
+     </attribute>
+    </zeroOrMore>
+    <ref name="mml.Annotation-xml.datatype"/>
+   </element>
+  </zeroOrMore>
+ </mixed>
+</define>
+
+
+<!-- Space datatype -->
+
+<define name="mml.namedspace.datatype">
+ <choice>
+  <!-- <ref name="mml.length.datatype"/> forbidden pattern list//ref -->
+  <data type="normalizedString">
+   <param name="pattern">-?([0-9]+|[0-9]*\.[0-9]+)*(em|ex|px|in|cm|mm|pt|pc|%)?</param>
+  </data>
+  <value>veryverythinmathspace</value>
+  <value>verythinmathspace</value>
+  <value>thinmathspace</value>
+  <value>mediummathspace</value>
+  <value>thickmathspace</value>
+  <value>verythickmathspace</value>
+  <value>veryverythickmathspace</value>
+ </choice>
+</define>
+
+<!-- datatypes for making matrix -->
+
+<define name="mml.align.datatype">
+ <list> <!-- (top | bottom | center | baseline | axis) [ rownumber ] -->
+  <choice>
+   <value>top</value>
+   <value>bottom</value>
+   <value>center</value>
+   <value>baseline</value>
+   <value>axis</value>
+  </choice>
+  <optional>
+   <!-- <ref name="mml.positiveinteger.datatype"/> forbidden pattern list//ref -->
+   <data type="positiveInteger"/>
+  </optional>
+ </list>
+</define>
+
+<define name="mml.rowalign.datatype">
+ <list> <!-- (top | bottom | center | baseline | axis) + -->
+  <oneOrMore>
+   <choice>
+    <value>top</value>
+    <value>bottom</value>
+    <value>center</value>
+    <value>baseline</value>
+    <value>axis</value>
+   </choice>
+  </oneOrMore>
+ </list>
+</define>
+
+<define name="mml.columnalign.datatype">
+ <list> <!-- (left | center | right) + -->
+  <oneOrMore>
+   <choice>
+    <value>left</value>
+    <value>center</value>
+    <value>right</value>
+   </choice>
+  </oneOrMore>
+ </list>
+</define>
+
+<define name="mml.columnwidth.datatype">
+ <list> <!-- ( auto | number h-unit | namedspace | fit ) + -->
+  <oneOrMore>
+   <choice>
+    <value>auto</value>
+    <!-- <ref name="mml.length.datatype"/> forbidden pattern list//ref -->
+    <data type="normalizedString">
+     <param name="pattern">-?([0-9]+|[0-9]*\.[0-9]+)*(em|ex|px|in|cm|mm|pt|pc|%)?</param>
+    </data>
+    <!-- <ref name="mml.namedspace.datatype"/> forbidden pattern list//ref -->
+    <choice>
+     <!-- <ref name="mml.length.datatype"/> forbidden pattern list//ref -->
+     <data type="normalizedString">
+      <param name="pattern">-?([0-9]+|[0-9]*\.[0-9]+)*(em|ex|px|in|cm|mm|pt|pc|%)?</param>
+     </data>
+     <value>veryverythinmathspace</value>
+     <value>verythinmathspace</value>
+     <value>thinmathspace</value>
+     <value>mediummathspace</value>
+     <value>thickmathspace</value>
+     <value>verythickmathspace</value>
+     <value>veryverythickmathspace</value>
+    </choice>
+    <value>fit</value>
+   </choice>
+  </oneOrMore>
+ </list>
+</define>
+
+<define name="mml.columnspan.datatype">
+ <ref name="mml.positiveinteger.datatype"/>
+</define>
+
+<define name="mml.groupalign.datatype">
+ <text/> <!-- group-alignment-list-list -->
+</define>
+
+<define name="mml.alignmentscope.datatype">
+ <list> <!-- (true | false) + -->
+  <oneOrMore>
+   <choice>
+    <value>true</value>
+    <value>false</value>
+   </choice>
+  </oneOrMore>
+ </list>
+</define>
+
+<define name="mml.rowspacing.datatype">
+ <list> <!-- ( number v-unit ) + -->
+  <oneOrMore>
+   <!-- <ref name="mml.length.datatype"/> forbidden pattern list//ref -->
+   <data type="normalizedString">
+    <param name="pattern">-?([0-9]+|[0-9]*\.[0-9]+)*(em|ex|px|in|cm|mm|pt|pc|%)?</param>
+   </data>
+  </oneOrMore>
+ </list>
+</define>
+
+<define name="mml.columnspacing.datatype">
+ <list> <!-- ( number h-unit | namedspace ) + -->
+  <oneOrMore>
+   <!-- <ref name="mml.length.datatype"/> forbidden pattern list//ref -->
+   <data type="normalizedString">
+    <param name="pattern">-?([0-9]+|[0-9]*\.[0-9]+)*(em|ex|px|in|cm|mm|pt|pc|%)?</param>
+   </data>
+   <choice>
+    <!-- <ref name="mml.length.datatype"/> forbidden pattern list//ref -->
+    <data type="normalizedString">
+     <param name="pattern">-?([0-9]+|[0-9]*\.[0-9]+)*(em|ex|px|in|cm|mm|pt|pc|%)?</param>
+    </data>
+    <value>veryverythinmathspace</value>
+    <value>verythinmathspace</value>
+    <value>thinmathspace</value>
+    <value>mediummathspace</value>
+    <value>thickmathspace</value>
+    <value>verythickmathspace</value>
+    <value>veryverythickmathspace</value>
+   </choice>
+  </oneOrMore>
+ </list>
+</define>
+
+<define name="mml.lines.datatype">
+ <list> <!-- (none | solid | dashed) + -->
+  <oneOrMore>
+   <choice>
+    <value>none</value>
+    <value>solid</value>
+    <value>dashed</value>
+   </choice>
+  </oneOrMore>
+ </list>
+</define>
+
+<define name="mml.framespacing.datatype">
+ <list> <!-- (number h-unit | namedspace) (number v-unit | namedspace) -->
+  <choice>
+   <!-- <ref name="mml.length.datatype"/> forbidden pattern list//ref -->
+   <data type="normalizedString">
+    <param name="pattern">-?([0-9]+|[0-9]*\.[0-9]+)*(em|ex|px|in|cm|mm|pt|pc|%)?</param>
+   </data>
+   <choice>
+    <!-- <ref name="mml.length.datatype"/> forbidden pattern list//ref -->
+    <data type="normalizedString">
+     <param name="pattern">-?([0-9]+|[0-9]*\.[0-9]+)*(em|ex|px|in|cm|mm|pt|pc|%)?</param>
+    </data>
+    <value>veryverythinmathspace</value>
+    <value>verythinmathspace</value>
+    <value>thinmathspace</value>
+    <value>mediummathspace</value>
+    <value>thickmathspace</value>
+    <value>verythickmathspace</value>
+    <value>veryverythickmathspace</value>
+   </choice>
+  </choice>
+  <choice>
+   <!-- <ref name="mml.length.datatype"/> forbidden pattern list//ref -->
+   <data type="normalizedString">
+    <param name="pattern">-?([0-9]+|[0-9]*\.[0-9]+)*(em|ex|px|in|cm|mm|pt|pc|%)?</param>
+   </data>
+   <choice>
+    <!-- <ref name="mml.length.datatype"/> forbidden pattern list//ref -->
+    <data type="normalizedString">
+     <param name="pattern">-?([0-9]+|[0-9]*\.[0-9]+)*(em|ex|px|in|cm|mm|pt|pc|%)?</param>
+    </data>
+    <value>veryverythinmathspace</value>
+    <value>verythinmathspace</value>
+    <value>thinmathspace</value>
+    <value>mediummathspace</value>
+    <value>thickmathspace</value>
+    <value>verythickmathspace</value>
+    <value>veryverythickmathspace</value>
+   </choice>
+  </choice>
+ </list>
+</define>
+
+</grammar>

@@ -1,0 +1,175 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE ini-file PUBLIC "-//MAXPROGRAMS//Converters 2.0.0//EN" "configuration.dtd">
+<ini-file>
+
+    <tag hard-break="segment">assessmentItem</tag>
+    <tag attributes="title" hard-break="segment">assessmentTest</tag>
+    <tag attributes="title" hard-break="segment">assessmentSection</tag>
+    <tag attributes="title;label" hard-break="segment">assessmentStimulus</tag>
+    <tag attributes="label" hard-break="segment">itemBody</tag>
+    <tag attributes="interpretation" hard-break="segment">outcomeDeclaration</tag>
+    <tag attributes="label" hard-break="segment">inlineChoiceInteraction</tag>
+    <tag attributes="label" hard-break="segment">simpleAssociableChoice</tag>
+    <tag attributes="label" hard-break="segment">hottext</tag>
+    <tag attributes="label" hard-break="segment">feedbackInline</tag>
+    <tag attributes="label" hard-break="segment">associableHotspot</tag>
+    <tag attributes="label" hard-break="segment">associateInteraction</tag>
+    <tag attributes="title" hard-break="inline" ctype="x-other">audio-description</tag>
+    <tag attributes="label" hard-break="segment">candidateComment</tag>
+    <tag attributes="label" hard-break="segment">candidateResponse</tag>
+    <tag attributes="title" hard-break="inline" ctype="x-other">captions</tag>
+    <tag attributes="label" hard-break="segment">labelledGUID</tag>
+    <tag hard-break="segment">context</tag>
+    <tag hard-break="segment">description</tag>
+    <tag attributes="interpretation" hard-break="segment">correctResponse</tag>
+    <tag attributes="resourceLabel" hard-break="segment">curriculumStandardsMetadata</tag>
+    <tag attributes="resourceLabel" hard-break="segment">curriculumStandardsMetadataSet</tag>
+    <tag attributes="label" hard-break="segment">customInteraction</tag>
+    <tag attributes="description" hard-break="segment">annotation</tag>
+    <tag attributes="description" hard-break="segment">classification</tag>
+    <tag attributes="label" hard-break="segment">drawingInteraction</tag>
+    <tag hard-break="segment">educational</tag>
+    <tag attributes="title" hard-break="segment">endAttemptInteraction</tag>
+    <tag attributes="description" hard-break="segment">environment</tag>
+    <tag attributes="label" hard-break="segment">extendedTextInteraction</tag>
+    <tag hard-break="segment">feedbackBlock</tag>
+    <tag attributes="label" hard-break="segment">gap</tag>
+    <tag attributes="label" hard-break="segment">gapImg</tag>
+    <tag attributes="label" hard-break="segment">gapMatchInteraction</tag>
+    <tag attributes="label" hard-break="segment">gapText</tag>
+    <tag attributes="title;description" hard-break="segment">general</tag>
+    <tag attributes="label" hard-break="segment">graphicAssociateInteraction</tag>
+    <tag attributes="label" hard-break="segment">graphicOrderInteraction</tag>
+    <tag hard-break="segment">hardware</tag>
+    <tag attributes="title;label" hard-break="segment">infoControl</tag>
+    <tag hard-break="segment">installationRemarks</tag>
+    <tag hard-break="segment">interactionKind</tag>
+    <tag hard-break="segment">interpretationNote</tag>
+    <tag attributes="label" hard-break="segment">itemBody</tag>
+    <tag hard-break="inline" ctype="x-other">keyword</tag>
+    <tag hard-break="inline" ctype="x-other">langstring</tag>
+    <tag hard-break="inline" ctype="x-other">language</tag>
+    <tag hard-break="inline" ctype="x-other">language-of-interface</tag>
+    <tag hard-break="inline" ctype="x-other">languageOfAdaptation</tag>
+    <tag attributes="title" hard-break="inline" ctype="x-other">layout-single-column</tag>
+    <tag hard-break="inline" ctype="x-other">location</tag>
+    <tag hard-break="segment">lom</tag>
+    <tag attributes="label" hard-break="segment">mediaInteraction</tag>
+    <tag hard-break="segment">medical</tag>
+    <tag attributes="title" hard-break="segment">modalFeedback</tag>
+    <tag hard-break="inline" ctype="x-other">otherPlatformRequirements</tag>
+    <tag attributes="interpretation" hard-break="segment">outcomeVariable</tag>
+    <tag attributes="label" hard-break="segment">printedVariable</tag>
+    <tag attributes="description" hard-break="segment">resource</tag>
+    <tag hard-break="segment">software</tag>
+    <tag attributes="title" hard-break="segment">stylesheet</tag>
+    <tag attributes="label" hard-break="segment">templateBlock</tag>
+    <tag attributes="title" hard-break="segment">testFeedback</tag>
+    <tag hard-break="inline" ctype="x-other">text</tag>
+    <tag hard-break="segment">title</tag>
+    <tag hard-break="segment">typicalAgeRange</tag>
+    <tag hard-break="segment">value</tag>
+    <tag hard-break="ignore">manifest</tag>
+    <tag hard-break="ignore">metadata</tag>
+    <tag hard-break="ignore">resources</tag>
+
+
+    <tag hard-break="segment">qti-assessment-item</tag>
+    <tag attributes="title" hard-break="segment">qti-assessment-test</tag>
+    <tag attributes="title" hard-break="segment">qti-assessment-section</tag>
+    <tag attributes="title;label" hard-break="segment">qti-assessment-stimulus</tag>
+    <tag attributes="interpretation" hard-break="segment">qti-outcome-declaration</tag>
+    <tag attributes="label" hard-break="segment">qti-calculator-info</tag>
+    <tag attributes="interpretation" hard-break="segment">qti-correct-response</tag>
+    <tag attributes="interpretation" hard-break="segment">qti-default-value</tag>
+    <tag attributes="interpretation" hard-break="segment">qti-description</tag>
+    <tag attributes="label" hard-break="segment">qti-digital-material</tag>
+    <tag attributes="title" hard-break="segment">qti-end-attempt-interaction</tag>
+    <tag attributes="object-label" hard-break="segment">qti-gap-img</tag>
+    <tag attributes="label" hard-break="segment">qti-item-body</tag>
+    <tag hard-break="segment">qti-label</tag>
+    <tag attributes="title" hard-break="segment">qti-modal-feedback</tag>
+    <tag attributes="interpretation" hard-break="segment">qti-outcome-declaration</tag>
+    <tag hard-break="segment">qti-physical-material</tag>
+    <tag attributes="label" hard-break="segment">qti-printed-variable</tag>
+    <tag attributes="title" hard-break="segment">qti-stylesheet</tag>
+    <tag attributes="title" hard-break="segment">qti-test-feedback</tag>
+    <tag attributes="title" hard-break="segment">qti-test-part</tag>
+    <tag hard-break="segment">qti-value</tag>
+    <tag hard-break="ignore">qti-metadata-ref</tag>    
+    <tag hard-break="ignore">qti-digital-material</tag>   
+    <tag hard-break="ignore">qti-calculator-info</tag>    
+
+
+    <!-- From XHTML -->
+    <tag attributes="title" hard-break="inline" ctype="x-other">abbr</tag>
+    <tag attributes="title" hard-break="inline" ctype="x-other">acronym</tag>
+    <tag attributes="title" hard-break="segment">address</tag>
+    <tag attributes="title" hard-break="segment">blockquote</tag>
+    <tag attributes="title" hard-break="inline" ctype="x-other">br</tag>
+    <tag attributes="title" hard-break="inline" ctype="x-other">cite</tag>
+    <tag attributes="title" hard-break="inline" ctype="x-other">code</tag>
+    <tag attributes="title" hard-break="inline" ctype="x-other">dfn</tag>
+    <tag attributes="title" hard-break="segment">div</tag>
+    <tag attributes="title" hard-break="inline" ctype="x-other">em</tag>
+    <tag attributes="title" hard-break="segment">h1</tag>
+    <tag attributes="title" hard-break="segment">h2</tag>
+    <tag attributes="title" hard-break="segment">h3</tag>
+    <tag attributes="title" hard-break="segment">h4</tag>
+    <tag attributes="title" hard-break="segment">h5</tag>
+    <tag attributes="title" hard-break="segment">h6</tag>
+    <tag attributes="title" hard-break="inline" ctype="x-other">kbd</tag>
+    <tag attributes="title" hard-break="segment">p</tag>
+    <tag attributes="title" hard-break="segment">pre</tag>
+    <tag attributes="title" hard-break="inline" ctype="x-other">q</tag>
+    <tag attributes="title" hard-break="inline" ctype="x-other">samp</tag>
+    <tag attributes="title" hard-break="inline" ctype="x-other">span</tag>
+    <tag attributes="title" hard-break="inline" ctype="x-other">strong</tag>
+    <tag attributes="title" hard-break="inline" ctype="x-other">var</tag>
+    <tag attributes="title" hard-break="segment">dl</tag>
+    <tag attributes="title" hard-break="segment">dt</tag>
+    <tag attributes="title" hard-break="segment">dd</tag>
+    <tag attributes="title" hard-break="segment">li</tag>
+    <tag attributes="title" hard-break="segment">ol</tag>
+    <tag attributes="title" hard-break="segment">ul</tag>
+    <tag attributes="title" hard-break="inline" ctype="x-other">object</tag>
+    <tag attributes="title" ctype="x-bold" hard-break="inline">b</tag>
+    <tag attributes="title" hard-break="inline" ctype="x-other">big</tag>
+    <tag attributes="title" hard-break="segment">hr</tag>
+    <tag attributes="title" ctype="x-italic" hard-break="inline">i</tag>
+    <tag attributes="title" hard-break="inline" ctype="x-other">small</tag>
+    <tag attributes="title" hard-break="inline" ctype="x-other">sub</tag>
+    <tag attributes="title" hard-break="inline" ctype="x-other">sup</tag>
+    <tag attributes="title" hard-break="inline" ctype="x-other">tt</tag>
+    <tag attributes="title" hard-break="segment">caption</tag>
+    <tag attributes="title" hard-break="segment">col</tag>
+    <tag attributes="title" hard-break="segment">colgroup</tag>
+    <tag attributes="title" hard-break="segment">table</tag>
+    <tag attributes="title" hard-break="segment">tbody</tag>
+    <tag attributes="title" hard-break="segment">td</tag>
+    <tag attributes="title" hard-break="segment">tfoot</tag>
+    <tag attributes="title" hard-break="segment">thead</tag>
+    <tag attributes="title" hard-break="segment">tr</tag>
+    <tag attributes="title;alt" hard-break="inline" ctype="x-other">img</tag>
+    <tag attributes="title" hard-break="inline" ctype="x-link">a</tag>
+    <tag attributes="title" hard-break="segment">article</tag>
+    <tag attributes="title" hard-break="segment">aside</tag>
+    <tag attributes="title" hard-break="inline" ctype="x-other">audio</tag>
+    <tag attributes="title" hard-break="inline" ctype="x-other">bdi</tag>
+    <tag attributes="title" hard-break="segment">figcaption</tag>
+    <tag attributes="title" hard-break="segment">figure</tag>
+    <tag attributes="title" hard-break="segment">footer</tag>
+    <tag attributes="title" hard-break="segment">header</tag>
+    <tag attributes="title" hard-break="inline" ctype="x-other">label</tag>
+    <tag attributes="title" hard-break="segment">nav</tag>
+    <tag attributes="title" hard-break="inline" ctype="x-other">picture</tag>
+    <tag attributes="title" hard-break="inline" ctype="x-other">rb</tag>
+    <tag attributes="title" hard-break="inline" ctype="x-other">rp</tag>
+    <tag attributes="title" hard-break="inline" ctype="x-other">rt</tag>
+    <tag attributes="title" hard-break="inline" ctype="x-other">rtc</tag>
+    <tag attributes="title" hard-break="inline" ctype="x-other">ruby</tag>
+    <tag attributes="title" hard-break="segment">section</tag>
+    <tag attributes="title" hard-break="inline" ctype="x-other">source</tag>
+    <tag attributes="title;label" hard-break="inline" ctype="x-other">track</tag>
+    <tag attributes="title" hard-break="inline" ctype="x-other">video</tag>
+</ini-file>

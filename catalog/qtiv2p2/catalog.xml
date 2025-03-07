@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<catalog xmlns="urn:oasis:names:tc:entity:xmlns:xml:catalog">
+    <system systemId="http://www.imsglobal.org/xsd/w3/2001/xml.xsd" uri="../xml/xml.xsd" />
+    <system systemId="http://www.imsglobal.org/xsd/qti/qtiv2p2/imsqti_v2p2.xsd"
+        uri="imsqti_v2p2p2.xsd" />
+    <system systemId="http://www.imsglobal.org/xsd/w3/2001/XInclude.xsd"
+        uri="../xinclude/xinclude.xsd" />
+   
+    <system systemId="apipv1p0_qtiextv2p2_v1p0.xsd" uri="apipv1p0_qtiextv2p2_v1p0p1.xsd" />
+    <system systemId="http://www.imsglobal.org/profile/apip/apipv1p0/apipv1p0_qtiextv2p2_v1p0p1.xsd"
+        uri="apipv1p0_qtiextv2p2_v1p0p1.xsd" />
+    <system systemId="http://www.imsglobal.org/xsd/w3/2001/ssmlv1p0.xsd" uri="ssmlv1p0.xsd" />
+    <system
+        systemId="https://www.imsglobal.org/profile/apip/apipv1p0/apipv1p0_qtiextv2p2_v1p0p1.xsd"
+        uri="apipv1p0_qtiextv2p2_v1p0p1.xsd" />
+    <system systemId="https://www.imsglobal.org/xsd/w3/2010/ssmlv1p1-core.xsd" uri="ssmlv1p1-core.xsd" />
+    <system systemId="https://www.imsglobal.org/xsd/w3/2001/synthesis-core.xsd" uri="synthesis-core.xsd" />
+    <system systemId="synthesis-core.xsd" uri="synthesis-core.xsd" />
+    <system systemId="http://www.imsglobal.org/xsd/qti/qtiv2p2/imsqtiv2p2p1_html5_v1p0.xsd" uri="imsqtiv2p2p1_html5_v1p0.xsd" />
+    <system systemId="http://www.imsglobal.org/xsd/w3/2010/ssmlv1p1-core.xsd" uri="ssmlv1p1-core.xsd" />
+
+    <uri name="http://www.imsglobal.org/xsd/imsqti_metadata_v2p2" uri="imsqti_metadata_v2p2.xsd" />
+    <uri name="http://www.imsglobal.org/xsd/imsqti_result_v2p2" uri="imsqti_result_v2p2.xsd" />
+    <uri name="http://www.imsglobal.org/xsd/imsqti_usagedata_v2p2" uri="imsqti_usagedata_v2p2.xsd" />
+    <uri name="http://www.imsglobal.org/xsd/imsqti_v2p2" uri="imsqti_v2p2p2.xsd" />
+    <uri name="http://www.imsglobal.org/xsd/imsqtiv2p2_html5_v1p0" uri="imsqtiv2p2p1_html5_v1p0.xsd" />
+    <uri name="http://www.imsglobal.org/xsd/qti/qtiv2p2/imscsmd_v1p0" uri="qtiv2p2_csm_v2p2.xsd" />
+    <uri name="http://www.imsglobal.org/xsd/imscp_v1p1" uri="qtiv2p2_imscpv1p2_v1p0.xsd" />
+    <system systemId="http://www.imsglobal.org/xsd/imscp_v1p1" uri="qtiv2p2_imscpv1p2_v1p0.xsd" />
+    <system systemId="http://www.imsglobal.org/xsd/qti/qtiv2p2/qtiv2p2_imscpv1p2_v1p0.xsd" uri="qtiv2p2_imscpv1p2_v1p0.xsd" />
+    <system systemId="http://www.imsglobal.org/xsd/imsqti_metadata_v2p2" uri="imsqti_metadata_v2p2.xsd" />
+    <system systemId="http://www.imsglobal.org/xsd/qti/qtiv2p2/imsqti_metadata_v2p2.xsd" uri="imsqti_metadata_v2p2.xsd" />
+    <system systemId="http://www.imsglobal.org/xsd/qti/qtiv2p2/qtiv2p2_csm_v2p2.xsd" uri="qtiv2p2_csm_v2p2.xsd" />
+
+</catalog>

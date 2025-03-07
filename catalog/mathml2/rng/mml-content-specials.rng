@@ -1,0 +1,45 @@
+<?xml version="1.0" ?>
+
+<!-- Content elements: specials -->
+
+<!--
+
+RELAX NG Schema on MathML 2.0
+
+See COPYING for the status of this software.
+Yutaka Furubayashi (Poka-Poka Dream Factory) <info@yupotan.sppd.ne.jp>
+
+-->
+
+<grammar xmlns="http://relaxng.org/ns/structure/1.0">
+
+<define name="mml.cspecial">
+ <choice>
+  <ref name="mml.apply.qname"/>
+  <ref name="mml.reln.qname"/>
+  <ref name="mml.lambda.qname"/>
+ </choice>
+</define>
+
+<define name="mml.apply.qname">
+ <element name="apply">
+  <ref name="mml.ContentExpression"/>
+  <ref name="mml.Common.attrib"/>
+ </element>
+</define>
+
+<define name="mml.reln.qname">
+ <element name="reln">
+  <ref name="mml.ContentExpression"/>
+  <ref name="mml.Common.attrib"/>
+ </element>
+</define>
+
+<define name="mml.lambda.qname">
+ <element name="lambda">
+  <ref name="mml.ContentExpression"/>
+  <ref name="mml.Common.attrib"/>
+ </element>
+</define>
+
+</grammar>

@@ -1,0 +1,580 @@
+<?xml version = "1.0" encoding = "UTF-8"?>
+<xs:schema xmlns="http://www.imsglobal.org/xsd/imsqti_result_v2p2"
+     targetNamespace="http://www.imsglobal.org/xsd/imsqti_result_v2p2"
+     xmlns:xs="http://www.w3.org/2001/XMLSchema"
+     version="IMS QTI RESULT 2.2.0"
+     elementFormDefault="qualified"
+     attributeFormDefault="unqualified">
+
+    <xs:annotation>
+        <xs:documentation>
+            XSD Data File Information
+            =========================
+            Author:         Colin Smythe (IMS Global, UK) and Mark McKell (IMS Global, USA)
+            Date:           1st September, 2015
+            Version:        2.2
+            Status:         Final Release
+            Description:    This is the Platform Specific Model of the Assessment Result object in the IMS QTIv2.2 Specification Information Model. It is this representation that is used to produce the XSD binding for the AssessmentResult IMS QTI v2.2.
+
+            History:        This version supercedes the full IMS QTI v2.1 specification.
+
+            License:        IPR and Distribution Notices
+
+                            This machine readable file is derived from IMS Global specification IMS Question and Test Interoperability (QTI) Version 2.2
+                            found at http://www.imsglobal.org/question and the original IMS Global schema binding or code base
+                            http://www.imsglobal.org/question.
+
+                            Recipients of this document are requested to submit, with their comments, notification of any relevant 
+                            patent claims or other intellectual property rights of which they may be aware that might be infringed by
+                            any implementation of the specification set forth in this document, and to provide supporting documentation.
+
+                            IMS takes no position regarding the validity or scope of any intellectual property or other rights that might
+                            be claimed to pertain to the implementation or use of the technology described in this document or the extent 
+                            to which any license under such rights might or might not be available; neither does it represent that it has 
+                            made any effort to identify any such rights. Information on IMS procedures with respect to rights in IMS 
+                            specifications can be found at the IMS Global Intellectual Property Rights web page: http://www.imsglobal.org/ipr/imsipr_policyFinal.pdf.
+
+                            Copyright (c) IMS Global Learning Consortium 1999-2015. All Rights Reserved.
+
+                            Use of this specification to develop products or services is governed by the license with IMS found on the IMS website: http://www.imsglobal.org/license.html.
+
+                            Permission is granted to all parties to use excerpts from this document as needed in producing requests for proposals.
+
+                            The limited permissions granted above are perpetual and will not be revoked by IMS or its successors or assigns.
+
+                            THIS SPECIFICATION IS BEING OFFERED WITHOUT ANY WARRANTY WHATSOEVER, AND IN PARTICULAR, ANY WARRANTY OF NONINFRINGEMENT IS
+                            EXPRESSLY DISCLAIMED. ANY USE OF THIS SPECIFICATION SHALL BE MADE ENTIRELY AT THE IMPLEMENTERS OWN RISK, AND NEITHER THE CONSORTIUM
+                            NOR ANY OF ITS MEMBERS OR SUBMITTERS, SHALL HAVE ANY LIABILITY WHATSOEVER TO ANY IMPLEMENTER OR THIRD PARTY FOR ANY DAMAGES OF
+                            ANY NATURE WHATSOEVER, DIRECTLY OR INDIRECTLY, ARISING FROM THE USE OF THIS SPECIFICATION.
+
+            Source UML File Information
+            ===========================
+            The source file information must be supplied as an XMI file (without diagram layout information).
+            The supported UML authoring tools are:
+            (a) Poseidon - v6 (and later)
+            (b) Papyrus - v0.10.2 (and later)
+
+            Source XSLT File Information
+            ============================
+            XSL Generator:    Specificationv1p0_GenerationToolv1.xsl
+            XSLT Processor:   Saxon-PE-9.5.0.2
+            Release:          1.0
+            Date:             31st July, 2014
+            Autogen Engineer: Colin Smythe (IMS Global, UK)
+            Autogen Date:     2015-12-14
+
+            IMS Global Auto-generation Binding Tool-kit (I-BAT)
+            ===================================================
+            This file was auto-generated using the IMS Global Binding Auto-generation Tool-kit (I-BAT).  While every
+            attempt has been made to ensure that this tool auto-generates the files correctly, users should be aware
+            that this is an experimental tool.  Permission is given to make use of this tool.  IMS Global makes no
+            claim on the materials created by third party users of this tool.  Details on how to use this tool
+            are contained in the IMS Global "I-BAT" documentation available at the IMS Global web-site:
+            http://www.imsglobal.org.
+
+            Tool Copyright:  2012-2015  (c) IMS Global Learning Consortium Inc.  All Rights Reserved.
+        </xs:documentation>
+    </xs:annotation>
+
+    <!-- Generate Global Attributes (non-assigned) ******************************************************** -->
+
+    <!-- ================================================================================================== -->
+
+    <!-- Generate Global Attributes *********************************************************************** -->
+
+    <!-- ================================================================================================== -->
+
+    <!-- Generate Global List Types *********************************************************************** -->
+
+    <xs:simpleType name="IdentifierList.Type">
+        <xs:restriction base="xs:NCName" />
+    </xs:simpleType>
+
+    <xs:simpleType name="View.Type">
+        <xs:restriction base="xs:string">
+            <xs:enumeration value="author" />
+            <xs:enumeration value="candidate" />
+            <xs:enumeration value="proctor" />
+            <xs:enumeration value="scorer" />
+            <xs:enumeration value="testConstructor" />
+            <xs:enumeration value="tutor" />
+        </xs:restriction>
+    </xs:simpleType>
+
+    <!-- ================================================================================================== -->
+
+    <!-- Generate Namespaced extension Group  ************************************************************* -->
+
+    <!-- ================================================================================================== -->
+
+    <!-- Generate Special DataTypes  ********************************************************************** -->
+
+    <xs:complexType name="EmptyPrimitiveType.Type">
+        <xs:complexContent>
+            <xs:restriction base="xs:anyType" />
+        </xs:complexContent>
+    </xs:complexType>
+
+    <!-- ================================================================================================== -->
+
+    <!-- Generate the enumerated simpleType declarations ************************************************** -->
+
+    <!-- ================================================================================================== -->
+
+    <!-- Generate the simpleType elements based on IMS data-types (Parameter) ***************************** -->
+
+    <!-- ================================================================================================== -->
+
+    <!-- Generate the simpleType elements based on IMS data-types (Derived) ******************************* -->
+
+    <!-- ================================================================================================== -->
+
+    <!-- Generate the simpleType elements based on IMS data-types (Union) ********************************* -->
+
+    <!-- ================================================================================================== -->
+
+    <!-- Generate the simpleType elements based on IMS data-types (Complex) ******************************* -->
+
+    <!-- ================================================================================================== -->
+
+    <!-- Generate the derived data-type elements based upon simpleType ************************************ -->
+
+    <xs:simpleType name="DateTime.Type">
+        <xs:restriction base="xs:dateTime">
+            <xs:pattern value="[0-9]{4}.*" />
+        </xs:restriction>
+    </xs:simpleType>
+
+    <xs:simpleType name="Identifier.Type">
+        <xs:restriction base="xs:NCName" />
+    </xs:simpleType>
+
+    <!-- ================================================================================================== -->
+
+    <!-- Generate the derived data-type elements based upon derived simpleType **************************** -->
+
+    <!-- ================================================================================================== -->
+
+    <!-- Generate the ComplexTypes ************************************************************************ -->
+
+    <xs:complexType name="AssessmentResult.Type" abstract="false" mixed="false">
+        <xs:annotation>
+            <xs:documentation source="documentation">
+                This is the root class to contain the assessment result data. An Assessment Result is used
+                to report the results of a candidate's interaction with a test and/or one or more items a-
+                ttempted. Information about the test is optional, in some systems it may be possible to i-
+                nteract with items that are not organized into a test at all. For example, items that are 
+                organized with learning resources and presented individually in a formative context.      
+            </xs:documentation>
+        </xs:annotation>
+        <xs:sequence>
+            <xs:element name="context" type="Context.Type" minOccurs="1" maxOccurs="1" />
+            <xs:element name="testResult" type="TestResult.Type" minOccurs="0" maxOccurs="1" />
+            <xs:element name="itemResult" type="ItemResult.Type" minOccurs="0" maxOccurs="unbounded" />
+        </xs:sequence>
+    </xs:complexType>
+
+    <xs:complexType name="CandidateResponse.Type" abstract="false" mixed="false">
+        <xs:annotation>
+            <xs:documentation source="documentation">
+                The response given by the candidate.                                                      
+            </xs:documentation>
+        </xs:annotation>
+        <xs:sequence>
+            <xs:element name="value" type="Value.Type" minOccurs="0" maxOccurs="unbounded" />
+        </xs:sequence>
+    </xs:complexType>
+
+    <xs:complexType name="Context.Type" abstract="false" mixed="false">
+        <xs:annotation>
+            <xs:documentation source="documentation">
+                This is the context for the 'assessmentResult'. It provides the corresponding set of iden-
+                tifiers.                                                                                  
+            </xs:documentation>
+        </xs:annotation>
+        <xs:sequence>
+            <xs:element name="sessionIdentifier" type="SessionIdentifier.Type" minOccurs="0" maxOccurs="unbounded" />
+        </xs:sequence>
+        <xs:attribute name="sourcedId" use="optional" type="Identifier.Type" />
+    </xs:complexType>
+
+    <xs:complexType name="CorrectResponse.Type" abstract="false" mixed="false">
+        <xs:annotation>
+            <xs:documentation source="documentation">
+                The correct response may be output as part of the report if desired. Systems are not limi-
+                ted to reporting correct responses declared in responseDeclarations. For example, a corre-
+                ct response may be set by a templateRule or may simply have been suppressed from the decl-
+                aration passed to the delivery engine e.g. for security.                                  
+            </xs:documentation>
+        </xs:annotation>
+        <xs:sequence>
+            <xs:element name="value" type="Value.Type" minOccurs="1" maxOccurs="unbounded" />
+        </xs:sequence>
+        <xs:attribute name="interpretation" use="optional" type="xs:string" />
+    </xs:complexType>
+
+    <xs:complexType name="ItemResult.Type" abstract="false" mixed="false">
+        <xs:annotation>
+            <xs:documentation source="documentation">
+                The result of an item session is reported with an itemResult. A report may contain multip-
+                le results for the same instance of an item representing multiple attempts, progression t-
+                hrough an adaptive item or even more detailed tracking. In these cases, each item result  
+                must have a different datestamp.                                                          
+            </xs:documentation>
+        </xs:annotation>
+        <xs:sequence>
+            <xs:choice minOccurs="0" maxOccurs="unbounded">
+                <xs:element name="responseVariable" type="ResponseVariable.Type" minOccurs="1" maxOccurs="1"/>
+                <xs:element name="templateVariable" type="TemplateVariable.Type" minOccurs="1" maxOccurs="1"/>
+                <xs:element name="outcomeVariable" type="OutcomeVariable.Type" minOccurs="1" maxOccurs="1"/>
+            </xs:choice>
+            <xs:element name="candidateComment" type="xs:string" minOccurs="0" maxOccurs="1" />
+        </xs:sequence>
+        <xs:attribute name="identifier" use="required" type="xs:normalizedString" />
+        <xs:attribute name="sequenceIndex" use="optional" type="xs:integer" />
+        <xs:attribute name="datestamp" use="required" type="DateTime.Type" />
+        <xs:attribute name="sessionStatus" use="required">
+            <xs:simpleType>
+                <xs:annotation>
+                    <xs:documentation source="documentation">
+                        The session status is used to keep track of the status of the item variables in an item s-
+                        ession.                                                                                   
+                    </xs:documentation>
+                </xs:annotation>
+                <xs:restriction base="xs:string">
+                    <xs:enumeration value="final" />
+                    <xs:enumeration value="initial" />
+                    <xs:enumeration value="pendingResponseProcessing" />
+                    <xs:enumeration value="pendingSubmission" />
+                </xs:restriction>
+            </xs:simpleType>
+        </xs:attribute>
+    </xs:complexType>
+
+    <xs:complexType name="OutcomeVariable.Type" abstract="false" mixed="false">
+        <xs:annotation>
+            <xs:documentation source="documentation">
+                The Item result information related to an 'Outcome Variable'.                             
+            </xs:documentation>
+        </xs:annotation>
+        <xs:sequence>
+            <xs:element name="value" type="Value.Type" minOccurs="0" maxOccurs="unbounded" />
+        </xs:sequence>
+        <xs:attribute name="identifier" use="required" type="Identifier.Type" />
+        <xs:attribute name="cardinality" use="required">
+            <xs:simpleType>
+                <xs:annotation>
+                    <xs:documentation source="documentation">
+                        An expression or itemVariable can either be single-valued or multi-valued. A multi-valued 
+                        expression (or variable) is called a container. A container contains a list of values, th-
+                        is list may be empty in which case it is treated as NULL. All the values in a multiple or 
+                        ordered container are drawn from the same value set, however, containers may contain mult-
+                        iple occurrences of the same value. In other words, [A,B,B,C] is an acceptable value for a
+                        container. A container with cardinality multiple and value [A,B,C] is equivalent to a sim-
+                        ilar one with value [C,B,A] whereas these two values would be considered distinct for con-
+                        tainers with cardinality ordered. When used as the value of a response variable this dist-
+                        inction is typified by the difference between selecting choices in a multi-response multi-
+                        -choice task and ranking choices in an order objects task. In the language of [ISO 11404] 
+                        a container with multiple cardinality is a "bag-type", a container with ordered cardinali-
+                        ty is a "sequence-type" and a container with record cardinality is a "record-type". The r-
+                        ecord container type is a special container that contains a set of independent values each
+                        identified by its own identifier and having its own base-type. This specification does not
+                        make use of the record type directly however it is provided to enable customInteractions  
+                        to manipulate more complex responses and customOperators to return more complex values, in
+                        addition to the use for detailed information about numeric responses described in the str-
+                        ingInteraction abstract class.                                                            
+                    </xs:documentation>
+                </xs:annotation>
+                <xs:restriction base="xs:string">
+                    <xs:enumeration value="multiple" />
+                    <xs:enumeration value="ordered" />
+                    <xs:enumeration value="record" />
+                    <xs:enumeration value="single" />
+                </xs:restriction>
+            </xs:simpleType>
+        </xs:attribute>
+        <xs:attribute name="baseType" use="optional">
+            <xs:simpleType>
+                <xs:annotation>
+                    <xs:documentation source="documentation">
+                        A base-type is simply a description of a set of atomic values (atomic to this specificati-
+                        on). Note that several of the baseTypes used to define the runtime data model have identi-
+                        cal definitions to those of the basic data types used to define the values for attributes 
+                        in the specification itself. The use of an enumeration to define the set of baseTypes used
+                        in the runtime model, as opposed to the use of classes with similar names, is designed to 
+                        help distinguish between these two distinct levels of modelling.                          
+                    </xs:documentation>
+                </xs:annotation>
+                <xs:restriction base="xs:string">
+                    <xs:enumeration value="boolean" />
+                    <xs:enumeration value="directedPair" />
+                    <xs:enumeration value="duration" />
+                    <xs:enumeration value="file" />
+                    <xs:enumeration value="float" />
+                    <xs:enumeration value="identifier" />
+                    <xs:enumeration value="integer" />
+                    <xs:enumeration value="pair" />
+                    <xs:enumeration value="point" />
+                    <xs:enumeration value="string" />
+                    <xs:enumeration value="uri" />
+                </xs:restriction>
+            </xs:simpleType>
+        </xs:attribute>
+        <xs:attribute name="view" use="optional">
+            <xs:simpleType>
+                <xs:list itemType="View.Type" />
+            </xs:simpleType>
+        </xs:attribute>
+        <xs:attribute name="interpretation" use="optional" type="xs:string" />
+        <xs:attribute name="longInterpretation" use="optional" type="xs:anyURI" />
+        <xs:attribute name="normalMaximum" use="optional" type="xs:double" />
+        <xs:attribute name="normalMinimum" use="optional" type="xs:double" />
+        <xs:attribute name="masteryValue" use="optional" type="xs:double" />
+    </xs:complexType>
+
+    <xs:complexType name="ResponseVariable.Type" abstract="false" mixed="false">
+        <xs:annotation>
+            <xs:documentation source="documentation">
+                The Item result information related to a 'Response Variable'.                             
+            </xs:documentation>
+        </xs:annotation>
+        <xs:sequence>
+            <xs:element name="correctResponse" type="CorrectResponse.Type" minOccurs="0" maxOccurs="1" />
+            <xs:element name="candidateResponse" type="CandidateResponse.Type" minOccurs="1" maxOccurs="1" />
+        </xs:sequence>
+        <xs:attribute name="identifier" use="required" type="Identifier.Type" />
+        <xs:attribute name="cardinality" use="required">
+            <xs:simpleType>
+                <xs:annotation>
+                    <xs:documentation source="documentation">
+                        An expression or itemVariable can either be single-valued or multi-valued. A multi-valued 
+                        expression (or variable) is called a container. A container contains a list of values, th-
+                        is list may be empty in which case it is treated as NULL. All the values in a multiple or 
+                        ordered container are drawn from the same value set, however, containers may contain mult-
+                        iple occurrences of the same value. In other words, [A,B,B,C] is an acceptable value for a
+                        container. A container with cardinality multiple and value [A,B,C] is equivalent to a sim-
+                        ilar one with value [C,B,A] whereas these two values would be considered distinct for con-
+                        tainers with cardinality ordered. When used as the value of a response variable this dist-
+                        inction is typified by the difference between selecting choices in a multi-response multi-
+                        -choice task and ranking choices in an order objects task. In the language of [ISO 11404] 
+                        a container with multiple cardinality is a "bag-type", a container with ordered cardinali-
+                        ty is a "sequence-type" and a container with record cardinality is a "record-type". The r-
+                        ecord container type is a special container that contains a set of independent values each
+                        identified by its own identifier and having its own base-type. This specification does not
+                        make use of the record type directly however it is provided to enable customInteractions  
+                        to manipulate more complex responses and customOperators to return more complex values, in
+                        addition to the use for detailed information about numeric responses described in the str-
+                        ingInteraction abstract class.                                                            
+                    </xs:documentation>
+                </xs:annotation>
+                <xs:restriction base="xs:string">
+                    <xs:enumeration value="multiple" />
+                    <xs:enumeration value="ordered" />
+                    <xs:enumeration value="record" />
+                    <xs:enumeration value="single" />
+                </xs:restriction>
+            </xs:simpleType>
+        </xs:attribute>
+        <xs:attribute name="baseType" use="optional">
+            <xs:simpleType>
+                <xs:annotation>
+                    <xs:documentation source="documentation">
+                        A base-type is simply a description of a set of atomic values (atomic to this specificati-
+                        on). Note that several of the baseTypes used to define the runtime data model have identi-
+                        cal definitions to those of the basic data types used to define the values for attributes 
+                        in the specification itself. The use of an enumeration to define the set of baseTypes used
+                        in the runtime model, as opposed to the use of classes with similar names, is designed to 
+                        help distinguish between these two distinct levels of modelling.                          
+                    </xs:documentation>
+                </xs:annotation>
+                <xs:restriction base="xs:string">
+                    <xs:enumeration value="boolean" />
+                    <xs:enumeration value="directedPair" />
+                    <xs:enumeration value="duration" />
+                    <xs:enumeration value="file" />
+                    <xs:enumeration value="float" />
+                    <xs:enumeration value="identifier" />
+                    <xs:enumeration value="integer" />
+                    <xs:enumeration value="pair" />
+                    <xs:enumeration value="point" />
+                    <xs:enumeration value="string" />
+                    <xs:enumeration value="uri" />
+                </xs:restriction>
+            </xs:simpleType>
+        </xs:attribute>
+        <xs:attribute name="choiceSequence" use="optional">
+            <xs:simpleType>
+                <xs:list itemType="IdentifierList.Type" />
+            </xs:simpleType>
+        </xs:attribute>
+    </xs:complexType>
+
+    <xs:complexType name="TemplateVariable.Type" abstract="false" mixed="false">
+        <xs:annotation>
+            <xs:documentation source="documentation">
+                The Item result information related to a 'Template Variable'.                             
+            </xs:documentation>
+        </xs:annotation>
+        <xs:sequence>
+            <xs:element name="value" type="Value.Type" minOccurs="0" maxOccurs="unbounded" />
+        </xs:sequence>
+        <xs:attribute name="identifier" use="required" type="Identifier.Type" />
+        <xs:attribute name="cardinality" use="required">
+            <xs:simpleType>
+                <xs:annotation>
+                    <xs:documentation source="documentation">
+                        An expression or itemVariable can either be single-valued or multi-valued. A multi-valued 
+                        expression (or variable) is called a container. A container contains a list of values, th-
+                        is list may be empty in which case it is treated as NULL. All the values in a multiple or 
+                        ordered container are drawn from the same value set, however, containers may contain mult-
+                        iple occurrences of the same value. In other words, [A,B,B,C] is an acceptable value for a
+                        container. A container with cardinality multiple and value [A,B,C] is equivalent to a sim-
+                        ilar one with value [C,B,A] whereas these two values would be considered distinct for con-
+                        tainers with cardinality ordered. When used as the value of a response variable this dist-
+                        inction is typified by the difference between selecting choices in a multi-response multi-
+                        -choice task and ranking choices in an order objects task. In the language of [ISO 11404] 
+                        a container with multiple cardinality is a "bag-type", a container with ordered cardinali-
+                        ty is a "sequence-type" and a container with record cardinality is a "record-type". The r-
+                        ecord container type is a special container that contains a set of independent values each
+                        identified by its own identifier and having its own base-type. This specification does not
+                        make use of the record type directly however it is provided to enable customInteractions  
+                        to manipulate more complex responses and customOperators to return more complex values, in
+                        addition to the use for detailed information about numeric responses described in the str-
+                        ingInteraction abstract class.                                                            
+                    </xs:documentation>
+                </xs:annotation>
+                <xs:restriction base="xs:string">
+                    <xs:enumeration value="multiple" />
+                    <xs:enumeration value="ordered" />
+                    <xs:enumeration value="record" />
+                    <xs:enumeration value="single" />
+                </xs:restriction>
+            </xs:simpleType>
+        </xs:attribute>
+        <xs:attribute name="baseType" use="optional">
+            <xs:simpleType>
+                <xs:annotation>
+                    <xs:documentation source="documentation">
+                        A base-type is simply a description of a set of atomic values (atomic to this specificati-
+                        on). Note that several of the baseTypes used to define the runtime data model have identi-
+                        cal definitions to those of the basic data types used to define the values for attributes 
+                        in the specification itself. The use of an enumeration to define the set of baseTypes used
+                        in the runtime model, as opposed to the use of classes with similar names, is designed to 
+                        help distinguish between these two distinct levels of modelling.                          
+                    </xs:documentation>
+                </xs:annotation>
+                <xs:restriction base="xs:string">
+                    <xs:enumeration value="boolean" />
+                    <xs:enumeration value="directedPair" />
+                    <xs:enumeration value="duration" />
+                    <xs:enumeration value="file" />
+                    <xs:enumeration value="float" />
+                    <xs:enumeration value="identifier" />
+                    <xs:enumeration value="integer" />
+                    <xs:enumeration value="pair" />
+                    <xs:enumeration value="point" />
+                    <xs:enumeration value="string" />
+                    <xs:enumeration value="uri" />
+                </xs:restriction>
+            </xs:simpleType>
+        </xs:attribute>
+    </xs:complexType>
+
+    <xs:complexType name="TestResult.Type" abstract="false" mixed="false">
+        <xs:annotation>
+            <xs:documentation source="documentation">
+                The container for the Test result. When a test result is given the following item results 
+                must relate only to items that were selected for presentation as part of the corresponding
+                test session. Furthermore, all items selected for presentation should be reported with a  
+                corresponding itemResult.                                                                 
+            </xs:documentation>
+        </xs:annotation>
+        <xs:sequence>
+            <xs:choice minOccurs="0" maxOccurs="unbounded">
+                <xs:element name="responseVariable" type="ResponseVariable.Type" minOccurs="1" maxOccurs="1"/>
+                <xs:element name="templateVariable" type="TemplateVariable.Type" minOccurs="1" maxOccurs="1"/>
+                <xs:element name="outcomeVariable" type="OutcomeVariable.Type" minOccurs="1" maxOccurs="1"/>
+            </xs:choice>
+        </xs:sequence>
+        <xs:attribute name="identifier" use="required" type="xs:normalizedString" />
+        <xs:attribute name="datestamp" use="required" type="DateTime.Type" />
+    </xs:complexType>
+
+    <!-- ================================================================================================== -->
+
+    <!-- Generate the derived ComplexTypes **************************************************************** -->
+
+    <xs:complexType name="SessionIdentifier.Type" abstract="false" mixed="false">
+        <xs:annotation>
+            <xs:documentation source="documentation">
+                The system that creates the result (for example, the test delivery system) should assign a
+                session identifier that it can use to identify the session.                               
+            </xs:documentation>
+        </xs:annotation>
+        <xs:complexContent>
+            <xs:extension base="EmptyPrimitiveType.Type">
+                <xs:attribute name="sourceID" use="required" type="xs:anyURI" />
+                <xs:attribute name="identifier" use="required" type="xs:normalizedString" />
+            </xs:extension>
+        </xs:complexContent>
+    </xs:complexType>
+
+    <xs:complexType name="Value.Type" abstract="false" mixed="false">
+        <xs:annotation>
+            <xs:documentation source="documentation">
+                A class that can represent a single value of any baseType in variable declarations and re-
+                sult reports. The base-type is defined by the baseType attribute of the declaration except
+                in the case of variables with record cardinality.                                         
+            </xs:documentation>
+        </xs:annotation>
+        <xs:simpleContent>
+            <xs:extension base="xs:normalizedString">
+                <xs:attribute name="fieldIdentifier" use="optional" type="Identifier.Type" />
+                <xs:attribute name="baseType" use="optional">
+                    <xs:simpleType>
+                        <xs:annotation>
+                            <xs:documentation source="documentation">
+                                A base-type is simply a description of a set of atomic values (atomic to this specificati-
+                                on). Note that several of the baseTypes used to define the runtime data model have identi-
+                                cal definitions to those of the basic data types used to define the values for attributes 
+                                in the specification itself. The use of an enumeration to define the set of baseTypes used
+                                in the runtime model, as opposed to the use of classes with similar names, is designed to 
+                                help distinguish between these two distinct levels of modelling.                          
+                            </xs:documentation>
+                        </xs:annotation>
+                        <xs:restriction base="xs:string">
+                            <xs:enumeration value="boolean" />
+                            <xs:enumeration value="directedPair" />
+                            <xs:enumeration value="duration" />
+                            <xs:enumeration value="file" />
+                            <xs:enumeration value="float" />
+                            <xs:enumeration value="identifier" />
+                            <xs:enumeration value="integer" />
+                            <xs:enumeration value="pair" />
+                            <xs:enumeration value="point" />
+                            <xs:enumeration value="string" />
+                            <xs:enumeration value="uri" />
+                        </xs:restriction>
+                    </xs:simpleType>
+                </xs:attribute>
+            </xs:extension>
+        </xs:simpleContent>
+    </xs:complexType>
+
+    <!-- ================================================================================================== -->
+
+    <!-- Declaration of the elements (Complex) ************************************************************ -->
+
+    <!-- ================================================================================================== -->
+
+    <!-- Declaration of the elements (Derived) ************************************************************ -->
+
+    <!-- ================================================================================================== -->
+
+    <!-- Declaration of the root element(s) *************************************************************** -->
+
+    <xs:element name="assessmentResult" type="AssessmentResult.Type" />
+
+    <!-- ================================================================================================== -->
+
+</xs:schema>

@@ -1,0 +1,140 @@
+<?xml version="1.0" ?>
+
+<!-- Content elements: symbols -->
+
+<!--
+
+RELAX NG Schema on MathML 2.0
+
+See COPYING for the status of this software.
+Yutaka Furubayashi (Poka-Poka Dream Factory) <info@yupotan.sppd.ne.jp>
+
+-->
+
+<grammar xmlns="http://relaxng.org/ns/structure/1.0">
+
+<define name="mml.c0ary">
+ <choice>
+  <ref name="mml.integers.qname"/>
+  <ref name="mml.reals.qname"/>
+  <ref name="mml.rationals.qname"/>
+  <ref name="mml.naturalnumbers.qname"/>
+  <ref name="mml.complexes.qname"/>
+  <ref name="mml.primes.qname"/>
+  <ref name="mml.exponentiale.qname"/>
+  <ref name="mml.imaginaryi.qname"/>
+  <ref name="mml.notanumber.qname"/>
+  <ref name="mml.true.qname"/>
+  <ref name="mml.false.qname"/>
+  <ref name="mml.emptyset.qname"/>
+  <ref name="mml.eulergamma.qname"/>
+  <ref name="mml.infinity.qname"/>
+ </choice>
+</define>
+
+<define name="mml.integers.qname">
+ <element name="integers">
+  <empty/>
+  <ref name="mml.operators.common.attrib"/>
+ </element>
+</define>
+
+<define name="mml.reals.qname">
+ <element name="reals">
+  <empty/>
+  <ref name="mml.operators.common.attrib"/>
+ </element>
+</define>
+
+<define name="mml.rationals.qname">
+ <element name="rationals">
+  <empty/>
+  <ref name="mml.operators.common.attrib"/>
+ </element>
+</define>
+
+<define name="mml.naturalnumbers.qname">
+ <element name="naturalnumbers">
+  <empty/>
+  <ref name="mml.operators.common.attrib"/>
+ </element>
+</define>
+
+<define name="mml.complexes.qname">
+ <element name="complexes">
+  <empty/>
+  <ref name="mml.operators.common.attrib"/>
+ </element>
+</define>
+
+<define name="mml.primes.qname">
+ <element name="primes">
+  <empty/>
+  <ref name="mml.operators.common.attrib"/>
+ </element>
+</define>
+
+<define name="mml.exponentiale.qname">
+ <element name="exponentiale">
+  <empty/>
+  <ref name="mml.operators.common.attrib"/>
+ </element>
+</define>
+
+<define name="mml.imaginaryi.qname">
+ <element name="imaginaryi">
+  <empty/>
+  <ref name="mml.operators.common.attrib"/>
+ </element>
+</define>
+
+<define name="mml.notanumber.qname">
+ <element name="notanumber">
+  <empty/>
+  <ref name="mml.operators.common.attrib"/>
+ </element>
+</define>
+
+<define name="mml.true.qname">
+ <element name="true">
+  <empty/>
+  <ref name="mml.operators.common.attrib"/>
+ </element>
+</define>
+
+<define name="mml.false.qname">
+ <element name="false">
+  <empty/>
+  <ref name="mml.operators.common.attrib"/>
+ </element>
+</define>
+
+<define name="mml.emptyset.qname">
+ <element name="emptyset">
+  <empty/>
+  <ref name="mml.operators.common.attrib"/>
+ </element>
+</define>
+
+<define name="mml.pi.qname">
+ <element name="pi">
+  <empty/>
+  <ref name="mml.operators.common.attrib"/>
+ </element>
+</define>
+
+<define name="mml.eulergamma.qname">
+ <element name="eulergamma">
+  <empty/>
+  <ref name="mml.operators.common.attrib"/>
+ </element>
+</define>
+
+<define name="mml.infinity.qname">
+ <element name="infinity">
+  <empty/>
+  <ref name="mml.operators.common.attrib"/>
+ </element>
+</define>
+
+</grammar>

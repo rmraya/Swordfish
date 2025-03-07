@@ -1,0 +1,39 @@
+<?xml version="1.0" ?>
+
+<!--
+
+RELAX NG Schema on MathML 2.0
+
+See COPYING for the status of this software.
+Yutaka Furubayashi (Poka-Poka Dream Factory) <info@yupotan.sppd.ne.jp>
+
+-->
+
+<grammar xmlns="http://relaxng.org/ns/structure/1.0" ns="http://www.w3.org/1998/Math/MathML">
+
+<include href="mml-content-all.rng"/>
+<include href="mml-content-attrib.rng"/>
+<include href="mml-content-construct.rng"/>
+<include href="mml-content-leaf.rng"/>
+<include href="mml-content-operators.rng"/>
+<include href="mml-content-others.rng"/>
+<include href="mml-content-quantifiers.rng"/>
+<include href="mml-content-relations.rng"/>
+<include href="mml-content-semantics.rng"/>
+<include href="mml-content-specials.rng"/>
+<include href="mml-content-symbols.rng"/>
+<include href="mml-datatypes.rng"/>
+<include href="mml-framework.rng"/>
+<include href="mml-math.rng"/>
+<include href="mml-pres-action.rng"/>
+<include href="mml-pres-all.rng"/>
+<include href="mml-pres-attrib.rng"/>
+<include href="mml-pres-content.rng"/>
+<include href="mml-pres-empty.rng"/>
+<include href="mml-pres-layout-empty.rng"/>
+<include href="mml-pres-layout.rng"/>
+<include href="mml-pres-scripts-empty.rng"/>
+<include href="mml-pres-scripts.rng"/>
+<include href="mml-pres-tables.rng"/>
+
+</grammar>

@@ -26,7 +26,7 @@
                     Jun Fujisawa <fujisawa.jun@canon.co.jp> (SVG modules)
                     Masayasu Ishikawa <mimasa@w3.org> (DTD driver)
         Revision:
-          $Id: xhtml-math-svg.dtd,v 1.1 2011-03-28 16:14:12 maxprograms-cvs Exp $
+          $Id: xhtml-math-svg.dtd,v 1.26 2002/08/08 12:33:40 mimasa Exp $
 
 -->
 <!-- This is the driver for an XHTML 1.1 plus MathML 2.0 plus SVG 1.1 DTD.

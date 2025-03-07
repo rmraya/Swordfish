@@ -399,6 +399,9 @@ class Main {
         Main.electron.ipcRenderer.on('edit-source', () => {
             this.editSource();
         });
+        Main.electron.ipcRenderer.on('remember-segment', () => {
+            this.rememberSegment();
+        })
         Main.electron.ipcRenderer.on('tags-deleted', () => {
             if (Main.translationViews.size > 0) {
                 Main.electron.ipcRenderer.send('show-message', {
@@ -562,6 +565,13 @@ class Main {
         }
     }
 
+    rememberSegment(): void {
+        let selected = Main.tabHolder.getSelected();
+        if (Main.translationViews.has(selected)) {
+            Main.translationViews.get(selected).rememberSegment();
+        }
+    }
+    
     cancelEdit(): void {
         let selected = Main.tabHolder.getSelected();
         if (Main.translationViews.has(selected)) {

@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+	elementFormDefault="qualified">
+	<xsd:annotation>
+		<xsd:documentation>
+			SSML 1.1 (Extended Profile) no-namespace Schema (20081002)
+		</xsd:documentation>
+	</xsd:annotation>
+	<xsd:annotation>
+		<xsd:documentation>
+			Copyright 1998-2008 W3C (MIT, ERCIM, Keio), All Rights
+			Reserved. Permission to use, copy, modify and distribute
+			the SSML core schema and its accompanying documentation
+			for any purpose and without fee is hereby granted in
+			perpetuity, provided that the above copyright notice and
+			this paragraph appear in all copies. The copyright
+			holders make no representation about the suitability of
+			the schema for any purpose. It is provided "as is"
+			without expressed or implied warranty.
+		</xsd:documentation>
+	</xsd:annotation>
+
+
+	<xsd:annotation>
+		<xsd:documentation>
+			Extends synthesis-nonamespace schema by adding attributes to
+			audio element
+		</xsd:documentation>
+	</xsd:annotation>
+
+
+	<xsd:annotation>
+		<xsd:documentation>
+			Importing dependent namespaces
+		</xsd:documentation>
+	</xsd:annotation>
+
+	<xsd:import namespace="http://www.w3.org/XML/1998/namespace"
+		schemaLocation="http://www.w3.org/2001/xml.xsd" />
+
+	<xsd:redefine schemaLocation="synthesis-nonamespace.xsd">
+
+		<xsd:complexType name="audio" mixed="true">
+			<xsd:annotation>
+				<xsd:documentation>
+					extended: adds trimming, soundLevel and speed
+					attributes to audio element
+				</xsd:documentation>
+			</xsd:annotation>
+			<xsd:complexContent>
+				<xsd:extension base="audio">
+					<xsd:attribute name="clipBegin"
+						type="timedesignation.datatype" default="0s" />
+					<xsd:attribute name="clipEnd"
+						type="timedesignation.datatype" />
+					<xsd:attribute name="repeatCount"
+						type="repeatcount.datatype" default="1" />
+					<xsd:attribute name="repeatDur"
+						type="timedesignation.datatype" />
+					<xsd:attribute name="soundLevel"
+						type="db.datatype" default="+0.0dB" />
+					<xsd:attribute name="speed" type="speed.datatype"
+						default="100%" />
+				</xsd:extension>
+			</xsd:complexContent>
+		</xsd:complexType>
+
+
+	</xsd:redefine>
+
+
+	<xsd:simpleType name="speed.datatype">
+		<xsd:annotation>
+			<xsd:documentation>speed</xsd:documentation>
+		</xsd:annotation>
+		<xsd:restriction base="xsd:string">
+			<xsd:pattern value="([0-9])+%" />
+		</xsd:restriction>
+	</xsd:simpleType>
+
+	<xsd:simpleType name="repeatcount.datatype">
+		<xsd:annotation>
+			<xsd:documentation>repeat count</xsd:documentation>
+		</xsd:annotation>
+		<xsd:restriction base="xsd:string">
+			<xsd:pattern value="(\+)?([0-9]*\.)?[0-9]+" />
+		</xsd:restriction>
+	</xsd:simpleType>
+
+
+</xsd:schema>

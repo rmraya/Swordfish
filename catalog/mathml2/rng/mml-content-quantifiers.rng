@@ -1,0 +1,77 @@
+<?xml version="1.0" ?>
+
+<!-- Content elements: quantifiers -->
+
+<!--
+
+RELAX NG Schema on MathML 2.0
+
+See COPYING for the status of this software.
+Yutaka Furubayashi (Poka-Poka Dream Factory) <info@yupotan.sppd.ne.jp>
+
+-->
+
+<grammar xmlns="http://relaxng.org/ns/structure/1.0">
+
+<define name="mml.cquantifier">
+ <choice>
+  <ref name="mml.lowlimit.qname"/>
+  <ref name="mml.uplimit.qname"/>
+  <ref name="mml.bvar.qname"/>
+  <ref name="mml.degree.qname"/>
+  <ref name="mml.logbase.qname"/>
+  <ref name="mml.momentabout.qname"/>
+  <ref name="mml.domainofapplication.qname"/>
+ </choice>
+</define>
+
+<define name="mml.lowlimit.qname">
+ <element name="lowlimit">
+  <ref name="mml.ContentExpression"/>
+  <ref name="mml.Common.attrib"/>
+ </element>
+</define>
+
+<define name="mml.uplimit.qname">
+ <element name="uplimit">
+  <ref name="mml.ContentExpression"/>
+  <ref name="mml.Common.attrib"/>
+ </element>
+</define>
+
+<define name="mml.bvar.qname">
+ <element name="bvar">
+  <ref name="mml.ContentExpression"/>
+  <ref name="mml.Common.attrib"/>
+ </element>
+</define>
+
+<define name="mml.degree.qname">
+ <element name="degree">
+  <ref name="mml.ContentExpression"/>
+  <ref name="mml.Common.attrib"/>
+ </element>
+</define>
+
+<define name="mml.logbase.qname">
+ <element name="logbase">
+  <ref name="mml.ContentExpression"/>
+  <ref name="mml.Common.attrib"/>
+ </element>
+</define>
+
+<define name="mml.momentabout.qname">
+ <element name="momentabout">
+  <ref name="mml.ContentExpression"/>
+  <ref name="mml.Common.attrib"/>
+ </element>
+</define>
+
+<define name="mml.domainofapplication.qname">
+ <element name="domainofapplication">
+  <ref name="mml.ContentExpression"/>
+  <ref name="mml.Common.attrib"/>
+ </element>
+</define>
+
+</grammar>

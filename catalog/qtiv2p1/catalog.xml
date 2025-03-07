@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<catalog xmlns="urn:oasis:names:tc:entity:xmlns:xml:catalog">
+    <uri name="http://www.imsglobal.org/xsd/imsqti_metadata_v2p1" uri="imsqti_metadata_v2p1.xsd" />
+    <uri name="http://www.imsglobal.org/xsd/imsqti_result_v2p1" uri="imsqti_result_v2p1.xsd" />
+    <uri name="http://www.imsglobal.org/xsd/imsqti_usagedata_v2p1" uri="imsqti_usagedata_v2p1.xsd" />
+    <uri name="http://www.imsglobal.org/xsd/imsqti_v2p1" uri="imsqti_v2p1.xsd" />
+    <uri name="http://www.imsglobal.org/xsd/imsqti_v2p1" uri="imsqti_v2p1.xsd" />
+    <uri name="http://www.imsglobal.org/xsd/qti/qtiv2p1/imsqti_v2p1.xsd" uri="imsqti_v2p1.xsd" />
+    <system systemId="http://www.imsglobal.org/xsd/qti/qtiv2p1/imsqti_v2p1.xsd" uri="imsqti_v2p1.xsd" />
+    <uri name="http://www.imsglobal.org/xsd/apip/apipv1p0/imsapip_qtiv1p0" uri="apipv1p0_qtiextv2p2_v1p0p1.xsd" />
+    <uri name="http://www.imsglobal.org/profile/apip/apipv1p0/apipv1p0_qtiextv2p1_v1p0.xsd" uri="apipv1p0_qtiextv2p1_v1p0.xsd" />
+    <system systemId="http://www.imsglobal.org/profile/apip/apipv1p0/apipv1p0_qtiextv2p1_v1p0.xsd" uri="apipv1p0_qtiextv2p1_v1p0.xsd" />
+</catalog>

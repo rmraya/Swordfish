@@ -1,0 +1,9 @@
+<catalog xmlns="urn:oasis:names:tc:entity:xmlns:xml:catalog" prefer="public">
+    <uri name="http://www.w3.org/Math/RelaxNG/mathml3/mathml3.rnc" uri="rnc/mathml3.rnc"/>
+    <uri name="http://www.w3.org/Math/XMLSchema/mathml3/mathml3.xsd" uri="xsd/mathml3.xsd"/>
+    <uri name="http://www.w3.org/Math/DTD/mathml3/mathml3.dtd" uri="dtd/mathml3.dtd"/>
+    <system systemId="http://www.w3.org/Math/DTD/mathml3/mathml3.dtd" uri="dtd/mathml3.dtd"/>
+    <rewriteSystem systemIdStartString="http://www.w3.org/Math/DTD/mathml3/" rewritePrefix="dtd/"/>
+    <rewriteSystem systemIdStartString="http://www.w3.org/TR/MathML3/dtd/" rewritePrefix="dtd/"/>
+    <public publicId="-//W3C//DTD MathML 3.0//EN" uri="dtd/mathml3.dtd"/>
+</catalog>

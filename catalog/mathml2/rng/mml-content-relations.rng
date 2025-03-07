@@ -1,0 +1,187 @@
+<?xml version="1.0" ?>
+
+<!-- Content elements: relations -->
+
+<!--
+
+RELAX NG Schema on MathML 2.0
+
+See COPYING for the status of this software.
+Yutaka Furubayashi (Poka-Poka Dream Factory) <info@yupotan.sppd.ne.jp>
+
+-->
+
+<grammar xmlns="http://relaxng.org/ns/structure/1.0">
+
+<define name="mml.cgenrel2ary">
+ <choice>
+  <ref name="mml.neq.qname"/>
+  <ref name="mml.factorof.qname"/>
+ </choice>
+</define>
+
+<define name="mml.neq.qname">
+ <element name="neq">
+  <empty/>
+  <ref name="mml.operators.common.attrib"/>
+ </element>
+</define>
+
+<define name="mml.factorof.qname">
+ <element name="factorof">
+  <empty/>
+  <ref name="mml.operators.common.attrib"/>
+ </element>
+</define>
+
+<define name="mml.cgenrelnary">
+ <choice>
+  <ref name="mml.eq.qname"/>
+  <ref name="mml.leq.qname"/>
+  <ref name="mml.lt.qname"/>
+  <ref name="mml.geq.qname"/>
+  <ref name="mml.gt.qname"/>
+  <ref name="mml.equivalent.qname"/>
+  <ref name="mml.approx.qname"/>
+ </choice>
+</define>
+
+<define name="mml.eq.qname">
+ <element name="eq">
+  <empty/>
+  <ref name="mml.operators.common.attrib"/>
+ </element>
+</define>
+
+<define name="mml.equivalent.qname">
+ <element name="equivalent">
+  <empty/>
+  <ref name="mml.operators.common.attrib"/>
+ </element>
+</define>
+
+<define name="mml.approx.qname">
+ <element name="approx">
+  <empty/>
+  <ref name="mml.operators.common.attrib"/>
+ </element>
+</define>
+
+<define name="mml.gt.qname">
+ <element name="gt">
+  <empty/>
+  <ref name="mml.operators.common.attrib"/>
+ </element>
+</define>
+
+<define name="mml.lt.qname">
+ <element name="lt">
+  <empty/>
+  <ref name="mml.operators.common.attrib"/>
+ </element>
+</define>
+
+<define name="mml.geq.qname">
+ <element name="geq">
+  <empty/>
+  <ref name="mml.operators.common.attrib"/>
+ </element>
+</define>
+
+<define name="mml.leq.qname">
+ <element name="leq">
+  <empty/>
+  <ref name="mml.operators.common.attrib"/>
+ </element>
+</define>
+
+<define name="mml.csetrel2ary">
+ <choice>
+  <ref name="mml.in.qname"/>
+  <ref name="mml.notin.qname"/>
+  <ref name="mml.notsubset.qname"/>
+  <ref name="mml.notprsubset.qname"/>
+ </choice>
+</define>
+
+<define name="mml.in.qname">
+ <element name="in">
+  <empty/>
+  <ref name="mml.operators.common.attrib"/>
+ </element>
+</define>
+
+<define name="mml.notin.qname">
+ <element name="notin">
+  <empty/>
+  <ref name="mml.operators.common.attrib"/>
+ </element>
+</define>
+
+<define name="mml.notsubset.qname">
+ <element name="notsubset">
+  <empty/>
+  <ref name="mml.operators.common.attrib"/>
+ </element>
+</define>
+
+<define name="mml.notprsubset.qname">
+ <element name="notprsubset">
+  <empty/>
+  <ref name="mml.operators.common.attrib"/>
+ </element>
+</define>
+
+<define name="mml.csetrelnary">
+ <choice>
+  <ref name="mml.subset.qname"/>
+  <ref name="mml.prsubset.qname"/>
+ </choice>
+</define>
+
+<define name="mml.subset.qname">
+ <element name="subset">
+  <empty/>
+  <ref name="mml.operators.common.attrib"/>
+ </element>
+</define>
+
+<define name="mml.prsubset.qname">
+ <element name="prsubset">
+  <empty/>
+  <ref name="mml.operators.common.attrib"/>
+ </element>
+</define>
+
+<define name="mml.cseqrel2ary">
+ <choice>
+  <ref name="mml.tendsto.qname"/>
+ </choice>
+</define>
+
+<define name="mml.tendsto.qname">
+ <element name="tendsto">
+  <empty/>
+  <ref name="mml.operators.common.attrib"/>
+  <ref name="mml.att-type"/>
+ </element>
+</define>
+
+<!-- Relation groups -->
+
+<define name="mml.crel2ary">
+ <choice>
+  <ref name="mml.cgenrel2ary"/>
+  <ref name="mml.csetrel2ary"/>
+  <ref name="mml.cseqrel2ary"/>
+ </choice>
+</define>
+
+<define name="mml.crelnary">
+ <choice>
+  <ref name="mml.cgenrelnary"/>
+  <ref name="mml.csetrelnary"/>
+ </choice>
+</define>
+
+</grammar>

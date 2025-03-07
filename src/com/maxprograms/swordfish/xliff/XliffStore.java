@@ -619,7 +619,7 @@ public class XliffStore {
 		List<JSONObject> result = new Vector<>();
 		StringBuilder queryBuilder = new StringBuilder();
 		queryBuilder.append(
-				"SELECT file, unitId, segId, child, source, target, tags, state, space, translate, sourceText, targetText, idx FROM segments WHERE type='S'");
+				"SELECT file, unitId, segId, child, source, target, tags, state, space, translate, idx FROM segments WHERE type='S'");
 		if (!filterText.isEmpty()) {
 			if (regExp) {
 				try {
@@ -691,9 +691,7 @@ public class XliffStore {
 				String segState = rs.getString(8);
 				boolean segPreserve = "Y".equals(rs.getString(9));
 				boolean segTranslate = "Y".equals(rs.getString(10));
-				String sourceText = rs.getString(11);
-				String targetText = rs.getString(12);
-				int idx = rs.getInt(13);
+				int idx = rs.getInt(11);
 
 				JSONObject tagsData = new JSONObject();
 				if (tags > 0) {
@@ -716,7 +714,7 @@ public class XliffStore {
 				boolean spaceErrors = false;
 				if (checkErrors) {
 					tagErrors = hasTagErrors(source, target);
-					spaceErrors = hasSpaceErrors(sourceText, targetText);
+					spaceErrors = hasSpaceErrors(source, target);
 				}
 				tagsMap = new Hashtable<>();
 				JSONObject row = new JSONObject();
@@ -855,10 +853,10 @@ public class XliffStore {
 		return false;
 	}
 
-	private boolean hasSpaceErrors(String sourceText, String targetText) {
-		int[] sourceSpaces = countSpaces(sourceText);
-		int[] targetSpaces = countSpaces(targetText);
-		return sourceSpaces[0] != targetSpaces[0] || sourceSpaces[1] != targetSpaces[1];
+	private boolean hasSpaceErrors(Element source, Element target) {
+		String[] sourceSpaces = getSpaces(source);
+		String[] targetSpaces = getSpaces(target);
+		return !(sourceSpaces[0].equals(targetSpaces[0]) && sourceSpaces[1].equals(targetSpaces[1]));
 	}
 
 	private synchronized int getBestMatch(String file, String unit, String segment) throws SQLException {
@@ -958,7 +956,6 @@ public class XliffStore {
 		String memory = json.getString("memory");
 
 		String src = "";
-		String pureSource = "";
 		getSource.setString(1, file);
 		getSource.setString(2, unit);
 		getSource.setString(3, segment);
@@ -967,7 +964,6 @@ public class XliffStore {
 		try (ResultSet rs = getSource.executeQuery()) {
 			while (rs.next()) {
 				src = rs.getString(1);
-				pureSource = rs.getString(2);
 				wasFinal = rs.getString(3).equals("final");
 				translatable = rs.getString(4).equals("Y");
 			}
@@ -1009,17 +1005,17 @@ public class XliffStore {
 		boolean spaceErrors = false;
 		if (checkErrors) {
 			tagErrors = hasTagErrors(source, target);
-			spaceErrors = hasSpaceErrors(pureSource, pureTarget);
+			spaceErrors = hasSpaceErrors(source, target);
 		}
 
 		result.put("tagErrors", tagErrors);
 		result.put("spaceErrors", spaceErrors);
-		
+
 		JSONObject originalData = getUnitData(file, unit);
 		tag = 1;
 		tagsMap = new Hashtable<>();
 		result.put("target", addHtmlTags(target, originalData));
-		
+
 		if (!memory.equals(Constants.NONE) && !pureTarget.isBlank() && confirm) {
 			new Thread(() -> {
 				try {
@@ -1057,7 +1053,7 @@ public class XliffStore {
 			}
 		}
 		if (child == -1) {
-			return result;	
+			return result;
 		}
 		if (child > 0) {
 			String prevUnitId = "";
@@ -4041,26 +4037,29 @@ public class XliffStore {
 		}
 	}
 
-	public JSONObject analyzeSpaces() throws SQLException, IOException {
+	public JSONObject analyzeSpaces() throws SQLException, IOException, SAXException, ParserConfigurationException {
 		getPreferences();
 		JSONObject result = new JSONObject();
 		JSONArray errors = new JSONArray();
 		int idx = 0;
-		String sql = "SELECT file, unitId, segId, child, sourceText, targetText, state, translate FROM segments WHERE type='S' ORDER BY file, child ";
+		String sql = "SELECT file, unitId, segId, child, source, target, targetText, translate FROM segments WHERE type='S' ORDER BY file, child ";
 		try (ResultSet rs = stmt.executeQuery(sql)) {
 			while (rs.next()) {
 				idx++;
 				boolean segTranslate = rs.getString(8).equals("Y");
-				String segState = rs.getString(7);
-				if (!segTranslate || Constants.INITIAL.equals(segState)) {
+				if (!segTranslate) {
 					continue;
 				}
-				String sourceText = rs.getString(5);
-				String targetText = rs.getString(6);
-				int[] sourceSpaces = countSpaces(sourceText);
-				int[] targetSpaces = countSpaces(targetText);
-				boolean initial = sourceSpaces[0] != targetSpaces[0];
-				boolean trailing = sourceSpaces[1] != targetSpaces[1];
+				String targetText = rs.getString(7);
+				if (targetText.isEmpty()) {
+					continue;
+				}
+				String source = rs.getString(5);
+				String target = rs.getString(6);
+				String[] sourceSpaces = getSpaces(XliffUtils.buildElement(source));
+				String[] targetSpaces = getSpaces(XliffUtils.buildElement(target));
+				boolean initial = !sourceSpaces[0].equals(targetSpaces[0]);
+				boolean trailing = !sourceSpaces[1].equals(targetSpaces[1]);
 				if (initial || trailing) {
 					JSONObject error = new JSONObject();
 					error.put("file", rs.getString(1));
@@ -4086,24 +4085,205 @@ public class XliffStore {
 		return result;
 	}
 
-	private int[] countSpaces(String text) {
-		int start = 0;
-		for (int i = 0; i < text.length(); i++) {
-			char c = text.charAt(i);
-			if (!Character.isWhitespace(c)) {
+	public void fixSpaces() throws SQLException, IOException, SAXException, ParserConfigurationException {
+		getPreferences();
+		String sql = "SELECT file, unitId, segId, child, source, target, targetText, translate FROM segments WHERE type='S' ORDER BY file, child ";
+		try (ResultSet rs = stmt.executeQuery(sql)) {
+			sql = "UPDATE segments SET target=?, targetText=?, state=? WHERE file=? AND unitId=? AND segId=?";
+			try (PreparedStatement fixStmt = conn.prepareStatement(sql)) {
+				while (rs.next()) {
+					boolean segTranslate = rs.getString(8).equals("Y");
+					if (!segTranslate) {
+						continue;
+					}
+					String targetText = rs.getString(7);
+					if (targetText.isEmpty()) {
+						continue;
+					}
+					String source = rs.getString(5);
+					String target = rs.getString(6);
+					Element src = XliffUtils.buildElement(source);
+					Element tgt = XliffUtils.buildElement(target);
+					String[] sourceSpaces = getSpaces(src);
+					String[] targetSpaces = getSpaces(tgt);
+					boolean initial = !sourceSpaces[0].equals(targetSpaces[0]);
+					boolean trailing = !sourceSpaces[1].equals(targetSpaces[1]);
+					if (initial || trailing) {
+						if (initial) {
+							try {
+								tgt = fixInitialSpaces(src, tgt);
+							} catch (Exception e) {
+								System.out.println(src.toString());
+								System.out.println(tgt.toString());
+							}
+						}
+						if (trailing) {
+							tgt = fixTrailingSpaces(src, tgt);
+						}
+						targetText = XliffUtils.pureText(tgt);
+						fixStmt.setString(1, tgt.toString());
+						fixStmt.setString(2, targetText);
+						fixStmt.setString(3, targetText.isEmpty() ? Constants.INITIAL : Constants.TRANSLATED);
+						fixStmt.setString(4, rs.getString(1));
+						fixStmt.setString(5, rs.getString(2));
+						fixStmt.setString(6, rs.getString(3));
+						fixStmt.executeUpdate();
+						conn.commit();
+					}
+				}
+			}
+		}
+	}
+
+	private Element fixInitialSpaces(Element source, Element target) {
+		List<XMLNode> srcContent = source.getContent();
+		boolean srcStartsWithTag = srcContent.get(0).getNodeType() == XMLNode.ELEMENT_NODE;
+		String initial = "";
+		for (int i = 0; i < srcContent.size(); i++) {
+			XMLNode node = srcContent.get(i);
+			if (node.getNodeType() == XMLNode.TEXT_NODE) {
+				String text = ((TextNode) node).getText();
+				for (int j = 0; j < text.length(); j++) {
+					char c = text.charAt(j);
+					if (!Character.isWhitespace(c)) {
+						break;
+					}
+					initial += c;
+				}
 				break;
 			}
-			start++;
 		}
-		int end = 0;
-		for (int i = text.length() - 1; i >= 0; i--) {
-			char c = text.charAt(i);
-			if (!Character.isWhitespace(c)) {
+		List<XMLNode> tgtContent = target.getContent();
+		boolean tgtStartsWithTag = tgtContent.get(0).getNodeType() == XMLNode.ELEMENT_NODE;
+		XMLNode firstNode = null;
+		String newText = "";
+		for (int i = 0; i < tgtContent.size(); i++) {
+			XMLNode node = tgtContent.get(i);
+			if (node.getNodeType() == XMLNode.TEXT_NODE) {
+				firstNode = node;
+				String oldText = ((TextNode) node).getText();
+				int j = 0;
+				for (; j < oldText.length(); j++) {
+					char c = oldText.charAt(j);
+					if (!Character.isWhitespace(c)) {
+						break;
+					}
+				}
+				newText = oldText.substring(j);
+				node = new TextNode(newText);
+				tgtContent.set(i, node);
 				break;
 			}
-			end++;
 		}
-		return new int[] { start, end };
+		int idx = tgtContent.indexOf(firstNode);
+		if (!srcStartsWithTag && tgtStartsWithTag) {
+			// source starts with text and target starts with tag
+			// move spaces before tag
+			TextNode node = new TextNode(initial);
+			tgtContent.add(0, node);
+		} else {
+			TextNode node = (TextNode) tgtContent.get(idx);
+			((TextNode) node).setText(initial + newText);
+			tgtContent.set(idx, node);
+		}
+		target.setContent(tgtContent);
+		return target;
+	}
+
+	private Element fixTrailingSpaces(Element source, Element target) {
+		List<XMLNode> srcContent = source.getContent();
+		boolean srcEndsWithTag = srcContent.get(srcContent.size() - 1).getNodeType() == XMLNode.ELEMENT_NODE;
+		String ending = "";
+		for (int i = srcContent.size() - 1; i >= 0; i--) {
+			XMLNode node = srcContent.get(i);
+			if (node.getNodeType() == XMLNode.TEXT_NODE) {
+				String text = ((TextNode) node).getText();
+				for (int j = text.length() - 1; j >= 0; j--) {
+					char c = text.charAt(j);
+					if (!Character.isWhitespace(c)) {
+						break;
+					}
+					ending = c + ending;
+				}
+				break;
+			}
+		}
+		List<XMLNode> tgtContent = target.getContent();
+		boolean tgtEndsWithTag = tgtContent.get(tgtContent.size() - 1).getNodeType() == XMLNode.ELEMENT_NODE;
+		String newText = "";
+		int h = tgtContent.size() - 1;
+		XMLNode lastNode = null;
+		for (; h >= 0; h--) {
+			XMLNode node = tgtContent.get(h);
+			if (node.getNodeType() == XMLNode.TEXT_NODE) {
+				lastNode = node;
+				String oldText = ((TextNode) node).getText();
+				int j = oldText.length() - 1;
+				for (; j >= 0; j--) {
+					char c = oldText.charAt(j);
+					if (!Character.isWhitespace(c)) {
+						break;
+					}
+				}
+				newText = oldText.substring(0, j + 1);
+				break;
+			}
+		}
+		int idx = tgtContent.indexOf(lastNode);
+		if (!srcEndsWithTag && tgtEndsWithTag) {
+			// source ends with text and target ends with tag
+			// move spaces behing tag
+			lastNode = tgtContent.get(idx);
+			((TextNode) lastNode).setText(newText);
+			tgtContent.set(idx, lastNode);
+			TextNode node = new TextNode(ending);
+			tgtContent.add(node);
+		} else {
+			lastNode = tgtContent.get(idx);
+			((TextNode) lastNode).setText(newText + ending);
+			tgtContent.set(idx, lastNode);
+		}
+		target.setContent(tgtContent);
+		return target;
+	}
+
+	private String[] getSpaces(Element source) {
+		List<XMLNode> srcContent = source.getContent();
+		String initial = "";
+		boolean textFound = false;
+		for (int i = 0; i < srcContent.size(); i++) {
+			XMLNode node = srcContent.get(i);
+			if (node.getNodeType() == XMLNode.TEXT_NODE && !textFound) {
+				String text = ((TextNode) node).getText();
+				for (int j = 0; j < text.length(); j++) {
+					char c = text.charAt(j);
+					if (!Character.isWhitespace(c)) {
+						textFound = true;
+						break;
+					}
+					initial += c;
+				}
+				break;
+			}
+		}
+		String ending = "";
+		textFound = false;
+		for (int i = srcContent.size() - 1; i >= 0; i--) {
+			XMLNode node = srcContent.get(i);
+			if (node.getNodeType() == XMLNode.TEXT_NODE && !textFound) {
+				String text = ((TextNode) node).getText();
+				for (int j = text.length() - 1; j >= 0; j--) {
+					char c = text.charAt(j);
+					if (!Character.isWhitespace(c)) {
+						textFound = true;
+						break;
+					}
+					ending = c + ending;
+				}
+				break;
+			}
+		}
+		return new String[] { initial, ending };
 	}
 
 	public JSONObject analyzeTags() throws SQLException, SAXException, IOException, ParserConfigurationException {

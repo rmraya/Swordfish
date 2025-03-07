@@ -1,0 +1,71 @@
+<?xml version="1.0" ?>
+
+<!-- Content elements: leaf nodes -->
+
+<!--
+
+RELAX NG Schema on MathML 2.0
+
+See COPYING for the status of this software.
+Yutaka Furubayashi (Poka-Poka Dream Factory) <info@yupotan.sppd.ne.jp>
+
+-->
+
+<grammar xmlns="http://relaxng.org/ns/structure/1.0">
+
+<define name="mml.ctoken">
+ <choice>
+  <ref name="mml.csymbol.qname"/>
+  <ref name="mml.ci.qname"/>
+  <ref name="mml.cn.qname"/>
+ </choice>
+</define>
+
+<define name="mml.ci.qname">
+ <element name="ci">
+  <zeroOrMore>
+   <choice>
+   <ref name="mml.MathMLCharacters"/>
+   <ref name="mml.PresInCont"/>
+   </choice>
+  </zeroOrMore>
+  <ref name="mml.Common.attrib"/>
+  <ref name="mml.att-type"/>
+  <ref name="mml.att-definition"/>
+  <ref name="mml.att-encoding"/>
+ </element>
+</define>
+
+<define name="mml.csymbol.qname">
+ <element name="csymbol">
+  <zeroOrMore>
+   <choice>
+   <ref name="mml.MathMLCharacters"/>
+   <ref name="mml.PresInCont"/>
+   </choice>
+  </zeroOrMore>
+  <ref name="mml.Common.attrib"/>
+  <ref name="mml.att-type"/>
+  <ref name="mml.att-definition"/>
+  <ref name="mml.att-encoding"/>
+ </element>
+</define>
+
+<define name="mml.cn.qname">
+ <element name="cn">
+  <zeroOrMore>
+   <choice>
+   <ref name="mml.MathMLCharacters"/>
+   <ref name="mml.PresInCont"/>
+   <ref name="mml.sep.qname"/>
+   </choice>
+  </zeroOrMore>
+  <ref name="mml.Common.attrib"/>
+  <ref name="mml.att-type"/>
+  <ref name="mml.att-base"/>
+  <ref name="mml.att-definition"/>
+  <ref name="mml.att-encoding"/>
+ </element>
+</define>
+
+</grammar>

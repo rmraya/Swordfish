@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<catalog xmlns="urn:oasis:names:tc:entity:xmlns:xml:catalog">
+
+    <!-- Packaging -->
+    <uri name="http://www.imsglobal.org/xsd/qti/qtiv3p0/imscp_v1p1" uri="imsqtiv3p0_imscpv1p2_v1p0.xsd"/>
+    <uri name="http://www.imsglobal.org/xsd/qti/qtiv3p0/imscp_extensionv1p2" uri="imsqtiv3p0_cpextv1p2_v1p0.xsd"/> 
+
+    <!-- QTI Core -->
+    <uri name="http://www.imsglobal.org/xsd/imsqtiasi_v3p0" uri="imsqti_asiv3p0_v1p0.xsd" />
+    <uri name="http://www.imsglobal.org/xsd/imsqti_result_v3p0" uri="imsqti_resultv3p0_v1p0.xsd"/>
+    <uri name="http://www.imsglobal.org/xsd/imsqti_usagedata_v3p0" uri="imsqti_usagedatav3p0_v1p0.xsd" />
+
+    <!-- Limited Profiles
+    <uri name="http://www.imsglobal.org/xsd/imsqtiasi_v3p0" uri="imsqti_asiv3p0_sbacv1p0_v1p0.xsd" />
+    <uri name="http://www.imsglobal.org/xsd/imsqtiasi_v3p0" uri="imsqti_itemv3p0_v1p0.xsd"/> 
+    <uri name="http://www.imsglobal.org/xsd/imsqtiasi_v3p0" uri="imsqti_outcomev3p0_v1p0.xsd"/> 
+    <uri name="http://www.imsglobal.org/xsd/imsqtiasi_v3p0" uri="imsqti_responseprocessingv3p0_v1p0.xsd" />
+    <uri name="http://www.imsglobal.org/xsd/imsqtiasi_v3p0" uri="imsqti_sectionv3p0_v1p0.xsd"/> 
+    -->
+
+    <!-- Metadata -->
+
+    <uri name="http://www.imsglobal.org/xsd/qti/qtiv3p0/imscsmd_v1p1" uri="imsqtiv3p0_csmv1p1_v1p0.xsd"/>
+    <uri name="http://ltsc.ieee.org/xsd/LOM" uri="imsmd_loose_v1p3p2.xsd" />
+    <system systemId="http://www.imsglobal.org/xsd/imsmd_loose_v1p3p2.xsd" uri="imsmd_loose_v1p3p2.xsd" />
+    <uri name="http://www.imsglobal.org/xsd/imsqti_metadata_v3p0" uri="imsqti_metadatav3p0_v1p0.xsd"/>
+    <uri name="http://www.imsglobal.org/xsd/qti/qtiv3p0/imsafa3p0drd_v1p0" uri="imsqtiv3p0_afa3p0pnp_v1p0.xsd" />
+
+    <!-- Other related -->
+
+    <uri name="http://www.imsglobal.org/xsd/imsvdex_v1p0" uri="imsvdex_v1p0.xsd"/>
+
+</catalog>

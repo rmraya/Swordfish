@@ -1,0 +1,35 @@
+<?xml version="1.0" ?>
+
+<!-- Presentation layout: empty elements for scripts -->
+
+<!--
+
+RELAX NG Schema on MathML 2.0
+
+See COPYING for the status of this software.
+Yutaka Furubayashi (Poka-Poka Dream Factory) <info@yupotan.sppd.ne.jp>
+
+-->
+
+<grammar xmlns="http://relaxng.org/ns/structure/1.0">
+
+<define name="mml.pscreschema">
+ <choice>
+  <ref name="mml.mprescripts.qname"/>
+  <ref name="mml.none.qname"/>
+ </choice>
+</define>
+
+<define name="mml.mprescripts.qname">
+ <element name="mprescripts">
+  <empty/>
+ </element>
+</define>
+
+<define name="mml.none.qname">
+ <element name="none">
+  <empty/>
+ </element>
+</define>
+
+</grammar>

@@ -1,0 +1,47 @@
+<?xml version="1.0" ?>
+
+<!-- Empty presentation layout -->
+
+<!--
+
+RELAX NG Schema on MathML 2.0
+
+See COPYING for the status of this software.
+Yutaka Furubayashi (Poka-Poka Dream Factory) <info@yupotan.sppd.ne.jp>
+
+-->
+
+<grammar xmlns="http://relaxng.org/ns/structure/1.0">
+
+<define name="mml.peschema">
+ <choice>
+  <ref name="mml.maligngroup.qname"/>
+  <ref name="mml.malignmark.qname"/>
+ </choice>
+</define>
+
+<define name="mml.malignmark.qname">
+ <element name="malignmark">
+  <empty/>
+  <ref name="mml.att-edge"/>
+ </element>
+</define>
+
+<define name="mml.maligngroup.qname">
+ <element name="maligngroup">
+  <empty/>
+  <ref name="mml.Common.attrib"/>
+  <ref name="mml.att-groupalign"/>
+ </element>
+</define>
+
+<define name="mml.mglyph.qname">
+ <element name="mglyph">
+  <empty/>
+  <ref name="mml.att-alt"/>
+  <ref name="mml.att-fontfamily"/>
+  <ref name="mml.att-index"/>
+ </element>
+</define>
+
+</grammar>

@@ -1,0 +1,118 @@
+<?xml version="1.0" ?>
+
+<!-- Content element set  ........................................ -->
+
+<!-- Attribute definitions -->
+
+<!--
+
+RELAX NG Schema on MathML 2.0
+
+See COPYING for the status of this software.
+Yutaka Furubayashi (Poka-Poka Dream Factory) <info@yupotan.sppd.ne.jp>
+
+-->
+
+<grammar xmlns="http://relaxng.org/ns/structure/1.0">
+
+<define name="mml.att-base">
+<optional>
+<attribute name="base">
+ <ref name="mml.number.datatype"/>
+</attribute>
+</optional>
+</define>
+
+<define name="mml.att-closure">
+<optional>
+<attribute name="closure">
+ <choice>
+  <value>open</value>
+  <value>closed</value>
+  <value>open-closed</value>
+  <value>closed-open</value>
+ </choice>
+</attribute>
+</optional>
+</define>
+
+<define name="mml.att-definition">
+<optional>
+<attribute name="definitionURL">
+ <ref name="mml.uri.datatype"/>
+</attribute>
+</optional>
+</define>
+
+<define name="mml.att-encoding">
+<optional>
+<attribute name="encoding">
+ <text/>
+</attribute>
+</optional>
+</define>
+
+<define name="mml.att-nargs">
+<optional>
+<attribute name="nargs">
+ <choice>
+  <value>nary</value>
+  <ref name="mml.number.datatype"/>
+ </choice>
+</attribute>
+</optional>
+</define>
+
+<define name="mml.att-occurrence">
+<optional>
+<attribute name="occurrence">
+ <choice>
+ <value>prefix</value>
+ <value>infix</value>
+ <value>function-model</value>
+ </choice>
+</attribute>
+</optional>
+</define>
+
+<define name="mml.att-order">
+<optional>
+<attribute name="order">
+ <choice>
+ <value>lexicographic</value>
+ <value>numeric</value>
+ </choice>
+</attribute>
+</optional>
+</define>
+
+<define name="mml.att-scope">
+<optional>
+<attribute name="scope">
+ <choice>
+  <value>local</value>
+  <value>global</value>
+ </choice>
+</attribute>
+</optional>
+</define>
+
+<define name="mml.att-type">
+<optional>
+<attribute name="type">
+ <choice>
+  <value>e-notation</value>
+  <value>integer</value>
+  <value>rational</value>
+  <value>real</value>
+  <value>float</value>
+  <value>complex-polar</value>
+  <value>complex-cartesian</value>
+  <value>constant</value>
+ </choice>
+</attribute>
+</optional>
+</define>
+
+
+</grammar>

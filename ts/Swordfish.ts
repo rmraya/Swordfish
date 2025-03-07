@@ -284,7 +284,7 @@ export class Swordfish {
             Swordfish.setHeight(arg);
         });
         ipcMain.on('close-serverSettings', () => {
-            Swordfish.destroyWindow(Swordfish.serverSettingsWindow);
+            Swordfish.serverSettingsWindow.close();
         });
         ipcMain.on('browse-server', (event: IpcMainEvent, arg: any) => {
             Swordfish.connectToServer(arg);
@@ -296,13 +296,13 @@ export class Swordfish {
             Swordfish.showServerSettings(arg.type);
         });
         ipcMain.on('close-browseServer', () => {
-            Swordfish.destroyWindow(Swordfish.browseDatabasesWindow);
+            Swordfish.browseDatabasesWindow.close();
         });
         ipcMain.on('add-databases', (event: IpcMainEvent, arg: any) => {
             Swordfish.addDatabases(arg);
         });
         ipcMain.on('close-licenses', () => {
-            Swordfish.destroyWindow(Swordfish.licensesWindow);
+            Swordfish.licensesWindow.close();
         });
         ipcMain.on('save-preferences', (event: IpcMainEvent, arg: Preferences) => {
             Swordfish.savePreferences(arg);
@@ -311,16 +311,18 @@ export class Swordfish {
             Swordfish.savelanguages(arg);
         });
         ipcMain.on('close-addProject', () => {
-            Swordfish.destroyWindow(Swordfish.addProjectWindow);
+            Swordfish.addProjectWindow.close();
         });
         ipcMain.on('close-editProject', () => {
-            Swordfish.destroyWindow(Swordfish.editProjectWindow);
+            Swordfish.editProjectWindow.close();
         });
         ipcMain.on('close-addFile', () => {
-            Swordfish.destroyWindow(Swordfish.addFileWindow);
+            Swordfish.addFileWindow.close();
         });
         ipcMain.on('close-go-to', () => {
-            Swordfish.destroyWindow(Swordfish.goToWindow);
+            if (Swordfish.goToWindow) {
+                Swordfish.goToWindow.close();
+            }
         });
         ipcMain.on('go-to-segment', (event: IpcMainEvent, arg: any) => {
             Swordfish.mainWindow.focus();
@@ -330,7 +332,7 @@ export class Swordfish {
             Swordfish.projectParam ? event.sender.send('set-project', Swordfish.projectParam) : event.preventDefault();
         });
         ipcMain.on('close-replaceText', () => {
-            Swordfish.destroyWindow(Swordfish.replaceTextWindow);
+            Swordfish.replaceTextWindow.close();
         });
         ipcMain.on('close-tags', () => {
             Swordfish.closeTagsWindow();
@@ -345,13 +347,13 @@ export class Swordfish {
             this.selectSourceFiles(event);
         });
         ipcMain.on('close-about', () => {
-            Swordfish.destroyWindow(Swordfish.aboutWindow);
+            Swordfish.aboutWindow.close();
         });
         ipcMain.on('system-info-clicked', () => {
             Swordfish.showSystemInfo();
         });
         ipcMain.on('close-systemInfo', () => {
-            Swordfish.destroyWindow(Swordfish.systemInfoWindow);
+            Swordfish.systemInfoWindow.close();
         });
         ipcMain.on('get-system-info', (event: IpcMainEvent) => {
             Swordfish.getSystemInformation(event);
@@ -381,7 +383,7 @@ export class Swordfish {
             Swordfish.showAddMemory();
         });
         ipcMain.on('close-addMemory', () => {
-            Swordfish.destroyWindow(Swordfish.addMemoryWindow);
+            Swordfish.addMemoryWindow.close();
         });
         ipcMain.on('add-memory', (event: IpcMainEvent, arg: any) => {
             Swordfish.addMemory(arg);
@@ -393,7 +395,7 @@ export class Swordfish {
             Swordfish.addGlossary(arg);
         });
         ipcMain.on('close-addGlossary', () => {
-            Swordfish.destroyWindow(Swordfish.addGlossaryWindow);
+            Swordfish.addGlossaryWindow.close();
         });
         ipcMain.on('get-glossaries', (event: IpcMainEvent) => {
             Swordfish.getGlossaries(event);
@@ -405,7 +407,7 @@ export class Swordfish {
             Swordfish.showAddTerm(arg);
         });
         ipcMain.on('close-addTerm', () => {
-            Swordfish.destroyWindow(Swordfish.addTermWindow);
+            Swordfish.addTermWindow.close();
         });
         ipcMain.on('add-to-glossary', (event: IpcMainEvent, arg: any) => {
             Swordfish.addToGlossary(arg);
@@ -432,10 +434,10 @@ export class Swordfish {
             Swordfish.exportGlossaries(arg);
         });
         ipcMain.on('close-importGlossary', () => {
-            Swordfish.destroyWindow(Swordfish.importGlossaryWindow);
+            Swordfish.importGlossaryWindow.close();
         });
         ipcMain.on('close-importTmx', () => {
-            Swordfish.destroyWindow(Swordfish.importTmxWindow);
+            Swordfish.importTmxWindow.close();
         });
         ipcMain.on('import-tmx-file', (event: IpcMainEvent, arg: any) => {
             Swordfish.importTmxFile(arg);
@@ -456,7 +458,7 @@ export class Swordfish {
             event.sender.send('set-concordance-memories', Swordfish.concordanceMemories);
         });
         ipcMain.on('close-concordanceSearch', () => {
-            Swordfish.destroyWindow(Swordfish.concordanceSearchWindow);
+            Swordfish.concordanceSearchWindow.close();
         });
         ipcMain.on('get-concordance', (event: IpcMainEvent, arg: any) => {
             Swordfish.concordanceSearch(event, arg);
@@ -478,7 +480,7 @@ export class Swordfish {
             event.sender.send('set-id', Swordfish.htmlId);
         });
         ipcMain.on('close-htmlViewer', (event: IpcMainEvent, arg: any) => {
-            Swordfish.destroyWindow(BrowserWindow.fromId(arg.id));
+            BrowserWindow.fromId(arg.id).close();
         });
         ipcMain.on('get-clients', (event: IpcMainEvent) => {
             this.getClients(event);
@@ -487,7 +489,7 @@ export class Swordfish {
             Swordfish.showTermSearch(arg);
         });
         ipcMain.on('close-termSearch', () => {
-            Swordfish.destroyWindow(Swordfish.termSearchWindow);
+            Swordfish.termSearchWindow.close();
         });
         ipcMain.on('search-terms', (event: IpcMainEvent, arg: any) => {
             Swordfish.termSearch(arg);
@@ -511,10 +513,10 @@ export class Swordfish {
             event.sender.send('set-version', app.name + ' ' + app.getVersion());
         });
         ipcMain.on('close-preferences', () => {
-            Swordfish.destroyWindow(Swordfish.preferencesWindow);
+            Swordfish.preferencesWindow.close();
         });
         ipcMain.on('close-defaultLangs', () => {
-            Swordfish.destroyWindow(Swordfish.defaultLangsWindow);
+            Swordfish.defaultLangsWindow.close();
         });
         ipcMain.on('get-preferences', (event: IpcMainEvent) => {
             event.sender.send('set-preferences', Swordfish.currentPreferences);
@@ -622,7 +624,7 @@ export class Swordfish {
             Swordfish.showApplyTm(arg);
         });
         ipcMain.on('close-apply-tm', () => {
-            Swordfish.destroyWindow(Swordfish.applyTmWindow);
+            Swordfish.applyTmWindow.close();
         });
         ipcMain.on('tm-translate', (event: IpcMainEvent, arg: any) => {
             Swordfish.tmTranslate(arg);
@@ -649,7 +651,7 @@ export class Swordfish {
             Swordfish.getSpellCheckerLangs(event);
         });
         ipcMain.on('close-spellingLangs', () => {
-            Swordfish.destroyWindow(Swordfish.spellingLangsWindow);
+            Swordfish.spellingLangsWindow.close();
         });
         ipcMain.on('show-sort-segments', (event: IpcMainEvent, arg: any) => {
             Swordfish.showSortSegments(arg);
@@ -691,7 +693,7 @@ export class Swordfish {
             Swordfish.showImportXliff();
         });
         ipcMain.on('close-importXliff', () => {
-            Swordfish.destroyWindow(Swordfish.importXliffWindow);
+            Swordfish.importXliffWindow.close();
         });
         ipcMain.on('browse-xliff-import', (event: IpcMainEvent) => {
             Swordfish.browseXLIFF(event);
@@ -772,7 +774,7 @@ export class Swordfish {
             Swordfish.showChangeCase();
         });
         ipcMain.on('close-change-case', () => {
-            Swordfish.destroyWindow(Swordfish.changeCaseWindow);
+            Swordfish.changeCaseWindow.close();
         });
         ipcMain.on('change-case-to', (event: IpcMainEvent, arg: any) => {
             Swordfish.changeCaseTo(arg);
@@ -795,7 +797,7 @@ export class Swordfish {
             Swordfish.showAddNote(arg);
         });
         ipcMain.on('close-add-note', () => {
-            Swordfish.destroyWindow(Swordfish.addNoteWindow);
+            Swordfish.addNoteWindow.close();
         });
         ipcMain.on('add-note', (event: IpcMainEvent, arg: any) => {
             Swordfish.addNote(arg);
@@ -807,7 +809,7 @@ export class Swordfish {
             event.sender.send('set-versions', { current: app.getVersion(), latest: Swordfish.latestVersion });
         });
         ipcMain.on('close-updates', () => {
-            Swordfish.destroyWindow(Swordfish.updatesWindow);
+            Swordfish.updatesWindow.close();
         });
         ipcMain.on('release-history', () => {
             Swordfish.showReleaseHistory();
@@ -816,7 +818,7 @@ export class Swordfish {
             Swordfish.downloadLatest();
         });
         ipcMain.on('close-getting-started', () => {
-            Swordfish.destroyWindow(Swordfish.gettingStartedWindow);
+            Swordfish.gettingStartedWindow.close();
         });
         ipcMain.on('show-help', () => {
             Swordfish.showHelp();
@@ -838,7 +840,7 @@ export class Swordfish {
             Swordfish.editXmlFilter(arg);
         });
         ipcMain.on('close-filterConfig', () => {
-            Swordfish.destroyWindow(Swordfish.editXmlFilterWindow);
+            Swordfish.editXmlFilterWindow.close();
         });
         ipcMain.on('get-filterData', (event: IpcMainEvent) => {
             Swordfish.getXmlFilterData(event);
@@ -847,7 +849,7 @@ export class Swordfish {
             Swordfish.addElement(arg);
         });
         ipcMain.on('close-elementConfig', () => {
-            Swordfish.destroyWindow(Swordfish.configElementWindow);
+            Swordfish.configElementWindow.close();
         });
         ipcMain.on('get-elementConfig', (event: IpcMainEvent) => {
             Swordfish.getElementConfig(event);
@@ -871,22 +873,26 @@ export class Swordfish {
             Swordfish.showAddXmlConfiguration(event);
         });
         ipcMain.on('close-addXmlConfiguration', () => {
-            Swordfish.destroyWindow(Swordfish.addXmlConfigurationWindow);
+            Swordfish.addXmlConfigurationWindow.close();
         });
         ipcMain.on('add-xmlConfigurationFile', (event: IpcMainEvent, arg: any) => {
             Swordfish.addXmlConfiguration(event, arg);
         });
         ipcMain.on('close-tagsAnalysis', () => {
-            Swordfish.destroyWindow(Swordfish.tagsAnalysisWindow);
+            Swordfish.tagsAnalysisWindow.close();
         });
         ipcMain.on('get-tagsErrors', (event: IpcMainEvent) => {
             Swordfish.getTagErrors(event);
         });
         ipcMain.on('close-spaceAnalysis', () => {
-            Swordfish.destroyWindow(Swordfish.spaceAnalysisWindow);
+            Swordfish.spaceAnalysisWindow.close();
         });
         ipcMain.on('get-spaceErrors', (event: IpcMainEvent) => {
             Swordfish.getSpaceErrors(event);
+        });
+        ipcMain.on('fix-spaceErrors', (event: IpcMainEvent) => {
+            Swordfish.mainWindow.webContents.send('remember-segment');
+            Swordfish.fixSpaceErrors(event);
         });
     } // end constructor
 
@@ -1430,7 +1436,7 @@ export class Swordfish {
     }
 
     static savePreferences(preferences: Preferences): void {
-        Swordfish.destroyWindow(Swordfish.preferencesWindow);
+        Swordfish.preferencesWindow.close();
         let reloadProjects: boolean = this.currentPreferences.projectsFolder !== preferences.projectsFolder;
         let reloadMemories: boolean = this.currentPreferences.memoriesFolder !== preferences.memoriesFolder;
         let reloadGlossaries: boolean = this.currentPreferences.glossariesFolder !== preferences.glossariesFolder;
@@ -1777,7 +1783,7 @@ export class Swordfish {
             (data: any) => {
                 if (data.status === Swordfish.SUCCESS) {
                     Swordfish.mainWindow.webContents.send('request-projects', {});
-                    Swordfish.destroyWindow(Swordfish.editProjectWindow);
+                    Swordfish.editProjectWindow.close();
                 } else {
                     Swordfish.showMessage({ type: 'error', message: data.reason });
                 }
@@ -1790,10 +1796,10 @@ export class Swordfish {
 
     static createProject(arg: any): void {
         if (arg.from === 'addProject') {
-            Swordfish.destroyWindow(Swordfish.addProjectWindow);
+            Swordfish.addProjectWindow.close();
         }
         if (arg.from === 'addFile') {
-            Swordfish.destroyWindow(Swordfish.addFileWindow);
+            Swordfish.addFileWindow.close();
         }
         arg.xmlfilter = Swordfish.path.join(app.getAppPath(), 'xmlfilter');
         Swordfish.mainWindow.webContents.send('start-waiting');
@@ -2643,7 +2649,7 @@ export class Swordfish {
     }
 
     static savelanguages(arg: any) {
-        Swordfish.destroyWindow(this.defaultLangsWindow);
+        this.defaultLangsWindow.close();
         this.currentPreferences.srcLang = arg.srcLang;
         this.currentPreferences.tgtLang = arg.tgtLang;
         writeFileSync(Swordfish.path.join(app.getPath('appData'), app.name, 'preferences.json'), JSON.stringify(this.currentPreferences, null, 2));
@@ -2703,7 +2709,7 @@ export class Swordfish {
     }
 
     static addMemory(arg: any): void {
-        Swordfish.destroyWindow(Swordfish.addMemoryWindow);
+        Swordfish.addMemoryWindow.close();
         Swordfish.mainWindow.webContents.send('start-waiting');
         Swordfish.mainWindow.webContents.send('set-status', 'Creating memory');
         Swordfish.sendRequest('/memories/create', arg,
@@ -2725,7 +2731,7 @@ export class Swordfish {
     }
 
     static addGlossary(arg: any): void {
-        Swordfish.destroyWindow(Swordfish.addGlossaryWindow);
+        Swordfish.addGlossaryWindow.close();
         Swordfish.mainWindow.webContents.send('start-waiting');
         Swordfish.mainWindow.webContents.send('set-status', 'Creating glossary');
         Swordfish.sendRequest('/glossaries/create', arg,
@@ -2801,7 +2807,7 @@ export class Swordfish {
     }
 
     static importTmxFile(arg: any): void {
-        Swordfish.destroyWindow(Swordfish.importTmxWindow);
+        Swordfish.importTmxWindow.close();
         Swordfish.mainWindow.webContents.send('start-waiting');
         Swordfish.mainWindow.webContents.send('set-status', 'Importing TMX File');
         Swordfish.sendRequest('/memories/import', arg,
@@ -3300,7 +3306,7 @@ export class Swordfish {
     }
 
     static tmTranslateAll(arg: any): void {
-        Swordfish.destroyWindow(Swordfish.applyTmWindow);
+        Swordfish.applyTmWindow.close();
         Swordfish.mainWindow.webContents.send('start-waiting');
         Swordfish.mainWindow.webContents.send('set-status', 'Translating Project \u00A0\u00A0\u00A0 0%');
         Swordfish.sendRequest('/projects/tmTranslateAll', arg,
@@ -3833,7 +3839,7 @@ export class Swordfish {
     }
 
     static importXLIFF(arg: any): void {
-        Swordfish.destroyWindow(Swordfish.importXliffWindow);
+        Swordfish.importXliffWindow.close();
         Swordfish.mainWindow.webContents.send('start-waiting');
         Swordfish.mainWindow.webContents.send('set-status', 'Importing XLIFF');
         Swordfish.sendRequest('/projects/import', arg,
@@ -3943,12 +3949,12 @@ export class Swordfish {
 
     static sortOptions(arg: any): void {
         Swordfish.mainWindow.webContents.send('set-sorting', arg);
-        Swordfish.destroyWindow(Swordfish.sortSegmentsWindow);
+        Swordfish.sortSegmentsWindow.close();
     }
 
     static filterOptions(arg: any): void {
         Swordfish.mainWindow.webContents.send('set-filters', arg);
-        Swordfish.destroyWindow(Swordfish.filterSegmentsWindow);
+        Swordfish.filterSegmentsWindow.close();
     }
 
     static removeTranslations(arg: any): void {
@@ -4327,7 +4333,7 @@ export class Swordfish {
 
     static closeTagsWindow(): void {
         if (this.tagsWindow?.isVisible()) {
-            Swordfish.destroyWindow(Swordfish.tagsWindow);
+            Swordfish.tagsWindow.close();
         }
     }
 
@@ -4369,7 +4375,7 @@ export class Swordfish {
                     Swordfish.showMessage({ type: 'error', message: data.reason });
                     return;
                 }
-                Swordfish.destroyWindow(Swordfish.replaceTextWindow);
+                Swordfish.replaceTextWindow.close();
                 Swordfish.mainWindow.webContents.send('reload-page', arg.project);
                 Swordfish.mainWindow.webContents.send('set-statistics', { project: arg.project, statistics: data.statistics });
             },
@@ -4513,25 +4519,6 @@ export class Swordfish {
         });
     }
 
-    static destroyWindow(window: BrowserWindow): void {
-        if (window) {
-            try {
-                let parent: BrowserWindow = window.getParentWindow();
-                window.hide();
-                window.destroy();
-                window = undefined;
-                if (parent) {
-                    parent.show();
-                    parent.focus()
-                } else {
-                    Swordfish.mainWindow.focus();
-                }
-            } catch (e) {
-                // ignore
-            }
-        }
-    }
-
     static acceptAllMachineTranslations(arg: any) {
         dialog.showMessageBox(Swordfish.mainWindow, {
             type: 'question',
@@ -4563,7 +4550,7 @@ export class Swordfish {
     }
 
     static importGlossaryFile(arg: any): void {
-        Swordfish.destroyWindow(Swordfish.importGlossaryWindow);
+        Swordfish.importGlossaryWindow.close();
         Swordfish.mainWindow.webContents.send('start-waiting');
         Swordfish.mainWindow.webContents.send('set-status', 'Importing glossary');
         Swordfish.sendRequest('/glossaries/import', arg,
@@ -4798,7 +4785,7 @@ export class Swordfish {
     }
 
     static addToGlossary(arg: any): void {
-        Swordfish.destroyWindow(this.addTermWindow);
+        this.addTermWindow.close();
         Swordfish.sendRequest('/glossaries/addTerm', arg,
             (data: any) => {
                 if (data.status !== Swordfish.SUCCESS) {
@@ -4933,7 +4920,7 @@ export class Swordfish {
         Swordfish.activeProject = projectId;
         Swordfish.spaceAnalysisWindow = new BrowserWindow({
             parent: this.mainWindow,
-            width: 400,
+            width: 540,
             height: 350,
             minimizable: false,
             maximizable: false,
@@ -5013,6 +5000,28 @@ export class Swordfish {
         );
     }
 
+    static fixSpaceErrors(event: IpcMainEvent): void {
+        Swordfish.mainWindow.webContents.send('start-waiting');
+        Swordfish.mainWindow.webContents.send('set-status', 'Fixing spaces');
+        Swordfish.sendRequest('/projects/fixSpaces', { project: Swordfish.activeProject },
+            (data: any) => {
+                Swordfish.mainWindow.webContents.send('end-waiting');
+                Swordfish.mainWindow.webContents.send('set-status', '');
+                if (data.status !== Swordfish.SUCCESS) {
+                    Swordfish.showMessage({ type: 'error', message: data.reason });
+                    return;
+                }
+                event.sender.send('set-spaceErrors', data);
+                Swordfish.mainWindow.webContents.send('reload-page', Swordfish.activeProject);
+            },
+            (reason: string) => {
+                Swordfish.mainWindow.webContents.send('end-waiting');
+                Swordfish.mainWindow.webContents.send('set-status', '');
+                Swordfish.showMessage({ type: 'error', message: reason });
+            }
+        );
+    }
+
     static exportHTML(arg: any): void {
         Swordfish.mainWindow.webContents.send('start-waiting');
         Swordfish.mainWindow.webContents.send('set-status', 'Exporting HTML');
@@ -5073,7 +5082,7 @@ export class Swordfish {
 
     static changeCaseTo(arg: any) {
         Swordfish.mainWindow.webContents.send('case-changed', arg);
-        Swordfish.destroyWindow(this.changeCaseWindow);
+        this.changeCaseWindow.close();
     }
 
     static splitSegment(arg: any): void {
@@ -5108,7 +5117,7 @@ export class Swordfish {
 
     static toggleNotes(): void {
         if (Swordfish.notesWindow) {
-            Swordfish.destroyWindow(Swordfish.notesWindow);
+            Swordfish.notesWindow.close();
             Swordfish.mainWindow.webContents.send('notes-closed');
             Swordfish.notesParam = undefined;
             return;
@@ -5200,7 +5209,7 @@ export class Swordfish {
     }
 
     static addNote(arg: any) {
-        Swordfish.destroyWindow(Swordfish.addNoteWindow);
+        Swordfish.addNoteWindow.close();
         Swordfish.sendRequest('/projects/addNote', arg,
             (data: any) => {
                 if (data.status === 'Success') {
@@ -5250,7 +5259,7 @@ export class Swordfish {
             session: session.defaultSession
         });
         Swordfish.mainWindow.webContents.send('set-status', 'Downloading...');
-        Swordfish.updatesWindow.destroy();
+        Swordfish.updatesWindow.close();
         request.on('response', (response: IncomingMessage) => {
             let fileSize = Number.parseInt(response.headers['content-length'] as string);
             let received: number = 0;
@@ -5386,7 +5395,7 @@ export class Swordfish {
         this.sendRequest('/services/saveElement', arg,
             (data: any) => {
                 if (data.status === 'Success') {
-                    Swordfish.destroyWindow(Swordfish.configElementWindow);
+                    Swordfish.configElementWindow.close();
                     Swordfish.editXmlFilterWindow.webContents.send('refresh');
                 } else {
                     Swordfish.showMessage({ type: 'error', message: data.reason, parent: 'elementConfig' });
@@ -5564,7 +5573,7 @@ export class Swordfish {
                 if (data.status === 'Success') {
                     Swordfish.showMessage({ type: 'info', message: 'Configuration added' });
                     Swordfish.getXMLFilters(Swordfish.addConfigurationEvent);
-                    Swordfish.destroyWindow(Swordfish.addXmlConfigurationWindow);
+                    Swordfish.addXmlConfigurationWindow.close();
                     Swordfish.preferencesWindow.focus();
                 } else {
                     Swordfish.showMessage({ type: 'error', message: data.reason, parent: 'addConfiguration' });

@@ -1,0 +1,2276 @@
+<?xml version = "1.0" encoding = "UTF-8"?>
+<xs:schema xmlns="http://www.imsglobal.org/xsd/qti/qtiv3p0/imsafa3p0pnp_v1p0"
+     targetNamespace="http://www.imsglobal.org/xsd/qti/qtiv3p0/imsafa3p0pnp_v1p0"
+     xmlns:xs="http://www.w3.org/2001/XMLSchema"
+     xmlns:sch="http://purl.oclc.org/dsdl/schematron"
+     version="IMS AFAPNP QTI V3.0"
+     elementFormDefault="qualified"
+     attributeFormDefault="unqualified">
+    <xs:import namespace="http://www.w3.org/XML/1998/namespace" schemaLocation="https://purl.imsglobal.org/spec/w3/2001/schema/xsd/xml.xsd" />
+
+    <xs:annotation>
+        <xs:documentation>
+            XSD Data File Information
+            =========================
+            Author:         Colin Smythe (IMS Global, UK)
+            Date:           18th March, 2019
+            Version:        1.0
+            Status:         Candidate Final
+            Description:    This is the QTI 3.0 Profile of the Access For All Personal Needs and Preferences (AfA PNP) data model.
+
+            History:        Version 1.0: This version supercedes QTI 2.2. It is the first release of QTI 3.0.
+
+            PROFILE:        This is the "QTIv3p0". THIS IS A PROFILE OF THE BASE SPECIFICATION.
+                            The changes to the base specification are:
+                            * The schema namespace has been changed to "http://www.imsglobal.org/xsd/qti/qtiv3p0/imsafa3p0pnp_v1p0".
+                            * The schema version has been changed to "IMS AFAPNP QTI V3.0".
+                            * The "AccessModeRequired" class/complexType and set of XML attributes have been deleted;
+                            * The "AdaptationDetailRequired" class/complexType and set of XML attributes have been deleted;
+                            * The "AdaptationMediaRequired" class/complexType and set of XML attributes have been deleted;
+                            * The "AdaptationMediaTypeValue" class/complexType and set of XML attributes have been deleted;
+                            * The "AdaptationTypeRequired" class/complexType and set of XML attributes have been deleted;
+                            * The "AdaptationTypeValue" class/complexType and set of XML attributes have been deleted;
+                            * The "EducationalComplexityValue" class/complexType and set of XML attributes have been deleted;
+                            * The "AccessForAllPNP" class/complexType has been modified by:-
+                              - The "at-interoperable" attribute has been prohibited;
+                              - The "language-of-adaptation" attribute has been prohibited;
+                              - The "educational-level-of-adaptation" attribute has been prohibited;
+                            * The "HazardValue" class/complexType has been modified by:-
+                              - The "sound" attribute has been prohibited;
+                              - The "olfactory-hazard" attribute has been prohibited;
+
+            License:        IPR and Distribution Notices
+
+                            This machine readable file is derived from IMS Global specification IMS Access for All Personal Needs and Preferences (AfA PNP) Version 3.0
+                            found at http://www.imsglobal.org/qti and the original IMS Global schema binding or code base
+                            http://www.imsglobal.org/qti.
+
+                            Recipients of this document are requested to submit, with their comments, notification of any relevant 
+                            patent claims or other intellectual property rights of which they may be aware that might be infringed by
+                            any implementation of the specification set forth in this document, and to provide supporting documentation.
+
+                            IMS takes no position regarding the validity or scope of any intellectual property or other rights that might
+                            be claimed to pertain to the implementation or use of the technology described in this document or the extent 
+                            to which any license under such rights might or might not be available; neither does it represent that it has 
+                            made any effort to identify any such rights. Information on IMS procedures with respect to rights in IMS 
+                            specifications can be found at the IMS Global Intellectual Property Rights web page: http://www.imsglobal.org/ipr/imsipr_policyFinal.pdf.
+
+                            Copyright (c) IMS Global Learning Consortium 1999-2019. All Rights Reserved.
+
+                            Use of this specification to develop products or services is governed by the license with IMS found on the IMS website: http://www.imsglobal.org/license.html.
+
+                            Permission is granted to all parties to use excerpts from this document as needed in producing requests for proposals.
+
+                            The limited permissions granted above are perpetual and will not be revoked by IMS or its successors or assigns.
+
+                            THIS SPECIFICATION IS BEING OFFERED WITHOUT ANY WARRANTY WHATSOEVER, AND IN PARTICULAR, ANY WARRANTY OF NONINFRINGEMENT IS
+                            EXPRESSLY DISCLAIMED. ANY USE OF THIS SPECIFICATION SHALL BE MADE ENTIRELY AT THE IMPLEMENTERS OWN RISK, AND NEITHER THE CONSORTIUM
+                            NOR ANY OF ITS MEMBERS OR SUBMITTERS, SHALL HAVE ANY LIABILITY WHATSOEVER TO ANY IMPLEMENTER OR THIRD PARTY FOR ANY DAMAGES OF
+                            ANY NATURE WHATSOEVER, DIRECTLY OR INDIRECTLY, ARISING FROM THE USE OF THIS SPECIFICATION.
+
+            Source UML File Information
+            ===========================
+            The source file information must be supplied as an XMI file (without diagram layout information).
+            The supported UML authoring tools are:
+            (a) Poseidon - v6 (and later)
+            (b) Papyrus - v1.1.3 (and later)
+
+            Source XSLT File Information
+            ============================
+            XSL Generator:    Specificationv1p0_GenerationToolv1.xsl
+            XSLT Processor:   Saxon
+            Release:          1.0
+            Date:             31st July, 2017
+            Autogen Engineer: Colin Smythe (IMS Global, UK)
+            Autogen Date:     2019-03-18
+
+            IMS Global Auto-generation Binding Tool-kit (I-BAT)
+            ===================================================
+            This file was auto-generated using the IMS Global Binding Auto-generation Tool-kit (I-BAT).  While every
+            attempt has been made to ensure that this tool auto-generates the files correctly, users should be aware
+            that this is an experimental tool.  Permission is given to make use of this tool.  IMS Global makes no
+            claim on the materials created by third party users of this tool.  Details on how to use this tool
+            are contained in the IMS Global "I-BAT" documentation available at the IMS Global web-site:
+            http://www.imsglobal.org.
+
+            Tool Copyright:  2012-2019  (c) IMS Global Learning Consortium Inc.  All Rights Reserved.
+        </xs:documentation>
+    </xs:annotation>
+
+    <xs:annotation>
+        <xs:documentation>
+            Schematron Strict Selection Validation Rules
+            ============================================
+            This is the set of Schematron rules that have been created to enforce the use of the "Unordered" stereotype.
+            These rules ensure that the number of entries in an unordered complexType of an element obey the multiplicity constraints.
+            This is required so that any-order/any-multiplicity complexTypes can be constructed and validated.
+        </xs:documentation>
+        <xs:appinfo>
+            <sch:ns uri="http://www.imsglobal.org/xsd/qti/qtiv3p0/imsafa3p0pnp_v1p0" prefix="apnp" />
+            <sch:title>Schematron validation rules for the enforcement of the Unordered stereotype.</sch:title>
+
+            <!-- RULESET ******************************************************************* -->
+            <sch:pattern abstract="false" id="AccessForAllPNP.Type">
+                <sch:title>[RULESET] For the AccessForAllPNP.Type complexType.</sch:title>
+
+                <sch:rule abstract="false" context="apnp:access-for-all-pnp">
+                    <!--
+                        [QTIv3p0] Profile - the changes to the XML element list are:
+                        * The "at-interoperable" attribute has been prohibited;
+                        * The "language-of-adaptation" attribute has been prohibited;
+                        * The "educational-level-of-adaptation" attribute has been prohibited;
+                    -->
+
+                    <sch:assert test="count(apnp:educational-complexity-of-adaptation) = 0 or count(apnp:educational-complexity-of-adaptation) = 1">
+                        [RULE for Root Class Attribute 4] Invalid number of "educational-complexity-of-adaptation" elements: <sch:value-of select="count(apnp:educational-complexity-of-adaptation)" />.
+                    </sch:assert>
+
+                    <sch:assert test="count(apnp:input-requirements) = 0 or count(apnp:input-requirements) = 1">
+                        [RULE for Root Class Attribute 6] Invalid number of "input-requirements" elements: <sch:value-of select="count(apnp:input-requirements)" />.
+                    </sch:assert>
+
+                    <sch:assert test="count(apnp:linguistic-guidance) = 0 or count(apnp:linguistic-guidance) = 1">
+                        [RULE for Root Class Attribute 12] Invalid number of "linguistic-guidance" elements: <sch:value-of select="count(apnp:linguistic-guidance)" />.
+                    </sch:assert>
+
+                    <sch:assert test="count(apnp:keyword-emphasis) = 0 or count(apnp:keyword-emphasis) = 1">
+                        [RULE for Root Class Attribute 13] Invalid number of "keyword-emphasis" elements: <sch:value-of select="count(apnp:keyword-emphasis)" />.
+                    </sch:assert>
+
+                    <sch:assert test="count(apnp:keyword-translation) = 0 or count(apnp:keyword-translation) = 1">
+                        [RULE for Root Class Attribute 14] Invalid number of "keyword-translation" elements: <sch:value-of select="count(apnp:keyword-translation)" />.
+                    </sch:assert>
+
+                    <sch:assert test="count(apnp:simplified-language-portions) = 0 or count(apnp:simplified-language-portions) = 1">
+                        [RULE for Root Class Attribute 15] Invalid number of "simplified-language-portions" elements: <sch:value-of select="count(apnp:simplified-language-portions)" />.
+                    </sch:assert>
+
+                    <sch:assert test="count(apnp:simplified-graphics) = 0 or count(apnp:simplified-graphics) = 1">
+                        [RULE for Root Class Attribute 16] Invalid number of "simplified-graphics" elements: <sch:value-of select="count(apnp:simplified-graphics)" />.
+                    </sch:assert>
+
+                    <sch:assert test="count(apnp:item-translation) = 0 or count(apnp:item-translation) = 1">
+                        [RULE for Root Class Attribute 17] Invalid number of "item-translation" elements: <sch:value-of select="count(apnp:item-translation)" />.
+                    </sch:assert>
+
+                    <sch:assert test="count(apnp:sign-language) = 0 or count(apnp:sign-language) = 1">
+                        [RULE for Root Class Attribute 18] Invalid number of "sign-language" elements: <sch:value-of select="count(apnp:sign-language)" />.
+                    </sch:assert>
+
+                    <sch:assert test="count(apnp:encouragement) = 0 or count(apnp:encouragement) = 1">
+                        [RULE for Root Class Attribute 19] Invalid number of "encouragement" elements: <sch:value-of select="count(apnp:encouragement)" />.
+                    </sch:assert>
+
+                    <sch:assert test="count(apnp:additional-testing-time) = 0 or count(apnp:additional-testing-time) = 1">
+                        [RULE for Root Class Attribute 20] Invalid number of "additional-testing-time" elements: <sch:value-of select="count(apnp:additional-testing-time)" />.
+                    </sch:assert>
+
+                    <sch:assert test="count(apnp:line-reader) = 0 or count(apnp:line-reader) = 1">
+                        [RULE for Root Class Attribute 21] Invalid number of "line-reader" elements: <sch:value-of select="count(apnp:line-reader)" />.
+                    </sch:assert>
+
+                    <sch:assert test="count(apnp:invert-display-polarity) = 0 or count(apnp:invert-display-polarity) = 1">
+                        [RULE for Root Class Attribute 22] Invalid number of "invert-display-polarity" elements: <sch:value-of select="count(apnp:invert-display-polarity)" />.
+                    </sch:assert>
+
+                    <sch:assert test="count(apnp:magnification) = 0 or count(apnp:magnification) = 1">
+                        [RULE for Root Class Attribute 23] Invalid number of "magnification" elements: <sch:value-of select="count(apnp:magnification)" />.
+                    </sch:assert>
+
+                    <sch:assert test="count(apnp:spoken) = 0 or count(apnp:spoken) = 1">
+                        [RULE for Root Class Attribute 24] Invalid number of "spoken" elements: <sch:value-of select="count(apnp:spoken)" />.
+                    </sch:assert>
+
+                    <sch:assert test="count(apnp:tactile) = 0 or count(apnp:tactile) = 1">
+                        [RULE for Root Class Attribute 25] Invalid number of "tactile" elements: <sch:value-of select="count(apnp:tactile)" />.
+                    </sch:assert>
+
+                    <sch:assert test="count(apnp:braille) = 0 or count(apnp:braille) = 1">
+                        [RULE for Root Class Attribute 26] Invalid number of "braille" elements: <sch:value-of select="count(apnp:braille)" />.
+                    </sch:assert>
+
+                    <sch:assert test="count(apnp:answer-masking) = 0 or count(apnp:answer-masking) = 1">
+                        [RULE for Root Class Attribute 27] Invalid number of "answer-masking" elements: <sch:value-of select="count(apnp:answer-masking)" />.
+                    </sch:assert>
+
+                    <sch:assert test="count(apnp:keyboard-directions) = 0 or count(apnp:keyboard-directions) = 1">
+                        [RULE for Root Class Attribute 28] Invalid number of "keyboard-directions" elements: <sch:value-of select="count(apnp:keyboard-directions)" />.
+                    </sch:assert>
+
+                    <sch:assert test="count(apnp:additional-directions) = 0 or count(apnp:additional-directions) = 1">
+                        [RULE for Root Class Attribute 29] Invalid number of "additional-directions" elements: <sch:value-of select="count(apnp:additional-directions)" />.
+                    </sch:assert>
+
+                    <sch:assert test="count(apnp:long-description) = 0 or count(apnp:long-description) = 1">
+                        [RULE for Root Class Attribute 30] Invalid number of "long-description" elements: <sch:value-of select="count(apnp:long-description)" />.
+                    </sch:assert>
+
+                    <sch:assert test="count(apnp:captions) = 0 or count(apnp:captions) = 1">
+                        [RULE for Root Class Attribute 31] Invalid number of "captions" elements: <sch:value-of select="count(apnp:captions)" />.
+                    </sch:assert>
+
+                    <sch:assert test="count(apnp:environment) = 0 or count(apnp:environment) = 1">
+                        [RULE for Root Class Attribute 32] Invalid number of "environment" elements: <sch:value-of select="count(apnp:environment)" />.
+                    </sch:assert>
+
+                    <sch:assert test="count(apnp:transcript) = 0 or count(apnp:transcript) = 1">
+                        [RULE for Root Class Attribute 33] Invalid number of "transcript" elements: <sch:value-of select="count(apnp:transcript)" />.
+                    </sch:assert>
+
+                    <sch:assert test="count(apnp:alternative-text) = 0 or count(apnp:alternative-text) = 1">
+                        [RULE for Root Class Attribute 34] Invalid number of "alternative-text" elements: <sch:value-of select="count(apnp:alternative-text)" />.
+                    </sch:assert>
+
+                    <sch:assert test="count(apnp:audio-description) = 0 or count(apnp:audio-description) = 1">
+                        [RULE for Root Class Attribute 35] Invalid number of "audio-description" elements: <sch:value-of select="count(apnp:audio-description)" />.
+                    </sch:assert>
+
+                    <sch:assert test="count(apnp:high-contrast) = 0 or count(apnp:high-contrast) = 1">
+                        [RULE for Root Class Attribute 36] Invalid number of "high-contrast" elements: <sch:value-of select="count(apnp:high-contrast)" />.
+                    </sch:assert>
+
+                    <sch:assert test="count(apnp:layout-single-column) = 0 or count(apnp:layout-single-column) = 1">
+                        [RULE for Root Class Attribute 37] Invalid number of "layout-single-column" elements: <sch:value-of select="count(apnp:layout-single-column)" />.
+                    </sch:assert>
+
+                    <sch:assert test="count(apnp:text-appearance) = 0 or count(apnp:text-appearance) = 1">
+                        [RULE for Root Class Attribute 38] Invalid number of "text-appearance" elements: <sch:value-of select="count(apnp:text-appearance)" />.
+                    </sch:assert>
+
+                    <sch:assert test="count(apnp:calculator-on-screen) = 0 or count(apnp:calculator-on-screen) = 1">
+                        [RULE for Root Class Attribute 39] Invalid number of "calculator-on-screen" elements: <sch:value-of select="count(apnp:calculator-on-screen)" />.
+                    </sch:assert>
+
+                    <sch:assert test="count(apnp:dictionary-on-screen) = 0 or count(apnp:dictionary-on-screen) = 1">
+                        [RULE for Root Class Attribute 40] Invalid number of "dictionary-on-screen" elements: <sch:value-of select="count(apnp:dictionary-on-screen)" />.
+                    </sch:assert>
+
+                    <sch:assert test="count(apnp:glossary-on-screen) = 0 or count(apnp:glossary-on-screen) = 1">
+                        [RULE for Root Class Attribute 41] Invalid number of "glossary-on-screen" elements: <sch:value-of select="count(apnp:glossary-on-screen)" />.
+                    </sch:assert>
+
+                    <sch:assert test="count(apnp:thesaurus-on-screen) = 0 or count(apnp:thesaurus-on-screen) = 1">
+                        [RULE for Root Class Attribute 42] Invalid number of "thesaurus-on-screen" elements: <sch:value-of select="count(apnp:thesaurus-on-screen)" />.
+                    </sch:assert>
+
+                    <sch:assert test="count(apnp:homophone-checker-on-screen) = 0 or count(apnp:homophone-checker-on-screen) = 1">
+                        [RULE for Root Class Attribute 43] Invalid number of "homophone-checker-on-screen" elements: <sch:value-of select="count(apnp:homophone-checker-on-screen)" />.
+                    </sch:assert>
+
+                    <sch:assert test="count(apnp:note-taking-on-screen) = 0 or count(apnp:note-taking-on-screen) = 1">
+                        [RULE for Root Class Attribute 44] Invalid number of "note-taking-on-screen" elements: <sch:value-of select="count(apnp:note-taking-on-screen)" />.
+                    </sch:assert>
+
+                    <sch:assert test="count(apnp:visual-organizer-on-screen) = 0 or count(apnp:visual-organizer-on-screen) = 1">
+                        [RULE for Root Class Attribute 45] Invalid number of "visual-organizer-on-screen" elements: <sch:value-of select="count(apnp:visual-organizer-on-screen)" />.
+                    </sch:assert>
+
+                    <sch:assert test="count(apnp:outliner-on-screen) = 0 or count(apnp:outliner-on-screen) = 1">
+                        [RULE for Root Class Attribute 46] Invalid number of "outliner-on-screen" elements: <sch:value-of select="count(apnp:outliner-on-screen)" />.
+                    </sch:assert>
+
+                    <sch:assert test="count(apnp:peer-interaction-on-screen) = 0 or count(apnp:peer-interaction-on-screen) = 1">
+                        [RULE for Root Class Attribute 47] Invalid number of "peer-interaction-on-screen" elements: <sch:value-of select="count(apnp:peer-interaction-on-screen)" />.
+                    </sch:assert>
+
+                    <sch:assert test="count(apnp:spell-checker-on-screen) = 0 or count(apnp:spell-checker-on-screen) = 1">
+                        [RULE for Root Class Attribute 48] Invalid number of "spell-checker-on-screen" elements: <sch:value-of select="count(apnp:spell-checker-on-screen)" />.
+                    </sch:assert>
+
+                    <sch:assert test="count(apnp:activate-at-initialization-set) = 0 or count(apnp:activate-at-initialization-set) = 1">
+                        [RULE for Root Class Attribute 49] Invalid number of "activate-at-initialization-set" elements: <sch:value-of select="count(apnp:activate-at-initialization-set)" />.
+                    </sch:assert>
+
+                    <sch:assert test="count(apnp:activate-as-option-set) = 0 or count(apnp:activate-as-option-set) = 1">
+                        [RULE for Root Class Attribute 50] Invalid number of "activate-as-option-set" elements: <sch:value-of select="count(apnp:activate-as-option-set)" />.
+                    </sch:assert>
+
+                    <sch:assert test="count(apnp:prohibit-set) = 0 or count(apnp:prohibit-set) = 1">
+                        [RULE for Root Class Attribute 51] Invalid number of "prohibit-set" elements: <sch:value-of select="count(apnp:prohibit-set)" />.
+                    </sch:assert>
+
+                </sch:rule>
+
+            </sch:pattern>
+            <!-- *************************************************************************** -->
+
+            <!-- RULESET ******************************************************************* -->
+            <sch:pattern abstract="false" id="Braille.Type">
+                <sch:title>[RULESET] For the Braille.Type complexType.</sch:title>
+
+                <sch:rule abstract="false" context="apnp:access-for-all-pnp/apnp:access-for-all-pnp/apnp:braille">
+
+                    <sch:assert test="count(apnp:delivery-mode) = 0 or count(apnp:delivery-mode) = 1">
+                        [RULE for Local Attribute 1] Invalid number of "delivery-mode" elements: <sch:value-of select="count(apnp:delivery-mode)" />.
+                    </sch:assert>
+
+                    <sch:assert test="count(apnp:grade) = 0 or count(apnp:grade) = 1">
+                        [RULE for Local Attribute 2] Invalid number of "grade" elements: <sch:value-of select="count(apnp:grade)" />.
+                    </sch:assert>
+
+                    <sch:assert test="count(apnp:braille-type) = 0 or count(apnp:braille-type) = 1">
+                        [RULE for Local Attribute 3] Invalid number of "braille-type" elements: <sch:value-of select="count(apnp:braille-type)" />.
+                    </sch:assert>
+
+                    <sch:assert test="count(apnp:math-type) = 0 or count(apnp:math-type) = 1">
+                        [RULE for Local Attribute 4] Invalid number of "math-type" elements: <sch:value-of select="count(apnp:math-type)" />.
+                    </sch:assert>
+
+                </sch:rule>
+
+            </sch:pattern>
+            <!-- *************************************************************************** -->
+
+            <!-- RULESET ******************************************************************* -->
+            <sch:pattern abstract="false" id="Environment.Type">
+                <sch:title>[RULESET] For the Environment.Type complexType.</sch:title>
+
+                <sch:rule abstract="false" context="apnp:access-for-all-pnp/apnp:access-for-all-pnp/apnp:environment">
+
+                    <sch:assert test="count(apnp:description) = 0 or count(apnp:description) = 1">
+                        [RULE for Local Attribute 1] Invalid number of "description" elements: <sch:value-of select="count(apnp:description)" />.
+                    </sch:assert>
+
+                    <sch:assert test="count(apnp:medical) = 0 or count(apnp:medical) = 1">
+                        [RULE for Local Attribute 2] Invalid number of "medical" elements: <sch:value-of select="count(apnp:medical)" />.
+                    </sch:assert>
+
+                    <sch:assert test="count(apnp:software) = 0 or count(apnp:software) = 1">
+                        [RULE for Local Attribute 3] Invalid number of "software" elements: <sch:value-of select="count(apnp:software)" />.
+                    </sch:assert>
+
+                    <sch:assert test="count(apnp:hardware) = 0 or count(apnp:hardware) = 1">
+                        [RULE for Local Attribute 4] Invalid number of "hardware" elements: <sch:value-of select="count(apnp:hardware)" />.
+                    </sch:assert>
+
+                    <sch:assert test="count(apnp:breaks) = 0 or count(apnp:breaks) = 1">
+                        [RULE for Local Attribute 5] Invalid number of "breaks" elements: <sch:value-of select="count(apnp:breaks)" />.
+                    </sch:assert>
+
+                </sch:rule>
+
+            </sch:pattern>
+            <!-- *************************************************************************** -->
+
+            <!-- RULESET ******************************************************************* -->
+            <sch:pattern abstract="false" id="FeatureSet.Type">
+                <sch:title>[RULESET] For the FeatureSet.Type complexType.</sch:title>
+
+                <sch:rule abstract="false" context="apnp:access-for-all-pnp/apnp:access-for-all-pnp/apnp:activate-at-initialization-set">
+
+                    <sch:assert test="count(apnp:linguistic-guidance) = 0 or count(apnp:linguistic-guidance) = 1">
+                        [RULE for Local Attribute 1] Invalid number of "linguistic-guidance" elements: <sch:value-of select="count(apnp:linguistic-guidance)" />.
+                    </sch:assert>
+
+                    <sch:assert test="count(apnp:keyword-emphasis) = 0 or count(apnp:keyword-emphasis) = 1">
+                        [RULE for Local Attribute 2] Invalid number of "keyword-emphasis" elements: <sch:value-of select="count(apnp:keyword-emphasis)" />.
+                    </sch:assert>
+
+                    <sch:assert test="count(apnp:keyword-translation) = 0 or count(apnp:keyword-translation) = 1">
+                        [RULE for Local Attribute 3] Invalid number of "keyword-translation" elements: <sch:value-of select="count(apnp:keyword-translation)" />.
+                    </sch:assert>
+
+                    <sch:assert test="count(apnp:simplified-language-portions) = 0 or count(apnp:simplified-language-portions) = 1">
+                        [RULE for Local Attribute 4] Invalid number of "simplified-language-portions" elements: <sch:value-of select="count(apnp:simplified-language-portions)" />.
+                    </sch:assert>
+
+                    <sch:assert test="count(apnp:simplified-graphics) = 0 or count(apnp:simplified-graphics) = 1">
+                        [RULE for Local Attribute 5] Invalid number of "simplified-graphics" elements: <sch:value-of select="count(apnp:simplified-graphics)" />.
+                    </sch:assert>
+
+                    <sch:assert test="count(apnp:item-translation) = 0 or count(apnp:item-translation) = 1">
+                        [RULE for Local Attribute 6] Invalid number of "item-translation" elements: <sch:value-of select="count(apnp:item-translation)" />.
+                    </sch:assert>
+
+                    <sch:assert test="count(apnp:sign-language) = 0 or count(apnp:sign-language) = 1">
+                        [RULE for Local Attribute 7] Invalid number of "sign-language" elements: <sch:value-of select="count(apnp:sign-language)" />.
+                    </sch:assert>
+
+                    <sch:assert test="count(apnp:encouragement) = 0 or count(apnp:encouragement) = 1">
+                        [RULE for Local Attribute 8] Invalid number of "encouragement" elements: <sch:value-of select="count(apnp:encouragement)" />.
+                    </sch:assert>
+
+                    <sch:assert test="count(apnp:additional-testing-time) = 0 or count(apnp:additional-testing-time) = 1">
+                        [RULE for Local Attribute 9] Invalid number of "additional-testing-time" elements: <sch:value-of select="count(apnp:additional-testing-time)" />.
+                    </sch:assert>
+
+                    <sch:assert test="count(apnp:line-reader) = 0 or count(apnp:line-reader) = 1">
+                        [RULE for Local Attribute 10] Invalid number of "line-reader" elements: <sch:value-of select="count(apnp:line-reader)" />.
+                    </sch:assert>
+
+                    <sch:assert test="count(apnp:invert-display-polarity) = 0 or count(apnp:invert-display-polarity) = 1">
+                        [RULE for Local Attribute 11] Invalid number of "invert-display-polarity" elements: <sch:value-of select="count(apnp:invert-display-polarity)" />.
+                    </sch:assert>
+
+                    <sch:assert test="count(apnp:magnification) = 0 or count(apnp:magnification) = 1">
+                        [RULE for Local Attribute 12] Invalid number of "magnification" elements: <sch:value-of select="count(apnp:magnification)" />.
+                    </sch:assert>
+
+                    <sch:assert test="count(apnp:spoken) = 0 or count(apnp:spoken) = 1">
+                        [RULE for Local Attribute 13] Invalid number of "spoken" elements: <sch:value-of select="count(apnp:spoken)" />.
+                    </sch:assert>
+
+                    <sch:assert test="count(apnp:tactile) = 0 or count(apnp:tactile) = 1">
+                        [RULE for Local Attribute 14] Invalid number of "tactile" elements: <sch:value-of select="count(apnp:tactile)" />.
+                    </sch:assert>
+
+                    <sch:assert test="count(apnp:braille) = 0 or count(apnp:braille) = 1">
+                        [RULE for Local Attribute 15] Invalid number of "braille" elements: <sch:value-of select="count(apnp:braille)" />.
+                    </sch:assert>
+
+                    <sch:assert test="count(apnp:answer-masking) = 0 or count(apnp:answer-masking) = 1">
+                        [RULE for Local Attribute 16] Invalid number of "answer-masking" elements: <sch:value-of select="count(apnp:answer-masking)" />.
+                    </sch:assert>
+
+                    <sch:assert test="count(apnp:keyboard-directions) = 0 or count(apnp:keyboard-directions) = 1">
+                        [RULE for Local Attribute 17] Invalid number of "keyboard-directions" elements: <sch:value-of select="count(apnp:keyboard-directions)" />.
+                    </sch:assert>
+
+                    <sch:assert test="count(apnp:additional-directions) = 0 or count(apnp:additional-directions) = 1">
+                        [RULE for Local Attribute 18] Invalid number of "additional-directions" elements: <sch:value-of select="count(apnp:additional-directions)" />.
+                    </sch:assert>
+
+                    <sch:assert test="count(apnp:long-description) = 0 or count(apnp:long-description) = 1">
+                        [RULE for Local Attribute 19] Invalid number of "long-description" elements: <sch:value-of select="count(apnp:long-description)" />.
+                    </sch:assert>
+
+                    <sch:assert test="count(apnp:captions) = 0 or count(apnp:captions) = 1">
+                        [RULE for Local Attribute 20] Invalid number of "captions" elements: <sch:value-of select="count(apnp:captions)" />.
+                    </sch:assert>
+
+                    <sch:assert test="count(apnp:transcript) = 0 or count(apnp:transcript) = 1">
+                        [RULE for Local Attribute 21] Invalid number of "transcript" elements: <sch:value-of select="count(apnp:transcript)" />.
+                    </sch:assert>
+
+                    <sch:assert test="count(apnp:alternative-text) = 0 or count(apnp:alternative-text) = 1">
+                        [RULE for Local Attribute 22] Invalid number of "alternative-text" elements: <sch:value-of select="count(apnp:alternative-text)" />.
+                    </sch:assert>
+
+                    <sch:assert test="count(apnp:audio-description) = 0 or count(apnp:audio-description) = 1">
+                        [RULE for Local Attribute 23] Invalid number of "audio-description" elements: <sch:value-of select="count(apnp:audio-description)" />.
+                    </sch:assert>
+
+                    <sch:assert test="count(apnp:high-contrast) = 0 or count(apnp:high-contrast) = 1">
+                        [RULE for Local Attribute 24] Invalid number of "high-contrast" elements: <sch:value-of select="count(apnp:high-contrast)" />.
+                    </sch:assert>
+
+                    <sch:assert test="count(apnp:input-requirements) = 0 or count(apnp:input-requirements) = 1">
+                        [RULE for Local Attribute 25] Invalid number of "input-requirements" elements: <sch:value-of select="count(apnp:input-requirements)" />.
+                    </sch:assert>
+
+                    <sch:assert test="count(apnp:language-of-interface) = 0 or count(apnp:language-of-interface) = 1">
+                        [RULE for Local Attribute 26] Invalid number of "language-of-interface" elements: <sch:value-of select="count(apnp:language-of-interface)" />.
+                    </sch:assert>
+
+                    <sch:assert test="count(apnp:layout-single-column) = 0 or count(apnp:layout-single-column) = 1">
+                        [RULE for Local Attribute 27] Invalid number of "layout-single-column" elements: <sch:value-of select="count(apnp:layout-single-column)" />.
+                    </sch:assert>
+
+                    <sch:assert test="count(apnp:text-appearance) = 0 or count(apnp:text-appearance) = 1">
+                        [RULE for Local Attribute 28] Invalid number of "text-appearance" elements: <sch:value-of select="count(apnp:text-appearance)" />.
+                    </sch:assert>
+
+                    <sch:assert test="count(apnp:calculator-on-screen) = 0 or count(apnp:calculator-on-screen) = 1">
+                        [RULE for Local Attribute 29] Invalid number of "calculator-on-screen" elements: <sch:value-of select="count(apnp:calculator-on-screen)" />.
+                    </sch:assert>
+
+                    <sch:assert test="count(apnp:dictionary-on-screen) = 0 or count(apnp:dictionary-on-screen) = 1">
+                        [RULE for Local Attribute 30] Invalid number of "dictionary-on-screen" elements: <sch:value-of select="count(apnp:dictionary-on-screen)" />.
+                    </sch:assert>
+
+                    <sch:assert test="count(apnp:glossary-on-screen) = 0 or count(apnp:glossary-on-screen) = 1">
+                        [RULE for Local Attribute 31] Invalid number of "glossary-on-screen" elements: <sch:value-of select="count(apnp:glossary-on-screen)" />.
+                    </sch:assert>
+
+                    <sch:assert test="count(apnp:thesaurus-on-screen) = 0 or count(apnp:thesaurus-on-screen) = 1">
+                        [RULE for Local Attribute 32] Invalid number of "thesaurus-on-screen" elements: <sch:value-of select="count(apnp:thesaurus-on-screen)" />.
+                    </sch:assert>
+
+                    <sch:assert test="count(apnp:homophone-checker-on-screen) = 0 or count(apnp:homophone-checker-on-screen) = 1">
+                        [RULE for Local Attribute 33] Invalid number of "homophone-checker-on-screen" elements: <sch:value-of select="count(apnp:homophone-checker-on-screen)" />.
+                    </sch:assert>
+
+                    <sch:assert test="count(apnp:note-taking-on-screen) = 0 or count(apnp:note-taking-on-screen) = 1">
+                        [RULE for Local Attribute 34] Invalid number of "note-taking-on-screen" elements: <sch:value-of select="count(apnp:note-taking-on-screen)" />.
+                    </sch:assert>
+
+                    <sch:assert test="count(apnp:visual-organizer-on-screen) = 0 or count(apnp:visual-organizer-on-screen) = 1">
+                        [RULE for Local Attribute 35] Invalid number of "visual-organizer-on-screen" elements: <sch:value-of select="count(apnp:visual-organizer-on-screen)" />.
+                    </sch:assert>
+
+                    <sch:assert test="count(apnp:outliner-on-screen) = 0 or count(apnp:outliner-on-screen) = 1">
+                        [RULE for Local Attribute 36] Invalid number of "outliner-on-screen" elements: <sch:value-of select="count(apnp:outliner-on-screen)" />.
+                    </sch:assert>
+
+                    <sch:assert test="count(apnp:peer-interaction-on-screen) = 0 or count(apnp:peer-interaction-on-screen) = 1">
+                        [RULE for Local Attribute 37] Invalid number of "peer-interaction-on-screen" elements: <sch:value-of select="count(apnp:peer-interaction-on-screen)" />.
+                    </sch:assert>
+
+                    <sch:assert test="count(apnp:spell-checker-on-screen) = 0 or count(apnp:spell-checker-on-screen) = 1">
+                        [RULE for Local Attribute 38] Invalid number of "spell-checker-on-screen" elements: <sch:value-of select="count(apnp:spell-checker-on-screen)" />.
+                    </sch:assert>
+
+                </sch:rule>
+
+                <sch:rule abstract="false" context="apnp:access-for-all-pnp/apnp:access-for-all-pnp/apnp:activate-as-option-set">
+
+                    <sch:assert test="count(apnp:linguistic-guidance) = 0 or count(apnp:linguistic-guidance) = 1">
+                        [RULE for Local Attribute 1] Invalid number of "linguistic-guidance" elements: <sch:value-of select="count(apnp:linguistic-guidance)" />.
+                    </sch:assert>
+
+                    <sch:assert test="count(apnp:keyword-emphasis) = 0 or count(apnp:keyword-emphasis) = 1">
+                        [RULE for Local Attribute 2] Invalid number of "keyword-emphasis" elements: <sch:value-of select="count(apnp:keyword-emphasis)" />.
+                    </sch:assert>
+
+                    <sch:assert test="count(apnp:keyword-translation) = 0 or count(apnp:keyword-translation) = 1">
+                        [RULE for Local Attribute 3] Invalid number of "keyword-translation" elements: <sch:value-of select="count(apnp:keyword-translation)" />.
+                    </sch:assert>
+
+                    <sch:assert test="count(apnp:simplified-language-portions) = 0 or count(apnp:simplified-language-portions) = 1">
+                        [RULE for Local Attribute 4] Invalid number of "simplified-language-portions" elements: <sch:value-of select="count(apnp:simplified-language-portions)" />.
+                    </sch:assert>
+
+                    <sch:assert test="count(apnp:simplified-graphics) = 0 or count(apnp:simplified-graphics) = 1">
+                        [RULE for Local Attribute 5] Invalid number of "simplified-graphics" elements: <sch:value-of select="count(apnp:simplified-graphics)" />.
+                    </sch:assert>
+
+                    <sch:assert test="count(apnp:item-translation) = 0 or count(apnp:item-translation) = 1">
+                        [RULE for Local Attribute 6] Invalid number of "item-translation" elements: <sch:value-of select="count(apnp:item-translation)" />.
+                    </sch:assert>
+
+                    <sch:assert test="count(apnp:sign-language) = 0 or count(apnp:sign-language) = 1">
+                        [RULE for Local Attribute 7] Invalid number of "sign-language" elements: <sch:value-of select="count(apnp:sign-language)" />.
+                    </sch:assert>
+
+                    <sch:assert test="count(apnp:encouragement) = 0 or count(apnp:encouragement) = 1">
+                        [RULE for Local Attribute 8] Invalid number of "encouragement" elements: <sch:value-of select="count(apnp:encouragement)" />.
+                    </sch:assert>
+
+                    <sch:assert test="count(apnp:additional-testing-time) = 0 or count(apnp:additional-testing-time) = 1">
+                        [RULE for Local Attribute 9] Invalid number of "additional-testing-time" elements: <sch:value-of select="count(apnp:additional-testing-time)" />.
+                    </sch:assert>
+
+                    <sch:assert test="count(apnp:line-reader) = 0 or count(apnp:line-reader) = 1">
+                        [RULE for Local Attribute 10] Invalid number of "line-reader" elements: <sch:value-of select="count(apnp:line-reader)" />.
+                    </sch:assert>
+
+                    <sch:assert test="count(apnp:invert-display-polarity) = 0 or count(apnp:invert-display-polarity) = 1">
+                        [RULE for Local Attribute 11] Invalid number of "invert-display-polarity" elements: <sch:value-of select="count(apnp:invert-display-polarity)" />.
+                    </sch:assert>
+
+                    <sch:assert test="count(apnp:magnification) = 0 or count(apnp:magnification) = 1">
+                        [RULE for Local Attribute 12] Invalid number of "magnification" elements: <sch:value-of select="count(apnp:magnification)" />.
+                    </sch:assert>
+
+                    <sch:assert test="count(apnp:spoken) = 0 or count(apnp:spoken) = 1">
+                        [RULE for Local Attribute 13] Invalid number of "spoken" elements: <sch:value-of select="count(apnp:spoken)" />.
+                    </sch:assert>
+
+                    <sch:assert test="count(apnp:tactile) = 0 or count(apnp:tactile) = 1">
+                        [RULE for Local Attribute 14] Invalid number of "tactile" elements: <sch:value-of select="count(apnp:tactile)" />.
+                    </sch:assert>
+
+                    <sch:assert test="count(apnp:braille) = 0 or count(apnp:braille) = 1">
+                        [RULE for Local Attribute 15] Invalid number of "braille" elements: <sch:value-of select="count(apnp:braille)" />.
+                    </sch:assert>
+
+                    <sch:assert test="count(apnp:answer-masking) = 0 or count(apnp:answer-masking) = 1">
+                        [RULE for Local Attribute 16] Invalid number of "answer-masking" elements: <sch:value-of select="count(apnp:answer-masking)" />.
+                    </sch:assert>
+
+                    <sch:assert test="count(apnp:keyboard-directions) = 0 or count(apnp:keyboard-directions) = 1">
+                        [RULE for Local Attribute 17] Invalid number of "keyboard-directions" elements: <sch:value-of select="count(apnp:keyboard-directions)" />.
+                    </sch:assert>
+
+                    <sch:assert test="count(apnp:additional-directions) = 0 or count(apnp:additional-directions) = 1">
+                        [RULE for Local Attribute 18] Invalid number of "additional-directions" elements: <sch:value-of select="count(apnp:additional-directions)" />.
+                    </sch:assert>
+
+                    <sch:assert test="count(apnp:long-description) = 0 or count(apnp:long-description) = 1">
+                        [RULE for Local Attribute 19] Invalid number of "long-description" elements: <sch:value-of select="count(apnp:long-description)" />.
+                    </sch:assert>
+
+                    <sch:assert test="count(apnp:captions) = 0 or count(apnp:captions) = 1">
+                        [RULE for Local Attribute 20] Invalid number of "captions" elements: <sch:value-of select="count(apnp:captions)" />.
+                    </sch:assert>
+
+                    <sch:assert test="count(apnp:transcript) = 0 or count(apnp:transcript) = 1">
+                        [RULE for Local Attribute 21] Invalid number of "transcript" elements: <sch:value-of select="count(apnp:transcript)" />.
+                    </sch:assert>
+
+                    <sch:assert test="count(apnp:alternative-text) = 0 or count(apnp:alternative-text) = 1">
+                        [RULE for Local Attribute 22] Invalid number of "alternative-text" elements: <sch:value-of select="count(apnp:alternative-text)" />.
+                    </sch:assert>
+
+                    <sch:assert test="count(apnp:audio-description) = 0 or count(apnp:audio-description) = 1">
+                        [RULE for Local Attribute 23] Invalid number of "audio-description" elements: <sch:value-of select="count(apnp:audio-description)" />.
+                    </sch:assert>
+
+                    <sch:assert test="count(apnp:high-contrast) = 0 or count(apnp:high-contrast) = 1">
+                        [RULE for Local Attribute 24] Invalid number of "high-contrast" elements: <sch:value-of select="count(apnp:high-contrast)" />.
+                    </sch:assert>
+
+                    <sch:assert test="count(apnp:input-requirements) = 0 or count(apnp:input-requirements) = 1">
+                        [RULE for Local Attribute 25] Invalid number of "input-requirements" elements: <sch:value-of select="count(apnp:input-requirements)" />.
+                    </sch:assert>
+
+                    <sch:assert test="count(apnp:language-of-interface) = 0 or count(apnp:language-of-interface) = 1">
+                        [RULE for Local Attribute 26] Invalid number of "language-of-interface" elements: <sch:value-of select="count(apnp:language-of-interface)" />.
+                    </sch:assert>
+
+                    <sch:assert test="count(apnp:layout-single-column) = 0 or count(apnp:layout-single-column) = 1">
+                        [RULE for Local Attribute 27] Invalid number of "layout-single-column" elements: <sch:value-of select="count(apnp:layout-single-column)" />.
+                    </sch:assert>
+
+                    <sch:assert test="count(apnp:text-appearance) = 0 or count(apnp:text-appearance) = 1">
+                        [RULE for Local Attribute 28] Invalid number of "text-appearance" elements: <sch:value-of select="count(apnp:text-appearance)" />.
+                    </sch:assert>
+
+                    <sch:assert test="count(apnp:calculator-on-screen) = 0 or count(apnp:calculator-on-screen) = 1">
+                        [RULE for Local Attribute 29] Invalid number of "calculator-on-screen" elements: <sch:value-of select="count(apnp:calculator-on-screen)" />.
+                    </sch:assert>
+
+                    <sch:assert test="count(apnp:dictionary-on-screen) = 0 or count(apnp:dictionary-on-screen) = 1">
+                        [RULE for Local Attribute 30] Invalid number of "dictionary-on-screen" elements: <sch:value-of select="count(apnp:dictionary-on-screen)" />.
+                    </sch:assert>
+
+                    <sch:assert test="count(apnp:glossary-on-screen) = 0 or count(apnp:glossary-on-screen) = 1">
+                        [RULE for Local Attribute 31] Invalid number of "glossary-on-screen" elements: <sch:value-of select="count(apnp:glossary-on-screen)" />.
+                    </sch:assert>
+
+                    <sch:assert test="count(apnp:thesaurus-on-screen) = 0 or count(apnp:thesaurus-on-screen) = 1">
+                        [RULE for Local Attribute 32] Invalid number of "thesaurus-on-screen" elements: <sch:value-of select="count(apnp:thesaurus-on-screen)" />.
+                    </sch:assert>
+
+                    <sch:assert test="count(apnp:homophone-checker-on-screen) = 0 or count(apnp:homophone-checker-on-screen) = 1">
+                        [RULE for Local Attribute 33] Invalid number of "homophone-checker-on-screen" elements: <sch:value-of select="count(apnp:homophone-checker-on-screen)" />.
+                    </sch:assert>
+
+                    <sch:assert test="count(apnp:note-taking-on-screen) = 0 or count(apnp:note-taking-on-screen) = 1">
+                        [RULE for Local Attribute 34] Invalid number of "note-taking-on-screen" elements: <sch:value-of select="count(apnp:note-taking-on-screen)" />.
+                    </sch:assert>
+
+                    <sch:assert test="count(apnp:visual-organizer-on-screen) = 0 or count(apnp:visual-organizer-on-screen) = 1">
+                        [RULE for Local Attribute 35] Invalid number of "visual-organizer-on-screen" elements: <sch:value-of select="count(apnp:visual-organizer-on-screen)" />.
+                    </sch:assert>
+
+                    <sch:assert test="count(apnp:outliner-on-screen) = 0 or count(apnp:outliner-on-screen) = 1">
+                        [RULE for Local Attribute 36] Invalid number of "outliner-on-screen" elements: <sch:value-of select="count(apnp:outliner-on-screen)" />.
+                    </sch:assert>
+
+                    <sch:assert test="count(apnp:peer-interaction-on-screen) = 0 or count(apnp:peer-interaction-on-screen) = 1">
+                        [RULE for Local Attribute 37] Invalid number of "peer-interaction-on-screen" elements: <sch:value-of select="count(apnp:peer-interaction-on-screen)" />.
+                    </sch:assert>
+
+                    <sch:assert test="count(apnp:spell-checker-on-screen) = 0 or count(apnp:spell-checker-on-screen) = 1">
+                        [RULE for Local Attribute 38] Invalid number of "spell-checker-on-screen" elements: <sch:value-of select="count(apnp:spell-checker-on-screen)" />.
+                    </sch:assert>
+
+                </sch:rule>
+
+                <sch:rule abstract="false" context="apnp:access-for-all-pnp/apnp:access-for-all-pnp/apnp:prohibit-set">
+
+                    <sch:assert test="count(apnp:linguistic-guidance) = 0 or count(apnp:linguistic-guidance) = 1">
+                        [RULE for Local Attribute 1] Invalid number of "linguistic-guidance" elements: <sch:value-of select="count(apnp:linguistic-guidance)" />.
+                    </sch:assert>
+
+                    <sch:assert test="count(apnp:keyword-emphasis) = 0 or count(apnp:keyword-emphasis) = 1">
+                        [RULE for Local Attribute 2] Invalid number of "keyword-emphasis" elements: <sch:value-of select="count(apnp:keyword-emphasis)" />.
+                    </sch:assert>
+
+                    <sch:assert test="count(apnp:keyword-translation) = 0 or count(apnp:keyword-translation) = 1">
+                        [RULE for Local Attribute 3] Invalid number of "keyword-translation" elements: <sch:value-of select="count(apnp:keyword-translation)" />.
+                    </sch:assert>
+
+                    <sch:assert test="count(apnp:simplified-language-portions) = 0 or count(apnp:simplified-language-portions) = 1">
+                        [RULE for Local Attribute 4] Invalid number of "simplified-language-portions" elements: <sch:value-of select="count(apnp:simplified-language-portions)" />.
+                    </sch:assert>
+
+                    <sch:assert test="count(apnp:simplified-graphics) = 0 or count(apnp:simplified-graphics) = 1">
+                        [RULE for Local Attribute 5] Invalid number of "simplified-graphics" elements: <sch:value-of select="count(apnp:simplified-graphics)" />.
+                    </sch:assert>
+
+                    <sch:assert test="count(apnp:item-translation) = 0 or count(apnp:item-translation) = 1">
+                        [RULE for Local Attribute 6] Invalid number of "item-translation" elements: <sch:value-of select="count(apnp:item-translation)" />.
+                    </sch:assert>
+
+                    <sch:assert test="count(apnp:sign-language) = 0 or count(apnp:sign-language) = 1">
+                        [RULE for Local Attribute 7] Invalid number of "sign-language" elements: <sch:value-of select="count(apnp:sign-language)" />.
+                    </sch:assert>
+
+                    <sch:assert test="count(apnp:encouragement) = 0 or count(apnp:encouragement) = 1">
+                        [RULE for Local Attribute 8] Invalid number of "encouragement" elements: <sch:value-of select="count(apnp:encouragement)" />.
+                    </sch:assert>
+
+                    <sch:assert test="count(apnp:additional-testing-time) = 0 or count(apnp:additional-testing-time) = 1">
+                        [RULE for Local Attribute 9] Invalid number of "additional-testing-time" elements: <sch:value-of select="count(apnp:additional-testing-time)" />.
+                    </sch:assert>
+
+                    <sch:assert test="count(apnp:line-reader) = 0 or count(apnp:line-reader) = 1">
+                        [RULE for Local Attribute 10] Invalid number of "line-reader" elements: <sch:value-of select="count(apnp:line-reader)" />.
+                    </sch:assert>
+
+                    <sch:assert test="count(apnp:invert-display-polarity) = 0 or count(apnp:invert-display-polarity) = 1">
+                        [RULE for Local Attribute 11] Invalid number of "invert-display-polarity" elements: <sch:value-of select="count(apnp:invert-display-polarity)" />.
+                    </sch:assert>
+
+                    <sch:assert test="count(apnp:magnification) = 0 or count(apnp:magnification) = 1">
+                        [RULE for Local Attribute 12] Invalid number of "magnification" elements: <sch:value-of select="count(apnp:magnification)" />.
+                    </sch:assert>
+
+                    <sch:assert test="count(apnp:spoken) = 0 or count(apnp:spoken) = 1">
+                        [RULE for Local Attribute 13] Invalid number of "spoken" elements: <sch:value-of select="count(apnp:spoken)" />.
+                    </sch:assert>
+
+                    <sch:assert test="count(apnp:tactile) = 0 or count(apnp:tactile) = 1">
+                        [RULE for Local Attribute 14] Invalid number of "tactile" elements: <sch:value-of select="count(apnp:tactile)" />.
+                    </sch:assert>
+
+                    <sch:assert test="count(apnp:braille) = 0 or count(apnp:braille) = 1">
+                        [RULE for Local Attribute 15] Invalid number of "braille" elements: <sch:value-of select="count(apnp:braille)" />.
+                    </sch:assert>
+
+                    <sch:assert test="count(apnp:answer-masking) = 0 or count(apnp:answer-masking) = 1">
+                        [RULE for Local Attribute 16] Invalid number of "answer-masking" elements: <sch:value-of select="count(apnp:answer-masking)" />.
+                    </sch:assert>
+
+                    <sch:assert test="count(apnp:keyboard-directions) = 0 or count(apnp:keyboard-directions) = 1">
+                        [RULE for Local Attribute 17] Invalid number of "keyboard-directions" elements: <sch:value-of select="count(apnp:keyboard-directions)" />.
+                    </sch:assert>
+
+                    <sch:assert test="count(apnp:additional-directions) = 0 or count(apnp:additional-directions) = 1">
+                        [RULE for Local Attribute 18] Invalid number of "additional-directions" elements: <sch:value-of select="count(apnp:additional-directions)" />.
+                    </sch:assert>
+
+                    <sch:assert test="count(apnp:long-description) = 0 or count(apnp:long-description) = 1">
+                        [RULE for Local Attribute 19] Invalid number of "long-description" elements: <sch:value-of select="count(apnp:long-description)" />.
+                    </sch:assert>
+
+                    <sch:assert test="count(apnp:captions) = 0 or count(apnp:captions) = 1">
+                        [RULE for Local Attribute 20] Invalid number of "captions" elements: <sch:value-of select="count(apnp:captions)" />.
+                    </sch:assert>
+
+                    <sch:assert test="count(apnp:transcript) = 0 or count(apnp:transcript) = 1">
+                        [RULE for Local Attribute 21] Invalid number of "transcript" elements: <sch:value-of select="count(apnp:transcript)" />.
+                    </sch:assert>
+
+                    <sch:assert test="count(apnp:alternative-text) = 0 or count(apnp:alternative-text) = 1">
+                        [RULE for Local Attribute 22] Invalid number of "alternative-text" elements: <sch:value-of select="count(apnp:alternative-text)" />.
+                    </sch:assert>
+
+                    <sch:assert test="count(apnp:audio-description) = 0 or count(apnp:audio-description) = 1">
+                        [RULE for Local Attribute 23] Invalid number of "audio-description" elements: <sch:value-of select="count(apnp:audio-description)" />.
+                    </sch:assert>
+
+                    <sch:assert test="count(apnp:high-contrast) = 0 or count(apnp:high-contrast) = 1">
+                        [RULE for Local Attribute 24] Invalid number of "high-contrast" elements: <sch:value-of select="count(apnp:high-contrast)" />.
+                    </sch:assert>
+
+                    <sch:assert test="count(apnp:input-requirements) = 0 or count(apnp:input-requirements) = 1">
+                        [RULE for Local Attribute 25] Invalid number of "input-requirements" elements: <sch:value-of select="count(apnp:input-requirements)" />.
+                    </sch:assert>
+
+                    <sch:assert test="count(apnp:language-of-interface) = 0 or count(apnp:language-of-interface) = 1">
+                        [RULE for Local Attribute 26] Invalid number of "language-of-interface" elements: <sch:value-of select="count(apnp:language-of-interface)" />.
+                    </sch:assert>
+
+                    <sch:assert test="count(apnp:layout-single-column) = 0 or count(apnp:layout-single-column) = 1">
+                        [RULE for Local Attribute 27] Invalid number of "layout-single-column" elements: <sch:value-of select="count(apnp:layout-single-column)" />.
+                    </sch:assert>
+
+                    <sch:assert test="count(apnp:text-appearance) = 0 or count(apnp:text-appearance) = 1">
+                        [RULE for Local Attribute 28] Invalid number of "text-appearance" elements: <sch:value-of select="count(apnp:text-appearance)" />.
+                    </sch:assert>
+
+                    <sch:assert test="count(apnp:calculator-on-screen) = 0 or count(apnp:calculator-on-screen) = 1">
+                        [RULE for Local Attribute 29] Invalid number of "calculator-on-screen" elements: <sch:value-of select="count(apnp:calculator-on-screen)" />.
+                    </sch:assert>
+
+                    <sch:assert test="count(apnp:dictionary-on-screen) = 0 or count(apnp:dictionary-on-screen) = 1">
+                        [RULE for Local Attribute 30] Invalid number of "dictionary-on-screen" elements: <sch:value-of select="count(apnp:dictionary-on-screen)" />.
+                    </sch:assert>
+
+                    <sch:assert test="count(apnp:glossary-on-screen) = 0 or count(apnp:glossary-on-screen) = 1">
+                        [RULE for Local Attribute 31] Invalid number of "glossary-on-screen" elements: <sch:value-of select="count(apnp:glossary-on-screen)" />.
+                    </sch:assert>
+
+                    <sch:assert test="count(apnp:thesaurus-on-screen) = 0 or count(apnp:thesaurus-on-screen) = 1">
+                        [RULE for Local Attribute 32] Invalid number of "thesaurus-on-screen" elements: <sch:value-of select="count(apnp:thesaurus-on-screen)" />.
+                    </sch:assert>
+
+                    <sch:assert test="count(apnp:homophone-checker-on-screen) = 0 or count(apnp:homophone-checker-on-screen) = 1">
+                        [RULE for Local Attribute 33] Invalid number of "homophone-checker-on-screen" elements: <sch:value-of select="count(apnp:homophone-checker-on-screen)" />.
+                    </sch:assert>
+
+                    <sch:assert test="count(apnp:note-taking-on-screen) = 0 or count(apnp:note-taking-on-screen) = 1">
+                        [RULE for Local Attribute 34] Invalid number of "note-taking-on-screen" elements: <sch:value-of select="count(apnp:note-taking-on-screen)" />.
+                    </sch:assert>
+
+                    <sch:assert test="count(apnp:visual-organizer-on-screen) = 0 or count(apnp:visual-organizer-on-screen) = 1">
+                        [RULE for Local Attribute 35] Invalid number of "visual-organizer-on-screen" elements: <sch:value-of select="count(apnp:visual-organizer-on-screen)" />.
+                    </sch:assert>
+
+                    <sch:assert test="count(apnp:outliner-on-screen) = 0 or count(apnp:outliner-on-screen) = 1">
+                        [RULE for Local Attribute 36] Invalid number of "outliner-on-screen" elements: <sch:value-of select="count(apnp:outliner-on-screen)" />.
+                    </sch:assert>
+
+                    <sch:assert test="count(apnp:peer-interaction-on-screen) = 0 or count(apnp:peer-interaction-on-screen) = 1">
+                        [RULE for Local Attribute 37] Invalid number of "peer-interaction-on-screen" elements: <sch:value-of select="count(apnp:peer-interaction-on-screen)" />.
+                    </sch:assert>
+
+                    <sch:assert test="count(apnp:spell-checker-on-screen) = 0 or count(apnp:spell-checker-on-screen) = 1">
+                        [RULE for Local Attribute 38] Invalid number of "spell-checker-on-screen" elements: <sch:value-of select="count(apnp:spell-checker-on-screen)" />.
+                    </sch:assert>
+
+                </sch:rule>
+
+            </sch:pattern>
+            <!-- *************************************************************************** -->
+
+            <!-- RULESET ******************************************************************* -->
+            <sch:pattern abstract="false" id="FontFace.Type">
+                <sch:title>[RULESET] For the FontFace.Type complexType.</sch:title>
+
+                <sch:rule abstract="false" context="apnp:access-for-all-pnp/apnp:text-appearance/apnp:access-for-all-pnp/apnp:text-appearance/apnp:font-face">
+
+                    <sch:assert test="count(apnp:generic-font-face) = 1">
+                        [RULE for Local Attribute 2] Invalid number of "generic-font-face" elements: <sch:value-of select="count(apnp:generic-font-face)" />.
+                    </sch:assert>
+
+                </sch:rule>
+
+            </sch:pattern>
+            <!-- *************************************************************************** -->
+
+            <!-- RULESET ******************************************************************* -->
+            <sch:pattern abstract="false" id="InvertDisplayPolarity.Type">
+                <sch:title>[RULESET] For the InvertDisplayPolarity.Type complexType.</sch:title>
+                <!-- There are no elements that have an upper multiplicity of only "1". -->
+
+            </sch:pattern>
+            <!-- *************************************************************************** -->
+
+            <!-- RULESET ******************************************************************* -->
+            <sch:pattern abstract="false" id="LanguageMode.Type">
+                <sch:title>[RULESET] For the LanguageMode.Type complexType.</sch:title>
+                <!-- There are no elements that have an upper multiplicity of only "1". -->
+                <!-- There are no elements that have an upper multiplicity of only "1". -->
+                <!-- There are no elements that have an upper multiplicity of only "1". -->
+                <!-- There are no elements that have an upper multiplicity of only "1". -->
+                <!-- There are no elements that have an upper multiplicity of only "1". -->
+
+            </sch:pattern>
+            <!-- *************************************************************************** -->
+
+            <!-- RULESET ******************************************************************* -->
+            <sch:pattern abstract="false" id="LineReader.Type">
+                <sch:title>[RULESET] For the LineReader.Type complexType.</sch:title>
+                <!-- There are no elements that have an upper multiplicity of only "1". -->
+
+            </sch:pattern>
+            <!-- *************************************************************************** -->
+
+            <!-- RULESET ******************************************************************* -->
+            <sch:pattern abstract="false" id="LongDescription.Type">
+                <sch:title>[RULESET] For the LongDescription.Type complexType.</sch:title>
+                <!-- There are no elements that have an upper multiplicity of only "1". -->
+
+            </sch:pattern>
+            <!-- *************************************************************************** -->
+
+            <!-- RULESET ******************************************************************* -->
+            <sch:pattern abstract="false" id="ReplacesAccessMode.Type">
+                <sch:title>[RULESET] For the ReplacesAccessMode.Type complexType.</sch:title>
+
+                <sch:rule abstract="false" context="apnp:access-for-all-pnp/apnp:access-for-all-pnp/apnp:linguistic-guidance">
+
+                    <sch:assert test="count(apnp:replace-access-mode-auditory) = 0 or count(apnp:replace-access-mode-auditory) = 1">
+                        [RULE for Local Attribute 1] Invalid number of "replace-access-mode-auditory" elements: <sch:value-of select="count(apnp:replace-access-mode-auditory)" />.
+                    </sch:assert>
+
+                    <sch:assert test="count(apnp:replace-access-mode-color) = 0 or count(apnp:replace-access-mode-color) = 1">
+                        [RULE for Local Attribute 2] Invalid number of "replace-access-mode-color" elements: <sch:value-of select="count(apnp:replace-access-mode-color)" />.
+                    </sch:assert>
+
+                    <sch:assert test="count(apnp:replace-access-mode-item-size) = 0 or count(apnp:replace-access-mode-item-size) = 1">
+                        [RULE for Local Attribute 3] Invalid number of "replace-access-mode-item-size" elements: <sch:value-of select="count(apnp:replace-access-mode-item-size)" />.
+                    </sch:assert>
+
+                    <sch:assert test="count(apnp:replace-access-mode-olfactory) = 0 or count(apnp:replace-access-mode-olfactory) = 1">
+                        [RULE for Local Attribute 4] Invalid number of "replace-access-mode-olfactory" elements: <sch:value-of select="count(apnp:replace-access-mode-olfactory)" />.
+                    </sch:assert>
+
+                    <sch:assert test="count(apnp:replace-access-mode-orientation) = 0 or count(apnp:replace-access-mode-orientation) = 1">
+                        [RULE for Local Attribute 5] Invalid number of "replace-access-mode-orientation" elements: <sch:value-of select="count(apnp:replace-access-mode-orientation)" />.
+                    </sch:assert>
+
+                    <sch:assert test="count(apnp:replace-access-mode-position) = 0 or count(apnp:replace-access-mode-position) = 1">
+                        [RULE for Local Attribute 6] Invalid number of "replace-access-mode-position" elements: <sch:value-of select="count(apnp:replace-access-mode-position)" />.
+                    </sch:assert>
+
+                    <sch:assert test="count(apnp:replace-access-mode-tactile) = 0 or count(apnp:replace-access-mode-tactile) = 1">
+                        [RULE for Local Attribute 7] Invalid number of "replace-access-mode-tactile" elements: <sch:value-of select="count(apnp:replace-access-mode-tactile)" />.
+                    </sch:assert>
+
+                    <sch:assert test="count(apnp:replace-access-mode-text-on-image) = 0 or count(apnp:replace-access-mode-text-on-image) = 1">
+                        [RULE for Local Attribute 8] Invalid number of "replace-access-mode-text-on-image" elements: <sch:value-of select="count(apnp:replace-access-mode-text-on-image)" />.
+                    </sch:assert>
+
+                    <sch:assert test="count(apnp:replace-access-mode-textual) = 0 or count(apnp:replace-access-mode-textual) = 1">
+                        [RULE for Local Attribute 9] Invalid number of "replace-access-mode-textual" elements: <sch:value-of select="count(apnp:replace-access-mode-textual)" />.
+                    </sch:assert>
+
+                    <sch:assert test="count(apnp:replace-access-mode-visual) = 0 or count(apnp:replace-access-mode-visual) = 1">
+                        [RULE for Local Attribute 10] Invalid number of "replace-access-mode-visual" elements: <sch:value-of select="count(apnp:replace-access-mode-visual)" />.
+                    </sch:assert>
+
+                </sch:rule>
+
+                <sch:rule abstract="false" context="apnp:access-for-all-pnp/apnp:access-for-all-pnp/apnp:keyword-emphasis">
+
+                    <sch:assert test="count(apnp:replace-access-mode-auditory) = 0 or count(apnp:replace-access-mode-auditory) = 1">
+                        [RULE for Local Attribute 1] Invalid number of "replace-access-mode-auditory" elements: <sch:value-of select="count(apnp:replace-access-mode-auditory)" />.
+                    </sch:assert>
+
+                    <sch:assert test="count(apnp:replace-access-mode-color) = 0 or count(apnp:replace-access-mode-color) = 1">
+                        [RULE for Local Attribute 2] Invalid number of "replace-access-mode-color" elements: <sch:value-of select="count(apnp:replace-access-mode-color)" />.
+                    </sch:assert>
+
+                    <sch:assert test="count(apnp:replace-access-mode-item-size) = 0 or count(apnp:replace-access-mode-item-size) = 1">
+                        [RULE for Local Attribute 3] Invalid number of "replace-access-mode-item-size" elements: <sch:value-of select="count(apnp:replace-access-mode-item-size)" />.
+                    </sch:assert>
+
+                    <sch:assert test="count(apnp:replace-access-mode-olfactory) = 0 or count(apnp:replace-access-mode-olfactory) = 1">
+                        [RULE for Local Attribute 4] Invalid number of "replace-access-mode-olfactory" elements: <sch:value-of select="count(apnp:replace-access-mode-olfactory)" />.
+                    </sch:assert>
+
+                    <sch:assert test="count(apnp:replace-access-mode-orientation) = 0 or count(apnp:replace-access-mode-orientation) = 1">
+                        [RULE for Local Attribute 5] Invalid number of "replace-access-mode-orientation" elements: <sch:value-of select="count(apnp:replace-access-mode-orientation)" />.
+                    </sch:assert>
+
+                    <sch:assert test="count(apnp:replace-access-mode-position) = 0 or count(apnp:replace-access-mode-position) = 1">
+                        [RULE for Local Attribute 6] Invalid number of "replace-access-mode-position" elements: <sch:value-of select="count(apnp:replace-access-mode-position)" />.
+                    </sch:assert>
+
+                    <sch:assert test="count(apnp:replace-access-mode-tactile) = 0 or count(apnp:replace-access-mode-tactile) = 1">
+                        [RULE for Local Attribute 7] Invalid number of "replace-access-mode-tactile" elements: <sch:value-of select="count(apnp:replace-access-mode-tactile)" />.
+                    </sch:assert>
+
+                    <sch:assert test="count(apnp:replace-access-mode-text-on-image) = 0 or count(apnp:replace-access-mode-text-on-image) = 1">
+                        [RULE for Local Attribute 8] Invalid number of "replace-access-mode-text-on-image" elements: <sch:value-of select="count(apnp:replace-access-mode-text-on-image)" />.
+                    </sch:assert>
+
+                    <sch:assert test="count(apnp:replace-access-mode-textual) = 0 or count(apnp:replace-access-mode-textual) = 1">
+                        [RULE for Local Attribute 9] Invalid number of "replace-access-mode-textual" elements: <sch:value-of select="count(apnp:replace-access-mode-textual)" />.
+                    </sch:assert>
+
+                    <sch:assert test="count(apnp:replace-access-mode-visual) = 0 or count(apnp:replace-access-mode-visual) = 1">
+                        [RULE for Local Attribute 10] Invalid number of "replace-access-mode-visual" elements: <sch:value-of select="count(apnp:replace-access-mode-visual)" />.
+                    </sch:assert>
+
+                </sch:rule>
+
+                <sch:rule abstract="false" context="apnp:access-for-all-pnp/apnp:access-for-all-pnp/apnp:simplified-language-portions">
+
+                    <sch:assert test="count(apnp:replace-access-mode-auditory) = 0 or count(apnp:replace-access-mode-auditory) = 1">
+                        [RULE for Local Attribute 1] Invalid number of "replace-access-mode-auditory" elements: <sch:value-of select="count(apnp:replace-access-mode-auditory)" />.
+                    </sch:assert>
+
+                    <sch:assert test="count(apnp:replace-access-mode-color) = 0 or count(apnp:replace-access-mode-color) = 1">
+                        [RULE for Local Attribute 2] Invalid number of "replace-access-mode-color" elements: <sch:value-of select="count(apnp:replace-access-mode-color)" />.
+                    </sch:assert>
+
+                    <sch:assert test="count(apnp:replace-access-mode-item-size) = 0 or count(apnp:replace-access-mode-item-size) = 1">
+                        [RULE for Local Attribute 3] Invalid number of "replace-access-mode-item-size" elements: <sch:value-of select="count(apnp:replace-access-mode-item-size)" />.
+                    </sch:assert>
+
+                    <sch:assert test="count(apnp:replace-access-mode-olfactory) = 0 or count(apnp:replace-access-mode-olfactory) = 1">
+                        [RULE for Local Attribute 4] Invalid number of "replace-access-mode-olfactory" elements: <sch:value-of select="count(apnp:replace-access-mode-olfactory)" />.
+                    </sch:assert>
+
+                    <sch:assert test="count(apnp:replace-access-mode-orientation) = 0 or count(apnp:replace-access-mode-orientation) = 1">
+                        [RULE for Local Attribute 5] Invalid number of "replace-access-mode-orientation" elements: <sch:value-of select="count(apnp:replace-access-mode-orientation)" />.
+                    </sch:assert>
+
+                    <sch:assert test="count(apnp:replace-access-mode-position) = 0 or count(apnp:replace-access-mode-position) = 1">
+                        [RULE for Local Attribute 6] Invalid number of "replace-access-mode-position" elements: <sch:value-of select="count(apnp:replace-access-mode-position)" />.
+                    </sch:assert>
+
+                    <sch:assert test="count(apnp:replace-access-mode-tactile) = 0 or count(apnp:replace-access-mode-tactile) = 1">
+                        [RULE for Local Attribute 7] Invalid number of "replace-access-mode-tactile" elements: <sch:value-of select="count(apnp:replace-access-mode-tactile)" />.
+                    </sch:assert>
+
+                    <sch:assert test="count(apnp:replace-access-mode-text-on-image) = 0 or count(apnp:replace-access-mode-text-on-image) = 1">
+                        [RULE for Local Attribute 8] Invalid number of "replace-access-mode-text-on-image" elements: <sch:value-of select="count(apnp:replace-access-mode-text-on-image)" />.
+                    </sch:assert>
+
+                    <sch:assert test="count(apnp:replace-access-mode-textual) = 0 or count(apnp:replace-access-mode-textual) = 1">
+                        [RULE for Local Attribute 9] Invalid number of "replace-access-mode-textual" elements: <sch:value-of select="count(apnp:replace-access-mode-textual)" />.
+                    </sch:assert>
+
+                    <sch:assert test="count(apnp:replace-access-mode-visual) = 0 or count(apnp:replace-access-mode-visual) = 1">
+                        [RULE for Local Attribute 10] Invalid number of "replace-access-mode-visual" elements: <sch:value-of select="count(apnp:replace-access-mode-visual)" />.
+                    </sch:assert>
+
+                </sch:rule>
+
+                <sch:rule abstract="false" context="apnp:access-for-all-pnp/apnp:access-for-all-pnp/apnp:simplified-graphics">
+
+                    <sch:assert test="count(apnp:replace-access-mode-auditory) = 0 or count(apnp:replace-access-mode-auditory) = 1">
+                        [RULE for Local Attribute 1] Invalid number of "replace-access-mode-auditory" elements: <sch:value-of select="count(apnp:replace-access-mode-auditory)" />.
+                    </sch:assert>
+
+                    <sch:assert test="count(apnp:replace-access-mode-color) = 0 or count(apnp:replace-access-mode-color) = 1">
+                        [RULE for Local Attribute 2] Invalid number of "replace-access-mode-color" elements: <sch:value-of select="count(apnp:replace-access-mode-color)" />.
+                    </sch:assert>
+
+                    <sch:assert test="count(apnp:replace-access-mode-item-size) = 0 or count(apnp:replace-access-mode-item-size) = 1">
+                        [RULE for Local Attribute 3] Invalid number of "replace-access-mode-item-size" elements: <sch:value-of select="count(apnp:replace-access-mode-item-size)" />.
+                    </sch:assert>
+
+                    <sch:assert test="count(apnp:replace-access-mode-olfactory) = 0 or count(apnp:replace-access-mode-olfactory) = 1">
+                        [RULE for Local Attribute 4] Invalid number of "replace-access-mode-olfactory" elements: <sch:value-of select="count(apnp:replace-access-mode-olfactory)" />.
+                    </sch:assert>
+
+                    <sch:assert test="count(apnp:replace-access-mode-orientation) = 0 or count(apnp:replace-access-mode-orientation) = 1">
+                        [RULE for Local Attribute 5] Invalid number of "replace-access-mode-orientation" elements: <sch:value-of select="count(apnp:replace-access-mode-orientation)" />.
+                    </sch:assert>
+
+                    <sch:assert test="count(apnp:replace-access-mode-position) = 0 or count(apnp:replace-access-mode-position) = 1">
+                        [RULE for Local Attribute 6] Invalid number of "replace-access-mode-position" elements: <sch:value-of select="count(apnp:replace-access-mode-position)" />.
+                    </sch:assert>
+
+                    <sch:assert test="count(apnp:replace-access-mode-tactile) = 0 or count(apnp:replace-access-mode-tactile) = 1">
+                        [RULE for Local Attribute 7] Invalid number of "replace-access-mode-tactile" elements: <sch:value-of select="count(apnp:replace-access-mode-tactile)" />.
+                    </sch:assert>
+
+                    <sch:assert test="count(apnp:replace-access-mode-text-on-image) = 0 or count(apnp:replace-access-mode-text-on-image) = 1">
+                        [RULE for Local Attribute 8] Invalid number of "replace-access-mode-text-on-image" elements: <sch:value-of select="count(apnp:replace-access-mode-text-on-image)" />.
+                    </sch:assert>
+
+                    <sch:assert test="count(apnp:replace-access-mode-textual) = 0 or count(apnp:replace-access-mode-textual) = 1">
+                        [RULE for Local Attribute 9] Invalid number of "replace-access-mode-textual" elements: <sch:value-of select="count(apnp:replace-access-mode-textual)" />.
+                    </sch:assert>
+
+                    <sch:assert test="count(apnp:replace-access-mode-visual) = 0 or count(apnp:replace-access-mode-visual) = 1">
+                        [RULE for Local Attribute 10] Invalid number of "replace-access-mode-visual" elements: <sch:value-of select="count(apnp:replace-access-mode-visual)" />.
+                    </sch:assert>
+
+                </sch:rule>
+
+                <sch:rule abstract="false" context="apnp:access-for-all-pnp/apnp:access-for-all-pnp/apnp:encouragement">
+
+                    <sch:assert test="count(apnp:replace-access-mode-auditory) = 0 or count(apnp:replace-access-mode-auditory) = 1">
+                        [RULE for Local Attribute 1] Invalid number of "replace-access-mode-auditory" elements: <sch:value-of select="count(apnp:replace-access-mode-auditory)" />.
+                    </sch:assert>
+
+                    <sch:assert test="count(apnp:replace-access-mode-color) = 0 or count(apnp:replace-access-mode-color) = 1">
+                        [RULE for Local Attribute 2] Invalid number of "replace-access-mode-color" elements: <sch:value-of select="count(apnp:replace-access-mode-color)" />.
+                    </sch:assert>
+
+                    <sch:assert test="count(apnp:replace-access-mode-item-size) = 0 or count(apnp:replace-access-mode-item-size) = 1">
+                        [RULE for Local Attribute 3] Invalid number of "replace-access-mode-item-size" elements: <sch:value-of select="count(apnp:replace-access-mode-item-size)" />.
+                    </sch:assert>
+
+                    <sch:assert test="count(apnp:replace-access-mode-olfactory) = 0 or count(apnp:replace-access-mode-olfactory) = 1">
+                        [RULE for Local Attribute 4] Invalid number of "replace-access-mode-olfactory" elements: <sch:value-of select="count(apnp:replace-access-mode-olfactory)" />.
+                    </sch:assert>
+
+                    <sch:assert test="count(apnp:replace-access-mode-orientation) = 0 or count(apnp:replace-access-mode-orientation) = 1">
+                        [RULE for Local Attribute 5] Invalid number of "replace-access-mode-orientation" elements: <sch:value-of select="count(apnp:replace-access-mode-orientation)" />.
+                    </sch:assert>
+
+                    <sch:assert test="count(apnp:replace-access-mode-position) = 0 or count(apnp:replace-access-mode-position) = 1">
+                        [RULE for Local Attribute 6] Invalid number of "replace-access-mode-position" elements: <sch:value-of select="count(apnp:replace-access-mode-position)" />.
+                    </sch:assert>
+
+                    <sch:assert test="count(apnp:replace-access-mode-tactile) = 0 or count(apnp:replace-access-mode-tactile) = 1">
+                        [RULE for Local Attribute 7] Invalid number of "replace-access-mode-tactile" elements: <sch:value-of select="count(apnp:replace-access-mode-tactile)" />.
+                    </sch:assert>
+
+                    <sch:assert test="count(apnp:replace-access-mode-text-on-image) = 0 or count(apnp:replace-access-mode-text-on-image) = 1">
+                        [RULE for Local Attribute 8] Invalid number of "replace-access-mode-text-on-image" elements: <sch:value-of select="count(apnp:replace-access-mode-text-on-image)" />.
+                    </sch:assert>
+
+                    <sch:assert test="count(apnp:replace-access-mode-textual) = 0 or count(apnp:replace-access-mode-textual) = 1">
+                        [RULE for Local Attribute 9] Invalid number of "replace-access-mode-textual" elements: <sch:value-of select="count(apnp:replace-access-mode-textual)" />.
+                    </sch:assert>
+
+                    <sch:assert test="count(apnp:replace-access-mode-visual) = 0 or count(apnp:replace-access-mode-visual) = 1">
+                        [RULE for Local Attribute 10] Invalid number of "replace-access-mode-visual" elements: <sch:value-of select="count(apnp:replace-access-mode-visual)" />.
+                    </sch:assert>
+
+                </sch:rule>
+
+                <sch:rule abstract="false" context="apnp:access-for-all-pnp/apnp:access-for-all-pnp/apnp:tactile">
+
+                    <sch:assert test="count(apnp:replace-access-mode-auditory) = 0 or count(apnp:replace-access-mode-auditory) = 1">
+                        [RULE for Local Attribute 1] Invalid number of "replace-access-mode-auditory" elements: <sch:value-of select="count(apnp:replace-access-mode-auditory)" />.
+                    </sch:assert>
+
+                    <sch:assert test="count(apnp:replace-access-mode-color) = 0 or count(apnp:replace-access-mode-color) = 1">
+                        [RULE for Local Attribute 2] Invalid number of "replace-access-mode-color" elements: <sch:value-of select="count(apnp:replace-access-mode-color)" />.
+                    </sch:assert>
+
+                    <sch:assert test="count(apnp:replace-access-mode-item-size) = 0 or count(apnp:replace-access-mode-item-size) = 1">
+                        [RULE for Local Attribute 3] Invalid number of "replace-access-mode-item-size" elements: <sch:value-of select="count(apnp:replace-access-mode-item-size)" />.
+                    </sch:assert>
+
+                    <sch:assert test="count(apnp:replace-access-mode-olfactory) = 0 or count(apnp:replace-access-mode-olfactory) = 1">
+                        [RULE for Local Attribute 4] Invalid number of "replace-access-mode-olfactory" elements: <sch:value-of select="count(apnp:replace-access-mode-olfactory)" />.
+                    </sch:assert>
+
+                    <sch:assert test="count(apnp:replace-access-mode-orientation) = 0 or count(apnp:replace-access-mode-orientation) = 1">
+                        [RULE for Local Attribute 5] Invalid number of "replace-access-mode-orientation" elements: <sch:value-of select="count(apnp:replace-access-mode-orientation)" />.
+                    </sch:assert>
+
+                    <sch:assert test="count(apnp:replace-access-mode-position) = 0 or count(apnp:replace-access-mode-position) = 1">
+                        [RULE for Local Attribute 6] Invalid number of "replace-access-mode-position" elements: <sch:value-of select="count(apnp:replace-access-mode-position)" />.
+                    </sch:assert>
+
+                    <sch:assert test="count(apnp:replace-access-mode-tactile) = 0 or count(apnp:replace-access-mode-tactile) = 1">
+                        [RULE for Local Attribute 7] Invalid number of "replace-access-mode-tactile" elements: <sch:value-of select="count(apnp:replace-access-mode-tactile)" />.
+                    </sch:assert>
+
+                    <sch:assert test="count(apnp:replace-access-mode-text-on-image) = 0 or count(apnp:replace-access-mode-text-on-image) = 1">
+                        [RULE for Local Attribute 8] Invalid number of "replace-access-mode-text-on-image" elements: <sch:value-of select="count(apnp:replace-access-mode-text-on-image)" />.
+                    </sch:assert>
+
+                    <sch:assert test="count(apnp:replace-access-mode-textual) = 0 or count(apnp:replace-access-mode-textual) = 1">
+                        [RULE for Local Attribute 9] Invalid number of "replace-access-mode-textual" elements: <sch:value-of select="count(apnp:replace-access-mode-textual)" />.
+                    </sch:assert>
+
+                    <sch:assert test="count(apnp:replace-access-mode-visual) = 0 or count(apnp:replace-access-mode-visual) = 1">
+                        [RULE for Local Attribute 10] Invalid number of "replace-access-mode-visual" elements: <sch:value-of select="count(apnp:replace-access-mode-visual)" />.
+                    </sch:assert>
+
+                </sch:rule>
+
+                <sch:rule abstract="false" context="apnp:access-for-all-pnp/apnp:access-for-all-pnp/apnp:answer-masking">
+
+                    <sch:assert test="count(apnp:replace-access-mode-auditory) = 0 or count(apnp:replace-access-mode-auditory) = 1">
+                        [RULE for Local Attribute 1] Invalid number of "replace-access-mode-auditory" elements: <sch:value-of select="count(apnp:replace-access-mode-auditory)" />.
+                    </sch:assert>
+
+                    <sch:assert test="count(apnp:replace-access-mode-color) = 0 or count(apnp:replace-access-mode-color) = 1">
+                        [RULE for Local Attribute 2] Invalid number of "replace-access-mode-color" elements: <sch:value-of select="count(apnp:replace-access-mode-color)" />.
+                    </sch:assert>
+
+                    <sch:assert test="count(apnp:replace-access-mode-item-size) = 0 or count(apnp:replace-access-mode-item-size) = 1">
+                        [RULE for Local Attribute 3] Invalid number of "replace-access-mode-item-size" elements: <sch:value-of select="count(apnp:replace-access-mode-item-size)" />.
+                    </sch:assert>
+
+                    <sch:assert test="count(apnp:replace-access-mode-olfactory) = 0 or count(apnp:replace-access-mode-olfactory) = 1">
+                        [RULE for Local Attribute 4] Invalid number of "replace-access-mode-olfactory" elements: <sch:value-of select="count(apnp:replace-access-mode-olfactory)" />.
+                    </sch:assert>
+
+                    <sch:assert test="count(apnp:replace-access-mode-orientation) = 0 or count(apnp:replace-access-mode-orientation) = 1">
+                        [RULE for Local Attribute 5] Invalid number of "replace-access-mode-orientation" elements: <sch:value-of select="count(apnp:replace-access-mode-orientation)" />.
+                    </sch:assert>
+
+                    <sch:assert test="count(apnp:replace-access-mode-position) = 0 or count(apnp:replace-access-mode-position) = 1">
+                        [RULE for Local Attribute 6] Invalid number of "replace-access-mode-position" elements: <sch:value-of select="count(apnp:replace-access-mode-position)" />.
+                    </sch:assert>
+
+                    <sch:assert test="count(apnp:replace-access-mode-tactile) = 0 or count(apnp:replace-access-mode-tactile) = 1">
+                        [RULE for Local Attribute 7] Invalid number of "replace-access-mode-tactile" elements: <sch:value-of select="count(apnp:replace-access-mode-tactile)" />.
+                    </sch:assert>
+
+                    <sch:assert test="count(apnp:replace-access-mode-text-on-image) = 0 or count(apnp:replace-access-mode-text-on-image) = 1">
+                        [RULE for Local Attribute 8] Invalid number of "replace-access-mode-text-on-image" elements: <sch:value-of select="count(apnp:replace-access-mode-text-on-image)" />.
+                    </sch:assert>
+
+                    <sch:assert test="count(apnp:replace-access-mode-textual) = 0 or count(apnp:replace-access-mode-textual) = 1">
+                        [RULE for Local Attribute 9] Invalid number of "replace-access-mode-textual" elements: <sch:value-of select="count(apnp:replace-access-mode-textual)" />.
+                    </sch:assert>
+
+                    <sch:assert test="count(apnp:replace-access-mode-visual) = 0 or count(apnp:replace-access-mode-visual) = 1">
+                        [RULE for Local Attribute 10] Invalid number of "replace-access-mode-visual" elements: <sch:value-of select="count(apnp:replace-access-mode-visual)" />.
+                    </sch:assert>
+
+                </sch:rule>
+
+                <sch:rule abstract="false" context="apnp:access-for-all-pnp/apnp:access-for-all-pnp/apnp:keyboard-directions">
+
+                    <sch:assert test="count(apnp:replace-access-mode-auditory) = 0 or count(apnp:replace-access-mode-auditory) = 1">
+                        [RULE for Local Attribute 1] Invalid number of "replace-access-mode-auditory" elements: <sch:value-of select="count(apnp:replace-access-mode-auditory)" />.
+                    </sch:assert>
+
+                    <sch:assert test="count(apnp:replace-access-mode-color) = 0 or count(apnp:replace-access-mode-color) = 1">
+                        [RULE for Local Attribute 2] Invalid number of "replace-access-mode-color" elements: <sch:value-of select="count(apnp:replace-access-mode-color)" />.
+                    </sch:assert>
+
+                    <sch:assert test="count(apnp:replace-access-mode-item-size) = 0 or count(apnp:replace-access-mode-item-size) = 1">
+                        [RULE for Local Attribute 3] Invalid number of "replace-access-mode-item-size" elements: <sch:value-of select="count(apnp:replace-access-mode-item-size)" />.
+                    </sch:assert>
+
+                    <sch:assert test="count(apnp:replace-access-mode-olfactory) = 0 or count(apnp:replace-access-mode-olfactory) = 1">
+                        [RULE for Local Attribute 4] Invalid number of "replace-access-mode-olfactory" elements: <sch:value-of select="count(apnp:replace-access-mode-olfactory)" />.
+                    </sch:assert>
+
+                    <sch:assert test="count(apnp:replace-access-mode-orientation) = 0 or count(apnp:replace-access-mode-orientation) = 1">
+                        [RULE for Local Attribute 5] Invalid number of "replace-access-mode-orientation" elements: <sch:value-of select="count(apnp:replace-access-mode-orientation)" />.
+                    </sch:assert>
+
+                    <sch:assert test="count(apnp:replace-access-mode-position) = 0 or count(apnp:replace-access-mode-position) = 1">
+                        [RULE for Local Attribute 6] Invalid number of "replace-access-mode-position" elements: <sch:value-of select="count(apnp:replace-access-mode-position)" />.
+                    </sch:assert>
+
+                    <sch:assert test="count(apnp:replace-access-mode-tactile) = 0 or count(apnp:replace-access-mode-tactile) = 1">
+                        [RULE for Local Attribute 7] Invalid number of "replace-access-mode-tactile" elements: <sch:value-of select="count(apnp:replace-access-mode-tactile)" />.
+                    </sch:assert>
+
+                    <sch:assert test="count(apnp:replace-access-mode-text-on-image) = 0 or count(apnp:replace-access-mode-text-on-image) = 1">
+                        [RULE for Local Attribute 8] Invalid number of "replace-access-mode-text-on-image" elements: <sch:value-of select="count(apnp:replace-access-mode-text-on-image)" />.
+                    </sch:assert>
+
+                    <sch:assert test="count(apnp:replace-access-mode-textual) = 0 or count(apnp:replace-access-mode-textual) = 1">
+                        [RULE for Local Attribute 9] Invalid number of "replace-access-mode-textual" elements: <sch:value-of select="count(apnp:replace-access-mode-textual)" />.
+                    </sch:assert>
+
+                    <sch:assert test="count(apnp:replace-access-mode-visual) = 0 or count(apnp:replace-access-mode-visual) = 1">
+                        [RULE for Local Attribute 10] Invalid number of "replace-access-mode-visual" elements: <sch:value-of select="count(apnp:replace-access-mode-visual)" />.
+                    </sch:assert>
+
+                </sch:rule>
+
+                <sch:rule abstract="false" context="apnp:access-for-all-pnp/apnp:access-for-all-pnp/apnp:additional-directions">
+
+                    <sch:assert test="count(apnp:replace-access-mode-auditory) = 0 or count(apnp:replace-access-mode-auditory) = 1">
+                        [RULE for Local Attribute 1] Invalid number of "replace-access-mode-auditory" elements: <sch:value-of select="count(apnp:replace-access-mode-auditory)" />.
+                    </sch:assert>
+
+                    <sch:assert test="count(apnp:replace-access-mode-color) = 0 or count(apnp:replace-access-mode-color) = 1">
+                        [RULE for Local Attribute 2] Invalid number of "replace-access-mode-color" elements: <sch:value-of select="count(apnp:replace-access-mode-color)" />.
+                    </sch:assert>
+
+                    <sch:assert test="count(apnp:replace-access-mode-item-size) = 0 or count(apnp:replace-access-mode-item-size) = 1">
+                        [RULE for Local Attribute 3] Invalid number of "replace-access-mode-item-size" elements: <sch:value-of select="count(apnp:replace-access-mode-item-size)" />.
+                    </sch:assert>
+
+                    <sch:assert test="count(apnp:replace-access-mode-olfactory) = 0 or count(apnp:replace-access-mode-olfactory) = 1">
+                        [RULE for Local Attribute 4] Invalid number of "replace-access-mode-olfactory" elements: <sch:value-of select="count(apnp:replace-access-mode-olfactory)" />.
+                    </sch:assert>
+
+                    <sch:assert test="count(apnp:replace-access-mode-orientation) = 0 or count(apnp:replace-access-mode-orientation) = 1">
+                        [RULE for Local Attribute 5] Invalid number of "replace-access-mode-orientation" elements: <sch:value-of select="count(apnp:replace-access-mode-orientation)" />.
+                    </sch:assert>
+
+                    <sch:assert test="count(apnp:replace-access-mode-position) = 0 or count(apnp:replace-access-mode-position) = 1">
+                        [RULE for Local Attribute 6] Invalid number of "replace-access-mode-position" elements: <sch:value-of select="count(apnp:replace-access-mode-position)" />.
+                    </sch:assert>
+
+                    <sch:assert test="count(apnp:replace-access-mode-tactile) = 0 or count(apnp:replace-access-mode-tactile) = 1">
+                        [RULE for Local Attribute 7] Invalid number of "replace-access-mode-tactile" elements: <sch:value-of select="count(apnp:replace-access-mode-tactile)" />.
+                    </sch:assert>
+
+                    <sch:assert test="count(apnp:replace-access-mode-text-on-image) = 0 or count(apnp:replace-access-mode-text-on-image) = 1">
+                        [RULE for Local Attribute 8] Invalid number of "replace-access-mode-text-on-image" elements: <sch:value-of select="count(apnp:replace-access-mode-text-on-image)" />.
+                    </sch:assert>
+
+                    <sch:assert test="count(apnp:replace-access-mode-textual) = 0 or count(apnp:replace-access-mode-textual) = 1">
+                        [RULE for Local Attribute 9] Invalid number of "replace-access-mode-textual" elements: <sch:value-of select="count(apnp:replace-access-mode-textual)" />.
+                    </sch:assert>
+
+                    <sch:assert test="count(apnp:replace-access-mode-visual) = 0 or count(apnp:replace-access-mode-visual) = 1">
+                        [RULE for Local Attribute 10] Invalid number of "replace-access-mode-visual" elements: <sch:value-of select="count(apnp:replace-access-mode-visual)" />.
+                    </sch:assert>
+
+                </sch:rule>
+
+                <sch:rule abstract="false" context="apnp:access-for-all-pnp/apnp:access-for-all-pnp/apnp:captions">
+
+                    <sch:assert test="count(apnp:replace-access-mode-auditory) = 0 or count(apnp:replace-access-mode-auditory) = 1">
+                        [RULE for Local Attribute 1] Invalid number of "replace-access-mode-auditory" elements: <sch:value-of select="count(apnp:replace-access-mode-auditory)" />.
+                    </sch:assert>
+
+                    <sch:assert test="count(apnp:replace-access-mode-color) = 0 or count(apnp:replace-access-mode-color) = 1">
+                        [RULE for Local Attribute 2] Invalid number of "replace-access-mode-color" elements: <sch:value-of select="count(apnp:replace-access-mode-color)" />.
+                    </sch:assert>
+
+                    <sch:assert test="count(apnp:replace-access-mode-item-size) = 0 or count(apnp:replace-access-mode-item-size) = 1">
+                        [RULE for Local Attribute 3] Invalid number of "replace-access-mode-item-size" elements: <sch:value-of select="count(apnp:replace-access-mode-item-size)" />.
+                    </sch:assert>
+
+                    <sch:assert test="count(apnp:replace-access-mode-olfactory) = 0 or count(apnp:replace-access-mode-olfactory) = 1">
+                        [RULE for Local Attribute 4] Invalid number of "replace-access-mode-olfactory" elements: <sch:value-of select="count(apnp:replace-access-mode-olfactory)" />.
+                    </sch:assert>
+
+                    <sch:assert test="count(apnp:replace-access-mode-orientation) = 0 or count(apnp:replace-access-mode-orientation) = 1">
+                        [RULE for Local Attribute 5] Invalid number of "replace-access-mode-orientation" elements: <sch:value-of select="count(apnp:replace-access-mode-orientation)" />.
+                    </sch:assert>
+
+                    <sch:assert test="count(apnp:replace-access-mode-position) = 0 or count(apnp:replace-access-mode-position) = 1">
+                        [RULE for Local Attribute 6] Invalid number of "replace-access-mode-position" elements: <sch:value-of select="count(apnp:replace-access-mode-position)" />.
+                    </sch:assert>
+
+                    <sch:assert test="count(apnp:replace-access-mode-tactile) = 0 or count(apnp:replace-access-mode-tactile) = 1">
+                        [RULE for Local Attribute 7] Invalid number of "replace-access-mode-tactile" elements: <sch:value-of select="count(apnp:replace-access-mode-tactile)" />.
+                    </sch:assert>
+
+                    <sch:assert test="count(apnp:replace-access-mode-text-on-image) = 0 or count(apnp:replace-access-mode-text-on-image) = 1">
+                        [RULE for Local Attribute 8] Invalid number of "replace-access-mode-text-on-image" elements: <sch:value-of select="count(apnp:replace-access-mode-text-on-image)" />.
+                    </sch:assert>
+
+                    <sch:assert test="count(apnp:replace-access-mode-textual) = 0 or count(apnp:replace-access-mode-textual) = 1">
+                        [RULE for Local Attribute 9] Invalid number of "replace-access-mode-textual" elements: <sch:value-of select="count(apnp:replace-access-mode-textual)" />.
+                    </sch:assert>
+
+                    <sch:assert test="count(apnp:replace-access-mode-visual) = 0 or count(apnp:replace-access-mode-visual) = 1">
+                        [RULE for Local Attribute 10] Invalid number of "replace-access-mode-visual" elements: <sch:value-of select="count(apnp:replace-access-mode-visual)" />.
+                    </sch:assert>
+
+                </sch:rule>
+
+                <sch:rule abstract="false" context="apnp:access-for-all-pnp/apnp:access-for-all-pnp/apnp:transcript">
+
+                    <sch:assert test="count(apnp:replace-access-mode-auditory) = 0 or count(apnp:replace-access-mode-auditory) = 1">
+                        [RULE for Local Attribute 1] Invalid number of "replace-access-mode-auditory" elements: <sch:value-of select="count(apnp:replace-access-mode-auditory)" />.
+                    </sch:assert>
+
+                    <sch:assert test="count(apnp:replace-access-mode-color) = 0 or count(apnp:replace-access-mode-color) = 1">
+                        [RULE for Local Attribute 2] Invalid number of "replace-access-mode-color" elements: <sch:value-of select="count(apnp:replace-access-mode-color)" />.
+                    </sch:assert>
+
+                    <sch:assert test="count(apnp:replace-access-mode-item-size) = 0 or count(apnp:replace-access-mode-item-size) = 1">
+                        [RULE for Local Attribute 3] Invalid number of "replace-access-mode-item-size" elements: <sch:value-of select="count(apnp:replace-access-mode-item-size)" />.
+                    </sch:assert>
+
+                    <sch:assert test="count(apnp:replace-access-mode-olfactory) = 0 or count(apnp:replace-access-mode-olfactory) = 1">
+                        [RULE for Local Attribute 4] Invalid number of "replace-access-mode-olfactory" elements: <sch:value-of select="count(apnp:replace-access-mode-olfactory)" />.
+                    </sch:assert>
+
+                    <sch:assert test="count(apnp:replace-access-mode-orientation) = 0 or count(apnp:replace-access-mode-orientation) = 1">
+                        [RULE for Local Attribute 5] Invalid number of "replace-access-mode-orientation" elements: <sch:value-of select="count(apnp:replace-access-mode-orientation)" />.
+                    </sch:assert>
+
+                    <sch:assert test="count(apnp:replace-access-mode-position) = 0 or count(apnp:replace-access-mode-position) = 1">
+                        [RULE for Local Attribute 6] Invalid number of "replace-access-mode-position" elements: <sch:value-of select="count(apnp:replace-access-mode-position)" />.
+                    </sch:assert>
+
+                    <sch:assert test="count(apnp:replace-access-mode-tactile) = 0 or count(apnp:replace-access-mode-tactile) = 1">
+                        [RULE for Local Attribute 7] Invalid number of "replace-access-mode-tactile" elements: <sch:value-of select="count(apnp:replace-access-mode-tactile)" />.
+                    </sch:assert>
+
+                    <sch:assert test="count(apnp:replace-access-mode-text-on-image) = 0 or count(apnp:replace-access-mode-text-on-image) = 1">
+                        [RULE for Local Attribute 8] Invalid number of "replace-access-mode-text-on-image" elements: <sch:value-of select="count(apnp:replace-access-mode-text-on-image)" />.
+                    </sch:assert>
+
+                    <sch:assert test="count(apnp:replace-access-mode-textual) = 0 or count(apnp:replace-access-mode-textual) = 1">
+                        [RULE for Local Attribute 9] Invalid number of "replace-access-mode-textual" elements: <sch:value-of select="count(apnp:replace-access-mode-textual)" />.
+                    </sch:assert>
+
+                    <sch:assert test="count(apnp:replace-access-mode-visual) = 0 or count(apnp:replace-access-mode-visual) = 1">
+                        [RULE for Local Attribute 10] Invalid number of "replace-access-mode-visual" elements: <sch:value-of select="count(apnp:replace-access-mode-visual)" />.
+                    </sch:assert>
+
+                </sch:rule>
+
+                <sch:rule abstract="false" context="apnp:access-for-all-pnp/apnp:access-for-all-pnp/apnp:alternative-text">
+
+                    <sch:assert test="count(apnp:replace-access-mode-auditory) = 0 or count(apnp:replace-access-mode-auditory) = 1">
+                        [RULE for Local Attribute 1] Invalid number of "replace-access-mode-auditory" elements: <sch:value-of select="count(apnp:replace-access-mode-auditory)" />.
+                    </sch:assert>
+
+                    <sch:assert test="count(apnp:replace-access-mode-color) = 0 or count(apnp:replace-access-mode-color) = 1">
+                        [RULE for Local Attribute 2] Invalid number of "replace-access-mode-color" elements: <sch:value-of select="count(apnp:replace-access-mode-color)" />.
+                    </sch:assert>
+
+                    <sch:assert test="count(apnp:replace-access-mode-item-size) = 0 or count(apnp:replace-access-mode-item-size) = 1">
+                        [RULE for Local Attribute 3] Invalid number of "replace-access-mode-item-size" elements: <sch:value-of select="count(apnp:replace-access-mode-item-size)" />.
+                    </sch:assert>
+
+                    <sch:assert test="count(apnp:replace-access-mode-olfactory) = 0 or count(apnp:replace-access-mode-olfactory) = 1">
+                        [RULE for Local Attribute 4] Invalid number of "replace-access-mode-olfactory" elements: <sch:value-of select="count(apnp:replace-access-mode-olfactory)" />.
+                    </sch:assert>
+
+                    <sch:assert test="count(apnp:replace-access-mode-orientation) = 0 or count(apnp:replace-access-mode-orientation) = 1">
+                        [RULE for Local Attribute 5] Invalid number of "replace-access-mode-orientation" elements: <sch:value-of select="count(apnp:replace-access-mode-orientation)" />.
+                    </sch:assert>
+
+                    <sch:assert test="count(apnp:replace-access-mode-position) = 0 or count(apnp:replace-access-mode-position) = 1">
+                        [RULE for Local Attribute 6] Invalid number of "replace-access-mode-position" elements: <sch:value-of select="count(apnp:replace-access-mode-position)" />.
+                    </sch:assert>
+
+                    <sch:assert test="count(apnp:replace-access-mode-tactile) = 0 or count(apnp:replace-access-mode-tactile) = 1">
+                        [RULE for Local Attribute 7] Invalid number of "replace-access-mode-tactile" elements: <sch:value-of select="count(apnp:replace-access-mode-tactile)" />.
+                    </sch:assert>
+
+                    <sch:assert test="count(apnp:replace-access-mode-text-on-image) = 0 or count(apnp:replace-access-mode-text-on-image) = 1">
+                        [RULE for Local Attribute 8] Invalid number of "replace-access-mode-text-on-image" elements: <sch:value-of select="count(apnp:replace-access-mode-text-on-image)" />.
+                    </sch:assert>
+
+                    <sch:assert test="count(apnp:replace-access-mode-textual) = 0 or count(apnp:replace-access-mode-textual) = 1">
+                        [RULE for Local Attribute 9] Invalid number of "replace-access-mode-textual" elements: <sch:value-of select="count(apnp:replace-access-mode-textual)" />.
+                    </sch:assert>
+
+                    <sch:assert test="count(apnp:replace-access-mode-visual) = 0 or count(apnp:replace-access-mode-visual) = 1">
+                        [RULE for Local Attribute 10] Invalid number of "replace-access-mode-visual" elements: <sch:value-of select="count(apnp:replace-access-mode-visual)" />.
+                    </sch:assert>
+
+                </sch:rule>
+
+                <sch:rule abstract="false" context="apnp:access-for-all-pnp/apnp:access-for-all-pnp/apnp:audio-description">
+
+                    <sch:assert test="count(apnp:replace-access-mode-auditory) = 0 or count(apnp:replace-access-mode-auditory) = 1">
+                        [RULE for Local Attribute 1] Invalid number of "replace-access-mode-auditory" elements: <sch:value-of select="count(apnp:replace-access-mode-auditory)" />.
+                    </sch:assert>
+
+                    <sch:assert test="count(apnp:replace-access-mode-color) = 0 or count(apnp:replace-access-mode-color) = 1">
+                        [RULE for Local Attribute 2] Invalid number of "replace-access-mode-color" elements: <sch:value-of select="count(apnp:replace-access-mode-color)" />.
+                    </sch:assert>
+
+                    <sch:assert test="count(apnp:replace-access-mode-item-size) = 0 or count(apnp:replace-access-mode-item-size) = 1">
+                        [RULE for Local Attribute 3] Invalid number of "replace-access-mode-item-size" elements: <sch:value-of select="count(apnp:replace-access-mode-item-size)" />.
+                    </sch:assert>
+
+                    <sch:assert test="count(apnp:replace-access-mode-olfactory) = 0 or count(apnp:replace-access-mode-olfactory) = 1">
+                        [RULE for Local Attribute 4] Invalid number of "replace-access-mode-olfactory" elements: <sch:value-of select="count(apnp:replace-access-mode-olfactory)" />.
+                    </sch:assert>
+
+                    <sch:assert test="count(apnp:replace-access-mode-orientation) = 0 or count(apnp:replace-access-mode-orientation) = 1">
+                        [RULE for Local Attribute 5] Invalid number of "replace-access-mode-orientation" elements: <sch:value-of select="count(apnp:replace-access-mode-orientation)" />.
+                    </sch:assert>
+
+                    <sch:assert test="count(apnp:replace-access-mode-position) = 0 or count(apnp:replace-access-mode-position) = 1">
+                        [RULE for Local Attribute 6] Invalid number of "replace-access-mode-position" elements: <sch:value-of select="count(apnp:replace-access-mode-position)" />.
+                    </sch:assert>
+
+                    <sch:assert test="count(apnp:replace-access-mode-tactile) = 0 or count(apnp:replace-access-mode-tactile) = 1">
+                        [RULE for Local Attribute 7] Invalid number of "replace-access-mode-tactile" elements: <sch:value-of select="count(apnp:replace-access-mode-tactile)" />.
+                    </sch:assert>
+
+                    <sch:assert test="count(apnp:replace-access-mode-text-on-image) = 0 or count(apnp:replace-access-mode-text-on-image) = 1">
+                        [RULE for Local Attribute 8] Invalid number of "replace-access-mode-text-on-image" elements: <sch:value-of select="count(apnp:replace-access-mode-text-on-image)" />.
+                    </sch:assert>
+
+                    <sch:assert test="count(apnp:replace-access-mode-textual) = 0 or count(apnp:replace-access-mode-textual) = 1">
+                        [RULE for Local Attribute 9] Invalid number of "replace-access-mode-textual" elements: <sch:value-of select="count(apnp:replace-access-mode-textual)" />.
+                    </sch:assert>
+
+                    <sch:assert test="count(apnp:replace-access-mode-visual) = 0 or count(apnp:replace-access-mode-visual) = 1">
+                        [RULE for Local Attribute 10] Invalid number of "replace-access-mode-visual" elements: <sch:value-of select="count(apnp:replace-access-mode-visual)" />.
+                    </sch:assert>
+
+                </sch:rule>
+
+                <sch:rule abstract="false" context="apnp:access-for-all-pnp/apnp:access-for-all-pnp/apnp:high-contrast">
+
+                    <sch:assert test="count(apnp:replace-access-mode-auditory) = 0 or count(apnp:replace-access-mode-auditory) = 1">
+                        [RULE for Local Attribute 1] Invalid number of "replace-access-mode-auditory" elements: <sch:value-of select="count(apnp:replace-access-mode-auditory)" />.
+                    </sch:assert>
+
+                    <sch:assert test="count(apnp:replace-access-mode-color) = 0 or count(apnp:replace-access-mode-color) = 1">
+                        [RULE for Local Attribute 2] Invalid number of "replace-access-mode-color" elements: <sch:value-of select="count(apnp:replace-access-mode-color)" />.
+                    </sch:assert>
+
+                    <sch:assert test="count(apnp:replace-access-mode-item-size) = 0 or count(apnp:replace-access-mode-item-size) = 1">
+                        [RULE for Local Attribute 3] Invalid number of "replace-access-mode-item-size" elements: <sch:value-of select="count(apnp:replace-access-mode-item-size)" />.
+                    </sch:assert>
+
+                    <sch:assert test="count(apnp:replace-access-mode-olfactory) = 0 or count(apnp:replace-access-mode-olfactory) = 1">
+                        [RULE for Local Attribute 4] Invalid number of "replace-access-mode-olfactory" elements: <sch:value-of select="count(apnp:replace-access-mode-olfactory)" />.
+                    </sch:assert>
+
+                    <sch:assert test="count(apnp:replace-access-mode-orientation) = 0 or count(apnp:replace-access-mode-orientation) = 1">
+                        [RULE for Local Attribute 5] Invalid number of "replace-access-mode-orientation" elements: <sch:value-of select="count(apnp:replace-access-mode-orientation)" />.
+                    </sch:assert>
+
+                    <sch:assert test="count(apnp:replace-access-mode-position) = 0 or count(apnp:replace-access-mode-position) = 1">
+                        [RULE for Local Attribute 6] Invalid number of "replace-access-mode-position" elements: <sch:value-of select="count(apnp:replace-access-mode-position)" />.
+                    </sch:assert>
+
+                    <sch:assert test="count(apnp:replace-access-mode-tactile) = 0 or count(apnp:replace-access-mode-tactile) = 1">
+                        [RULE for Local Attribute 7] Invalid number of "replace-access-mode-tactile" elements: <sch:value-of select="count(apnp:replace-access-mode-tactile)" />.
+                    </sch:assert>
+
+                    <sch:assert test="count(apnp:replace-access-mode-text-on-image) = 0 or count(apnp:replace-access-mode-text-on-image) = 1">
+                        [RULE for Local Attribute 8] Invalid number of "replace-access-mode-text-on-image" elements: <sch:value-of select="count(apnp:replace-access-mode-text-on-image)" />.
+                    </sch:assert>
+
+                    <sch:assert test="count(apnp:replace-access-mode-textual) = 0 or count(apnp:replace-access-mode-textual) = 1">
+                        [RULE for Local Attribute 9] Invalid number of "replace-access-mode-textual" elements: <sch:value-of select="count(apnp:replace-access-mode-textual)" />.
+                    </sch:assert>
+
+                    <sch:assert test="count(apnp:replace-access-mode-visual) = 0 or count(apnp:replace-access-mode-visual) = 1">
+                        [RULE for Local Attribute 10] Invalid number of "replace-access-mode-visual" elements: <sch:value-of select="count(apnp:replace-access-mode-visual)" />.
+                    </sch:assert>
+
+                </sch:rule>
+
+                <sch:rule abstract="false" context="apnp:access-for-all-pnp/apnp:access-for-all-pnp/apnp:layout-single-column">
+
+                    <sch:assert test="count(apnp:replace-access-mode-auditory) = 0 or count(apnp:replace-access-mode-auditory) = 1">
+                        [RULE for Local Attribute 1] Invalid number of "replace-access-mode-auditory" elements: <sch:value-of select="count(apnp:replace-access-mode-auditory)" />.
+                    </sch:assert>
+
+                    <sch:assert test="count(apnp:replace-access-mode-color) = 0 or count(apnp:replace-access-mode-color) = 1">
+                        [RULE for Local Attribute 2] Invalid number of "replace-access-mode-color" elements: <sch:value-of select="count(apnp:replace-access-mode-color)" />.
+                    </sch:assert>
+
+                    <sch:assert test="count(apnp:replace-access-mode-item-size) = 0 or count(apnp:replace-access-mode-item-size) = 1">
+                        [RULE for Local Attribute 3] Invalid number of "replace-access-mode-item-size" elements: <sch:value-of select="count(apnp:replace-access-mode-item-size)" />.
+                    </sch:assert>
+
+                    <sch:assert test="count(apnp:replace-access-mode-olfactory) = 0 or count(apnp:replace-access-mode-olfactory) = 1">
+                        [RULE for Local Attribute 4] Invalid number of "replace-access-mode-olfactory" elements: <sch:value-of select="count(apnp:replace-access-mode-olfactory)" />.
+                    </sch:assert>
+
+                    <sch:assert test="count(apnp:replace-access-mode-orientation) = 0 or count(apnp:replace-access-mode-orientation) = 1">
+                        [RULE for Local Attribute 5] Invalid number of "replace-access-mode-orientation" elements: <sch:value-of select="count(apnp:replace-access-mode-orientation)" />.
+                    </sch:assert>
+
+                    <sch:assert test="count(apnp:replace-access-mode-position) = 0 or count(apnp:replace-access-mode-position) = 1">
+                        [RULE for Local Attribute 6] Invalid number of "replace-access-mode-position" elements: <sch:value-of select="count(apnp:replace-access-mode-position)" />.
+                    </sch:assert>
+
+                    <sch:assert test="count(apnp:replace-access-mode-tactile) = 0 or count(apnp:replace-access-mode-tactile) = 1">
+                        [RULE for Local Attribute 7] Invalid number of "replace-access-mode-tactile" elements: <sch:value-of select="count(apnp:replace-access-mode-tactile)" />.
+                    </sch:assert>
+
+                    <sch:assert test="count(apnp:replace-access-mode-text-on-image) = 0 or count(apnp:replace-access-mode-text-on-image) = 1">
+                        [RULE for Local Attribute 8] Invalid number of "replace-access-mode-text-on-image" elements: <sch:value-of select="count(apnp:replace-access-mode-text-on-image)" />.
+                    </sch:assert>
+
+                    <sch:assert test="count(apnp:replace-access-mode-textual) = 0 or count(apnp:replace-access-mode-textual) = 1">
+                        [RULE for Local Attribute 9] Invalid number of "replace-access-mode-textual" elements: <sch:value-of select="count(apnp:replace-access-mode-textual)" />.
+                    </sch:assert>
+
+                    <sch:assert test="count(apnp:replace-access-mode-visual) = 0 or count(apnp:replace-access-mode-visual) = 1">
+                        [RULE for Local Attribute 10] Invalid number of "replace-access-mode-visual" elements: <sch:value-of select="count(apnp:replace-access-mode-visual)" />.
+                    </sch:assert>
+
+                </sch:rule>
+
+            </sch:pattern>
+            <!-- *************************************************************************** -->
+
+            <!-- RULESET ******************************************************************* -->
+            <sch:pattern abstract="false" id="Spoken.Type">
+                <sch:title>[RULESET] For the Spoken.Type complexType.</sch:title>
+
+                <sch:rule abstract="false" context="apnp:access-for-all-pnp/apnp:access-for-all-pnp/apnp:spoken">
+
+                    <sch:assert test="count(apnp:reading-type) = 1">
+                        [RULE for Local Attribute 1] Invalid number of "reading-type" elements: <sch:value-of select="count(apnp:reading-type)" />.
+                    </sch:assert>
+
+                    <sch:assert test="count(apnp:speech-rate) = 0 or count(apnp:speech-rate) = 1">
+                        [RULE for Local Attribute 3] Invalid number of "speech-rate" elements: <sch:value-of select="count(apnp:speech-rate)" />.
+                    </sch:assert>
+
+                    <sch:assert test="count(apnp:pitch) = 0 or count(apnp:pitch) = 1">
+                        [RULE for Local Attribute 4] Invalid number of "pitch" elements: <sch:value-of select="count(apnp:pitch)" />.
+                    </sch:assert>
+
+                    <sch:assert test="count(apnp:volume) = 0 or count(apnp:volume) = 1">
+                        [RULE for Local Attribute 5] Invalid number of "volume" elements: <sch:value-of select="count(apnp:volume)" />.
+                    </sch:assert>
+
+                    <sch:assert test="count(apnp:link-indication) = 1">
+                        [RULE for Local Attribute 6] Invalid number of "link-indication" elements: <sch:value-of select="count(apnp:link-indication)" />.
+                    </sch:assert>
+
+                    <sch:assert test="count(apnp:typing-echo) = 1">
+                        [RULE for Local Attribute 7] Invalid number of "typing-echo" elements: <sch:value-of select="count(apnp:typing-echo)" />.
+                    </sch:assert>
+
+                </sch:rule>
+
+            </sch:pattern>
+            <!-- *************************************************************************** -->
+
+            <!-- RULESET ******************************************************************* -->
+            <sch:pattern abstract="false" id="TextAppearance.Type">
+                <sch:title>[RULESET] For the TextAppearance.Type complexType.</sch:title>
+
+                <sch:rule abstract="false" context="apnp:access-for-all-pnp/apnp:access-for-all-pnp/apnp:text-appearance">
+
+                    <sch:assert test="count(apnp:background-color) = 0 or count(apnp:background-color) = 1">
+                        [RULE for Local Attribute 1] Invalid number of "background-color" elements: <sch:value-of select="count(apnp:background-color)" />.
+                    </sch:assert>
+
+                    <sch:assert test="count(apnp:font-color) = 0 or count(apnp:font-color) = 1">
+                        [RULE for Local Attribute 2] Invalid number of "font-color" elements: <sch:value-of select="count(apnp:font-color)" />.
+                    </sch:assert>
+
+                    <sch:assert test="count(apnp:font-size) = 0 or count(apnp:font-size) = 1">
+                        [RULE for Local Attribute 3] Invalid number of "font-size" elements: <sch:value-of select="count(apnp:font-size)" />.
+                    </sch:assert>
+
+                    <sch:assert test="count(apnp:font-face) = 0 or count(apnp:font-face) = 1">
+                        [RULE for Local Attribute 4] Invalid number of "font-face" elements: <sch:value-of select="count(apnp:font-face)" />.
+                    </sch:assert>
+
+                    <sch:assert test="count(apnp:line-spacing) = 0 or count(apnp:line-spacing) = 1">
+                        [RULE for Local Attribute 5] Invalid number of "line-spacing" elements: <sch:value-of select="count(apnp:line-spacing)" />.
+                    </sch:assert>
+
+                    <sch:assert test="count(apnp:line-height) = 0 or count(apnp:line-height) = 1">
+                        [RULE for Local Attribute 6] Invalid number of "line-height" elements: <sch:value-of select="count(apnp:line-height)" />.
+                    </sch:assert>
+
+                    <sch:assert test="count(apnp:letter-spacing) = 0 or count(apnp:letter-spacing) = 1">
+                        [RULE for Local Attribute 7] Invalid number of "letter-spacing" elements: <sch:value-of select="count(apnp:letter-spacing)" />.
+                    </sch:assert>
+
+                    <sch:assert test="count(apnp:uniform-font-sizing) = 0 or count(apnp:uniform-font-sizing) = 1">
+                        [RULE for Local Attribute 8] Invalid number of "uniform-font-sizing" elements: <sch:value-of select="count(apnp:uniform-font-sizing)" />.
+                    </sch:assert>
+
+                    <sch:assert test="count(apnp:word-spacing) = 0 or count(apnp:word-spacing) = 1">
+                        [RULE for Local Attribute 9] Invalid number of "word-spacing" elements: <sch:value-of select="count(apnp:word-spacing)" />.
+                    </sch:assert>
+
+                    <sch:assert test="count(apnp:word-wrapping) = 0 or count(apnp:word-wrapping) = 1">
+                        [RULE for Local Attribute 10] Invalid number of "word-wrapping" elements: <sch:value-of select="count(apnp:word-wrapping)" />.
+                    </sch:assert>
+
+                </sch:rule>
+
+            </sch:pattern>
+            <!-- *************************************************************************** -->
+
+        </xs:appinfo>
+    </xs:annotation>
+
+    <!-- Generate Global Attributes (non-assigned) ******************************************************** -->
+
+    <!-- ================================================================================================== -->
+
+    <!-- Generate Global Attributes *********************************************************************** -->
+
+    <!-- ================================================================================================== -->
+
+    <!-- Generate Global List Types *********************************************************************** -->
+
+    <!-- ================================================================================================== -->
+
+    <!-- Generate Namespaced extension Group  ************************************************************* -->
+
+    <xs:group name="grpStrict.any">
+        <xs:annotation>
+            <xs:documentation>
+                Any namespaced element from any namespace, other than the target namespace, may be included within an "any" element.
+                The namespace for the imported element must be defined in the instance, and the schema must be imported.
+                The extension has a definition of "strict" i.e. they must have their own namespace.
+            </xs:documentation>
+        </xs:annotation>
+        <xs:sequence>
+            <xs:any namespace = "##other" processContents = "strict" minOccurs = "0" maxOccurs = "unbounded" />
+        </xs:sequence>
+    </xs:group>
+
+    <!-- ================================================================================================== -->
+
+    <!-- Generate Special DataTypes  ********************************************************************** -->
+
+    <xs:complexType name="EmptyPrimitiveType.Type">
+        <xs:complexContent>
+            <xs:restriction base="xs:anyType" />
+        </xs:complexContent>
+    </xs:complexType>
+
+    <!-- ================================================================================================== -->
+
+    <!-- Generate the enumerated simpleType declarations ************************************************** -->
+
+    <!-- ================================================================================================== -->
+
+    <!-- Generate the simpleType elements based on IMS data-types (Parameter) ***************************** -->
+
+    <!-- ================================================================================================== -->
+
+    <!-- Generate the simpleType elements based on IMS data-types (Derived) ******************************* -->
+
+    <!-- ================================================================================================== -->
+
+    <!-- Generate the simpleType elements based on IMS data-types (Union) ********************************* -->
+
+    <!-- ================================================================================================== -->
+
+    <!-- Generate the simpleType elements based on IMS data-types (Complex) ******************************* -->
+
+    <!-- ================================================================================================== -->
+
+    <!-- Generate the derived data-type elements based upon simpleType ************************************ -->
+
+    <xs:simpleType name="ExtensionString.Type">
+        <xs:restriction base="xs:string">
+            <xs:pattern value="(ext:)[a-z|A-Z|.|_]+" />
+        </xs:restriction>
+    </xs:simpleType>
+
+    <xs:simpleType name="Hex.Type">
+        <xs:restriction base="xs:string">
+            <xs:pattern value="(#)([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})" />
+        </xs:restriction>
+    </xs:simpleType>
+
+    <xs:simpleType name="Volume.Type">
+        <xs:restriction base="xs:float">
+            <xs:maxInclusive value="1.0" />
+        </xs:restriction>
+    </xs:simpleType>
+
+    <!-- ================================================================================================== -->
+
+    <!-- Generate the derived data-type elements based upon derived simpleType **************************** -->
+
+    <!-- ================================================================================================== -->
+
+    <!-- Generate the ComplexTypes ************************************************************************ -->
+
+    <xs:complexType name="AccessForAllPNP.Type" abstract="false" mixed="false">
+        <xs:annotation>
+            <xs:documentation source="documentation">
+                A collection of information that states how a user prefers digital learning resources to  
+                be supplied. This is the root container and so identifies all of the available PNP proper-
+                ties.                                                                                     
+                [QTIv3p0] Profile - the changes to the XML element list are:
+                * The "at-interoperable" element has been prohibited;
+                * The "language-of-adaptation" element has been prohibited;
+                * The "educational-level-of-adaptation" element has been prohibited;
+            </xs:documentation>
+        </xs:annotation>
+        <xs:choice minOccurs = "0" maxOccurs = "unbounded">
+            <xs:element name="hazard-avoidance" minOccurs="0" maxOccurs="unbounded">
+                <xs:simpleType>
+                    <xs:union>
+                        <xs:simpleType>
+                            <xs:restriction base="xs:string">
+                                <xs:enumeration value="flashing" />
+                                <xs:enumeration value="sound" />
+                                <xs:enumeration value="olfactory-hazard" />
+                                <xs:enumeration value="motion-simulation" />
+                            </xs:restriction>
+                        </xs:simpleType>
+                        <xs:simpleType>
+                            <xs:restriction base="ExtensionString.Type" />
+                        </xs:simpleType>
+                    </xs:union>
+                </xs:simpleType>
+            </xs:element>
+            <xs:element name="input-requirements" minOccurs="0" maxOccurs="1">
+                <xs:simpleType>
+                    <xs:union>
+                        <xs:simpleType>
+                            <xs:restriction base="xs:string">
+                                <xs:enumeration value="full-keyboard-control" />
+                                <xs:enumeration value="full-mouse-control" />
+                            </xs:restriction>
+                        </xs:simpleType>
+                        <xs:simpleType>
+                            <xs:restriction base="ExtensionString.Type" />
+                        </xs:simpleType>
+                    </xs:union>
+                </xs:simpleType>
+            </xs:element>
+            <xs:element name="language-of-interface" type="LanguageMode.Type" minOccurs="0" maxOccurs="unbounded" />
+            <xs:element name="linguistic-guidance" type="ReplacesAccessMode.Type" minOccurs="0" maxOccurs="1" />
+            <xs:element name="keyword-emphasis" type="ReplacesAccessMode.Type" minOccurs="0" maxOccurs="1" />
+            <xs:element name="keyword-translation" type="LanguageMode.Type" minOccurs="0" maxOccurs="1" />
+            <xs:element name="simplified-language-portions" type="ReplacesAccessMode.Type" minOccurs="0" maxOccurs="1" />
+            <xs:element name="simplified-graphics" type="ReplacesAccessMode.Type" minOccurs="0" maxOccurs="1" />
+            <xs:element name="item-translation" type="LanguageMode.Type" minOccurs="0" maxOccurs="1" />
+            <xs:element name="sign-language" type="LanguageMode.Type" minOccurs="0" maxOccurs="1" />
+            <xs:element name="encouragement" type="ReplacesAccessMode.Type" minOccurs="0" maxOccurs="1" />
+            <xs:element name="additional-testing-time" type="AdditionalTestingTime.Type" minOccurs="0" maxOccurs="1" />
+            <xs:element name="line-reader" type="LineReader.Type" minOccurs="0" maxOccurs="1" />
+            <xs:element name="invert-display-polarity" type="InvertDisplayPolarity.Type" minOccurs="0" maxOccurs="1" />
+            <xs:element name="magnification" type="Magnification.Type" minOccurs="0" maxOccurs="1" />
+            <xs:element name="spoken" type="Spoken.Type" minOccurs="0" maxOccurs="1" />
+            <xs:element name="tactile" type="ReplacesAccessMode.Type" minOccurs="0" maxOccurs="1" />
+            <xs:element name="braille" type="Braille.Type" minOccurs="0" maxOccurs="1" />
+            <xs:element name="answer-masking" type="ReplacesAccessMode.Type" minOccurs="0" maxOccurs="1" />
+            <xs:element name="keyboard-directions" type="ReplacesAccessMode.Type" minOccurs="0" maxOccurs="1" />
+            <xs:element name="additional-directions" type="ReplacesAccessMode.Type" minOccurs="0" maxOccurs="1" />
+            <xs:element name="long-description" type="LongDescription.Type" minOccurs="0" maxOccurs="1" />
+            <xs:element name="captions" type="ReplacesAccessMode.Type" minOccurs="0" maxOccurs="1" />
+            <xs:element name="environment" type="Environment.Type" minOccurs="0" maxOccurs="1" />
+            <xs:element name="transcript" type="ReplacesAccessMode.Type" minOccurs="0" maxOccurs="1" />
+            <xs:element name="alternative-text" type="ReplacesAccessMode.Type" minOccurs="0" maxOccurs="1" />
+            <xs:element name="audio-description" type="ReplacesAccessMode.Type" minOccurs="0" maxOccurs="1" />
+            <xs:element name="high-contrast" type="ReplacesAccessMode.Type" minOccurs="0" maxOccurs="1" />
+            <xs:element name="layout-single-column" type="ReplacesAccessMode.Type" minOccurs="0" maxOccurs="1" />
+            <xs:element name="text-appearance" type="TextAppearance.Type" minOccurs="0" maxOccurs="1" />
+            <xs:element name="calculator-on-screen" type="Calculator.Type" minOccurs="0" maxOccurs="1" />
+            <xs:element name="dictionary-on-screen" type="EmptyPrimitiveType.Type" minOccurs="0" maxOccurs="1" />
+            <xs:element name="glossary-on-screen" type="EmptyPrimitiveType.Type" minOccurs="0" maxOccurs="1" />
+            <xs:element name="thesaurus-on-screen" type="EmptyPrimitiveType.Type" minOccurs="0" maxOccurs="1" />
+            <xs:element name="homophone-checker-on-screen" type="EmptyPrimitiveType.Type" minOccurs="0" maxOccurs="1" />
+            <xs:element name="note-taking-on-screen" type="EmptyPrimitiveType.Type" minOccurs="0" maxOccurs="1" />
+            <xs:element name="visual-organizer-on-screen" type="EmptyPrimitiveType.Type" minOccurs="0" maxOccurs="1" />
+            <xs:element name="outliner-on-screen" type="EmptyPrimitiveType.Type" minOccurs="0" maxOccurs="1" />
+            <xs:element name="peer-interaction-on-screen" type="EmptyPrimitiveType.Type" minOccurs="0" maxOccurs="1" />
+            <xs:element name="spell-checker-on-screen" type="EmptyPrimitiveType.Type" minOccurs="0" maxOccurs="1" />
+            <xs:element name="activate-at-initialization-set" type="FeatureSet.Type" minOccurs="0" maxOccurs="1" />
+            <xs:element name="activate-as-option-set" type="FeatureSet.Type" minOccurs="0" maxOccurs="1" />
+            <xs:element name="prohibit-set" type="FeatureSet.Type" minOccurs="0" maxOccurs="1" />
+            <xs:group ref="grpStrict.any" />
+        </xs:choice>
+    </xs:complexType>
+
+    <xs:complexType name="AccessForAllPNPRecord.Type" abstract="false" mixed="false">
+        <xs:annotation>
+            <xs:documentation source="documentation">
+                This is the container for each of the AfA PNP Records.                                    
+            </xs:documentation>
+        </xs:annotation>
+        <xs:sequence>
+            <xs:element name="person-sourced-id" type="PersonSourcedId.Type" minOccurs="1" maxOccurs="1" />
+            <xs:element name="appointment-id" type="xs:normalizedString" minOccurs="0" maxOccurs="unbounded" />
+            <xs:element ref="access-for-all-pnp" minOccurs="1" maxOccurs="1" />
+        </xs:sequence>
+    </xs:complexType>
+
+    <xs:complexType name="AccessForAllPNPRecords.Type" abstract="false" mixed="false">
+        <xs:annotation>
+            <xs:documentation source="documentation">
+                This is the root container for the set AfA PNP Records. There must be at least one record 
+                and the order of the records is not significant.                                          
+            </xs:documentation>
+        </xs:annotation>
+        <xs:sequence>
+            <xs:element name="access-for-all-pnp-record" type="AccessForAllPNPRecord.Type" minOccurs="1" maxOccurs="unbounded" />
+        </xs:sequence>
+    </xs:complexType>
+
+    <xs:complexType name="AdditionalTestingTime.Type" abstract="false" mixed="false">
+        <xs:annotation>
+            <xs:documentation source="documentation">
+                The container for the set of additional testing time preferences. Only one of the availab-
+                le options can be selected.                                                               
+            </xs:documentation>
+        </xs:annotation>
+        <xs:complexContent>
+            <xs:extension base="ReplacesAccessMode.Type">
+                <xs:choice>
+                    <xs:element name="time-multiplier" type="xs:float" minOccurs="1" maxOccurs="1" />
+                    <xs:element name="fixed-minutes" type="xs:integer" minOccurs="1" maxOccurs="1" />
+                    <xs:element name="unlimited" type="EmptyPrimitiveType.Type" minOccurs="1" maxOccurs="1" />
+                </xs:choice>
+            </xs:extension>
+        </xs:complexContent>
+    </xs:complexType>
+
+    <xs:complexType name="Braille.Type" abstract="false" mixed="false">
+        <xs:annotation>
+            <xs:documentation source="documentation">
+                The container for the set of preferences for Braille devices.                             
+            </xs:documentation>
+        </xs:annotation>
+        <xs:complexContent>
+            <xs:extension base="ReplacesAccessMode.Type">
+                <xs:choice minOccurs = "0" maxOccurs = "unbounded">
+                    <xs:element name="delivery-mode" default="refreshable" minOccurs="0" maxOccurs="1">
+                        <xs:simpleType>
+                            <xs:restriction base="xs:string">
+                                <xs:enumeration value="refreshable" />
+                                <xs:enumeration value="embossed" />
+                            </xs:restriction>
+                        </xs:simpleType>
+                    </xs:element>
+                    <xs:element name="grade" default="2" minOccurs="0" maxOccurs="1">
+                        <xs:simpleType>
+                            <xs:restriction base="xs:string">
+                                <xs:enumeration value="1" />
+                                <xs:enumeration value="2" />
+                                <xs:enumeration value="3" />
+                            </xs:restriction>
+                        </xs:simpleType>
+                    </xs:element>
+                    <xs:element name="braille-type" minOccurs="0" maxOccurs="1">
+                        <xs:simpleType>
+                            <xs:union>
+                                <xs:simpleType>
+                                    <xs:restriction base="ExtensionString.Type" />
+                                </xs:simpleType>
+                                <xs:simpleType>
+                                    <xs:restriction base="xs:string">
+                                        <xs:enumeration value="ebae" />
+                                        <xs:enumeration value="ueb" />
+                                    </xs:restriction>
+                                </xs:simpleType>
+                            </xs:union>
+                        </xs:simpleType>
+                    </xs:element>
+                    <xs:element name="math-type" minOccurs="0" maxOccurs="1">
+                        <xs:simpleType>
+                            <xs:union>
+                                <xs:simpleType>
+                                    <xs:restriction base="xs:string">
+                                        <xs:enumeration value="nemeth" />
+                                        <xs:enumeration value="ueb" />
+                                    </xs:restriction>
+                                </xs:simpleType>
+                                <xs:simpleType>
+                                    <xs:restriction base="ExtensionString.Type" />
+                                </xs:simpleType>
+                            </xs:union>
+                        </xs:simpleType>
+                    </xs:element>
+                </xs:choice>
+                <xs:attribute ref="xml:lang" use="optional" />
+            </xs:extension>
+        </xs:complexContent>
+    </xs:complexType>
+
+    <xs:complexType name="Environment.Type" abstract="false" mixed="false">
+        <xs:annotation>
+            <xs:documentation source="documentation">
+                The container for the set of preferences for the environment within which the learning ex-
+                erience is to take place.                                                                 
+            </xs:documentation>
+        </xs:annotation>
+        <xs:complexContent>
+            <xs:extension base="ReplacesAccessMode.Type">
+                <xs:choice minOccurs = "0" maxOccurs = "unbounded">
+                    <xs:element name="description" type="xs:normalizedString" minOccurs="0" maxOccurs="1" />
+                    <xs:element name="medical" type="xs:normalizedString" minOccurs="0" maxOccurs="1" />
+                    <xs:element name="software" type="xs:normalizedString" minOccurs="0" maxOccurs="1" />
+                    <xs:element name="hardware" type="xs:normalizedString" minOccurs="0" maxOccurs="1" />
+                    <xs:element name="breaks" type="xs:boolean" minOccurs="0" maxOccurs="1" />
+                </xs:choice>
+            </xs:extension>
+        </xs:complexContent>
+    </xs:complexType>
+
+    <xs:complexType name="FeatureSet.Type" abstract="false" mixed="false">
+        <xs:annotation>
+            <xs:documentation source="documentation">
+                This is the container for the set of features whose preferences can be controlled. When a 
+                feature is listed in an instance then the preference is to be set as determined by the in-
+                tention of the contaning parent class.                                                    
+            </xs:documentation>
+        </xs:annotation>
+        <xs:choice minOccurs = "0" maxOccurs = "unbounded">
+            <xs:element name="linguistic-guidance" type="EmptyPrimitiveType.Type" minOccurs="0" maxOccurs="1" />
+            <xs:element name="keyword-emphasis" type="EmptyPrimitiveType.Type" minOccurs="0" maxOccurs="1" />
+            <xs:element name="keyword-translation" type="EmptyPrimitiveType.Type" minOccurs="0" maxOccurs="1" />
+            <xs:element name="simplified-language-portions" type="EmptyPrimitiveType.Type" minOccurs="0" maxOccurs="1" />
+            <xs:element name="simplified-graphics" type="EmptyPrimitiveType.Type" minOccurs="0" maxOccurs="1" />
+            <xs:element name="item-translation" type="EmptyPrimitiveType.Type" minOccurs="0" maxOccurs="1" />
+            <xs:element name="sign-language" type="EmptyPrimitiveType.Type" minOccurs="0" maxOccurs="1" />
+            <xs:element name="encouragement" type="EmptyPrimitiveType.Type" minOccurs="0" maxOccurs="1" />
+            <xs:element name="additional-testing-time" type="EmptyPrimitiveType.Type" minOccurs="0" maxOccurs="1" />
+            <xs:element name="line-reader" type="EmptyPrimitiveType.Type" minOccurs="0" maxOccurs="1" />
+            <xs:element name="invert-display-polarity" type="EmptyPrimitiveType.Type" minOccurs="0" maxOccurs="1" />
+            <xs:element name="magnification" type="EmptyPrimitiveType.Type" minOccurs="0" maxOccurs="1" />
+            <xs:element name="spoken" type="EmptyPrimitiveType.Type" minOccurs="0" maxOccurs="1" />
+            <xs:element name="tactile" type="EmptyPrimitiveType.Type" minOccurs="0" maxOccurs="1" />
+            <xs:element name="braille" type="EmptyPrimitiveType.Type" minOccurs="0" maxOccurs="1" />
+            <xs:element name="answer-masking" type="EmptyPrimitiveType.Type" minOccurs="0" maxOccurs="1" />
+            <xs:element name="keyboard-directions" type="EmptyPrimitiveType.Type" minOccurs="0" maxOccurs="1" />
+            <xs:element name="additional-directions" type="EmptyPrimitiveType.Type" minOccurs="0" maxOccurs="1" />
+            <xs:element name="long-description" type="EmptyPrimitiveType.Type" minOccurs="0" maxOccurs="1" />
+            <xs:element name="captions" type="EmptyPrimitiveType.Type" minOccurs="0" maxOccurs="1" />
+            <xs:element name="transcript" type="EmptyPrimitiveType.Type" minOccurs="0" maxOccurs="1" />
+            <xs:element name="alternative-text" type="EmptyPrimitiveType.Type" minOccurs="0" maxOccurs="1" />
+            <xs:element name="audio-description" type="EmptyPrimitiveType.Type" minOccurs="0" maxOccurs="1" />
+            <xs:element name="high-contrast" type="EmptyPrimitiveType.Type" minOccurs="0" maxOccurs="1" />
+            <xs:element name="input-requirements" type="EmptyPrimitiveType.Type" minOccurs="0" maxOccurs="1" />
+            <xs:element name="language-of-interface" type="EmptyPrimitiveType.Type" minOccurs="0" maxOccurs="1" />
+            <xs:element name="layout-single-column" type="EmptyPrimitiveType.Type" minOccurs="0" maxOccurs="1" />
+            <xs:element name="text-appearance" type="EmptyPrimitiveType.Type" minOccurs="0" maxOccurs="1" />
+            <xs:element name="calculator-on-screen" type="EmptyPrimitiveType.Type" minOccurs="0" maxOccurs="1" />
+            <xs:element name="dictionary-on-screen" type="EmptyPrimitiveType.Type" minOccurs="0" maxOccurs="1" />
+            <xs:element name="glossary-on-screen" type="EmptyPrimitiveType.Type" minOccurs="0" maxOccurs="1" />
+            <xs:element name="thesaurus-on-screen" type="EmptyPrimitiveType.Type" minOccurs="0" maxOccurs="1" />
+            <xs:element name="homophone-checker-on-screen" type="EmptyPrimitiveType.Type" minOccurs="0" maxOccurs="1" />
+            <xs:element name="note-taking-on-screen" type="EmptyPrimitiveType.Type" minOccurs="0" maxOccurs="1" />
+            <xs:element name="visual-organizer-on-screen" type="EmptyPrimitiveType.Type" minOccurs="0" maxOccurs="1" />
+            <xs:element name="outliner-on-screen" type="EmptyPrimitiveType.Type" minOccurs="0" maxOccurs="1" />
+            <xs:element name="peer-interaction-on-screen" type="EmptyPrimitiveType.Type" minOccurs="0" maxOccurs="1" />
+            <xs:element name="spell-checker-on-screen" type="EmptyPrimitiveType.Type" minOccurs="0" maxOccurs="1" />
+            <xs:group ref="grpStrict.any" />
+        </xs:choice>
+    </xs:complexType>
+
+    <xs:complexType name="FontFace.Type" abstract="false" mixed="false">
+        <xs:annotation>
+            <xs:documentation source="documentation">
+                The container for information about the font face to be used.                             
+            </xs:documentation>
+        </xs:annotation>
+        <xs:choice minOccurs = "0" maxOccurs = "unbounded">
+            <xs:element name="font-name" type="xs:normalizedString" minOccurs="0" maxOccurs="unbounded" />
+            <xs:element name="generic-font-face" minOccurs="1" maxOccurs="1">
+                <xs:simpleType>
+                    <xs:restriction base="xs:string">
+                        <xs:enumeration value="serif" />
+                        <xs:enumeration value="sans serif" />
+                        <xs:enumeration value="monospaced" />
+                        <xs:enumeration value="cursive" />
+                        <xs:enumeration value="fantasy" />
+                    </xs:restriction>
+                </xs:simpleType>
+            </xs:element>
+        </xs:choice>
+    </xs:complexType>
+
+    <xs:complexType name="InvertDisplayPolarity.Type" abstract="false" mixed="false">
+        <xs:annotation>
+            <xs:documentation source="documentation">
+                The container for the set of preferences related to the background and foreground color s-
+                ettings for displays.                                                                     
+            </xs:documentation>
+        </xs:annotation>
+        <xs:complexContent>
+            <xs:extension base="ReplacesAccessMode.Type">
+                <xs:attribute name="foreground" use="optional" type="Hex.Type" />
+                <xs:attribute name="background" use="optional" type="Hex.Type" />
+            </xs:extension>
+        </xs:complexContent>
+    </xs:complexType>
+
+    <xs:complexType name="LanguageMode.Type" abstract="false" mixed="false">
+        <xs:annotation>
+            <xs:documentation source="documentation">
+                The container for the set of preferences related to the language mode.                    
+            </xs:documentation>
+        </xs:annotation>
+        <xs:complexContent>
+            <xs:extension base="ReplacesAccessMode.Type">
+                <xs:attribute ref="xml:lang" use="required" />
+            </xs:extension>
+        </xs:complexContent>
+    </xs:complexType>
+
+    <xs:complexType name="LineReader.Type" abstract="false" mixed="false">
+        <xs:annotation>
+            <xs:documentation source="documentation">
+                The container for the preference settings for line readers.                               
+            </xs:documentation>
+        </xs:annotation>
+        <xs:complexContent>
+            <xs:extension base="ReplacesAccessMode.Type">
+                <xs:attribute name="highlight-color" use="optional" type="Hex.Type" />
+            </xs:extension>
+        </xs:complexContent>
+    </xs:complexType>
+
+    <xs:complexType name="LongDescription.Type" abstract="false" mixed="false">
+        <xs:annotation>
+            <xs:documentation source="documentation">
+                The container for the preferences for the provision of long descriptions.                 
+            </xs:documentation>
+        </xs:annotation>
+        <xs:complexContent>
+            <xs:extension base="ReplacesAccessMode.Type">
+                <xs:attribute name="hide-visually" use="optional" default="true" type="xs:boolean" />
+            </xs:extension>
+        </xs:complexContent>
+    </xs:complexType>
+
+    <xs:complexType name="Magnification.Type" abstract="false" mixed="false">
+        <xs:annotation>
+            <xs:documentation source="documentation">
+                The container for the details about the magnification preferences.                        
+            </xs:documentation>
+        </xs:annotation>
+        <xs:complexContent>
+            <xs:extension base="ReplacesAccessMode.Type">
+                <xs:choice>
+                    <xs:element name="all-content" type="ZoomAmount.Type" minOccurs="0" maxOccurs="1" />
+                    <xs:sequence minOccurs="0" maxOccurs="1">
+                        <xs:element name="text" type="ZoomAmount.Type" minOccurs="0" maxOccurs="1" />
+                        <xs:element name="non-text" type="ZoomAmount.Type" minOccurs="0" maxOccurs="1" />
+                    </xs:sequence>
+                </xs:choice>
+            </xs:extension>
+        </xs:complexContent>
+    </xs:complexType>
+
+    <xs:complexType name="ReplacesAccessMode.Type" abstract="false" mixed="false">
+        <xs:annotation>
+            <xs:documentation source="documentation">
+                This is the container for the identification for the set of access modes whose operational
+                state are to be replaced by the contained set of children. The presence of a child attrib-
+                ute means that the parent preference is to be applied to that attribute.                  
+            </xs:documentation>
+        </xs:annotation>
+        <xs:choice minOccurs = "0" maxOccurs = "unbounded">
+            <xs:element name="replace-access-mode-auditory" type="EmptyPrimitiveType.Type" minOccurs="0" maxOccurs="1" />
+            <xs:element name="replace-access-mode-color" type="EmptyPrimitiveType.Type" minOccurs="0" maxOccurs="1" />
+            <xs:element name="replace-access-mode-item-size" type="EmptyPrimitiveType.Type" minOccurs="0" maxOccurs="1" />
+            <xs:element name="replace-access-mode-olfactory" type="EmptyPrimitiveType.Type" minOccurs="0" maxOccurs="1" />
+            <xs:element name="replace-access-mode-orientation" type="EmptyPrimitiveType.Type" minOccurs="0" maxOccurs="1" />
+            <xs:element name="replace-access-mode-position" type="EmptyPrimitiveType.Type" minOccurs="0" maxOccurs="1" />
+            <xs:element name="replace-access-mode-tactile" type="EmptyPrimitiveType.Type" minOccurs="0" maxOccurs="1" />
+            <xs:element name="replace-access-mode-text-on-image" type="EmptyPrimitiveType.Type" minOccurs="0" maxOccurs="1" />
+            <xs:element name="replace-access-mode-textual" type="EmptyPrimitiveType.Type" minOccurs="0" maxOccurs="1" />
+            <xs:element name="replace-access-mode-visual" type="EmptyPrimitiveType.Type" minOccurs="0" maxOccurs="1" />
+        </xs:choice>
+    </xs:complexType>
+
+    <xs:complexType name="Spoken.Type" abstract="false" mixed="false">
+        <xs:annotation>
+            <xs:documentation source="documentation">
+                The container for the preferences that are used to define the ways in which information is
+                'spoken'.                                                                                 
+            </xs:documentation>
+        </xs:annotation>
+        <xs:complexContent>
+            <xs:extension base="ReplacesAccessMode.Type">
+                <xs:choice minOccurs = "0" maxOccurs = "unbounded">
+                    <xs:element name="reading-type" default="screen-reader" minOccurs="1" maxOccurs="1">
+                        <xs:simpleType>
+                            <xs:restriction base="xs:string">
+                                <xs:enumeration value="screen-reader" />
+                                <xs:enumeration value="computer-read-aloud" />
+                            </xs:restriction>
+                        </xs:simpleType>
+                    </xs:element>
+                    <xs:element name="restriction-type" default="unrestricted" minOccurs="0" maxOccurs="unbounded">
+                        <xs:simpleType>
+                            <xs:union>
+                                <xs:simpleType>
+                                    <xs:restriction base="xs:string">
+                                        <xs:enumeration value="unrestricted" />
+                                        <xs:enumeration value="word-by-word" />
+                                        <xs:enumeration value="directions-only" />
+                                        <xs:enumeration value="skip-math-equations" />
+                                        <xs:enumeration value="skip-chemistry-equations" />
+                                    </xs:restriction>
+                                </xs:simpleType>
+                                <xs:simpleType>
+                                    <xs:restriction base="ExtensionString.Type" />
+                                </xs:simpleType>
+                            </xs:union>
+                        </xs:simpleType>
+                    </xs:element>
+                    <xs:element name="speech-rate" type="xs:integer" default="180" minOccurs="0" maxOccurs="1" />
+                    <xs:element name="pitch" type="xs:float" default="0.5" minOccurs="0" maxOccurs="1" />
+                    <xs:element name="volume" type="Volume.Type" default="0.5" minOccurs="0" maxOccurs="1" />
+                    <xs:element name="link-indication" minOccurs="1" maxOccurs="1">
+                        <xs:simpleType>
+                            <xs:restriction base="xs:string">
+                                <xs:enumeration value="speak-link" />
+                                <xs:enumeration value="different-voice" />
+                                <xs:enumeration value="sound-effect" />
+                                <xs:enumeration value="none" />
+                            </xs:restriction>
+                        </xs:simpleType>
+                    </xs:element>
+                    <xs:element name="typing-echo" minOccurs="1" maxOccurs="1">
+                        <xs:simpleType>
+                            <xs:restriction base="xs:string">
+                                <xs:enumeration value="characters" />
+                                <xs:enumeration value="words" />
+                                <xs:enumeration value="characters-and-words" />
+                                <xs:enumeration value="none" />
+                            </xs:restriction>
+                        </xs:simpleType>
+                    </xs:element>
+                </xs:choice>
+            </xs:extension>
+        </xs:complexContent>
+    </xs:complexType>
+
+    <xs:complexType name="TextAppearance.Type" abstract="false" mixed="false">
+        <xs:annotation>
+            <xs:documentation source="documentation">
+                The container for the set of preferences for the appearance of text on a display.         
+            </xs:documentation>
+        </xs:annotation>
+        <xs:complexContent>
+            <xs:extension base="ReplacesAccessMode.Type">
+                <xs:choice minOccurs = "0" maxOccurs = "unbounded">
+                    <xs:element name="background-color" type="Hex.Type" minOccurs="0" maxOccurs="1" />
+                    <xs:element name="font-color" type="Hex.Type" minOccurs="0" maxOccurs="1" />
+                    <xs:element name="font-size" type="xs:float" default="12.0" minOccurs="0" maxOccurs="1" />
+                    <xs:element name="font-face" type="FontFace.Type" minOccurs="0" maxOccurs="1" />
+                    <xs:element name="line-spacing" type="xs:float" minOccurs="0" maxOccurs="1" />
+                    <xs:element name="line-height" type="xs:float" minOccurs="0" maxOccurs="1" />
+                    <xs:element name="letter-spacing" type="xs:float" minOccurs="0" maxOccurs="1" />
+                    <xs:element name="uniform-font-sizing" type="EmptyPrimitiveType.Type" minOccurs="0" maxOccurs="1" />
+                    <xs:element name="word-spacing" type="xs:float" minOccurs="0" maxOccurs="1" />
+                    <xs:element name="word-wrapping" type="EmptyPrimitiveType.Type" minOccurs="0" maxOccurs="1" />
+                </xs:choice>
+            </xs:extension>
+        </xs:complexContent>
+    </xs:complexType>
+
+    <!-- ================================================================================================== -->
+
+    <!-- Generate the SOAP Binding ComplexTypes *********************************************************** -->
+
+    <!-- ================================================================================================== -->
+
+    <!-- Generate the derived ComplexTypes **************************************************************** -->
+
+    <xs:complexType name="Calculator.Type" abstract="false" mixed="false">
+        <xs:annotation>
+            <xs:documentation source="documentation">
+                The data-type for the type of calculator tool.                                            
+            </xs:documentation>
+        </xs:annotation>
+        <xs:complexContent>
+            <xs:extension base="EmptyPrimitiveType.Type">
+                <xs:attribute name="calculator-type" use="optional">
+                    <xs:simpleType>
+                        <xs:union>
+                            <xs:simpleType>
+                                <xs:restriction base="xs:string">
+                                    <xs:enumeration value="basic" />
+                                    <xs:enumeration value="standard" />
+                                    <xs:enumeration value="scientific" />
+                                    <xs:enumeration value="graphing" />
+                                </xs:restriction>
+                            </xs:simpleType>
+                            <xs:simpleType>
+                                <xs:restriction base="ExtensionString.Type" />
+                            </xs:simpleType>
+                        </xs:union>
+                    </xs:simpleType>
+                </xs:attribute>
+            </xs:extension>
+        </xs:complexContent>
+    </xs:complexType>
+
+    <xs:complexType name="PersonSourcedId.Type" abstract="false" mixed="false">
+        <xs:annotation>
+            <xs:documentation source="documentation">
+                The data-type for the sourcedId of a Person. This is used to identify the owner of a PNP  
+                Record.                                                                                   
+            </xs:documentation>
+        </xs:annotation>
+        <xs:simpleContent>
+            <xs:extension base="xs:normalizedString">
+                <xs:attribute name="source-system" use="required" type="xs:normalizedString" />
+            </xs:extension>
+        </xs:simpleContent>
+    </xs:complexType>
+
+    <xs:complexType name="ZoomAmount.Type" abstract="false" mixed="false">
+        <xs:annotation>
+            <xs:documentation source="documentation">
+                A data-type for amount of zoom i.e. magnification.                                        
+            </xs:documentation>
+        </xs:annotation>
+        <xs:complexContent>
+            <xs:extension base="EmptyPrimitiveType.Type">
+                <xs:attribute name="zoom-amount" use="optional" type="xs:float" />
+            </xs:extension>
+        </xs:complexContent>
+    </xs:complexType>
+
+    <!-- ================================================================================================== -->
+
+    <!-- Declaration of the elements (Complex) ************************************************************ -->
+
+    <!-- ================================================================================================== -->
+
+    <!-- Declaration of the elements (Derived) ************************************************************ -->
+
+    <!-- ================================================================================================== -->
+
+    <!-- Declaration of the root element(s) *************************************************************** -->
+
+    <xs:element name="access-for-all-pnp" type="AccessForAllPNP.Type" />
+    <xs:element name="access-for-all-pnp-records" type="AccessForAllPNPRecords.Type" />
+
+    <!-- ================================================================================================== -->
+
+</xs:schema>

@@ -1,0 +1,87 @@
+<?xml version="1.0" ?>
+
+<!--
+
+RELAX NG Schema on MathML 2.0
+
+See COPYING for the status of this software.
+Yutaka Furubayashi (Poka-Poka Dream Factory) <info@yupotan.sppd.ne.jp>
+
+-->
+
+<!-- Presentation layout: scripts and limits -->
+
+<grammar xmlns="http://relaxng.org/ns/structure/1.0">
+
+<define name="mml.pscrschema">
+ <choice>
+  <ref name="mml.msub.qname"/>
+  <ref name="mml.msup.qname"/>
+  <ref name="mml.msubsup.qname"/>
+  <ref name="mml.munder.qname"/>
+  <ref name="mml.mover.qname"/>
+  <ref name="mml.munderover.qname"/>
+  <ref name="mml.mmultiscripts.qname"/>
+ </choice>
+</define>
+
+<define name="mml.msub.qname">
+ <element name="msub">
+  <ref name="mml.PresExpression"/>
+  <ref name="mml.Common.attrib"/>
+  <ref name="mml.att-subscriptshift"/>
+ </element>
+</define>
+
+<define name="mml.msup.qname">
+ <element name="msup">
+  <ref name="mml.PresExpression"/>
+  <ref name="mml.Common.attrib"/>
+  <ref name="mml.att-superscriptshift"/>
+ </element>
+</define>
+
+<define name="mml.msubsup.qname">
+ <element name="msubsup">
+  <ref name="mml.PresExpression"/>
+  <ref name="mml.Common.attrib"/>
+  <ref name="mml.att-subscriptshift"/>
+  <ref name="mml.att-superscriptshift"/>
+ </element>
+</define>
+
+<define name="mml.munder.qname">
+ <element name="munder">
+  <ref name="mml.PresExpression"/>
+  <ref name="mml.Common.attrib"/>
+  <ref name="mml.att-accentunder"/>
+ </element>
+</define>
+
+<define name="mml.mover.qname">
+ <element name="mover">
+  <ref name="mml.PresExpression"/>
+  <ref name="mml.Common.attrib"/>
+  <ref name="mml.att-accent"/>
+ </element>
+</define>
+
+<define name="mml.munderover.qname">
+ <element name="munderover">
+  <ref name="mml.PresExpression"/>
+  <ref name="mml.Common.attrib"/>
+  <ref name="mml.att-accent"/>
+  <ref name="mml.att-accentunder"/>
+ </element>
+</define>
+
+<define name="mml.mmultiscripts.qname">
+ <element name="mmultiscripts">
+  <ref name="mml.PresExpression"/>
+  <ref name="mml.Common.attrib"/>
+  <ref name="mml.att-subscriptshift"/>
+  <ref name="mml.att-superscriptshift"/>
+ </element>
+</define>
+
+</grammar>

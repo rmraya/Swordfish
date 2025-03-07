@@ -206,6 +206,8 @@ public class ProjectsHandler implements HttpHandler {
 				response = unlockAll(request);
 			} else if ("/projects/analyzeSpaces".equals(url)) {
 				response = analyzeSpaces(request);
+			} else if ("/projects/fixSpaces".equals(url)) {
+				response = fixSpaces(request);
 			} else if ("/projects/analyzeTags".equals(url)) {
 				response = analyzeTags(request);
 			} else if ("/projects/splitSegment".equals(url)) {
@@ -1754,7 +1756,23 @@ public class ProjectsHandler implements HttpHandler {
 			if (projectStores.containsKey(project)) {
 				result = projectStores.get(project).analyzeSpaces();
 			}
-		} catch (SQLException | JSONException | IOException e) {
+		} catch (SQLException | JSONException | IOException | SAXException | ParserConfigurationException e) {
+			logger.log(Level.ERROR, e);
+			result.put(Constants.REASON, e.getMessage());
+		}
+		return result;
+	}
+
+	private JSONObject fixSpaces(String request) {
+		JSONObject result = new JSONObject();
+		JSONObject json = new JSONObject(request);
+		try {
+			String project = json.getString("project");
+			if (projectStores.containsKey(project)) {
+				projectStores.get(project).fixSpaces();
+				result = projectStores.get(project).analyzeSpaces();
+			}
+		} catch (SQLException | JSONException | SAXException | IOException | ParserConfigurationException e) {
 			logger.log(Level.ERROR, e);
 			result.put(Constants.REASON, e.getMessage());
 		}
