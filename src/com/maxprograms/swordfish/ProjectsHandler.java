@@ -208,6 +208,8 @@ public class ProjectsHandler implements HttpHandler {
 				response = analyzeSpaces(request);
 			} else if ("/projects/fixSpaces".equals(url)) {
 				response = fixSpaces(request);
+			} else if ("/projects/getMatchData".equals(url)) {
+				response = getMatchData(request);
 			} else if ("/projects/analyzeTags".equals(url)) {
 				response = analyzeTags(request);
 			} else if ("/projects/splitSegment".equals(url)) {
@@ -1773,6 +1775,21 @@ public class ProjectsHandler implements HttpHandler {
 				result = projectStores.get(project).analyzeSpaces();
 			}
 		} catch (SQLException | JSONException | SAXException | IOException | ParserConfigurationException e) {
+			logger.log(Level.ERROR, e);
+			result.put(Constants.REASON, e.getMessage());
+		}
+		return result;
+	}
+
+	private JSONObject getMatchData(String request) {
+		JSONObject result = new JSONObject();
+		JSONObject json = new JSONObject(request);
+		try {
+			String project = json.getString("project");
+			if (projectStores.containsKey(project)) {
+				result.put("matchData", projectStores.get(project).getMatchData(json));
+			}
+		} catch (JSONException | SQLException e) {
 			logger.log(Level.ERROR, e);
 			result.put(Constants.REASON, e.getMessage());
 		}

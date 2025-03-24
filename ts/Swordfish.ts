@@ -195,7 +195,9 @@ export class Swordfish {
 
         app.on('ready', () => {
             Swordfish.createWindow();
-            Swordfish.mainWindow.loadURL('file://' + Swordfish.path.join(app.getAppPath(), 'html', 'index.html'));
+            let filePath = Swordfish.path.join(app.getAppPath(), 'html', 'index.html');
+            let fileUrl: URL = new URL('file://' + filePath);
+            Swordfish.mainWindow.loadURL(fileUrl.href);
             Swordfish.mainWindow.on('resize', () => {
                 this.saveDefaults();
             });
@@ -599,8 +601,11 @@ export class Swordfish {
         ipcMain.on('remove-assembled-matches', (event: IpcMainEvent, arg: any) => {
             Swordfish.removeAssembledMatches(arg);
         });
-        ipcMain.on('accept-match', (event: IpcMainEvent, arg: any) => {
-            Swordfish.mainWindow.webContents.send('set-target', arg);
+        ipcMain.on('accept-match', (event: IpcMainEvent, match: Match) => {
+            Swordfish.mainWindow.webContents.send('set-target', match);
+        });
+        ipcMain.on('fix-match', (event: IpcMainEvent, match: Match) => {
+            Swordfish.fixMatch(match);
         });
         ipcMain.on('get-mt-matches', () => {
             Swordfish.mainWindow.webContents.send('get-mt-matches');
@@ -1028,7 +1033,7 @@ export class Swordfish {
             new MenuItem({ label: 'Toggle Full Screen', role: 'togglefullscreen' })
         ]);
         if (!app.isPackaged) {
-            viewMenu.append(new MenuItem({ label: 'Open Development Tools', accelerator: 'F12', click: () => { Swordfish.mainWindow.webContents.openDevTools() } }));
+            viewMenu.append(new MenuItem({ label: 'Open Development Tools', accelerator: 'F12', click: () => { BrowserWindow.getFocusedWindow().webContents.openDevTools() } }));
         }
         let projectsMenu: Menu = Menu.buildFromTemplate([
             { label: 'New Project', accelerator: 'CmdOrCtrl+N', click: () => { Swordfish.showAddProject(); } },
@@ -1122,6 +1127,7 @@ export class Swordfish {
             new MenuItem({ type: 'separator' }),
             { label: 'Get Translations from Memory', accelerator: 'CmdOrCtrl+M', click: () => { Swordfish.mainWindow.webContents.send('get-tm-matches'); } },
             { label: 'Accept Translation Memory Match', accelerator: 'CmdOrCtrl+Alt+M', click: () => { Swordfish.mainWindow.webContents.send('accept-tm-match'); } },
+            { label: 'Fix TM Match with AI', accelerator: 'CmdOrCtrl+Shift+M', click: () => { Swordfish.mainWindow.webContents.send('fix-selected-match'); } },
             { label: 'Apply Translation Memory to All Segments', click: () => { Swordfish.mainWindow.webContents.send('apply-tm-all'); } },
             { label: 'Accept All 100% Matches', click: () => { Swordfish.mainWindow.webContents.send('accept-all-matches'); } },
             { label: 'Remove All Translation Memory Matches', click: () => { Swordfish.mainWindow.webContents.send('remove-matches'); } },
@@ -1436,7 +1442,9 @@ export class Swordfish {
     }
 
     static savePreferences(preferences: Preferences): void {
-        Swordfish.preferencesWindow.close();
+        if (Swordfish.preferencesWindow) {
+            Swordfish.preferencesWindow.close();
+        }
         let reloadProjects: boolean = this.currentPreferences.projectsFolder !== preferences.projectsFolder;
         let reloadMemories: boolean = this.currentPreferences.memoriesFolder !== preferences.memoriesFolder;
         let reloadGlossaries: boolean = this.currentPreferences.glossariesFolder !== preferences.glossariesFolder;
@@ -1472,7 +1480,9 @@ export class Swordfish {
         });
         this.sortParams = params;
         this.sortSegmentsWindow.setMenu(null);
-        this.sortSegmentsWindow.loadURL('file://' + this.path.join(app.getAppPath(), 'html', 'sortSegments.html'));
+        let filePath = Swordfish.path.join(app.getAppPath(), 'html', 'sortSegments.html');
+        let fileUrl: URL = new URL('file://' + filePath);
+        this.sortSegmentsWindow.loadURL(fileUrl.href);
         this.sortSegmentsWindow.once('ready-to-show', () => {
             this.sortSegmentsWindow.show();
         });
@@ -1499,7 +1509,9 @@ export class Swordfish {
         });
         this.filterParams = params;
         this.filterSegmentsWindow.setMenu(null);
-        this.filterSegmentsWindow.loadURL('file://' + this.path.join(app.getAppPath(), 'html', 'filterSegments.html'));
+        let filePath = Swordfish.path.join(app.getAppPath(), 'html', 'filterSegments.html');
+        let fileUrl: URL = new URL('file://' + filePath);
+        this.filterSegmentsWindow.loadURL(fileUrl.href);
         this.filterSegmentsWindow.once('ready-to-show', () => {
             this.filterParams = params;
             this.filterSegmentsWindow.show();
@@ -1525,7 +1537,7 @@ export class Swordfish {
     static showAddProject(): void {
         this.addProjectWindow = new BrowserWindow({
             parent: this.mainWindow,
-            width: 920,
+            width: 980,
             height: 570,
             minimizable: false,
             maximizable: false,
@@ -1538,7 +1550,9 @@ export class Swordfish {
             }
         });
         this.addProjectWindow.setMenu(null);
-        this.addProjectWindow.loadURL('file://' + this.path.join(app.getAppPath(), 'html', 'addProject.html'));
+        let filePath = Swordfish.path.join(app.getAppPath(), 'html', 'addProject.html');
+        let fileUrl: URL = new URL('file://' + filePath);
+        this.addProjectWindow.loadURL(fileUrl.href);
         this.addProjectWindow.once('ready-to-show', () => {
             this.addProjectWindow.show();
         });
@@ -1565,7 +1579,9 @@ export class Swordfish {
             }
         });
         this.editProjectWindow.setMenu(null);
-        this.editProjectWindow.loadURL('file://' + this.path.join(app.getAppPath(), 'html', 'editProject.html'));
+        let filePath = Swordfish.path.join(app.getAppPath(), 'html', 'editProject.html');
+        let fileUrl: URL = new URL('file://' + filePath);
+        this.editProjectWindow.loadURL(fileUrl.href);
         this.editProjectWindow.once('ready-to-show', () => {
             this.editProjectWindow.show();
         });
@@ -1751,7 +1767,9 @@ export class Swordfish {
                     }
                 });
                 this.addFileWindow.setMenu(null);
-                this.addFileWindow.loadURL('file://' + this.path.join(app.getAppPath(), 'html', 'addFile.html'));
+                let filePath = Swordfish.path.join(app.getAppPath(), 'html', 'addFile.html');
+                let fileUrl: URL = new URL('file://' + filePath);
+                this.addFileWindow.loadURL(fileUrl.href);
                 this.addFileWindow.once('ready-to-show', () => {
                     this.addFileWindow.show();
                 });
@@ -2020,7 +2038,9 @@ export class Swordfish {
         });
         this.typeParam = type;
         this.serverSettingsWindow.setMenu(null);
-        this.serverSettingsWindow.loadURL('file://' + this.path.join(app.getAppPath(), 'html', 'serverSettings.html'));
+        let filePath = Swordfish.path.join(app.getAppPath(), 'html', 'serverSettings.html');
+        let fileUrl: URL = new URL('file://' + filePath);
+        this.serverSettingsWindow.loadURL(fileUrl.href);
         this.serverSettingsWindow.once('ready-to-show', () => {
             this.serverSettingsWindow.show();
         });
@@ -2046,7 +2066,9 @@ export class Swordfish {
             }
         });
         this.browseDatabasesWindow.setMenu(null);
-        this.browseDatabasesWindow.loadURL('file://' + this.path.join(app.getAppPath(), 'html', 'browseDatabases.html'));
+        let filePath = Swordfish.path.join(app.getAppPath(), 'html', 'browseDatabases.html');
+        let fileUrl: URL = new URL('file://' + filePath);
+        this.browseDatabasesWindow.loadURL(fileUrl.href);
         this.browseDatabasesWindow.once('ready-to-show', () => {
             this.browseDatabasesWindow.show();
         });
@@ -2114,7 +2136,9 @@ export class Swordfish {
             }
         });
         this.addMemoryWindow.setMenu(null);
-        this.addMemoryWindow.loadURL('file://' + this.path.join(app.getAppPath(), 'html', 'addMemory.html'));
+        let filePath = Swordfish.path.join(app.getAppPath(), 'html', 'addMemory.html');
+        let fileUrl: URL = new URL('file://' + filePath);
+        this.addMemoryWindow.loadURL(fileUrl.href);
         this.addMemoryWindow.once('ready-to-show', () => {
             this.addMemoryWindow.show();
         });
@@ -2186,7 +2210,9 @@ export class Swordfish {
             }
         });
         Swordfish.aboutWindow.setMenu(null);
-        Swordfish.aboutWindow.loadURL('file://' + this.path.join(app.getAppPath(), 'html', 'about.html'));
+        let filePath = Swordfish.path.join(app.getAppPath(), 'html', 'about.html');
+        let fileUrl: URL = new URL('file://' + filePath);
+        Swordfish.aboutWindow.loadURL(fileUrl.href);
         Swordfish.aboutWindow.once('ready-to-show', () => {
             Swordfish.aboutWindow.show();
         });
@@ -2203,27 +2229,27 @@ export class Swordfish {
             case "OpenXLIFF":
             case "XMLJava":
             case "BCP47J":
-                licenseFile = 'file://' + this.path.join(app.getAppPath(), 'html', 'licenses', 'EclipsePublicLicense1.0.html');
+                licenseFile = 'EclipsePublicLicense1.0.html';
                 title = 'Eclipse Public License 1.0';
                 break;
             case "electron":
-                licenseFile = 'file://' + this.path.join(app.getAppPath(), 'html', 'licenses', 'electron.txt');
+                licenseFile = 'electron.txt';
                 title = 'MIT License';
                 break;
             case "MapDB":
-                licenseFile = 'file://' + this.path.join(app.getAppPath(), 'html', 'licenses', 'Apache2.0.html');
+                licenseFile = 'Apache2.0.html';
                 title = 'Apache 2.0';
                 break;
             case "Java":
-                licenseFile = 'file://' + this.path.join(app.getAppPath(), 'html', 'licenses', 'java.html');
+                licenseFile = 'java.html';
                 title = 'GPL2 with Classpath Exception';
                 break;
             case "jsoup":
-                licenseFile = 'file://' + this.path.join(app.getAppPath(), 'html', 'licenses', 'jsoup.txt');
+                licenseFile = 'jsoup.txt';
                 title = 'MIT License';
                 break;
             case "DTDParser":
-                licenseFile = 'file://' + this.path.join(app.getAppPath(), 'html', 'licenses', 'LGPL2.1.txt');
+                licenseFile = 'LGPL2.1.txt';
                 title = 'LGPL 2.1';
                 break;
             default:
@@ -2243,7 +2269,9 @@ export class Swordfish {
             }
         });
         licenseWindow.setMenu(null);
-        licenseWindow.loadURL(licenseFile);
+        let filePath = Swordfish.path.join(app.getAppPath(), 'html', 'licenses', licenseFile);
+        let fileUrl: URL = new URL('file://' + filePath);
+        licenseWindow.loadURL(fileUrl.href);
         licenseWindow.once('ready-to-show', () => {
             licenseWindow.show();
         });
@@ -2278,7 +2306,9 @@ export class Swordfish {
             }
         });
         this.preferencesWindow.setMenu(null);
-        this.preferencesWindow.loadURL('file://' + this.path.join(app.getAppPath(), 'html', 'preferencesDialog.html'));
+        let filePath = Swordfish.path.join(app.getAppPath(), 'html', 'preferencesDialog.html');
+        let fileUrl: URL = new URL('file://' + filePath);
+        this.preferencesWindow.loadURL(fileUrl.href);
         this.preferencesWindow.once('ready-to-show', () => {
             let mtManager: MTManager = new MTManager(Swordfish.currentPreferences, '', '');
             this.preferencesWindow.webContents.send('set-mt-languages', mtManager.getMTLanguages());
@@ -2306,7 +2336,9 @@ export class Swordfish {
             }
         });
         this.systemInfoWindow.setMenu(null);
-        this.systemInfoWindow.loadURL('file://' + this.path.join(app.getAppPath(), 'html', 'systemInfo.html'));
+        let filePath = Swordfish.path.join(app.getAppPath(), 'html', 'systemInfo.html');
+        let fileUrl: URL = new URL('file://' + filePath);
+        this.systemInfoWindow.loadURL(fileUrl.href);
         this.systemInfoWindow.once('ready-to-show', () => {
             this.systemInfoWindow.show();
         });
@@ -2352,7 +2384,9 @@ export class Swordfish {
             }
         });
         this.licensesWindow.setMenu(null);
-        this.licensesWindow.loadURL('file://' + this.path.join(app.getAppPath(), 'html', 'licenses.html'));
+        let filePath = Swordfish.path.join(app.getAppPath(), 'html', 'licenses.html');
+        let fileUrl: URL = new URL('file://' + filePath);
+        this.licensesWindow.loadURL(fileUrl.href);
         this.licensesWindow.once('ready-to-show', () => {
             this.licensesWindow.show();
         });
@@ -2434,7 +2468,9 @@ export class Swordfish {
                                 }
                             });
                             Swordfish.updatesWindow.setMenu(null);
-                            Swordfish.updatesWindow.loadURL('file://' + this.path.join(app.getAppPath(), 'html', 'updates.html'));
+                            let filePath = Swordfish.path.join(app.getAppPath(), 'html', 'updates.html');
+                            let fileUrl: URL = new URL('file://' + filePath);
+                            Swordfish.updatesWindow.loadURL(fileUrl.href);
                             Swordfish.updatesWindow.once('ready-to-show', () => {
                                 Swordfish.updatesWindow.show();
                             });
@@ -2638,7 +2674,9 @@ export class Swordfish {
             }
         });
         this.defaultLangsWindow.setMenu(null);
-        this.defaultLangsWindow.loadURL('file://' + this.path.join(app.getAppPath(), 'html', 'defaultLangs.html'));
+        let filePath = Swordfish.path.join(app.getAppPath(), 'html', 'defaultLangs.html');
+        let fileUrl: URL = new URL('file://' + filePath);
+        this.defaultLangsWindow.loadURL(fileUrl.href);
         this.defaultLangsWindow.once('ready-to-show', () => {
             this.defaultLangsWindow.show();
         });
@@ -2769,7 +2807,9 @@ export class Swordfish {
         });
         this.memoryParam = memory;
         this.importTmxWindow.setMenu(null);
-        this.importTmxWindow.loadURL('file://' + this.path.join(app.getAppPath(), 'html', 'importTmx.html'));
+        let filePath = Swordfish.path.join(app.getAppPath(), 'html', 'importTmx.html');
+        let fileUrl: URL = new URL('file://' + filePath);
+        this.importTmxWindow.loadURL(fileUrl.href);
         this.importTmxWindow.once('ready-to-show', () => {
             this.importTmxWindow.show();
         });
@@ -2796,7 +2836,9 @@ export class Swordfish {
         });
         this.glossaryParam = glossary;
         this.importGlossaryWindow.setMenu(null);
-        this.importGlossaryWindow.loadURL('file://' + this.path.join(app.getAppPath(), 'html', 'importGlossary.html'));
+        let filePath = Swordfish.path.join(app.getAppPath(), 'html', 'importGlossary.html');
+        let fileUrl: URL = new URL('file://' + filePath);
+        this.importGlossaryWindow.loadURL(fileUrl.href);
         this.importGlossaryWindow.once('ready-to-show', () => {
             this.importGlossaryWindow.show();
         });
@@ -3183,6 +3225,7 @@ export class Swordfish {
     }
 
     static getMatches(arg: any): void {
+        Swordfish.mainWindow.webContents.send('start-waiting');
         Swordfish.sendRequest('/projects/matches', arg,
             (data: any) => {
                 if (data.status !== Swordfish.SUCCESS) {
@@ -3192,8 +3235,10 @@ export class Swordfish {
                 if (data.matches.length > 0) {
                     Swordfish.mainWindow.webContents.send('set-matches', { project: arg.project, matches: data.matches });
                 }
+                Swordfish.mainWindow.webContents.send('end-waiting');
             },
             (reason: string) => {
+                Swordfish.mainWindow.webContents.send('end-waiting');
                 Swordfish.showMessage({ type: 'error', message: reason });
             }
         );
@@ -3216,13 +3261,28 @@ export class Swordfish {
         );
     }
 
+    static fixMatches(arg: any, srcLang: string, tgtLang: string): void {
+        let mtManager: MTManager = new MTManager(Swordfish.currentPreferences, srcLang, tgtLang);
+        try {
+            mtManager.fixMatch(arg.matchData);
+        } catch (error: any) {
+            Swordfish.mainWindow.webContents.send('end-waiting');
+            Swordfish.mainWindow.webContents.send('set-status', '');
+            if (error instanceof Error) {
+                Swordfish.showMessage({ type: 'error', message: error.message });
+            } else {
+                console.error(JSON.stringify(error));
+            }
+        }
+    }
+
     static machineTranslate(arg: any): void {
         let mtManager: MTManager = new MTManager(Swordfish.currentPreferences, arg.srcLang, arg.tgtLang);
         try {
             mtManager.translateSegment(arg);
         } catch (error: any) {
             if (error instanceof Error) {
-                console.error(error.message);
+                Swordfish.showMessage({ type: 'error', message: error.message });
             } else {
                 console.error(JSON.stringify(error));
             }
@@ -3295,7 +3355,9 @@ export class Swordfish {
         }
         Swordfish.projectParam = arg.project;
         this.applyTmWindow.setMenu(null);
-        this.applyTmWindow.loadURL('file://' + this.path.join(app.getAppPath(), 'html', 'applyTm.html'));
+        let filePath = Swordfish.path.join(app.getAppPath(), 'html', 'applyTm.html');
+        let fileUrl: URL = new URL('file://' + filePath);
+        this.applyTmWindow.loadURL(fileUrl.href);
         this.applyTmWindow.once('ready-to-show', () => {
             this.applyTmWindow.show();
         });
@@ -3434,7 +3496,9 @@ export class Swordfish {
             }
         });
         Swordfish.spellingLangsWindow.setMenu(null);
-        Swordfish.spellingLangsWindow.loadURL('file://' + this.path.join(app.getAppPath(), 'html', 'spellingLangs.html'));
+        let filePath = Swordfish.path.join(app.getAppPath(), 'html', 'spellingLangs.html');
+        let fileUrl: URL = new URL('file://' + filePath);
+        Swordfish.spellingLangsWindow.loadURL(fileUrl.href);
         Swordfish.spellingLangsWindow.once('ready-to-show', () => {
             Swordfish.spellingLangsWindow.show();
         });
@@ -3781,7 +3845,9 @@ export class Swordfish {
             }
         });
         this.addGlossaryWindow.setMenu(null);
-        this.addGlossaryWindow.loadURL('file://' + this.path.join(app.getAppPath(), 'html', 'addGlossary.html'));
+        let filePath = Swordfish.path.join(app.getAppPath(), 'html', 'addGlossary.html');
+        let fileUrl: URL = new URL('file://' + filePath);
+        this.addGlossaryWindow.loadURL(fileUrl.href);
         this.addGlossaryWindow.once('ready-to-show', () => {
             this.addGlossaryWindow.show();
         });
@@ -3811,7 +3877,9 @@ export class Swordfish {
             }
         });
         this.importXliffWindow.setMenu(null);
-        this.importXliffWindow.loadURL('file://' + this.path.join(app.getAppPath(), 'html', 'importXliff.html'));
+        let filePath = Swordfish.path.join(app.getAppPath(), 'html', 'importXliff.html');
+        let fileUrl: URL = new URL('file://' + filePath);
+        this.importXliffWindow.loadURL(fileUrl.href);
         this.importXliffWindow.once('ready-to-show', () => {
             this.importXliffWindow.show();
         });
@@ -3903,7 +3971,9 @@ export class Swordfish {
                 }
             });
             this.addFileWindow.setMenu(null);
-            this.addFileWindow.loadURL('file://' + this.path.join(app.getAppPath(), 'html', 'addFile.html'));
+            let filePath = Swordfish.path.join(app.getAppPath(), 'html', 'addFile.html');
+            let fileUrl: URL = new URL('file://' + filePath);
+            this.addFileWindow.loadURL(fileUrl.href);
             this.addFileWindow.once('ready-to-show', () => {
                 this.addFileWindow.show();
             });
@@ -4295,7 +4365,9 @@ export class Swordfish {
             }
         });
         this.tagsWindow.setMenu(null);
-        this.tagsWindow.loadURL('file://' + this.path.join(app.getAppPath(), 'html', 'tags.html'));
+        let filePath = Swordfish.path.join(app.getAppPath(), 'html', 'tags.html');
+        let fileUrl: URL = new URL('file://' + filePath);
+        this.tagsWindow.loadURL(fileUrl.href);
         this.tagsWindow.once('ready-to-show', () => {
             this.tagsWindow.show();
         });
@@ -4321,7 +4393,9 @@ export class Swordfish {
             }
         });
         this.goToWindow.setMenu(null);
-        this.goToWindow.loadURL('file://' + this.path.join(app.getAppPath(), 'html', 'goTo.html'));
+        let filePath = Swordfish.path.join(app.getAppPath(), 'html', 'goTo.html');
+        let fileUrl: URL = new URL('file://' + filePath);
+        this.goToWindow.loadURL(fileUrl.href);
         this.goToWindow.once('ready-to-show', () => {
             this.goToWindow.show();
         });
@@ -4354,7 +4428,9 @@ export class Swordfish {
         });
         this.projectParam = arg.project;
         this.replaceTextWindow.setMenu(null);
-        this.replaceTextWindow.loadURL('file://' + this.path.join(app.getAppPath(), 'html', 'replaceText.html'));
+        let filePath = Swordfish.path.join(app.getAppPath(), 'html', 'replaceText.html');
+        let fileUrl: URL = new URL('file://' + filePath);
+        this.replaceTextWindow.loadURL(fileUrl.href);
         this.replaceTextWindow.once('ready-to-show', () => {
             this.replaceTextWindow.show();
         });
@@ -4605,7 +4681,9 @@ export class Swordfish {
         });
         Swordfish.concordanceMemories = arg;
         this.concordanceSearchWindow.setMenu(null);
-        this.concordanceSearchWindow.loadURL('file://' + this.path.join(app.getAppPath(), 'html', 'concordanceSearch.html'));
+        let filePath = Swordfish.path.join(app.getAppPath(), 'html', 'concordanceSearch.html');
+        let fileUrl: URL = new URL('file://' + filePath);
+        this.concordanceSearchWindow.loadURL(fileUrl.href);
         this.concordanceSearchWindow.once('ready-to-show', () => {
             this.concordanceSearchWindow.show();
         });
@@ -4675,14 +4753,15 @@ export class Swordfish {
         Swordfish.htmlTitle = 'Concordance Search';
         Swordfish.htmlId = htmlViewerWindow.id;
         htmlViewerWindow.setMenu(null);
-        htmlViewerWindow.loadURL('file://' + this.path.join(app.getAppPath(), 'html', 'htmlViewer.html'));
+        let filePath = Swordfish.path.join(app.getAppPath(), 'html', 'htmlViewer.html');
+        let fileUrl: URL = new URL('file://' + filePath);
+        htmlViewerWindow.loadURL(fileUrl.href);
         htmlViewerWindow.once('ready-to-show', () => {
             htmlViewerWindow.show();
         });
         htmlViewerWindow.on('close', () => {
             this.concordanceSearchWindow.focus();
         });
-
     }
 
     static showTermSearch(arg: any): any {
@@ -4702,7 +4781,9 @@ export class Swordfish {
         });
         this.glossaryParam = arg.glossary;
         this.termSearchWindow.setMenu(null);
-        this.termSearchWindow.loadURL('file://' + this.path.join(app.getAppPath(), 'html', 'termSearch.html'));
+        let filePath = Swordfish.path.join(app.getAppPath(), 'html', 'termSearch.html');
+        let fileUrl: URL = new URL('file://' + filePath);
+        this.termSearchWindow.loadURL(fileUrl.href);
         this.termSearchWindow.once('ready-to-show', () => {
             this.termSearchWindow.show();
         });
@@ -4742,7 +4823,9 @@ export class Swordfish {
                 Swordfish.htmlContent = data.html;
                 Swordfish.htmlId = htmlViewerWindow.id;
                 htmlViewerWindow.setMenu(null);
-                htmlViewerWindow.loadURL('file://' + this.path.join(app.getAppPath(), 'html', 'htmlViewer.html'));
+                let filePath = Swordfish.path.join(app.getAppPath(), 'html', 'htmlViewer.html');
+                let fileUrl: URL = new URL('file://' + filePath);
+                htmlViewerWindow.loadURL(fileUrl.href);
                 htmlViewerWindow.once('ready-to-show', () => {
                     htmlViewerWindow.show();
                 });
@@ -4774,7 +4857,9 @@ export class Swordfish {
         });
         this.glossaryParam = glossary;
         this.addTermWindow.setMenu(null);
-        this.addTermWindow.loadURL('file://' + this.path.join(app.getAppPath(), 'html', 'addTerm.html'));
+        let filePath = Swordfish.path.join(app.getAppPath(), 'html', 'addTerm.html');
+        let fileUrl: URL = new URL('file://' + filePath);
+        this.addTermWindow.loadURL(fileUrl.href);
         this.addTermWindow.once('ready-to-show', () => {
             this.addTermWindow.show();
         });
@@ -4933,7 +5018,9 @@ export class Swordfish {
             }
         });
         Swordfish.spaceAnalysisWindow.setMenu(null);
-        Swordfish.spaceAnalysisWindow.loadURL('file://' + this.path.join(app.getAppPath(), 'html', 'spaceAnalysis.html'));
+        let filePath = Swordfish.path.join(app.getAppPath(), 'html', 'spaceAnalysis.html');
+        let fileUrl: URL = new URL('file://' + filePath);
+        Swordfish.spaceAnalysisWindow.loadURL(fileUrl.href);
         Swordfish.spaceAnalysisWindow.once('ready-to-show', () => {
             Swordfish.spaceAnalysisWindow.show();
         });
@@ -4960,7 +5047,9 @@ export class Swordfish {
             }
         });
         Swordfish.tagsAnalysisWindow.setMenu(null);
-        Swordfish.tagsAnalysisWindow.loadURL('file://' + this.path.join(app.getAppPath(), 'html', 'tagsAnalysis.html'));
+        let filePath = Swordfish.path.join(app.getAppPath(), 'html', 'tagsAnalysis.html');
+        let fileUrl: URL = new URL('file://' + filePath);
+        Swordfish.tagsAnalysisWindow.loadURL(fileUrl.href);
         Swordfish.tagsAnalysisWindow.once('ready-to-show', () => {
             Swordfish.tagsAnalysisWindow.show();
         });
@@ -5022,6 +5111,31 @@ export class Swordfish {
         );
     }
 
+    static fixMatch(match: Match) {
+        if (!Swordfish.currentPreferences.chatGpt.enabled) {
+            Swordfish.showMessage({ type: 'error', message: 'ChatGPT is not enabled' });
+            return;
+        }
+        Swordfish.mainWindow.webContents.send('start-waiting');
+        Swordfish.mainWindow.webContents.send('set-status', 'Fixing match');
+        Swordfish.sendRequest('/projects/getMatchData', match,
+            (data: any) => {
+                Swordfish.mainWindow.webContents.send('end-waiting');
+                Swordfish.mainWindow.webContents.send('set-status', '');
+                if (data.status !== Swordfish.SUCCESS) {
+                    Swordfish.showMessage({ type: 'error', message: data.reason });
+                    return;
+                }
+                Swordfish.fixMatches(data, match.srcLang, match.tgtLang);
+            },
+            (reason: string) => {
+                Swordfish.mainWindow.webContents.send('end-waiting');
+                Swordfish.mainWindow.webContents.send('set-status', '');
+                Swordfish.showMessage({ type: 'error', message: reason });
+            }
+        );
+    }
+
     static exportHTML(arg: any): void {
         Swordfish.mainWindow.webContents.send('start-waiting');
         Swordfish.mainWindow.webContents.send('set-status', 'Exporting HTML');
@@ -5066,7 +5180,9 @@ export class Swordfish {
             }
         });
         this.changeCaseWindow.setMenu(null);
-        this.changeCaseWindow.loadURL('file://' + this.path.join(app.getAppPath(), 'html', 'changeCase.html'));
+        let filePath = Swordfish.path.join(app.getAppPath(), 'html', 'changeCase.html');
+        let fileUrl: URL = new URL('file://' + filePath);
+        this.changeCaseWindow.loadURL(fileUrl.href);
         this.changeCaseWindow.once('ready-to-show', () => {
             let bounds: Rectangle = Swordfish.mainWindow.getBounds();
             if (!Swordfish.locations.hasLocation('changeCase.html')) {
@@ -5144,7 +5260,9 @@ export class Swordfish {
             });
             Swordfish.notesParam = arg;
             Swordfish.notesWindow.setMenu(null);
-            Swordfish.notesWindow.loadURL(Swordfish.path.join('file://', app.getAppPath(), 'html', 'notes.html'));
+            let filePath = Swordfish.path.join(app.getAppPath(), 'html', 'notes.html');
+            let fileUrl: URL = new URL('file://' + filePath);
+            Swordfish.notesWindow.loadURL(fileUrl.href);
             Swordfish.notesWindow.addListener('closed', () => {
                 Swordfish.mainWindow.webContents.send('notes-closed');
                 Swordfish.notesWindow = undefined;
@@ -5198,7 +5316,9 @@ export class Swordfish {
         });
         Swordfish.notesParam = arg;
         Swordfish.addNoteWindow.setMenu(null);
-        Swordfish.addNoteWindow.loadURL(Swordfish.path.join('file://', app.getAppPath(), 'html', 'addNote.html'));
+        let filePath = Swordfish.path.join(app.getAppPath(), 'html', 'addNote.html');
+        let fileUrl: URL = new URL('file://' + filePath);
+        Swordfish.addNoteWindow.loadURL(fileUrl.href);
         Swordfish.addNoteWindow.once('ready-to-show', () => {
             Swordfish.addNoteWindow.show();
         });
@@ -5317,7 +5437,9 @@ export class Swordfish {
             }
         });
         Swordfish.gettingStartedWindow.setMenu(null);
-        Swordfish.gettingStartedWindow.loadURL(Swordfish.path.join('file://', app.getAppPath(), 'html', 'gettingStarted.html'));
+        let filePath = Swordfish.path.join(app.getAppPath(), 'html', 'gettingStarted.html');
+        let fileUrl: URL = new URL('file://' + filePath);
+        Swordfish.gettingStartedWindow.loadURL(fileUrl.href);
         Swordfish.gettingStartedWindow.once('ready-to-show', () => {
             Swordfish.gettingStartedWindow.show();
         });
@@ -5360,7 +5482,9 @@ export class Swordfish {
             }
         });
         Swordfish.editXmlFilterWindow.setMenu(null);
-        Swordfish.editXmlFilterWindow.loadURL(Swordfish.path.join('file://', app.getAppPath(), 'html', 'filterConfig.html'));
+        let filePath = Swordfish.path.join(app.getAppPath(), 'html', 'filterConfig.html');
+        let fileUrl: URL = new URL('file://' + filePath);
+        Swordfish.editXmlFilterWindow.loadURL(fileUrl.href);
         Swordfish.editXmlFilterWindow.once('ready-to-show', () => {
             Swordfish.editXmlFilterWindow.show();
         });
@@ -5449,7 +5573,9 @@ export class Swordfish {
             }
         });
         Swordfish.configElementWindow.setMenu(null);
-        Swordfish.configElementWindow.loadURL(Swordfish.path.join('file://', app.getAppPath(), 'html', 'elementConfig.html'));
+        let filePath = Swordfish.path.join(app.getAppPath(), 'html', 'elementConfig.html');
+        let fileUrl: URL = new URL('file://' + filePath);
+        Swordfish.configElementWindow.loadURL(fileUrl.href);
         Swordfish.configElementWindow.once('ready-to-show', () => {
             Swordfish.configElementWindow.show();
         });
@@ -5556,7 +5682,9 @@ export class Swordfish {
             }
         });
         Swordfish.addXmlConfigurationWindow.setMenu(null);
-        Swordfish.addXmlConfigurationWindow.loadURL(Swordfish.path.join('file://', app.getAppPath(), 'html', 'addXmlConfiguration.html'));
+        let filePath = Swordfish.path.join(app.getAppPath(), 'html', 'addXmlConfiguration.html');
+        let fileUrl: URL = new URL('file://' + filePath);
+        Swordfish.addXmlConfigurationWindow.loadURL(fileUrl.href);
         Swordfish.addXmlConfigurationWindow.once('ready-to-show', () => {
             Swordfish.addXmlConfigurationWindow.show();
         });

@@ -76,9 +76,6 @@ class AddProject {
             this.electron.ipcRenderer.send('select-source-files');
             document.getElementById('addFilesButton').blur();
         });
-        document.getElementById('deleteFilesButton').addEventListener('click', () => {
-            this.deleteFiles();
-        });
         document.getElementById('addProjectButton').addEventListener('click', () => {
             this.addProject();
         });
@@ -193,82 +190,117 @@ class AddProject {
 
     addFiles(files: FileInfo[]): void {
         let length = files.length;
-        let tableBody: HTMLElement = document.getElementById('tableBody');
-        if (this.addedFiles.size === 0) {
-            tableBody.innerHTML = '';
-        }
         for (let i = 0; i < length; i++) {
             let file: FileInfo = files[i];
             let hash = this.hashCode(file.file);
             if (!this.addedFiles.has(hash)) {
                 this.addedFiles.set(hash, file);
-                let tr = document.createElement('tr');
-                tr.id = '' + hash;
-                let td = document.createElement('td');
-                let check: HTMLInputElement = document.createElement('input');
-                check.type = 'checkbox';
-                check.classList.add('check');
-                check.setAttribute('data', '' + hash);
-                td.appendChild(check);
-                tr.appendChild(td);
-
-                td = document.createElement('td');
-                td.className = 'noWrap';
-                td.style.overflowX = 'hidden';
-                if (file.file.length > 50 && (file.file.indexOf('/') != -1 || file.file.indexOf('\\') != -1)) {
-                    let f = file.file.replace(this.homeFolder, '~');
-                    td.innerText = f.substring(0, 10) + ' ... ' + f.substring(f.length - 30);
-                    td.title = file.file;
-                } else {
-                    td.innerText = file.file;
-                }
-                tr.appendChild(td);
-
-                td = document.createElement('td');
-                let typeSelect: HTMLSelectElement = document.createElement('select');
-                typeSelect.innerHTML = this.typesOption;
-                if (file.type !== 'Unknown') {
-                    typeSelect.value = file.type;
-                } else {
-                    typeSelect.value = 'none';
-                }
-                typeSelect.addEventListener('change', (event: InputEvent) => {
-                    this.addedFiles.get(hash).type = (event.currentTarget as HTMLSelectElement).value;
-                });
-                td.appendChild(typeSelect);
-                tr.appendChild(td);
-
-                td = document.createElement('td');
-                let charsetSelect: HTMLSelectElement = document.createElement('select');
-                charsetSelect.innerHTML = this.charsetOptions;
-                if (file.encoding !== 'Unknown') {
-                    charsetSelect.value = file.encoding;
-                } else {
-                    charsetSelect.value = 'none';
-                }
-                charsetSelect.addEventListener('change', (event: InputEvent) => {
-                    this.addedFiles.get(hash).encoding = (event.currentTarget as HTMLSelectElement).value;
-                });
-                td.appendChild(charsetSelect);
-                tr.appendChild(td);
-
-                tableBody.appendChild(tr);
             }
+        }
+        let tableBody: HTMLElement = document.getElementById('tableBody');
+        tableBody.innerHTML = '';
+        let commonStart: string = this.commonPrefix();
+        let loadedFiles = [];
+        for (let value of this.addedFiles.values()) {
+            loadedFiles.push(value);
+        }
+        loadedFiles.sort((a, b) => {
+            if (a.file < b.file) {
+                return -1;
+            }
+            if (a.file > b.file) {
+                return 1;
+            }
+            return 0;
+        });
+        for (let i = 0; i < loadedFiles.length; i++) {
+            let file: FileInfo = loadedFiles[i];
+            let hash: number = this.hashCode(file.file);
+            let tr = document.createElement('tr');
+            tr.id = '' + hash;
+
+            let td = document.createElement('td');
+            let remove: HTMLAnchorElement = document.createElement('a');
+            remove.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" height="20px" viewBox="0 -960 960 960" width="20px"><path d="m400-325 80-80 80 80 51-51-80-80 80-80-51-51-80 80-80-80-51 51 80 80-80 80 51 51Zm-88 181q-29.7 0-50.85-21.15Q240-186.3 240-216v-480h-48v-72h192v-48h192v48h192v72h-48v479.57Q720-186 698.85-165T648-144H312Zm336-552H312v480h336v-480Zm-336 0v480-480Z"/></svg>' +
+                '<span class="tooltiptext bottomTooltip">Remove File</span>';
+            remove.className = 'tooltip';
+            remove.addEventListener('click', () => {
+                this.deleteFiles('' + hash);
+            });
+            remove.setAttribute('data', '' + hash);
+            td.appendChild(remove);
+            tr.appendChild(td);
+
+            td = document.createElement('td');
+            td.className = 'noWrap';
+            td.style.overflowX = 'hidden';
+
+            let fileName: string = file.file;
+            if (fileName.length > commonStart.length) {
+                fileName = fileName.substring(commonStart.length - 1);
+            }
+            if (fileName.length > 50 && (file.file.indexOf('/') != -1 || fileName.indexOf('\\') != -1)) {
+                let f = fileName.replace(this.homeFolder, '~');
+                td.innerText = f.substring(0, 5) + ' ... ' + f.substring(f.length - 35);
+            } else {
+                td.innerText = fileName;
+            }
+            td.title = file.file;
+            tr.appendChild(td);
+
+            td = document.createElement('td');
+            let typeSelect: HTMLSelectElement = document.createElement('select');
+            typeSelect.innerHTML = this.typesOption;
+            if (file.type !== 'Unknown') {
+                typeSelect.value = file.type;
+            } else {
+                typeSelect.value = 'none';
+            }
+            typeSelect.addEventListener('change', (event: InputEvent) => {
+                this.addedFiles.get(hash).type = (event.currentTarget as HTMLSelectElement).value;
+            });
+            td.appendChild(typeSelect);
+            tr.appendChild(td);
+
+            td = document.createElement('td');
+            let charsetSelect: HTMLSelectElement = document.createElement('select');
+            charsetSelect.innerHTML = this.charsetOptions;
+            if (file.encoding !== 'Unknown') {
+                charsetSelect.value = file.encoding;
+            } else {
+                charsetSelect.value = 'none';
+            }
+            charsetSelect.addEventListener('change', (event: InputEvent) => {
+                this.addedFiles.get(hash).encoding = (event.currentTarget as HTMLSelectElement).value;
+            });
+            td.appendChild(charsetSelect);
+            tr.appendChild(td);
+
+            tableBody.appendChild(tr);
         }
     }
 
-    deleteFiles(): void {
-        let tableBody: HTMLElement = document.getElementById('tableBody');
-        let checked: HTMLCollectionOf<Element> = document.getElementsByClassName('check');
-        let length = checked.length;
-        for (let i = 0; i < length; i++) {
-            let check = (checked.item(i) as HTMLInputElement);
-            if (check.checked) {
-                let data: string = check.getAttribute('data');
-                this.addedFiles.delete(Number.parseInt(data, 10));
-                tableBody.removeChild(document.getElementById(data));
-            }
+    commonPrefix(): string {
+        let filesList: FileInfo[] = [];
+        for (let value of this.addedFiles.values()) {
+            filesList.push(value);
         }
+        let commonStart: string = filesList[0].file;
+        for (let i = 1; i < filesList.length; i++) {
+            let file: string = filesList[i].file;
+            let j = 0;
+            while (j < commonStart.length && j < file.length && commonStart.charAt(j) === file.charAt(j)) {
+                j++;
+            }
+            commonStart = commonStart.substring(0, j);
+        }
+        return commonStart;
+    }
+
+    deleteFiles(data: string): void {
+        let tableBody: HTMLElement = document.getElementById('tableBody');
+        this.addedFiles.delete(Number.parseInt(data, 10));
+        tableBody.removeChild(document.getElementById(data));
     }
 
     hashCode(str: string): number {

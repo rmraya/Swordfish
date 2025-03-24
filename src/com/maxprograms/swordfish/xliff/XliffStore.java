@@ -349,11 +349,15 @@ public class XliffStore {
 		conn.commit();
 	}
 
+	private void prepareInsertSegment() throws SQLException {
+		String sql = "INSERT INTO segments (file, unitId, segId, type, state, child, translate, tags, space, source, sourceText, target, targetText, words, chars) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
+		insertSegmentStmt = conn.prepareStatement(sql);
+	}
+
 	private void parseDocument() throws SQLException, IOException {
 		insertFile = conn.prepareStatement("INSERT INTO files (id, name) VALUES (?,?)");
 		insertUnit = conn.prepareStatement("INSERT INTO units (file, unitId, data, compressed) VALUES (?,?,?,?)");
-		insertSegmentStmt = conn.prepareStatement(
-				"INSERT INTO segments (file, unitId, segId, type, state, child, translate, tags, space, source, sourceText, target, targetText, words, chars) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)");
+		prepareInsertSegment();
 		insertNoteStmt = conn
 				.prepareStatement("INSERT INTO notes (file, unitId, segId, noteId, note) values (?,?,?,?,?)");
 		recurse(document.getRootElement());
@@ -531,6 +535,7 @@ public class XliffStore {
 
 	private synchronized void insertSegment(String file, String unit, String segment, String type, boolean translate,
 			Element source, Element target) throws SQLException {
+		// file, unitId, segId, type, state, child, translate, tags, space, source, sourceText, target, targetText, words, chars
 		String pureSource = XliffUtils.pureText(source);
 		insertSegmentStmt.setString(1, file);
 		insertSegmentStmt.setString(2, unit);
@@ -4517,15 +4522,15 @@ public class XliffStore {
 		if (segment.isEmpty()) {
 			return segment;
 		}
-		int index = segment.indexOf("<img ");
-		while (index != -1) {
-			int end = segment.indexOf(">", index) + 1;
-			String start = segment.substring(0, index);
-			String img = segment.substring(index, end);
+		int idx = segment.indexOf("<img ");
+		while (idx != -1) {
+			int end = segment.indexOf(">", idx) + 1;
+			String start = segment.substring(0, idx);
+			String img = segment.substring(idx, end);
 			String tag = "<span class=\"tag\">" + parseImg(img) + "</span>";
 			String rest = segment.substring(end);
 			segment = start + tag + rest;
-			index = segment.indexOf("<img ");
+			idx = segment.indexOf("<img ");
 		}
 		return segment;
 	}
@@ -4686,9 +4691,7 @@ public class XliffStore {
 		sql = "UPDATE segments SET child = child + 1 WHERE file = '" + currentFile + "' AND child >= " + index;
 		stmt.execute(sql);
 
-		sql = "INSERT INTO segments (file, unitId, segId, type, state, child, translate, tags, space, source, sourceText, target, targetText, words) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
-		insertSegmentStmt = conn.prepareStatement(sql);
-
+		prepareInsertSegment();
 		List<Element> segments = unit.getChildren();
 		for (int i = 0; i < segments.size(); i++) {
 			Element e = segments.get(i);
@@ -4868,9 +4871,7 @@ public class XliffStore {
 
 		deleteUnitSegments(currentFile, currentUnit);
 
-		sql = "INSERT INTO segments (file, unitId, segId, type, state, child, translate, tags, space, source, sourceText, target, targetText, words) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
-		insertSegmentStmt = conn.prepareStatement(sql);
-
+		prepareInsertSegment();
 		List<Element> segments = unit.getChildren();
 		for (int i = 0; i < segments.size(); i++) {
 			Element e = segments.get(i);
@@ -5012,5 +5013,47 @@ public class XliffStore {
 			document.getRootElement().setAttribute("trgLang", tgtLang);
 			saveXliff();
 		}
+	}
+
+	public JSONObject getMatchData(JSONObject json) throws JSONException, SQLException {
+		JSONObject result = new JSONObject();
+		String file = json.getString("file");
+		String unit = json.getString("unit");
+		String segment = json.getString("segment");
+		String matchId = json.getString("matchId");
+
+		String source = "";
+		getSource.setString(1, file);
+		getSource.setString(2, unit);
+		getSource.setString(3, segment);
+		try (ResultSet rs = getSource.executeQuery()) {
+			while (rs.next()) {
+				source = rs.getString(1);
+			}
+		}
+
+		String matchSource = "";
+		String matchTarget = "";
+		getMatches.setString(1, file);
+		getMatches.setString(2, unit);
+		getMatches.setString(3, segment);
+		try (ResultSet rs = getMatches.executeQuery()) {
+			while (rs.next()) {
+				String id = rs.getString(4);
+				if (id.equals(matchId)) {
+					matchSource = rs.getString(8);
+					matchTarget = rs.getString(9);
+					break;
+				}
+			}
+		}
+		result.put("project", json.getString("project"));
+		result.put("file", file);
+		result.put("unit", unit);
+		result.put("segment", segment);
+		result.put("source", source);
+		result.put("matchSource", matchSource);
+		result.put("matchTarget", matchTarget);
+		return result;
 	}
 }

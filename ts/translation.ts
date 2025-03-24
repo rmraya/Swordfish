@@ -14,7 +14,6 @@ class SegmentId {
     file: string;
     unit: string;
     id: string;
-
 }
 
 class Segment {
@@ -1730,7 +1729,7 @@ class TranslationView {
             id: this.currentId.id
         }
     }
-    
+
     removeAllTranslations(): void {
         this.returnTo = {
             file: this.currentId.file,

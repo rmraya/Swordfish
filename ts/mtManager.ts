@@ -40,7 +40,7 @@ export class MTManager {
             tgtLangs: ["ace", "af", "ak", "als", "am", "ar", "as", "ast", "awa", "ayr", "az", "azb", "azj", "ba", "ban", "be", "bem", "bg", "bho", "bjn", "bm", "bn", "bo", "bs", "bug", "ca", "ceb", "cjk", "ckb", "crh", "cs", "cy", "da", "de", "dik", "diq", "dyu", "dz", "ee", "el", "en", "eo", "es", "es-419", "es-ES", "et", "fi", "fj", "fo", "fon", "fr", "fur", "fuv", "ga", "gaz", "gd", "gl", "gn", "gu", "ha", "he", "hi", "hne", "hr", "ht", "hu", "hy", "id", "ig", "ilo", "is", "it", "ja", "jv", "ka", "kab", "kac", "kam", "kas", "kbp", "kea", "kg", "khk", "ki", "kk", "km", "kmb", "kmr", "kn", "knc", "ko", "ks", "ky", "la", "lb", "lg", "li", "lij", "lmo", "ln", "lo", "lt", "ltg", "lua", "luo", "lus", "lv", "lvs", "mag", "mai", "mg", "mi", "min", "mk", "ml", "mn", "mni", "mos", "mr", "ms", "mt", "my", "nb", "ne", "nl", "nn", "nso", "nus", "ny", "oc", "or", "pa", "pag", "pap", "pbt", "pes", "pl", "plt", "prs", "ps", "pt", "pt-BR", "pt-PT", "quy", "rn", "ro", "ru", "rw", "sa", "sat", "sc", "scn", "sd", "sg", "shn", "si", "sk", "sl", "sm", "sn", "so", "sq", "sr", "ss", "st", "su", "sv", "sw", "szl", "ta", "taq", "te", "tg", "th", "ti", "tk", "tl", "tn", "tpi", "tr", "ts", "tt", "tum", "tw", "tzm", "ug", "uk", "umb", "ur", "uzn", "vec", "vi", "war", "wo", "xh", "ydd", "yo", "zh", "zh-CN", "zh-TW", "zsm", "zu"]
         }
     };
-    currentSegment: any;
+    currentSegment: SegmentId;
 
     constructor(preferences: Preferences, srcLang: string, tgtLang: string) {
         this.mtEngines = [];
@@ -78,7 +78,7 @@ export class MTManager {
         }
     }
 
-    translateProject(project: string, exportedFile: string, currentSegment: any) {
+    translateProject(project: string, exportedFile: string, currentSegment: SegmentId) {
         this.currentSegment = currentSegment;
         let parser: SAXParser = new SAXParser();
         let handler: MTContentHandler = new MTContentHandler(this, project);
@@ -110,18 +110,61 @@ export class MTManager {
                 srcLang: this.srcLang,
                 tgtLang: this.tgtLang,
                 translations: translations,
-                currentSegment: this.currentSegment
+                currentSegment: {
+                    file: file,
+                    unit: unit,
+                    id: segment
+                }
             });
-
         }, (reason: any) => {
             if (reason instanceof Error) {
-                console.error(reason.message);
                 throw reason;
             }
             throw new Error(reason);
         }).catch((error: any) => {
             if (error instanceof Error) {
-                console.error(error.message);
+                throw error;
+            }
+        });
+    }
+
+    fixMatch(params: any): void {
+        let promises: Promise<MTMatch>[] = [];
+        for (let mtEngine of this.mtEngines) {
+            if (mtEngine.fixesMatches()) {
+                promises.push(mtEngine.fixMatch(
+                    MTUtils.toXMLElement(params.source),
+                    MTUtils.toXMLElement(params.matchSource),
+                    MTUtils.toXMLElement(params.matchTarget)
+                ));
+            }
+        }
+        Promise.all(promises).then((values: MTMatch[]) => {
+            let translations: MTMatch[] = [];
+            for (let value of values) {
+                translations.push(value);
+            }
+            this.setMTMatches({
+                project: params.project,
+                file: params.file,
+                unit: params.unit,
+                segment: params.segment,
+                srcLang: this.srcLang,
+                tgtLang: this.tgtLang,
+                translations: translations,
+                currentSegment: {
+                    file: params.file,
+                    unit: params.unit,
+                    id: params.segment
+                }
+            });
+        }, (reason: any) => {
+            if (reason instanceof Error) {
+                throw reason;
+            }
+            throw new Error(reason);
+        }).catch((error: any) => {
+            if (error instanceof Error) {
                 throw error;
             }
         });
@@ -170,7 +213,7 @@ export class MTManager {
             if (reason instanceof Error) {
                 throw reason;
             }
-            console.log(JSON.stringify(reason, null, 2));
+            console.log('translateSegment error', JSON.stringify(reason, null, 2));
             throw new Error(reason);
         });
     }
@@ -217,7 +260,7 @@ export class MTManager {
                     throw new Error(json.reason);
                 }
                 if (params.currentSegment) {
-                    let current: any = params.currentSegment;
+                    let current: SegmentId = params.currentSegment;
                     if (current.file === params.file && current.unit === params.unit && current.id === params.segment) {
                         Swordfish.getMatches({
                             project: params.project,
@@ -226,6 +269,8 @@ export class MTManager {
                             segment: params.segment
                         });
                     }
+                    Swordfish.mainWindow.webContents.send('end-waiting');
+                    Swordfish.mainWindow.webContents.send('set-status', '');
                 }
             } else {
                 throw new Error("Error setting MT matches: " + response.statusText);
