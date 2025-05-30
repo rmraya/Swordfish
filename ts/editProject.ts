@@ -13,20 +13,20 @@
 class EditProject {
 
     electron = require('electron');
-    projectId: string;
+    projectId: string = '';
 
     constructor() {
         this.electron.ipcRenderer.send('get-theme');
-        this.electron.ipcRenderer.on('set-theme', (event: Electron.IpcRendererEvent, arg: any) => {
-            (document.getElementById('theme') as HTMLLinkElement).href = arg;
+        this.electron.ipcRenderer.on('set-theme', (event: Electron.IpcRendererEvent, theme: string) => {
+            (document.getElementById('theme') as HTMLLinkElement).href = theme;
         });
         this.electron.ipcRenderer.send('get-clients');
-        this.electron.ipcRenderer.on('set-clients', (event: Electron.IpcRendererEvent, arg: any) => {
-            this.setClients(arg);
+        this.electron.ipcRenderer.on('set-clients', (event: Electron.IpcRendererEvent, clients: string[]) => {
+            this.setClients(clients);
         });
         this.electron.ipcRenderer.send('get-subjects');
-        this.electron.ipcRenderer.on('set-subjects', (event: Electron.IpcRendererEvent, arg: any) => {
-            this.setSubjects(arg);
+        this.electron.ipcRenderer.on('set-subjects', (event: Electron.IpcRendererEvent, subjects: string[]) => {
+            this.setSubjects(subjects);
         });
         this.electron.ipcRenderer.send('get-languages');
         this.electron.ipcRenderer.on('set-languages', (event: Electron.IpcRendererEvent, arg: any) => {
@@ -50,7 +50,7 @@ class EditProject {
                 this.electron.ipcRenderer.send('close-editProject');
             }
         });
-        document.getElementById('updateProjectButton').addEventListener('click', () => {
+        (document.getElementById('updateProjectButton') as HTMLButtonElement).addEventListener('click', () => {
             this.updateProject();
         });
         setTimeout(() => {
@@ -66,12 +66,12 @@ class EditProject {
         }
         let subject: string = (document.getElementById('subjectInput') as HTMLInputElement).value;
         let client: string = (document.getElementById('clientInput') as HTMLInputElement).value;
-        let srcLang = (document.getElementById('srcLangSelect') as HTMLSelectElement).value;
+        let srcLang: string = (document.getElementById('srcLangSelect') as HTMLSelectElement).value;
         if (srcLang === 'none') {
             this.electron.ipcRenderer.send('show-message', { type: 'warning', message: 'Select source language', parent: 'addProject' });
             return;
         }
-        let tgtLang = (document.getElementById('tgtLangSelect') as HTMLSelectElement).value;
+        let tgtLang: string = (document.getElementById('tgtLangSelect') as HTMLSelectElement).value;
         if (tgtLang === 'none') {
             this.electron.ipcRenderer.send('show-message', { type: 'warning', message: 'Select target language', parent: 'addProject' });
             return;
@@ -94,7 +94,7 @@ class EditProject {
         for (let i = 0; i < length; i++) {
             options = options + '<option value="' + clients[i] + '">' + clients[i] + '</option>';
         }
-        document.getElementById('clients').innerHTML = options;
+        (document.getElementById('clients') as HTMLDataListElement).innerHTML = options;
     }
 
     setSubjects(subjects: string[]): void {
@@ -102,16 +102,16 @@ class EditProject {
         for (let subject of subjects) {
             options = options + '<option value="' + subject + '">' + subject + '</option>';
         }
-        document.getElementById('subjects').innerHTML = options;
+        (document.getElementById('subjects') as HTMLDataListElement).innerHTML = options;
     }
 
     setLanguages(arg: any): void {
-        let array = arg.languages;
-        let languageOptions = '<option value="none">Select Language</option>';
+        let array: LanguageInterface[] = arg.languages;
+        let languageOptions: string = '<option value="none">Select Language</option>';
         for (let lang of array) {
             languageOptions = languageOptions + '<option value="' + lang.code + '">' + lang.description + '</option>';
         }
-        document.getElementById('srcLangSelect').innerHTML = languageOptions;
-        document.getElementById('tgtLangSelect').innerHTML = languageOptions;
+        (document.getElementById('srcLangSelect') as HTMLSelectElement).innerHTML = languageOptions;
+        (document.getElementById('tgtLangSelect') as HTMLSelectElement).innerHTML = languageOptions;
     }
 }

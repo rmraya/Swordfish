@@ -17,8 +17,8 @@ class SystemInformation {
     constructor() {
         this.electron.ipcRenderer.send('get-theme');
         this.electron.ipcRenderer.send('get-version');
-        this.electron.ipcRenderer.on('set-theme', (event: Electron.IpcRendererEvent, arg: any) => {
-            (document.getElementById('theme') as HTMLLinkElement).href = arg;
+        this.electron.ipcRenderer.on('set-theme', (event: Electron.IpcRendererEvent, theme: string) => {
+            (document.getElementById('theme') as HTMLLinkElement).href = theme;
         });
         this.electron.ipcRenderer.send('get-system-info');
         this.electron.ipcRenderer.on('set-system-info', (event: Electron.IpcRendererEvent, arg: any) => {
@@ -35,10 +35,10 @@ class SystemInformation {
     }
 
     setInfo(info: any) {
-        document.getElementById('swordfish').innerText = info.swordfish;
-        document.getElementById('openxliff').innerText = info.openxliff;
-        document.getElementById('xmljava').innerText = info.xmljava;
-        document.getElementById('java').innerText = info.java;
-        document.getElementById('electron').innerText = info.electron;
+        (document.getElementById('swordfish') as HTMLTableCellElement).innerText = info.swordfish;
+        (document.getElementById('openxliff') as HTMLTableCellElement).innerText = info.openxliff;
+        (document.getElementById('xmljava') as HTMLTableCellElement).innerText = info.xmljava;
+        (document.getElementById('java') as HTMLTableCellElement).innerText = info.java;
+        (document.getElementById('electron') as HTMLTableCellElement).innerText = info.electron;
     }
 }

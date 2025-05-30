@@ -10,20 +10,6 @@
  *     Maxprograms - initial API and implementation
  *******************************************************************************/
 
-class Match {
-    project: string;
-    file: string;
-    unit: string;
-    segment: string;
-    type: string;
-    matchId: string;
-    similarity: number;
-    srcLang: string;
-    tgtLang: string;
-    source: string;
-    target: string;
-    origin: string;
-}
 
 class TmMatches {
 
@@ -79,7 +65,7 @@ class TmMatches {
             this.fixMatch();
         });
         toolbar.appendChild(fixMatch);
-        
+
         this.origin = document.createElement('span');
         this.origin.innerText = '';
         this.origin.style.marginTop = '4px';
@@ -112,7 +98,7 @@ class TmMatches {
 
     add(match: Match) {
         this.matches.set(match.matchId, match);
-        let tab = new Tab(match.matchId, match.similarity + '%', false);
+        let tab = new Tab(match.matchId, match.similarity + '%', false, this.tabHolder);
 
         let height: number = this.container.clientHeight - 65; // tabHolder.labels + toolbar
         tab.getContainer().style.height = height + 'px';
@@ -178,7 +164,7 @@ class TmMatches {
             return;
         }
         let selected: string = this.tabHolder.getSelected();
-        let match: Match = this.matches.get(selected);
+        let match: Match = this.matches.get(selected) as Match;
         this.electron.ipcRenderer.send('accept-match', match);
     }
 
@@ -187,21 +173,21 @@ class TmMatches {
             return;
         }
         let selected: string = this.tabHolder.getSelected();
-        let match: Match = this.matches.get(selected);
+        let match: Match = this.matches.get(selected) as Match;
         this.electron.ipcRenderer.send('fix-match', match);
     }
 
     nextMatch(): void {
         this.tabHolder.selectNext();
         let selected: string = this.tabHolder.getSelected();
-        let match: Match = this.matches.get(selected);
+        let match: Match = this.matches.get(selected) as Match;
         this.origin.innerText = match.origin;
     }
 
     previousMatch(): void {
         this.tabHolder.selectPrevious();
         let selected: string = this.tabHolder.getSelected();
-        let match: Match = this.matches.get(selected);
+        let match: Match = this.matches.get(selected) as Match;
         this.origin.innerText = match.origin;
     }
 }

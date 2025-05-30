@@ -16,7 +16,7 @@ class ApplyTM {
 
     memSelect: HTMLSelectElement;
     penalty: HTMLInputElement;
-    project: string;
+    project: string = '';
 
     constructor() {
         this.memSelect = document.getElementById('memorySelect') as HTMLSelectElement;
@@ -25,8 +25,8 @@ class ApplyTM {
 
         this.electron.ipcRenderer.send('get-theme');
         this.electron.ipcRenderer.send('get-version');
-        this.electron.ipcRenderer.on('set-theme', (event: Electron.IpcRendererEvent, arg: any) => {
-            (document.getElementById('theme') as HTMLLinkElement).href = arg;
+        this.electron.ipcRenderer.on('set-theme', (event: Electron.IpcRendererEvent, theme: string) => {
+            (document.getElementById('theme') as HTMLLinkElement).href = theme;
         });
         document.addEventListener('keydown', (event: KeyboardEvent) => {
             if (event.code === 'Escape') {
@@ -40,12 +40,12 @@ class ApplyTM {
         this.electron.ipcRenderer.on('set-memories', (event: Electron.IpcRendererEvent, arg: any) => {
             this.setMemories(arg);
         });
-        this.electron.ipcRenderer.on('set-memory', (event: Electron.IpcRendererEvent, arg: any) => {
-            this.memSelect.value = arg;
+        this.electron.ipcRenderer.on('set-memory', (event: Electron.IpcRendererEvent, memory: string) => {
+            this.memSelect.value = memory;
         });
         this.electron.ipcRenderer.send('get-project-param');
-        this.electron.ipcRenderer.on('set-project', (event: Electron.IpcRendererEvent, arg: any) => {
-            this.project = arg;
+        this.electron.ipcRenderer.on('set-project', (event: Electron.IpcRendererEvent, project: string) => {
+            this.project = project;
         });
         this.penalty.addEventListener('keydown', (event: KeyboardEvent) => {
             let numberKeys: string[] = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '0', 'Backspace', 'Delete', 'Escape', 'Enter', 'NumpadEnter'];
@@ -53,7 +53,7 @@ class ApplyTM {
                 event.preventDefault();
             }
         });
-        document.getElementById('applyTmButton').addEventListener('click', () => {
+        (document.getElementById('applyTmButton') as HTMLButtonElement).addEventListener('click', () => {
             this.applyTM();
         });
         setTimeout(() => {

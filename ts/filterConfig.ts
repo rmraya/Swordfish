@@ -14,13 +14,14 @@ class FilterConfig {
 
     electron = require('electron');
     selected: Map<string, any>;
-    filterName: string;
+    filterName: string = '';
 
     constructor() {
+        this.selected = new Map<string, any>();
         this.electron.ipcRenderer.send('get-theme');
         this.electron.ipcRenderer.send('get-version');
-        this.electron.ipcRenderer.on('set-theme', (event: Electron.IpcRendererEvent, arg: any) => {
-            (document.getElementById('theme') as HTMLLinkElement).href = arg;
+        this.electron.ipcRenderer.on('set-theme', (event: Electron.IpcRendererEvent, theme: string) => {
+            (document.getElementById('theme') as HTMLLinkElement).href = theme;
         });
         document.addEventListener('keydown', (event: KeyboardEvent) => {
             if (event.code === 'Escape') {
@@ -34,9 +35,9 @@ class FilterConfig {
         this.electron.ipcRenderer.on('set-filterData', (event: Electron.IpcRendererEvent, arg: any) => {
             this.populateTable(arg);
         });
-        document.getElementById('add').addEventListener('click', () => { this.addElement(); });
-        document.getElementById('edit').addEventListener('click', () => { this.editElement(); });
-        document.getElementById('remove').addEventListener('click', () => { this.removeElements(); });
+        (document.getElementById('add') as HTMLButtonElement).addEventListener('click', () => { this.addElement(); });
+        (document.getElementById('edit') as HTMLButtonElement).addEventListener('click', () => { this.editElement(); });
+        (document.getElementById('remove') as HTMLButtonElement).addEventListener('click', () => { this.removeElements(); });
         setTimeout(() => {
             this.electron.ipcRenderer.send('set-height', { window: 'editXmlFilter', width: document.body.clientWidth, height: document.body.clientHeight });
         }, 200);

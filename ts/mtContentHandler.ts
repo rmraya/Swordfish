@@ -16,11 +16,11 @@ export class MTContentHandler implements ContentHandler {
 
     mtManager: MTManager;
     project: string;
-    file: string;
-    unit: string;
-    segment: string;
-    srcLang: string;
-    tgtLang: string;
+    file: string = '';
+    unit: string = '';
+    segment: string = '';
+    srcLang: string = '';
+    tgtLang: string = '';
 
     stack: Array<XMLElement>
 
@@ -56,20 +56,20 @@ export class MTContentHandler implements ContentHandler {
             element.setAttribute(att);
         });
         if (name === 'xliff') {
-            this.srcLang = element.getAttribute('srcLang').getValue();
-            this.tgtLang = element.getAttribute('tgtLang').getValue();
+            this.srcLang = (element.getAttribute('srcLang') as XMLAttribute).getValue();
+            this.tgtLang = (element.getAttribute('tgtLang') as XMLAttribute).getValue();
             return;
         }
         if (name === 'file') {
-            this.file = element.getAttribute('id').getValue();
+            this.file = (element.getAttribute('id') as XMLAttribute).getValue();
             return;
         }
         if (name === 'unit') {
-            this.unit = element.getAttribute('id').getValue();
+            this.unit = (element.getAttribute('id') as XMLAttribute).getValue();
             return;
         }
         if (name === 'segment') {
-            this.segment = element.getAttribute('id').getValue();
+            this.segment = (element.getAttribute('id') as XMLAttribute).getValue();
         }
         if (this.stack.length > 0) {
             this.stack[this.stack.length - 1].addElement(element);
@@ -81,7 +81,7 @@ export class MTContentHandler implements ContentHandler {
         if (name === 'xliff' || name === 'file' || name === 'unit') {
             return;
         }
-        let e: XMLElement = this.stack.pop();
+        let e: XMLElement = this.stack.pop() as XMLElement;
         if (name === 'segment') {
             this.translate(e);
             this.stack = new Array<XMLElement>();
@@ -131,7 +131,7 @@ export class MTContentHandler implements ContentHandler {
     }
 
     translate(segment: XMLElement): void {
-        let source: XMLElement = segment.getChild('source');
+        let source: XMLElement = segment.getChild('source') as XMLElement;
         this.mtManager.translateElement(source, this.project, this.file, this.unit, this.segment);
     }
 }

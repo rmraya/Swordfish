@@ -19,57 +19,57 @@ class PreferencesDialog {
     tabHolder: TabHolder;
     spellcheckTab: Tab;
 
-    srcLangSelect: HTMLSelectElement;
-    tgtLangSelect: HTMLSelectElement;
-    themeColor: HTMLSelectElement;
-    zoomFactor: HTMLSelectElement;
+    srcLangSelect: HTMLSelectElement = document.createElement('select');
+    tgtLangSelect: HTMLSelectElement = document.createElement('select');
+    themeColor: HTMLSelectElement = document.createElement('select');
+    zoomFactor: HTMLSelectElement = document.createElement('select');
 
-    projectFolder: HTMLInputElement;
-    memoriesFolder: HTMLInputElement;
-    glossariesFolder: HTMLInputElement;
-    defaultSRX: HTMLInputElement;
-    defaultCatalog: HTMLInputElement;
-    paragraphSegmentation: HTMLInputElement;
-    acceptUnconfirmed: HTMLInputElement;
-    fuzzyTermSearches: HTMLInputElement;
-    caseSensitiveTermSearches: HTMLInputElement;
-    caseSensitiveMatches: HTMLInputElement;
-    autoConfirm: HTMLInputElement;
+    projectFolder: HTMLInputElement = document.createElement('input');
+    memoriesFolder: HTMLInputElement = document.createElement('input');
+    glossariesFolder: HTMLInputElement = document.createElement('input');
+    defaultSRX: HTMLInputElement = document.createElement('input');
+    defaultCatalog: HTMLInputElement = document.createElement('input');
+    paragraphSegmentation: HTMLInputElement = document.createElement('input');
+    acceptUnconfirmed: HTMLInputElement = document.createElement('input');
+    fuzzyTermSearches: HTMLInputElement = document.createElement('input');
+    caseSensitiveTermSearches: HTMLInputElement = document.createElement('input');
+    caseSensitiveMatches: HTMLInputElement = document.createElement('input');
+    autoConfirm: HTMLInputElement = document.createElement('input');
 
-    enableGoogle: HTMLInputElement;
-    googleKey: HTMLInputElement;
-    googleSrcLang: HTMLSelectElement;
-    googleTgtLang: HTMLSelectElement;
+    enableGoogle: HTMLInputElement = document.createElement('input');
+    googleKey: HTMLInputElement = document.createElement('input');
+    googleSrcLang: HTMLSelectElement = document.createElement('select');
+    googleTgtLang: HTMLSelectElement = document.createElement('select');
 
-    enableAzure: HTMLInputElement;
-    azureKey: HTMLInputElement;
-    azureSrcLang: HTMLSelectElement;
-    azureTgtLang: HTMLSelectElement;
+    enableAzure: HTMLInputElement = document.createElement('input');
+    azureKey: HTMLInputElement = document.createElement('input');
+    azureSrcLang: HTMLSelectElement = document.createElement('select');
+    azureTgtLang: HTMLSelectElement = document.createElement('select');
 
-    enableDeepL: HTMLInputElement;
-    deeplKey: HTMLInputElement;
-    deeplSrcLang: HTMLSelectElement;
-    deeplTgtLang: HTMLSelectElement;
+    enableDeepL: HTMLInputElement = document.createElement('input');
+    deeplKey: HTMLInputElement = document.createElement('input');
+    deeplSrcLang: HTMLSelectElement = document.createElement('select');
+    deeplTgtLang: HTMLSelectElement = document.createElement('select');
 
-    enableChatGPT: HTMLInputElement;
-    chatGPTKey: HTMLInputElement;
-    chatGPTModel: HTMLSelectElement;
+    enableChatGPT: HTMLInputElement = document.createElement('input');
+    chatGPTKey: HTMLInputElement = document.createElement('input');
+    chatGPTModel: HTMLSelectElement = document.createElement('select');
 
-    enableModernmt: HTMLInputElement;
-    modernmtKey: HTMLInputElement;
-    modernmtSrcLang: HTMLSelectElement;
-    modernmtTgtLang: HTMLSelectElement;
+    enableModernmt: HTMLInputElement = document.createElement('input');
+    modernmtKey: HTMLInputElement = document.createElement('input');
+    modernmtSrcLang: HTMLSelectElement = document.createElement('select');
+    modernmtTgtLang: HTMLSelectElement = document.createElement('select');
 
-    defaultEnglish: HTMLSelectElement;
-    defaultPortuguese: HTMLSelectElement;
-    defaultSpanish: HTMLSelectElement;
+    defaultEnglish: HTMLSelectElement = document.createElement('select');
+    defaultPortuguese: HTMLSelectElement = document.createElement('select');
+    defaultSpanish: HTMLSelectElement = document.createElement('select');
 
-    os: string;
-    showGuide: boolean;
+    os: string = '';
+    showGuide: boolean = false;
 
-    pageRows: HTMLInputElement;
+    pageRows: HTMLInputElement = document.createElement('input');
 
-    filtersTable: HTMLTableElement;
+    filtersTable: HTMLTableElement = document.createElement('table');
     selected: Map<string, string>;
 
     constructor() {
@@ -78,7 +78,7 @@ class PreferencesDialog {
 
         this.tabHolder = new TabHolder(document.getElementById('main') as HTMLDivElement, "preferencesHolder");
 
-        let basicTab: Tab = new Tab('basicTab', 'Basic', false);
+        let basicTab: Tab = new Tab('basicTab', 'Basic', false, this.tabHolder);
         basicTab.getLabelDiv().addEventListener('click', () => {
             setTimeout(() => {
                 this.electron.ipcRenderer.send('set-height', { window: 'preferences', width: PreferencesDialog.defaultWidth, height: document.body.clientHeight });
@@ -87,7 +87,7 @@ class PreferencesDialog {
         this.tabHolder.addTab(basicTab);
         this.populateBasicTab(basicTab.getContainer());
 
-        let mtTab: Tab = new Tab('mtTab', 'Machine Translation', false);
+        let mtTab: Tab = new Tab('mtTab', 'Machine Translation', false, this.tabHolder);
         mtTab.getLabelDiv().addEventListener('click', () => {
             setTimeout(() => {
                 this.electron.ipcRenderer.send('set-height', { window: 'preferences', width: PreferencesDialog.defaultWidth, height: document.body.clientHeight });
@@ -96,7 +96,7 @@ class PreferencesDialog {
         this.tabHolder.addTab(mtTab);
         this.populateMtTab(mtTab.getContainer());
 
-        this.spellcheckTab = new Tab('spellcheckTab', 'Spellchecker', false);
+        this.spellcheckTab = new Tab('spellcheckTab', 'Spellchecker', false, this.tabHolder);
         this.spellcheckTab.getLabelDiv().addEventListener('click', () => {
             setTimeout(() => {
                 this.electron.ipcRenderer.send('set-height', { window: 'preferences', width: PreferencesDialog.defaultWidth, height: document.body.clientHeight });
@@ -104,7 +104,7 @@ class PreferencesDialog {
         });
         this.tabHolder.addTab(this.spellcheckTab);
 
-        let advancedTab: Tab = new Tab('advancedTab', 'Advanced', false);
+        let advancedTab: Tab = new Tab('advancedTab', 'Advanced', false, this.tabHolder);
         advancedTab.getLabelDiv().addEventListener('click', () => {
             setTimeout(() => {
                 this.electron.ipcRenderer.send('set-height', { window: 'preferences', width: PreferencesDialog.defaultWidth, height: document.body.clientHeight });
@@ -124,28 +124,28 @@ class PreferencesDialog {
             this.setMtLanguages(arg);
         });
 
-        this.electron.ipcRenderer.on('set-theme', (event: Electron.IpcRendererEvent, arg: any) => {
-            (document.getElementById('theme') as HTMLLinkElement).href = arg;
+        this.electron.ipcRenderer.on('set-theme', (event: Electron.IpcRendererEvent, theme: string) => {
+            (document.getElementById('theme') as HTMLLinkElement).href = theme;
         });
         this.electron.ipcRenderer.on('set-preferences', (event: Electron.IpcRendererEvent, preferences: any) => {
             this.setPreferences(preferences);
         });
-        document.getElementById('browseProjects').addEventListener('click', () => {
+        (document.getElementById('browseProjects') as HTMLButtonElement).addEventListener('click', () => {
             this.electron.ipcRenderer.send('browse-projects');
         });
-        document.getElementById('browseMemories').addEventListener('click', () => {
+        (document.getElementById('browseMemories') as HTMLButtonElement).addEventListener('click', () => {
             this.electron.ipcRenderer.send('browse-memories');
         });
-        document.getElementById('browseGlossaries').addEventListener('click', () => {
+        (document.getElementById('browseGlossaries') as HTMLButtonElement).addEventListener('click', () => {
             this.electron.ipcRenderer.send('browse-glossaries');
         });
-        document.getElementById('browseSRX').addEventListener('click', () => {
+        (document.getElementById('browseSRX') as HTMLButtonElement).addEventListener('click', () => {
             this.electron.ipcRenderer.send('browse-srx');
         });
-        document.getElementById('browseCatalog').addEventListener('click', () => {
+        (document.getElementById('browseCatalog') as HTMLButtonElement).addEventListener('click', () => {
             this.electron.ipcRenderer.send('browse-catalog');
         });
-        document.getElementById('save').addEventListener('click', () => {
+        (document.getElementById('save') as HTMLButtonElement).addEventListener('click', () => {
             this.savePreferences();
         });
         this.electron.ipcRenderer.on('set-srx', (event: Electron.IpcRendererEvent, arg: string) => {
@@ -266,7 +266,7 @@ class PreferencesDialog {
     }
 
     setLanguages(arg: any): void {
-        let languageOptions = this.getOptions(arg.languages)
+        let languageOptions: string = this.getOptions(arg.languages)
 
         this.srcLangSelect.innerHTML = languageOptions;
         this.tgtLangSelect.innerHTML = languageOptions;
@@ -638,7 +638,7 @@ class PreferencesDialog {
 
         let advHolder: TabHolder = new TabHolder(div, 'advHolder');
 
-        let generalTab: Tab = new Tab('generalTab', 'General', false);
+        let generalTab: Tab = new Tab('generalTab', 'General', false, advHolder);
         generalTab.getLabelDiv().addEventListener('click', () => {
             setTimeout(() => {
                 this.electron.ipcRenderer.send('set-height', { window: 'preferences', width: PreferencesDialog.defaultWidth, height: document.body.clientHeight });
@@ -647,7 +647,7 @@ class PreferencesDialog {
         advHolder.addTab(generalTab);
         this.populateAdvGeneralTab(generalTab.getContainer());
 
-        let xmlTab: Tab = new Tab('xmlTab', 'XML Filter', false);
+        let xmlTab: Tab = new Tab('xmlTab', 'XML Filter', false, advHolder);
         xmlTab.getLabelDiv().addEventListener('click', () => {
             setTimeout(() => {
                 this.electron.ipcRenderer.send('set-height', { window: 'preferences', width: PreferencesDialog.defaultWidth, height: document.body.clientHeight });
@@ -873,7 +873,6 @@ class PreferencesDialog {
         autoConfirmLabel.setAttribute('for', 'autoConfirm');
         autoConfirmLabel.style.marginTop = '4px';
         row6.appendChild(autoConfirmLabel);
-
     }
 
     populateXmlFilterTab(container: HTMLDivElement): void {
@@ -978,7 +977,7 @@ class PreferencesDialog {
 
         let mtHolder: TabHolder = new TabHolder(div, 'mtHolder');
 
-        let googleTab: Tab = new Tab('googleTab', 'Google', false);
+        let googleTab: Tab = new Tab('googleTab', 'Google', false, mtHolder);
         googleTab.getLabelDiv().addEventListener('click', () => {
             setTimeout(() => {
                 this.electron.ipcRenderer.send('set-height', { window: 'preferences', width: PreferencesDialog.defaultWidth, height: document.body.clientHeight });
@@ -987,7 +986,7 @@ class PreferencesDialog {
         mtHolder.addTab(googleTab);
         this.populateGoogleTab(googleTab.getContainer());
 
-        let azureTab: Tab = new Tab('azureTab', 'Microsoft Azure', false);
+        let azureTab: Tab = new Tab('azureTab', 'Microsoft Azure', false, mtHolder);
         azureTab.getLabelDiv().addEventListener('click', () => {
             setTimeout(() => {
                 this.electron.ipcRenderer.send('set-height', { window: 'preferences', width: PreferencesDialog.defaultWidth, height: document.body.clientHeight });
@@ -996,7 +995,7 @@ class PreferencesDialog {
         mtHolder.addTab(azureTab);
         this.populateAzureTab(azureTab.getContainer());
 
-        let deeplTab: Tab = new Tab('deeplTab', 'DeepL', false);
+        let deeplTab: Tab = new Tab('deeplTab', 'DeepL', false, mtHolder);
         deeplTab.getLabelDiv().addEventListener('click', () => {
             setTimeout(() => {
                 this.electron.ipcRenderer.send('set-height', { window: 'preferences', width: PreferencesDialog.defaultWidth, height: document.body.clientHeight });
@@ -1005,7 +1004,7 @@ class PreferencesDialog {
         mtHolder.addTab(deeplTab);
         this.populateDeeplTab(deeplTab.getContainer());
 
-        let chatGptTab: Tab = new Tab('chatGptTab', 'ChatGPT', false);
+        let chatGptTab: Tab = new Tab('chatGptTab', 'ChatGPT', false, mtHolder);
         chatGptTab.getLabelDiv().addEventListener('click', () => {
             setTimeout(() => {
                 this.electron.ipcRenderer.send('set-height', { window: 'preferences', width: PreferencesDialog.defaultWidth, height: document.body.clientHeight });
@@ -1014,7 +1013,7 @@ class PreferencesDialog {
         mtHolder.addTab(chatGptTab);
         this.populateChatGptTab(chatGptTab.getContainer());
 
-        let modernmtTab: Tab = new Tab('modernmtTab', 'ModernMT', false);
+        let modernmtTab: Tab = new Tab('modernmtTab', 'ModernMT', false, mtHolder);
         modernmtTab.getLabelDiv().addEventListener('click', () => {
             setTimeout(() => {
                 this.electron.ipcRenderer.send('set-height', { window: 'preferences', width: PreferencesDialog.defaultWidth, height: document.body.clientHeight });
@@ -1360,8 +1359,8 @@ class PreferencesDialog {
         document.body.classList.remove("wait");
     }
 
-    getOptions(array: any[]): string {
-        let languageOptions = '<option value="none">Select Language</option>';
+    getOptions(array: LanguageInterface[]): string {
+        let languageOptions: string = '<option value="none">Select Language</option>';
         for (let lang of array) {
             languageOptions = languageOptions + '<option value="' + lang.code + '">' + lang.description + '</option>';
         }

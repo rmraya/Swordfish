@@ -14,12 +14,12 @@ class AddTerm {
 
     electron = require('electron');
 
-    glossary: string;
+    glossary: string = '';
 
     constructor() {
         this.electron.ipcRenderer.send('get-theme');
-        this.electron.ipcRenderer.on('set-theme', (event: Electron.IpcRendererEvent, arg: any) => {
-            (document.getElementById('theme') as HTMLLinkElement).href = arg;
+        this.electron.ipcRenderer.on('set-theme', (event: Electron.IpcRendererEvent, theme: string) => {
+            (document.getElementById('theme') as HTMLLinkElement).href = theme;
         });
         document.addEventListener('keydown', (event: KeyboardEvent) => {
             if (event.code === 'Enter' || event.code === 'NumpadEnter') {
@@ -34,25 +34,25 @@ class AddTerm {
             this.setLanguages(arg);
         });
         this.electron.ipcRenderer.send('get-glossary-param');
-        this.electron.ipcRenderer.on('set-glossary', (event: Electron.IpcRendererEvent, arg: any) => {
-            this.glossary = arg.glossary;
+        this.electron.ipcRenderer.on('set-glossary', (event: Electron.IpcRendererEvent, glossary: string) => {
+            this.glossary = glossary;
         });
-        this.electron.ipcRenderer.on('set-selected-text', (event: Electron.IpcRendererEvent, arg: any) => {
+        this.electron.ipcRenderer.on('set-selected-text', (event: Electron.IpcRendererEvent, arg: { selected: string, lang?: string, srcLang: string, tgtLang: string }) => {
             this.setParams(arg);
         });
-        document.getElementById('srcLangSelect').addEventListener('change', () => {
+        (document.getElementById('srcLangSelect') as HTMLSelectElement).addEventListener('change', () => {
             let code: string = (document.getElementById('srcLangSelect') as HTMLSelectElement).value;
             if (this.isBiDi(code)) {
                 (document.getElementById('source') as HTMLInputElement).dir = 'rtl';
             }
         });
-        document.getElementById('tgtLangSelect').addEventListener('change', () => {
+        (document.getElementById('tgtLangSelect') as HTMLSelectElement).addEventListener('change', () => {
             let code: string = (document.getElementById('tgtLangSelect') as HTMLSelectElement).value;
             if (this.isBiDi(code)) {
                 (document.getElementById('target') as HTMLInputElement).dir = 'rtl';
             }
         });
-        document.getElementById('addTermButton').addEventListener('click', () => {
+        (document.getElementById('addTermButton') as HTMLButtonElement).addEventListener('click', () => {
             this.addTerm();
         });
         (document.getElementById('source') as HTMLInputElement).focus();
@@ -92,23 +92,23 @@ class AddTerm {
     }
 
     setLanguages(arg: any): void {
-        let array = arg.languages;
-        let languageOptions = '<option value="none">Select Language</option>';
+        let array: LanguageInterface[] = arg.languages;
+        let languageOptions: string = '<option value="none">Select Language</option>';
         for (let lang of array) {
             languageOptions = languageOptions + '<option value="' + lang.code + '">' + lang.description + '</option>';
         }
-        document.getElementById('srcLangSelect').innerHTML = languageOptions;
+        (document.getElementById('srcLangSelect') as HTMLSelectElement).innerHTML = languageOptions;
         if ((document.getElementById('srcLangSelect') as HTMLSelectElement).value === 'none') {
             (document.getElementById('srcLangSelect') as HTMLSelectElement).value = arg.srcLang;
         }
-        document.getElementById('tgtLangSelect').innerHTML = languageOptions;
+        (document.getElementById('tgtLangSelect') as HTMLSelectElement).innerHTML = languageOptions;
         if ((document.getElementById('tgtLangSelect') as HTMLSelectElement).value === 'none') {
             (document.getElementById('tgtLangSelect') as HTMLSelectElement).value = arg.tgtLang;
         }
         this.electron.ipcRenderer.send('get-selection');
     }
 
-    setParams(arg: any): void {
+    setParams(arg: { selected: string, lang?: string, srcLang: string, tgtLang: string }): void {
         if (arg.lang) {
             if (arg.lang === arg.srcLang) {
                 (document.getElementById('source') as HTMLInputElement).value = arg.selected;

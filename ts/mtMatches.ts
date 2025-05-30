@@ -86,7 +86,7 @@ class MtMatches {
 
     add(match: Match) {
         this.matches.set(match.matchId, match);
-        let tab = new Tab(match.matchId, match.origin, false);
+        let tab = new Tab(match.matchId, match.origin, false, this.tabHolder);
 
         let div: HTMLDivElement = tab.getContainer();
         div.classList.add('divContainer');
@@ -106,8 +106,10 @@ class MtMatches {
             return;
         }
         let selected: string = this.tabHolder.getSelected();
-        let match: Match = this.matches.get(selected);
-        this.electron.ipcRenderer.send('accept-match', match);
+        let match: Match | undefined = this.matches.get(selected);
+        if (match) {
+            this.electron.ipcRenderer.send('accept-match', match);
+        }
     }
 
     nextMatch(): void {

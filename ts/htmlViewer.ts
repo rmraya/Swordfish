@@ -14,16 +14,16 @@ class HtmlViewer {
 
     electron = require('electron');
 
-    id: number;
+    id: number = -1;
 
     constructor() {
         this.electron.ipcRenderer.send('get-theme');
-        this.electron.ipcRenderer.on('set-theme', (event: Electron.IpcRendererEvent, arg: any) => {
-            (document.getElementById('theme') as HTMLLinkElement).href = arg;
+        this.electron.ipcRenderer.on('set-theme', (event: Electron.IpcRendererEvent, theme: string) => {
+            (document.getElementById('theme') as HTMLLinkElement).href = theme;
         });
         document.addEventListener('keydown', (event: KeyboardEvent) => {
             if (event.code === 'Escape') {
-                this.electron.ipcRenderer.send('close-htmlViewer', { id: this.id });
+                this.electron.ipcRenderer.send('close-htmlViewer', this.id );
             }
         });
         this.electron.ipcRenderer.send('get-html-content');
@@ -34,12 +34,12 @@ class HtmlViewer {
             container.style.height = document.body.clientHeight + 'px';
         });
         this.electron.ipcRenderer.send('get-html-title');
-        this.electron.ipcRenderer.on('set-title', (event: Electron.IpcRendererEvent, arg: any) => {
-            document.getElementById('title').innerText = arg;
+        this.electron.ipcRenderer.on('set-title', (event: Electron.IpcRendererEvent, title: string) => {
+            (document.getElementById('title') as HTMLTitleElement).innerText = title;
         });
         this.electron.ipcRenderer.send('get-html-id');
-        this.electron.ipcRenderer.on('set-id', (event: Electron.IpcRendererEvent, arg: any) => {
-            this.id = arg;
+        this.electron.ipcRenderer.on('set-id', (event: Electron.IpcRendererEvent, id: number) => {
+            this.id = id;
         });
         window.addEventListener('resize', () => {
             let container: HTMLDivElement = document.getElementById('content') as HTMLDivElement;

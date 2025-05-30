@@ -16,8 +16,8 @@ class SpaceAnalysis {
 
     constructor() {
         this.electron.ipcRenderer.send('get-theme');
-        this.electron.ipcRenderer.on('set-theme', (event: Electron.IpcRendererEvent, arg: any) => {
-            (document.getElementById('theme') as HTMLLinkElement).href = arg;
+        this.electron.ipcRenderer.on('set-theme', (event: Electron.IpcRendererEvent, theme: string) => {
+            (document.getElementById('theme') as HTMLLinkElement).href = theme;
         });
         document.addEventListener('keydown', (event: KeyboardEvent) => {
             if (event.code === 'Enter' || event.code === 'NumpadEnter') {
@@ -30,13 +30,13 @@ class SpaceAnalysis {
         this.electron.ipcRenderer.on('set-spaceErrors', (event: Electron.IpcRendererEvent, arg: any) => {
             this.setErrors(arg);
         });
-        document.getElementById('goTo').addEventListener('click', () => {
+        (document.getElementById('goTo') as HTMLButtonElement).addEventListener('click', () => {
             this.gotoSegment();
         });
-        document.getElementById('fixAll').addEventListener('click', () => {
+        (document.getElementById('fixAll') as HTMLButtonElement).addEventListener('click', () => {
             this.electron.ipcRenderer.send('fix-spaceErrors');
         });
-        document.getElementById('refresh').addEventListener('click', () => {
+        (document.getElementById('refresh') as HTMLButtonElement).addEventListener('click', () => {
             this.electron.ipcRenderer.send('get-spaceErrors');
         });
         this.electron.ipcRenderer.send('get-spaceErrors');

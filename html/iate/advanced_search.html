@@ -1,0 +1,160 @@
+<html>
+
+<head>
+  <title>IATE widget demo setup</title>
+  <meta charset="UTF-8" />
+  <link rel="stylesheet" href="https://iate.europa.eu/assets/plugin.css" />
+  <style>
+    :root {
+      scrollbar-color: #2066A3 #e6e1df;
+      scrollbar-width: thin;
+    }
+
+    body {
+      background-color: #f2ede8;
+    }
+  </style>
+</head>
+
+<body>
+  <script>
+    // iate advanced search template
+    // To specify a configuration, you have to assign it to the iateConfig variable BEFORE embedding the widget.
+    // Please refer to the search widget guide for specific customisation options.
+    // For a basic installation example, please refer to the default_template_basic.html file.
+
+    const iateConfig = {
+      verbose: false,
+      number_of_results: 20,
+      form_is_shown: true,
+      query_is_automatically_launched: false,
+
+      // the iate advanced search template form contains most of the available fields:
+      // query, source language, target language, matching type, term type, primary status, and source and target term reliability
+      // we do not specify available_values for source and target language fields and for the source and target reliability fields as we will use the default values
+
+      form: {
+        query: {
+          name: "Query",
+          visible: true,
+          default: "",
+          mandatory: true,
+          type: "text",
+        },
+
+        sourceLanguages: {
+          name: "From",
+          visible: true,
+          default: "",
+          mandatory: true,
+          type: "singlechoice",
+        },
+
+        targetLanguages: {
+          name: "To",
+          visible: true,
+          default: [],
+          mandatory: true,
+          type: "multichoice",
+        },
+
+        matching: {
+          name: "Matching type",
+          visible: true,
+          default: 3,
+          // as we want to exclude some values which would come in the default, here we specify the available values manually
+          available_values: [
+            { code: 3, name: "Exact match" },
+            { code: 1, name: "All words" },
+            { code: 9, name: "Search by ID" },
+          ],
+          mandatory: true,
+          type: "singlechoice",
+        },
+
+        termType: {
+          name: "Term type",
+          visible: true,
+          // as we want to exclude some values which would come in the default, here we specify the available values manually
+          available_values: [
+            { code: 4, name: "Term" },
+            { code: 0, name: "Abbreviation" },
+            { code: 1, name: "Formula" },
+            { code: 2, name: "Phrase" },
+            { code: 3, name: "Short Form" },
+          ],
+          mandatory: true,
+          type: "multichoice",
+        },
+
+        primarity: {
+          name: "Primary status",
+          visible: true,
+          // here we specify the available_values in order to have them sorted in a different way than what the default would offer
+          available_values: [
+            { code: 1, name: "Primary" },
+            { code: 0, name: "Not primary" },
+          ],
+          mandatory: false, // if a field is not mandatory and nothing is selected by the user, the field is ignored (searches in 'all')
+          type: "multichoice",
+        },
+
+        reliability_sl: {
+          name: "Term reliability (source)",
+          visible: true,
+          mandatory: false,
+          type: "multichoice",
+        },
+
+        reliability_tl: {
+          name: "Term reliability (target)",
+          visible: true,
+          mandatory: false,
+          type: "multichoice",
+        },
+      },
+
+      hitlist: {
+        compact: true,
+        show_term_ref: true,
+        term_ref_label: "Term reference",
+        show_definition: true,
+        definition_label: "Definition",
+        show_definition_ref: true,
+        definition_ref_label: "Definition reference",
+        show_ll_note: true,
+        ll_note_label: "Language note",
+        show_ll_note_ref: true,
+        ll_note_ref_label: "Language note reference",
+        show_tl_note: true,
+        tl_note_label: "Term note",
+        show_tl_note_ref: true,
+        tl_note_ref_label: "Term note reference",
+        show_context: true,
+        context_label: "Context",
+        show_context_ref: true,
+        context_ref_label: "Context reference",
+        show_domains: true,
+        domains_label: "Domains",
+        show_reliability: true,
+        reliability_label: "Reliability",
+        show_lifecycle: true,
+        lifecycle_label: "Lifecycle",
+        show_origin: true,
+        origin_label: "Origin",
+        show_language_usage: false,
+        language_usage_label: "Language usage",
+        show_language_usage_ref: false,
+        language_usage_ref_label: "Language usage reference",
+        show_regional_usage: false,
+        regional_usage_label: "Regional usage",
+        show_regional_usage_ref: false,
+        regional_usage_ref_label: "Regional usage reference",
+      },
+    };
+  </script>
+
+  <script src="https://iate.europa.eu/assets/plugin.js"></script>
+</body>
+
+</html>

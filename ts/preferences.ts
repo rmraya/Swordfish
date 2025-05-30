@@ -10,7 +10,7 @@
  *     Maxprograms - initial API and implementation
  *******************************************************************************/
 
-class Preferences {
+interface Preferences {
     theme: string;
     zoomFactor: string;
     srcLang: string;

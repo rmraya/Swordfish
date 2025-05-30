@@ -18,8 +18,8 @@ class ElementConfig {
     constructor() {
         this.electron.ipcRenderer.send('get-theme');
         this.electron.ipcRenderer.send('get-version');
-        this.electron.ipcRenderer.on('set-theme', (event: Electron.IpcRendererEvent, arg: any) => {
-            (document.getElementById('theme') as HTMLLinkElement).href = arg;
+        this.electron.ipcRenderer.on('set-theme', (event: Electron.IpcRendererEvent, theme: string) => {
+            (document.getElementById('theme') as HTMLLinkElement).href = theme;
         });
         document.addEventListener('keydown', (event: KeyboardEvent) => {
             if (event.code === 'Escape') {
@@ -29,7 +29,7 @@ class ElementConfig {
                 this.saveElement();
             }
         });
-        document.getElementById('save').addEventListener('click', () => { this.saveElement(); });
+        (document.getElementById('save') as HTMLButtonElement).addEventListener('click', () => { this.saveElement(); });
         this.electron.ipcRenderer.send('get-elementConfig');
         this.electron.ipcRenderer.on('set-elementConfig', (event: Electron.IpcRendererEvent, arg: any) => {
             this.setValues(arg);
@@ -46,8 +46,8 @@ class ElementConfig {
         (document.getElementById('inline') as HTMLSelectElement).value = arg.inline;
         (document.getElementById('attributes') as HTMLInputElement).value = arg.attributes;
         (document.getElementById('keep') as HTMLInputElement).checked = arg.keepSpace === 'yes';
-        document.getElementById('type').addEventListener('change', (event) => {
-            let value: string = (event.target as HTMLInputElement).value;
+        (document.getElementById('type') as HTMLSelectElement).addEventListener('change', (event) => {
+            let value: string = (event.target as HTMLSelectElement).value;
             let inline: HTMLSelectElement = document.getElementById('inline') as HTMLSelectElement;
             inline.disabled = value !== 'inline';
             if (value != 'inline') {

@@ -10,19 +10,6 @@
  *     Maxprograms - initial API and implementation
  *******************************************************************************/
 
-class Memory {
-    id: string;
-    name: string;
-    project: string;
-    subject: string;
-    client: string;
-    creationDate: number;
-    creationString: string;
-    type: string;
-    server: string;
-    user: string;
-}
-
 class MemoriesView {
 
     electron = require('electron');
@@ -33,7 +20,7 @@ class MemoriesView {
     tbody: HTMLTableSectionElement;
     selected: Map<string, Memory>;
 
-    memories: Memory[]
+    memories: Memory[] = [];
 
     memoriesSortFielD: string = 'name';
     memoriesSortAscending: boolean = true;
@@ -261,7 +248,7 @@ class MemoriesView {
     }
 
     watchSizes(): void {
-        let targetNode: HTMLElement = document.getElementById('main');
+        let targetNode: HTMLDivElement = document.getElementById('main') as HTMLDivElement;
         let config: MutationObserverInit = { attributes: true, childList: false, subtree: false };
         let observer = new MutationObserver((mutationsList) => {
             for (let mutation of mutationsList) {
@@ -314,7 +301,7 @@ class MemoriesView {
         }
         let memories: any[] = [];
         for (let key of this.selected.keys()) {
-            let mem = { memory: key, name: this.selected.get(key).name }
+            let mem = { memory: key, name: (this.selected.get(key) as Memory).name }
             memories.push(mem);
         }
         this.electron.ipcRenderer.send('export-memories', memories);
@@ -381,6 +368,7 @@ class MemoriesView {
                 }
                 return 0;
             }
+            return 0;
         });
         this.tbody.innerHTML = '';
         let length = this.memories.length;
@@ -473,7 +461,7 @@ class MemoriesView {
         for (let key of this.selected.keys()) {
             memories.push(key);
         }
-        this.electron.ipcRenderer.send('concordance-search', { memories: memories });
+        this.electron.ipcRenderer.send('concordance-search', memories );
     }
 
     browseRemoteTM(): void {

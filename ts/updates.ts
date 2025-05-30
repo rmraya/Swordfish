@@ -16,13 +16,13 @@ class Updates {
 
     constructor() {
         this.electron.ipcRenderer.send('get-theme');
-        this.electron.ipcRenderer.on('set-theme', (event: Electron.IpcRendererEvent, arg: any) => {
-            (document.getElementById('theme') as HTMLLinkElement).href = arg;
+        this.electron.ipcRenderer.on('set-theme', (event: Electron.IpcRendererEvent, theme: string) => {
+            (document.getElementById('theme') as HTMLLinkElement).href = theme;
         });
         this.electron.ipcRenderer.send('get-versions');
         this.electron.ipcRenderer.on('set-versions', (event: Electron.IpcRendererEvent, arg: any) => {
-            document.getElementById('current').innerText = arg.current;
-            document.getElementById('latest').innerText = arg.latest;
+            (document.getElementById('current') as HTMLTableCellElement).innerText = arg.current;
+            (document.getElementById('latest') as HTMLTableCellElement).innerText = arg.latest;
             setTimeout(() => {
                 this.electron.ipcRenderer.send('set-height', { window: 'updates', width: document.body.clientWidth, height: document.body.clientHeight });
             }, 200);
@@ -35,7 +35,7 @@ class Updates {
                 this.electron.ipcRenderer.send('close-updates');
             }
         });
-        document.getElementById('release').addEventListener('click', () => { this.electron.ipcRenderer.send('release-history'); });
-        document.getElementById('download').addEventListener('click', () => { this.electron.ipcRenderer.send('download-latest'); });
+        (document.getElementById('release') as HTMLButtonElement).addEventListener('click', () => { this.electron.ipcRenderer.send('release-history'); });
+        (document.getElementById('download') as HTMLButtonElement).addEventListener('click', () => { this.electron.ipcRenderer.send('download-latest'); });
     }
 }

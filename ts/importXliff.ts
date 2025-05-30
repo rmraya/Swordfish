@@ -22,16 +22,16 @@ class ImportXLIFF {
         this.glossSelect = document.getElementById('glossarySelect') as HTMLSelectElement;
 
         this.electron.ipcRenderer.send('get-theme');
-        this.electron.ipcRenderer.on('set-theme', (event: Electron.IpcRendererEvent, arg: any) => {
-            (document.getElementById('theme') as HTMLLinkElement).href = arg;
+        this.electron.ipcRenderer.on('set-theme', (event: Electron.IpcRendererEvent, theme: string) => {
+            (document.getElementById('theme') as HTMLLinkElement).href = theme;
         });
         this.electron.ipcRenderer.send('get-clients');
-        this.electron.ipcRenderer.on('set-clients', (event: Electron.IpcRendererEvent, arg: any) => {
-            this.setClients(arg);
+        this.electron.ipcRenderer.on('set-clients', (event: Electron.IpcRendererEvent, clients: string[]) => {
+            this.setClients(clients);
         });
         this.electron.ipcRenderer.send('get-subjects');
-        this.electron.ipcRenderer.on('set-subjects', (event: Electron.IpcRendererEvent, arg: any) => {
-            this.setSubjects(arg);
+        this.electron.ipcRenderer.on('set-subjects', (event: Electron.IpcRendererEvent, subjects: string[]) => {
+            this.setSubjects(subjects);
         });
         this.electron.ipcRenderer.send('get-memories');
         this.electron.ipcRenderer.on('set-memories', (event: Electron.IpcRendererEvent, arg: any) => {
@@ -49,14 +49,14 @@ class ImportXLIFF {
                 this.importXLIFF();
             }
         });
-        document.getElementById('browse').addEventListener('click', () => {
+        (document.getElementById('browse') as HTMLButtonElement).addEventListener('click', () => {
             this.electron.ipcRenderer.send('browse-xliff-import');
-            document.getElementById('browse').blur();
+            (document.getElementById('browse') as HTMLButtonElement).blur();
         });
         this.electron.ipcRenderer.on('set-xliff', (event: Electron.IpcRendererEvent, arg: any) => {
             (document.getElementById('xliff') as HTMLInputElement).value = arg;
         });
-        document.getElementById('importXliff').addEventListener('click', () => {
+        (document.getElementById('importXliff') as HTMLButtonElement).addEventListener('click', () => {
             this.importXLIFF();
         });
         (document.getElementById('projectInput') as HTMLInputElement).focus();
@@ -71,7 +71,7 @@ class ImportXLIFF {
         for (let i = 0; i < length; i++) {
             options = options + '<option value="' + clients[i] + '">' + clients[i] + '</option>';
         }
-        document.getElementById('clients').innerHTML = options;
+        (document.getElementById('clients') as HTMLDataListElement).innerHTML = options;
     }
 
     setSubjects(subjects: string[]): void {
@@ -80,7 +80,7 @@ class ImportXLIFF {
         for (let i = 0; i < length; i++) {
             options = options + '<option value="' + subjects[i] + '">' + subjects[i] + '</option>';
         }
-        document.getElementById('subjects').innerHTML = options;
+        (document.getElementById('subjects') as HTMLDataListElement).innerHTML = options;
     }
 
     importXLIFF(): void {

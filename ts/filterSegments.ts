@@ -14,12 +14,10 @@ class FilterSegments {
 
     electron = require('electron');
 
-    projectId: string;
-
     constructor() {
         this.electron.ipcRenderer.send('get-theme');
-        this.electron.ipcRenderer.on('set-theme', (event: Electron.IpcRendererEvent, arg: any) => {
-            (document.getElementById('theme') as HTMLLinkElement).href = arg;
+        this.electron.ipcRenderer.on('set-theme', (event: Electron.IpcRendererEvent, theme: string) => {
+            (document.getElementById('theme') as HTMLLinkElement).href = theme;
         });
         this.electron.ipcRenderer.send('get-filter-params');
         this.electron.ipcRenderer.on('set-params', (event: Electron.IpcRendererEvent, arg: any) => {
@@ -44,7 +42,7 @@ class FilterSegments {
         (document.getElementById('filterSegments') as HTMLButtonElement).addEventListener('click', () => {
             this.filterSegments();
         });
-        document.getElementById('clearFilter').addEventListener('click', () => {
+        (document.getElementById('clearFilter') as HTMLButtonElement).addEventListener('click', () => {
             this.clearFilter();
         });
         (document.getElementById('filterText') as HTMLInputElement).focus();

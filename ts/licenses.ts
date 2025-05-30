@@ -16,35 +16,32 @@ class Licenses {
 
     constructor() {
         this.electron.ipcRenderer.send('get-theme');
-        this.electron.ipcRenderer.on('set-theme', (event: Electron.IpcRendererEvent, arg: any) => {
-            (document.getElementById('theme') as HTMLLinkElement).href = arg;
+        this.electron.ipcRenderer.on('set-theme', (event: Electron.IpcRendererEvent, theme: string) => {
+            (document.getElementById('theme') as HTMLLinkElement).href = theme;
         });
-        document.getElementById('Swordfish').addEventListener('click', () => {
+        (document.getElementById('Swordfish') as HTMLAnchorElement).addEventListener('click', () => {
             this.openLicense('Swordfish');
         });
-        document.getElementById('electron').addEventListener('click', () => {
+        (document.getElementById('electron') as HTMLAnchorElement).addEventListener('click', () => {
             this.openLicense('electron');
         });
-        document.getElementById('XMLJava').addEventListener('click', () => {
+        (document.getElementById('XMLJava') as HTMLAnchorElement).addEventListener('click', () => {
             this.openLicense('XMLJava');
         });
-        document.getElementById('Java').addEventListener('click', () => {
+        (document.getElementById('Java') as HTMLAnchorElement).addEventListener('click', () => {
             this.openLicense('Java');
         });
-        document.getElementById('OpenXLIFF').addEventListener('click', () => {
+        (document.getElementById('OpenXLIFF') as HTMLAnchorElement).addEventListener('click', () => {
             this.openLicense('OpenXLIFF');
         });
-        document.getElementById('BCP47J').addEventListener('click', () => {
+        (document.getElementById('BCP47J') as HTMLAnchorElement).addEventListener('click', () => {
             this.openLicense('BCP47J');
         });
-        document.getElementById('MapDB').addEventListener('click', () => {
+        (document.getElementById('MapDB') as HTMLAnchorElement).addEventListener('click', () => {
             this.openLicense('MapDB');
         });
-        document.getElementById('jsoup').addEventListener('click', () => {
+        (document.getElementById('jsoup') as HTMLAnchorElement).addEventListener('click', () => {
             this.openLicense('jsoup');
-        });
-        document.getElementById('DTDParser').addEventListener('click', () => {
-            this.openLicense('DTDParser');
         });
         document.addEventListener('keydown', (event: KeyboardEvent) => {
             if (event.code === 'Escape') {

@@ -16,7 +16,7 @@ class VerticalSplit {
     divider: HTMLDivElement;
     right: HTMLDivElement;
     weights: number[];
-    currentSum: number;
+    currentSum: number = 0;
 
     constructor(parent: HTMLDivElement) {
         parent.style.display = 'flex';
@@ -118,9 +118,9 @@ class ThreeHorizontalPanels {
     bottomDivider: HTMLDivElement;
     bottom: HTMLDivElement;
 
-    topHeight: number;
-    centerHeight: number;
-    bottomHeight: number;
+    topHeight: number = 0;
+    centerHeight: number = 0;
+    bottomHeight: number = 0;
 
     weights: number[];
 

@@ -17,8 +17,8 @@ class ChangeCase {
     constructor() {
         this.electron.ipcRenderer.send('get-theme');
         this.electron.ipcRenderer.send('get-version');
-        this.electron.ipcRenderer.on('set-theme', (event: Electron.IpcRendererEvent, arg: any) => {
-            (document.getElementById('theme') as HTMLLinkElement).href = arg;
+        this.electron.ipcRenderer.on('set-theme', (event: Electron.IpcRendererEvent, theme: string) => {
+            (document.getElementById('theme') as HTMLLinkElement).href = theme;
         });
         document.addEventListener('keydown', (event: KeyboardEvent) => {
             if (event.code === 'Escape') {
@@ -28,8 +28,8 @@ class ChangeCase {
                 this.changeCase();
             }
         });
-        document.getElementById('changeCase').addEventListener('click', () => { this.changeCase(); });
-        document.getElementById('uppercase').focus();
+        (document.getElementById('changeCase') as HTMLButtonElement).addEventListener('click', () => { this.changeCase(); });
+        (document.getElementById('uppercase') as HTMLInputElement).focus();
         setTimeout(() => {
             this.electron.ipcRenderer.send('set-height', { window: 'changeCase', width: document.body.clientWidth, height: document.body.clientHeight });
         }, 200);

@@ -16,8 +16,8 @@ class ServerSettings {
 
     constructor() {
         this.electron.ipcRenderer.send('get-theme');
-        this.electron.ipcRenderer.on('set-theme', (event: Electron.IpcRendererEvent, arg: any) => {
-            (document.getElementById('theme') as HTMLLinkElement).href = arg;
+        this.electron.ipcRenderer.on('set-theme', (event: Electron.IpcRendererEvent, theme: string) => {
+            (document.getElementById('theme') as HTMLLinkElement).href = theme;
         });
         document.addEventListener('keydown', (event: KeyboardEvent) => {
             if (event.code === 'Enter' || event.code === 'NumpadEnter') {
@@ -27,7 +27,7 @@ class ServerSettings {
                 this.electron.ipcRenderer.send('close-serverSettings');
             }
         });
-        document.getElementById('browseButton').addEventListener('click', () => { this.browseServer(); });
+        (document.getElementById('browseButton') as HTMLButtonElement).addEventListener('click', () => { this.browseServer(); });
         setTimeout(() => {
             this.electron.ipcRenderer.send('set-height', { window: 'serverSettings', width: document.body.clientWidth, height: document.body.clientHeight });
         }, 200);

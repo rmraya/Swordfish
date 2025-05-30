@@ -33,21 +33,21 @@ class Main {
 
         Main.main = document.getElementById('main') as HTMLDivElement;
 
-        let projectsTab = new Tab('projects', 'Projects', false);
+        let projectsTab = new Tab('projects', 'Projects', false, Main.tabHolder);
         this.projectsView = new ProjectsView(projectsTab.getContainer());
         projectsTab.getLabelDiv().addEventListener('click', () => {
             this.projectsView.setSizes();
         });
         Main.tabHolder.addTab(projectsTab);
 
-        let memoriesTab = new Tab('memories', 'Memories', false);
+        let memoriesTab = new Tab('memories', 'Memories', false, Main.tabHolder);
         this.memoriesView = new MemoriesView(memoriesTab.getContainer());
         memoriesTab.getLabelDiv().addEventListener('click', () => {
             this.memoriesView.setSizes();
         });
         Main.tabHolder.addTab(memoriesTab);
 
-        let glossariesTab = new Tab('glossaries', 'Glossaries', false);
+        let glossariesTab = new Tab('glossaries', 'Glossaries', false, Main.tabHolder);
         this.glossariesView = new GlossariesView(glossariesTab.getContainer());
         glossariesTab.getLabelDiv().addEventListener('click', () => {
             this.glossariesView.setSizes();
@@ -74,11 +74,11 @@ class Main {
         tabsObserver.observe(Main.tabHolder.getTabsHolder(), observerOptions);
 
         Main.electron.ipcRenderer.send('get-theme');
-        Main.electron.ipcRenderer.on('set-theme', (event: Electron.IpcRendererEvent, arg: any) => {
-            (document.getElementById('theme') as HTMLLinkElement).href = arg;
+        Main.electron.ipcRenderer.on('set-theme', (event: Electron.IpcRendererEvent, theme: string) => {
+            (document.getElementById('theme') as HTMLLinkElement).href = theme;
         });
         Main.electron.ipcRenderer.send('get-rows-page');
-        Main.electron.ipcRenderer.on('set-rows-page', (event: Electron.IpcRendererEvent, rows:number) => {
+        Main.electron.ipcRenderer.on('set-rows-page', (event: Electron.IpcRendererEvent, rows: number) => {
             Main.rowsPage = rows;
         });
         Main.electron.ipcRenderer.on('request-theme', () => {
@@ -423,15 +423,17 @@ class Main {
 
         document.addEventListener('paste', (event) => {
             let clipboardData = event.clipboardData;
-            let html: string = clipboardData.getData('text/html');
-            if (html.length !== 0) {
-                event.preventDefault();
-                if (this.hasTags(html)) {
-                    this.parseClipboardHtml(html);
-                } else {
-                    let text = clipboardData.getData('text/plain').replace(/\r/g, '');
-                    text = text.replace(/\n\n/g, '\n');
-                    document.execCommand('insertHTML', false, text);
+            if (clipboardData) {
+                let html: string = clipboardData.getData('text/html');
+                if (html.length !== 0) {
+                    event.preventDefault();
+                    if (this.hasTags(html)) {
+                        this.parseClipboardHtml(html);
+                    } else {
+                        let text = clipboardData.getData('text/plain').replace(/\r/g, '');
+                        text = text.replace(/\n\n/g, '\n');
+                        document.execCommand('insertHTML', false, text);
+                    }
                 }
             }
         });
@@ -447,7 +449,8 @@ class Main {
         let images: NodeListOf<HTMLImageElement> = container.querySelectorAll('img');
         if (images.length > 0) {
             for (let tag of images) {
-                if (tag.getAttribute('data-ref') && tag.getAttribute('src').endsWith('.svg')) {
+                let src: string | null = tag.getAttribute('src');
+                if (tag.getAttribute('data-ref') && src && src.endsWith('.svg')) {
                     return true;
                 }
             }
@@ -467,7 +470,10 @@ class Main {
     trimSpaces(node: Node): string {
         let result: string = '';
         if (node.nodeType === Node.TEXT_NODE) {
-            result = node.textContent.replace(/\s\s+/g, ' ');
+            let content = node.textContent;
+            if (content) {
+                result = content.replace(/\s\s+/g, ' ');
+            }
         }
         if (node.nodeName === 'IMG' && this.isTag(node)) {
             return (node as HTMLImageElement).outerHTML;
@@ -488,8 +494,10 @@ class Main {
             return '';
         }
         if (node.nodeType === Node.TEXT_NODE) {
-            let content = node.textContent.replace(/\n/g, '');
-            return content;
+            let content = node.textContent;
+            if (content) {
+                return content.replace(/\n/g, '');
+            }
         }
         node.childNodes.forEach((child) => {
             result += this.recurseNodes(child);
@@ -502,7 +510,8 @@ class Main {
 
     isTag(node: Node): boolean {
         let img: HTMLImageElement = node as HTMLImageElement;
-        if (img.getAttribute('data-ref') && img.getAttribute('src').endsWith('.svg')) {
+        let src: string | null = img.getAttribute('src');
+        if (img.getAttribute('data-ref') && src && src.endsWith('.svg')) {
             return true;
         }
         return false;
@@ -523,7 +532,7 @@ class Main {
             Main.tabHolder.selectTab(project.id);
             return;
         }
-        let tab = new Tab(project.id, project.description, true);
+        let tab = new Tab(project.id, project.description, true, Main.tabHolder);
         let view: TranslationView = new TranslationView(tab, project.id, project.sourceLang, project.targetLang, Main.rowsPage);
         Main.tabHolder.addTab(tab);
         Main.tabHolder.selectTab(project.id);
@@ -549,7 +558,7 @@ class Main {
     static checkTabs(): void {
         for (let key of Main.translationViews.keys()) {
             if (!Main.tabHolder.has(key)) {
-                let view: TranslationView = Main.translationViews.get(key);
+                let view: TranslationView = Main.translationViews.get(key) as TranslationView;
                 view.close();
                 Main.translationViews.delete(key);
                 Main.electron.ipcRenderer.send('close-project', { project: key });
@@ -561,215 +570,215 @@ class Main {
     editSource(): void {
         let selected = Main.tabHolder.getSelected();
         if (Main.translationViews.has(selected)) {
-            Main.translationViews.get(selected).editSource();
+            (Main.translationViews.get(selected) as TranslationView).editSource();
         }
     }
 
     rememberSegment(): void {
         let selected = Main.tabHolder.getSelected();
         if (Main.translationViews.has(selected)) {
-            Main.translationViews.get(selected).rememberSegment();
+            (Main.translationViews.get(selected) as TranslationView).rememberSegment();
         }
     }
-    
+
     cancelEdit(): void {
         let selected = Main.tabHolder.getSelected();
         if (Main.translationViews.has(selected)) {
-            Main.translationViews.get(selected).cancelEdit();
+            (Main.translationViews.get(selected) as TranslationView).cancelEdit();
         }
     }
 
     saveEdit(arg: any): void {
         let selected = Main.tabHolder.getSelected();
         if (Main.translationViews.has(selected)) {
-            Main.translationViews.get(selected).saveEdit(arg);
+            (Main.translationViews.get(selected) as TranslationView).saveEdit(arg);
         }
     }
 
     nextUntranslated(): void {
         let selected = Main.tabHolder.getSelected();
         if (Main.translationViews.has(selected)) {
-            Main.translationViews.get(selected).nextUntranslated();
+            (Main.translationViews.get(selected) as TranslationView).nextUntranslated();
         }
     }
 
     nextUnconfirmed(): void {
         let selected = Main.tabHolder.getSelected();
         if (Main.translationViews.has(selected)) {
-            Main.translationViews.get(selected).nextUnconfirmed();
+            (Main.translationViews.get(selected) as TranslationView).nextUnconfirmed();
         }
     }
 
     insertTag(arg: any): void {
         let selected = Main.tabHolder.getSelected();
         if (Main.translationViews.has(selected)) {
-            Main.translationViews.get(selected).insertTag(arg);
+            (Main.translationViews.get(selected) as TranslationView).insertTag(arg);
         }
     }
 
     insertTerm(arg: any): void {
         let selected = Main.tabHolder.getSelected();
         if (Main.translationViews.has(selected)) {
-            Main.translationViews.get(selected).insertTerm(arg);
+            (Main.translationViews.get(selected) as TranslationView).insertTerm(arg);
         }
     }
 
     insertNextTag(): void {
         let selected = Main.tabHolder.getSelected();
         if (Main.translationViews.has(selected)) {
-            Main.translationViews.get(selected).insertNextTag();
+            (Main.translationViews.get(selected) as TranslationView).insertNextTag();
         }
     }
 
     insertRemainingTags(): void {
         let selected = Main.tabHolder.getSelected();
         if (Main.translationViews.has(selected)) {
-            Main.translationViews.get(selected).insertRemainingTags();
+            (Main.translationViews.get(selected) as TranslationView).insertRemainingTags();
         }
     }
 
     removeTags(): void {
         let selected = Main.tabHolder.getSelected();
         if (Main.translationViews.has(selected)) {
-            Main.translationViews.get(selected).removeTags();
+            (Main.translationViews.get(selected) as TranslationView).removeTags();
         }
     }
 
     confirmAllTranslations(): void {
         let selected = Main.tabHolder.getSelected();
         if (Main.translationViews.has(selected)) {
-            Main.translationViews.get(selected).confirmAllTranslations();
+            (Main.translationViews.get(selected) as TranslationView).confirmAllTranslations();
         }
     }
 
     unconfirmAllTranslations(): void {
         let selected = Main.tabHolder.getSelected();
         if (Main.translationViews.has(selected)) {
-            Main.translationViews.get(selected).unconfirmAllTranslations();
+            (Main.translationViews.get(selected) as TranslationView).unconfirmAllTranslations();
         }
     }
 
     removeAllTranslations(): void {
         let selected = Main.tabHolder.getSelected();
         if (Main.translationViews.has(selected)) {
-            Main.translationViews.get(selected).removeAllTranslations();
+            (Main.translationViews.get(selected) as TranslationView).removeAllTranslations();
         }
     }
 
     removeAllMatches(): void {
         let selected = Main.tabHolder.getSelected();
         if (Main.translationViews.has(selected)) {
-            Main.translationViews.get(selected).removeAllMatches();
+            (Main.translationViews.get(selected) as TranslationView).removeAllMatches();
         }
     }
 
     copySource(): void {
         let selected = Main.tabHolder.getSelected();
         if (Main.translationViews.has(selected)) {
-            Main.translationViews.get(selected).copySource();
+            (Main.translationViews.get(selected) as TranslationView).copySource();
         }
     }
 
     copyAllSources(): void {
         let selected = Main.tabHolder.getSelected();
         if (Main.translationViews.has(selected)) {
-            Main.translationViews.get(selected).copyAllSources();
+            (Main.translationViews.get(selected) as TranslationView).copyAllSources();
         }
     }
 
     pseudoTranslate(): void {
         let selected = Main.tabHolder.getSelected();
         if (Main.translationViews.has(selected)) {
-            Main.translationViews.get(selected).pseudoTranslate();
+            (Main.translationViews.get(selected) as TranslationView).pseudoTranslate();
         }
     }
 
     autoPropagate(arg: any): void {
         let selected = Main.tabHolder.getSelected();
         if (Main.translationViews.has(selected)) {
-            Main.translationViews.get(selected).autoPropagate(arg.rows);
+            (Main.translationViews.get(selected) as TranslationView).autoPropagate(arg.rows);
         }
     }
 
     setMatches(arg: any): void {
         if (Main.translationViews.has(arg.project)) {
-            Main.translationViews.get(arg.project).setMatches(arg.matches);
+            (Main.translationViews.get(arg.project) as TranslationView).setMatches(arg.matches);
         }
     }
 
     setTerms(arg: any): void {
         if (Main.translationViews.has(arg.project)) {
-            Main.translationViews.get(arg.project).setTerms(arg.terms);
+            (Main.translationViews.get(arg.project) as TranslationView).setTerms(arg.terms);
         }
     }
 
     setTarget(arg: any): void {
         let selected = Main.tabHolder.getSelected();
         if (Main.translationViews.has(selected)) {
-            Main.translationViews.get(selected).setTarget(arg);
+            (Main.translationViews.get(selected) as TranslationView).setTarget(arg);
         }
     }
 
     firstPage(): void {
         let selected = Main.tabHolder.getSelected();
         if (Main.translationViews.has(selected)) {
-            Main.translationViews.get(selected).firstPage();
+            (Main.translationViews.get(selected) as TranslationView).firstPage();
         }
     }
 
     previousPage(): void {
         let selected = Main.tabHolder.getSelected();
         if (Main.translationViews.has(selected)) {
-            Main.translationViews.get(selected).previousPage();
+            (Main.translationViews.get(selected) as TranslationView).previousPage();
         }
     }
 
     nextPage(): void {
         let selected = Main.tabHolder.getSelected();
         if (Main.translationViews.has(selected)) {
-            Main.translationViews.get(selected).nextPage();
+            (Main.translationViews.get(selected) as TranslationView).nextPage();
         }
     }
 
     lastPage(): void {
         let selected = Main.tabHolder.getSelected();
         if (Main.translationViews.has(selected)) {
-            Main.translationViews.get(selected).lastPage();
+            (Main.translationViews.get(selected) as TranslationView).lastPage();
         }
     }
 
     getMachineTranslations(): void {
         let selected = Main.tabHolder.getSelected();
         if (Main.translationViews.has(selected)) {
-            Main.translationViews.get(selected).getMachineTranslations();
+            (Main.translationViews.get(selected) as TranslationView).getMachineTranslations();
         }
     }
 
     getAssembledMatches(): void {
         let selected = Main.tabHolder.getSelected();
         if (Main.translationViews.has(selected)) {
-            Main.translationViews.get(selected).getAssembledMatches();
+            (Main.translationViews.get(selected) as TranslationView).getAssembledMatches();
         }
     }
 
     assembleMatchesAll(): void {
         let selected = Main.tabHolder.getSelected();
         if (Main.translationViews.has(selected)) {
-            Main.translationViews.get(selected).assembleMatchesAll();
+            (Main.translationViews.get(selected) as TranslationView).assembleMatchesAll();
         }
     }
 
     removeAssembleMatches(): void {
         let selected = Main.tabHolder.getSelected();
         if (Main.translationViews.has(selected)) {
-            Main.translationViews.get(selected).removeAssembleMatches();
+            (Main.translationViews.get(selected) as TranslationView).removeAssembleMatches();
         }
     }
 
     getTmMatches(): void {
         let selected = Main.tabHolder.getSelected();
         if (Main.translationViews.has(selected)) {
-            Main.translationViews.get(selected).getTmMatches();
+            (Main.translationViews.get(selected) as TranslationView).getTmMatches();
         }
     }
 
@@ -780,76 +789,76 @@ class Main {
             return;
         }
         if (Main.translationViews.has(selected)) {
-            Main.translationViews.get(selected).applyTranslationMemoryAll();
+            (Main.translationViews.get(selected) as TranslationView).applyTranslationMemoryAll();
         }
     }
 
     acceptAll100Matches(): void {
         let selected = Main.tabHolder.getSelected();
         if (Main.translationViews.has(selected)) {
-            Main.translationViews.get(selected).acceptAll100Matches();
+            (Main.translationViews.get(selected) as TranslationView).acceptAll100Matches();
         }
     }
 
     applyMachineTranslationsAll(): void {
         let selected = Main.tabHolder.getSelected();
         if (Main.translationViews.has(selected)) {
-            Main.translationViews.get(selected).applyMachineTranslationsAll();
+            (Main.translationViews.get(selected) as TranslationView).applyMachineTranslationsAll();
         }
     }
 
     acceptAllMachineTranslations(): void {
         let selected = Main.tabHolder.getSelected();
         if (Main.translationViews.has(selected)) {
-            Main.translationViews.get(selected).acceptAllMachineTranslations();
+            (Main.translationViews.get(selected) as TranslationView).acceptAllMachineTranslations();
         }
     }
 
     removeAllMachineTranslations(): void {
         let selected = Main.tabHolder.getSelected();
         if (Main.translationViews.has(selected)) {
-            Main.translationViews.get(selected).removeAllMachineTranslations();
+            (Main.translationViews.get(selected) as TranslationView).removeAllMachineTranslations();
         }
     }
 
     splitSegment(): void {
         let selected = Main.tabHolder.getSelected();
         if (Main.translationViews.has(selected)) {
-            Main.translationViews.get(selected).splitSegment();
+            (Main.translationViews.get(selected) as TranslationView).splitSegment();
         }
     }
 
     mergeNext(): void {
         let selected = Main.tabHolder.getSelected();
         if (Main.translationViews.has(selected)) {
-            Main.translationViews.get(selected).mergeNext();
+            (Main.translationViews.get(selected) as TranslationView).mergeNext();
         }
     }
 
     setProjectMemories(arg: any): void {
         let project: string = arg.project;
         if (Main.translationViews.has(project)) {
-            Main.translationViews.get(project).setProjectMemories(arg);
+            (Main.translationViews.get(project) as TranslationView).setProjectMemories(arg);
         }
     }
 
     setProjectGlossaries(arg: any): void {
         let project: string = arg.project;
         if (Main.translationViews.has(project)) {
-            Main.translationViews.get(project).setProjectGlossaries(arg);
+            (Main.translationViews.get(project) as TranslationView).setProjectGlossaries(arg);
         }
     }
 
     reloadPage(projectId: string): void {
         if (Main.translationViews.has(projectId)) {
-            Main.translationViews.get(projectId).getSegments();
+            (Main.translationViews.get(projectId) as TranslationView).getSegments();
         }
     }
 
     setStatistics(arg: any): void {
         let project: string = arg.project;
         if (Main.translationViews.has(project)) {
-            Main.translationViews.get(project).setStatistics(arg.statistics);
+            (Main.translationViews.get(project) as TranslationView).setStatistics(arg.statistics);
         }
         this.projectsView.updateStatus(arg);
     }
@@ -857,28 +866,28 @@ class Main {
     sortSegments(): void {
         let selected = Main.tabHolder.getSelected();
         if (Main.translationViews.has(selected)) {
-            Main.translationViews.get(selected).sortSegments();
+            (Main.translationViews.get(selected) as TranslationView).sortSegments();
         }
     }
 
     filterSegments(): void {
         let selected = Main.tabHolder.getSelected();
         if (Main.translationViews.has(selected)) {
-            Main.translationViews.get(selected).filterSegments();
+            (Main.translationViews.get(selected) as TranslationView).filterSegments();
         }
     }
 
     setSorting(args: any) {
         let selected = Main.tabHolder.getSelected();
         if (Main.translationViews.has(selected)) {
-            Main.translationViews.get(selected).setSorting(args);
+            (Main.translationViews.get(selected) as TranslationView).setSorting(args);
         }
     }
 
     setFilters(args: any) {
         let selected = Main.tabHolder.getSelected();
         if (Main.translationViews.has(selected)) {
-            Main.translationViews.get(selected).setFilters(args);
+            (Main.translationViews.get(selected) as TranslationView).setFilters(args);
         }
     }
 
@@ -894,14 +903,14 @@ class Main {
     replaceText(): void {
         let selected = Main.tabHolder.getSelected();
         if (Main.translationViews.has(selected)) {
-            Main.translationViews.get(selected).replaceText();
+            (Main.translationViews.get(selected) as TranslationView).replaceText();
         }
     }
 
     concordanceSearch(): void {
         let selected = Main.tabHolder.getSelected();
         if (Main.translationViews.has(selected)) {
-            Main.translationViews.get(selected).concordanceSearch();
+            (Main.translationViews.get(selected) as TranslationView).concordanceSearch();
         } else {
             this.memoriesView.concordanceSearch();
         }
@@ -910,7 +919,7 @@ class Main {
     searchTerm(): void {
         let selected = Main.tabHolder.getSelected();
         if (Main.translationViews.has(selected)) {
-            Main.translationViews.get(selected).searchTerm();
+            (Main.translationViews.get(selected) as TranslationView).searchTerm();
         } else {
             this.glossariesView.searchTerm();
         }
@@ -919,7 +928,7 @@ class Main {
     addTerm(): void {
         let selected = Main.tabHolder.getSelected();
         if (Main.translationViews.has(selected)) {
-            Main.translationViews.get(selected).addTerm();
+            (Main.translationViews.get(selected) as TranslationView).addTerm();
         } else {
             this.glossariesView.addTerm();
         }
@@ -928,7 +937,7 @@ class Main {
     requestStatistics(): void {
         let selected = Main.tabHolder.getSelected();
         if (Main.translationViews.has(selected)) {
-            Main.translationViews.get(selected).generateStatistics();
+            (Main.translationViews.get(selected) as TranslationView).generateStatistics();
         } else {
             this.projectsView.generateStatistics();
         }
@@ -937,21 +946,21 @@ class Main {
     applyTerminology(): void {
         let selected = Main.tabHolder.getSelected();
         if (Main.translationViews.has(selected)) {
-            Main.translationViews.get(selected).applyTerminology();
+            (Main.translationViews.get(selected) as TranslationView).applyTerminology();
         }
     }
 
     applyTerminologyAll(): void {
         let selected = Main.tabHolder.getSelected();
         if (Main.translationViews.has(selected)) {
-            Main.translationViews.get(selected).applyTerminologyAll();
+            (Main.translationViews.get(selected) as TranslationView).applyTerminologyAll();
         }
     }
 
     toggleLock(): void {
         let selected = Main.tabHolder.getSelected();
         if (Main.translationViews.has(selected)) {
-            Main.translationViews.get(selected).toggleLock();
+            (Main.translationViews.get(selected) as TranslationView).toggleLock();
         }
     }
 
@@ -986,42 +995,42 @@ class Main {
     nextMatch(): void {
         let selected = Main.tabHolder.getSelected();
         if (Main.translationViews.has(selected)) {
-            Main.translationViews.get(selected).nextMatch();
+            (Main.translationViews.get(selected) as TranslationView).nextMatch();
         }
     }
 
     previousMatch(): void {
         let selected = Main.tabHolder.getSelected();
         if (Main.translationViews.has(selected)) {
-            Main.translationViews.get(selected).previousMatch();
+            (Main.translationViews.get(selected) as TranslationView).previousMatch();
         }
     }
 
     nextMT(): void {
         let selected = Main.tabHolder.getSelected();
         if (Main.translationViews.has(selected)) {
-            Main.translationViews.get(selected).nextMT();
+            (Main.translationViews.get(selected) as TranslationView).nextMT();
         }
     }
 
     previousMT(): void {
         let selected = Main.tabHolder.getSelected();
         if (Main.translationViews.has(selected)) {
-            Main.translationViews.get(selected).previousMT();
+            (Main.translationViews.get(selected) as TranslationView).previousMT();
         }
     }
 
     previousSegment(): void {
         let selected = Main.tabHolder.getSelected();
         if (Main.translationViews.has(selected)) {
-            Main.translationViews.get(selected).gotoPrevious();
+            (Main.translationViews.get(selected) as TranslationView).gotoPrevious();
         }
     }
 
     nextSegment(): void {
         let selected = Main.tabHolder.getSelected();
         if (Main.translationViews.has(selected)) {
-            Main.translationViews.get(selected).gotoNext();
+            (Main.translationViews.get(selected) as TranslationView).gotoNext();
         }
     }
 
@@ -1035,36 +1044,43 @@ class Main {
     openSegment(arg: any): void {
         let selected = Main.tabHolder.getSelected();
         if (Main.translationViews.has(selected)) {
-            Main.translationViews.get(selected).openSegment(arg);
+            (Main.translationViews.get(selected) as TranslationView).openSegment(arg);
         }
     }
 
     getSelectedText(): void {
         let selected = Main.tabHolder.getSelected();
         if (Main.translationViews.has(selected)) {
-            let selection: Selection = document.getSelection();
-            let selectedText = selection.toString();
-            if (selectedText.length > 0) {
-                let element: Element = selection.anchorNode.parentElement;
-                let lang: string = '';
-                if (element.classList.contains('source')) {
-                    lang = Main.translationViews.get(selected).getSrcLang();
+            let selection: Selection | null = document.getSelection();
+            if (selection) {
+                let selectedText = selection.toString();
+                if (selectedText.length > 0) {
+                    let anchorNode: Node | null = selection.anchorNode;
+                    if (anchorNode) {
+                        let element: Element | null = anchorNode.parentElement;
+                        if (element) {
+                            let lang: string = '';
+                            if (element.classList.contains('source')) {
+                                lang = (Main.translationViews.get(selected) as TranslationView).getSrcLang();
+                            }
+                            if (element.classList.contains('target')) {
+                                lang = (Main.translationViews.get(selected) as TranslationView).getTgtLang();
+                            }
+                            Main.electron.ipcRenderer.send('selected-text', {
+                                selected: selectedText,
+                                lang: lang,
+                                srcLang: (Main.translationViews.get(selected) as TranslationView).getSrcLang(),
+                                tgtLang: (Main.translationViews.get(selected) as TranslationView).getTgtLang()
+                            });
+                        }
+                    }
+                } else {
+                    Main.electron.ipcRenderer.send('selected-text', {
+                        selected: "",
+                        srcLang: (Main.translationViews.get(selected) as TranslationView).getSrcLang(),
+                        tgtLang: (Main.translationViews.get(selected) as TranslationView).getTgtLang()
+                    });
                 }
-                if (element.classList.contains('target')) {
-                    lang = Main.translationViews.get(selected).getTgtLang();
-                }
-                Main.electron.ipcRenderer.send('selected-text', {
-                    selected: selectedText,
-                    lang: lang,
-                    srcLang: Main.translationViews.get(selected).getSrcLang(),
-                    tgtLang: Main.translationViews.get(selected).getTgtLang()
-                });
-            } else {
-                Main.electron.ipcRenderer.send('selected-text', {
-                    selected: "",
-                    srcLang: Main.translationViews.get(selected).getSrcLang(),
-                    tgtLang: Main.translationViews.get(selected).getTgtLang()
-                });
             }
         }
     }
@@ -1072,14 +1088,14 @@ class Main {
     selectNextTerm(): void {
         let selected = Main.tabHolder.getSelected();
         if (Main.translationViews.has(selected)) {
-            Main.translationViews.get(selected).selectNextTerm();
+            (Main.translationViews.get(selected) as TranslationView).selectNextTerm();
         }
     }
 
     selectPreviousTerm(): void {
         let selected = Main.tabHolder.getSelected();
         if (Main.translationViews.has(selected)) {
-            Main.translationViews.get(selected).selectPreviousTerm();
+            (Main.translationViews.get(selected) as TranslationView).selectPreviousTerm();
         }
     }
 
@@ -1095,63 +1111,63 @@ class Main {
     changeCase(): void {
         let selected = Main.tabHolder.getSelected();
         if (Main.translationViews.has(selected)) {
-            Main.translationViews.get(selected).changeCase();
+            (Main.translationViews.get(selected) as TranslationView).changeCase();
         }
     }
 
     caseChanged(arg: any): void {
         let selected = Main.tabHolder.getSelected();
         if (Main.translationViews.has(selected)) {
-            Main.translationViews.get(selected).caseChanged(arg);
+            (Main.translationViews.get(selected) as TranslationView).caseChanged(arg);
         }
     }
 
     setErrors(arg: any): void {
         let selected = Main.tabHolder.getSelected();
         if (Main.translationViews.has(selected)) {
-            Main.translationViews.get(selected).setErrors(arg);
+            (Main.translationViews.get(selected) as TranslationView).setErrors(arg);
         }
     }
 
     clearErrors(arg: any): void {
         let selected = Main.tabHolder.getSelected();
         if (Main.translationViews.has(selected)) {
-            Main.translationViews.get(selected).clearErrors(arg);
+            (Main.translationViews.get(selected) as TranslationView).clearErrors(arg);
         }
     }
 
     updateTarget(arg: any): void {
         let selected = Main.tabHolder.getSelected();
         if (Main.translationViews.has(selected)) {
-            Main.translationViews.get(selected).updateTarget(arg);
+            (Main.translationViews.get(selected) as TranslationView).updateTarget(arg);
         }
     }
 
     notesRequested(): void {
         let selected = Main.tabHolder.getSelected();
         for (let key of Main.translationViews.keys()) {
-            Main.translationViews.get(key).showingNotes(true);
+            (Main.translationViews.get(key) as TranslationView).showingNotes(true);
         }
         if (Main.translationViews.has(selected)) {
-            Main.translationViews.get(selected).showNotes();
+            (Main.translationViews.get(selected) as TranslationView).showNotes();
         }
     }
 
     notesClosed(): void {
         for (let key of Main.translationViews.keys()) {
-            Main.translationViews.get(key).showingNotes(false);
+            (Main.translationViews.get(key) as TranslationView).showingNotes(false);
         }
     }
 
     notesRemoved(arg: any): void {
         if (Main.translationViews.has(arg.project)) {
-            Main.translationViews.get(arg.project).notesRemoved(arg);
+            (Main.translationViews.get(arg.project) as TranslationView).notesRemoved(arg);
         }
     }
 
     notesAdded(arg: any): void {
         if (Main.translationViews.has(arg.project)) {
-            Main.translationViews.get(arg.project).notesAdded(arg);
+            (Main.translationViews.get(arg.project) as TranslationView).notesAdded();
         }
     }
 }

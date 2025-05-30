@@ -19,8 +19,8 @@ class Notes {
 
     constructor() {
         this.electron.ipcRenderer.send('get-theme');
-        this.electron.ipcRenderer.on('set-theme', (event: Electron.IpcRendererEvent, arg: any) => {
-            (document.getElementById('theme') as HTMLLinkElement).href = arg;
+        this.electron.ipcRenderer.on('set-theme', (event: Electron.IpcRendererEvent, theme: string) => {
+            (document.getElementById('theme') as HTMLLinkElement).href = theme;
         });
         this.electron.ipcRenderer.send('get-initial-notes');
         this.electron.ipcRenderer.on('set-notes', (event: Electron.IpcRendererEvent, arg: any) => {
@@ -29,10 +29,10 @@ class Notes {
         this.electron.ipcRenderer.on('note-params', (event: Electron.IpcRendererEvent, arg: any) => {
             this.segmentData = arg;
         });
-        document.getElementById('addNote').addEventListener('click', () => {
+        (document.getElementById('addNote') as HTMLAnchorElement).addEventListener('click', () => {
             this.addNote();
         });
-        document.getElementById('removeNote').addEventListener('click', () => {
+        (document.getElementById('removeNote') as HTMLAnchorElement).addEventListener('click', () => {
             this.removeNote();
         });
         let main: HTMLDivElement = document.getElementById('main') as HTMLDivElement;
@@ -54,7 +54,7 @@ class Notes {
         this.tabHolder.clear();
         let length = notes.length;
         for (let i: number = 0; i < length; i++) {
-            let tab = new Tab(notes[i].id, 'Note ' + notes[i].id, false);
+            let tab = new Tab(notes[i].id, 'Note ' + notes[i].id, false, this.tabHolder);
             tab.getContainer().innerText = notes[i].note;
             tab.getContainer().style.padding = '8px';
             this.tabHolder.addTab(tab);

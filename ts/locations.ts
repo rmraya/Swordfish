@@ -9,7 +9,7 @@
  * Contributors:
  *     Maxprograms - initial API and implementation
  *******************************************************************************/
-import { existsSync, readFileSync, writeFile } from "fs";
+import { existsSync, readFileSync, writeFileSync } from "fs";
 
 export class Point {
 
@@ -60,15 +60,13 @@ export class Locations {
         });
         text = text.substring(0, text.length - 1) + '}'
         let json = JSON.parse(text);
-        writeFile(this.file, JSON.stringify(json, null, 2), (err: Error) => {
-            if (err) throw err;
-        });
+        writeFileSync(this.file, JSON.stringify(json, null, 2));
     }
 
-    getLocation(window: string): Point {
+    getLocation(window: string): Point | undefined{
         if (this.locations.has(window)) {
             return this.locations.get(window);
         }
-        return null;
+        return undefined;
     }
 }

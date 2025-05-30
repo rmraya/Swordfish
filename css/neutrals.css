@@ -1,16 +1,16 @@
 :root {
-    --black: hsl(0, 0%, 0%);
-    --gray190: hsl(30, 3%, 12%);
-    --gray160: hsl(30, 2%, 19%);
-    --gray150: hsl(30, 2%, 23%);
-    --gray130: hsl(30, 2%, 37%);
-    --gray110: hsl(30, 2%, 53%);
-    --gray90: hsl(30, 2%, 62%);
-    --gray60: hsl(30, 4%, 78%);
-    --gray50: hsl(30, 4%, 82%);
-    --gray40: hsl(30, 6%, 87%);
-    --gray30: hsl(30, 10%, 92%);
-    --gray20: hsl(30, 8%, 95%);
-    --gray10: hsl(30, 17%, 98%);
-    --white: hsl(0, 0%, 100%);
+    --black: #000000;
+    --gray190: #1f1b1a;
+    --gray160: #312c2b;
+    --gray150: #393433;
+    --gray130: #5e5857;
+    --gray110: #898483;
+    --gray90: #a29e9d;
+    --gray60: #cbc6c4;
+    --gray50: #d8d3d1;
+    --gray40: #e6e1df;
+    --gray30: #f2ede8;
+    --gray20: #f7f4ef;
+    --gray10: #fcf9f4;
+    --white: #ffffff;
 }

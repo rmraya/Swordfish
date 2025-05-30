@@ -1,0 +1,116 @@
+<html>
+
+<head>
+  <title>IATE widget demo setup</title>
+  <meta charset="UTF-8" />
+  <link rel="stylesheet" href="https://iate.europa.eu/assets/plugin.css" />
+  <style>
+    :root {
+      scrollbar-color: #2066A3 #e6e1df;
+      scrollbar-width: thin;
+    }
+
+    body {
+      background-color: #f2ede8;
+    }
+  </style>
+</head>
+
+<body>
+  <script>
+    // iate basic search template
+    // To specify a configuration, you have to assign it to the iateConfig variable BEFORE embedding the widget.
+    // Please refer to the search widget guide for specific customisation options.
+    // For a basic installation example, please refer to the default_template_basic.html file.
+
+    const iateConfig = {
+      verbose: false,
+      number_of_results: 20,
+      form_is_shown: true,
+      query_is_automatically_launched: false,
+
+      // the iate basic search template form contains only four fields: query, source language, target language, matching type
+      // we do not specify available_values for source and target language fields as we will use the default values
+      form: {
+        query: {
+          name: "Query",
+          visible: true,
+          default: "",
+          mandatory: true,
+          type: "text",
+        },
+        sourceLanguages: {
+          name: "From",
+          visible: true,
+          default: "",
+          mandatory: true,
+          type: "singlechoice",
+        },
+        targetLanguages: {
+          name: "To",
+          visible: true,
+          default: [],
+          mandatory: true,
+          type: "multichoice",
+        },
+        matching: {
+          name: "Matching type",
+          visible: true,
+          default: 3,
+          // in the iate basic search template we only offer exact match, all words and search by ID as matching options.
+          // in this case you have to pass the available values as an array of code/name objects.
+          // delete this property if you want to show all the available values.
+          available_values: [
+            { code: 3, name: "Exact match" },
+            { code: 1, name: "All words" },
+            { code: 9, name: "Search by ID" },
+          ],
+          mandatory: true,
+          type: "singlechoice",
+        },
+      },
+
+      hitlist: {
+        compact: true,
+        show_term_ref: true,
+        term_ref_label: "Term reference",
+        show_definition: true,
+        definition_label: "Definition",
+        show_definition_ref: true,
+        definition_ref_label: "Definition reference",
+        show_ll_note: true,
+        ll_note_label: "Language note",
+        show_ll_note_ref: true,
+        ll_note_ref_label: "Language note reference",
+        show_tl_note: true,
+        tl_note_label: "Term note",
+        show_tl_note_ref: true,
+        tl_note_ref_label: "Term note reference",
+        show_context: true,
+        context_label: "Context",
+        show_context_ref: true,
+        context_ref_label: "Context reference",
+        show_domains: true,
+        domains_label: "Domains",
+        show_reliability: true,
+        reliability_label: "Reliability",
+        show_lifecycle: true,
+        lifecycle_label: "Lifecycle",
+        show_origin: true,
+        origin_label: "Origin",
+        show_language_usage: false,
+        language_usage_label: "Language usage",
+        show_language_usage_ref: false,
+        language_usage_ref_label: "Language usage reference",
+        show_regional_usage: false,
+        regional_usage_label: "Regional usage",
+        show_regional_usage_ref: false,
+        regional_usage_ref_label: "Regional usage reference",
+      },
+    };
+  </script>
+
+  <script src="https://iate.europa.eu/assets/plugin.js"></script>
+</body>
+
+</html>

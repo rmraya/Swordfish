@@ -10,29 +10,6 @@
  *     Maxprograms - initial API and implementation
  *******************************************************************************/
 
-class SourceFile {
-    file: string;
-    type: string;
-    encoding: string;
-}
-
-class Project {
-    id: string;
-    description: string;
-    status: string;
-    sourceLang: string;
-    targetLang: string;
-    client: string;
-    subject: string;
-    creationDate: string;
-    files: SourceFile[];
-    xliff: string;
-    memory: string;
-    glossary: string;
-    svg: string;
-    version: string;
-}
-
 class ProjectsView {
     electron = require('electron');
 
@@ -40,7 +17,7 @@ class ProjectsView {
     topBar: HTMLDivElement;
     tableContainer: HTMLDivElement;
     tbody: HTMLTableSectionElement;
-    projects: Project[];
+    projects: Project[] = [];
     shouldOpen: string;
 
     projectSortFielD: string = 'created';
@@ -346,7 +323,7 @@ class ProjectsView {
     }
 
     watchSizes(): void {
-        let targetNode: HTMLElement = document.getElementById('main');
+        let targetNode: HTMLDivElement = document.getElementById('main') as HTMLDivElement;
         let config: MutationObserverInit = { attributes: true, childList: false, subtree: false };
         let observer = new MutationObserver((mutationsList) => {
             for (let mutation of mutationsList) {
@@ -362,8 +339,10 @@ class ProjectsView {
         event.preventDefault();
         event.stopPropagation();
         let filesList: string[] = [];
-        for (const f of event.dataTransfer.files) {
-            filesList.push(this.electron.webUtils.getPathForFile(f));
+        if (event.dataTransfer) {
+            for (const f of event.dataTransfer.files) {
+                filesList.push(this.electron.webUtils.getPathForFile(f));
+            }
         }
         if (filesList.length > 0) {
             this.electron.ipcRenderer.send('files-dropped', filesList);
@@ -382,7 +361,9 @@ class ProjectsView {
     dragOverListener(event: DragEvent): void {
         event.preventDefault();
         event.stopPropagation();
-        event.dataTransfer.dropEffect = 'link';
+        if (event.dataTransfer) {
+            event.dataTransfer.dropEffect = 'link';
+        }
     }
 
     loadProjects(arg: any): void {
@@ -411,7 +392,7 @@ class ProjectsView {
             return;
         }
         for (let key of selected.keys()) {
-            let project: Project = selected.get(key);
+            let project: Project = selected.get(key) as Project;
             this.electron.ipcRenderer.send('show-edit-project', project);
         }
     }
@@ -422,22 +403,25 @@ class ProjectsView {
         for (let check of checkboxes) {
             let id: string = check.id.substring('ck_'.length);
             if ((check as HTMLInputElement).checked) {
-                selected.set(id, this.getProject(id));
+                let project: Project | undefined = this.getProject(id);
+                if (project) {
+                    selected.set(id, project);
+                }
             } else {
-                document.getElementById(id).classList.remove('selected');
+                (document.getElementById(id) as HTMLInputElement).classList.remove('selected');
             }
         }
         return selected;
     }
 
-    getProject(id: string): Project {
+    getProject(id: string): Project | undefined {
         let length: number = this.projects.length;
         for (let i = 0; i < length; i++) {
             if (this.projects[i].id === id) {
                 return this.projects[i];
             }
         }
-        return null;
+        return undefined
     }
 
     clearSelection(): void {
@@ -445,7 +429,7 @@ class ProjectsView {
         for (let check of checkboxes) {
             (check as HTMLInputElement).checked = false;
             let id: string = check.id.substring('ck_'.length);
-            document.getElementById(id).classList.remove('selected');
+            (document.getElementById(id) as HTMLInputElement).classList.remove('selected');
         }
     }
 
@@ -456,8 +440,10 @@ class ProjectsView {
             return;
         }
         for (let key of selected.keys()) {
-            let project: Project = selected.get(key);
-            this.electron.ipcRenderer.send('add-tab', project);
+            let project: Project | undefined = selected.get(key);
+            if (project) {
+                this.electron.ipcRenderer.send('add-tab', project);
+            }
         }
     }
 
@@ -502,8 +488,10 @@ class ProjectsView {
             if (!Main.tabHolder.has(key)) {
                 projects.push(key);
             } else {
-                let p: Project = this.getProject(key);
-                this.electron.ipcRenderer.send('show-message', { type: 'warning', message: 'Project "' + p.description + '" is open' });
+                let project: Project | undefined = this.getProject(key);
+                if (project) {
+                    this.electron.ipcRenderer.send('show-message', { type: 'warning', message: 'Project "' + project.description + '" is open' });
+                }
             }
         }
         this.electron.ipcRenderer.send('remove-projects', { projects: projects });
@@ -520,8 +508,10 @@ class ProjectsView {
             return;
         }
         for (let key of selected.keys()) {
-            let project: Project = selected.get(key);
-            this.electron.ipcRenderer.send('export-xliff-review', { projectId: key, description: project.description });
+            let project: Project | undefined = selected.get(key);
+            if (project) {
+                this.electron.ipcRenderer.send('export-xliff-review', { projectId: key, description: project.description });
+            }
         }
     }
 
@@ -536,8 +526,10 @@ class ProjectsView {
             return;
         }
         for (let key of selected.keys()) {
-            let project: Project = selected.get(key);
-            this.electron.ipcRenderer.send('export-xliff', { projectId: key, description: project.description });
+            let project: Project | undefined = selected.get(key);
+            if (project) {
+                this.electron.ipcRenderer.send('export-xliff', { projectId: key, description: project.description });
+            }
         }
     }
 
@@ -552,8 +544,10 @@ class ProjectsView {
             return;
         }
         for (let key of selected.keys()) {
-            let project: Project = selected.get(key);
-            this.electron.ipcRenderer.send('export-tmx-file', { projectId: key, description: project.description });
+            let project: Project | undefined = selected.get(key);
+            if (project) {
+                this.electron.ipcRenderer.send('export-tmx-file', { projectId: key, description: project.description });
+            }
         }
     }
 
@@ -568,8 +562,10 @@ class ProjectsView {
             return;
         }
         for (let key of selected.keys()) {
-            let project: Project = selected.get(key);
-            this.electron.ipcRenderer.send('export-tm-matches', { projectId: key, description: project.description });
+            let project: Project | undefined = selected.get(key);
+            if (project) {
+                this.electron.ipcRenderer.send('export-tm-matches', { projectId: key, description: project.description });
+            }
         }
     }
 
@@ -584,8 +580,10 @@ class ProjectsView {
             return;
         }
         for (let key of selected.keys()) {
-            let project: Project = selected.get(key);
-            this.electron.ipcRenderer.send('export-terms', { projectId: key, description: project.description });
+            let project: Project | undefined = selected.get(key);
+            if (project) {
+                this.electron.ipcRenderer.send('export-terms', { projectId: key, description: project.description });
+            }
         }
     }
 
@@ -660,6 +658,7 @@ class ProjectsView {
                 }
                 return 0;
             }
+            return 0;
         });
         this.tbody.innerHTML = '';
         let length = this.projects.length;
@@ -831,8 +830,10 @@ class ProjectsView {
             return;
         }
         for (let key of selected.keys()) {
-            let project: Project = selected.get(key);
-            this.electron.ipcRenderer.send('show-apply-tm', { project: key, memory: project.memory });
+            let project: Project | undefined = selected.get(key);
+            if (project) {
+                this.electron.ipcRenderer.send('show-apply-tm', { project: key, memory: project.memory });
+            }
         }
     }
 }

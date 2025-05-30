@@ -1,9 +1,10 @@
 {
     "compilerOptions": {
         "target": "ES6",
-        "moduleResolution": "node",
-        "module": "CommonJS",
+        "module": "commonjs",
         "noImplicitAny": true,
+        "strictFunctionTypes": true,
+        "noImplicitReturns": true,
         "sourceMap": false,
         "outDir": "js",
         "baseUrl": ".",
@@ -11,7 +12,9 @@
             "*": [
                 "node_modules/*"
             ]
-        }
+        },
+        "forceConsistentCasingInFileNames": true,
+        "strict": true
     },
     "include": [
         "ts/**/*"

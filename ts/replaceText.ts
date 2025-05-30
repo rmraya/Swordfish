@@ -14,12 +14,12 @@ class ReplaceText {
 
     electron = require('electron');
 
-    project: string;
+    project: string = '';
 
     constructor() {
         this.electron.ipcRenderer.send('get-theme');
-        this.electron.ipcRenderer.on('set-theme', (event: Electron.IpcRendererEvent, arg: any) => {
-            (document.getElementById('theme') as HTMLLinkElement).href = arg;
+        this.electron.ipcRenderer.on('set-theme', (event: Electron.IpcRendererEvent, theme: string) => {
+            (document.getElementById('theme') as HTMLLinkElement).href = theme;
         });
         document.addEventListener('keydown', (event: KeyboardEvent) => {
             if (event.code === 'Enter' || event.code === 'NumpadEnter') {
@@ -30,10 +30,10 @@ class ReplaceText {
             }
         });
         this.electron.ipcRenderer.send('get-project-param');
-        this.electron.ipcRenderer.on('set-project', (event: Electron.IpcRendererEvent, arg: any) => {
-            this.project = arg;
+        this.electron.ipcRenderer.on('set-project', (event: Electron.IpcRendererEvent, project: string) => {
+            this.project = project;
         });
-        document.getElementById('replace').addEventListener('click', () => {
+        (document.getElementById('replace') as HTMLButtonElement).addEventListener('click', () => {
             this.replaceText();
         });
         (document.getElementById('searchText') as HTMLInputElement).focus();

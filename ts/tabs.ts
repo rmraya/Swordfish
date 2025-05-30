@@ -19,7 +19,8 @@ class Tab {
     parent: TabHolder;
     closeable: boolean;
 
-    constructor(tabId: string, description: string, closeable: boolean) {
+    constructor(tabId: string, description: string, closeable: boolean, parent: TabHolder) {
+        this.parent = parent;
         this.id = tabId;
         this.labelDiv = document.createElement('div');
         this.labelDiv.classList.add('tab');
@@ -50,10 +51,6 @@ class Tab {
         this.container.style.width = '100%';
         this.container.style.height = '100%';
         this.container.classList.add('hidden');
-    }
-
-    setParent(holder: TabHolder): void {
-        this.parent = holder;
     }
 
     getId(): string {
@@ -101,7 +98,7 @@ class TabHolder {
     contentHolder: HTMLDivElement;
 
     tabsList: string[] = [];
-    selectedTab: string;
+    selectedTab: string = '';
 
     constructor(parent: HTMLDivElement, id: string) {
         this.labels = new Map<string, HTMLDivElement>();
@@ -137,11 +134,10 @@ class TabHolder {
         });
         this.tabs.clear();
         this.tabsList = [];
-        this.selectedTab = undefined;
+        this.selectedTab ='';
     }
 
     addTab(tab: Tab): void {
-        tab.setParent(this);
         this.tabsHolder.insertBefore(tab.getLabelDiv(), this.filler);
         this.labels.set(tab.getId(), tab.getLabelDiv());
         this.contentHolder.appendChild(tab.getContainer());
@@ -165,16 +161,19 @@ class TabHolder {
     }
 
     canClose(tabId: string): boolean {
-        return this.closeable.get(tabId);
+        if (this.closeable.has(tabId)) {
+            return this.closeable.get(tabId) as boolean;
+        }
+        return false;
     }
 
     closeTab(tabId: string): void {
         if (tabId === this.selectedTab && this.tabsList.length > 1) {
             this.selectTab(this.tabsList[0]);
         }
-        this.tabsHolder.removeChild(this.labels.get(tabId));
+        this.tabsHolder.removeChild(this.labels.get(tabId) as HTMLDivElement);
         this.labels.delete(tabId);
-        this.contentHolder.removeChild(this.tabs.get(tabId).getContainer());
+        this.contentHolder.removeChild((this.tabs.get(tabId) as Tab).getContainer());
         this.tabs.delete(tabId);
         this.closeable.delete(tabId);
         this.tabsList.splice(this.tabsList.indexOf(tabId), 1);

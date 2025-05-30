@@ -17,19 +17,19 @@ class About {
     constructor() {
         this.electron.ipcRenderer.send('get-theme');
         this.electron.ipcRenderer.send('get-version');
-        this.electron.ipcRenderer.on('set-theme', (event: Electron.IpcRendererEvent, arg: any) => {
-            (document.getElementById('theme') as HTMLLinkElement).href = arg;
+        this.electron.ipcRenderer.on('set-theme', (event: Electron.IpcRendererEvent, theme: string) => {
+            (document.getElementById('theme') as HTMLLinkElement).href = theme;
         });
         this.electron.ipcRenderer.on('set-version', (event: Electron.IpcRendererEvent, arg: any) => {
-            document.getElementById('version').innerHTML = arg;
+            (document.getElementById('version') as HTMLTitleElement).innerHTML = arg;
         });
-        document.getElementById('system').addEventListener('click', () => {
+        (document.getElementById('system') as HTMLButtonElement).addEventListener('click', () => {
             this.electron.ipcRenderer.send('system-info-clicked');
-            document.getElementById('system').blur();
+            (document.getElementById('system') as HTMLButtonElement).blur();
         });
-        document.getElementById('licensesButton').addEventListener('click', () => {
+        (document.getElementById('licensesButton') as HTMLButtonElement).addEventListener('click', () => {
             this.electron.ipcRenderer.send('licenses-clicked');
-            document.getElementById('licensesButton').blur();
+            (document.getElementById('licensesButton') as HTMLButtonElement).blur();
         });
         document.addEventListener('keydown', (event: KeyboardEvent) => {
             if (event.code === 'Escape') {
@@ -39,7 +39,7 @@ class About {
         setTimeout(() => {
             this.electron.ipcRenderer.send('set-height', { window: 'about', width: document.body.clientWidth, height: document.body.clientHeight });
         }, 150);
-        document.getElementById('system').blur();
+        (document.getElementById('system') as HTMLButtonElement).blur();
     }
 
 }

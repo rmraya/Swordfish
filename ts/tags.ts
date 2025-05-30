@@ -19,14 +19,14 @@ class Tags {
 
     constructor() {
         this.electron.ipcRenderer.send('get-theme');
-        this.electron.ipcRenderer.on('set-theme', (event: Electron.IpcRendererEvent, arg: any) => {
-            (document.getElementById('theme') as HTMLLinkElement).href = arg;
+        this.electron.ipcRenderer.on('set-theme', (event: Electron.IpcRendererEvent, theme: string) => {
+            (document.getElementById('theme') as HTMLLinkElement).href = theme;
         });
         this.tagInput = document.getElementById('tagInput') as HTMLInputElement;
         this.tagInput.addEventListener('keydown', (event: KeyboardEvent) => {
             this.parseKey(event);
         });
-        document.getElementById('tagInput').focus();
+        this.tagInput.focus();
         setTimeout(() => {
             this.electron.ipcRenderer.send('set-height', { window: 'tags', width: document.body.clientWidth, height: document.body.clientHeight });
         }, 200);

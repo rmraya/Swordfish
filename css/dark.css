@@ -7,6 +7,9 @@
 	--odd-unit: #e20606;
 	--orange: #ff9800;
 	--teal: #009688;
+	
+	scrollbar-color: var(--ClassicBlue80) var(--gray150);
+	scrollbar-width: thin;
 }
 
 body {
@@ -299,6 +302,16 @@ input[type=number] {
 	padding-left: 2px;
 }
 
+input[type=radio] {
+	width: 1em;
+	height: 1em;
+	margin-top: 0.2em;
+	margin-bottom: 0.2em;
+	margin-left: 1em;
+	margin-right: 0;
+	padding: 0;
+}
+
 select {
 	background-color: var(--gray160);
 	color: var(--gray30);
@@ -417,6 +430,17 @@ label {
 }
 
 /* toolbars */
+
+.radiobar {
+	display: flex;
+	flex-direction: row;
+	color: var(--gray10);
+	fill: var(--ClassicBlue70);
+	stroke: var(--ClassicBlue70);
+	padding: 2px 4px;
+	justify-content: flex-start;
+	border-bottom: 2px solid var(--ClassicBlue70);
+}
 
 .toolbar {
 	display: flex;
@@ -793,28 +817,26 @@ svg.stats {
 }
 
 ::-webkit-scrollbar {
-	mix-blend-mode: darken;
-	width: 12px;
-	height: 12px;
+	width: 8px;
+	height: 8px;
+}
+
+::-webkit-scrollbar-track-piece {
+	background: var(--gray110);
+	border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb {
-	min-height: 30px !important;
-	background-color: var(--gray110);
-	border-radius: 6px;
+	background-color: var(--ClassicBlue90);
+	border-radius: 4px;
 }
 
 ::-webkit-scrollbar-corner {
-	background-color: inherit;
-	border-radius: inherit;
+	background-color: var(--ClassicBlue90);
 }
 
 ::-webkit-scrollbar-button {
-	border-radius: inherit;
-}
-
-::-webkit-scrollbar-button {
-	border-radius: inherit;
+	background-color: var(--ClassicBlue90);
 }
 
 .arrow-down:after {

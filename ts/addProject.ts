@@ -15,13 +15,13 @@ class AddProject {
     electron = require('electron');
     addedFiles: Map<number, FileInfo>;
 
-    charsetOptions: string;
-    typesOption: string;
+    charsetOptions: string = '';
+    typesOption: string = '';
 
     memSelect: HTMLSelectElement;
     glossSelect: HTMLSelectElement;
 
-    homeFolder: string;
+    homeFolder: string = '';
 
     constructor() {
         this.memSelect = document.getElementById('memorySelect') as HTMLSelectElement;
@@ -29,16 +29,16 @@ class AddProject {
 
         this.addedFiles = new Map<number, FileInfo>();
         this.electron.ipcRenderer.send('get-theme');
-        this.electron.ipcRenderer.on('set-theme', (event: Electron.IpcRendererEvent, arg: any) => {
-            (document.getElementById('theme') as HTMLLinkElement).href = arg;
+        this.electron.ipcRenderer.on('set-theme', (event: Electron.IpcRendererEvent, theme: string) => {
+            (document.getElementById('theme') as HTMLLinkElement).href = theme;
         });
         this.electron.ipcRenderer.send('get-clients');
-        this.electron.ipcRenderer.on('set-clients', (event: Electron.IpcRendererEvent, arg: any) => {
-            this.setClients(arg);
+        this.electron.ipcRenderer.on('set-clients', (event: Electron.IpcRendererEvent, clients: string[]) => {
+            this.setClients(clients);
         });
         this.electron.ipcRenderer.send('get-subjects');
-        this.electron.ipcRenderer.on('set-subjects', (event: Electron.IpcRendererEvent, arg: any) => {
-            this.setSubjects(arg);
+        this.electron.ipcRenderer.on('set-subjects', (event: Electron.IpcRendererEvent, subjects: string[]) => {
+            this.setSubjects(subjects);
         });
         this.electron.ipcRenderer.send('get-languages');
         this.electron.ipcRenderer.on('set-languages', (event: Electron.IpcRendererEvent, arg: any) => {
@@ -72,11 +72,11 @@ class AddProject {
                 this.electron.ipcRenderer.send('close-addProject');
             }
         });
-        document.getElementById('addFilesButton').addEventListener('click', () => {
+        (document.getElementById('addFilesButton') as HTMLButtonElement).addEventListener('click', () => {
             this.electron.ipcRenderer.send('select-source-files');
-            document.getElementById('addFilesButton').blur();
+            (document.getElementById('addFilesButton') as HTMLButtonElement).blur();
         });
-        document.getElementById('addProjectButton').addEventListener('click', () => {
+        (document.getElementById('addProjectButton') as HTMLButtonElement).addEventListener('click', () => {
             this.addProject();
         });
         (document.getElementById('nameInput') as HTMLInputElement).focus();
@@ -115,12 +115,12 @@ class AddProject {
         }
         let subject: string = (document.getElementById('subjectInput') as HTMLInputElement).value;
         let client: string = (document.getElementById('clientInput') as HTMLInputElement).value;
-        let srcLang = (document.getElementById('srcLangSelect') as HTMLSelectElement).value;
+        let srcLang: string = (document.getElementById('srcLangSelect') as HTMLSelectElement).value;
         if (srcLang === 'none') {
             this.electron.ipcRenderer.send('show-message', { type: 'warning', message: 'Select source language', parent: 'addProject' });
             return;
         }
-        let tgtLang = (document.getElementById('tgtLangSelect') as HTMLSelectElement).value;
+        let tgtLang: string = (document.getElementById('tgtLangSelect') as HTMLSelectElement).value;
         if (tgtLang === 'none') {
             this.electron.ipcRenderer.send('show-message', { type: 'warning', message: 'Select target language', parent: 'addProject' });
             return;
@@ -165,7 +165,7 @@ class AddProject {
         for (let i = 0; i < length; i++) {
             options = options + '<option value="' + clients[i] + '">' + clients[i] + '</option>';
         }
-        document.getElementById('clients').innerHTML = options;
+        (document.getElementById('clients') as HTMLDataListElement).innerHTML = options;
     }
 
     setSubjects(subjects: string[]): void {
@@ -173,34 +173,34 @@ class AddProject {
         for (let subject of subjects) {
             options = options + '<option value="' + subject + '">' + subject + '</option>';
         }
-        document.getElementById('subjects').innerHTML = options;
+        (document.getElementById('subjects') as HTMLDataListElement).innerHTML = options;
     }
 
     setLanguages(arg: any): void {
-        let array = arg.languages;
-        let languageOptions = '<option value="none">Select Language</option>';
+        let array: LanguageInterface[] = arg.languages;
+        let languageOptions: string = '<option value="none">Select Language</option>';
         for (let lang of array) {
             languageOptions = languageOptions + '<option value="' + lang.code + '">' + lang.description + '</option>';
         }
-        document.getElementById('srcLangSelect').innerHTML = languageOptions;
+        (document.getElementById('srcLangSelect') as HTMLSelectElement).innerHTML = languageOptions;
         (document.getElementById('srcLangSelect') as HTMLSelectElement).value = arg.srcLang;
-        document.getElementById('tgtLangSelect').innerHTML = languageOptions;
+        (document.getElementById('tgtLangSelect') as HTMLSelectElement).innerHTML = languageOptions;
         (document.getElementById('tgtLangSelect') as HTMLSelectElement).value = arg.tgtLang;
     }
 
     addFiles(files: FileInfo[]): void {
-        let length = files.length;
+        let length: number = files.length;
         for (let i = 0; i < length; i++) {
             let file: FileInfo = files[i];
-            let hash = this.hashCode(file.file);
+            let hash: number = this.hashCode(file.file);
             if (!this.addedFiles.has(hash)) {
                 this.addedFiles.set(hash, file);
             }
         }
-        let tableBody: HTMLElement = document.getElementById('tableBody');
+        let tableBody: HTMLTableSectionElement = document.getElementById('tableBody') as HTMLTableSectionElement;
         tableBody.innerHTML = '';
         let commonStart: string = this.commonPrefix();
-        let loadedFiles = [];
+        let loadedFiles: FileInfo[] = [];
         for (let value of this.addedFiles.values()) {
             loadedFiles.push(value);
         }
@@ -216,10 +216,10 @@ class AddProject {
         for (let i = 0; i < loadedFiles.length; i++) {
             let file: FileInfo = loadedFiles[i];
             let hash: number = this.hashCode(file.file);
-            let tr = document.createElement('tr');
+            let tr: HTMLTableRowElement = document.createElement('tr');
             tr.id = '' + hash;
 
-            let td = document.createElement('td');
+            let td: HTMLTableCellElement = document.createElement('td');
             let remove: HTMLAnchorElement = document.createElement('a');
             remove.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" height="20px" viewBox="0 -960 960 960" width="20px"><path d="m400-325 80-80 80 80 51-51-80-80 80-80-51-51-80 80-80-80-51 51 80 80-80 80 51 51Zm-88 181q-29.7 0-50.85-21.15Q240-186.3 240-216v-480h-48v-72h192v-48h192v48h192v72h-48v479.57Q720-186 698.85-165T648-144H312Zm336-552H312v480h336v-480Zm-336 0v480-480Z"/></svg>' +
                 '<span class="tooltiptext bottomTooltip">Remove File</span>';
@@ -256,8 +256,13 @@ class AddProject {
             } else {
                 typeSelect.value = 'none';
             }
-            typeSelect.addEventListener('change', (event: InputEvent) => {
-                this.addedFiles.get(hash).type = (event.currentTarget as HTMLSelectElement).value;
+            typeSelect.addEventListener('change', (event: Event) => {
+                let value: string = (event.currentTarget as HTMLSelectElement).value;
+                let fileInfo: FileInfo | undefined = this.addedFiles.get(hash);
+                if (fileInfo) {
+                    fileInfo.type = value;
+                    this.addedFiles.set(hash, fileInfo);
+                }
             });
             td.appendChild(typeSelect);
             tr.appendChild(td);
@@ -270,8 +275,13 @@ class AddProject {
             } else {
                 charsetSelect.value = 'none';
             }
-            charsetSelect.addEventListener('change', (event: InputEvent) => {
-                this.addedFiles.get(hash).encoding = (event.currentTarget as HTMLSelectElement).value;
+            charsetSelect.addEventListener('change', (event: Event) => {
+                let value:string = (event.currentTarget as HTMLSelectElement).value;
+                let fileInfo: FileInfo | undefined = this.addedFiles.get(hash);
+                if (fileInfo) {
+                    fileInfo.encoding = value;
+                    this.addedFiles.set(hash, fileInfo);
+                }                
             });
             td.appendChild(charsetSelect);
             tr.appendChild(td);
@@ -288,7 +298,7 @@ class AddProject {
         let commonStart: string = filesList[0].file;
         for (let i = 1; i < filesList.length; i++) {
             let file: string = filesList[i].file;
-            let j = 0;
+            let j: number = 0;
             while (j < commonStart.length && j < file.length && commonStart.charAt(j) === file.charAt(j)) {
                 j++;
             }
@@ -298,9 +308,9 @@ class AddProject {
     }
 
     deleteFiles(data: string): void {
-        let tableBody: HTMLElement = document.getElementById('tableBody');
+        let tableBody: HTMLTableSectionElement = document.getElementById('tableBody') as HTMLTableSectionElement;
         this.addedFiles.delete(Number.parseInt(data, 10));
-        tableBody.removeChild(document.getElementById(data));
+        tableBody.removeChild(document.getElementById(data) as HTMLTableRowElement);
     }
 
     hashCode(str: string): number {
@@ -349,8 +359,8 @@ class AddProject {
             this.glossSelect.innerHTML = '<option value="none" class="error">-- No Glossary --</option>';
             return;
         }
-        let options = '<option value="none" class="error">-- Select Glossary --</option>';
-        let length = glossaries.length;
+        let options: string = '<option value="none" class="error">-- Select Glossary --</option>';
+        let length: number = glossaries.length;
         for (let i = 0; i < length; i++) {
             options = options + '<option value="' + glossaries[i].id + '">' + glossaries[i].name + '</option>';
         }

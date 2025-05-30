@@ -16,20 +16,20 @@ class AddGlossary {
 
     constructor() {
         this.electron.ipcRenderer.send('get-theme');
-        this.electron.ipcRenderer.on('set-theme', (event: Electron.IpcRendererEvent, arg: any) => {
-            (document.getElementById('theme') as HTMLLinkElement).href = arg;
+        this.electron.ipcRenderer.on('set-theme', (event: Electron.IpcRendererEvent, theme: string) => {
+            (document.getElementById('theme') as HTMLLinkElement).href = theme;
         });
         this.electron.ipcRenderer.send('get-project-names');
-        this.electron.ipcRenderer.on('set-project-names', (event: Electron.IpcRendererEvent, arg: any) => {
-            this.setProjectNames(arg);
+        this.electron.ipcRenderer.on('set-project-names', (event: Electron.IpcRendererEvent, projects: string[]) => {
+            this.setProjectNames(projects);
         });
         this.electron.ipcRenderer.send('get-clients');
-        this.electron.ipcRenderer.on('set-clients', (event: Electron.IpcRendererEvent, arg: any) => {
-            this.setClients(arg);
+        this.electron.ipcRenderer.on('set-clients', (event: Electron.IpcRendererEvent, clients: string[]) => {
+            this.setClients(clients);
         });
         this.electron.ipcRenderer.send('get-subjects');
-        this.electron.ipcRenderer.on('set-subjects', (event: Electron.IpcRendererEvent, arg: any) => {
-            this.setSubjects(arg);
+        this.electron.ipcRenderer.on('set-subjects', (event: Electron.IpcRendererEvent, subjects: string[]) => {
+            this.setSubjects(subjects);
         });
         document.addEventListener('keydown', (event: KeyboardEvent) => {
             if (event.code === 'Enter' || event.code === 'NumpadEnter') {
@@ -39,7 +39,7 @@ class AddGlossary {
                 this.electron.ipcRenderer.send('close-addGlossary');
             }
         });
-        document.getElementById('addGlossaryButton').addEventListener('click', () => {
+        (document.getElementById('addGlossaryButton') as HTMLButtonElement).addEventListener('click', () => {
             this.addGlossary();
         });
         (document.getElementById('nameInput') as HTMLInputElement).focus();
@@ -69,7 +69,7 @@ class AddGlossary {
         for (let i = 0; i < length; i++) {
             options = options + '<option value="' + projects[i] + '">' + projects[i] + '</option>';
         }
-        document.getElementById('projects').innerHTML = options;
+        (document.getElementById('projects') as HTMLDataListElement).innerHTML = options;
     }
 
     setClients(clients: string[]): void {
@@ -78,7 +78,7 @@ class AddGlossary {
         for (let i = 0; i < length; i++) {
             options = options + '<option value="' + clients[i] + '">' + clients[i] + '</option>';
         }
-        document.getElementById('clients').innerHTML = options;
+        (document.getElementById('clients') as HTMLDataListElement).innerHTML = options;
     }
 
     setSubjects(subjects: string[]): void {
@@ -87,6 +87,6 @@ class AddGlossary {
         for (let i = 0; i < length; i++) {
             options = options + '<option value="' + subjects[i] + '">' + subjects[i] + '</option>';
         }
-        document.getElementById('subjects').innerHTML = options;
+        (document.getElementById('subjects') as HTMLDataListElement).innerHTML = options;
     }
 }

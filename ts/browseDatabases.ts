@@ -10,17 +10,6 @@
  *     Maxprograms - initial API and implementation
  *******************************************************************************/
 
-class Database {
-    id: string;
-    name: string;
-    owner: string;
-    project: string;
-    subject: string;
-    client: string;
-    creationDate: string;
-    open: boolean;
-}
-
 class BrowseDatabases {
 
     electron = require('electron');
@@ -30,10 +19,10 @@ class BrowseDatabases {
     constructor() {
         this.selected = new Map<string, Database>();
         this.electron.ipcRenderer.send('get-theme');
-        this.electron.ipcRenderer.on('set-theme', (event: Electron.IpcRendererEvent, arg: any) => {
-            (document.getElementById('theme') as HTMLLinkElement).href = arg;
+        this.electron.ipcRenderer.on('set-theme', (event: Electron.IpcRendererEvent, theme: string) => {
+            (document.getElementById('theme') as HTMLLinkElement).href = theme;
         });
-        document.getElementById('container').style.height = '250px';
+        (document.getElementById('container') as HTMLDivElement).style.height = '250px';
         this.electron.ipcRenderer.send('get-databases');
         this.electron.ipcRenderer.on('set-databases', (event: Electron.IpcRendererEvent, arg: any) => {
             this.setDatabases(arg);
@@ -46,7 +35,7 @@ class BrowseDatabases {
                 this.electron.ipcRenderer.send('close-browseServer');
             }
         });
-        document.getElementById('addButton').addEventListener('click', () => {
+        (document.getElementById('addButton') as HTMLButtonElement).addEventListener('click', () => {
             this.addSelected();
         });
         setTimeout(() => {
@@ -95,7 +84,7 @@ class BrowseDatabases {
             tr.appendChild(td);
             td.innerText = database.client;
         }
-        document.getElementById('addButton').innerText = arg.type === 'memory' ? 'Add Memory' : 'Add Glossary';
+        (document.getElementById('addButton') as HTMLButtonElement).innerText = arg.type === 'memory' ? 'Add Memory' : 'Add Glossary';
     }
 
     addSelected(): void {

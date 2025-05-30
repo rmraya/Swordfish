@@ -10,21 +10,13 @@
  *     Maxprograms - initial API and implementation
  *******************************************************************************/
 
-class Term {
-    srcLang: string;
-    tgtLang: string;
-    source: string;
-    target: string;
-    origin: string;
-}
-
 class TermsPanel {
 
     electron = require('electron');
 
     container: HTMLDivElement;
     projectId: string;
-    selected: Term;
+    selected: Term | undefined = undefined;
     selectedIndex: number = 0;
     terms: Term[] = [];
     rows: HTMLTableRowElement[] = [];

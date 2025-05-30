@@ -14,24 +14,24 @@ class ImportGlossary {
 
     electron = require('electron');
 
-    glossary: string;
+    glossary: string = '';
 
     constructor() {
         this.electron.ipcRenderer.send('get-theme');
-        this.electron.ipcRenderer.on('set-theme', (event: Electron.IpcRendererEvent, arg: any) => {
-            (document.getElementById('theme') as HTMLLinkElement).href = arg;
+        this.electron.ipcRenderer.on('set-theme', (event: Electron.IpcRendererEvent, theme: string) => {
+            (document.getElementById('theme') as HTMLLinkElement).href = theme;
         });
         this.electron.ipcRenderer.send('get-project-names');
-        this.electron.ipcRenderer.on('set-project-names', (event: Electron.IpcRendererEvent, arg: any) => {
-            this.setProjectNames(arg);
+        this.electron.ipcRenderer.on('set-project-names', (event: Electron.IpcRendererEvent, projects: string[]) => {
+            this.setProjectNames(projects);
         });
         this.electron.ipcRenderer.send('get-clients');
-        this.electron.ipcRenderer.on('set-clients', (event: Electron.IpcRendererEvent, arg: any) => {
-            this.setClients(arg);
+        this.electron.ipcRenderer.on('set-clients', (event: Electron.IpcRendererEvent, clients: string[]) => {
+            this.setClients(clients);
         });
         this.electron.ipcRenderer.send('get-subjects');
-        this.electron.ipcRenderer.on('set-subjects', (event: Electron.IpcRendererEvent, arg: any) => {
-            this.setSubjects(arg);
+        this.electron.ipcRenderer.on('set-subjects', (event: Electron.IpcRendererEvent, subjects: string[]) => {
+            this.setSubjects(subjects);
         });
         document.addEventListener('keydown', (event: KeyboardEvent) => {
             if (event.code === 'Escape') {
@@ -42,17 +42,17 @@ class ImportGlossary {
             }
         });
         this.electron.ipcRenderer.send('get-glossary-param');
-        this.electron.ipcRenderer.on('set-glossary', (event: Electron.IpcRendererEvent, arg: any) => {
-            this.glossary = arg;
+        this.electron.ipcRenderer.on('set-glossary', (event: Electron.IpcRendererEvent, glossary: string) => {
+            this.glossary = glossary;
         });
-        document.getElementById('browse').addEventListener('click', () => {
+        (document.getElementById('browse') as HTMLButtonElement).addEventListener('click', () => {
             this.electron.ipcRenderer.send('get-glossary-file');
-            document.getElementById('browse').blur();
+            (document.getElementById('browse') as HTMLButtonElement).blur();
         });
         this.electron.ipcRenderer.on('set-glossary-file', (event: Electron.IpcRendererEvent, arg: any) => {
             (document.getElementById('file') as HTMLInputElement).value = arg;
         });
-        document.getElementById('importGlossary').addEventListener('click', () => {
+        (document.getElementById('importGlossary') as HTMLButtonElement).addEventListener('click', () => {
             this.importGlossary();
         });
         (document.getElementById('file') as HTMLInputElement).focus();
@@ -67,7 +67,7 @@ class ImportGlossary {
         for (let i = 0; i < length; i++) {
             options = options + '<option value="' + projects[i] + '">' + projects[i] + '</option>';
         }
-        document.getElementById('projects').innerHTML = options;
+        (document.getElementById('projects') as HTMLDataListElement).innerHTML = options;
     }
 
     setClients(clients: string[]): void {
@@ -76,7 +76,7 @@ class ImportGlossary {
         for (let i = 0; i < length; i++) {
             options = options + '<option value="' + clients[i] + '">' + clients[i] + '</option>';
         }
-        document.getElementById('clients').innerHTML = options;
+        (document.getElementById('clients') as HTMLDataListElement).innerHTML = options;
     }
 
     setSubjects(subjects: string[]): void {
@@ -85,7 +85,7 @@ class ImportGlossary {
         for (let i = 0; i < length; i++) {
             options = options + '<option value="' + subjects[i] + '">' + subjects[i] + '</option>';
         }
-        document.getElementById('subjects').innerHTML = options;
+        (document.getElementById('subjects') as HTMLDataListElement).innerHTML = options;
     }
 
     importGlossary(): void {

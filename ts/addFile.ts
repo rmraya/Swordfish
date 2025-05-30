@@ -14,10 +14,10 @@ class AddFile {
 
     electron = require('electron');
 
-    selectedFile: string;
-    homeFolder: string;
-    charsetOptions: string;
-    typesOption: string;
+    selectedFile: string = '';
+    homeFolder: string = '';
+    charsetOptions: string = '';
+    typesOption: string = '';
 
     memSelect: HTMLSelectElement;
     glossSelect: HTMLSelectElement;
@@ -27,16 +27,16 @@ class AddFile {
         this.glossSelect = document.getElementById('glossarySelect') as HTMLSelectElement;
 
         this.electron.ipcRenderer.send('get-theme');
-        this.electron.ipcRenderer.on('set-theme', (event: Electron.IpcRendererEvent, arg: any) => {
-            (document.getElementById('theme') as HTMLLinkElement).href = arg;
+        this.electron.ipcRenderer.on('set-theme', (event: Electron.IpcRendererEvent, theme: string) => {
+            (document.getElementById('theme') as HTMLLinkElement).href = theme;
         });
         this.electron.ipcRenderer.send('get-clients');
-        this.electron.ipcRenderer.on('set-clients', (event: Electron.IpcRendererEvent, arg: any) => {
-            this.setClients(arg);
+        this.electron.ipcRenderer.on('set-clients', (event: Electron.IpcRendererEvent, clients: string[]) => {
+            this.setClients(clients);
         });
         this.electron.ipcRenderer.send('get-subjects');
-        this.electron.ipcRenderer.on('set-subjects', (event: Electron.IpcRendererEvent, arg: any) => {
-            this.setSubjects(arg);
+        this.electron.ipcRenderer.on('set-subjects', (event: Electron.IpcRendererEvent, subjects: string[]) => {
+            this.setSubjects(subjects);
         });
         this.electron.ipcRenderer.send('get-languages');
         this.electron.ipcRenderer.on('set-languages', (event: Electron.IpcRendererEvent, arg: any) => {
@@ -68,7 +68,7 @@ class AddFile {
         this.electron.ipcRenderer.on('add-source-files', (event: Electron.IpcRendererEvent, files: FileInfo[]) => {
             this.addFile(files[0]);
         });
-        document.getElementById('addProjectButton').addEventListener('click', () => {
+        (document.getElementById('addProjectButton') as HTMLButtonElement).addEventListener('click', () => {
             this.addProject();
         });
         this.electron.ipcRenderer.send('get-home');
@@ -86,7 +86,7 @@ class AddFile {
         for (let i = 0; i < length; i++) {
             options = options + '<option value="' + clients[i] + '">' + clients[i] + '</option>';
         }
-        document.getElementById('clients').innerHTML = options;
+        (document.getElementById('clients') as HTMLDataListElement).innerHTML = options;
     }
 
     setSubjects(subjects: string[]): void {
@@ -95,18 +95,18 @@ class AddFile {
         for (let i = 0; i < length; i++) {
             options = options + '<option value="' + subjects[i] + '">' + subjects[i] + '</option>';
         }
-        document.getElementById('subjects').innerHTML = options;
+        (document.getElementById('subjects') as HTMLDataListElement).innerHTML = options;
     }
 
     setLanguages(arg: any): void {
-        let array = arg.languages;
-        let languageOptions = '<option value="none">Select Language</option>';
+        let array: LanguageInterface[] = arg.languages;
+        let languageOptions: string = '<option value="none">Select Language</option>';
         for (let lang of array) {
             languageOptions = languageOptions + '<option value="' + lang.code + '">' + lang.description + '</option>';
         }
-        document.getElementById('srcLangSelect').innerHTML = languageOptions;
+        (document.getElementById('srcLangSelect') as HTMLSelectElement).innerHTML = languageOptions;
         (document.getElementById('srcLangSelect') as HTMLSelectElement).value = arg.srcLang;
-        document.getElementById('tgtLangSelect').innerHTML = languageOptions;
+        (document.getElementById('tgtLangSelect') as HTMLSelectElement).innerHTML = languageOptions;
         (document.getElementById('tgtLangSelect') as HTMLSelectElement).value = arg.tgtLang;
     }
 
@@ -115,7 +115,7 @@ class AddFile {
         for (let format of arg.formats) {
             this.typesOption = this.typesOption + '<option value="' + format.code + '">' + format.description + '</option>';
         }
-        document.getElementById('typeSelect').innerHTML = this.typesOption;
+        (document.getElementById('typeSelect') as HTMLSelectElement).innerHTML = this.typesOption;
         this.electron.ipcRenderer.send('get-charsets');
     }
 
@@ -125,7 +125,7 @@ class AddFile {
         for (let i = 0; i < length; i++) {
             this.charsetOptions = this.charsetOptions + '<option value="' + arg.charsets[i].code + '">' + arg.charsets[i].description + '</option>';
         }
-        document.getElementById('charsetSelect').innerHTML = this.charsetOptions;
+        (document.getElementById('charsetSelect') as HTMLSelectElement).innerHTML = this.charsetOptions;
         this.electron.ipcRenderer.send('get-selected-file');
     }
 
@@ -144,7 +144,7 @@ class AddFile {
         } else {
             typeSelect.value = 'none';
         }
-        let charsetSelect = document.getElementById('charsetSelect') as HTMLSelectElement;
+        let charsetSelect: HTMLSelectElement = document.getElementById('charsetSelect') as HTMLSelectElement;
         if (file.encoding !== 'Unknown') {
             charsetSelect.value = file.encoding;
         } else {
@@ -211,9 +211,9 @@ class AddFile {
             this.memSelect.innerHTML = '<option value="none" class="error">-- No Memory --</option>';
             return;
         }
-        let options = '<option value="none" class="error">-- Select Memory --</option>';
-        let length = memories.length;
-        for (let i = 0; i < length; i++) {
+        let options: string = '<option value="none" class="error">-- Select Memory --</option>';
+        let length: number = memories.length;
+        for (let i: number = 0; i < length; i++) {
             options = options + '<option value="' + memories[i].id + '">' + memories[i].name + '</option>';
         }
         this.memSelect.innerHTML = options;
@@ -224,9 +224,9 @@ class AddFile {
             this.glossSelect.innerHTML = '<option value="none" class="error">-- No Glossary --</option>';
             return;
         }
-        let options = '<option value="none" class="error">-- Select Glossary --</option>';
-        let length = glossaries.length;
-        for (let i = 0; i < length; i++) {
+        let options: string = '<option value="none" class="error">-- Select Glossary --</option>';
+        let length: number = glossaries.length;
+        for (let i: number = 0; i < length; i++) {
             options = options + '<option value="' + glossaries[i].id + '">' + glossaries[i].name + '</option>';
         }
         this.glossSelect.innerHTML = options;

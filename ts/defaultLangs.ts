@@ -20,10 +20,10 @@ class DefaultLanguages {
         this.electron.ipcRenderer.on('set-languages', (event: Electron.IpcRendererEvent, arg: any) => {
             this.setLanguages(arg);
         });
-        this.electron.ipcRenderer.on('set-theme', (event: Electron.IpcRendererEvent, arg: any) => {
-            (document.getElementById('theme') as HTMLLinkElement).href = arg;
+        this.electron.ipcRenderer.on('set-theme', (event: Electron.IpcRendererEvent, theme: string) => {
+            (document.getElementById('theme') as HTMLLinkElement).href = theme;
         });
-        document.getElementById('save').addEventListener('click', () => {
+        (document.getElementById('save') as HTMLButtonElement).addEventListener('click', () => {
             this.savePreferences();
         });
         document.addEventListener('keydown', (event: KeyboardEvent) => {
@@ -41,13 +41,13 @@ class DefaultLanguages {
     }
 
     setLanguages(arg: any): void {
-        let array = arg.languages;
-        let languageOptions = '<option value="none">Select Language</option>';
+        let array: LanguageInterface[] = arg.languages;
+        let languageOptions: string = '<option value="none">Select Language</option>';
         for (let lang of array) {
             languageOptions = languageOptions + '<option value="' + lang.code + '">' + lang.description + '</option>';
         }
-        document.getElementById('srcLangSelect').innerHTML = languageOptions;
-        document.getElementById('tgtLangSelect').innerHTML = languageOptions;
+        (document.getElementById('srcLangSelect') as HTMLSelectElement).innerHTML = languageOptions;
+        (document.getElementById('tgtLangSelect') as HTMLSelectElement).innerHTML = languageOptions;
         this.electron.ipcRenderer.send('get-preferences');
     }
 

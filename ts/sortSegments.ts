@@ -16,8 +16,8 @@ class SortSegments {
 
     constructor() {
         this.electron.ipcRenderer.send('get-theme');
-        this.electron.ipcRenderer.on('set-theme', (event: Electron.IpcRendererEvent, arg: any) => {
-            (document.getElementById('theme') as HTMLLinkElement).href = arg;
+        this.electron.ipcRenderer.on('set-theme', (event: Electron.IpcRendererEvent, theme: string) => {
+            (document.getElementById('theme') as HTMLLinkElement).href = theme;
         });
         this.electron.ipcRenderer.send('get-sort-params');
         this.electron.ipcRenderer.on('set-params', (event: Electron.IpcRendererEvent, arg: any) => {
@@ -34,14 +34,14 @@ class SortSegments {
         (document.getElementById('sort') as HTMLButtonElement).addEventListener('click', () => {
             this.sortSegments();
         });
-        document.getElementById('clearSort').addEventListener('click', () => {
+        (document.getElementById('clearSort') as HTMLButtonElement).addEventListener('click', () => {
             this.clearSorting();
         });
-        document.getElementById('language').addEventListener('click', () => {
+        (document.getElementById('language') as HTMLInputElement).addEventListener('click', () => {
             (document.getElementById('source') as HTMLInputElement).disabled = false;
             (document.getElementById('target') as HTMLInputElement).disabled = false;
         });
-        document.getElementById('status').addEventListener('click', () => {
+        (document.getElementById('status') as HTMLInputElement).addEventListener('click', () => {
             (document.getElementById('source') as HTMLInputElement).disabled = true;
             (document.getElementById('target') as HTMLInputElement).disabled = true;
         });

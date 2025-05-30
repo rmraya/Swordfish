@@ -18,8 +18,8 @@ class AddNote {
 
     constructor() {
         this.electron.ipcRenderer.send('get-theme');
-        this.electron.ipcRenderer.on('set-theme', (event: Electron.IpcRendererEvent, arg: any) => {
-            (document.getElementById('theme') as HTMLLinkElement).href = arg;
+        this.electron.ipcRenderer.on('set-theme', (event: Electron.IpcRendererEvent, theme: string) => {
+            (document.getElementById('theme') as HTMLLinkElement).href = theme;
         });
         this.electron.ipcRenderer.send('get-note-params');
         this.electron.ipcRenderer.on('note-params', (event: Electron.IpcRendererEvent, arg: any) => {
@@ -30,7 +30,7 @@ class AddNote {
                 this.electron.ipcRenderer.send('close-add-note');
             }
         });
-        document.getElementById('addButton').addEventListener('click', () => {
+        (document.getElementById('addButton') as HTMLButtonElement).addEventListener('click', () => {
             this.addNote();
         });
         (document.getElementById('area') as HTMLTextAreaElement).focus();

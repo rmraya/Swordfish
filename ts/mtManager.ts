@@ -43,6 +43,7 @@ export class MTManager {
     currentSegment: SegmentId;
 
     constructor(preferences: Preferences, srcLang: string, tgtLang: string) {
+        this.currentSegment = {file:'', unit: '', id: ''};
         this.mtEngines = [];
         this.srcLang = srcLang;
         this.tgtLang = tgtLang;

@@ -14,12 +14,12 @@ class ConcordanceSearch {
 
     electron = require('electron');
 
-    memories: string[];
+    memories: string[] = [];
 
     constructor() {
         this.electron.ipcRenderer.send('get-theme');
-        this.electron.ipcRenderer.on('set-theme', (event: Electron.IpcRendererEvent, arg: any) => {
-            (document.getElementById('theme') as HTMLLinkElement).href = arg;
+        this.electron.ipcRenderer.on('set-theme', (event: Electron.IpcRendererEvent, theme: string) => {
+            (document.getElementById('theme') as HTMLLinkElement).href = theme;
         });
         document.addEventListener('keydown', (event: KeyboardEvent) => {
             if (event.code === 'Enter' || event.code === 'NumpadEnter') {
@@ -33,14 +33,14 @@ class ConcordanceSearch {
         this.electron.ipcRenderer.on('set-languages', (event: Electron.IpcRendererEvent, arg: any) => {
             this.setLanguages(arg);
         });
-        document.getElementById('searchButton').addEventListener('click', () => {
+        (document.getElementById('searchButton') as HTMLButtonElement).addEventListener('click', () => {
             this.search()
         });
         this.electron.ipcRenderer.send('get-concordance-memories');
-        this.electron.ipcRenderer.on('set-concordance-memories', (event: Electron.IpcRendererEvent, arg: any) => {
-            this.memories = arg.memories;
+        this.electron.ipcRenderer.on('set-concordance-memories', (event: Electron.IpcRendererEvent, memories: string[]) => {
+            this.memories = memories;
         });
-        this.electron.ipcRenderer.on('set-selected-text', (event: Electron.IpcRendererEvent, arg: any) => {
+        this.electron.ipcRenderer.on('set-selected-text', (event: Electron.IpcRendererEvent, arg: { selected: string, lang?: string, srcLang: string, tgtLang: string }) => {
             this.setParams(arg);
         });
         let regExp: HTMLInputElement = document.getElementById('regularExpression') as HTMLInputElement;
@@ -53,7 +53,7 @@ class ConcordanceSearch {
         });
         (document.getElementById('maxEntries') as HTMLSelectElement).value = '20';
         (document.getElementById('searchText') as HTMLInputElement).focus();
-        document.getElementById('languagesSelect').addEventListener('change', () => {
+        (document.getElementById('languagesSelect') as HTMLSelectElement).addEventListener('change', () => {
             let code: string = (document.getElementById('languagesSelect') as HTMLSelectElement).value;
             if (this.isBiDi(code)) {
                 (document.getElementById('searchText') as HTMLInputElement).dir = 'rtl';
@@ -71,17 +71,18 @@ class ConcordanceSearch {
     }
 
     setLanguages(arg: any): void {
-        let array = arg.languages;
-        let languageOptions = '<option value="none">Select Language</option>';
+        let array: LanguageInterface[] = arg.languages;
+        let languageOptions: string = '<option value="none">Select Language</option>';
         for (let lang of array) {
             languageOptions = languageOptions + '<option value="' + lang.code + '">' + lang.description + '</option>';
         }
-        document.getElementById('languagesSelect').innerHTML = languageOptions;
-        (document.getElementById('languagesSelect') as HTMLSelectElement).value = arg.srcLang;
+        let languageSelect: HTMLSelectElement = document.getElementById('languagesSelect') as HTMLSelectElement;
+        languageSelect.innerHTML = languageOptions;
+        languageSelect.value = arg.srcLang;
         this.electron.ipcRenderer.send('get-selection');
     }
 
-    setParams(arg: any): void {
+    setParams(arg: { selected: string, lang?: string, srcLang: string, tgtLang: string }): void {
         (document.getElementById('searchText') as HTMLInputElement).value = arg.selected;
         if (arg.lang) {
             (document.getElementById('languagesSelect') as HTMLSelectElement).value = arg.lang;

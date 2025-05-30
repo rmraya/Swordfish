@@ -13,9 +13,10 @@
 import { ChildProcessWithoutNullStreams, execFileSync, spawn } from "child_process";
 import { BrowserWindow, ClientRequest, IpcMainEvent, Menu, MenuItem, Notification, Rectangle, Size, app, clipboard, dialog, ipcMain, nativeTheme, net, screen, session, shell } from "electron";
 import { IncomingMessage } from "electron/main";
-import { appendFileSync, existsSync, lstatSync, mkdirSync, readFile, readFileSync, readdirSync, rmSync, unlinkSync, writeFileSync } from "fs";
+import { appendFileSync, existsSync, lstatSync, mkdirSync, readFileSync, readdirSync, rmSync, unlinkSync, writeFileSync } from "fs";
 import { Locations, Point } from "./locations";
 import { MTManager } from "./mtManager";
+import { platform } from "os";
 
 export class Swordfish {
 
@@ -40,6 +41,7 @@ export class Swordfish {
     static importGlossaryWindow: BrowserWindow;
     static concordanceSearchWindow: BrowserWindow;
     static termSearchWindow: BrowserWindow;
+    static iatePluginWindow: BrowserWindow;
     static addTermWindow: BrowserWindow;
     static goToWindow: BrowserWindow;
     static sortSegmentsWindow: BrowserWindow;
@@ -131,7 +133,7 @@ export class Swordfish {
     static memoryParam: string;
     static notesParam: any;
     static notesEvent: IpcMainEvent;
-    static concordanceMemories: any;
+    static concordanceMemories: string[];
     static glossaryParam: string;
     static messageParam: any;
     static projectParam: string;
@@ -171,7 +173,9 @@ export class Swordfish {
             }
             Swordfish.mainWindow.focus();
         }
-
+        if (process.platform === 'linux') {
+            app.commandLine.appendSwitch('gtk-version', '3');
+        }
         if (process.platform === 'win32') {
             this.javapath = Swordfish.path.join(app.getAppPath(), 'bin', 'java.exe');
         }
@@ -211,7 +215,7 @@ export class Swordfish {
             });
         });
 
-        app.on('before-quit', (event: Event) => {
+        app.on('before-quit', (event: Electron.Event) => {
             if (!this.ls.killed) {
                 event.preventDefault();
                 this.stopServer();
@@ -246,7 +250,7 @@ export class Swordfish {
                 }
             }
             if ((oldCss === dark || oldCss === light) && Swordfish.currentCss === highcontrast) {
-                Swordfish.deleteAllTags('#C5E1A5', '#000000');
+                Swordfish.deleteAllTags('#003e66;', '#ffffff');
             }
             if ((oldCss === highcontrast) && (Swordfish.currentCss === dark || Swordfish.currentCss === light)) {
                 Swordfish.deleteAllTags('#009688', '#ffffff');
@@ -453,8 +457,8 @@ export class Swordfish {
         ipcMain.on('get-tmx-file', (event: IpcMainEvent) => {
             this.getTmxFile(event);
         });
-        ipcMain.on('concordance-search', (event: IpcMainEvent, arg: any) => {
-            Swordfish.showConcordanceWindow(arg);
+        ipcMain.on('concordance-search', (event: IpcMainEvent, memories: string[]) => {
+            Swordfish.showConcordanceWindow(memories);
         });
         ipcMain.on('get-concordance-memories', (event: IpcMainEvent) => {
             event.sender.send('set-concordance-memories', Swordfish.concordanceMemories);
@@ -469,7 +473,7 @@ export class Swordfish {
             Swordfish.selectionRequest = event;
             Swordfish.mainWindow.webContents.send('get-selected-text');
         });
-        ipcMain.on('selected-text', (event: IpcMainEvent, arg: any) => {
+        ipcMain.on('selected-text', (event: IpcMainEvent, arg: { selected: string, lang?: string, srcLang: string, tgtLang: string }) => {
             Swordfish.selectionRequest.sender.send('set-selected-text', arg);
         });
         ipcMain.on('get-html-content', (event: IpcMainEvent) => {
@@ -481,14 +485,20 @@ export class Swordfish {
         ipcMain.on('get-html-id', (event: IpcMainEvent) => {
             event.sender.send('set-id', Swordfish.htmlId);
         });
-        ipcMain.on('close-htmlViewer', (event: IpcMainEvent, arg: any) => {
-            BrowserWindow.fromId(arg.id).close();
+        ipcMain.on('close-htmlViewer', (event: IpcMainEvent, id: number) => {
+            BrowserWindow.fromId(id)?.close();
         });
         ipcMain.on('get-clients', (event: IpcMainEvent) => {
             this.getClients(event);
         });
         ipcMain.on('show-term-search', (event: IpcMainEvent, arg: any) => {
             Swordfish.showTermSearch(arg);
+        });
+        ipcMain.on('search-iate', () => {
+            Swordfish.showIatePlugin();
+        });
+        ipcMain.on('close-iatePlugin', () => {
+            Swordfish.iatePluginWindow.close();
         });
         ipcMain.on('close-termSearch', () => {
             Swordfish.termSearchWindow.close();
@@ -969,12 +979,12 @@ export class Swordfish {
             { label: 'Insert Tag "10"', accelerator: 'CmdOrCtrl+0', click: () => { Swordfish.mainWindow.webContents.send('insert-tag', { tag: 10 }); } }
         ]);
         let editMenu: Menu = Menu.buildFromTemplate([
-            { label: 'Undo', accelerator: 'CmdOrCtrl+Z', click: () => { BrowserWindow.getFocusedWindow().webContents.undo(); } },
+            { label: 'Undo', accelerator: 'CmdOrCtrl+Z', click: () => { Swordfish.undo() } },
             new MenuItem({ type: 'separator' }),
-            { label: 'Cut', accelerator: 'CmdOrCtrl+X', click: () => { BrowserWindow.getFocusedWindow().webContents.cut(); } },
-            { label: 'Copy', accelerator: 'CmdOrCtrl+C', click: () => { BrowserWindow.getFocusedWindow().webContents.copy(); } },
-            { label: 'Paste', accelerator: 'CmdOrCtrl+V', click: () => { BrowserWindow.getFocusedWindow().webContents.paste(); } },
-            { label: 'Select All', accelerator: 'CmdOrCtrl+A', click: () => { BrowserWindow.getFocusedWindow().webContents.selectAll(); } },
+            { label: 'Cut', accelerator: 'CmdOrCtrl+X', click: () => { Swordfish.cut() } },
+            { label: 'Copy', accelerator: 'CmdOrCtrl+C', click: () => { Swordfish.copy(); } },
+            { label: 'Paste', accelerator: 'CmdOrCtrl+V', click: () => { Swordfish.paste() } },
+            { label: 'Select All', accelerator: 'CmdOrCtrl+A', click: () => { Swordfish.selectAll(); } },
             new MenuItem({ type: 'separator' }),
             { label: 'Edit Previous Segment', accelerator: 'PageUp', click: () => { Swordfish.mainWindow.webContents.send('previous-segment'); } },
             { label: 'Edit Next Segment', accelerator: 'PageDown', click: () => { Swordfish.mainWindow.webContents.send('next-segment'); } },
@@ -1033,7 +1043,7 @@ export class Swordfish {
             new MenuItem({ label: 'Toggle Full Screen', role: 'togglefullscreen' })
         ]);
         if (!app.isPackaged) {
-            viewMenu.append(new MenuItem({ label: 'Open Development Tools', accelerator: 'F12', click: () => { BrowserWindow.getFocusedWindow().webContents.openDevTools() } }));
+            viewMenu.append(new MenuItem({ label: 'Open Development Tools', accelerator: 'F12', click: () => { BrowserWindow.getFocusedWindow()?.webContents.openDevTools() } }));
         }
         let projectsMenu: Menu = Menu.buildFromTemplate([
             { label: 'New Project', accelerator: 'CmdOrCtrl+N', click: () => { Swordfish.showAddProject(); } },
@@ -1075,6 +1085,8 @@ export class Swordfish {
             new MenuItem({ type: 'separator' }),
             { label: 'Search Term in Glossary', accelerator: 'CmdOrCtrl+D', click: () => { Swordfish.mainWindow.webContents.send('term-search-requested'); } },
             { label: 'Add Term to Glossary', accelerator: 'CmdOrCtrl+B', click: () => { Swordfish.mainWindow.webContents.send('add-term-requested'); } },
+            new MenuItem({ type: 'separator' }),
+            { label: 'Search on IATE', accelerator: 'CmdOrCtrl+Alt+I', click: () => { Swordfish.showIatePlugin(); } },
             new MenuItem({ type: 'separator' }),
             { label: 'Import Glossary', click: () => { Swordfish.mainWindow.webContents.send('import-glossary'); } },
             { label: 'Export Glossary', click: () => { Swordfish.mainWindow.webContents.send('export-glossary'); } }
@@ -1183,7 +1195,7 @@ export class Swordfish {
             ]);
             template.unshift(new MenuItem({ label: 'Swordfish', role: 'appMenu', submenu: appleMenu }));
         } else {
-            let help: MenuItem = template.pop();
+            let help: MenuItem = template.pop() as MenuItem;
             template.push(new MenuItem({
                 label: '&Settings', submenu: [
                     { label: 'Preferences', click: () => { this.showPreferences(); } }
@@ -1192,18 +1204,53 @@ export class Swordfish {
             template.push(help);
         }
         if (process.platform === 'win32') {
-            template[0].submenu.append(new MenuItem({ type: 'separator' }));
-            template[0].submenu.append(new MenuItem({ label: 'Exit', accelerator: 'Alt+F4', role: 'quit', click: () => { app.quit(); } }));
-            template[9].submenu.append(new MenuItem({ type: 'separator' }));
-            template[9].submenu.append(new MenuItem({ label: 'About...', click: () => { this.showAbout(); } }));
+            fileMenu.append(new MenuItem({ type: 'separator' }));
+            fileMenu.append(new MenuItem({ label: 'Exit', accelerator: 'Alt+F4', role: 'quit', click: () => { app.quit(); } }));
+            helpMenu.append(new MenuItem({ type: 'separator' }));
+            helpMenu.append(new MenuItem({ label: 'About...', click: () => { this.showAbout(); } }));
         }
         if (process.platform === 'linux') {
-            template[0].submenu.append(new MenuItem({ type: 'separator' }));
-            template[0].submenu.append(new MenuItem({ label: 'Quit', accelerator: 'Ctrl+Q', role: 'quit', click: () => { app.quit(); } }));
-            template[9].submenu.append(new MenuItem({ type: 'separator' }));
-            template[9].submenu.append(new MenuItem({ label: 'About...', click: () => { this.showAbout(); } }));
+            fileMenu.append(new MenuItem({ type: 'separator' }));
+            fileMenu.append(new MenuItem({ label: 'Quit', accelerator: 'Ctrl+Q', role: 'quit', click: () => { app.quit(); } }));
+            helpMenu.append(new MenuItem({ type: 'separator' }));
+            helpMenu.append(new MenuItem({ label: 'About...', click: () => { this.showAbout(); } }));
         }
         Menu.setApplicationMenu(Menu.buildFromTemplate(template));
+    }
+
+    static undo() {
+        let focusedWindow = BrowserWindow.getFocusedWindow();
+        if (focusedWindow) {
+            focusedWindow.webContents.undo();
+        }
+    }
+
+    static cut() {
+        let focusedWindow = BrowserWindow.getFocusedWindow();
+        if (focusedWindow) {
+            focusedWindow.webContents.cut();
+        }
+    }
+
+    static copy() {
+        let focusedWindow = BrowserWindow.getFocusedWindow();
+        if (focusedWindow) {
+            focusedWindow.webContents.copy();
+        }
+    }
+
+    static paste() {
+        let focusedWindow = BrowserWindow.getFocusedWindow();
+        if (focusedWindow) {
+            focusedWindow.webContents.paste();
+        }
+    }
+
+    static selectAll() {
+        let focusedWindow = BrowserWindow.getFocusedWindow();
+        if (focusedWindow) {
+            focusedWindow.webContents.selectAll();
+        }
     }
 
     stopServer(): void {
@@ -1346,14 +1393,17 @@ export class Swordfish {
         if ('spaceAnalysis' === arg.window) {
             Swordfish.spaceAnalysisWindow.setContentSize(arg.width, arg.height, true);
         }
+        if ('iatePlugin' === arg.window) {
+            Swordfish.iatePluginWindow.setContentSize(arg.width, arg.height, true);
+        }
     }
 
     static loadPreferences(): void {
         let dark: string = 'file://' + Swordfish.path.join(app.getAppPath(), 'css', 'dark.css');
         let light: string = 'file://' + Swordfish.path.join(app.getAppPath(), 'css', 'light.css');
-        let highContrast = 'file://' + Swordfish.path.join(app.getAppPath(), 'css', 'highcontrast.css');
-        let preferencesFile = Swordfish.path.join(app.getPath('appData'), app.name, 'preferences.json');
-        let oldCss = Swordfish.currentCss;
+        let highContrast: string = 'file://' + Swordfish.path.join(app.getAppPath(), 'css', 'highcontrast.css');
+        let preferencesFile: string = Swordfish.path.join(app.getPath('appData'), app.name, 'preferences.json');
+        let oldCss: string = Swordfish.currentCss;
         if (existsSync(preferencesFile)) {
             try {
                 let data: Buffer = readFileSync(preferencesFile);
@@ -1784,9 +1834,9 @@ export class Swordfish {
     }
 
     static setSelectedFile(event: IpcMainEvent): void {
-        if (Swordfish.selectedFiles) {
+        if (Swordfish.selectedFiles.length > 0) {
             Swordfish.getFileType(event, Swordfish.selectedFiles);
-            Swordfish.selectedFiles = undefined;
+            Swordfish.selectedFiles = [];
         } else {
             Swordfish.showMessage({ type: 'error', message: 'No file selected' });
         }
@@ -2248,10 +2298,6 @@ export class Swordfish {
                 licenseFile = 'jsoup.txt';
                 title = 'MIT License';
                 break;
-            case "DTDParser":
-                licenseFile = 'LGPL2.1.txt';
-                title = 'LGPL 2.1';
-                break;
             default:
                 Swordfish.showMessage({ type: 'error', message: 'Unknown license' });
                 return;
@@ -2279,13 +2325,8 @@ export class Swordfish {
             this.licensesWindow.focus();
         });
         licenseWindow.webContents.on('did-finish-load', () => {
-            readFile(Swordfish.currentCss.substring('file://'.length), (error: Error, data: Buffer) => {
-                if (!error) {
-                    licenseWindow.webContents.insertCSS(data.toString());
-                } else {
-                    Swordfish.showMessage({ type: 'error', message: error.message });
-                }
-            });
+            let css: string = readFileSync(Swordfish.currentCss.substring('file://'.length), { encoding: 'utf8' });
+            licenseWindow.webContents.insertCSS(css.toString());
         });
     }
 
@@ -2371,8 +2412,8 @@ export class Swordfish {
         }
         this.licensesWindow = new BrowserWindow({
             parent: parent,
-            width: 430,
-            height: 450,
+            width: 425,
+            height: 410,
             minimizable: false,
             maximizable: false,
             resizable: false,
@@ -4664,7 +4705,7 @@ export class Swordfish {
         );
     }
 
-    static showConcordanceWindow(arg: any): void {
+    static showConcordanceWindow(memories: string[]): void {
         this.concordanceSearchWindow = new BrowserWindow({
             parent: this.mainWindow,
             width: 470,
@@ -4679,7 +4720,7 @@ export class Swordfish {
                 contextIsolation: false
             }
         });
-        Swordfish.concordanceMemories = arg;
+        Swordfish.concordanceMemories = memories;
         this.concordanceSearchWindow.setMenu(null);
         let filePath = Swordfish.path.join(app.getAppPath(), 'html', 'concordanceSearch.html');
         let fileUrl: URL = new URL('file://' + filePath);
@@ -4762,6 +4803,34 @@ export class Swordfish {
         htmlViewerWindow.on('close', () => {
             this.concordanceSearchWindow.focus();
         });
+    }
+
+    static showIatePlugin(): void {
+        this.iatePluginWindow = new BrowserWindow({
+            parent: this.mainWindow,
+            width: 600,
+            height: 510,
+            minimizable: true,
+            maximizable: false,
+            resizable: true,
+            show: false,
+            icon: this.iconPath,
+            webPreferences: {
+                nodeIntegration: true,
+                contextIsolation: false
+            }
+        });
+        this.iatePluginWindow.setMenu(null);
+        let filePath = Swordfish.path.join(app.getAppPath(), 'html', 'iatePlugin.html');
+        let fileUrl: URL = new URL('file://' + filePath);
+        this.iatePluginWindow.loadURL(fileUrl.href);
+        this.iatePluginWindow.once('ready-to-show', () => {
+            this.iatePluginWindow.show();
+        });
+        this.iatePluginWindow.on('close', () => {
+            this.mainWindow.focus();
+        });
+        Swordfish.setLocation(this.iatePluginWindow, 'iatePlugin.html');
     }
 
     static showTermSearch(arg: any): any {
@@ -5265,7 +5334,6 @@ export class Swordfish {
             Swordfish.notesWindow.loadURL(fileUrl.href);
             Swordfish.notesWindow.addListener('closed', () => {
                 Swordfish.mainWindow.webContents.send('notes-closed');
-                Swordfish.notesWindow = undefined;
             });
             Swordfish.notesWindow.once('ready-to-show', () => {
                 Swordfish.notesWindow.show();
@@ -5715,8 +5783,10 @@ export class Swordfish {
 
     static setLocation(window: BrowserWindow, key: string): void {
         if (Swordfish.locations.hasLocation(key)) {
-            let position: Point = Swordfish.locations.getLocation(key);
-            window.setPosition(position.x, position.y, true);
+            let position: Point | undefined = Swordfish.locations.getLocation(key);
+            if (position) {
+                window.setPosition(position.x, position.y, true);
+            }
         }
         window.addListener('moved', () => {
             let bounds: Rectangle = window.getBounds();

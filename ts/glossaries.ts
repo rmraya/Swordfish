@@ -20,7 +20,7 @@ class GlossariesView {
     tableContainer: HTMLDivElement;
     selected: Map<string, Memory>;
 
-    glossaries: Memory[]
+    glossaries: Memory[] = []
 
     glossariesSortFielD: string = 'name';
     glossariesSortAscending: boolean = true;
@@ -256,7 +256,7 @@ class GlossariesView {
     }
 
     watchSizes(): void {
-        let targetNode: HTMLElement = document.getElementById('main');
+        let targetNode: HTMLDivElement = document.getElementById('main') as HTMLDivElement;
         let config: MutationObserverInit = { attributes: true, childList: false, subtree: false };
         let observer = new MutationObserver((mutationsList) => {
             for (let mutation of mutationsList) {
@@ -305,7 +305,7 @@ class GlossariesView {
         }
         let glossaries: any[] = [];
         for (let key of this.selected.keys()) {
-            let mem = { glossary: key, name: this.selected.get(key).name }
+            let mem = { glossary: key, name: (this.selected.get(key) as Memory).name }
             glossaries.push(mem);
         }
         this.electron.ipcRenderer.send('export-glossaries', glossaries);
@@ -376,6 +376,7 @@ class GlossariesView {
                 }
                 return 0;
             }
+            return 0;
         });
         this.tbody.innerHTML = '';
         let length = this.glossaries.length;

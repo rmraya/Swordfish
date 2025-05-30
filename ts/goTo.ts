@@ -18,17 +18,17 @@ class GoTo {
 
     constructor() {
         this.electron.ipcRenderer.send('get-theme');
-        this.electron.ipcRenderer.on('set-theme', (event: Electron.IpcRendererEvent, arg: any) => {
-            (document.getElementById('theme') as HTMLLinkElement).href = arg;
+        this.electron.ipcRenderer.on('set-theme', (event: Electron.IpcRendererEvent, theme: string) => {
+            (document.getElementById('theme') as HTMLLinkElement).href = theme;
         });
         this.segInput = document.getElementById('segInput') as HTMLInputElement;
         this.segInput.addEventListener('keydown', (event: KeyboardEvent) => {
             this.parseKey(event);
         });
-        document.getElementById('goToButton').addEventListener('click', () => {
+        (document.getElementById('goToButton') as HTMLButtonElement).addEventListener('click', () => {
             this.goToSegment();
         });
-        document.getElementById('segInput').focus();
+        (document.getElementById('segInput') as HTMLInputElement).focus();
         setTimeout(() => {
             this.electron.ipcRenderer.send('set-height', { window: 'goTo', width: document.body.clientWidth, height: document.body.clientHeight });
         }, 200);
@@ -55,6 +55,6 @@ class GoTo {
             return;
         }
         this.electron.ipcRenderer.send('show-message', { type: 'warning', message: 'Enter segment number', parent: 'goTo' });
-        document.getElementById('segInput').focus();
+        (document.getElementById('segInput') as HTMLInputElement).focus();
     }
 }
