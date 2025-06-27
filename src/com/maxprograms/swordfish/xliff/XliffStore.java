@@ -535,7 +535,6 @@ public class XliffStore {
 
 	private synchronized void insertSegment(String file, String unit, String segment, String type, boolean translate,
 			Element source, Element target) throws SQLException {
-		// file, unitId, segId, type, state, child, translate, tags, space, source, sourceText, target, targetText, words, chars
 		String pureSource = XliffUtils.pureText(source);
 		insertSegmentStmt.setString(1, file);
 		insertSegmentStmt.setString(2, unit);
@@ -732,7 +731,6 @@ public class XliffStore {
 				row.put("preserve", segPreserve);
 				tag = 1;
 				row.put("source", addHtmlTags(source, filterText, caseSensitiveFilter, regExp, tagsData, segPreserve));
-				tag = 1;
 				row.put("target", addHtmlTags(target, filterText, caseSensitiveFilter, regExp, tagsData, segPreserve));
 				row.put("match", getBestMatch(file, unit, segId));
 				row.put("hasNotes", hasNotes(file, unit, segId));
@@ -977,6 +975,19 @@ public class XliffStore {
 
 		Map<String, String> tags = getTags(source);
 
+		String tgt = "";
+		getTargetStmt.setString(1, file);
+		getTargetStmt.setString(2, unit);
+		getTargetStmt.setString(3, segment);
+		try (ResultSet rs = getTargetStmt.executeQuery()) {
+			while (rs.next()) {
+				tgt = rs.getString(1);
+			}
+		}
+		Element oldTarget = tgt.isEmpty() ? XliffUtils.buildElement("<target/>") : XliffUtils.buildElement(tgt);
+		Map<String, String> tgtTags = getTags(oldTarget);
+		tags.putAll(tgtTags);
+
 		translation = XliffUtils.clearHTML(translation);
 
 		List<String[]> list = XliffUtils.harvestTags(translation);
@@ -1019,6 +1030,8 @@ public class XliffStore {
 		JSONObject originalData = getUnitData(file, unit);
 		tag = 1;
 		tagsMap = new Hashtable<>();
+		// populate tagsMap with source to get the right numbers when processing target
+		addHtmlTags(source, originalData); 
 		result.put("target", addHtmlTags(target, originalData));
 
 		if (!memory.equals(Constants.NONE) && !pureTarget.isBlank() && confirm) {
@@ -1158,6 +1171,32 @@ public class XliffStore {
 			prep.setString(5, segment);
 			prep.executeUpdate();
 		}
+	}
+
+	public synchronized JSONObject setTarget(JSONObject json)
+			throws IOException, SQLException, SAXException, ParserConfigurationException, DataFormatException {
+		JSONObject result = new JSONObject();
+		String file = json.getString("file");
+		String unit = json.getString("unit");
+		String segment = json.getString("segment");
+		String target = json.getString("target");
+		Element tgt = XliffUtils.buildElement(target);
+		String pureTarget = XliffUtils.pureText(tgt);
+
+		String sql = "UPDATE segments SET target=?, targetText=? WHERE file=? AND unitId=? AND segId=?";
+		try (PreparedStatement prep = conn.prepareStatement(sql)) {
+			prep.setString(1, target);
+			prep.setString(2, pureTarget);
+			prep.setString(3, file);
+			prep.setString(4, unit);
+			prep.setString(5, segment);
+			prep.executeUpdate();
+		}
+		JSONObject tagsData = getUnitData(file, unit);
+		boolean preserve = "preserve".equals(tgt.getAttributeValue("xml:space", "default"));
+		String tagged = addHtmlTags(tgt, "", false, false, tagsData, preserve);
+		result.put("target", tagged);
+		return result;
 	}
 
 	public synchronized JSONObject getTranslationStatus() throws SQLException {
@@ -1444,7 +1483,7 @@ public class XliffStore {
 					String id = e.getAttributeValue("id");
 					if (!tagsMap.containsKey("pc" + id)) {
 						XliffUtils.checkSVG(tag);
-						String header = XliffUtils.getHeader(e);
+						String header = e.getHead();
 						StringBuilder sb = new StringBuilder();
 						sb.append("<img data-ref='");
 						sb.append(id);
@@ -1479,7 +1518,7 @@ public class XliffStore {
 					String id = e.getAttributeValue("id");
 					if (!tagsMap.containsKey("mrk" + id)) {
 						XliffUtils.checkSVG(tag);
-						String header = XliffUtils.getHeader(e);
+						String header = e.getHead();
 						StringBuilder sb = new StringBuilder();
 						sb.append("<img data-ref='");
 						sb.append(id);
@@ -1634,7 +1673,7 @@ public class XliffStore {
 			String id = e.getAttributeValue("id");
 			if (!tagsMap.containsKey("pc" + id)) {
 				XliffUtils.checkSVG(tag);
-				String header = XliffUtils.getHeader(e);
+				String header = e.getHead();
 				StringBuilder sb = new StringBuilder();
 				sb.append("<img data-ref='");
 				sb.append(id);
@@ -1685,7 +1724,7 @@ public class XliffStore {
 			if (!isTerm) {
 				if (!tagsMap.containsKey("mrk" + id)) {
 					XliffUtils.checkSVG(tag);
-					String header = XliffUtils.getHeader(e);
+					String header = e.getHead();
 					StringBuilder sb = new StringBuilder();
 					sb.append("<img data-ref='");
 					sb.append(id);
@@ -1822,8 +1861,8 @@ public class XliffStore {
 			if (node.getNodeType() == XMLNode.ELEMENT_NODE) {
 				Element e = (Element) node;
 				if ("mrk".equals(e.getName()) || "pc".equals(e.getName())) {
-					result.put(e.getAttributeValue("id"), XliffUtils.getHeader(e));
-					result.put("/" + e.getAttributeValue("id"), XliffUtils.getTail(e));
+					result.put(e.getAttributeValue("id"), e.getHead());
+					result.put("/" + e.getAttributeValue("id"), e.getTail());
 					Map<String, String> map = getTags(e);
 					result.putAll(map);
 				} else if ("cp".equals(e.getName())) {
@@ -4118,8 +4157,7 @@ public class XliffStore {
 							try {
 								tgt = fixInitialSpaces(src, tgt);
 							} catch (Exception e) {
-								System.out.println(src.toString());
-								System.out.println(tgt.toString());
+								// ignore
 							}
 						}
 						if (trailing) {
@@ -4188,7 +4226,7 @@ public class XliffStore {
 			tgtContent.add(0, node);
 		} else {
 			TextNode node = (TextNode) tgtContent.get(idx);
-			((TextNode) node).setText(initial + newText);
+			node.setText(initial + newText);
 			tgtContent.set(idx, node);
 		}
 		target.setContent(tgtContent);
@@ -4385,8 +4423,8 @@ public class XliffStore {
 			if (node.getNodeType() == XMLNode.ELEMENT_NODE) {
 				Element e = (Element) node;
 				if ("mrk".equals(e.getName()) || "pc".equals(e.getName())) {
-					result.add(XliffUtils.getHeader(e));
-					result.add(XliffUtils.getTail(e));
+					result.add(e.getHead());
+					result.add(e.getTail());
 				} else {
 					result.add(e.toString());
 				}
@@ -4970,22 +5008,41 @@ public class XliffStore {
 		conn.commit();
 	}
 
-	public JSONObject getSegmentSource(JSONObject json)
+	public JSONObject getSegment(JSONObject json)
 			throws JSONException, SQLException, SAXException, IOException, ParserConfigurationException {
-		getSource.setString(1, json.getString("file"));
-		getSource.setString(2, json.getString("unit"));
-		getSource.setString(3, json.getString("segment"));
+		JSONObject result = new JSONObject();
+		getSegment.setString(1, json.getString("file"));
+		getSegment.setString(2, json.getString("unit"));
+		getSegment.setString(3, json.getString("segment"));
 		String src = "";
-		try (ResultSet rs = getSource.executeQuery()) {
+		String tgt = "";
+		try (ResultSet rs = getSegment.executeQuery()) {
 			while (rs.next()) {
 				src = rs.getString(1);
+				tgt = rs.getString(2);
 			}
 		}
 		Element source = XliffUtils.buildElement(src);
-		String plainText = XliffUtils.pureText(source);
-		JSONObject result = new JSONObject();
+		Element target = XliffUtils.buildElement(tgt);
 		result.put("source", source.toString());
+		result.put("target", target.toString());
+		result.put("srcLang", srcLang);
+		result.put("tgtLang", tgtLang);
+		String plainText = XliffUtils.pureText(source);
 		result.put("plainText", "<source>" + plainText + "</source>");
+		getTerms.setString(1, json.getString("file"));
+		getTerms.setString(2, json.getString("unit"));
+		getTerms.setString(3, json.getString("segment"));
+		JSONArray terms = new JSONArray();
+		try (ResultSet rs = getTerms.executeQuery()) {
+			while (rs.next()) {
+				JSONObject term = new JSONObject();
+				term.put("source", rs.getString(3));
+				term.put("target", rs.getString(4));
+				terms.put(term);
+			}
+		}
+		result.put("terms", terms);
 		return result;
 	}
 

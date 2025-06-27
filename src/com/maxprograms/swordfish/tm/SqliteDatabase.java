@@ -628,7 +628,7 @@ public class SqliteDatabase implements ITmEngine {
                 }
                 Element seg = tuv.getChild("seg");
                 String puretext = TMUtils.extractText(seg);
-                if (puretext.length() < 1) {
+                if (puretext.isEmpty()) {
                     continue;
                 }
                 storeTUV.setString(2, lang);

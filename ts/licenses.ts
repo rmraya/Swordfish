@@ -54,6 +54,6 @@ class Licenses {
     }
 
     openLicense(type: string) {
-        this.electron.ipcRenderer.send('open-license', { type: type });
+        this.electron.ipcRenderer.send('open-license', type );
     }
 }

@@ -14,9 +14,10 @@ import { ChildProcessWithoutNullStreams, execFileSync, spawn } from "child_proce
 import { BrowserWindow, ClientRequest, IpcMainEvent, Menu, MenuItem, Notification, Rectangle, Size, app, clipboard, dialog, ipcMain, nativeTheme, net, screen, session, shell } from "electron";
 import { IncomingMessage } from "electron/main";
 import { appendFileSync, existsSync, lstatSync, mkdirSync, readFileSync, readdirSync, rmSync, unlinkSync, writeFileSync } from "fs";
+import { MTUtils } from "mtengines/dist";
+import { XMLElement } from "typesxml";
 import { Locations, Point } from "./locations";
 import { MTManager } from "./mtManager";
-import { platform } from "os";
 
 export class Swordfish {
 
@@ -59,6 +60,7 @@ export class Swordfish {
     static tagsAnalysisWindow: BrowserWindow;
     static spaceAnalysisWindow: BrowserWindow;
     static systemInfoWindow: BrowserWindow;
+    static promptWindow: BrowserWindow;
 
     javapath: string = Swordfish.path.join(app.getAppPath(), 'bin', 'java');
 
@@ -106,7 +108,14 @@ export class Swordfish {
         chatGpt: {
             enabled: false,
             apiKey: '',
-            model: 'gpt-3.5-turbo',
+            model: 'gpt-4o-mini',
+            fixTags: false
+        },
+        anthropic: {
+            enabled: false,
+            apiKey: '',
+            model: 'claude-3-7-sonnet-latest',
+            fixTags: false
         },
         modernmt: {
             enabled: false,
@@ -555,8 +564,8 @@ export class Swordfish {
         ipcMain.on('get-mt-languages', (event: IpcMainEvent) => {
             this.getMtLanguages(event);
         });
-        ipcMain.on('open-license', (event: IpcMainEvent, arg: any) => {
-            Swordfish.openLicense(arg.type);
+        ipcMain.on('open-license', (event: IpcMainEvent, type: string) => {
+            Swordfish.openLicense(type);
         });
         ipcMain.on('get-message-param', (event: IpcMainEvent) => {
             event.sender.send('set-message', Swordfish.messageParam);
@@ -574,10 +583,10 @@ export class Swordfish {
             Swordfish.getSegmenstCount(event, arg);
         });
         ipcMain.on('get-segments', (event: IpcMainEvent, arg: any) => {
-            Swordfish.getSegmenst(event, arg);
+            Swordfish.getSegments(event, arg);
         });
-        ipcMain.on('paste-text', (event: IpcMainEvent, arg: any) => {
-            clipboard.writeText(arg);
+        ipcMain.on('paste-text', (event: IpcMainEvent, text: string) => {
+            clipboard.writeText(text);
             Swordfish.mainWindow.webContents.paste();
         });
         ipcMain.on('save-translation', (event: IpcMainEvent, arg: any) => {
@@ -586,7 +595,26 @@ export class Swordfish {
         ipcMain.on('save-source', (event: IpcMainEvent, arg: any) => {
             Swordfish.saveSource(arg);
         });
-
+        ipcMain.on('fix-segment-tags', (event: IpcMainEvent, arg: any) => {
+            Swordfish.fixTags(arg);
+        });
+        ipcMain.on('open-prompt', (event: IpcMainEvent, arg: any) => {
+            Swordfish.openPrompt(arg);
+        });
+        ipcMain.on('generate-prompt', (event: IpcMainEvent, arg: any) => {
+            Swordfish.generatePrompt(arg);
+        });
+        ipcMain.on('paste-response', () => {
+            Swordfish.insertAiResponse();
+        });
+        ipcMain.on('insert-response', (event: IpcMainEvent, arg: any) => {
+            Swordfish.insertResponse(arg);
+        });
+        ipcMain.on('close-promptDialog', () => {
+            if (Swordfish.promptWindow) {
+                Swordfish.promptWindow.close();
+            }
+        });
         ipcMain.on('get-matches', (event: IpcMainEvent, arg: any) => {
             Swordfish.getMatches(arg);
         });
@@ -1091,6 +1119,15 @@ export class Swordfish {
             { label: 'Import Glossary', click: () => { Swordfish.mainWindow.webContents.send('import-glossary'); } },
             { label: 'Export Glossary', click: () => { Swordfish.mainWindow.webContents.send('export-glossary'); } }
         ]);
+        let aiMenu: Menu = Menu.buildFromTemplate([
+            { label: 'Fix Tags with AI', accelerator: 'CmdOrCtrl+Shift+Alt+T', click: () => { Swordfish.mainWindow.webContents.send('fix-tags'); } },
+            { label: 'Fix TM Match with AI', accelerator: 'CmdOrCtrl+Shift+M', click: () => { Swordfish.mainWindow.webContents.send('fix-selected-match'); } },
+            new MenuItem({ type: 'separator' }),
+            { label: 'Open AI Prompt Dialog', accelerator: 'CmdOrCtrl+Shift+P', click: () => { Swordfish.mainWindow.webContents.send('open-ai-prompt'); } },
+            { label: 'Copy AI Prompt to Clipboard', accelerator: 'CmdOrCtrl+Shift+C', click: () => { Swordfish.mainWindow.webContents.send('copy-ai-prompt'); } },
+            new MenuItem({ type: 'separator' }),
+            { label: 'Insert AI Response in Segment', accelerator: 'CmdOrCtrl+Shift+R', click: () => { Swordfish.insertAiResponse(); } }
+        ]);
         let helpMenu: Menu = Menu.buildFromTemplate([
             { label: 'Swordfish User Guide', accelerator: 'F1', click: () => { this.showHelp(); } },
             { label: 'Getting Started Guide', click: () => { Swordfish.showGettingStarted(); } },
@@ -1139,7 +1176,6 @@ export class Swordfish {
             new MenuItem({ type: 'separator' }),
             { label: 'Get Translations from Memory', accelerator: 'CmdOrCtrl+M', click: () => { Swordfish.mainWindow.webContents.send('get-tm-matches'); } },
             { label: 'Accept Translation Memory Match', accelerator: 'CmdOrCtrl+Alt+M', click: () => { Swordfish.mainWindow.webContents.send('accept-tm-match'); } },
-            { label: 'Fix TM Match with AI', accelerator: 'CmdOrCtrl+Shift+M', click: () => { Swordfish.mainWindow.webContents.send('fix-selected-match'); } },
             { label: 'Apply Translation Memory to All Segments', click: () => { Swordfish.mainWindow.webContents.send('apply-tm-all'); } },
             { label: 'Accept All 100% Matches', click: () => { Swordfish.mainWindow.webContents.send('accept-all-matches'); } },
             { label: 'Remove All Translation Memory Matches', click: () => { Swordfish.mainWindow.webContents.send('remove-matches'); } },
@@ -1174,6 +1210,7 @@ export class Swordfish {
             new MenuItem({ label: '&Glossaries', submenu: glossariesMenu }),
             new MenuItem({ label: '&Tasks', submenu: tasksMenu }),
             new MenuItem({ label: '&QA', submenu: qaMenu }),
+            new MenuItem({ label: '&AI', submenu: aiMenu }),
             new MenuItem({ label: '&Help', role: 'help', submenu: helpMenu })
         ];
         if (process.platform === 'darwin') {
@@ -1393,6 +1430,9 @@ export class Swordfish {
         if ('spaceAnalysis' === arg.window) {
             Swordfish.spaceAnalysisWindow.setContentSize(arg.width, arg.height, true);
         }
+        if ('promptDialog' === arg.window) {
+            Swordfish.promptWindow.setContentSize(arg.width, arg.height, true);
+        }
         if ('iatePlugin' === arg.window) {
             Swordfish.iatePluginWindow.setContentSize(arg.width, arg.height, true);
         }
@@ -1409,7 +1449,13 @@ export class Swordfish {
                 let data: Buffer = readFileSync(preferencesFile);
                 let json: Preferences = JSON.parse(data.toString());
                 if (!json.hasOwnProperty('chatGpt')) {
-                    json.chatGpt = { enabled: false, apiKey: '', model: 'gpt-3.5-turbo' };
+                    json.chatGpt = { enabled: false, apiKey: '', model: 'o1-mini', fixTags: false };
+                }
+                if (!json.chatGpt.hasOwnProperty('fixTags')) {
+                    json.chatGpt.fixTags = false;
+                }
+                if (!json.hasOwnProperty('anthropic')) {
+                    json.anthropic = { enabled: false, apiKey: '', model: 'claude-3-5-sonnet-latest', fixTags: false };
                 }
                 if (!json.hasOwnProperty('caseSensitiveMatches')) {
                     json.caseSensitiveMatches = true;
@@ -1764,38 +1810,13 @@ export class Swordfish {
     }
 
     static addFile(): void {
+        let extensions: string[] = ['inx', 'icml', 'idml', 'ditamap', 'dita', 'xml', 'html', 'htm', 'js', 'properties', 'json', 'mif', 'docx', 'xlsx', 'pptx',
+            'sxw', 'sxc', 'sxi', 'sxd', 'odt', 'ods', 'odp', 'odg', 'txt', 'po', 'pot', 'rc', 'resx', 'sdlxliff', 'srt', 'svg', 'sdlppx', 'ts', 'txml', 'vsdx',
+            'xlf', 'xliff', 'mqxliff', 'txlf'];
         let filters: any[] = [
-            { name: 'Any File', extensions: ['*'] },
-            { name: 'Adobe InDesign Interchange', extensions: ['inx'] },
-            { name: 'Adobe InCopy ICML', extensions: ['icml'] },
-            { name: 'Adobe InDesign IDML', extensions: ['idml'] },
-            { name: 'DITA Map', extensions: ['ditamap', 'dita', 'xml'] },
-            { name: 'HTML Page', extensions: ['html', 'htm'] },
-            { name: 'JavaScript', extensions: ['js'] },
-            { name: 'Java Properties', extensions: ['properties'] },
-            { name: 'JSON', extensions: ['json'] },
-            { name: 'MIF (Maker Interchange Format)', extensions: ['mif'] },
-            { name: 'Microsoft Office 2007 Document', extensions: ['docx', 'xlsx', 'pptx'] },
-            { name: 'OpenOffice 1.x Document', extensions: ['sxw', 'sxc', 'sxi', 'sxd'] },
-            { name: 'OpenOffice 2.x Document', extensions: ['odt', 'ods', 'odp', 'odg'] },
-            { name: 'Plain Text', extensions: ['txt'] },
-            { name: 'PO (Portable Objects)', extensions: ['po', 'pot'] },
-            { name: 'RC (Windows C/C++ Resources)', extensions: ['rc'] },
-            { name: 'ResX (Windows .NET Resources)', extensions: ['resx'] },
-            { name: 'SDLXLIFF Document', extensions: ['sdlxliff'] },
-            { name: 'SRT Subtitle', extensions: ['srt'] },
-            { name: 'SVG (Scalable Vector Graphics)', extensions: ['svg'] },
-            { name: 'Trados Studio Package', extensions: ['sdlppx'] },
-            { name: 'TS (Qt Linguist translation source)', extensions: ['ts'] },
-            { name: 'TXML Document', extensions: ['txml'] },
-            { name: 'Visio XML Drawing', extensions: ['vsdx'] },
-            { name: 'XLIFF', extensions: ['xlf', 'xliff', 'mqxliff', 'txlf'] },
-            { name: 'XML Document', extensions: ['xml'] }
+            { name: 'Supported Files', extensions: extensions },
+            { name: 'Any File', extensions: ['*'] }
         ];
-        if (process.platform === 'linux' || process.platform === 'win32') {
-            filters.splice(0, 1);
-            filters.push({ name: 'Any File', extensions: ['*'] });
-        }
         dialog.showOpenDialog(Swordfish.mainWindow, {
             properties: ['openFile'],
             filters: filters
@@ -1987,38 +2008,13 @@ export class Swordfish {
     }
 
     selectSourceFiles(event: IpcMainEvent): void {
+        let extensions: string[] = ['inx', 'icml', 'idml', 'ditamap', 'dita', 'xml', 'html', 'htm', 'js', 'properties', 'json', 'mif', 'docx', 'xlsx', 'pptx',
+            'sxw', 'sxc', 'sxi', 'sxd', 'odt', 'ods', 'odp', 'odg', 'txt', 'po', 'pot', 'rc', 'resx', 'sdlxliff', 'srt', 'svg', 'sdlppx', 'ts', 'txml', 'vsdx',
+            'xlf', 'xliff', 'mqxliff', 'txlf'];
         let filters: any[] = [
+            { name: 'Supported Files', extensions: extensions },
             { name: 'Any File', extensions: ['*'] },
-            { name: 'Adobe InDesign Interchange', extensions: ['inx'] },
-            { name: 'Adobe InCopy ICML', extensions: ['icml'] },
-            { name: 'Adobe InDesign IDML', extensions: ['idml'] },
-            { name: 'DITA Map', extensions: ['ditamap', 'dita', 'xml'] },
-            { name: 'HTML Page', extensions: ['html', 'htm'] },
-            { name: 'JavaScript', extensions: ['js'] },
-            { name: 'Java Properties', extensions: ['properties'] },
-            { name: 'JSON', extensions: ['json'] },
-            { name: 'MIF (Maker Interchange Format)', extensions: ['mif'] },
-            { name: 'Microsoft Office 2007 Document', extensions: ['docx', 'xlsx', 'pptx'] },
-            { name: 'OpenOffice 1.x Document', extensions: ['sxw', 'sxc', 'sxi', 'sxd'] },
-            { name: 'OpenOffice 2.x Document', extensions: ['odt', 'ods', 'odp', 'odg'] },
-            { name: 'Plain Text', extensions: ['txt'] },
-            { name: 'PO (Portable Objects)', extensions: ['po', 'pot'] },
-            { name: 'RC (Windows C/C++ Resources)', extensions: ['rc'] },
-            { name: 'ResX (Windows .NET Resources)', extensions: ['resx'] },
-            { name: 'SDLXLIFF Document', extensions: ['sdlxliff'] },
-            { name: 'SRT Subtitle', extensions: ['srt'] },
-            { name: 'SVG (Scalable Vector Graphics)', extensions: ['svg'] },
-            { name: 'Trados Studio Package', extensions: ['sdlppx'] },
-            { name: 'TS (Qt Linguist translation source)', extensions: ['ts'] },
-            { name: 'TXML Document', extensions: ['txml'] },
-            { name: 'Visio XML Drawing', extensions: ['vsdx'] },
-            { name: 'XLIFF', extensions: ['xlf', 'xliff', 'mqxliff', 'txlf'] },
-            { name: 'XML Document', extensions: ['xml'] }
         ];
-        if (process.platform === 'linux' || process.platform === 'win32') {
-            filters.splice(0, 1);
-            filters.push({ name: 'Any File', extensions: ['*'] });
-        }
         dialog.showOpenDialog({
             properties: ['openFile', 'multiSelections'],
             filters: filters
@@ -2751,7 +2747,7 @@ export class Swordfish {
         );
     }
 
-    static getSegmenst(event: IpcMainEvent, arg: any): void {
+    static getSegments(event: IpcMainEvent, arg: any): void {
         Swordfish.sendRequest('/projects/segments', arg,
             (data: any) => {
                 if (data.status === Swordfish.SUCCESS) {
@@ -3651,8 +3647,8 @@ export class Swordfish {
 
     static showNotification(message: string): void {
         let notification: Notification = new Notification({
-            title: app.name,
-            body: message,
+            title: message,
+            silent: true,
             icon: this.iconPath
         });
         notification.show();
@@ -5056,7 +5052,7 @@ export class Swordfish {
     }
 
     static unlockAll(projectId: string) {
-        Swordfish.sendRequest('/projects/unlockAll', projectId,
+        Swordfish.sendRequest('/projects/unlockAll', { project: projectId },
             (data: any) => {
                 if (data.status !== Swordfish.SUCCESS) {
                     Swordfish.showMessage({ type: 'error', message: data.reason });
@@ -5180,9 +5176,176 @@ export class Swordfish {
         );
     }
 
+    static openPrompt(args: any): void {
+        Swordfish.mainWindow.webContents.send('start-waiting');
+        Swordfish.mainWindow.webContents.send('set-status', 'Generating Prompt');
+        Swordfish.sendRequest('/projects/getSegment', args,
+            (data: any) => {
+                Swordfish.mainWindow.webContents.send('end-waiting');
+                Swordfish.mainWindow.webContents.send('set-status', '');
+                try {
+                    if (data.status !== Swordfish.SUCCESS) {
+                        console.error('Swordfish.generatePrompt', data);
+                    } else {
+                        let source: XMLElement = MTUtils.toXMLElement(data.source);
+                        let prompt: string = MTUtils.getRole(data.srcLang, data.tgtLang) + ' ' + MTUtils.generatePrompt(source, data.srcLang, data.tgtLang, data.terms);
+                        Swordfish.showPromptDialog(prompt);
+                    }
+                } catch (e) {
+                    if (e instanceof Error) {
+                        Swordfish.showMessage({ type: 'error', message: e.message });
+                    }
+                }
+            },
+            (reason: string) => {
+                Swordfish.mainWindow.webContents.send('end-waiting');
+                Swordfish.mainWindow.webContents.send('set-status', '');
+                Swordfish.showMessage({ type: 'error', message: reason });
+            }
+        );
+    }
+
+    static generatePrompt(args: any): void {
+        Swordfish.mainWindow.webContents.send('start-waiting');
+        Swordfish.mainWindow.webContents.send('set-status', 'Generating Prompt');
+        Swordfish.sendRequest('/projects/getSegment', args,
+            (data: any) => {
+                Swordfish.mainWindow.webContents.send('end-waiting');
+                Swordfish.mainWindow.webContents.send('set-status', '');
+                try {
+                    if (data.status !== Swordfish.SUCCESS) {
+                        console.error('Swordfish.generatePrompt', data);
+                    } else {
+                        let source: XMLElement = MTUtils.toXMLElement(data.source);
+                        let prompt: string = MTUtils.getRole(data.srcLang, data.tgtLang) + ' ' + MTUtils.generatePrompt(source, data.srcLang, data.tgtLang, data.terms);
+                        clipboard.writeText(prompt);
+                        Swordfish.showNotification('Prompt copied to clipboard');
+                    }
+                } catch (e) {
+                    if (e instanceof Error) {
+                        Swordfish.showMessage({ type: 'error', message: e.message });
+                    }
+                }
+            },
+            (reason: string) => {
+                Swordfish.mainWindow.webContents.send('end-waiting');
+                Swordfish.mainWindow.webContents.send('set-status', '');
+                Swordfish.showMessage({ type: 'error', message: reason });
+            }
+        );
+    }
+
+    static showPromptDialog(prompt: string): void {
+        if (this.promptWindow && !this.promptWindow.isDestroyed()) {
+            this.promptWindow.webContents.send('set-prompt', prompt);
+            this.promptWindow.focus();
+        } else {
+            this.promptWindow = new BrowserWindow({
+                parent: this.mainWindow,
+                width: 680,
+                height: 560,
+                minimizable: false,
+                maximizable: false,
+                resizable: true,
+                show: false,
+                icon: this.iconPath,
+                webPreferences: {
+                    nodeIntegration: true,
+                    contextIsolation: false
+                }
+            });
+            this.promptWindow.setMenu(null);
+            let filePath = Swordfish.path.join(app.getAppPath(), 'html', 'promptDialog.html');
+            let fileUrl: URL = new URL('file://' + filePath);
+            this.promptWindow.loadURL(fileUrl.href);
+        }
+        this.promptWindow.once('ready-to-show', () => {
+            this.promptWindow.webContents.send('set-prompt', prompt);
+            this.promptWindow.show();
+        });
+        this.promptWindow.on('close', () => {
+            this.mainWindow.focus();
+        });
+        Swordfish.setLocation(this.promptWindow, 'promptDialog.html');
+    }
+
+    static insertAiResponse(): void {
+        let clipboardText: string = clipboard.readText();
+        try {
+            let target: XMLElement = MTUtils.toXMLElement(clipboardText);
+            if (target.getName() === 'target') {
+                this.mainWindow.webContents.send('insert-ai-response', target.toString());
+            } else {
+                Swordfish.showMessage({ type: 'error', message: 'Invalid AI response: ' + clipboardText });
+                return;
+            }
+        } catch (e) {
+            if (e instanceof Error) {
+                Swordfish.showMessage({ type: 'error', message: 'Invalid AI response: ' + clipboardText });
+                return;
+            }
+        }
+    }
+
+    static insertResponse(aiResponse: any): void {
+        Swordfish.sendRequest('/projects/setTarget', aiResponse,
+            (data: any) => {
+                if (data.status === Swordfish.SUCCESS) {
+                    Swordfish.mainWindow.webContents.send('set-target', data);
+                } else {
+                    Swordfish.showMessage({ type: 'error', message: data.reason });
+                }
+            },
+            (reason: string) => {
+                Swordfish.showMessage({ type: 'error', message: reason });
+            }
+        );
+    }
+
+    static fixTags(args: any): void {
+        if (!(Swordfish.currentPreferences.chatGpt.enabled || Swordfish.currentPreferences.anthropic.enabled)) {
+            Swordfish.showMessage({ type: 'error', message: 'No AI engine is currently enabled' });
+            return;
+        }
+        Swordfish.mainWindow.webContents.send('start-waiting');
+        Swordfish.mainWindow.webContents.send('set-status', 'Fixing tags');
+        Swordfish.sendRequest('/projects/getSegment', args,
+            (data: any) => {
+                try {
+                    if (data.status !== Swordfish.SUCCESS) {
+                        console.error('Swordfish.fixTags', data);
+                    } else {
+                        let mtManager = new MTManager(Swordfish.currentPreferences, args.srcLang, args.tgtLang);
+                        data.project = args.project;
+                        data.file = args.file;
+                        data.unit = args.unit;
+                        data.segment = args.segment;
+                        mtManager.fixTags(data);
+                    }
+                } catch (e) {
+                    Swordfish.mainWindow.webContents.send('end-waiting');
+                    Swordfish.mainWindow.webContents.send('set-status', '');
+                    if (e instanceof Error) {
+                        Swordfish.showMessage({ type: 'error', message: e.message });
+                    }
+                }
+            },
+            (reason: string) => {
+                Swordfish.mainWindow.webContents.send('end-waiting');
+                Swordfish.mainWindow.webContents.send('set-status', '');
+                Swordfish.showMessage({ type: 'error', message: reason });
+            }
+        );
+    }
+
+    static updateTarget(params: any) {
+        Swordfish.mainWindow.webContents.send('update-target-cell', params);
+        Swordfish.mainWindow.webContents.send('end-waiting');
+        Swordfish.mainWindow.webContents.send('set-status', '');
+    }
     static fixMatch(match: Match) {
-        if (!Swordfish.currentPreferences.chatGpt.enabled) {
-            Swordfish.showMessage({ type: 'error', message: 'ChatGPT is not enabled' });
+        if (!(Swordfish.currentPreferences.chatGpt.enabled || Swordfish.currentPreferences.anthropic.enabled)) {
+            Swordfish.showMessage({ type: 'error', message: 'No AI engine is currently enabled' });
             return;
         }
         Swordfish.mainWindow.webContents.send('start-waiting');

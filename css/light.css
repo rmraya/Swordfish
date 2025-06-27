@@ -337,12 +337,19 @@ option {
 }
 
 textarea {
-	padding: 0;
 	font-size: medium;
 	background-color: var(--gray10);
 	color: var(--gray190);
 	border: 1px solid var(--gray190);
+	border-radius: 4px;
+	padding: 8px;
 	outline: none;
+	resize: none;
+}
+
+.dialogBody textarea {
+	width: calc(100% - 24px);
+	height: calc(100% - 16px);
 }
 
 textarea:focus {
@@ -615,8 +622,8 @@ th svg {
 }
 
 .tooltip .tooltiptext {
-	background-color: var(--ClassicBlue100);
-	color: var(--white);
+	background-color: var(--ClassicBlue30);
+	color: var(--black);
 	visibility: hidden;
 	padding: 4px;
 	border-radius: 2px;
@@ -626,24 +633,65 @@ th svg {
 	z-index: 100;
 }
 
-.topTooltip {
-	bottom: 120%;
-	left: 20px;
+/* Tooltip arrow */
+.bottomTooltip .tooltiptext::before {
+  content: "";
+  position: absolute;
+  bottom: 100%;
+  left: 8px;
+  border-width: 8px;
+  border-style: solid;
+  border-color: transparent transparent var(--ClassicBlue30) transparent;
 }
 
-.bottomTooltip {
-	top: 120%;
-	left: 20px;
+.bottomRightTooltip .tooltiptext::before {
+  content: "";
+  position: absolute;
+  bottom: 100%;
+  right: 8px;
+  border-width: 8px;
+  border-style: solid;
+  border-color: transparent transparent var(--ClassicBlue30) transparent;
 }
 
-.bottomCenterTooltip {
-	top: 120%;
+.bottomCenterTooltip .tooltiptext::before {
+  content: "";
+  position: absolute;
+  bottom: 100%;
+  left: 80px;
+  border-width: 8px;
+  border-style: solid;
+  border-color: transparent transparent var(--ClassicBlue30) transparent;
+}
+
+.topTooltip .tooltiptext::after {
+  content: "";
+  position: absolute;
+  top: 100%;
+  left: 8px;
+  border-width: 8px;
+  border-style: solid;
+  border-color: var(--ClassicBlue30) transparent transparent transparent;
+}
+
+.topTooltip .tooltiptext {
+	bottom: 130%;
+	left: 0px;
+}
+
+.bottomTooltip .tooltiptext {
+	top: 130%;
+	left: 0px;
+}
+
+.bottomCenterTooltip .tooltiptext {
+	top: 130%;
 	left: -80px;
 }
 
-.bottomRightTooltip {
-	top: 120%;
-	right: 20px;
+.bottomRightTooltip .tooltiptext {
+	top: 130%;
+	right: 0px;
 }
 
 .tooltip:hover .tooltiptext {
@@ -656,7 +704,7 @@ th svg {
 }
 
 .iconTooltip .tooltiptext {
-	background-color: var(--gray40);
+	background-color: var(--ClassicBlue30);
 	color: var(--black);
 	visibility: hidden;
 	padding: 4px;

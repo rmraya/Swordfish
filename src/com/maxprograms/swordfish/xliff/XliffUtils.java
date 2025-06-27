@@ -36,7 +36,6 @@ import com.maxprograms.converters.FileFormats;
 import com.maxprograms.swordfish.Constants;
 import com.maxprograms.swordfish.TmsServer;
 import com.maxprograms.swordfish.tm.TMUtils;
-import com.maxprograms.xml.Attribute;
 import com.maxprograms.xml.Document;
 import com.maxprograms.xml.Element;
 import com.maxprograms.xml.Indenter;
@@ -171,28 +170,6 @@ public class XliffUtils {
 		res = res.replace("<", "\u200B\u2039");
 		res = res.replace(">", "\u200B\u203A");
 		return res;
-	}
-
-	public static String getHeader(Element e) {
-		StringBuilder result = new StringBuilder();
-		result.append('<');
-		result.append(e.getName());
-		List<Attribute> atts = e.getAttributes();
-		Iterator<Attribute> it = atts.iterator();
-		while (it.hasNext()) {
-			Attribute a = it.next();
-			result.append(' ');
-			result.append(a.getName());
-			result.append("=\"");
-			result.append(unquote(cleanString(a.getValue())));
-			result.append("\"");
-		}
-		result.append('>');
-		return result.toString();
-	}
-
-	public static String getTail(Element e) {
-		return "</" + e.getName() + ">";
 	}
 
 	public static String cleanString(String string) {

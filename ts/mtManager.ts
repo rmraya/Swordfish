@@ -10,7 +10,7 @@
  *     Maxprograms - initial API and implementation
  *******************************************************************************/
 
-import { AzureTranslator, ChatGPTTranslator, DeepLTranslator, GoogleTranslator, MTEngine, MTMatch, MTUtils, ModernMTTranslator } from "mtengines";
+import { AnthropicTranslator, AzureTranslator, ChatGPTTranslator, DeepLTranslator, GoogleTranslator, MTEngine, MTMatch, MTUtils, ModernMTTranslator } from "mtengines";
 import { Language, LanguageUtils } from "typesbcp47";
 import { SAXParser, XMLElement } from "typesxml";
 import { MTContentHandler } from "./mtContentHandler";
@@ -21,6 +21,7 @@ export class MTManager {
     mtEngines: MTEngine[];
     srcLang: string;
     tgtLang: string;
+    tagFixer: MTEngine | undefined = undefined;
 
     readonly mtLanguages: any = {
         google: {
@@ -43,7 +44,7 @@ export class MTManager {
     currentSegment: SegmentId;
 
     constructor(preferences: Preferences, srcLang: string, tgtLang: string) {
-        this.currentSegment = {file:'', unit: '', id: ''};
+        this.currentSegment = { file: '', unit: '', id: '' };
         this.mtEngines = [];
         this.srcLang = srcLang;
         this.tgtLang = tgtLang;
@@ -70,6 +71,18 @@ export class MTManager {
             chatGptTranslator.setSourceLanguage(srcLang);
             chatGptTranslator.setTargetLanguage(tgtLang);
             this.mtEngines.push(chatGptTranslator);
+            if (preferences.chatGpt.fixTags) {
+                this.tagFixer = chatGptTranslator;
+            }
+        }
+        if (preferences.anthropic.enabled) {
+            let anthropicTranslator: AnthropicTranslator = new AnthropicTranslator(preferences.anthropic.apiKey, preferences.anthropic.model);
+            anthropicTranslator.setSourceLanguage(srcLang);
+            anthropicTranslator.setTargetLanguage(tgtLang);
+            this.mtEngines.push(anthropicTranslator);
+            if (preferences.anthropic.fixTags) {
+                this.tagFixer = anthropicTranslator;
+            }
         }
         if (preferences.modernmt.enabled) {
             let modernmtTranslator: ModernMTTranslator = new ModernMTTranslator(preferences.modernmt.apiKey);
@@ -87,15 +100,15 @@ export class MTManager {
         parser.parseFile(exportedFile);
     }
 
-    translateElement(source: XMLElement, project: string, file: string, unit: string, segment: string) {
+    translateElement(source: XMLElement, project: string, file: string, unit: string, segment: string, terms: { source: string, target: string }[]) {
         let promises: Promise<MTMatch>[] = [];
         for (let mtEngine of this.mtEngines) {
             if (mtEngine.handlesTags()) {
-                promises.push(mtEngine.getMTMatch(source));
+                promises.push(mtEngine.getMTMatch(source, terms));
             } else {
                 let plainText: string = MTUtils.plainText(source);
                 let plainSource: XMLElement = MTUtils.toXMLElement('<source>' + plainText + '</source>');
-                promises.push(mtEngine.getMTMatch(plainSource));
+                promises.push(mtEngine.getMTMatch(plainSource, terms));
             }
         }
         Promise.all(promises).then((values: MTMatch[]) => {
@@ -126,6 +139,59 @@ export class MTManager {
             if (error instanceof Error) {
                 throw error;
             }
+        });
+    }
+
+    fixTags(params: any): void {
+        if (this.tagFixer) {
+            try {
+                this.tagFixer.fixTags(
+                    MTUtils.toXMLElement(params.source),
+                    MTUtils.toXMLElement(params.target)
+                ).then((result: XMLElement) => {
+                    params.target = result.toString();
+                    this.setTarget(params);
+                }, (error: any) => {
+                    console.error(error);
+                });
+            } catch (error: any) {
+                console.error("Error fixing tags: " + error.message);
+                Swordfish.mainWindow.webContents.send('end-waiting');
+                Swordfish.mainWindow.webContents.send('set-status', '');
+            }
+        }
+    }
+
+    setTarget(params: any): void {
+        fetch('http://127.0.0.1:8070/projects/setTarget', {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify(params)
+        }).then(async (response: Response) => {
+            if (response.ok) {
+                let json: any = await response.json();
+                if (json.status !== 'Success') {
+                    console.error("Received " + JSON.stringify(json));
+                    throw new Error(json.reason);
+                }
+                let args: any = {
+                    project: params.project,
+                    file: params.file,
+                    unit: params.unit,
+                    segment: params.segment,
+                    target: json.target
+                };
+                Swordfish.updateTarget(args);
+            } else {
+                throw new Error("Error setting fixed target: " + response.statusText);
+            }
+        }).catch((error: any) => {
+            if (error instanceof Error) {
+                throw error;
+            }
+            throw new Error("Error setting fixed target");
         });
     }
 
@@ -174,13 +240,13 @@ export class MTManager {
     translateSegment(params: any) {
         Swordfish.mainWindow.webContents.send('start-waiting');
         Swordfish.mainWindow.webContents.send('set-status', 'Getting Translations');
-        this.getSourceSegment(params, (segment: any) => {
+        this.getSegment(params, (segment: any) => {
             let promises: Promise<MTMatch>[] = [];
             for (let mtEngine of this.mtEngines) {
                 if (mtEngine.handlesTags()) {
-                    promises.push(mtEngine.getMTMatch(MTUtils.toXMLElement(segment.source)));
+                    promises.push(mtEngine.getMTMatch(MTUtils.toXMLElement(segment.source), segment.terms));
                 } else {
-                    promises.push(mtEngine.getMTMatch(MTUtils.toXMLElement(segment.plainText)));
+                    promises.push(mtEngine.getMTMatch(MTUtils.toXMLElement(segment.plainText), segment.terms));
                 }
             }
             Promise.all(promises).then((values: MTMatch[]) => {
@@ -219,8 +285,8 @@ export class MTManager {
         });
     }
 
-    getSourceSegment(params: any, resolve: Function, reject: Function): void {
-        fetch('http://127.0.0.1:8070/projects/segmentSource', {
+    getSegment(params: any, resolve: Function, reject: Function): void {
+        fetch('http://127.0.0.1:8070/projects/getSegment', {
             method: "POST",
             headers: {
                 "Content-Type": "application/json"

@@ -130,12 +130,12 @@ public class ProjectsHandler implements HttpHandler {
 				response = getProjectFiles(request);
 			} else if ("/projects/segments".equals(url)) {
 				response = getSegments(request);
-			} else if ("/projects/segmentSource".equals(url)) {
-				response = getSegmentSource(request);
 			} else if ("/projects/setMTMatches".equals(url)) {
 				response = setMTMatches(request);
 			} else if ("/projects/count".equals(url)) {
 				response = getSegmentsCount(request);
+			} else if ("/projects/setTarget".equals(url)) {
+				response = setTarget(request);
 			} else if ("/projects/save".equals(url)) {
 				response = save(request);
 			} else if ("/projects/saveSource".equals(url)) {
@@ -194,6 +194,8 @@ public class ProjectsHandler implements HttpHandler {
 				response = getProjectGlossaries(request);
 			} else if ("/projects/terms".equals(url)) {
 				response = getTerms(request);
+			} else if ("/projects/getSegment".equals(url)) {
+				response = getSegment(request);
 			} else if ("/projects/getSegmentTerms".equals(url)) {
 				response = getSegmentTerms(request);
 			} else if ("/projects/getProjectTerms".equals(url)) {
@@ -238,6 +240,37 @@ public class ProjectsHandler implements HttpHandler {
 			response.put(Constants.REASON, j.getMessage());
 		}
 		return response;
+	}
+
+	private JSONObject getSegment(String request) {
+		JSONObject result = new JSONObject();
+		JSONObject json = new JSONObject(request);
+		String project = json.getString("project");
+		if (project == null) {
+			logger.log(Level.ERROR, Messages.getString("ProjectsHandler.7"));
+			result.put(Constants.REASON, Messages.getString("ProjectsHandler.7"));
+			return result;
+		}
+		if (!projectStores.containsKey(project)) {
+			try {
+				Map<String, Project> projects = getProjects();
+				Project prj = projects.get(project);
+				XliffStore store = new XliffStore(prj.getXliff(), prj.getSourceLang().getCode(),
+						prj.getTargetLang().getCode());
+				projectStores.put(project, store);
+			} catch (SAXException | IOException | ParserConfigurationException | URISyntaxException | SQLException e) {
+				logger.log(Level.ERROR, Messages.getString("ProjectsHandler.3"), e);
+				result.put(Constants.REASON, e.getMessage());
+				return result;
+			}
+		}
+		try {
+			result = projectStores.get(project).getSegment(json);
+		} catch (SQLException | SAXException | IOException | ParserConfigurationException | JSONException e) {
+			logger.log(Level.ERROR, e);
+			result.put(Constants.REASON, e.getMessage());
+		}
+		return result;
 	}
 
 	private JSONObject setMTMatches(String request)
@@ -707,37 +740,6 @@ public class ProjectsHandler implements HttpHandler {
 		}
 	}
 
-	private JSONObject getSegmentSource(String request) {
-		JSONObject result = new JSONObject();
-		JSONObject json = new JSONObject(request);
-		String project = json.getString("project");
-		if (project == null) {
-			logger.log(Level.ERROR, Messages.getString("ProjectsHandler.7"));
-			result.put(Constants.REASON, Messages.getString("ProjectsHandler.7"));
-			return result;
-		}
-		if (!projectStores.containsKey(project)) {
-			try {
-				Map<String, Project> projects = getProjects();
-				Project prj = projects.get(project);
-				XliffStore store = new XliffStore(prj.getXliff(), prj.getSourceLang().getCode(),
-						prj.getTargetLang().getCode());
-				projectStores.put(project, store);
-			} catch (SAXException | IOException | ParserConfigurationException | URISyntaxException | SQLException e) {
-				logger.log(Level.ERROR, Messages.getString("ProjectsHandler.3"), e);
-				result.put(Constants.REASON, e.getMessage());
-				return result;
-			}
-		}
-		try {
-			result = projectStores.get(project).getSegmentSource(json);
-		} catch (SQLException | SAXException | IOException | ParserConfigurationException | JSONException e) {
-			logger.log(Level.ERROR, e);
-			result.put(Constants.REASON, e.getMessage());
-		}
-		return result;
-	}
-
 	private JSONObject getSegments(String request) {
 		JSONObject result = new JSONObject();
 		JSONObject json = new JSONObject(request);
@@ -1076,6 +1078,19 @@ public class ProjectsHandler implements HttpHandler {
 		try {
 			projectStores.get(project).saveSource(json);
 		} catch (IOException | SQLException | SAXException | ParserConfigurationException e) {
+			logger.log(Level.ERROR, e);
+			result.put(Constants.REASON, e.getMessage());
+		}
+		return result;
+	}
+
+	private JSONObject setTarget(String request) {
+		JSONObject result = new JSONObject();
+		JSONObject json = new JSONObject(request);
+		String project = json.getString("project");
+		try {
+			result = projectStores.get(project).setTarget(json);
+		} catch (IOException | SQLException | SAXException | ParserConfigurationException | DataFormatException e) {
 			logger.log(Level.ERROR, e);
 			result.put(Constants.REASON, e.getMessage());
 		}

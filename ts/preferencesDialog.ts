@@ -54,6 +54,12 @@ class PreferencesDialog {
     enableChatGPT: HTMLInputElement = document.createElement('input');
     chatGPTKey: HTMLInputElement = document.createElement('input');
     chatGPTModel: HTMLSelectElement = document.createElement('select');
+    chatGptFixTags: HTMLInputElement = document.createElement('input');
+
+    enableAnthropic: HTMLInputElement = document.createElement('input');
+    anthropicKey: HTMLInputElement = document.createElement('input');
+    anthropicModel: HTMLSelectElement = document.createElement('select');
+    anthropicFixTags: HTMLInputElement = document.createElement('input');
 
     enableModernmt: HTMLInputElement = document.createElement('input');
     modernmtKey: HTMLInputElement = document.createElement('input');
@@ -239,9 +245,25 @@ class PreferencesDialog {
         this.chatGPTModel.value = preferences.chatGpt.model;
         this.chatGPTKey.disabled = !preferences.chatGpt.enabled;
         this.chatGPTModel.disabled = !preferences.chatGpt.enabled;
+        this.chatGptFixTags.checked = preferences.chatGpt.fixTags;
+        this.chatGptFixTags.disabled = !preferences.chatGpt.enabled;
         this.enableChatGPT.addEventListener('change', () => {
             this.chatGPTKey.disabled = !this.enableChatGPT.checked;
             this.chatGPTModel.disabled = !this.enableChatGPT.checked;
+            this.chatGptFixTags.disabled = !this.enableChatGPT.checked;
+        });
+
+        this.enableAnthropic.checked = preferences.anthropic.enabled;
+        this.anthropicKey.value = preferences.anthropic.apiKey;
+        this.anthropicModel.value = preferences.anthropic.model;
+        this.anthropicKey.disabled = !preferences.anthropic.enabled;
+        this.anthropicModel.disabled = !preferences.anthropic.enabled;
+        this.anthropicFixTags.checked = preferences.anthropic.fixTags;
+        this.anthropicFixTags.disabled = !preferences.anthropic.enabled;
+        this.enableAnthropic.addEventListener('change', () => {
+            this.anthropicKey.disabled = !this.enableAnthropic.checked;
+            this.anthropicModel.disabled = !this.enableAnthropic.checked;
+            this.anthropicFixTags.disabled = !this.enableAnthropic.checked;
         });
 
         this.enableModernmt.checked = preferences.modernmt.enabled;
@@ -310,6 +332,11 @@ class PreferencesDialog {
             return;
         }
 
+        if (this.enableAnthropic.checked && this.anthropicModel.value === 'none') {
+            this.electron.ipcRenderer.send('show-message', { type: 'warning', message: 'Select Anthropic model', parent: 'preferences' });
+            return;
+        }
+
         if (this.enableModernmt.checked && this.modernmtKey.value === '') {
             this.electron.ipcRenderer.send('show-message', { type: 'warning', message: 'Enter ModernMT API key', parent: 'preferences' });
             return;
@@ -356,7 +383,14 @@ class PreferencesDialog {
             chatGpt: {
                 enabled: this.enableChatGPT.checked,
                 apiKey: this.chatGPTKey.value,
-                model: this.chatGPTModel.value
+                model: this.chatGPTModel.value,
+                fixTags: this.chatGptFixTags.checked
+            },
+            anthropic: {
+                enabled: this.enableAnthropic.checked,
+                apiKey: this.anthropicKey.value,
+                model: this.anthropicModel.value,
+                fixTags: this.anthropicFixTags.checked
             },
             modernmt: {
                 enabled: this.enableModernmt.checked,
@@ -1013,6 +1047,15 @@ class PreferencesDialog {
         mtHolder.addTab(chatGptTab);
         this.populateChatGptTab(chatGptTab.getContainer());
 
+        let anthropicTab: Tab = new Tab('anthropicTab', 'Anthropic', false, mtHolder);
+        anthropicTab.getLabelDiv().addEventListener('click', () => {
+            setTimeout(() => {
+                this.electron.ipcRenderer.send('set-height', { window: 'preferences', width: PreferencesDialog.defaultWidth, height: document.body.clientHeight });
+            }, 200);
+        });
+        mtHolder.addTab(anthropicTab);
+        this.populateAnthropicTab(anthropicTab.getContainer());
+
         let modernmtTab: Tab = new Tab('modernmtTab', 'ModernMT', false, mtHolder);
         modernmtTab.getLabelDiv().addEventListener('click', () => {
             setTimeout(() => {
@@ -1261,17 +1304,116 @@ class PreferencesDialog {
         td.classList.add('fill_width');
 
         td.innerHTML = '<select id="chatGPTModel" class="table_select">' +
-            '<option value="gpt-4o">gpt-4o</option>' +
-            '<option value="gpt-4o-mini">gpt-4o-mini</option>' +
+            '<option value="gpt-3.5-turbo">gpt-3.5-turbo</option>' +
             '<option value="gpt-4">gpt-4</option>' +
             '<option value="gpt-4-turbo">gpt-4-turbo</option>' +
-            '<option value="gpt-3.5-turbo">gpt-3.5-turbo</option>' +
+            '<option value="gpt-4.1">gpt-4.1</option>' +
+            '<option value="gpt-4.1-mini">gpt-4.1-mini</option>' +
+            '<option value="gpt-4.1-nano">gpt-4.1-nano</option>' +
+            '<option value="gpt-4o">gpt-4o</option>' +
+            '<option value="gpt-4o-mini">gpt-4o-mini</option>' +
+            '<option value="o1">o1</option>' +
+            '<option value="o1-mini">o1-mini</option>' +
+            '<option value="o1-pro">o1-pro</option>' +
+            '<option value="o3-mini">o3-mini</option>' +
+            '<option value="o4-mini">o4-mini</option>' +
             '</select>';
         tr.appendChild(td);
+
+        let tagsRow: HTMLDivElement = document.createElement('div');
+        tagsRow.classList.add('row');
+        tagsRow.classList.add('middle');
+        container.appendChild(tagsRow);
+
+        this.chatGptFixTags.id = 'chatGptFixTags';
+        this.chatGptFixTags.type = 'checkbox';
+        this.chatGptFixTags.addEventListener('change', () => {
+            if (this.chatGptFixTags.checked) {
+                this.anthropicFixTags.checked = false;
+            }
+        });
+        tagsRow.appendChild(this.chatGptFixTags);
+
+        let fixLabel: HTMLLabelElement = document.createElement('label');
+        fixLabel.innerText = 'Use to Fix Tags';
+        fixLabel.setAttribute('for', 'chatGptFixTags');
+        fixLabel.style.paddingTop = '4px';
+        tagsRow.appendChild(fixLabel);
 
         this.enableChatGPT = document.getElementById('enableChatGPT') as HTMLInputElement;
         this.chatGPTKey = document.getElementById('chatGPTKey') as HTMLInputElement;
         this.chatGPTModel = document.getElementById('chatGPTModel') as HTMLSelectElement;
+    }
+
+    populateAnthropicTab(container: HTMLDivElement): void {
+        container.style.paddingTop = '10px';
+        let anthropicDiv: HTMLDivElement = document.createElement('div');
+        anthropicDiv.classList.add('middle');
+        anthropicDiv.classList.add('row');
+        anthropicDiv.style.paddingLeft = '4px';
+        anthropicDiv.innerHTML = '<input type="checkbox" id="enableAnthropic"><label for="enableAnthropic" style="padding-top:4px;">Enable Anthropic Translation</label>';
+        container.appendChild(anthropicDiv);
+        let langsTable: HTMLTableElement = document.createElement('table');
+        langsTable.classList.add('fill_width');
+        container.appendChild(langsTable);
+        let tr: HTMLTableRowElement = document.createElement('tr');
+        langsTable.appendChild(tr);
+        let td: HTMLTableCellElement = document.createElement('td');
+        td.classList.add('middle');
+        td.classList.add('noWrap');
+        td.innerHTML = '<label for="anthropicKey">API Key</label>'
+        tr.appendChild(td);
+        td = document.createElement('td');
+        td.classList.add('middle');
+        td.classList.add('fill_width');
+        td.innerHTML = '<input type="text" id="anthropicKey" class="table_input"/>';
+        tr.appendChild(td);
+        tr = document.createElement('tr');
+        langsTable.appendChild(tr);
+        td = document.createElement('td');
+        td.classList.add('middle');
+        td.classList.add('noWrap');
+        td.innerHTML = '<label for="anthropicModel">Anthropic Model</label>'
+        tr.appendChild(td);
+        td = document.createElement('td');
+        td.classList.add('middle');
+        td.classList.add('fill_width');
+        td.innerHTML = '<select id="anthropicModel" class="table_select">' +
+            '<option value="claude-3-5-haiku-latest">claude-3-5-haiku-latest</option>' +
+            '<option value="claude-3-5-sonnet-latest">claude-3-5-sonnet-latest</option>' +
+            '<option value="claude-3-7-sonnet-latest">claude-3-7-sonnet-latest</option>' +
+            '<option value="claude-3-7-sonnet-latest">claude-3-7-sonnet-latest</option>' +
+            '<option value="claude-3-haiku-20240307">claude-3-haiku-20240307</option>' +
+            '<option value="claude-3-opus-latest">claude-3-opus-latest</option>' +
+            '<option value="claude-3-sonnet-20240229">claude-3-sonnet-20240229</option>' +
+            '<option value="claude-opus-4-0">claude-opus-4-0</option>' +
+            '<option value="claude-sonnet-4-0">claude-sonnet-4-0</option>' +
+            '</select>';
+        tr.appendChild(td);
+
+        let tagsRow: HTMLDivElement = document.createElement('div');
+        tagsRow.classList.add('row');
+        tagsRow.classList.add('middle');
+        container.appendChild(tagsRow);
+
+        this.anthropicFixTags.id = 'anthropicFixTags';
+        this.anthropicFixTags.type = 'checkbox';
+        tagsRow.appendChild(this.anthropicFixTags);
+        this.anthropicFixTags.addEventListener('change', () => {
+            if (this.anthropicFixTags.checked) {
+                this.chatGptFixTags.checked = false;
+            }
+        });
+
+        let fixLabel: HTMLLabelElement = document.createElement('label');
+        fixLabel.innerText = 'Use to Fix Tags';
+        fixLabel.setAttribute('for', 'anthropicFixTags');
+        fixLabel.style.paddingTop = '4px';
+        tagsRow.appendChild(fixLabel);
+
+        this.enableAnthropic = document.getElementById('enableAnthropic') as HTMLInputElement;
+        this.anthropicKey = document.getElementById('anthropicKey') as HTMLInputElement;
+        this.anthropicModel = document.getElementById('anthropicModel') as HTMLSelectElement;
     }
 
     populateModernmtTab(container: HTMLDivElement): void {

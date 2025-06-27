@@ -48,6 +48,13 @@ interface Preferences {
         enabled: boolean;
         apiKey: string;
         model: string;
+        fixTags: boolean;
+    };
+    anthropic: {
+        enabled: boolean;
+        apiKey: string;
+        model: string;
+        fixTags: boolean;
     };
     modernmt: {
         enabled: boolean;

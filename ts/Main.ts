@@ -231,6 +231,12 @@ class Main {
         Main.electron.ipcRenderer.on('insert-remaining-tags', () => {
             this.insertRemainingTags();
         });
+        Main.electron.ipcRenderer.on('fix-tags', () => {
+            this.fixTags();
+        });
+        Main.electron.ipcRenderer.on('update-target-cell', (event: Electron.IpcRendererEvent, arg: any) => {
+            this.updateTargetCell(arg);
+        });
         Main.electron.ipcRenderer.on('remove-tags', () => {
             this.removeTags();
         });
@@ -401,7 +407,16 @@ class Main {
         });
         Main.electron.ipcRenderer.on('remember-segment', () => {
             this.rememberSegment();
-        })
+        });
+        Main.electron.ipcRenderer.on('open-ai-prompt', () => {
+            this.openAiPrompt();
+        });
+        Main.electron.ipcRenderer.on('copy-ai-prompt', () => {
+            this.copyAiPropmpt();
+        });
+        Main.electron.ipcRenderer.on('insert-ai-response', (event: Electron.IpcRendererEvent, response: string) => {
+            this.insertAiReponse(response);
+        });
         Main.electron.ipcRenderer.on('tags-deleted', () => {
             if (Main.translationViews.size > 0) {
                 Main.electron.ipcRenderer.send('show-message', {
@@ -581,6 +596,27 @@ class Main {
         }
     }
 
+    openAiPrompt(): void {
+        let selected = Main.tabHolder.getSelected();
+        if (Main.translationViews.has(selected)) {
+            (Main.translationViews.get(selected) as TranslationView).openAiPrompt();
+        }
+    }
+
+    copyAiPropmpt(): void {
+        let selected = Main.tabHolder.getSelected();
+        if (Main.translationViews.has(selected)) {
+            (Main.translationViews.get(selected) as TranslationView).generatePrompt();
+        }
+    }
+
+    insertAiReponse(response: string): void {
+        let selected = Main.tabHolder.getSelected();
+        if (Main.translationViews.has(selected)) {
+            (Main.translationViews.get(selected) as TranslationView).insertAiResponse(response);
+        }
+    }
+
     cancelEdit(): void {
         let selected = Main.tabHolder.getSelected();
         if (Main.translationViews.has(selected)) {
@@ -634,6 +670,13 @@ class Main {
         let selected = Main.tabHolder.getSelected();
         if (Main.translationViews.has(selected)) {
             (Main.translationViews.get(selected) as TranslationView).insertRemainingTags();
+        }
+    }
+
+    fixTags(): void {
+        let selected = Main.tabHolder.getSelected();
+        if (Main.translationViews.has(selected)) {
+            (Main.translationViews.get(selected) as TranslationView).fixTags();
         }
     }
 
@@ -1140,6 +1183,13 @@ class Main {
         let selected = Main.tabHolder.getSelected();
         if (Main.translationViews.has(selected)) {
             (Main.translationViews.get(selected) as TranslationView).updateTarget(arg);
+        }
+    }
+
+    updateTargetCell(arg: any): void {
+        let selected = Main.tabHolder.getSelected();
+        if (Main.translationViews.has(selected)) {
+            (Main.translationViews.get(selected) as TranslationView).updateTargetCell(arg);
         }
     }
 
