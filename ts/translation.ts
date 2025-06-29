@@ -2114,7 +2114,7 @@ class TranslationView {
             this.electron.ipcRenderer.send('show-message', { type: 'warning', message: 'Select glossary' });
             return;
         }
-        this.electron.ipcRenderer.send('show-add-term', { glossary: this.glossSelect.value, srcLang: this.srcLang, tgtLang: this.tgtLang });
+        this.electron.ipcRenderer.send('show-add-term', this.glossSelect.value);
     }
 
     applyTerminologyAll(): void {

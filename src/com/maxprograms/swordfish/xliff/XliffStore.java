@@ -1031,7 +1031,7 @@ public class XliffStore {
 		tag = 1;
 		tagsMap = new Hashtable<>();
 		// populate tagsMap with source to get the right numbers when processing target
-		addHtmlTags(source, originalData); 
+		addHtmlTags(source, originalData);
 		result.put("target", addHtmlTags(target, originalData));
 
 		if (!memory.equals(Constants.NONE) && !pureTarget.isBlank() && confirm) {
@@ -1516,41 +1516,48 @@ public class XliffStore {
 					text.append("/" + tagsMap.get(e.getName() + id));
 				} else if (type.equals("mrk")) {
 					String id = e.getAttributeValue("id");
-					if (!tagsMap.containsKey("mrk" + id)) {
-						XliffUtils.checkSVG(tag);
-						String header = e.getHead();
-						StringBuilder sb = new StringBuilder();
-						sb.append("<img data-ref='");
-						sb.append(id);
-						sb.append("' src='");
-						sb.append(TmsServer.getWorkFolder().toURI().toURL().toString());
-						sb.append("images/");
-						sb.append(tag++);
-						sb.append(".svg' align='bottom' alt='' title=\"");
-						sb.append(XliffUtils.unquote(XliffUtils.cleanAngles(header)));
-						sb.append("\"/>");
-						tagsMap.put("mrk" + id, sb.toString());
+					if (!"term".equals(e.getAttributeValue("type"))) {
+						if (!tagsMap.containsKey("mrk" + id)) {
+							XliffUtils.checkSVG(tag);
+							String header = e.getHead();
+							StringBuilder sb = new StringBuilder();
+							sb.append("<img data-ref='");
+							sb.append(id);
+							sb.append("' src='");
+							sb.append(TmsServer.getWorkFolder().toURI().toURL().toString());
+							sb.append("images/");
+							sb.append(tag++);
+							sb.append(".svg' align='bottom' alt='' title=\"");
+							sb.append(XliffUtils.unquote(XliffUtils.cleanAngles(header)));
+							sb.append("\"/>");
+							tagsMap.put("mrk" + id, sb.toString());
+						}
+						text.append(tagsMap.get(e.getName() + id));
+						text.append("<span " + XliffUtils.STYLE + ">");
+					} else {
+						text.append("<span " + XliffUtils.STYLE + " title=\""
+								+ XliffUtils.unquote(e.getAttributeValue("value")) + "\">");
 					}
-					text.append(tagsMap.get(e.getName() + id));
-					text.append("<span " + XliffUtils.STYLE + ">");
 					text.append(e.getText());
 					text.append("</span>");
-					if (!tagsMap.containsKey("/mrk" + id)) {
-						XliffUtils.checkSVG(tag);
-						String tail = "</mrk>";
-						StringBuilder sb = new StringBuilder();
-						sb.append("<img data-ref='/");
-						sb.append(e.getAttributeValue("id"));
-						sb.append("' src='");
-						sb.append(TmsServer.getWorkFolder().toURI().toURL().toString());
-						sb.append("images/");
-						sb.append(tag++);
-						sb.append(".svg' align='bottom' alt='' title=\"");
-						sb.append(XliffUtils.unquote(XliffUtils.cleanAngles(tail)));
-						sb.append("\"/>");
-						tagsMap.put("/mrk" + id, sb.toString());
+					if (!"term".equals(e.getAttributeValue("type"))) {
+						if (!tagsMap.containsKey("/mrk" + id)) {
+							XliffUtils.checkSVG(tag);
+							String tail = "</mrk>";
+							StringBuilder sb = new StringBuilder();
+							sb.append("<img data-ref='/");
+							sb.append(e.getAttributeValue("id"));
+							sb.append("' src='");
+							sb.append(TmsServer.getWorkFolder().toURI().toURL().toString());
+							sb.append("images/");
+							sb.append(tag++);
+							sb.append(".svg' align='bottom' alt='' title=\"");
+							sb.append(XliffUtils.unquote(XliffUtils.cleanAngles(tail)));
+							sb.append("\"/>");
+							tagsMap.put("/mrk" + id, sb.toString());
+						}
+						text.append(tagsMap.get("/mrk" + id));
 					}
-					text.append(tagsMap.get("/mrk" + id));
 				} else if (type.equals("cp")) {
 					// empty - special case
 					String hex = "cp" + e.getAttributeValue("hex");
@@ -5029,7 +5036,7 @@ public class XliffStore {
 		result.put("srcLang", srcLang);
 		result.put("tgtLang", tgtLang);
 		String plainText = XliffUtils.pureText(source);
-		result.put("plainText", "<source>" + plainText + "</source>");
+		result.put("plainText", "<source>" + XliffUtils.cleanString(plainText) + "</source>");
 		getTerms.setString(1, json.getString("file"));
 		getTerms.setString(2, json.getString("unit"));
 		getTerms.setString(3, json.getString("segment"));

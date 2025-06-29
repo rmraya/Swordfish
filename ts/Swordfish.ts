@@ -418,8 +418,8 @@ export class Swordfish {
         ipcMain.on('remove-glossaries', (event: IpcMainEvent, arg: any) => {
             Swordfish.removeGlossaries(arg);
         });
-        ipcMain.on('show-add-term', (event: IpcMainEvent, arg: any) => {
-            Swordfish.showAddTerm(arg);
+        ipcMain.on('show-add-term', (event: IpcMainEvent, glossary: string) => {
+            Swordfish.showAddTerm(glossary);
         });
         ipcMain.on('close-addTerm', () => {
             Swordfish.addTermWindow.close();
@@ -1037,7 +1037,7 @@ export class Swordfish {
             new MenuItem({ label: 'Insert Tags...', submenu: tagsMenu }),
             { label: 'Insert Next Tag', accelerator: 'CmdOrCtrl+Shift+T', click: () => { Swordfish.mainWindow.webContents.send('insert-next-tag'); } },
             { label: 'Insert Remaining Tags', accelerator: 'CmdOrCtrl+Alt+T', click: () => { Swordfish.mainWindow.webContents.send('insert-remaining-tags'); } },
-            { label: 'Remove All Tags', accelerator: 'CmdOrCtrl+Shift+R', click: () => { Swordfish.mainWindow.webContents.send('remove-tags'); } },
+            { label: 'Remove All Tags', accelerator: 'CmdOrCtrl+Alt+Shift+R', click: () => { Swordfish.mainWindow.webContents.send('remove-tags'); } },
         ]);
         let nextMT: string = 'Alt+Right';
         let previousMT: string = 'Alt+Left';
