@@ -831,6 +831,9 @@ export class Swordfish {
         ipcMain.on('show-notes', (event: IpcMainEvent, arg: any) => {
             Swordfish.showNotes(arg);
         });
+        ipcMain.on('close-notes', () => {
+            Swordfish.notesWindow.close();
+        });
         ipcMain.on('get-initial-notes', (event: IpcMainEvent) => {
             Swordfish.notesEvent = event;
             event.sender.send('note-params', Swordfish.notesParam);
@@ -5464,9 +5467,9 @@ export class Swordfish {
     }
 
     static toggleNotes(): void {
-        if (Swordfish.notesWindow) {
+        if (Swordfish.notesWindow && !Swordfish.notesWindow.isDestroyed()) {
             Swordfish.notesWindow.close();
-            Swordfish.mainWindow.webContents.send('notes-closed');
+            Swordfish.mainWindow?.webContents.send('notes-closed');
             Swordfish.notesParam = undefined;
             return;
         }
@@ -5474,7 +5477,7 @@ export class Swordfish {
     }
 
     static showNotes(arg: any): void {
-        if (!Swordfish.notesWindow) {
+        if (!Swordfish.notesWindow || Swordfish.notesWindow.isDestroyed()) {
             Swordfish.notesWindow = new BrowserWindow({
                 parent: Swordfish.mainWindow,
                 width: 450,
@@ -5496,14 +5499,16 @@ export class Swordfish {
             let fileUrl: URL = new URL('file://' + filePath);
             Swordfish.notesWindow.loadURL(fileUrl.href);
             Swordfish.notesWindow.addListener('closed', () => {
-                Swordfish.mainWindow.webContents.send('notes-closed');
+                try {
+                    Swordfish.mainWindow.webContents.send('notes-closed');
+                } catch (e) {
+                    // ignore
+                }
             });
             Swordfish.notesWindow.once('ready-to-show', () => {
                 Swordfish.notesWindow.show();
             });
-            this.notesWindow.on('close', () => {
-                this.mainWindow.focus();
-            });
+            Swordfish.setLocation(this.notesWindow, 'notes.html');
             return;
         }
         Swordfish.getNotes(arg);

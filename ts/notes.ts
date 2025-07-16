@@ -35,6 +35,11 @@ class Notes {
         (document.getElementById('removeNote') as HTMLAnchorElement).addEventListener('click', () => {
             this.removeNote();
         });
+        document.addEventListener('keydown', (event: KeyboardEvent) => {
+            if (event.code === 'Escape' || event.code === 'F2') {
+                this.electron.ipcRenderer.send('close-notes');
+            }
+        });
         let main: HTMLDivElement = document.getElementById('main') as HTMLDivElement;
         main.classList.add('fill_width');
 
@@ -57,6 +62,7 @@ class Notes {
             let tab = new Tab(notes[i].id, 'Note ' + notes[i].id, false, this.tabHolder);
             tab.getContainer().innerText = notes[i].note;
             tab.getContainer().style.padding = '8px';
+            tab.getContainer().style.width = 'calc(100% - 16px)';
             this.tabHolder.addTab(tab);
         }
         setTimeout(() => {
