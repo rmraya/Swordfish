@@ -17,7 +17,7 @@ class Main {
     static tabHolder: TabHolder;
     static translationViews: Map<string, TranslationView>;
 
-    mainContainer: HTMLDivElement;
+    static mainContainer: HTMLDivElement;
     static main: HTMLDivElement;
 
     projectsView: ProjectsView;
@@ -28,8 +28,8 @@ class Main {
 
     constructor() {
         Main.translationViews = new Map<string, TranslationView>();
-        this.mainContainer = document.getElementById('mainContainer') as HTMLDivElement;
-        Main.tabHolder = new TabHolder(this.mainContainer, 'main');
+        Main.mainContainer = document.getElementById('mainContainer') as HTMLDivElement;
+        Main.tabHolder = new TabHolder(Main.mainContainer, 'main');
 
         Main.main = document.getElementById('main') as HTMLDivElement;
 
@@ -85,7 +85,7 @@ class Main {
             Main.electron.ipcRenderer.send('get-theme');
         });
         window.addEventListener('resize', () => {
-            this.resizePanels();
+            Main.resizePanels();
         });
         Main.electron.ipcRenderer.on('view-projects', () => {
             Main.tabHolder.selectTab('projects');
@@ -233,6 +233,9 @@ class Main {
         });
         Main.electron.ipcRenderer.on('fix-tags', () => {
             this.fixTags();
+        });
+        Main.electron.ipcRenderer.on('set-project-files', (event: Electron.IpcRendererEvent, files: any[]) => {
+            this.drawFiles(files);
         });
         Main.electron.ipcRenderer.on('update-target-cell', (event: Electron.IpcRendererEvent, arg: any) => {
             this.updateTargetCell(arg);
@@ -390,6 +393,9 @@ class Main {
         Main.electron.ipcRenderer.on('update-target', (event: Electron.IpcRendererEvent, arg: any) => {
             this.updateTarget(arg);
         });
+        Main.electron.ipcRenderer.on('toggle-files-panel', () => {
+            this.toggleFilesPanel();
+        });
         Main.electron.ipcRenderer.on('notes-requested', () => {
             this.notesRequested();
         });
@@ -429,12 +435,12 @@ class Main {
         let observer = new MutationObserver((mutationsList) => {
             for (let mutation of mutationsList) {
                 if (mutation.type === 'attributes') {
-                    Main.main.style.height = (this.mainContainer.clientHeight - Main.tabHolder.getTabsHeight()) + 'px';
-                    Main.main.style.width = this.mainContainer.clientWidth + 'px';
+                    Main.main.style.height = (Main.mainContainer.clientHeight - Main.tabHolder.getTabsHeight()) + 'px';
+                    Main.main.style.width = Main.mainContainer.clientWidth + 'px';
                 }
             }
         });
-        observer.observe(this.mainContainer, config);
+        observer.observe(Main.mainContainer, config);
 
         document.addEventListener('paste', (event) => {
             let clipboardData = event.clipboardData;
@@ -454,8 +460,8 @@ class Main {
         });
 
         setTimeout(() => {
-            this.resizePanels();
-        }, 200);
+            Main.resizePanels();
+        }, 300);
     }
 
     hasTags(html: string): boolean {
@@ -565,9 +571,9 @@ class Main {
         }
     }
 
-    resizePanels(): void {
-        this.mainContainer.style.width = document.body.clientWidth + 'px';
-        this.mainContainer.style.height = document.body.clientHeight + 'px';
+    static resizePanels(): void {
+        Main.mainContainer.style.width = document.body.clientWidth + 'px';
+        Main.mainContainer.style.height = document.body.clientHeight + 'px';
     }
 
     static checkTabs(): void {
@@ -614,6 +620,13 @@ class Main {
         let selected = Main.tabHolder.getSelected();
         if (Main.translationViews.has(selected)) {
             (Main.translationViews.get(selected) as TranslationView).insertAiResponse(response);
+        }
+    }
+
+    drawFiles(files: any[]) {
+        let selected = Main.tabHolder.getSelected();
+        if (Main.translationViews.has(selected)) {
+            (Main.translationViews.get(selected) as TranslationView).drawFiles(files);
         }
     }
 
@@ -1200,6 +1213,12 @@ class Main {
         }
         if (Main.translationViews.has(selected)) {
             (Main.translationViews.get(selected) as TranslationView).showNotes();
+        }
+    }
+
+    toggleFilesPanel(): void {
+        for (let key of Main.translationViews.keys()) {
+            (Main.translationViews.get(key) as TranslationView).toggleFilesPanel();
         }
     }
 

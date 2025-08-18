@@ -22,6 +22,7 @@ interface Segment {
     target: string;
     match: number;
     hasNotes: boolean;
+    hasMetadata: boolean;
     tagErrors: boolean;
     spaceErrors: boolean;
 }

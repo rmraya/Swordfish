@@ -303,6 +303,7 @@ class ProjectsView {
         this.electron.ipcRenderer.on('set-projects', (event: Electron.IpcRendererEvent, arg: any) => {
             this.projects = arg;
             this.displayProjects();
+            Main.resizePanels();
         });
 
         // finish setup

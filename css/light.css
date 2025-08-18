@@ -59,6 +59,10 @@ body {
 	background-position: center;
 }
 
+.dragging {
+	background-color: var(--ClassicBlue50);
+}
+
 .wait {
 	cursor: wait !important;
 }
@@ -121,6 +125,31 @@ thead tr {
 .stripes tr {
 	border-top: 2px solid var(--gray50);
 	border-bottom: 2px solid var(--gray50);
+}
+
+.nestedTable {
+	border: none;
+}
+
+.nestedTable tr {
+	border-top: none;
+	border-bottom: none;
+}
+
+.nestedTable td {
+	border: 2px solid var(--gray50);
+}
+
+.nestedTable tr:first-child td {
+	border-top: none;
+}
+
+.nestedTable tr:last-child td {
+	border-bottom: none;
+}
+
+.nopadding {
+	padding: 0 !important;
 }
 
 .currentRow {
@@ -587,15 +616,21 @@ th svg {
 
 .titlepanel {
 	margin: 0;
-	padding-top: 0;
+	padding-top: 0px;
 	padding-left: 4px;
 	border-radius: 4px 4px 0px 0px;
 	background: var(--ClassicBlue90);
 	color: var(--gray10);
 	white-space: nowrap;
-	overflow-x: hidden;
+	overflow: hidden;
 	height: 26px;
 	vertical-align: middle;
+}
+
+.titlepanel a svg {
+	color: var(--white);
+	fill: var(--white);
+	stroke: var(--white);
 }
 
 .roundedBottom {
@@ -627,6 +662,7 @@ th svg {
 	visibility: hidden;
 	padding: 4px;
 	border-radius: 2px;
+	box-shadow: 0px 2px 4px var(--gray110);
 	white-space: nowrap;
 	/* Position the tooltip */
 	position: absolute;
@@ -635,43 +671,43 @@ th svg {
 
 /* Tooltip arrow */
 .bottomTooltip .tooltiptext::before {
-  content: "";
-  position: absolute;
-  bottom: 100%;
-  left: 8px;
-  border-width: 8px;
-  border-style: solid;
-  border-color: transparent transparent var(--ClassicBlue30) transparent;
+	content: "";
+	position: absolute;
+	bottom: 100%;
+	left: 8px;
+	border-width: 8px;
+	border-style: solid;
+	border-color: transparent transparent var(--ClassicBlue30) transparent;
 }
 
 .bottomRightTooltip .tooltiptext::before {
-  content: "";
-  position: absolute;
-  bottom: 100%;
-  right: 8px;
-  border-width: 8px;
-  border-style: solid;
-  border-color: transparent transparent var(--ClassicBlue30) transparent;
+	content: "";
+	position: absolute;
+	bottom: 100%;
+	right: 8px;
+	border-width: 8px;
+	border-style: solid;
+	border-color: transparent transparent var(--ClassicBlue30) transparent;
 }
 
 .bottomCenterTooltip .tooltiptext::before {
-  content: "";
-  position: absolute;
-  bottom: 100%;
-  left: 80px;
-  border-width: 8px;
-  border-style: solid;
-  border-color: transparent transparent var(--ClassicBlue30) transparent;
+	content: "";
+	position: absolute;
+	bottom: 100%;
+	left: 80px;
+	border-width: 8px;
+	border-style: solid;
+	border-color: transparent transparent var(--ClassicBlue30) transparent;
 }
 
 .topTooltip .tooltiptext::after {
-  content: "";
-  position: absolute;
-  top: 100%;
-  left: 8px;
-  border-width: 8px;
-  border-style: solid;
-  border-color: var(--ClassicBlue30) transparent transparent transparent;
+	content: "";
+	position: absolute;
+	top: 100%;
+	left: 8px;
+	border-width: 8px;
+	border-style: solid;
+	border-color: var(--ClassicBlue30) transparent transparent transparent;
 }
 
 .topTooltip .tooltiptext {
@@ -709,14 +745,31 @@ th svg {
 	visibility: hidden;
 	padding: 4px;
 	border-radius: 4px;
+	box-shadow: 0px 2px 4px var(--gray110);
 	white-space: nowrap;
 	/* Position the tooltip */
 	position: absolute;
+	left: 130%;
+	top: 50%;
 	z-index: 100;
 }
 
 .iconTooltip:hover .tooltiptext {
 	visibility: visible;
+}
+
+.filesTooltip {
+	background-color: var(--ClassicBlue30);
+	color: var(--black);
+	visibility: hidden;
+	padding: 4px;
+	border-radius: 4px;
+	white-space: nowrap;
+	/* Position the tooltip */
+	position: absolute;
+	top: 0;
+	left: 0;
+	z-index: 100;
 }
 
 .highlight {
@@ -820,6 +873,19 @@ svg.stats {
 	border-radius: 4px;
 	width: calc(100% - 12px);
 	height: calc(100% - 16px);
+	overflow-y: hidden;
+	overflow-x: hidden;
+	background: var(--gray30);
+}
+
+.translationPanel {
+	margin-top: 8px;
+	margin-right: 4px;
+	margin-left: 4px;
+	margin-bottom: 8px;
+	border-radius: 4px;
+	width: calc(100% - 8px);
+	height: calc(100% - 16px);
 	overflow-y: auto;
 	overflow-x: hidden;
 	background: var(--gray30);
@@ -880,7 +946,7 @@ svg.stats {
 }
 
 ::-webkit-scrollbar-corner {
-	background:  var(--ClassicBlue80);
+	background: var(--ClassicBlue80);
 }
 
 ::-webkit-scrollbar-button {
@@ -904,4 +970,47 @@ svg.stats {
 .dialogBody {
 	padding: 8px 0px 16px 8px;
 	overflow-y: hidden;
+}
+
+.borderBottom {
+	border-bottom: 1px solid var(--gray50);
+}
+
+.fileContainer {
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+	width: 100%;
+	overflow: visible;
+	margin-left: 8px;
+	padding: 0;
+	text-align: center;
+	text-wrap: nowrap;
+}
+
+.fileContainer input {
+	background-color: var(--gray20);
+	border: none;
+	outline: none;
+	padding: 2px 1px;
+}
+
+.fileContainer label {
+	padding: 2px 1px;
+	white-space: nowrap;
+}
+
+.sourceFile {
+	font-style: italic;
+	margin-top: 4px;
+	padding: 2px 1px;
+	color: var(--ClassicBlue90);
+	text-align: left;
+}
+
+.sourceSymbol {
+	color: var(--ClassicBlue90);
+	margin-left: 2px;
+	margin-right: 2px;
+	cursor: pointer;
 }

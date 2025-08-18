@@ -58,6 +58,11 @@ import com.maxprograms.swordfish.xliff.XliffUtils;
 import com.maxprograms.xliff2.Resegmenter;
 import com.maxprograms.xliff2.ToXliff2;
 import com.maxprograms.xml.CatalogBuilder;
+import com.maxprograms.xml.Document;
+import com.maxprograms.xml.Element;
+import com.maxprograms.xml.Indenter;
+import com.maxprograms.xml.SAXBuilder;
+import com.maxprograms.xml.XMLOutputter;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 
@@ -220,6 +225,10 @@ public class ProjectsHandler implements HttpHandler {
 				response = mergeSegment(request);
 			} else if ("/projects/getNotes".equals(url)) {
 				response = getNotes(request);
+			} else if ("/projects/getMetadata".equals(url)) {
+				response = getMetadata(request);
+			} else if ("/projects/getFiles".equals(url)) {
+				response = getFiles(request);
 			} else if ("/projects/addNote".equals(url)) {
 				response = addNote(request);
 			} else if ("/projects/removeNote".equals(url)) {
@@ -943,7 +952,9 @@ public class ProjectsHandler implements HttpHandler {
 										CatalogBuilder.getCatalog(catalogFile));
 							}
 						}
-						if (!"0".equals(res.get(0))) {
+						if ("0".equals(res.get(0))) {
+							setSourceFile(xliff, source.getName());
+						} else {
 							MessageFormat mf = new MessageFormat(Messages.getString("ProjectsHandler.11"));
 							logger.log(Level.ERROR, mf.format(new String[] { source.getAbsolutePath() }));
 							try {
@@ -1003,6 +1014,29 @@ public class ProjectsHandler implements HttpHandler {
 			result.put(Constants.REASON, e.getMessage());
 		}
 		return result;
+	}
+
+	private void setSourceFile(File xliff, String name) throws SAXException, IOException, ParserConfigurationException {
+		SAXBuilder builder = new SAXBuilder();
+		Document doc = builder.build(xliff);
+		Element root = doc.getRootElement();
+		List<Element> files = root.getChildren("file");
+		for (Element file : files) {
+			Element metadata = file.getChild("mda:metadata");
+			Element group = new Element("mda:metaGroup");
+			group.setAttribute("category", "sourceFile");
+			metadata.addContent(group);
+			Element meta = new Element("mda:meta");
+			meta.setAttribute("type", "sourceFile");
+			meta.addContent(name);
+			group.addContent(meta);
+			Indenter.indent(metadata, 2);
+		}
+		try (FileOutputStream out = new FileOutputStream(xliff)) {
+			XMLOutputter outputter = new XMLOutputter();
+			outputter.preserveSpace(true);
+			outputter.output(doc, out);
+		}
 	}
 
 	private void loadPreferences() throws IOException {
@@ -1866,6 +1900,40 @@ public class ProjectsHandler implements HttpHandler {
 						json.getString("segment")));
 			}
 		} catch (SQLException e) {
+			logger.log(Level.ERROR, e);
+			result.put(Constants.REASON, e.getMessage());
+		}
+		return result;
+	}
+
+	private JSONObject getFiles(String request) {
+		JSONObject result = new JSONObject();
+		JSONObject json = new JSONObject(request);
+		try {
+			String project = json.getString("project");
+			if (projectStores.containsKey(project)) {
+				result.put("files", projectStores.get(project).getFiles());
+			}
+		} catch (SQLException | JSONException e) {
+			logger.log(Level.ERROR, e);
+			result.put(Constants.REASON, e.getMessage());
+		}
+		return result;
+	}
+
+	private JSONObject getMetadata(String request) {
+		JSONObject result = new JSONObject();
+		JSONObject json = new JSONObject(request);
+		try {
+			String project = json.getString("project");
+			if (projectStores.containsKey(project)) {
+				JSONObject metadata = projectStores.get(project).getMetadata(json);
+				if (metadata != null && metadata.has("data")) {
+					result = json;
+					result.put("data", metadata.getJSONArray("data"));
+				}
+			}
+		} catch (SQLException | JSONException e) {
 			logger.log(Level.ERROR, e);
 			result.put(Constants.REASON, e.getMessage());
 		}

@@ -24,7 +24,7 @@ module swordfish {
 	requires java.xml;
 	requires java.sql;
 	requires java.net.http;
-	requires transitive javabcp47;
+	requires transitive bcp47j;
 	requires transitive openxliff;
 	requires transitive xmljava;
 	requires transitive jdk.httpserver;

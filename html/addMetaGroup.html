@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <title id="version">Group</title>
+    <link id="theme" rel="stylesheet" type="text/css" href="../css/light.css">
+    <link rel="stylesheet" type="text/css" href="../css/fonts.css">
+</head>
+
+<body class="dialogBody" onload="new AddMetaGroup();">
+    <table class="fill_width">
+        <tr>
+            <td class="middle"><label for="metaGroup" class="noWrap">ID:</label></td>
+            <td class="middle fill_width"><input id="metaGroup" class="table_input"></td>
+        </tr>
+        <tr>
+            <td class="middle"><label for="category" class="noWrap">Category:</label></td>
+            <td class="middle fill_width"><input id="category" class="table_input"></td>
+        </tr>
+        <tr>
+            <td class="middle"><label for="appliesTo" class="noWrap">Applies To:</label></td>
+            <td class="middle fill_width">
+                <select id="appliesTo" class="table_select">
+                    <option value="none"></option>
+                    <option value="source">Source</option>
+                    <option value="target">Target</option>
+                    <option value="ignorable">Ignorable</option>
+                    </select>
+                </td>
+        </tr>
+    </table>
+    <div class="buttonArea">
+        <button id="saveGroup">Save</button>
+    </div>
+    <script src="../js/addMetaGroup.js"></script>
+</body>
+
+</html>

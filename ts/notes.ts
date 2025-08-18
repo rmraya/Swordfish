@@ -23,14 +23,17 @@ class Notes {
             (document.getElementById('theme') as HTMLLinkElement).href = theme;
         });
         this.electron.ipcRenderer.send('get-initial-notes');
-        this.electron.ipcRenderer.on('set-notes', (event: Electron.IpcRendererEvent, arg: any) => {
-            this.setNotes(arg.notes);
+        this.electron.ipcRenderer.on('set-notes', (event: Electron.IpcRendererEvent, arg: Note[]) => {
+            this.setNotes(arg);
         });
         this.electron.ipcRenderer.on('note-params', (event: Electron.IpcRendererEvent, arg: any) => {
             this.segmentData = arg;
         });
         (document.getElementById('addNote') as HTMLAnchorElement).addEventListener('click', () => {
             this.addNote();
+        });
+        (document.getElementById('editNote') as HTMLButtonElement).addEventListener('click', () => {
+            this.editNote();
         });
         (document.getElementById('removeNote') as HTMLAnchorElement).addEventListener('click', () => {
             this.removeNote();
@@ -47,15 +50,20 @@ class Notes {
         window.addEventListener('resize', () => {
             this.resize();
         });
+
+        setTimeout(() => {
+            this.electron.ipcRenderer.send('set-height', { window: 'notes', width: document.body.clientWidth, height: document.body.clientHeight });
+        }, 200);
+
     }
 
     resize(): void {
-        let toolbar: HTMLDivElement = document.getElementById('toolbar') as HTMLDivElement;
+        let noteButtons: HTMLDivElement = document.getElementById('noteButtons') as HTMLDivElement;
         let main: HTMLDivElement = document.getElementById('main') as HTMLDivElement;
-        main.style.height = (document.body.clientHeight - toolbar.clientHeight - 10) + 'px';
+        main.style.height = (document.body.clientHeight - noteButtons.clientHeight) + 'px';
     }
 
-    setNotes(notes: any[]): void {
+    setNotes(notes: Note[]): void {
         this.tabHolder.clear();
         let length = notes.length;
         for (let i: number = 0; i < length; i++) {
@@ -67,11 +75,17 @@ class Notes {
         }
         setTimeout(() => {
             this.electron.ipcRenderer.send('set-height', { window: 'notes', width: document.body.clientWidth, height: document.body.clientHeight });
+            this.resize();
         }, 200);
     }
 
     addNote(): void {
         this.electron.ipcRenderer.send('show-add-note', this.segmentData);
+    }
+
+    // TODO: change to edit
+    editNote(): void {
+        this.electron.ipcRenderer.send('show-edit-note', this.segmentData);
     }
 
     removeNote(): void {

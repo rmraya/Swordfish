@@ -28,11 +28,19 @@ class TranslationView {
         "<path d='M11 15h2v2h-2v-2zm0-8h2v6h-2V7zm.99-5C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8z'/></svg>";
     static SVG_NOTE: string = "<svg xmlns='http://www.w3.org/2000/svg' height='24' viewBox='0 0 24 24' width='24'>" +
         "<path d='M20 2H4c-1.1 0-1.99.9-1.99 2L2 22l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm0 14H5.17l-.59.59-.58.58V4h16v12zm-9-4h2v2h-2zm0-6h2v4h-2z'/></svg>";
+    static SVG_EXPAND: string = '<svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px">' +
+        '<path d="M460-320v-320L300-480l160 160ZM200-120q-33 0-56.5-23.5T120-200v-560q0-33 23.5-56.5T200-840h560q33 0 56.5 23.5T840-760v560q0 33-23.5 56.5T760-120H200Zm440-80h120v-560H640v560Zm-80 0v-560H200v560h360Zm80 0h120-120Z"/>' +
+        '</svg>';
+    static SVG_COLLAPSE: string = '<svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px">' +
+        '<path d="M300-640v320l160-160-160-160ZM200-120q-33 0-56.5-23.5T120-200v-560q0-33 23.5-56.5T200-840h560q33 0 56.5 23.5T840-760v560q0 33-23.5 56.5T760-120H200Zm440-80h120v-560H640v560Zm-80 0v-560H200v560h360Zm80 0h120-120Z"/>' +
+        '</svg>';
+    static SVG_METDATA: string = "<svg xmlns='http://www.w3.org/2000/svg' height='24px' viewBox='0 -960 960 960' width='24px'><path d='M240-160q-33 0-56.5-23.5T160-240q0-33 23.5-56.5T240-320q33 0 56.5 23.5T320-240q0 33-23.5 56.5T240-160Zm0-240q-33 0-56.5-23.5T160-480q0-33 23.5-56.5T240-560q33 0 56.5 23.5T320-480q0 33-23.5 56.5T240-400Zm0-240q-33 0-56.5-23.5T160-720q0-33 23.5-56.5T240-800q33 0 56.5 23.5T320-720q0 33-23.5 56.5T240-640Zm240 480q-33 0-56.5-23.5T400-240q0-33 23.5-56.5T480-320q33 0 56.5 23.5T560-240q0 33-23.5 56.5T480-160Zm0-240q-33 0-56.5-23.5T400-480q0-33 23.5-56.5T480-560q33 0 56.5 23.5T560-480q0 33-23.5 56.5T480-400Zm0-240q-33 0-56.5-23.5T400-720q0-35 24.5-57.5T483-800q-2 10-2.5 19.5T480-760q0 31 6.5 60.5T505-644q-6 2-12 3t-13 1Zm280 80q-83 0-141.5-58.5T560-760q0-83 58.5-141.5T760-960q83 0 141.5 58.5T960-760q0 83-58.5 141.5T760-560Zm-40 400q-33 0-56.5-23.5T640-240q0-33 23.5-56.5T720-320q33 0 56.5 23.5T800-240q0 33-23.5 56.5T720-160Zm0-240q-33 0-56.5-23.5T640-480q0-7 1-13t3-12q26 12 55.5 18.5T760-480q11 0 20.5-.5T800-483q0 34-22.5 58.5T720-400Zm40-240q8 0 14-6t6-14q0-8-6-14t-14-6q-8 0-14 6t-6 14q0 8 6 14t14 6Zm-20-80h40v-160h-40v160Z'/></svg>";
 
     static LOCK_SPAN: string = "<span class='iconTooltip'>" + this.SVG_LOCK + " <small class='tooltiptext'>Locked segment</small></span>";
     static FINAL_SPAN: string = "<span class='iconTooltip'>" + this.SVG_FINAL + " <small class='tooltiptext'>Confirmed</small></span>";
     static TRANSLATED_SPAN: string = "<span class='iconTooltip'>" + this.SVG_TRANSLATED + " <small class='tooltiptext'>Draft</small></span>";
     static NOTES_SPAN: string = "<span class='iconTooltip'>" + this.SVG_NOTE + " <small class='tooltiptext'>Segment has notes</small></span>";
+    static METADATA_SPAN: string = "<span class='iconTooltip'>" + this.SVG_METDATA + " <small class='tooltiptext'>Segment has metadata</small></span>";
     static SPACE_WARNING: string = "<span class='iconTooltip'>" + this.SVG_WARNING + " <small class='tooltiptext'>Space errors</small></span>";
     static TAG_WARNING: string = "<span class='iconTooltip'>" + this.SVG_WARNING + " <small class='tooltiptext'>Tag errors</small></span>";
     static SPACE_TAG_WARNING: string = "<span class='iconTooltip'>" + this.SVG_WARNING + " <small class='tooltiptext'>Tag and space errors</small></span>";
@@ -45,7 +53,10 @@ class TranslationView {
     observer: MutationObserver | undefined;
     rowsObserver: MutationObserver | undefined;
 
+    verticalPanels: ThreeVerticalPanels;
     mainArea: HTMLDivElement;
+    filesPanel: HTMLDivElement;
+    filesContainer: HTMLDivElement = document.createElement('div');
     translationArea: HTMLDivElement;
     rightPanel: HTMLDivElement;
 
@@ -67,6 +78,9 @@ class TranslationView {
     currentContent: string = '';
     currentId: SegmentId = { id: '', file: '', unit: '' };
     sourceTags: Map<string, string>;
+
+    collapseFilesButton: HTMLAnchorElement;
+    expandFilesButton: HTMLAnchorElement;
 
     filterButton: HTMLAnchorElement;
     sortButton: HTMLAnchorElement;
@@ -114,18 +128,25 @@ class TranslationView {
 
         this.buildTopBar();
 
+        this.collapseFilesButton = document.createElement('a');
+        this.expandFilesButton = document.createElement('a');
+
         this.mainArea = document.createElement('div');
         this.mainArea.id = 'main' + projectId;
         this.mainArea.style.display = 'flex';
         this.container.appendChild(this.mainArea);
 
-        let verticalPanels: VerticalSplit = new VerticalSplit(this.mainArea);
-        verticalPanels.setWeights([75, 25]);
+        this.verticalPanels = new ThreeVerticalPanels(this.mainArea);
+        this.verticalPanels.setWeights([18, 62, 20]);
 
-        this.translationArea = verticalPanels.leftPanel();
+        this.filesPanel = this.verticalPanels.leftPanel();
+        this.filesPanel.style.height = '100%';
+
+        this.translationArea = this.verticalPanels.centerPanel();
         this.translationArea.style.height = '100%';
 
-        this.rightPanel = verticalPanels.rightPanel();
+        this.rightPanel = this.verticalPanels.rightPanel();
+        this.rightPanel.style.height = '100%';
 
         this.container.addEventListener('keydown', (event: KeyboardEvent) => {
             if (event.key === 'PageDown' && !(event.ctrlKey || event.metaKey)) {
@@ -249,6 +270,7 @@ class TranslationView {
             }
         });
 
+        this.buildFilesArea();
         this.buildTranslationArea();
         this.buildRightSide();
 
@@ -287,6 +309,147 @@ class TranslationView {
             this.setZoom(arg.zoom);
         });
         this.setSpellChecker();
+    }
+
+    drawFiles(files: any[]): void {
+        this.filesContainer.innerHTML = '';
+        for (const file of files) {
+            let sourceFile: string = file.sourceFile;
+            let detailsArray: any[] = file.files;
+
+            if (detailsArray.length === 1) {
+                let fileDiv = document.createElement('div');
+                fileDiv.className = 'fileContainer';
+
+                let infoSpan: HTMLSpanElement = document.createElement('span');
+                infoSpan.classList.add('iconTooltip');
+                infoSpan.classList.add('sourceSymbol');
+                infoSpan.innerHTML = '\u24D8<small class="tooltiptext">File Info</small>';
+                infoSpan.addEventListener('click', () => {
+                    this.showFileInfo(detailsArray[0]);
+                });
+                fileDiv.appendChild(infoSpan);
+
+                if (this.hasCustomMetadata(detailsArray[0].metadata)) {
+                    let metaSpan: HTMLSpanElement = document.createElement('span');
+                    metaSpan.classList.add('iconTooltip');
+                    metaSpan.classList.add('sourceSymbol');
+                    metaSpan.innerHTML = '\u283F<small class="tooltiptext">Custom Metadata</small>';
+                    metaSpan.addEventListener('click', () => {
+                        this.showFileMetadata(detailsArray[0]);
+                    });
+                    fileDiv.appendChild(metaSpan);
+                }
+
+                let label: HTMLLabelElement = document.createElement('label');
+                label.innerText = sourceFile;
+                fileDiv.appendChild(label);
+                this.filesContainer.appendChild(fileDiv);
+            } else {
+                let fileDiv = document.createElement('div');
+                fileDiv.className = 'fileContainer';
+                this.filesContainer.appendChild(fileDiv);
+
+                let sourceSpan: HTMLSpanElement = document.createElement('span');
+                sourceSpan.className = 'sourceFile';
+                sourceSpan.innerText = sourceFile;
+                fileDiv.appendChild(sourceSpan);
+
+                for (const details of detailsArray) {
+                    let detailsDiv = document.createElement('div');
+                    detailsDiv.className = 'fileContainer';
+                    this.filesContainer.appendChild(detailsDiv);
+
+                    let checkBox: HTMLInputElement = document.createElement('input');
+                    checkBox.type = 'checkbox';
+                    checkBox.id = 'file_' + details.file;
+                    checkBox.checked = true;
+                    detailsDiv.appendChild(checkBox);
+
+                    let infoSpan: HTMLSpanElement = document.createElement('span');
+                    infoSpan.classList.add('iconTooltip');
+                    infoSpan.classList.add('sourceSymbol');
+                    infoSpan.innerHTML = '\u24D8<small class="tooltiptext">File Info</small>';
+                    infoSpan.addEventListener('click', () => {
+                        this.showFileInfo(details);
+                    });
+                    detailsDiv.appendChild(infoSpan);
+
+                    if (this.hasCustomMetadata(details.metadata)) {
+                        let metaSpan: HTMLSpanElement = document.createElement('span');
+                        metaSpan.classList.add('iconTooltip');
+                        metaSpan.classList.add('sourceSymbol');
+                        metaSpan.innerHTML = '\u283F<small class="tooltiptext">Custom Metadata</small>';
+                        metaSpan.addEventListener('click', () => {
+                            this.showFileMetadata(details);
+                        });
+                        detailsDiv.appendChild(metaSpan);
+                    }
+
+                    let label: HTMLLabelElement = document.createElement('label');
+                    label.htmlFor = checkBox.id;
+                    label.innerText = details.original;
+                    detailsDiv.appendChild(label);
+                }
+            }
+        }
+    }
+
+    showFileMetadata(details: any) {
+        let metadata: any = details.metadata;
+        let data: any[] = metadata.data;
+        let array: any[] = [];
+        for (let i = 0; i < data.length; i++) {
+            let meta: any = data[i];
+            let category: string = meta.category || '';
+            if (category === 'format' || category === 'tool' || category === 'PI' || category === 'sourceFile' || category === 'document') {
+                continue; // Skip standard metadata categories
+            }
+            array.push(meta);
+        }
+        let json: any = { data: array };
+        json.project = this.projectId;
+        json.file = details.file;
+        this.electron.ipcRenderer.send('show-metadata', json);
+        console.log(JSON.stringify(json, null, 2));
+    }
+
+    showFileInfo(details: any) {
+        let metadata: any = details.metadata;
+        let data: any[] = metadata.data;
+        let array: any[] = [];
+        for (let i = 0; i < data.length; i++) {
+            let meta: any = data[i];
+            let category: string = meta.category || '';
+            if (category === 'format' || category === 'tool' || category === 'PI' || category === 'sourceFile' || category === 'document') {
+                array.push(meta);
+            }
+        }
+        let info: any = {
+            original: details.original,
+            id: details.file,
+            metadata: array
+        };
+        this.electron.ipcRenderer.send('show-file-info', info);
+    }
+
+    hasCustomMetadata(metadata: any): boolean {
+        let categories: string[] = ['format', 'tool', 'PI', 'sourceFile', 'document'];
+        let data: any[] = metadata.data;
+        for (let i = 0; i < data.length; i++) {
+            let meta: any = data[i];
+            if (meta.category) {
+                if (!categories.includes(meta.category)) {
+                    return true;
+                }
+            }
+            if (meta.id || meta.appliesTo) {
+                if (!categories.includes(meta.id)) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
     setZoom(zoom: string): void {
@@ -478,6 +641,17 @@ class TranslationView {
             this.showNotes();
         });
         this.topBar.appendChild(notesButton);
+
+        let metadataButton: HTMLAnchorElement = document.createElement('a');
+        metadataButton.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px">' +
+            '<path d="M240-160q-33 0-56.5-23.5T160-240q0-33 23.5-56.5T240-320q33 0 56.5 23.5T320-240q0 33-23.5 56.5T240-160Zm0-240q-33 0-56.5-23.5T160-480q0-33 23.5-56.5T240-560q33 0 56.5 23.5T320-480q0 33-23.5 56.5T240-400Zm0-240q-33 0-56.5-23.5T160-720q0-33 23.5-56.5T240-800q33 0 56.5 23.5T320-720q0 33-23.5 56.5T240-640Zm240 0q-33 0-56.5-23.5T400-720q0-33 23.5-56.5T480-800q33 0 56.5 23.5T560-720q0 33-23.5 56.5T480-640Zm240 0q-33 0-56.5-23.5T640-720q0-33 23.5-56.5T720-800q33 0 56.5 23.5T800-720q0 33-23.5 56.5T720-640ZM480-400q-33 0-56.5-23.5T400-480q0-33 23.5-56.5T480-560q33 0 56.5 23.5T560-480q0 33-23.5 56.5T480-400Zm40 240v-123l221-220q9-9 20-13t22-4q12 0 23 4.5t20 13.5l37 37q8 9 12.5 20t4.5 22q0 11-4 22.5T863-380L643-160H520Zm300-263-37-37 37 37ZM580-220h38l121-122-18-19-19-18-122 121v38Zm141-141-19-18 37 37-18-19Z"/>' +
+            '</svg>' +
+            '<span class="tooltiptext bottomTooltip">Show/Hide Metadata</span>';
+        metadataButton.className = 'tooltip bottomTooltip';
+        metadataButton.addEventListener('click', () => {
+            this.showMetadata();
+        });
+        this.topBar.appendChild(metadataButton);
 
         let addTermButton: HTMLAnchorElement = document.createElement('a');
         addTermButton.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 0 24 24" width="24">' +
@@ -710,9 +884,8 @@ class TranslationView {
     }
 
     buildTranslationArea(): void {
-
         let leftPanel: HTMLDivElement = document.createElement('div');
-        leftPanel.classList.add('leftPaddedPanel');
+        leftPanel.classList.add('translationPanel');
         this.translationArea.appendChild(leftPanel);
 
         let tableContainer: HTMLDivElement = document.createElement('div');
@@ -797,7 +970,6 @@ class TranslationView {
         let pageLabel: HTMLLabelElement = document.createElement('label');
         pageLabel.innerText = 'Page';
         pageLabel.setAttribute('for', 'page' + this.projectId);
-        pageLabel.style.marginLeft = '10px';
         pageLabel.style.marginTop = '4px';
         statusArea.appendChild(pageLabel);
 
@@ -809,9 +981,9 @@ class TranslationView {
         let pageInput: HTMLInputElement = document.createElement('input');
         pageInput.id = 'page' + this.projectId;
         pageInput.type = 'number';
-        pageInput.style.marginLeft = '10px';
+        pageInput.style.marginLeft = '4px';
         pageInput.style.marginTop = '4px';
-        pageInput.style.width = '50px';
+        pageInput.style.width = '40px';
         pageInput.value = '0';
         pageInput.addEventListener('change', () => {
             let page = Number.parseInt(pageInput.value, 10);
@@ -827,7 +999,7 @@ class TranslationView {
         pagesSpan.id = 'pages' + this.projectId;
         pagesSpan.classList.add('noWrap');
         pagesSpan.innerText = 'of'
-        pagesSpan.style.marginLeft = '10px';
+        pagesSpan.style.marginLeft = '4px';
         pagesSpan.style.marginTop = '4px';
         pagesSpan.innerText = '0';
         statusArea.appendChild(pagesSpan);
@@ -857,7 +1029,6 @@ class TranslationView {
         let rowsLabel: HTMLLabelElement = document.createElement('label');
         rowsLabel.innerText = 'Rows/Page';
         rowsLabel.setAttribute('for', 'rows_page' + this.projectId);
-        rowsLabel.style.marginLeft = '10px';
         rowsLabel.style.marginTop = '4px';
         statusArea.appendChild(rowsLabel);
 
@@ -869,9 +1040,8 @@ class TranslationView {
         let rowsInput: HTMLInputElement = document.createElement('input');
         rowsInput.id = 'rows_page' + this.projectId;
         rowsInput.type = 'number';
-        rowsInput.style.marginLeft = '10px';
         rowsInput.style.marginTop = '4px';
-        rowsInput.style.width = '50px';
+        rowsInput.style.width = '44px';
         rowsInput.value = '' + this.rowsPage;
         rowsInput.addEventListener('change', () => {
             this.rowsPage = Number.parseInt(rowsInput.value, 10);
@@ -947,6 +1117,94 @@ class TranslationView {
         sourceTh.style.width = (100 * width / this.translationArea.clientWidth) + '%';
         let targetTh: HTMLTableCellElement = document.getElementById('targetTh' + this.projectId) as HTMLTableCellElement;
         targetTh.style.width = (100 * width / this.translationArea.clientWidth) + '%';
+    }
+
+    toggleFilesPanel() {
+        if (this.collapseFilesButton.classList.contains('hidden')) {
+            this.expandFilesButton.click();
+        } else {
+            this.collapseFilesButton.click();
+        }
+    }
+
+    buildFilesArea(): void {
+        let panelsContainer: HTMLDivElement = document.createElement('div');
+        panelsContainer.classList.add('leftPaddedPanel');
+        this.filesPanel.appendChild(panelsContainer);
+
+        let filesTitle: HTMLDivElement = document.createElement('div');
+        filesTitle.classList.add('titlepanel');
+        filesTitle.classList.add('row');
+        panelsContainer.appendChild(filesTitle);
+
+        let filler: HTMLSpanElement = document.createElement('span');
+        filler.classList.add('fill_width');
+        filler.innerText = 'Files';
+        filesTitle.appendChild(filler);
+
+        this.collapseFilesButton.innerHTML = TranslationView.SVG_EXPAND;
+        this.collapseFilesButton.style.marginRight = '4px';
+        this.collapseFilesButton.addEventListener('click', () => {
+            filler.classList.add('hidden');
+            this.collapseFilesButton.classList.add('hidden');
+            this.expandFilesButton.classList.remove('hidden');
+            this.filesContainer.classList.add('hidden');
+            this.verticalPanels.collapseLeft();
+        });
+        this.collapseFilesButton.addEventListener('mouseenter', () => {
+            const rect = this.collapseFilesButton.getBoundingClientRect();
+            collapseTooltip.style.top = rect.top + 'px';
+            collapseTooltip.style.left = (rect.left + rect.width + 4) + 'px';
+            collapseTooltip.style.visibility = 'visible';
+        });
+        this.collapseFilesButton.addEventListener('mouseleave', () => {
+            collapseTooltip.style.visibility = 'hidden';
+        });
+        filesTitle.appendChild(this.collapseFilesButton);
+
+        this.expandFilesButton.classList.add('hidden');
+        this.expandFilesButton.innerHTML = TranslationView.SVG_COLLAPSE;
+        this.expandFilesButton.style.marginRight = '4px';
+        this.expandFilesButton.style.marginLeft = '-2px';
+        this.expandFilesButton.addEventListener('click', () => {
+            filler.classList.remove('hidden');
+            this.collapseFilesButton.classList.remove('hidden');
+            this.expandFilesButton.classList.add('hidden');
+            this.filesContainer.classList.remove('hidden');
+            this.verticalPanels.expandLeft();
+        });
+        this.expandFilesButton.addEventListener('mouseenter', () => {
+            const rect = this.expandFilesButton.getBoundingClientRect();
+            expandTooltip.style.top = (rect.top) + 'px';
+            expandTooltip.style.left = (rect.left + rect.width + 6) + 'px';
+            expandTooltip.style.visibility = 'visible';
+        });
+        this.expandFilesButton.addEventListener('mouseleave', () => {
+            expandTooltip.style.visibility = 'hidden';
+        });
+        filesTitle.appendChild(this.expandFilesButton);
+
+        let collapseTooltip: HTMLDivElement = document.createElement('div');
+        collapseTooltip.classList.add('filesTooltip');
+        collapseTooltip.innerText = 'Collapse Files Panel';
+        collapseTooltip.style.visibility = 'hidden';
+        panelsContainer.appendChild(collapseTooltip);
+
+        let expandTooltip: HTMLDivElement = document.createElement('div');
+        expandTooltip.classList.add('filesTooltip');
+        expandTooltip.innerText = 'Expand Files Panel';
+        expandTooltip.style.visibility = 'hidden';
+        panelsContainer.appendChild(expandTooltip);
+
+        this.filesContainer.classList.add('fill_width');
+        this.filesContainer.classList.add('roundedBottom');
+        this.filesContainer.classList.add('divContainer');
+
+        panelsContainer.appendChild(this.filesContainer);
+
+        setTimeout(() => {
+            this.filesContainer.style.height = 'calc(100% - ' + filesTitle.clientHeight + 'px)';
+        }, 200);
     }
 
     buildRightSide(): void {
@@ -1127,6 +1385,20 @@ class TranslationView {
                     td.innerHTML = TranslationView.SPACE_TAG_WARNING;
                 }
             }
+            if (row.hasMetadata) {
+                let span: HTMLSpanElement = document.createElement('span');
+                span.innerHTML = TranslationView.METADATA_SPAN;
+                span.addEventListener('click', (event: MouseEvent) => {
+                    event.stopPropagation();
+                    this.electron.ipcRenderer.send('show-metadata', {
+                        project: this.projectId,
+                        file: row.file,
+                        unit: row.unit,
+                        segment: row.segment
+                    });
+                });
+                td.appendChild(span);
+            }
             tr.appendChild(td);
 
             td = document.createElement('td');
@@ -1152,7 +1424,18 @@ class TranslationView {
                 td.innerHTML = TranslationView.FINAL_SPAN;
             }
             if (row.hasNotes) {
-                td.innerHTML = td.innerHTML + TranslationView.NOTES_SPAN;
+                let span: HTMLSpanElement = document.createElement('span');
+                span.innerHTML = TranslationView.NOTES_SPAN;
+                span.addEventListener('click', (event: MouseEvent) => {
+                    event.stopPropagation();
+                    this.electron.ipcRenderer.send('show-notes', {
+                        project: this.projectId,
+                        file: row.file,
+                        unit: row.unit,
+                        segment: row.segment
+                    });
+                });
+                td.appendChild(span);
             }
             tr.appendChild(td);
 
@@ -1186,6 +1469,8 @@ class TranslationView {
             return;
         }
         this.selectRow(rows[0]);
+
+        this.electron.ipcRenderer.send('get-project-files', this.projectId);
     }
 
     static isBiDi(code: string): boolean {
@@ -1314,7 +1599,18 @@ class TranslationView {
                     currentState.classList.add('translated');
                     currentState.innerHTML = TranslationView.TRANSLATED_SPAN;
                     if (hasNotes) {
-                        currentState.innerHTML = currentState.innerHTML + TranslationView.NOTES_SPAN;
+                        let span: HTMLSpanElement = document.createElement('span');
+                        span.innerHTML = TranslationView.NOTES_SPAN;
+                        span.addEventListener('click', (event: MouseEvent) => {
+                            event.stopPropagation();
+                            this.electron.ipcRenderer.send('show-notes', {
+                                project: this.projectId,
+                                file: this.currentId.file,
+                                unit: this.currentId.unit,
+                                segment: this.currentId.id,
+                            });
+                        });
+                        currentState.appendChild(span);
                     }
                 }
             }
@@ -1324,21 +1620,58 @@ class TranslationView {
                 currentState.classList.add('final');
                 currentState.innerHTML = TranslationView.FINAL_SPAN;
                 if (hasNotes) {
-                    currentState.innerHTML = currentState.innerHTML + TranslationView.NOTES_SPAN;
+                    let span: HTMLSpanElement = document.createElement('span');
+                    span.innerHTML = TranslationView.NOTES_SPAN;
+                    span.addEventListener('click', (event: MouseEvent) => {
+                        event.stopPropagation();
+                        this.electron.ipcRenderer.send('show-notes', {
+                            project: this.projectId,
+                            file: this.currentId.file,
+                            unit: this.currentId.unit,
+                            segment: this.currentId.id,
+                        });
+                    });
+                    currentState.appendChild(span);
                 }
             } else {
                 if (translation === '') {
                     currentState.classList.remove('final');
                     currentState.classList.remove('translated');
                     currentState.classList.add('initial');
-                    currentState.innerHTML = hasNotes ? TranslationView.NOTES_SPAN : TranslationView.SVG_BLANK;
+                    if (hasNotes) {
+                        let span: HTMLSpanElement = document.createElement('span');
+                        span.innerHTML = TranslationView.NOTES_SPAN;
+                        span.addEventListener('click', (event: MouseEvent) => {
+                            event.stopPropagation();
+                            this.electron.ipcRenderer.send('show-notes', {
+                                project: this.projectId,
+                                file: this.currentId.file,
+                                unit: this.currentId.unit,
+                                segment: this.currentId.id,
+                            });
+                        });
+                        currentState.appendChild(span);
+                    } else {
+                        currentState.innerHTML = TranslationView.SVG_BLANK;
+                    }
                 } else {
                     currentState.classList.remove('final');
                     currentState.classList.remove('initial');
                     currentState.classList.add('translated');
                     currentState.innerHTML = TranslationView.TRANSLATED_SPAN;
                     if (hasNotes) {
-                        currentState.innerHTML = currentState.innerHTML + TranslationView.NOTES_SPAN;
+                        let span: HTMLSpanElement = document.createElement('span');
+                        span.innerHTML = TranslationView.NOTES_SPAN;
+                        span.addEventListener('click', (event: MouseEvent) => {
+                            event.stopPropagation();
+                            this.electron.ipcRenderer.send('show-notes', {
+                                project: this.projectId,
+                                file: this.currentId.file,
+                                unit: this.currentId.unit,
+                                segment: this.currentId.id,
+                            });
+                        });
+                        currentState.appendChild(span);
                     }
                 }
             }
@@ -1610,12 +1943,38 @@ class TranslationView {
             currentState.classList.remove('final');
             if (source.innerHTML === '') {
                 currentState.classList.add('initial');
-                currentState.innerHTML = hasNotes ? TranslationView.NOTES_SPAN : TranslationView.SVG_BLANK;
+                if (hasNotes) {
+                    let span: HTMLSpanElement = document.createElement('span');
+                    span.innerHTML = TranslationView.NOTES_SPAN;
+                    span.addEventListener('click', (event: MouseEvent) => {
+                        event.stopPropagation();
+                        this.electron.ipcRenderer.send('show-notes', {
+                            project: this.projectId,
+                            file: this.currentId.file,
+                            unit: this.currentId.unit,
+                            segment: this.currentId.id,
+                        });
+                    });
+                    currentState.appendChild(span);
+                } else {
+                    currentState.innerHTML = TranslationView.SVG_BLANK;
+                }
             } else {
                 currentState.classList.add('translated');
                 currentState.innerHTML = TranslationView.TRANSLATED_SPAN;
                 if (hasNotes) {
-                    currentState.innerHTML = currentState.innerHTML + TranslationView.NOTES_SPAN;
+                    let span: HTMLSpanElement = document.createElement('span');
+                    span.innerHTML = TranslationView.NOTES_SPAN;
+                    span.addEventListener('click', (event: MouseEvent) => {
+                        event.stopPropagation();
+                        this.electron.ipcRenderer.send('show-notes', {
+                            project: this.projectId,
+                            file: this.currentId.file,
+                            unit: this.currentId.unit,
+                            segment: this.currentId.id,
+                        });
+                    });
+                    currentState.appendChild(span);
                 }
             }
             this.currentCell.focus();
@@ -2492,6 +2851,15 @@ class TranslationView {
         });
     }
 
+    showMetadata(): void {
+        this.electron.ipcRenderer.send('show-metadata', {
+            project: this.projectId,
+            file: this.currentId.file,
+            unit: this.currentId.unit,
+            segment: this.currentId.id
+        });
+    }
+
     showingNotes(arg: boolean): void {
         this.notesVisible = arg;
     }
@@ -2515,14 +2883,26 @@ class TranslationView {
         let currentState: HTMLTableCellElement = this.currentRow?.getElementsByClassName('state')[0] as HTMLTableCellElement;
         if (!currentState.innerHTML.includes(TranslationView.NOTE_FRAGMENT)) {
             if (currentState.classList.contains('final')) {
-                currentState.innerHTML = TranslationView.FINAL_SPAN + TranslationView.NOTES_SPAN;
+                currentState.innerHTML = TranslationView.FINAL_SPAN;
             }
             if (currentState.classList.contains('initial')) {
-                currentState.innerHTML = TranslationView.SVG_BLANK + TranslationView.NOTES_SPAN;
+                currentState.innerHTML = TranslationView.SVG_BLANK;
             }
             if (currentState.classList.contains('translated')) {
-                currentState.innerHTML = TranslationView.TRANSLATED_SPAN + TranslationView.NOTES_SPAN;
+                currentState.innerHTML = TranslationView.TRANSLATED_SPAN;
             }
+            let span: HTMLSpanElement = document.createElement('span');
+            span.innerHTML = TranslationView.NOTES_SPAN;
+            span.addEventListener('click', (event: MouseEvent) => {
+                event.stopPropagation();
+                this.electron.ipcRenderer.send('show-notes', {
+                    project: this.projectId,
+                    file: this.currentId.file,
+                    unit: this.currentId.unit,
+                    segment: this.currentId.id,
+                });
+            });
+            currentState.appendChild(span);
         }
     }
 

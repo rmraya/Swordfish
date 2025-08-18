@@ -376,10 +376,12 @@ export class MTManager {
         let result: Language[] = [];
         for (let lang of langs) {
             try {
-                result.push(LanguageUtils.getLanguage(lang, 'en'));
+                let l:Language | undefined = LanguageUtils.getLanguage(lang, 'en');
+                if (l) {
+                    result.push(l);
+                }
             } catch (error) {
                 // ignore unsupported tags
-                // console.log('unsupported tag', lang);
             }
         }
         result.sort((a: Language, b: Language) => {
