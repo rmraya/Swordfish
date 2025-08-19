@@ -247,7 +247,7 @@ public class XliffStore {
 			}
 		}
 		if (!metadataExists) {
-			System.out.println("Metadata table does not exist, creating it.");
+			logger.log(Level.INFO, "Metadata table does not exist, creating it.");
 			String metadata = """
 					CREATE TABLE metadata (
 					    file VARCHAR(50),
@@ -270,7 +270,7 @@ public class XliffStore {
 			}
 		}
 		if (!filesDataExists) {
-			System.out.println("Files data table does not exist, creating it.");
+			logger.log(Level.INFO, "Files data table does not exist, creating it.");
 			String filesData = """
 					CREATE TABLE filesdata (
 					file VARCHAR(50),
@@ -1245,6 +1245,8 @@ public class XliffStore {
 
 		result.put("tagErrors", tagErrors);
 		result.put("spaceErrors", spaceErrors);
+		result.put("hasMetadata", hasMetadata(file, unit));
+		result.put("hasNotes", hasNotes(file, unit, segment));
 
 		JSONObject originalData = getUnitData(file, unit);
 		tag = 1;

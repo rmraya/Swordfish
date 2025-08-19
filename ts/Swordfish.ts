@@ -871,7 +871,7 @@ export class Swordfish {
         ipcMain.on('show-metadata', (event: IpcMainEvent, arg: MetaId) => {
             Swordfish.showMetadata(arg);
         });
-        ipcMain.on('get-metadata', (event: IpcMainEvent, arg: any) => {
+        ipcMain.on('get-metadata', (event: IpcMainEvent, arg: MetaId) => {
             Swordfish.getMetadata(arg);
         });
         ipcMain.on('close-metadata', () => {
@@ -3286,7 +3286,9 @@ export class Swordfish {
                         unit: arg.unit,
                         segment: arg.segment,
                         tagErrors: data.tagErrors,
-                        spaceErrors: data.spaceErrors
+                        spaceErrors: data.spaceErrors,
+                        hasNotes: data.hasNotes,
+                        hasMetadata: data.hasMetadata
                     });
                 } else {
                     Swordfish.mainWindow.webContents.send('clear-errors', {
@@ -3295,7 +3297,9 @@ export class Swordfish {
                         unit: arg.unit,
                         segment: arg.segment,
                         tagErrors: data.tagErrors,
-                        spaceErrors: data.spaceErrors
+                        spaceErrors: data.spaceErrors,
+                        hasNotes: data.hasNotes,
+                        hasMetadata: data.hasMetadata
                     });
                 }
                 Swordfish.mainWindow.webContents.send('set-statistics', { project: arg.project, statistics: data.statistics });
@@ -5587,12 +5591,17 @@ export class Swordfish {
             let fileUrl: URL = new URL('file://' + filePath);
             Swordfish.notesWindow.loadURL(fileUrl.href);
             Swordfish.notesWindow.addListener('closed', () => {
-                Swordfish.mainWindow?.focus();
-                Swordfish.mainWindow?.webContents.send('notes-closed');
+                try {
+                    Swordfish.mainWindow?.focus();
+                    Swordfish.mainWindow?.webContents.send('notes-closed');
+                } catch (e) {
+                    // ignore
+                }
             });
             Swordfish.notesWindow.once('ready-to-show', () => {
                 Swordfish.notesWindow.show();
                 Swordfish.mainWindow.webContents.send('notes-requested');
+                Swordfish.mainWindow.focus();
             });
             Swordfish.setLocation(this.notesWindow, 'notes.html');
             return;
@@ -5779,13 +5788,18 @@ export class Swordfish {
             let fileUrl: URL = new URL('file://' + filePath);
             Swordfish.metadataWindow.loadURL(fileUrl.href);
             Swordfish.metadataWindow.addListener('closed', () => {
-                Swordfish.mainWindow?.focus();
-                Swordfish.mainWindow?.webContents.send('metadata-closed');
+                try {
+                    Swordfish.mainWindow?.focus();
+                    Swordfish.mainWindow?.webContents.send('metadata-closed');
+                } catch (e) {
+                    // ignore
+                }
             });
             Swordfish.metadataWindow.once('ready-to-show', () => {
                 Swordfish.metadataWindow.show();
                 Swordfish.metadataWindow.webContents.send('set-data', metaId);
                 Swordfish.mainWindow.webContents.send('metadata-requested');
+                Swordfish.mainWindow.focus();
             });
             Swordfish.setLocation(this.metadataWindow, 'metadataDialog.html');
             return;
