@@ -1934,6 +1934,7 @@ public class ProjectsHandler implements HttpHandler {
 				}
 			}
 		} catch (SQLException | JSONException e) {
+			e.printStackTrace();
 			logger.log(Level.ERROR, e);
 			result.put(Constants.REASON, e.getMessage());
 		}

@@ -923,15 +923,11 @@ public class XliffStore {
 	}
 
 	private boolean hasMetadata(String file, String unit) throws SQLException {
-		boolean result = false;
-		getMetadata.setString(1, file);
-		getMetadata.setString(2, unit);
-		try (ResultSet rs = getMetadata.executeQuery()) {
-			while (rs.next()) {
-				result = true;
-			}
-		}
-		return result;
+		JSONObject json = new JSONObject();
+		json.put("file", file);
+		json.put("unit", unit);
+		JSONObject metadata = getMetadata(json);
+		return metadata != null;
 	}
 
 	public JSONArray getNotes(String file, String unit, String segId) throws SQLException {
