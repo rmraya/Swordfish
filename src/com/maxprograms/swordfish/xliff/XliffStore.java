@@ -128,9 +128,7 @@ public class XliffStore {
 	private PreparedStatement getChild;
 	private PreparedStatement getContext;
 	private PreparedStatement insertMetadata;
-	private PreparedStatement getMetadata;
 	private PreparedStatement insertFileData;
-	private PreparedStatement getFileData;
 
 	private Statement stmt;
 	private boolean preserve;
@@ -254,9 +252,8 @@ public class XliffStore {
 					CREATE TABLE metadata (
 					    file VARCHAR(50),
 					    unitId VARCHAR(256) NOT NULL,
-					    segId VARCHAR(256) NOT NULL,
 					    metadata TEXT NOT NULL,
-					    PRIMARY KEY(file, unitId, segId)
+					    PRIMARY KEY(file, unitId)
 					    );""";
 			try (Statement create = conn.createStatement()) {
 				create.execute(metadata);
@@ -313,8 +310,6 @@ public class XliffStore {
 		getChild = conn.prepareStatement("SELECT child FROM segments WHERE file=? AND unitId=? AND segId=?");
 		getContext = conn.prepareStatement("SELECT unitId, segId FROM segments WHERE file=? AND child=?");
 		insertMetadata = conn.prepareStatement("INSERT INTO metadata (file, unitId,  metadata) VALUES(?,?,?)");
-		getMetadata = conn.prepareStatement("SELECT metadata FROM metadata WHERE file=? AND unitId=?");
-		getFileData = conn.prepareStatement("SELECT original, sourceFile, metadata FROM filesdata WHERE file=?");
 
 		stmt = conn.createStatement();
 		if (needsLoading) {
@@ -946,42 +941,48 @@ public class XliffStore {
 		return array;
 	}
 
-	public JSONObject getMetadata(JSONObject json) throws SQLException {
+	public synchronized JSONObject getMetadata(JSONObject json) throws SQLException {
 		JSONObject result = null;
 		if (json.has("unit")) {
-			String file = json.getString("file");
-			String unit = json.getString("unit");
-			getMetadata.setString(1, file);
-			getMetadata.setString(2, unit);
-			try (ResultSet rs = getMetadata.executeQuery()) {
-				while (rs.next()) {
-					String data = rs.getString(1);
-					result = new JSONObject(data);
+			try (PreparedStatement getMetadata = conn
+					.prepareStatement("SELECT metadata FROM metadata WHERE file=? AND unitId=?")) {
+				String file = json.getString("file");
+				String unit = json.getString("unit");
+				getMetadata.setString(1, file);
+				getMetadata.setString(2, unit);
+				try (ResultSet rs = getMetadata.executeQuery()) {
+					while (rs.next()) {
+						String data = rs.getString(1);
+						result = new JSONObject(data);
+					}
 				}
 			}
 		} else if (json.has("file")) {
 			String file = json.getString("file");
-			getFileData.setString(1, file);
-			try (ResultSet rs = getFileData.executeQuery()) {
-				while (rs.next()) {
-					String data = rs.getString(3);
-					result = new JSONObject(data);
-					JSONArray dataArray = result.getJSONArray("data");
-					JSONArray array = new JSONArray();
-					for (int i = 0; i < dataArray.length(); i++) {
-						JSONObject group = dataArray.getJSONObject(i);
-						if (group.has("category")) {
-							String category = group.getString("category");
-							if (category.equals("format") || category.equals("tool") || category.equals("PI")
-									|| category.equals("sourceFile") || category.equals("document")) {
-								continue; // Skip standard metadata categories
+			try (PreparedStatement getFileData = conn
+					.prepareStatement("SELECT original, sourceFile, metadata FROM filesdata WHERE file=?")) {
+				getFileData.setString(1, file);
+				try (ResultSet rs = getFileData.executeQuery()) {
+					while (rs.next()) {
+						String data = rs.getString(3);
+						result = new JSONObject(data);
+						JSONArray dataArray = result.getJSONArray("data");
+						JSONArray array = new JSONArray();
+						for (int i = 0; i < dataArray.length(); i++) {
+							JSONObject group = dataArray.getJSONObject(i);
+							if (group.has("category")) {
+								String category = group.getString("category");
+								if (category.equals("format") || category.equals("tool") || category.equals("PI")
+										|| category.equals("sourceFile") || category.equals("document")) {
+									continue; // Skip standard metadata categories
+								}
+								array.put(group);
+							} else {
+								array.put(group); // Include groups without category
 							}
-							array.put(group);	
-						} else {
-							array.put(group); // Include groups without category
 						}
+						result.put("data", array);
 					}
-					result.put("data", array);
 				}
 			}
 		}
@@ -1134,8 +1135,6 @@ public class XliffStore {
 		getChild.close();
 		getContext.close();
 		insertMetadata.close();
-		getMetadata.close();
-		getFileData.close();
 		stmt.close();
 		conn.commit();
 		conn.close();

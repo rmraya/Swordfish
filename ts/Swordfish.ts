@@ -5587,15 +5587,12 @@ export class Swordfish {
             let fileUrl: URL = new URL('file://' + filePath);
             Swordfish.notesWindow.loadURL(fileUrl.href);
             Swordfish.notesWindow.addListener('closed', () => {
-                try {
-                    Swordfish.mainWindow.webContents.send('notes-closed');
-                } catch (e) {
-                    // ignore
-                }
+                Swordfish.mainWindow?.focus();
+                Swordfish.mainWindow?.webContents.send('notes-closed');
             });
             Swordfish.notesWindow.once('ready-to-show', () => {
                 Swordfish.notesWindow.show();
-                 Swordfish.mainWindow.webContents.send('notes-requested');
+                Swordfish.mainWindow.webContents.send('notes-requested');
             });
             Swordfish.setLocation(this.notesWindow, 'notes.html');
             return;
@@ -5760,7 +5757,7 @@ export class Swordfish {
         Swordfish.fileInfoWindow.focus();
     }
 
-    static showMetadata(arg: MetaId): void {
+    static showMetadata(metaId: MetaId): void {
         if (!Swordfish.metadataWindow || Swordfish.metadataWindow.isDestroyed()) {
             Swordfish.metadataWindow = new BrowserWindow({
                 parent: Swordfish.mainWindow,
@@ -5783,16 +5780,17 @@ export class Swordfish {
             Swordfish.metadataWindow.loadURL(fileUrl.href);
             Swordfish.metadataWindow.addListener('closed', () => {
                 Swordfish.mainWindow?.focus();
+                Swordfish.mainWindow?.webContents.send('metadata-closed');
             });
             Swordfish.metadataWindow.once('ready-to-show', () => {
                 Swordfish.metadataWindow.show();
-                Swordfish.metadataWindow.webContents.send('set-data', arg);
+                Swordfish.metadataWindow.webContents.send('set-data', metaId);
                 Swordfish.mainWindow.webContents.send('metadata-requested');
             });
             Swordfish.setLocation(this.metadataWindow, 'metadataDialog.html');
             return;
         }
-        Swordfish.metadataWindow.webContents.send('set-data', arg);
+        Swordfish.metadataWindow.webContents.send('set-data', metaId);
     }
 
     static getMetadata(arg: MetaId): void {

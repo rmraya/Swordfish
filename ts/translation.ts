@@ -1401,12 +1401,13 @@ class TranslationView {
                 span.innerHTML = TranslationView.METADATA_SPAN;
                 span.addEventListener('click', (event: MouseEvent) => {
                     event.stopPropagation();
-                    this.electron.ipcRenderer.send('show-metadata', {
+                    let metaId: MetaId = {
                         project: this.projectId,
                         file: row.file,
                         unit: row.unit,
                         segment: row.segment
-                    });
+                    };
+                    this.electron.ipcRenderer.send('show-metadata', metaId);
                 });
                 td.appendChild(span);
             }
