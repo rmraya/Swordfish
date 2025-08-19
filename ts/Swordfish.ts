@@ -868,7 +868,7 @@ export class Swordfish {
         ipcMain.on('close-file-info', () => {
             Swordfish.fileInfoWindow?.close();
         });
-        ipcMain.on('show-metadata', (event: IpcMainEvent, arg: any) => {
+        ipcMain.on('show-metadata', (event: IpcMainEvent, arg: MetaId) => {
             Swordfish.showMetadata(arg);
         });
         ipcMain.on('get-metadata', (event: IpcMainEvent, arg: any) => {
@@ -1315,35 +1315,35 @@ export class Swordfish {
         Menu.setApplicationMenu(Menu.buildFromTemplate(template));
     }
 
-    static undo() {
+    static undo(): void {
         let focusedWindow = BrowserWindow.getFocusedWindow();
         if (focusedWindow) {
             focusedWindow.webContents.undo();
         }
     }
 
-    static cut() {
+    static cut(): void {
         let focusedWindow = BrowserWindow.getFocusedWindow();
         if (focusedWindow) {
             focusedWindow.webContents.cut();
         }
     }
 
-    static copy() {
+    static copy(): void {
         let focusedWindow = BrowserWindow.getFocusedWindow();
         if (focusedWindow) {
             focusedWindow.webContents.copy();
         }
     }
 
-    static paste() {
+    static paste(): void {
         let focusedWindow = BrowserWindow.getFocusedWindow();
         if (focusedWindow) {
             focusedWindow.webContents.paste();
         }
     }
 
-    static selectAll() {
+    static selectAll(): void {
         let focusedWindow = BrowserWindow.getFocusedWindow();
         if (focusedWindow) {
             focusedWindow.webContents.selectAll();
@@ -1384,7 +1384,7 @@ export class Swordfish {
         writeFileSync(defaultsFile, JSON.stringify(Swordfish.mainWindow.getBounds(), null, 2));
     }
 
-    static setHeight(arg: { window: string, width: number, height: number }) {
+    static setHeight(arg: { window: string, width: number, height: number }): void {
         if ('about' === arg.window) {
             Swordfish.aboutWindow.setContentSize(arg.width, arg.height, true);
         }
@@ -1939,7 +1939,7 @@ export class Swordfish {
         Swordfish.mainWindow.webContents.send('translate-projects');
     }
 
-    static updateProject(data: any) {
+    static updateProject(data: any): void {
         Swordfish.sendRequest('/projects/update', data,
             (data: any) => {
                 if (data.status === Swordfish.SUCCESS) {
@@ -2168,7 +2168,7 @@ export class Swordfish {
         Swordfish.setLocation(this.serverSettingsWindow, 'serverSettings.html');
     }
 
-    static showBrowseDatabases() {
+    static showBrowseDatabases(): void {
         this.browseDatabasesWindow = new BrowserWindow({
             parent: this.mainWindow,
             width: 635,
@@ -2270,7 +2270,7 @@ export class Swordfish {
         Swordfish.mainWindow.webContents.send('view-glossaries');
     }
 
-    static sendRequest(url: string, params: any, success: Function, error: Function) {
+    static sendRequest(url: string, params: any, success: Function, error: Function): void {
         let options: any = {
             url: 'http://127.0.0.1:8070' + url,
             method: 'POST'
@@ -2339,7 +2339,7 @@ export class Swordfish {
         });
     }
 
-    static openLicense(type: string) {
+    static openLicense(type: string): void {
         let licenseFile = '';
         let title = '';
         switch (type) {
@@ -2429,7 +2429,7 @@ export class Swordfish {
         Swordfish.setLocation(this.preferencesWindow, 'preferencesDialog.html');
     }
 
-    static showSystemInfo() {
+    static showSystemInfo(): void {
         this.systemInfoWindow = new BrowserWindow({
             parent: Swordfish.aboutWindow,
             width: 430,
@@ -2457,7 +2457,7 @@ export class Swordfish {
         Swordfish.setLocation(this.systemInfoWindow, 'systemInfo.html');
     }
 
-    static getSystemInformation(event: IpcMainEvent) {
+    static getSystemInformation(event: IpcMainEvent): void {
         this.sendRequest('/services/systemInfo', {},
             (data: any) => {
                 if (data.status === Swordfish.SUCCESS) {
@@ -2795,7 +2795,7 @@ export class Swordfish {
         Swordfish.setLocation(this.defaultLangsWindow, 'defaultLangs.html');
     }
 
-    static savelanguages(arg: any) {
+    static savelanguages(arg: any): void {
         this.defaultLangsWindow.close();
         this.currentPreferences.srcLang = arg.srcLang;
         this.currentPreferences.tgtLang = arg.tgtLang;
@@ -2850,7 +2850,7 @@ export class Swordfish {
         );
     }
 
-    static removeProjects(arg: any) {
+    static removeProjects(arg: any): void {
         dialog.showMessageBox(Swordfish.mainWindow, { type: "question", message: "Delete selected projects?", buttons: ["Yes", "No"], defaultId: 1 }
         ).then((result: any) => {
             if (result.response === 0) {
@@ -3068,7 +3068,7 @@ export class Swordfish {
         Swordfish.mainWindow.webContents.send('remove-memory');
     }
 
-    static removeMemories(arg: string[]) {
+    static removeMemories(arg: string[]): void {
         dialog.showMessageBox(Swordfish.mainWindow, { type: "question", message: "Delete selected memories?", buttons: ["Yes", "No"], defaultId: 1 }
         ).then((result: any) => {
             if (result.response === 0) {
@@ -3111,7 +3111,7 @@ export class Swordfish {
         });
     }
 
-    static removeGlossaries(arg: string[]) {
+    static removeGlossaries(arg: string[]): void {
         dialog.showMessageBox(Swordfish.mainWindow, { type: "question", message: "Delete selected glossaries?", buttons: ["Yes", "No"], defaultId: 1 }
         ).then((result: any) => {
             if (result.response === 0) {
@@ -4445,7 +4445,7 @@ export class Swordfish {
         });
     }
 
-    static generateStatistics(arg: any) {
+    static generateStatistics(arg: any): void {
         Swordfish.mainWindow.webContents.send('start-waiting');
         Swordfish.mainWindow.webContents.send('set-status', 'Generating statistics');
         Swordfish.sendRequest('/projects/generateStatistics', arg,
@@ -4719,7 +4719,7 @@ export class Swordfish {
         });
     }
 
-    static acceptAllMachineTranslations(arg: any) {
+    static acceptAllMachineTranslations(arg: any): void {
         dialog.showMessageBox(Swordfish.mainWindow, {
             type: 'question',
             message: 'Accept all machine translations?',
@@ -4992,7 +4992,7 @@ export class Swordfish {
         );
     }
 
-    static showAddTerm(glossary: string) {
+    static showAddTerm(glossary: string): void {
         this.addTermWindow = new BrowserWindow({
             parent: this.mainWindow,
             width: 680,
@@ -5035,7 +5035,7 @@ export class Swordfish {
         );
     }
 
-    static getSegmentTerms(arg: any) {
+    static getSegmentTerms(arg: any): void {
         Swordfish.sendRequest('/projects/getSegmentTerms', arg,
             (data: any) => {
                 if (data.status !== Swordfish.SUCCESS) {
@@ -5052,7 +5052,7 @@ export class Swordfish {
         );
     }
 
-    static getProjectTerms(arg: any) {
+    static getProjectTerms(arg: any): void {
         dialog.showMessageBox(Swordfish.mainWindow, {
             type: 'question',
             message: 'Get terms for all segments?',
@@ -5110,7 +5110,7 @@ export class Swordfish {
         });
     }
 
-    static lockSegment(arg: any) {
+    static lockSegment(arg: any): void {
         Swordfish.sendRequest('/projects/lockSegment', arg,
             (data: any) => {
                 if (data.status !== Swordfish.SUCCESS) {
@@ -5123,7 +5123,7 @@ export class Swordfish {
         );
     }
 
-    static lockDuplicates(arg: any) {
+    static lockDuplicates(arg: any): void {
         Swordfish.sendRequest('/projects/lockDuplicates', arg,
             (data: any) => {
                 if (data.status !== Swordfish.SUCCESS) {
@@ -5138,7 +5138,7 @@ export class Swordfish {
         );
     }
 
-    static unlockAll(projectId: string) {
+    static unlockAll(projectId: string): void {
         Swordfish.sendRequest('/projects/unlockAll', { project: projectId },
             (data: any) => {
                 if (data.status !== Swordfish.SUCCESS) {
@@ -5425,12 +5425,12 @@ export class Swordfish {
         );
     }
 
-    static updateTarget(params: any) {
+    static updateTarget(params: any): void {
         Swordfish.mainWindow.webContents.send('update-target-cell', params);
         Swordfish.mainWindow.webContents.send('end-waiting');
         Swordfish.mainWindow.webContents.send('set-status', '');
     }
-    static fixMatch(match: Match) {
+    static fixMatch(match: Match): void {
         if (!(Swordfish.currentPreferences.chatGpt.enabled || Swordfish.currentPreferences.anthropic.enabled)) {
             Swordfish.showMessage({ type: 'error', message: 'No AI engine is currently enabled' });
             return;
@@ -5515,7 +5515,7 @@ export class Swordfish {
         Swordfish.setLocation(this.changeCaseWindow, 'changeCase.html');
     }
 
-    static changeCaseTo(arg: any) {
+    static changeCaseTo(arg: any): void {
         Swordfish.mainWindow.webContents.send('case-changed', arg);
         this.changeCaseWindow.close();
     }
@@ -5595,6 +5595,7 @@ export class Swordfish {
             });
             Swordfish.notesWindow.once('ready-to-show', () => {
                 Swordfish.notesWindow.show();
+                 Swordfish.mainWindow.webContents.send('notes-requested');
             });
             Swordfish.setLocation(this.notesWindow, 'notes.html');
             return;
@@ -5602,7 +5603,7 @@ export class Swordfish {
         Swordfish.getNotes(arg);
     }
 
-    static getNotes(arg: any) {
+    static getNotes(arg: any): void {
         if (!Swordfish.notesParam) {
             return;
         }
@@ -5685,7 +5686,7 @@ export class Swordfish {
         Swordfish.setLocation(this.addNoteWindow, 'addNote.html');
     }
 
-    static addNote(arg: any) {
+    static addNote(arg: any): void {
         Swordfish.addNoteWindow.close();
         Swordfish.sendRequest('/projects/addNote', arg,
             (data: any) => {
@@ -5703,7 +5704,7 @@ export class Swordfish {
         );
     }
 
-    static removeNote(arg: any) {
+    static removeNote(arg: any): void {
         Swordfish.sendRequest('/projects/removeNote', arg,
             (data: any) => {
                 if (data.status === 'Success') {
@@ -5759,7 +5760,7 @@ export class Swordfish {
         Swordfish.fileInfoWindow.focus();
     }
 
-    static showMetadata(arg: any): void {
+    static showMetadata(arg: MetaId): void {
         if (!Swordfish.metadataWindow || Swordfish.metadataWindow.isDestroyed()) {
             Swordfish.metadataWindow = new BrowserWindow({
                 parent: Swordfish.mainWindow,
@@ -5786,6 +5787,7 @@ export class Swordfish {
             Swordfish.metadataWindow.once('ready-to-show', () => {
                 Swordfish.metadataWindow.show();
                 Swordfish.metadataWindow.webContents.send('set-data', arg);
+                Swordfish.mainWindow.webContents.send('metadata-requested');
             });
             Swordfish.setLocation(this.metadataWindow, 'metadataDialog.html');
             return;
@@ -5793,7 +5795,7 @@ export class Swordfish {
         Swordfish.metadataWindow.webContents.send('set-data', arg);
     }
 
-    static getMetadata(arg: any) {
+    static getMetadata(arg: MetaId): void {
         Swordfish.sendRequest('/projects/getMetadata', arg,
             (data: any) => {
                 if (data.status === 'Success') {
@@ -5872,7 +5874,7 @@ export class Swordfish {
         Swordfish.setLocation(this.addMetaGroupWindow, 'addMetaGroup.html');
     }
 
-    static addMetaGroup(arg: any) {
+    static addMetaGroup(arg: any): void {
         Swordfish.addMetaGroupWindow.close();
         Swordfish.sendRequest('/projects/addMetaGroup', arg,
             (data: any) => {
@@ -5889,7 +5891,7 @@ export class Swordfish {
         );
     }
 
-    static removeMetaGroup(arg: any) {
+    static removeMetaGroup(arg: any): void {
         Swordfish.sendRequest('/projects/removeMetaGroup', arg,
             (data: any) => {
                 if (data.status === 'Success') {
@@ -5910,7 +5912,6 @@ export class Swordfish {
     }
 
     static showAddMetaDialog(): void {
-        // Swordfish.metadataParam = arg;
         Swordfish.addMetaDialogWindow = new BrowserWindow({
             parent: Swordfish.metadataWindow,
             width: 400,
@@ -5971,7 +5972,7 @@ export class Swordfish {
         Swordfish.setLocation(this.addMetaDialogWindow, 'addMetaDialog.html');
     }
 
-    static addMeta(arg: any) {
+    static addMeta(arg: any): void {
         Swordfish.addMetaGroupWindow.close();
         Swordfish.sendRequest('/projects/addMeta', arg,
             (data: any) => {
@@ -5988,7 +5989,7 @@ export class Swordfish {
         );
     }
 
-    static removeMeta(arg: any) {
+    static removeMeta(arg: any): void {
         Swordfish.sendRequest('/projects/removeMeta', arg,
             (data: any) => {
                 if (data.status === 'Success') {
@@ -6174,7 +6175,7 @@ export class Swordfish {
         );
     }
 
-    static removeElements(arg: any) {
+    static removeElements(arg: any): void {
         arg.path = app.getAppPath();
         dialog.showMessageBox(Swordfish.mainWindow, {
             type: 'question',

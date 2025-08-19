@@ -34,13 +34,16 @@ class TranslationView {
     static SVG_COLLAPSE: string = '<svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px">' +
         '<path d="M300-640v320l160-160-160-160ZM200-120q-33 0-56.5-23.5T120-200v-560q0-33 23.5-56.5T200-840h560q33 0 56.5 23.5T840-760v560q0 33-23.5 56.5T760-120H200Zm440-80h120v-560H640v560Zm-80 0v-560H200v560h360Zm80 0h120-120Z"/>' +
         '</svg>';
-    static SVG_METDATA: string = "<svg xmlns='http://www.w3.org/2000/svg' height='24px' viewBox='0 -960 960 960' width='24px'><path d='M240-160q-33 0-56.5-23.5T160-240q0-33 23.5-56.5T240-320q33 0 56.5 23.5T320-240q0 33-23.5 56.5T240-160Zm0-240q-33 0-56.5-23.5T160-480q0-33 23.5-56.5T240-560q33 0 56.5 23.5T320-480q0 33-23.5 56.5T240-400Zm0-240q-33 0-56.5-23.5T160-720q0-33 23.5-56.5T240-800q33 0 56.5 23.5T320-720q0 33-23.5 56.5T240-640Zm240 480q-33 0-56.5-23.5T400-240q0-33 23.5-56.5T480-320q33 0 56.5 23.5T560-240q0 33-23.5 56.5T480-160Zm0-240q-33 0-56.5-23.5T400-480q0-33 23.5-56.5T480-560q33 0 56.5 23.5T560-480q0 33-23.5 56.5T480-400Zm0-240q-33 0-56.5-23.5T400-720q0-35 24.5-57.5T483-800q-2 10-2.5 19.5T480-760q0 31 6.5 60.5T505-644q-6 2-12 3t-13 1Zm280 80q-83 0-141.5-58.5T560-760q0-83 58.5-141.5T760-960q83 0 141.5 58.5T960-760q0 83-58.5 141.5T760-560Zm-40 400q-33 0-56.5-23.5T640-240q0-33 23.5-56.5T720-320q33 0 56.5 23.5T800-240q0 33-23.5 56.5T720-160Zm0-240q-33 0-56.5-23.5T640-480q0-7 1-13t3-12q26 12 55.5 18.5T760-480q11 0 20.5-.5T800-483q0 34-22.5 58.5T720-400Zm40-240q8 0 14-6t6-14q0-8-6-14t-14-6q-8 0-14 6t-6 14q0 8 6 14t14 6Zm-20-80h40v-160h-40v160Z'/></svg>";
+    static SVG_METADATA: string = "<svg xmlns='http://www.w3.org/2000/svg' height='24px' viewBox='0 -960 960 960' width='24px'><path d='M240-160q-33 0-56.5-23.5T160-240q0-33 23.5-56.5T240-320q33 0 56.5 23.5T320-240q0 33-23.5 56.5T240-160Zm0-240q-33 0-56.5-23.5T160-480q0-33 23.5-56.5T240-560q33 0 56.5 23.5T320-480q0 33-23.5 56.5T240-400Zm0-240q-33 0-56.5-23.5T160-720q0-33 23.5-56.5T240-800q33 0 56.5 23.5T320-720q0 33-23.5 56.5T240-640Zm240 480q-33 0-56.5-23.5T400-240q0-33 23.5-56.5T480-320q33 0 56.5 23.5T560-240q0 33-23.5 56.5T480-160Zm0-240q-33 0-56.5-23.5T400-480q0-33 23.5-56.5T480-560q33 0 56.5 23.5T560-480q0 33-23.5 56.5T480-400Zm0-240q-33 0-56.5-23.5T400-720q0-35 24.5-57.5T483-800q-2 10-2.5 19.5T480-760q0 31 6.5 60.5T505-644q-6 2-12 3t-13 1Zm280 80q-83 0-141.5-58.5T560-760q0-83 58.5-141.5T760-960q83 0 141.5 58.5T960-760q0 83-58.5 141.5T760-560Zm-40 400q-33 0-56.5-23.5T640-240q0-33 23.5-56.5T720-320q33 0 56.5 23.5T800-240q0 33-23.5 56.5T720-160Zm0-240q-33 0-56.5-23.5T640-480q0-7 1-13t3-12q26 12 55.5 18.5T760-480q11 0 20.5-.5T800-483q0 34-22.5 58.5T720-400Zm40-240q8 0 14-6t6-14q0-8-6-14t-14-6q-8 0-14 6t-6 14q0 8 6 14t14 6Zm-20-80h40v-160h-40v160Z'/></svg>";
+
+    static HAS_METADATA:string = "<svg xmlns='http://www.w3.org/2000/svg' height='20px' viewBox='0 -960 960 960' width='20px'><path d='M263.79-192Q234-192 213-213.21t-21-51Q192-294 213.21-315t51-21Q294-336 315-314.79t21 51Q336-234 314.79-213t-51 21Zm0-216Q234-408 213-429.21t-21-51Q192-510 213.21-531t51-21Q294-552 315-530.79t21 51Q336-450 314.79-429t-51 21Zm0-216Q234-624 213-645.21t-21-51Q192-726 213.21-747t51-21Q294-768 315-746.79t21 51Q336-666 314.79-645t-51 21Zm216 432Q450-192 429-213.21t-21-51Q408-294 429.21-315t51-21Q510-336 531-314.79t21 51Q552-234 530.79-213t-51 21Zm0-216Q450-408 429-429.21t-21-51Q408-510 429.21-531t51-21Q510-552 531-530.79t21 51Q552-450 530.79-429t-51 21Zm.21-216q-29.7 0-50.85-21.15Q408-666.3 408-696q0-30 21-51t51-21q7 0 12.5 1t11.5 3q0 32 7.54 61.15Q519.08-673.69 533-648q-10 11-23.58 17.5Q495.84-624 480-624Zm287.77 48Q688-576 632-632.23q-56-56.22-56-136Q576-848 632.23-904q56.22-56 136-56Q848-960 904-903.77q56 56.22 56 136Q960-688 903.77-632q-56.22 56-136 56Zm-71.98 384Q666-192 645-213.21t-21-51Q624-294 645.21-315t51-21Q726-336 747-314.79t21 51Q768-234 746.79-213t-51 21Zm.21-216q-29.7 0-50.85-21.15Q624-450.3 624-480q0-15.84 6.5-29.42Q637-523 648-533q26 14 55 21t61 8q2 6 3 11.5t1 12.5q0 30-21 51t-51 21Zm72-264q9.6 0 16.8-7.2 7.2-7.2 7.2-16.8 0-9.6-7.2-16.8-7.2-7.2-16.8-7.2-9.6 0-16.8 7.2-7.2 7.2-7.2 16.8 0 9.6 7.2 16.8 7.2 7.2 16.8 7.2Zm-24-96h48v-96h-48v96Z'/></svg>";
+    static NO_METADATA:string = "<svg xmlns='http://www.w3.org/2000/svg' height='20px' viewBox='0 -960 960 960' width='20px'><path d='M263.79-192Q234-192 213-213.21t-21-51Q192-294 213.21-315t51-21Q294-336 315-314.79t21 51Q336-234 314.79-213t-51 21Zm216 0Q450-192 429-213.21t-21-51Q408-294 429.21-315t51-21Q510-336 531-314.79t21 51Q552-234 530.79-213t-51 21Zm216 0Q666-192 645-213.21t-21-51Q624-294 645.21-315t51-21Q726-336 747-314.79t21 51Q768-234 746.79-213t-51 21Zm-432-216Q234-408 213-429.21t-21-51Q192-510 213.21-531t51-21Q294-552 315-530.79t21 51Q336-450 314.79-429t-51 21Zm216 0Q450-408 429-429.21t-21-51Q408-510 429.21-531t51-21Q510-552 531-530.79t21 51Q552-450 530.79-429t-51 21Zm216 0Q666-408 645-429.21t-21-51Q624-510 645.21-531t51-21Q726-552 747-530.79t21 51Q768-450 746.79-429t-51 21Zm-432-216Q234-624 213-645.21t-21-51Q192-726 213.21-747t51-21Q294-768 315-746.79t21 51Q336-666 314.79-645t-51 21Zm216 0Q450-624 429-645.21t-21-51Q408-726 429.21-747t51-21Q510-768 531-746.79t21 51Q552-666 530.79-645t-51 21Zm216 0Q666-624 645-645.21t-21-51Q624-726 645.21-747t51-21Q726-768 747-746.79t21 51Q768-666 746.79-645t-51 21Z'/></svg>";
 
     static LOCK_SPAN: string = "<span class='iconTooltip'>" + this.SVG_LOCK + " <small class='tooltiptext'>Locked segment</small></span>";
     static FINAL_SPAN: string = "<span class='iconTooltip'>" + this.SVG_FINAL + " <small class='tooltiptext'>Confirmed</small></span>";
     static TRANSLATED_SPAN: string = "<span class='iconTooltip'>" + this.SVG_TRANSLATED + " <small class='tooltiptext'>Draft</small></span>";
     static NOTES_SPAN: string = "<span class='iconTooltip'>" + this.SVG_NOTE + " <small class='tooltiptext'>Segment has notes</small></span>";
-    static METADATA_SPAN: string = "<span class='iconTooltip'>" + this.SVG_METDATA + " <small class='tooltiptext'>Segment has metadata</small></span>";
+    static METADATA_SPAN: string = "<span class='iconTooltip'>" + this.SVG_METADATA + " <small class='tooltiptext'>Segment has metadata</small></span>";
     static SPACE_WARNING: string = "<span class='iconTooltip'>" + this.SVG_WARNING + " <small class='tooltiptext'>Space errors</small></span>";
     static TAG_WARNING: string = "<span class='iconTooltip'>" + this.SVG_WARNING + " <small class='tooltiptext'>Tag errors</small></span>";
     static SPACE_TAG_WARNING: string = "<span class='iconTooltip'>" + this.SVG_WARNING + " <small class='tooltiptext'>Tag and space errors</small></span>";
@@ -106,6 +109,7 @@ class TranslationView {
     returnNumber: number = -1;
 
     notesVisible: boolean = false;
+    metadataVisible: boolean = false;
 
     constructor(tab: Tab, projectId: string, sourceLang: string, targetLang: string, rows: number) {
         this.container = tab.getContainer();
@@ -330,16 +334,20 @@ class TranslationView {
                 });
                 fileDiv.appendChild(infoSpan);
 
+                let metaSpan: HTMLSpanElement = document.createElement('span');
+                metaSpan.classList.add('iconTooltip');
+                metaSpan.classList.add('sourceSymbol');
+                metaSpan.classList.add('bottomAlign');
+                metaSpan.innerHTML = '\u283F<small class="tooltiptext">Custom Metadata</small>';
+                metaSpan.addEventListener('click', () => {
+                    this.showFileMetadata(detailsArray[0]);
+                });
                 if (this.hasCustomMetadata(detailsArray[0].metadata)) {
-                    let metaSpan: HTMLSpanElement = document.createElement('span');
-                    metaSpan.classList.add('iconTooltip');
-                    metaSpan.classList.add('sourceSymbol');
-                    metaSpan.innerHTML = '\u283F<small class="tooltiptext">Custom Metadata</small>';
-                    metaSpan.addEventListener('click', () => {
-                        this.showFileMetadata(detailsArray[0]);
-                    });
-                    fileDiv.appendChild(metaSpan);
+                    metaSpan.innerHTML = TranslationView.HAS_METADATA + '<small class="tooltiptext">Custom Metadata</small>';
+                } else {
+                    metaSpan.innerHTML = TranslationView.NO_METADATA + '<small class="tooltiptext">Custom Metadata</small>';
                 }
+                fileDiv.appendChild(metaSpan);
 
                 let label: HTMLLabelElement = document.createElement('label');
                 label.innerText = sourceFile;
@@ -375,16 +383,19 @@ class TranslationView {
                     });
                     detailsDiv.appendChild(infoSpan);
 
+                    let metaSpan: HTMLSpanElement = document.createElement('span');
+                    metaSpan.classList.add('iconTooltip');
+                    metaSpan.classList.add('sourceSymbol');
+                    metaSpan.classList.add('bottomAlign');
+                    metaSpan.addEventListener('click', () => {
+                        this.showFileMetadata(details);
+                    });
                     if (this.hasCustomMetadata(details.metadata)) {
-                        let metaSpan: HTMLSpanElement = document.createElement('span');
-                        metaSpan.classList.add('iconTooltip');
-                        metaSpan.classList.add('sourceSymbol');
-                        metaSpan.innerHTML = '\u283F<small class="tooltiptext">Custom Metadata</small>';
-                        metaSpan.addEventListener('click', () => {
-                            this.showFileMetadata(details);
-                        });
-                        detailsDiv.appendChild(metaSpan);
+                        metaSpan.innerHTML = TranslationView.HAS_METADATA + '<small class="tooltiptext">Custom Metadata</small>';
+                    } else {
+                        metaSpan.innerHTML = TranslationView.NO_METADATA + '<small class="tooltiptext">Custom Metadata</small>';
                     }
+                    detailsDiv.appendChild(metaSpan);
 
                     let label: HTMLLabelElement = document.createElement('label');
                     label.htmlFor = checkBox.id;
@@ -1843,7 +1854,9 @@ class TranslationView {
         if (this.notesVisible) {
             this.showNotes();
         }
-
+        if (this.metadataVisible) {
+            this.showMetadata();
+        }
         this.centerRow(this.currentRow);
         this.currentCell.focus();
     }
@@ -2852,16 +2865,21 @@ class TranslationView {
     }
 
     showMetadata(): void {
-        this.electron.ipcRenderer.send('show-metadata', {
+        let data: MetaId = {
             project: this.projectId,
             file: this.currentId.file,
             unit: this.currentId.unit,
             segment: this.currentId.id
-        });
+        };
+        this.electron.ipcRenderer.send('show-metadata', data);
     }
 
     showingNotes(arg: boolean): void {
         this.notesVisible = arg;
+    }
+
+    showingMetadata(arg: boolean): void {
+        this.metadataVisible = arg;
     }
 
     notesRemoved(arg: any): void {

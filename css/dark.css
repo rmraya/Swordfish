@@ -974,6 +974,10 @@ svg.stats {
 	border-bottom: 1px solid var(--gray50);
 }
 
+.borderTop {
+	border-top: 1px solid var(--gray50);
+}
+
 .fileContainer {
 	display: flex;
 	flex-direction: row;
@@ -1011,4 +1015,8 @@ svg.stats {
 	margin-left: 2px;
 	margin-right: 2px;
 	cursor: pointer;
+}
+
+.bottomAlign {
+	margin-bottom: -4px;
 }

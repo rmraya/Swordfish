@@ -10,6 +10,13 @@
  *     Maxprograms - initial API and implementation
  *******************************************************************************/
 
+interface MetaId {
+    project:string;
+    file: string;
+    unit?: string;
+    segment?: string;
+}
+
 interface MetaData {
     project:string;
     file: string;

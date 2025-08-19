@@ -399,8 +399,14 @@ class Main {
         Main.electron.ipcRenderer.on('notes-requested', () => {
             this.notesRequested();
         });
+        Main.electron.ipcRenderer.on('metadata-requested', () => {
+            this.metadataRequested();
+        });
         Main.electron.ipcRenderer.on('notes-closed', () => {
             this.notesClosed();
+        });
+        Main.electron.ipcRenderer.on('metadata-closed', () => {
+            this.metadataClosed();
         });
         Main.electron.ipcRenderer.on('notes-removed', (event: Electron.IpcRendererEvent, arg: any) => {
             this.notesRemoved(arg);
@@ -1216,6 +1222,16 @@ class Main {
         }
     }
 
+    metadataRequested(): void {
+        let selected = Main.tabHolder.getSelected();
+        for (let key of Main.translationViews.keys()) {
+            (Main.translationViews.get(key) as TranslationView).showingMetadata(true);
+        }
+        if (Main.translationViews.has(selected)) {
+            (Main.translationViews.get(selected) as TranslationView).showMetadata();
+        }
+    }
+
     toggleFilesPanel(): void {
         for (let key of Main.translationViews.keys()) {
             (Main.translationViews.get(key) as TranslationView).toggleFilesPanel();
@@ -1225,6 +1241,12 @@ class Main {
     notesClosed(): void {
         for (let key of Main.translationViews.keys()) {
             (Main.translationViews.get(key) as TranslationView).showingNotes(false);
+        }
+    }
+
+    metadataClosed(): void {
+        for (let key of Main.translationViews.keys()) {
+            (Main.translationViews.get(key) as TranslationView).showingMetadata(false);
         }
     }
 

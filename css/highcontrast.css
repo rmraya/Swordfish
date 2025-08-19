@@ -671,43 +671,43 @@ th svg {
 
 /* Tooltip arrow */
 .bottomTooltip .tooltiptext::before {
-  content: "";
-  position: absolute;
-  bottom: 100%;
-  left: 8px;
-  border-width: 8px;
-  border-style: solid;
-  border-color: transparent transparent var(--ClassicBlue10) transparent;
+	content: "";
+	position: absolute;
+	bottom: 100%;
+	left: 8px;
+	border-width: 8px;
+	border-style: solid;
+	border-color: transparent transparent var(--ClassicBlue10) transparent;
 }
 
 .bottomRightTooltip .tooltiptext::before {
-  content: "";
-  position: absolute;
-  bottom: 100%;
-  right: 8px;
-  border-width: 8px;
-  border-style: solid;
-  border-color: transparent transparent var(--ClassicBlue10) transparent;
+	content: "";
+	position: absolute;
+	bottom: 100%;
+	right: 8px;
+	border-width: 8px;
+	border-style: solid;
+	border-color: transparent transparent var(--ClassicBlue10) transparent;
 }
 
 .bottomCenterTooltip .tooltiptext::before {
-  content: "";
-  position: absolute;
-  bottom: 100%;
-  left: 80px;
-  border-width: 8px;
-  border-style: solid;
-  border-color: transparent transparent var(--ClassicBlue10) transparent;
+	content: "";
+	position: absolute;
+	bottom: 100%;
+	left: 80px;
+	border-width: 8px;
+	border-style: solid;
+	border-color: transparent transparent var(--ClassicBlue10) transparent;
 }
 
 .topTooltip .tooltiptext::after {
-  content: "";
-  position: absolute;
-  top: 100%;
-  left: 8px;
-  border-width: 8px;
-  border-style: solid;
-  border-color: var(--ClassicBlue10) transparent transparent transparent;
+	content: "";
+	position: absolute;
+	top: 100%;
+	left: 8px;
+	border-width: 8px;
+	border-style: solid;
+	border-color: var(--ClassicBlue10) transparent transparent transparent;
 }
 
 .topTooltip .tooltiptext {
@@ -757,7 +757,7 @@ th svg {
 	visibility: visible;
 }
 
-.filesTooltip {	
+.filesTooltip {
 	background-color: var(--ClassicBlue30);
 	color: var(--black);
 	visibility: hidden;
@@ -975,6 +975,10 @@ svg.stats {
 	border-bottom: 1px solid var(--gray50);
 }
 
+.borderTop {
+	border-top: 1px solid var(--gray50);
+}
+
 .fileContainer {
 	display: flex;
 	flex-direction: row;
@@ -1012,4 +1016,8 @@ svg.stats {
 	margin-left: 2px;
 	margin-right: 2px;
 	cursor: pointer;
+}
+
+.bottomAlign {
+	margin-bottom: -4px;
 }

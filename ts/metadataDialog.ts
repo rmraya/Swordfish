@@ -16,13 +16,15 @@ class MetaData {
 
     tabHolder: TabHolder;
     counter: number = 1;
+    metaId: MetaId = { project: '', file: '' };
 
     constructor() {
         this.electron.ipcRenderer.send('get-theme');
         this.electron.ipcRenderer.on('set-theme', (event: Electron.IpcRendererEvent, theme: string) => {
             (document.getElementById('theme') as HTMLLinkElement).href = theme;
         });
-        this.electron.ipcRenderer.on('set-data', (event: Electron.IpcRendererEvent, arg: any) => {
+        this.electron.ipcRenderer.on('set-data', (event: Electron.IpcRendererEvent, arg: MetaId) => {
+            this.metaId = arg;
             this.electron.ipcRenderer.send('get-metadata', arg);
         });
         this.electron.ipcRenderer.on('set-metadata', (event: Electron.IpcRendererEvent, arg: any) => {
@@ -73,13 +75,11 @@ class MetaData {
     }
 
     setMetadata(metadata: MetaData): void {
-        console.log(JSON.stringify(metadata));
+
         this.tabHolder.clear();
-        if (!metadata.data) {
-            return;
-        }
-        let data = metadata.data;
-        let length = data.length;
+
+        let data: any[] = metadata.data;
+        let length: number = data ? data.length : 0;
         for (let i: number = 0; i < length; i++) {
             let id: string = data[i].id ? data[i].id : 'Group_' + this.counter++;
             let tab: Tab = new Tab(id, id, false, this.tabHolder);
@@ -120,7 +120,6 @@ class MetaData {
             let tableContainer: HTMLDivElement = document.createElement('div');
             tableContainer.classList.add('divContainer');
             tableContainer.style.height = '300px';
-            tableContainer.classList.add('metaContainer');
             holder.appendChild(tableContainer);
 
             let table: HTMLTableElement = document.createElement('table');
@@ -182,7 +181,6 @@ class MetaData {
             let entryButtons: HTMLDivElement = document.createElement('div');
             entryButtons.classList.add('buttonArea');
             entryButtons.classList.add('borderBottom');
-            entryButtons.classList.add('entryButtonsContainer');
             holder.appendChild(entryButtons);
 
             let addButton: HTMLButtonElement = document.createElement('button');
