@@ -1399,7 +1399,6 @@ class TranslationView {
                 let span: HTMLSpanElement = document.createElement('span');
                 span.innerHTML = TranslationView.METADATA_SPAN;
                 span.addEventListener('click', (event: MouseEvent) => {
-                    event.stopPropagation();
                     let metaId: MetaId = {
                         project: this.projectId,
                         file: row.file,
@@ -1438,7 +1437,6 @@ class TranslationView {
                 let span: HTMLSpanElement = document.createElement('span');
                 span.innerHTML = TranslationView.NOTES_SPAN;
                 span.addEventListener('click', (event: MouseEvent) => {
-                    event.stopPropagation();
                     this.electron.ipcRenderer.send('show-notes', {
                         project: this.projectId,
                         file: row.file,
@@ -1613,7 +1611,6 @@ class TranslationView {
                         let span: HTMLSpanElement = document.createElement('span');
                         span.innerHTML = TranslationView.NOTES_SPAN;
                         span.addEventListener('click', (event: MouseEvent) => {
-                            event.stopPropagation();
                             this.electron.ipcRenderer.send('show-notes', {
                                 project: this.projectId,
                                 file: this.currentId.file,
@@ -1634,7 +1631,6 @@ class TranslationView {
                     let span: HTMLSpanElement = document.createElement('span');
                     span.innerHTML = TranslationView.NOTES_SPAN;
                     span.addEventListener('click', (event: MouseEvent) => {
-                        event.stopPropagation();
                         this.electron.ipcRenderer.send('show-notes', {
                             project: this.projectId,
                             file: this.currentId.file,
@@ -1653,7 +1649,6 @@ class TranslationView {
                         let span: HTMLSpanElement = document.createElement('span');
                         span.innerHTML = TranslationView.NOTES_SPAN;
                         span.addEventListener('click', (event: MouseEvent) => {
-                            event.stopPropagation();
                             this.electron.ipcRenderer.send('show-notes', {
                                 project: this.projectId,
                                 file: this.currentId.file,
@@ -1674,7 +1669,6 @@ class TranslationView {
                         let span: HTMLSpanElement = document.createElement('span');
                         span.innerHTML = TranslationView.NOTES_SPAN;
                         span.addEventListener('click', (event: MouseEvent) => {
-                            event.stopPropagation();
                             this.electron.ipcRenderer.send('show-notes', {
                                 project: this.projectId,
                                 file: this.currentId.file,
@@ -1960,7 +1954,6 @@ class TranslationView {
                     let span: HTMLSpanElement = document.createElement('span');
                     span.innerHTML = TranslationView.NOTES_SPAN;
                     span.addEventListener('click', (event: MouseEvent) => {
-                        event.stopPropagation();
                         this.electron.ipcRenderer.send('show-notes', {
                             project: this.projectId,
                             file: this.currentId.file,
@@ -1979,7 +1972,6 @@ class TranslationView {
                     let span: HTMLSpanElement = document.createElement('span');
                     span.innerHTML = TranslationView.NOTES_SPAN;
                     span.addEventListener('click', (event: MouseEvent) => {
-                        event.stopPropagation();
                         this.electron.ipcRenderer.send('show-notes', {
                             project: this.projectId,
                             file: this.currentId.file,
@@ -2838,7 +2830,6 @@ class TranslationView {
                     let span: HTMLSpanElement = document.createElement('span');
                     span.innerHTML = TranslationView.METADATA_SPAN;
                     span.addEventListener('click', (event: MouseEvent) => {
-                        event.stopPropagation();
                         let metaId: MetaId = {
                             project: arg.project,
                             file: arg.file,
@@ -2869,7 +2860,6 @@ class TranslationView {
                     let span: HTMLSpanElement = document.createElement('span');
                     span.innerHTML = TranslationView.METADATA_SPAN;
                     span.addEventListener('click', (event: MouseEvent) => {
-                        event.stopPropagation();
                         let metaId: MetaId = {
                             project: arg.project,
                             file: arg.file,
@@ -2942,7 +2932,6 @@ class TranslationView {
             let span: HTMLSpanElement = document.createElement('span');
             span.innerHTML = TranslationView.NOTES_SPAN;
             span.addEventListener('click', (event: MouseEvent) => {
-                event.stopPropagation();
                 this.electron.ipcRenderer.send('show-notes', {
                     project: this.projectId,
                     file: this.currentId.file,

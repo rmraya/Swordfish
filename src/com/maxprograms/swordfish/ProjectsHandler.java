@@ -1947,8 +1947,15 @@ public class ProjectsHandler implements HttpHandler {
 		try {
 			String project = json.getString("project");
 			if (projectStores.containsKey(project)) {
-				result.put("notes", projectStores.get(project).addNote(json.getString("file"), json.getString("unit"),
-						json.getString("segment"), json.getString("noteText")));
+				if (json.has("noteId")) {
+					result.put("notes",
+							projectStores.get(project).updateNote(json.getString("file"), json.getString("unit"),
+									json.getString("segment"), json.getString("noteText"), json.getString("noteId")));
+				} else {
+					result.put("notes",
+							projectStores.get(project).addNote(json.getString("file"), json.getString("unit"),
+									json.getString("segment"), json.getString("noteText")));
+				}
 			}
 		} catch (SQLException e) {
 			logger.log(Level.ERROR, e);

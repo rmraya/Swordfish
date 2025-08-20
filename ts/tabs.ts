@@ -183,6 +183,10 @@ class TabHolder {
         return this.labels.has(tabId);
     }
 
+    getTab(tabId: string): Tab | undefined {
+        return this.tabs.get(tabId);
+    }
+
     getTabsHolder(): HTMLDivElement {
         return this.tabsHolder;
     }

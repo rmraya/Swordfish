@@ -989,6 +989,20 @@ public class XliffStore {
 		return result;
 	}
 
+	public JSONArray updateNote(String file, String unit, String segId, String noteText, String noteId) throws SQLException {
+		String sql = "UPDATE notes SET note=? WHERE file=? AND unitId=? AND segId=? AND noteId=?";
+		try (PreparedStatement prep = conn.prepareStatement(sql)) {
+			prep.setString(1, noteText);
+			prep.setString(2, file);
+			prep.setString(3, unit);
+			prep.setString(4, segId);
+			prep.setString(5, noteId);
+			prep.executeUpdate();
+		}
+		conn.commit();
+		return getNotes(file, unit, segId);
+	}
+
 	public JSONArray addNote(String file, String unit, String segId, String noteText) throws SQLException {
 		String sql = "SELECT noteId FROM notes WHERE file=? AND unitId=? AND segId=?";
 		int maxId = 0;

@@ -10,6 +10,13 @@
  *     Maxprograms - initial API and implementation
  *******************************************************************************/
 
+interface FullId {
+    project: string;
+    file: string;
+    unit: string;
+    segment: string;
+}
+
 interface SegmentId {
     file: string;
     unit: string;

@@ -24,6 +24,10 @@ class AddNote {
         this.electron.ipcRenderer.send('get-note-params');
         this.electron.ipcRenderer.on('note-params', (event: Electron.IpcRendererEvent, arg: any) => {
             this.segmentData = arg;
+            if (arg.note) {
+                (document.getElementById('area') as HTMLTextAreaElement).value = arg.note;
+                (document.getElementById('addButton') as HTMLButtonElement).innerText = 'Update Note';
+            }
         });
         document.addEventListener('keydown', (event: KeyboardEvent) => {
             if (event.code === 'Escape') {

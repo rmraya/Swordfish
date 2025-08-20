@@ -1114,6 +1114,7 @@ export class Swordfish {
             new MenuItem({ type: 'separator' }),
             { label: 'Expand/Collapse Files Panel', accelerator: 'CmdOrCtrl+Shift+F', click: () => { Swordfish.toggleFilesPanel(); } },
             { label: 'Show/Hide Notes', accelerator: 'F2', click: () => { Swordfish.toggleNotes(); } },
+            { label: 'Show/Hide Metadata', accelerator: 'CmdOrCtrl+F2', click: () => { Swordfish.toggleCustomMetadata(); } },
             new MenuItem({ type: 'separator' }),
             { label: 'Close Selected Tab', accelerator: 'CmdOrCtrl+W', click: () => { Swordfish.closeSelectedTab(); } },
             new MenuItem({ type: 'separator' }),
@@ -5558,6 +5559,15 @@ export class Swordfish {
         Swordfish.mainWindow.webContents.send('toggle-files-panel');
     }
 
+    static toggleCustomMetadata(): void {
+        if (Swordfish.metadataWindow && !Swordfish.metadataWindow.isDestroyed()) {
+            Swordfish.metadataWindow.close();
+            Swordfish.mainWindow?.webContents.send('metadata-closed');
+            return;
+        }
+        Swordfish.mainWindow.webContents.send('metadata-requested');
+    }
+
     static toggleNotes(): void {
         if (Swordfish.notesWindow && !Swordfish.notesWindow.isDestroyed()) {
             Swordfish.notesWindow.close();
@@ -5601,7 +5611,6 @@ export class Swordfish {
             Swordfish.notesWindow.once('ready-to-show', () => {
                 Swordfish.notesWindow.show();
                 Swordfish.mainWindow.webContents.send('notes-requested');
-                Swordfish.mainWindow.focus();
             });
             Swordfish.setLocation(this.notesWindow, 'notes.html');
             return;
@@ -5684,6 +5693,7 @@ export class Swordfish {
         Swordfish.addNoteWindow.loadURL(fileUrl.href);
         Swordfish.addNoteWindow.once('ready-to-show', () => {
             Swordfish.addNoteWindow.show();
+            Swordfish.addNoteWindow.webContents.send('set-note', arg);
         });
         this.addNoteWindow.on('close', () => {
             this.notesWindow.focus();
@@ -5799,7 +5809,6 @@ export class Swordfish {
                 Swordfish.metadataWindow.show();
                 Swordfish.metadataWindow.webContents.send('set-data', metaId);
                 Swordfish.mainWindow.webContents.send('metadata-requested');
-                Swordfish.mainWindow.focus();
             });
             Swordfish.setLocation(this.metadataWindow, 'metadataDialog.html');
             return;

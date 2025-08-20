@@ -14,10 +14,12 @@ class Notes {
 
     electron = require('electron');
 
-    segmentData: any;
+    segmentData: FullId;
     tabHolder: TabHolder;
+    notes: Note[] = [];
 
     constructor() {
+        this.segmentData = { project: '', file: '', unit: '', segment: '' };
         this.electron.ipcRenderer.send('get-theme');
         this.electron.ipcRenderer.on('set-theme', (event: Electron.IpcRendererEvent, theme: string) => {
             (document.getElementById('theme') as HTMLLinkElement).href = theme;
@@ -26,7 +28,7 @@ class Notes {
         this.electron.ipcRenderer.on('set-notes', (event: Electron.IpcRendererEvent, arg: Note[]) => {
             this.setNotes(arg);
         });
-        this.electron.ipcRenderer.on('note-params', (event: Electron.IpcRendererEvent, arg: any) => {
+        this.electron.ipcRenderer.on('note-params', (event: Electron.IpcRendererEvent, arg: FullId) => {
             this.segmentData = arg;
         });
         (document.getElementById('addNote') as HTMLAnchorElement).addEventListener('click', () => {
@@ -65,6 +67,7 @@ class Notes {
 
     setNotes(notes: Note[]): void {
         this.tabHolder.clear();
+        this.notes = notes;
         let length = notes.length;
         for (let i: number = 0; i < length; i++) {
             let tab = new Tab(notes[i].id, 'Note ' + notes[i].id, false, this.tabHolder);
@@ -85,7 +88,16 @@ class Notes {
 
     // TODO: change to edit
     editNote(): void {
-        this.electron.ipcRenderer.send('show-edit-note', this.segmentData);
+        let selected: string = this.tabHolder.getSelected();
+        if (selected) {
+            let params: any = this.segmentData;
+            params.noteId = selected;
+            let tab: Tab | undefined = this.tabHolder.getTab(selected);
+            if (tab) {
+                params.note = tab.getContainer().innerText;
+                this.electron.ipcRenderer.send('show-edit-note', params);
+            }
+        }
     }
 
     removeNote(): void {
