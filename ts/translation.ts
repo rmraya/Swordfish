@@ -36,6 +36,7 @@ class TranslationView {
         '</svg>';
     static SVG_METADATA: string = "<svg xmlns='http://www.w3.org/2000/svg' height='24px' viewBox='0 -960 960 960' width='24px'><path d='M240-160q-33 0-56.5-23.5T160-240q0-33 23.5-56.5T240-320q33 0 56.5 23.5T320-240q0 33-23.5 56.5T240-160Zm0-240q-33 0-56.5-23.5T160-480q0-33 23.5-56.5T240-560q33 0 56.5 23.5T320-480q0 33-23.5 56.5T240-400Zm0-240q-33 0-56.5-23.5T160-720q0-33 23.5-56.5T240-800q33 0 56.5 23.5T320-720q0 33-23.5 56.5T240-640Zm240 480q-33 0-56.5-23.5T400-240q0-33 23.5-56.5T480-320q33 0 56.5 23.5T560-240q0 33-23.5 56.5T480-160Zm0-240q-33 0-56.5-23.5T400-480q0-33 23.5-56.5T480-560q33 0 56.5 23.5T560-480q0 33-23.5 56.5T480-400Zm0-240q-33 0-56.5-23.5T400-720q0-35 24.5-57.5T483-800q-2 10-2.5 19.5T480-760q0 31 6.5 60.5T505-644q-6 2-12 3t-13 1Zm280 80q-83 0-141.5-58.5T560-760q0-83 58.5-141.5T760-960q83 0 141.5 58.5T960-760q0 83-58.5 141.5T760-560Zm-40 400q-33 0-56.5-23.5T640-240q0-33 23.5-56.5T720-320q33 0 56.5 23.5T800-240q0 33-23.5 56.5T720-160Zm0-240q-33 0-56.5-23.5T640-480q0-7 1-13t3-12q26 12 55.5 18.5T760-480q11 0 20.5-.5T800-483q0 34-22.5 58.5T720-400Zm40-240q8 0 14-6t6-14q0-8-6-14t-14-6q-8 0-14 6t-6 14q0 8 6 14t14 6Zm-20-80h40v-160h-40v160Z'/></svg>";
 
+    static FILE_INFO: string = "<svg xmlns='http://www.w3.org/2000/svg' height='20px' viewBox='0 -960 960 960' width='20px'><path d='M444-288h72v-240h-72v240Zm35.79-312q15.21 0 25.71-10.29t10.5-25.5q0-15.21-10.29-25.71t-25.5-10.5q-15.21 0-25.71 10.29t-10.5 25.5q0 15.21 10.29 25.71t25.5 10.5Zm.49 504Q401-96 331-126t-122.5-82.5Q156-261 126-330.96t-30-149.5Q96-560 126-629.5q30-69.5 82.5-122T330.96-834q69.96-30 149.5-30t149.04 30q69.5 30 122 82.5T834-629.28q30 69.73 30 149Q864-401 834-331t-82.5 122.5Q699-156 629.28-126q-69.73 30-149 30Zm-.28-72q130 0 221-91t91-221q0-130-91-221t-221-91q-130 0-221 91t-91 221q0 130 91 221t221 91Zm0-312Z'/></svg>";
     static HAS_METADATA: string = "<svg xmlns='http://www.w3.org/2000/svg' height='20px' viewBox='0 -960 960 960' width='20px'><path d='M263.79-192Q234-192 213-213.21t-21-51Q192-294 213.21-315t51-21Q294-336 315-314.79t21 51Q336-234 314.79-213t-51 21Zm0-216Q234-408 213-429.21t-21-51Q192-510 213.21-531t51-21Q294-552 315-530.79t21 51Q336-450 314.79-429t-51 21Zm0-216Q234-624 213-645.21t-21-51Q192-726 213.21-747t51-21Q294-768 315-746.79t21 51Q336-666 314.79-645t-51 21Zm216 432Q450-192 429-213.21t-21-51Q408-294 429.21-315t51-21Q510-336 531-314.79t21 51Q552-234 530.79-213t-51 21Zm0-216Q450-408 429-429.21t-21-51Q408-510 429.21-531t51-21Q510-552 531-530.79t21 51Q552-450 530.79-429t-51 21Zm.21-216q-29.7 0-50.85-21.15Q408-666.3 408-696q0-30 21-51t51-21q7 0 12.5 1t11.5 3q0 32 7.54 61.15Q519.08-673.69 533-648q-10 11-23.58 17.5Q495.84-624 480-624Zm287.77 48Q688-576 632-632.23q-56-56.22-56-136Q576-848 632.23-904q56.22-56 136-56Q848-960 904-903.77q56 56.22 56 136Q960-688 903.77-632q-56.22 56-136 56Zm-71.98 384Q666-192 645-213.21t-21-51Q624-294 645.21-315t51-21Q726-336 747-314.79t21 51Q768-234 746.79-213t-51 21Zm.21-216q-29.7 0-50.85-21.15Q624-450.3 624-480q0-15.84 6.5-29.42Q637-523 648-533q26 14 55 21t61 8q2 6 3 11.5t1 12.5q0 30-21 51t-51 21Zm72-264q9.6 0 16.8-7.2 7.2-7.2 7.2-16.8 0-9.6-7.2-16.8-7.2-7.2-16.8-7.2-9.6 0-16.8 7.2-7.2 7.2-7.2 16.8 0 9.6 7.2 16.8 7.2 7.2 16.8 7.2Zm-24-96h48v-96h-48v96Z'/></svg>";
     static NO_METADATA: string = "<svg xmlns='http://www.w3.org/2000/svg' height='20px' viewBox='0 -960 960 960' width='20px'><path d='M263.79-192Q234-192 213-213.21t-21-51Q192-294 213.21-315t51-21Q294-336 315-314.79t21 51Q336-234 314.79-213t-51 21Zm216 0Q450-192 429-213.21t-21-51Q408-294 429.21-315t51-21Q510-336 531-314.79t21 51Q552-234 530.79-213t-51 21Zm216 0Q666-192 645-213.21t-21-51Q624-294 645.21-315t51-21Q726-336 747-314.79t21 51Q768-234 746.79-213t-51 21Zm-432-216Q234-408 213-429.21t-21-51Q192-510 213.21-531t51-21Q294-552 315-530.79t21 51Q336-450 314.79-429t-51 21Zm216 0Q450-408 429-429.21t-21-51Q408-510 429.21-531t51-21Q510-552 531-530.79t21 51Q552-450 530.79-429t-51 21Zm216 0Q666-408 645-429.21t-21-51Q624-510 645.21-531t51-21Q726-552 747-530.79t21 51Q768-450 746.79-429t-51 21Zm-432-216Q234-624 213-645.21t-21-51Q192-726 213.21-747t51-21Q294-768 315-746.79t21 51Q336-666 314.79-645t-51 21Zm216 0Q450-624 429-645.21t-21-51Q408-726 429.21-747t51-21Q510-768 531-746.79t21 51Q552-666 530.79-645t-51 21Zm216 0Q666-624 645-645.21t-21-51Q624-726 645.21-747t51-21Q726-768 747-746.79t21 51Q768-666 746.79-645t-51 21Z'/></svg>";
 
@@ -315,6 +316,15 @@ class TranslationView {
         this.setSpellChecker();
     }
 
+    selectFile(file: string): void {
+        console.log('Selecting file:', file);
+        let selectedFile = this.filesContainer.querySelector(`[data-file="${file}"]`);
+        if (selectedFile) {
+            this.filesContainer.getElementsByClassName('selectedFile')[0]?.classList.remove('selectedFile');
+        }
+        this.filesContainer.querySelector(`[data-file="${file}"]`)?.classList.add('selectedFile');
+    }
+
     drawFiles(files: any[]): void {
         this.filesContainer.innerHTML = '';
         for (const file of files) {
@@ -324,11 +334,13 @@ class TranslationView {
             if (detailsArray.length === 1) {
                 let fileDiv = document.createElement('div');
                 fileDiv.className = 'fileContainer';
+                fileDiv.setAttribute('data-file', detailsArray[0].file);
 
                 let infoSpan: HTMLSpanElement = document.createElement('span');
                 infoSpan.classList.add('iconTooltip');
                 infoSpan.classList.add('sourceSymbol');
-                infoSpan.innerHTML = '\u24D8<small class="tooltiptext">File Info</small>';
+                infoSpan.classList.add('bottomAlign');
+                infoSpan.innerHTML = TranslationView.FILE_INFO + '<small class="tooltiptext">File Info</small>';
                 infoSpan.addEventListener('click', () => {
                     this.showFileInfo(detailsArray[0]);
                 });
@@ -338,14 +350,13 @@ class TranslationView {
                 metaSpan.classList.add('iconTooltip');
                 metaSpan.classList.add('sourceSymbol');
                 metaSpan.classList.add('bottomAlign');
-                metaSpan.innerHTML = '\u283F<small class="tooltiptext">Custom Metadata</small>';
                 metaSpan.addEventListener('click', () => {
                     this.showFileMetadata(detailsArray[0]);
                 });
                 if (this.hasCustomMetadata(detailsArray[0].metadata)) {
-                    metaSpan.innerHTML = TranslationView.HAS_METADATA + '<small class="tooltiptext">Custom Metadata</small>';
+                    metaSpan.innerHTML = TranslationView.HAS_METADATA + '<small class="tooltiptext">File Metadata</small>';
                 } else {
-                    metaSpan.innerHTML = TranslationView.NO_METADATA + '<small class="tooltiptext">Custom Metadata</small>';
+                    metaSpan.innerHTML = TranslationView.NO_METADATA + '<small class="tooltiptext">File Metadata</small>';
                 }
                 fileDiv.appendChild(metaSpan);
 
@@ -366,18 +377,14 @@ class TranslationView {
                 for (const details of detailsArray) {
                     let detailsDiv = document.createElement('div');
                     detailsDiv.className = 'fileContainer';
+                    detailsDiv.setAttribute('data-file', details.file);
                     this.filesContainer.appendChild(detailsDiv);
-
-                    let checkBox: HTMLInputElement = document.createElement('input');
-                    checkBox.type = 'checkbox';
-                    checkBox.id = 'file_' + details.file;
-                    checkBox.checked = true;
-                    detailsDiv.appendChild(checkBox);
 
                     let infoSpan: HTMLSpanElement = document.createElement('span');
                     infoSpan.classList.add('iconTooltip');
                     infoSpan.classList.add('sourceSymbol');
-                    infoSpan.innerHTML = '\u24D8<small class="tooltiptext">File Info</small>';
+                    infoSpan.classList.add('bottomAlign');
+                    infoSpan.innerHTML = TranslationView.FILE_INFO + '<small class="tooltiptext">File Info</small>';
                     infoSpan.addEventListener('click', () => {
                         this.showFileInfo(details);
                     });
@@ -391,18 +398,21 @@ class TranslationView {
                         this.showFileMetadata(details);
                     });
                     if (this.hasCustomMetadata(details.metadata)) {
-                        metaSpan.innerHTML = TranslationView.HAS_METADATA + '<small class="tooltiptext">Custom Metadata</small>';
+                        metaSpan.innerHTML = TranslationView.HAS_METADATA + '<small class="tooltiptext">File Metadata</small>';
                     } else {
-                        metaSpan.innerHTML = TranslationView.NO_METADATA + '<small class="tooltiptext">Custom Metadata</small>';
+                        metaSpan.innerHTML = TranslationView.NO_METADATA + '<small class="tooltiptext">File Metadata</small>';
                     }
                     detailsDiv.appendChild(metaSpan);
 
-                    let label: HTMLLabelElement = document.createElement('label');
-                    label.htmlFor = checkBox.id;
+                    let label: HTMLSpanElement = document.createElement('span');
                     label.innerText = details.original;
                     detailsDiv.appendChild(label);
                 }
             }
+        }
+        if (this.currentRow) {
+            let file: string = this.currentRow.getAttribute('data-file') || '';
+            this.selectFile(file);
         }
     }
 
@@ -1818,6 +1828,8 @@ class TranslationView {
         let id: string = this.currentRow.getAttribute('data-id') as string;
         let file: string = this.currentRow.getAttribute('data-file') as string;
         let unit: string = this.currentRow.getAttribute('data-unit') as string;
+
+        this.selectFile(file);
 
         this.currentId = { id: id, file: file, unit: unit };
         let source: HTMLTableCellElement = this.currentRow.getElementsByClassName('source')[0] as HTMLTableCellElement;

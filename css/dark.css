@@ -1020,3 +1020,7 @@ svg.stats {
 .bottomAlign {
 	margin-bottom: -4px;
 }
+
+.selectedFile {
+	background: var(--ClassicBlue90);
+}
