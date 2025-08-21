@@ -8,42 +8,42 @@
 </head>
 
 <body class="dialogBody" onload="new AddTerm();">
+    <div class="paddedArea">
+        <table class="fill_width">
+            <tr>
+                <td class="middle noWrap">
+                    <label for="source">Source Term</label>
+                </td>
+                <td class="middle" style="width: 40%;">
+                    <input id="source" class="table_input" />
+                </td>
+                <td class="middle noWrap">
+                    <label for="srcLangSelect">Source Language</label>
+                </td>
+                <td class="middle" style="width: 40%;">
+                    <select id="srcLangSelect" class="table_select">
 
-    <table class="fill_width">
-        <tr>
-            <td class="middle noWrap" >
-                <label for="source">Source Term</label>
-            </td>
-            <td class="middle"  style="width: 40%;">
-                <input id="source" class="table_input" />
-            </td>
-            <td class="middle noWrap">
-                <label for="srcLangSelect">Source Language</label>
-            </td>
-            <td class="middle"  style="width: 40%;">
-                <select id="srcLangSelect" class="table_select">
+                    </select>
+                </td>
+            </tr>
+            <tr>
+                <td class="middle noWrap">
+                    <label for="target">Target Term</label>
+                </td>
+                <td class="middle" style="width: 40%;">
+                    <input id="target" class="table_input" />
+                </td>
+                <td class="middle noWrap">
+                    <label for="tgtLangSelect">Target Language</label>
+                </td>
+                <td class="middle" style="width: 40%;">
+                    <select id="tgtLangSelect" class="table_select">
 
-                </select>
-            </td>
-        </tr>
-        <tr>
-            <td class="middle noWrap">
-                <label for="target">Target Term</label>
-            </td>
-            <td class="middle"  style="width: 40%;">
-                <input id="target" class="table_input" />
-            </td>
-            <td class="middle noWrap">
-                <label for="tgtLangSelect">Target Language</label>
-            </td>
-            <td class="middle"  style="width: 40%;">
-                <select id="tgtLangSelect" class="table_select">
-
-                </select>
-            </td>
-        </tr>
-    </table>
-
+                    </select>
+                </td>
+            </tr>
+        </table>
+    </div>
     <div class="buttonArea">
         <button id="addTermButton">Add Term</button>
     </div>

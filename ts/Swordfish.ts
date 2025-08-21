@@ -5780,8 +5780,10 @@ export class Swordfish {
         if (!Swordfish.metadataWindow || Swordfish.metadataWindow.isDestroyed()) {
             Swordfish.metadataWindow = new BrowserWindow({
                 parent: Swordfish.mainWindow,
-                width: 600,
-                height: 540,
+                width: 500,
+                height: 440,
+                minWidth:400,
+                minHeight: 380,
                 minimizable: false,
                 maximizable: false,
                 resizable: true,

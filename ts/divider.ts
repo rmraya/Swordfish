@@ -345,7 +345,6 @@ class ThreeVerticalPanels {
 
     setExpandedLeft(width: number) {
         this.expandedLeft = width;
-        console.log(this.expandedLeft);
     }
 
 }

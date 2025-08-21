@@ -443,8 +443,7 @@ label {
 }
 
 .paddedArea {
-	padding: 4px;
-	margin: 4px;
+	padding: 8px 8px 4px 8px;
 }
 
 .optionBox {
@@ -456,7 +455,10 @@ label {
 	display: flex;
 	flex-direction: row;
 	padding: 8px 16px;
+	margin: 0;
 	justify-content: flex-end;
+	background-color: var(--gray30);
+	border-top: 1px solid var(--gray50);
 }
 
 .inputArea {
@@ -968,16 +970,13 @@ svg.stats {
 }
 
 .dialogBody {
-	padding: 8px 0px 16px 8px;
 	overflow-y: hidden;
+	margin: 0;
+	padding: 0;
 }
 
 .borderBottom {
 	border-bottom: 1px solid var(--gray50);
-}
-
-.borderTop {
-	border-top: 1px solid var(--gray50);
 }
 
 .fileContainer {
@@ -1024,5 +1023,5 @@ svg.stats {
 }
 
 .selectedFile {
-	background: var(--ClassicBlue20);
+	background-color: var(--ClassicBlue20);
 }

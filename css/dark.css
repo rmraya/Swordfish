@@ -457,6 +457,8 @@ label {
 	flex-direction: row;
 	padding: 8px 16px;
 	justify-content: flex-end;
+	background-color: var(--gray130);
+	border-top: 1px solid var(--gray150);
 }
 
 .inputArea {
@@ -966,16 +968,13 @@ svg.stats {
 }
 
 .dialogBody {
-	padding: 8px 0px 16px 8px;
+	padding: 0;
+	margin: 0;
 	overflow-y: hidden;
 }
 
 .borderBottom {
 	border-bottom: 1px solid var(--gray50);
-}
-
-.borderTop {
-	border-top: 1px solid var(--gray50);
 }
 
 .fileContainer {

@@ -63,14 +63,12 @@ class MetaData {
 
         let tabs: HTMLCollectionOf<Element> = document.getElementsByClassName('tab');
         let attributesContainers: HTMLCollectionOf<Element> = document.getElementsByClassName('attributesContainer');
-        let tableContainers: HTMLCollectionOf<Element> = document.getElementsByClassName('metaContainer');
-        let entryButtonsContainer: HTMLCollectionOf<Element> = document.getElementsByClassName('entryButtonsContainer');
+        let tableContainers: HTMLCollectionOf<Element> = document.getElementsByClassName('divContainer');
         for (let i: number = 0; i < tableContainers.length; i++) {
             let tab: HTMLDivElement = tabs[i] as HTMLDivElement;
             let attributesContainer: HTMLDivElement = attributesContainers[i] as HTMLDivElement;
             let tableContainer: HTMLDivElement = tableContainers[i] as HTMLDivElement;
-            let entryButtons: HTMLDivElement = entryButtonsContainer[i] as HTMLDivElement;
-            tableContainer.style.height = (main.clientHeight - (tab.clientHeight + attributesContainer.clientHeight + entryButtons.clientHeight)) + 'px';
+            tableContainer.style.height = (main.clientHeight - (tab.clientHeight + attributesContainer.clientHeight + buttons.clientHeight)) + 'px';
         }
     }
 
@@ -180,7 +178,6 @@ class MetaData {
 
             let entryButtons: HTMLDivElement = document.createElement('div');
             entryButtons.classList.add('buttonArea');
-            entryButtons.classList.add('borderBottom');
             holder.appendChild(entryButtons);
 
             let addButton: HTMLButtonElement = document.createElement('button');
