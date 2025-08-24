@@ -470,7 +470,7 @@ class GlossariesView {
             return;
         }
         for (let key of this.selected.keys()) {
-            this.electron.ipcRenderer.send('show-term-search', { glossary: key });
+            this.electron.ipcRenderer.send('show-term-search', key as string);
         }
     }
 
@@ -484,7 +484,7 @@ class GlossariesView {
             return;
         }
         for (let key of this.selected.keys()) {
-            this.electron.ipcRenderer.send('show-add-term', { glossary: key });
+            this.electron.ipcRenderer.send('show-add-term', key as string);
         }
     }
 

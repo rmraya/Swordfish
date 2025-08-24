@@ -134,7 +134,7 @@ class TabHolder {
         });
         this.tabs.clear();
         this.tabsList = [];
-        this.selectedTab ='';
+        this.selectedTab = '';
     }
 
     addTab(tab: Tab): void {
@@ -153,7 +153,9 @@ class TabHolder {
         this.tabs.forEach((value, key) => {
             value.setSelected(tabId === key);
         });
-        this.selectedTab = tabId;
+        if (this.tabs.has(tabId)) {
+            this.selectedTab = tabId;
+        }
     }
 
     getSelected(): string {

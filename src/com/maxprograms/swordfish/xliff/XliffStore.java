@@ -122,7 +122,6 @@ public class XliffStore {
 	private PreparedStatement unitTerms;
 	private PreparedStatement unitNotes;
 	private PreparedStatement checkTerm;
-	private PreparedStatement getNotesStmt;
 	private PreparedStatement insertNoteStmt;
 	private PreparedStatement getSegment;
 	private PreparedStatement getChild;
@@ -305,7 +304,6 @@ public class XliffStore {
 				"SELECT termid, origin, source, target FROM terms WHERE file=? AND unitId=? AND segId=? ORDER BY source");
 		checkTerm = conn
 				.prepareStatement("SELECT target FROM terms WHERE file=? AND unitId=? AND segId=? AND termid=?");
-		getNotesStmt = conn.prepareStatement("SELECT noteId, note FROM notes WHERE file=? AND unitId=? AND segId=?");
 		getSegment = conn.prepareStatement("SELECT source, target FROM segments WHERE file=? AND unitId=? AND segId=?");
 		getChild = conn.prepareStatement("SELECT child FROM segments WHERE file=? AND unitId=? AND segId=?");
 		getContext = conn.prepareStatement("SELECT unitId, segId FROM segments WHERE file=? AND child=?");
@@ -905,13 +903,16 @@ public class XliffStore {
 
 	private boolean hasNotes(String file, String unit, String segId) throws SQLException {
 		boolean result = false;
-		getNotesStmt.setString(1, file);
-		getNotesStmt.setString(2, unit);
-		getNotesStmt.setString(3, segId);
-		try (ResultSet rs = getNotesStmt.executeQuery()) {
-			while (rs.next()) {
-				result = true;
-				break;
+		try (PreparedStatement getNotesStmt = conn
+				.prepareStatement("SELECT noteId, note FROM notes WHERE file=? AND unitId=? AND segId=?")) {
+			getNotesStmt.setString(1, file);
+			getNotesStmt.setString(2, unit);
+			getNotesStmt.setString(3, segId);
+			try (ResultSet rs = getNotesStmt.executeQuery()) {
+				while (rs.next()) {
+					result = true;
+					break;
+				}
 			}
 		}
 		return result;
@@ -925,17 +926,20 @@ public class XliffStore {
 		return metadata != null;
 	}
 
-	public JSONArray getNotes(String file, String unit, String segId) throws SQLException {
+	public synchronized JSONArray getNotes(String file, String unit, String segId) throws SQLException {
 		JSONArray array = new JSONArray();
-		getNotesStmt.setString(1, file);
-		getNotesStmt.setString(2, unit);
-		getNotesStmt.setString(3, segId);
-		try (ResultSet rs = getNotesStmt.executeQuery()) {
-			while (rs.next()) {
-				JSONObject note = new JSONObject();
-				note.put("id", rs.getString(1));
-				note.put("note", rs.getString(2));
-				array.put(note);
+		try (PreparedStatement getNotesStmt = conn
+				.prepareStatement("SELECT noteId, note FROM notes WHERE file=? AND unitId=? AND segId=?")) {
+			getNotesStmt.setString(1, file);
+			getNotesStmt.setString(2, unit);
+			getNotesStmt.setString(3, segId);
+			try (ResultSet rs = getNotesStmt.executeQuery()) {
+				while (rs.next()) {
+					JSONObject note = new JSONObject();
+					note.put("id", rs.getString(1));
+					note.put("note", rs.getString(2));
+					array.put(note);
+				}
 			}
 		}
 		return array;
@@ -989,7 +993,8 @@ public class XliffStore {
 		return result;
 	}
 
-	public JSONArray updateNote(String file, String unit, String segId, String noteText, String noteId) throws SQLException {
+	public JSONArray updateNote(String file, String unit, String segId, String noteText, String noteId)
+			throws SQLException {
 		String sql = "UPDATE notes SET note=? WHERE file=? AND unitId=? AND segId=? AND noteId=?";
 		try (PreparedStatement prep = conn.prepareStatement(sql)) {
 			prep.setString(1, noteText);
@@ -1003,7 +1008,7 @@ public class XliffStore {
 		return getNotes(file, unit, segId);
 	}
 
-	public JSONArray addNote(String file, String unit, String segId, String noteText) throws SQLException {
+	public synchronized JSONArray addNote(String file, String unit, String segId, String noteText) throws SQLException {
 		String sql = "SELECT noteId FROM notes WHERE file=? AND unitId=? AND segId=?";
 		int maxId = 0;
 		try (PreparedStatement prep = conn.prepareStatement(sql)) {
@@ -1024,26 +1029,30 @@ public class XliffStore {
 				}
 			}
 		}
+		maxId++;
 		sql = "INSERT INTO notes (file, unitId, segId, noteId, note) values (?,?,?,?,?)";
 		try (PreparedStatement prep = conn.prepareStatement(sql)) {
 			prep.setString(1, file);
 			prep.setString(2, unit);
 			prep.setString(3, segId);
-			prep.setString(4, "" + (maxId + 1));
+			prep.setString(4, "" + maxId);
 			prep.setString(5, noteText);
 			prep.executeUpdate();
 		}
 		conn.commit();
 		JSONArray array = new JSONArray();
-		getNotesStmt.setString(1, file);
-		getNotesStmt.setString(2, unit);
-		getNotesStmt.setString(3, segId);
-		try (ResultSet rs = getNotesStmt.executeQuery()) {
-			while (rs.next()) {
-				JSONObject note = new JSONObject();
-				note.put("id", rs.getString(1));
-				note.put("note", rs.getString(2));
-				array.put(note);
+		try (PreparedStatement getNotesStmt = conn
+				.prepareStatement("SELECT noteId, note FROM notes WHERE file=? AND unitId=? AND segId=?")) {
+			getNotesStmt.setString(1, file);
+			getNotesStmt.setString(2, unit);
+			getNotesStmt.setString(3, segId);
+			try (ResultSet rs = getNotesStmt.executeQuery()) {
+				while (rs.next()) {
+					JSONObject note = new JSONObject();
+					note.put("id", rs.getString(1));
+					note.put("note", rs.getString(2));
+					array.put(note);
+				}
 			}
 		}
 		return array;
@@ -1060,15 +1069,18 @@ public class XliffStore {
 		}
 		conn.commit();
 		JSONArray array = new JSONArray();
-		getNotesStmt.setString(1, file);
-		getNotesStmt.setString(2, unit);
-		getNotesStmt.setString(3, segId);
-		try (ResultSet rs = getNotesStmt.executeQuery()) {
-			while (rs.next()) {
-				JSONObject note = new JSONObject();
-				note.put("id", rs.getString(1));
-				note.put("note", rs.getString(2));
-				array.put(note);
+		try (PreparedStatement getNotesStmt = conn
+				.prepareStatement("SELECT noteId, note FROM notes WHERE file=? AND unitId=? AND segId=?")) {
+			getNotesStmt.setString(1, file);
+			getNotesStmt.setString(2, unit);
+			getNotesStmt.setString(3, segId);
+			try (ResultSet rs = getNotesStmt.executeQuery()) {
+				while (rs.next()) {
+					JSONObject note = new JSONObject();
+					note.put("id", rs.getString(1));
+					note.put("note", rs.getString(2));
+					array.put(note);
+				}
 			}
 		}
 		return array;
@@ -1144,7 +1156,6 @@ public class XliffStore {
 		insertTerm.close();
 		getTerms.close();
 		checkTerm.close();
-		getNotesStmt.close();
 		getSegment.close();
 		getChild.close();
 		getContext.close();

@@ -144,11 +144,9 @@ export class Swordfish {
     static sortParams: any;
     static filterParams: any;
     static memoryParam: string;
-    static notesParam: any;
-    static notesEvent: IpcMainEvent;
     static metadataEvent: IpcMainEvent;
     static concordanceMemories: string[];
-    static glossaryParam: string;
+    static selectedGlossary: string;
     static messageParam: any;
     static projectParam: string;
     static remoteTmParams: any;
@@ -213,7 +211,7 @@ export class Swordfish {
 
         app.on('ready', () => {
             Swordfish.createWindow();
-            let filePath = Swordfish.path.join(app.getAppPath(), 'html', 'index.html');
+            let filePath: string = Swordfish.path.join(app.getAppPath(), 'html', 'index.html');
             let fileUrl: URL = new URL('file://' + filePath);
             Swordfish.mainWindow.loadURL(fileUrl.href);
             Swordfish.mainWindow.on('resize', () => {
@@ -296,9 +294,6 @@ export class Swordfish {
         });
         ipcMain.on('get-theme', (event: IpcMainEvent) => {
             event.sender.send('set-theme', Swordfish.currentCss);
-        });
-        ipcMain.on('get-note-params', (event: IpcMainEvent) => {
-            event.sender.send('note-params', Swordfish.notesParam);
         });
         ipcMain.on('set-height', (event: IpcMainEvent, arg: { window: string, width: number, height: number }) => {
             Swordfish.setHeight(arg);
@@ -429,7 +424,7 @@ export class Swordfish {
         ipcMain.on('close-addTerm', () => {
             Swordfish.addTermWindow.close();
         });
-        ipcMain.on('add-to-glossary', (event: IpcMainEvent, arg: any) => {
+        ipcMain.on('add-to-glossary', (event: IpcMainEvent, arg: { glossary: string, sourceTerm: string, targetTerm: string, srcLang: string, tgtLang: string }) => {
             Swordfish.addToGlossary(arg);
         });
         ipcMain.on('show-import-tmx', (event: IpcMainEvent, arg: any) => {
@@ -442,7 +437,7 @@ export class Swordfish {
             Swordfish.showImportGlossary(arg);
         });
         ipcMain.on('get-glossary-param', (event: IpcMainEvent) => {
-            event.sender.send('set-glossary', Swordfish.glossaryParam);
+            event.sender.send('set-glossary', Swordfish.selectedGlossary);
         });
         ipcMain.on('get-glossary-file', (event: IpcMainEvent) => {
             Swordfish.getGlossaryFile(event);
@@ -836,52 +831,50 @@ export class Swordfish {
         ipcMain.on('merge-at', (event: IpcMainEvent, arg: any) => {
             Swordfish.mergeSegment(arg);
         });
-        ipcMain.on('show-notes', (event: IpcMainEvent, arg: any) => {
-            Swordfish.showNotes(arg);
+        ipcMain.on('show-notes', (event: IpcMainEvent, segment: FullId) => {
+            Swordfish.showNotes(segment);
         });
         ipcMain.on('close-notes', () => {
             Swordfish.notesWindow.close();
         });
-        ipcMain.on('get-initial-notes', (event: IpcMainEvent) => {
-            Swordfish.notesEvent = event;
-            event.sender.send('note-params', Swordfish.notesParam);
-            Swordfish.getNotes(Swordfish.notesParam);
+        ipcMain.on('show-add-note', (event: IpcMainEvent, segmentId: FullId) => {
+            Swordfish.showAddNote(segmentId);
         });
-        ipcMain.on('show-add-note', (event: IpcMainEvent, arg: any) => {
-            Swordfish.showAddNote(arg);
-        });
-        ipcMain.on('show-edit-note', (event: IpcMainEvent, arg: any) => {
-            Swordfish.showEditNote(arg);
+        ipcMain.on('show-edit-note', (event: IpcMainEvent, arg: { segmentId: FullId, noteId: string, noteText: string }) => {
+            Swordfish.showEditNote(arg.segmentId, arg.noteId, arg.noteText);
         });
         ipcMain.on('close-add-note', () => {
             Swordfish.addNoteWindow.close();
         });
-        ipcMain.on('add-note', (event: IpcMainEvent, arg: any) => {
-            Swordfish.addNote(arg);
+        ipcMain.on('add-note', (event: IpcMainEvent, arg: { segment: FullId, note: string }) => {
+            Swordfish.addNote(arg.segment, arg.note);
+        });
+        ipcMain.on('update-note', (event: IpcMainEvent, arg: { segment: FullId, note: string, noteId: string }) => {
+            Swordfish.updateNote(arg.segment, arg.note, arg.noteId);
         });
         ipcMain.on('remove-note', (event: IpcMainEvent, arg: any) => {
             Swordfish.removeNote(arg);
         });
-        ipcMain.on('show-file-info', (event: IpcMainEvent, arg: any) => {
-            Swordfish.showFileInfo(arg);
+        ipcMain.on('show-file-info', (event: IpcMainEvent, fileInfo: any) => {
+            Swordfish.showFileInfo(fileInfo);
         });
         ipcMain.on('close-file-info', () => {
             Swordfish.fileInfoWindow?.close();
         });
-        ipcMain.on('show-metadata', (event: IpcMainEvent, arg: MetaId) => {
-            Swordfish.showMetadata(arg);
+        ipcMain.on('show-metadata', (event: IpcMainEvent, metaId: MetaId) => {
+            Swordfish.showMetadata(metaId);
         });
-        ipcMain.on('get-metadata', (event: IpcMainEvent, arg: MetaId) => {
-            Swordfish.getMetadata(arg);
+        ipcMain.on('get-metadata', (event: IpcMainEvent, metaId: MetaId) => {
+            Swordfish.getMetadata(metaId);
         });
         ipcMain.on('close-metadata', () => {
             Swordfish.metadataWindow.close();
         });
-        ipcMain.on('show-add-metaGroup', () => {
-            Swordfish.showAddMetaGroup();
+        ipcMain.on('show-add-metaGroup', (event: IpcMainEvent, metaId: MetaId) => {
+            Swordfish.showAddMetaGroup(metaId);
         });
-        ipcMain.on('show-edit-metaGroup', () => {
-            Swordfish.showEditMetaGroup();
+        ipcMain.on('show-edit-metaGroup', (event: IpcMainEvent, arg: { metaId: MetaId, metaGroup: MetaGroup }) => {
+            Swordfish.showEditMetaGroup(arg.metaId, arg.metaGroup);
         });
         ipcMain.on('close-add-metaGroup', () => {
             Swordfish.addMetaGroupWindow.close();
@@ -1030,7 +1023,7 @@ export class Swordfish {
             icon: this.iconPath
         });
         this.mainWindow.webContents.on('context-menu', (event: Electron.Event, params: any) => {
-            const menu = new Menu();
+            const menu: Menu = new Menu();
             // Add each spelling suggestion
             for (const suggestion of params.dictionarySuggestions) {
                 menu.append(new MenuItem({
@@ -1199,8 +1192,8 @@ export class Swordfish {
             { label: 'Release History', click: () => { Swordfish.showReleaseHistory(); } },
             { label: 'Support Group', click: () => { this.showSupportGroup(); } }
         ]);
-        let nextUntranslatedKey = 'Alt+Down';
-        let nextUnconfirmedKey = 'Alt+Shift+Down';
+        let nextUntranslatedKey: string = 'Alt+Down';
+        let nextUnconfirmedKey: string = 'Alt+Shift+Down';
         if (process.platform === 'darwin') {
             nextUntranslatedKey = 'Ctrl+Alt+Down';
             nextUnconfirmedKey = 'Ctrl+Shift+Down';
@@ -1317,35 +1310,35 @@ export class Swordfish {
     }
 
     static undo(): void {
-        let focusedWindow = BrowserWindow.getFocusedWindow();
+        let focusedWindow: BrowserWindow | null = BrowserWindow.getFocusedWindow();
         if (focusedWindow) {
             focusedWindow.webContents.undo();
         }
     }
 
     static cut(): void {
-        let focusedWindow = BrowserWindow.getFocusedWindow();
+        let focusedWindow: BrowserWindow | null = BrowserWindow.getFocusedWindow();
         if (focusedWindow) {
             focusedWindow.webContents.cut();
         }
     }
 
     static copy(): void {
-        let focusedWindow = BrowserWindow.getFocusedWindow();
+        let focusedWindow: BrowserWindow | null = BrowserWindow.getFocusedWindow();
         if (focusedWindow) {
             focusedWindow.webContents.copy();
         }
     }
 
     static paste(): void {
-        let focusedWindow = BrowserWindow.getFocusedWindow();
+        let focusedWindow: BrowserWindow | null = BrowserWindow.getFocusedWindow();
         if (focusedWindow) {
             focusedWindow.webContents.paste();
         }
     }
 
     static selectAll(): void {
-        let focusedWindow = BrowserWindow.getFocusedWindow();
+        let focusedWindow: BrowserWindow | null = BrowserWindow.getFocusedWindow();
         if (focusedWindow) {
             focusedWindow.webContents.selectAll();
         }
@@ -1649,7 +1642,7 @@ export class Swordfish {
         });
         this.sortParams = params;
         this.sortSegmentsWindow.setMenu(null);
-        let filePath = Swordfish.path.join(app.getAppPath(), 'html', 'sortSegments.html');
+        let filePath: string = Swordfish.path.join(app.getAppPath(), 'html', 'sortSegments.html');
         let fileUrl: URL = new URL('file://' + filePath);
         this.sortSegmentsWindow.loadURL(fileUrl.href);
         this.sortSegmentsWindow.once('ready-to-show', () => {
@@ -1678,7 +1671,7 @@ export class Swordfish {
         });
         this.filterParams = params;
         this.filterSegmentsWindow.setMenu(null);
-        let filePath = Swordfish.path.join(app.getAppPath(), 'html', 'filterSegments.html');
+        let filePath: string = Swordfish.path.join(app.getAppPath(), 'html', 'filterSegments.html');
         let fileUrl: URL = new URL('file://' + filePath);
         this.filterSegmentsWindow.loadURL(fileUrl.href);
         this.filterSegmentsWindow.once('ready-to-show', () => {
@@ -1719,7 +1712,7 @@ export class Swordfish {
             }
         });
         this.addProjectWindow.setMenu(null);
-        let filePath = Swordfish.path.join(app.getAppPath(), 'html', 'addProject.html');
+        let filePath: string = Swordfish.path.join(app.getAppPath(), 'html', 'addProject.html');
         let fileUrl: URL = new URL('file://' + filePath);
         this.addProjectWindow.loadURL(fileUrl.href);
         this.addProjectWindow.once('ready-to-show', () => {
@@ -1748,7 +1741,7 @@ export class Swordfish {
             }
         });
         this.editProjectWindow.setMenu(null);
-        let filePath = Swordfish.path.join(app.getAppPath(), 'html', 'editProject.html');
+        let filePath: string = Swordfish.path.join(app.getAppPath(), 'html', 'editProject.html');
         let fileUrl: URL = new URL('file://' + filePath);
         this.editProjectWindow.loadURL(fileUrl.href);
         this.editProjectWindow.once('ready-to-show', () => {
@@ -1819,7 +1812,7 @@ export class Swordfish {
         Swordfish.mainWindow.webContents.send('set-status', 'Exporting translations');
         Swordfish.currentStatus = data;
         let processId: string = data.process;
-        let intervalObject = setInterval(() => {
+        let intervalObject: NodeJS.Timeout = setInterval(() => {
             if (Swordfish.currentStatus.progress) {
                 if (Swordfish.currentStatus.progress === Swordfish.COMPLETED) {
                     Swordfish.mainWindow.webContents.send('end-waiting');
@@ -1874,8 +1867,8 @@ export class Swordfish {
                 filters: [{ name: file.type, extensions: 'sdlrpx' }, { name: 'Any File', extensions: '*' }]
             }
         }
-        let name = fileName.substring(0, fileName.lastIndexOf('.'));
-        let extension = fileName.substring(fileName.lastIndexOf('.'));
+        let name: string = fileName.substring(0, fileName.lastIndexOf('.'));
+        let extension: string = fileName.substring(fileName.lastIndexOf('.'));
         return {
             defaultPath: name + '_' + lang + extension,
             filters: [{ name: file.type, extensions: extension }, { name: 'Any File', extensions: '*' }]
@@ -1911,7 +1904,7 @@ export class Swordfish {
                     }
                 });
                 this.addFileWindow.setMenu(null);
-                let filePath = Swordfish.path.join(app.getAppPath(), 'html', 'addFile.html');
+                let filePath: string = Swordfish.path.join(app.getAppPath(), 'html', 'addFile.html');
                 let fileUrl: URL = new URL('file://' + filePath);
                 this.addFileWindow.loadURL(fileUrl.href);
                 this.addFileWindow.once('ready-to-show', () => {
@@ -1975,7 +1968,7 @@ export class Swordfish {
                 }
                 Swordfish.currentStatus = data;
                 let processId: string = data.process;
-                let intervalObject = setInterval(() => {
+                let intervalObject: NodeJS.Timeout = setInterval(() => {
                     if (Swordfish.currentStatus.progress) {
                         if (Swordfish.currentStatus.progress === Swordfish.COMPLETED) {
                             Swordfish.mainWindow.webContents.send('end-waiting');
@@ -2157,7 +2150,7 @@ export class Swordfish {
         });
         this.typeParam = type;
         this.serverSettingsWindow.setMenu(null);
-        let filePath = Swordfish.path.join(app.getAppPath(), 'html', 'serverSettings.html');
+        let filePath: string = Swordfish.path.join(app.getAppPath(), 'html', 'serverSettings.html');
         let fileUrl: URL = new URL('file://' + filePath);
         this.serverSettingsWindow.loadURL(fileUrl.href);
         this.serverSettingsWindow.once('ready-to-show', () => {
@@ -2185,7 +2178,7 @@ export class Swordfish {
             }
         });
         this.browseDatabasesWindow.setMenu(null);
-        let filePath = Swordfish.path.join(app.getAppPath(), 'html', 'browseDatabases.html');
+        let filePath: string = Swordfish.path.join(app.getAppPath(), 'html', 'browseDatabases.html');
         let fileUrl: URL = new URL('file://' + filePath);
         this.browseDatabasesWindow.loadURL(fileUrl.href);
         this.browseDatabasesWindow.once('ready-to-show', () => {
@@ -2255,7 +2248,7 @@ export class Swordfish {
             }
         });
         this.addMemoryWindow.setMenu(null);
-        let filePath = Swordfish.path.join(app.getAppPath(), 'html', 'addMemory.html');
+        let filePath: string = Swordfish.path.join(app.getAppPath(), 'html', 'addMemory.html');
         let fileUrl: URL = new URL('file://' + filePath);
         this.addMemoryWindow.loadURL(fileUrl.href);
         this.addMemoryWindow.once('ready-to-show', () => {
@@ -2329,7 +2322,7 @@ export class Swordfish {
             }
         });
         Swordfish.aboutWindow.setMenu(null);
-        let filePath = Swordfish.path.join(app.getAppPath(), 'html', 'about.html');
+        let filePath: string = Swordfish.path.join(app.getAppPath(), 'html', 'about.html');
         let fileUrl: URL = new URL('file://' + filePath);
         Swordfish.aboutWindow.loadURL(fileUrl.href);
         Swordfish.aboutWindow.once('ready-to-show', () => {
@@ -2371,7 +2364,7 @@ export class Swordfish {
                 Swordfish.showMessage({ type: 'error', message: 'Unknown license' });
                 return;
         }
-        let licenseWindow = new BrowserWindow({
+        let licenseWindow: BrowserWindow = new BrowserWindow({
             parent: this.licensesWindow,
             width: 680,
             height: 400,
@@ -2384,7 +2377,7 @@ export class Swordfish {
             }
         });
         licenseWindow.setMenu(null);
-        let filePath = Swordfish.path.join(app.getAppPath(), 'html', 'licenses', licenseFile);
+        let filePath: string = Swordfish.path.join(app.getAppPath(), 'html', 'licenses', licenseFile);
         let fileUrl: URL = new URL('file://' + filePath);
         licenseWindow.loadURL(fileUrl.href);
         licenseWindow.once('ready-to-show', () => {
@@ -2416,7 +2409,7 @@ export class Swordfish {
             }
         });
         this.preferencesWindow.setMenu(null);
-        let filePath = Swordfish.path.join(app.getAppPath(), 'html', 'preferencesDialog.html');
+        let filePath: string = Swordfish.path.join(app.getAppPath(), 'html', 'preferencesDialog.html');
         let fileUrl: URL = new URL('file://' + filePath);
         this.preferencesWindow.loadURL(fileUrl.href);
         this.preferencesWindow.once('ready-to-show', () => {
@@ -2446,7 +2439,7 @@ export class Swordfish {
             }
         });
         this.systemInfoWindow.setMenu(null);
-        let filePath = Swordfish.path.join(app.getAppPath(), 'html', 'systemInfo.html');
+        let filePath: string = Swordfish.path.join(app.getAppPath(), 'html', 'systemInfo.html');
         let fileUrl: URL = new URL('file://' + filePath);
         this.systemInfoWindow.loadURL(fileUrl.href);
         this.systemInfoWindow.once('ready-to-show', () => {
@@ -2494,7 +2487,7 @@ export class Swordfish {
             }
         });
         this.licensesWindow.setMenu(null);
-        let filePath = Swordfish.path.join(app.getAppPath(), 'html', 'licenses.html');
+        let filePath: string = Swordfish.path.join(app.getAppPath(), 'html', 'licenses.html');
         let fileUrl: URL = new URL('file://' + filePath);
         this.licensesWindow.loadURL(fileUrl.href);
         this.licensesWindow.once('ready-to-show', () => {
@@ -2549,7 +2542,7 @@ export class Swordfish {
                 });
                 response.on('end', () => {
                     try {
-                        let parsedData = JSON.parse(responseData);
+                        let parsedData: any = JSON.parse(responseData);
                         if (app.getVersion() !== parsedData.version) {
                             Swordfish.latestVersion = parsedData.version;
                             switch (process.platform) {
@@ -2578,7 +2571,7 @@ export class Swordfish {
                                 }
                             });
                             Swordfish.updatesWindow.setMenu(null);
-                            let filePath = Swordfish.path.join(app.getAppPath(), 'html', 'updates.html');
+                            let filePath: string = Swordfish.path.join(app.getAppPath(), 'html', 'updates.html');
                             let fileUrl: URL = new URL('file://' + filePath);
                             Swordfish.updatesWindow.loadURL(fileUrl.href);
                             Swordfish.updatesWindow.once('ready-to-show', () => {
@@ -2784,7 +2777,7 @@ export class Swordfish {
             }
         });
         this.defaultLangsWindow.setMenu(null);
-        let filePath = Swordfish.path.join(app.getAppPath(), 'html', 'defaultLangs.html');
+        let filePath: string = Swordfish.path.join(app.getAppPath(), 'html', 'defaultLangs.html');
         let fileUrl: URL = new URL('file://' + filePath);
         this.defaultLangsWindow.loadURL(fileUrl.href);
         this.defaultLangsWindow.once('ready-to-show', () => {
@@ -2932,7 +2925,7 @@ export class Swordfish {
         });
         this.memoryParam = memory;
         this.importTmxWindow.setMenu(null);
-        let filePath = Swordfish.path.join(app.getAppPath(), 'html', 'importTmx.html');
+        let filePath: string = Swordfish.path.join(app.getAppPath(), 'html', 'importTmx.html');
         let fileUrl: URL = new URL('file://' + filePath);
         this.importTmxWindow.loadURL(fileUrl.href);
         this.importTmxWindow.once('ready-to-show', () => {
@@ -2959,9 +2952,9 @@ export class Swordfish {
                 contextIsolation: false
             }
         });
-        this.glossaryParam = glossary;
+        this.selectedGlossary = glossary;
         this.importGlossaryWindow.setMenu(null);
-        let filePath = Swordfish.path.join(app.getAppPath(), 'html', 'importGlossary.html');
+        let filePath: string = Swordfish.path.join(app.getAppPath(), 'html', 'importGlossary.html');
         let fileUrl: URL = new URL('file://' + filePath);
         this.importGlossaryWindow.loadURL(fileUrl.href);
         this.importGlossaryWindow.once('ready-to-show', () => {
@@ -2986,7 +2979,7 @@ export class Swordfish {
                 }
                 Swordfish.currentStatus = data;
                 let processId: string = data.process;
-                let intervalObject = setInterval(() => {
+                let intervalObject: NodeJS.Timeout = setInterval(() => {
                     if (Swordfish.currentStatus.imported) {
                         Swordfish.mainWindow.webContents.send('set-status', 'Imported ' + Swordfish.currentStatus.imported + ' units');
                     }
@@ -3084,7 +3077,7 @@ export class Swordfish {
                         }
                         Swordfish.currentStatus = data;
                         let processId: string = data.process;
-                        let intervalObject = setInterval(() => {
+                        let intervalObject: NodeJS.Timeout = setInterval(() => {
                             if (Swordfish.currentStatus.status === Swordfish.SUCCESS) {
                                 if (Swordfish.currentStatus.progress === Swordfish.COMPLETED) {
                                     Swordfish.mainWindow.webContents.send('end-waiting');
@@ -3127,7 +3120,7 @@ export class Swordfish {
                         }
                         Swordfish.currentStatus = data;
                         let processId: string = data.process;
-                        let intervalObject = setInterval(() => {
+                        let intervalObject: NodeJS.Timeout = setInterval(() => {
                             if (Swordfish.currentStatus.status === Swordfish.SUCCESS) {
                                 if (Swordfish.currentStatus.progress === Swordfish.COMPLETED) {
                                     Swordfish.mainWindow.webContents.send('end-waiting');
@@ -3174,7 +3167,7 @@ export class Swordfish {
                             }
                             Swordfish.currentStatus = data;
                             let processId: string = data.process;
-                            let intervalObject = setInterval(() => {
+                            let intervalObject: NodeJS.Timeout = setInterval(() => {
                                 if (Swordfish.currentStatus.status === Swordfish.SUCCESS) {
                                     if (Swordfish.currentStatus.progress === Swordfish.COMPLETED) {
                                         Swordfish.mainWindow.webContents.send('end-waiting');
@@ -3225,7 +3218,7 @@ export class Swordfish {
                             }
                             Swordfish.currentStatus = data;
                             let processId: string = data.process;
-                            let intervalObject = setInterval(() => {
+                            let intervalObject: NodeJS.Timeout = setInterval(() => {
                                 if (Swordfish.currentStatus.status === Swordfish.SUCCESS) {
                                     if (Swordfish.currentStatus.progress === Swordfish.COMPLETED) {
                                         Swordfish.mainWindow.webContents.send('end-waiting');
@@ -3484,7 +3477,7 @@ export class Swordfish {
         }
         Swordfish.projectParam = arg.project;
         this.applyTmWindow.setMenu(null);
-        let filePath = Swordfish.path.join(app.getAppPath(), 'html', 'applyTm.html');
+        let filePath: string = Swordfish.path.join(app.getAppPath(), 'html', 'applyTm.html');
         let fileUrl: URL = new URL('file://' + filePath);
         this.applyTmWindow.loadURL(fileUrl.href);
         this.applyTmWindow.once('ready-to-show', () => {
@@ -3510,7 +3503,7 @@ export class Swordfish {
                 Swordfish.currentStatus = data;
                 let processId: string = data.process;
                 let percentage: number = 0;
-                let intervalObject = setInterval(() => {
+                let intervalObject: NodeJS.Timeout = setInterval(() => {
                     if (Swordfish.currentStatus.progress) {
                         if (Swordfish.currentStatus.progress === Swordfish.COMPLETED) {
                             Swordfish.mainWindow.webContents.send('end-waiting');
@@ -3625,7 +3618,7 @@ export class Swordfish {
             }
         });
         Swordfish.spellingLangsWindow.setMenu(null);
-        let filePath = Swordfish.path.join(app.getAppPath(), 'html', 'spellingLangs.html');
+        let filePath: string = Swordfish.path.join(app.getAppPath(), 'html', 'spellingLangs.html');
         let fileUrl: URL = new URL('file://' + filePath);
         Swordfish.spellingLangsWindow.loadURL(fileUrl.href);
         Swordfish.spellingLangsWindow.once('ready-to-show', () => {
@@ -3930,7 +3923,7 @@ export class Swordfish {
         Swordfish.mainWindow.webContents.send('set-status', message);
         Swordfish.currentStatus = data;
         let processId: string = data.process;
-        let intervalObject = setInterval(() => {
+        let intervalObject: NodeJS.Timeout = setInterval(() => {
             if (Swordfish.currentStatus.progress) {
                 if (Swordfish.currentStatus.progress === Swordfish.COMPLETED) {
                     Swordfish.mainWindow.webContents.send('end-waiting');
@@ -3974,7 +3967,7 @@ export class Swordfish {
             }
         });
         this.addGlossaryWindow.setMenu(null);
-        let filePath = Swordfish.path.join(app.getAppPath(), 'html', 'addGlossary.html');
+        let filePath: string = Swordfish.path.join(app.getAppPath(), 'html', 'addGlossary.html');
         let fileUrl: URL = new URL('file://' + filePath);
         this.addGlossaryWindow.loadURL(fileUrl.href);
         this.addGlossaryWindow.once('ready-to-show', () => {
@@ -4006,7 +3999,7 @@ export class Swordfish {
             }
         });
         this.importXliffWindow.setMenu(null);
-        let filePath = Swordfish.path.join(app.getAppPath(), 'html', 'importXliff.html');
+        let filePath: string = Swordfish.path.join(app.getAppPath(), 'html', 'importXliff.html');
         let fileUrl: URL = new URL('file://' + filePath);
         this.importXliffWindow.loadURL(fileUrl.href);
         this.importXliffWindow.once('ready-to-show', () => {
@@ -4048,7 +4041,7 @@ export class Swordfish {
                 }
                 Swordfish.currentStatus = data;
                 let processId: string = data.process;
-                let intervalObject = setInterval(() => {
+                let intervalObject: NodeJS.Timeout = setInterval(() => {
                     if (Swordfish.currentStatus.progress) {
                         if (Swordfish.currentStatus.progress === Swordfish.COMPLETED) {
                             Swordfish.mainWindow.webContents.send('end-waiting');
@@ -4100,7 +4093,7 @@ export class Swordfish {
                 }
             });
             this.addFileWindow.setMenu(null);
-            let filePath = Swordfish.path.join(app.getAppPath(), 'html', 'addFile.html');
+            let filePath: string = Swordfish.path.join(app.getAppPath(), 'html', 'addFile.html');
             let fileUrl: URL = new URL('file://' + filePath);
             this.addFileWindow.loadURL(fileUrl.href);
             this.addFileWindow.once('ready-to-show', () => {
@@ -4382,7 +4375,7 @@ export class Swordfish {
                         }
                         Swordfish.currentStatus = data;
                         let processId: string = data.process;
-                        let intervalObject = setInterval(() => {
+                        let intervalObject: NodeJS.Timeout = setInterval(() => {
                             if (Swordfish.currentStatus.progress) {
                                 if (Swordfish.currentStatus.progress === Swordfish.COMPLETED) {
                                     Swordfish.mainWindow.webContents.send('end-waiting');
@@ -4494,7 +4487,7 @@ export class Swordfish {
             }
         });
         this.tagsWindow.setMenu(null);
-        let filePath = Swordfish.path.join(app.getAppPath(), 'html', 'tags.html');
+        let filePath: string = Swordfish.path.join(app.getAppPath(), 'html', 'tags.html');
         let fileUrl: URL = new URL('file://' + filePath);
         this.tagsWindow.loadURL(fileUrl.href);
         this.tagsWindow.once('ready-to-show', () => {
@@ -4522,7 +4515,7 @@ export class Swordfish {
             }
         });
         this.goToWindow.setMenu(null);
-        let filePath = Swordfish.path.join(app.getAppPath(), 'html', 'goTo.html');
+        let filePath: string = Swordfish.path.join(app.getAppPath(), 'html', 'goTo.html');
         let fileUrl: URL = new URL('file://' + filePath);
         this.goToWindow.loadURL(fileUrl.href);
         this.goToWindow.once('ready-to-show', () => {
@@ -4557,7 +4550,7 @@ export class Swordfish {
         });
         this.projectParam = arg.project;
         this.replaceTextWindow.setMenu(null);
-        let filePath = Swordfish.path.join(app.getAppPath(), 'html', 'replaceText.html');
+        let filePath: string = Swordfish.path.join(app.getAppPath(), 'html', 'replaceText.html');
         let fileUrl: URL = new URL('file://' + filePath);
         this.replaceTextWindow.loadURL(fileUrl.href);
         this.replaceTextWindow.once('ready-to-show', () => {
@@ -4610,7 +4603,7 @@ export class Swordfish {
                         }
                         Swordfish.currentStatus = data;
                         let processId: string = data.process;
-                        let intervalObject = setInterval(() => {
+                        let intervalObject: NodeJS.Timeout = setInterval(() => {
                             if (Swordfish.currentStatus.progress) {
                                 if (Swordfish.currentStatus.progress === Swordfish.COMPLETED) {
                                     Swordfish.mainWindow.webContents.send('end-waiting');
@@ -4665,7 +4658,7 @@ export class Swordfish {
                         }
                         Swordfish.currentStatus = data;
                         let processId: string = data.process;
-                        let intervalObject = setInterval(() => {
+                        let intervalObject: NodeJS.Timeout = setInterval(() => {
                             if (Swordfish.currentStatus.progress) {
                                 if (Swordfish.currentStatus.progress === Swordfish.COMPLETED) {
                                     clearInterval(intervalObject);
@@ -4767,7 +4760,7 @@ export class Swordfish {
                 }
                 Swordfish.currentStatus = data;
                 let processId: string = data.process;
-                let intervalObject = setInterval(() => {
+                let intervalObject: NodeJS.Timeout = setInterval(() => {
                     if (Swordfish.currentStatus.status === Swordfish.SUCCESS) {
                         if (Swordfish.currentStatus.progress === Swordfish.COMPLETED) {
                             Swordfish.mainWindow.webContents.send('end-waiting');
@@ -4810,7 +4803,7 @@ export class Swordfish {
         });
         Swordfish.concordanceMemories = memories;
         this.concordanceSearchWindow.setMenu(null);
-        let filePath = Swordfish.path.join(app.getAppPath(), 'html', 'concordanceSearch.html');
+        let filePath: string = Swordfish.path.join(app.getAppPath(), 'html', 'concordanceSearch.html');
         let fileUrl: URL = new URL('file://' + filePath);
         this.concordanceSearchWindow.loadURL(fileUrl.href);
         this.concordanceSearchWindow.once('ready-to-show', () => {
@@ -4833,7 +4826,7 @@ export class Swordfish {
                 }
                 Swordfish.currentStatus = data;
                 let processId: string = data.process;
-                let intervalObject = setInterval(() => {
+                let intervalObject: NodeJS.Timeout = setInterval(() => {
                     if (Swordfish.currentStatus.status === Swordfish.SUCCESS) {
                         if (Swordfish.currentStatus.progress === Swordfish.COMPLETED) {
                             clearInterval(intervalObject);
@@ -4882,7 +4875,7 @@ export class Swordfish {
         Swordfish.htmlTitle = 'Concordance Search';
         Swordfish.htmlId = htmlViewerWindow.id;
         htmlViewerWindow.setMenu(null);
-        let filePath = Swordfish.path.join(app.getAppPath(), 'html', 'htmlViewer.html');
+        let filePath: string = Swordfish.path.join(app.getAppPath(), 'html', 'htmlViewer.html');
         let fileUrl: URL = new URL('file://' + filePath);
         htmlViewerWindow.loadURL(fileUrl.href);
         htmlViewerWindow.once('ready-to-show', () => {
@@ -4909,7 +4902,7 @@ export class Swordfish {
             }
         });
         this.iatePluginWindow.setMenu(null);
-        let filePath = Swordfish.path.join(app.getAppPath(), 'html', 'iatePlugin.html');
+        let filePath: string = Swordfish.path.join(app.getAppPath(), 'html', 'iatePlugin.html');
         let fileUrl: URL = new URL('file://' + filePath);
         this.iatePluginWindow.loadURL(fileUrl.href);
         this.iatePluginWindow.once('ready-to-show', () => {
@@ -4921,7 +4914,7 @@ export class Swordfish {
         Swordfish.setLocation(this.iatePluginWindow, 'iatePlugin.html');
     }
 
-    static showTermSearch(arg: any): any {
+    static showTermSearch(glossary: string): any {
         this.termSearchWindow = new BrowserWindow({
             parent: this.mainWindow,
             width: 500,
@@ -4936,9 +4929,9 @@ export class Swordfish {
                 contextIsolation: false
             }
         });
-        this.glossaryParam = arg.glossary;
+        this.selectedGlossary = glossary;
         this.termSearchWindow.setMenu(null);
-        let filePath = Swordfish.path.join(app.getAppPath(), 'html', 'termSearch.html');
+        let filePath: string = Swordfish.path.join(app.getAppPath(), 'html', 'termSearch.html');
         let fileUrl: URL = new URL('file://' + filePath);
         this.termSearchWindow.loadURL(fileUrl.href);
         this.termSearchWindow.once('ready-to-show', () => {
@@ -4980,7 +4973,7 @@ export class Swordfish {
                 Swordfish.htmlContent = data.html;
                 Swordfish.htmlId = htmlViewerWindow.id;
                 htmlViewerWindow.setMenu(null);
-                let filePath = Swordfish.path.join(app.getAppPath(), 'html', 'htmlViewer.html');
+                let filePath: string = Swordfish.path.join(app.getAppPath(), 'html', 'htmlViewer.html');
                 let fileUrl: URL = new URL('file://' + filePath);
                 htmlViewerWindow.loadURL(fileUrl.href);
                 htmlViewerWindow.once('ready-to-show', () => {
@@ -5012,9 +5005,9 @@ export class Swordfish {
                 contextIsolation: false
             }
         });
-        this.glossaryParam = glossary;
+        this.selectedGlossary = glossary;
         this.addTermWindow.setMenu(null);
-        let filePath = Swordfish.path.join(app.getAppPath(), 'html', 'addTerm.html');
+        let filePath: string = Swordfish.path.join(app.getAppPath(), 'html', 'addTerm.html');
         let fileUrl: URL = new URL('file://' + filePath);
         this.addTermWindow.loadURL(fileUrl.href);
         this.addTermWindow.once('ready-to-show', () => {
@@ -5026,7 +5019,7 @@ export class Swordfish {
         Swordfish.setLocation(this.addTermWindow, 'addTerm.html');
     }
 
-    static addToGlossary(arg: any): void {
+    static addToGlossary(arg: { glossary: string, sourceTerm: string, targetTerm: string, srcLang: string, tgtLang: string }): void {
         this.addTermWindow.close();
         Swordfish.sendRequest('/glossaries/addTerm', arg,
             (data: any) => {
@@ -5075,7 +5068,7 @@ export class Swordfish {
                         }
                         Swordfish.currentStatus = data;
                         let processId: string = data.process;
-                        let intervalObject = setInterval(() => {
+                        let intervalObject: NodeJS.Timeout = setInterval(() => {
                             if (Swordfish.currentStatus.progress) {
                                 if (Swordfish.currentStatus.progress === Swordfish.COMPLETED) {
                                     Swordfish.mainWindow.webContents.send('end-waiting');
@@ -5175,7 +5168,7 @@ export class Swordfish {
             }
         });
         Swordfish.spaceAnalysisWindow.setMenu(null);
-        let filePath = Swordfish.path.join(app.getAppPath(), 'html', 'spaceAnalysis.html');
+        let filePath: string = Swordfish.path.join(app.getAppPath(), 'html', 'spaceAnalysis.html');
         let fileUrl: URL = new URL('file://' + filePath);
         Swordfish.spaceAnalysisWindow.loadURL(fileUrl.href);
         Swordfish.spaceAnalysisWindow.once('ready-to-show', () => {
@@ -5204,7 +5197,7 @@ export class Swordfish {
             }
         });
         Swordfish.tagsAnalysisWindow.setMenu(null);
-        let filePath = Swordfish.path.join(app.getAppPath(), 'html', 'tagsAnalysis.html');
+        let filePath: string = Swordfish.path.join(app.getAppPath(), 'html', 'tagsAnalysis.html');
         let fileUrl: URL = new URL('file://' + filePath);
         Swordfish.tagsAnalysisWindow.loadURL(fileUrl.href);
         Swordfish.tagsAnalysisWindow.once('ready-to-show', () => {
@@ -5347,7 +5340,7 @@ export class Swordfish {
                 }
             });
             this.promptWindow.setMenu(null);
-            let filePath = Swordfish.path.join(app.getAppPath(), 'html', 'promptDialog.html');
+            let filePath: string = Swordfish.path.join(app.getAppPath(), 'html', 'promptDialog.html');
             let fileUrl: URL = new URL('file://' + filePath);
             this.promptWindow.loadURL(fileUrl.href);
         }
@@ -5504,7 +5497,7 @@ export class Swordfish {
             }
         });
         this.changeCaseWindow.setMenu(null);
-        let filePath = Swordfish.path.join(app.getAppPath(), 'html', 'changeCase.html');
+        let filePath: string = Swordfish.path.join(app.getAppPath(), 'html', 'changeCase.html');
         let fileUrl: URL = new URL('file://' + filePath);
         this.changeCaseWindow.loadURL(fileUrl.href);
         this.changeCaseWindow.once('ready-to-show', () => {
@@ -5572,61 +5565,58 @@ export class Swordfish {
         if (Swordfish.notesWindow && !Swordfish.notesWindow.isDestroyed()) {
             Swordfish.notesWindow.close();
             Swordfish.mainWindow?.webContents.send('notes-closed');
-            Swordfish.notesParam = undefined;
             return;
         }
         Swordfish.mainWindow.webContents.send('notes-requested');
     }
 
-    static showNotes(arg: any): void {
-        if (!Swordfish.notesWindow || Swordfish.notesWindow.isDestroyed()) {
-            Swordfish.notesWindow = new BrowserWindow({
-                parent: Swordfish.mainWindow,
-                width: 450,
-                height: 300,
-                minimizable: false,
-                maximizable: false,
-                resizable: true,
-                show: false,
-                alwaysOnTop: true,
-                icon: this.iconPath,
-                webPreferences: {
-                    nodeIntegration: true,
-                    contextIsolation: false
-                }
-            });
-            Swordfish.notesParam = arg;
-            Swordfish.notesWindow.setMenu(null);
-            let filePath = Swordfish.path.join(app.getAppPath(), 'html', 'notes.html');
-            let fileUrl: URL = new URL('file://' + filePath);
-            Swordfish.notesWindow.loadURL(fileUrl.href);
-            Swordfish.notesWindow.addListener('closed', () => {
-                try {
-                    Swordfish.mainWindow?.focus();
-                    Swordfish.mainWindow?.webContents.send('notes-closed');
-                } catch (e) {
-                    // ignore
-                }
-            });
-            Swordfish.notesWindow.once('ready-to-show', () => {
-                Swordfish.notesWindow.show();
-                Swordfish.mainWindow.webContents.send('notes-requested');
-            });
-            Swordfish.setLocation(this.notesWindow, 'notes.html');
+    static showNotes(segment: FullId): void {
+        if (Swordfish.notesWindow && !Swordfish.notesWindow.isDestroyed()) {
+            Swordfish.notesWindow.webContents.send('note-params', segment);
+            Swordfish.getNotes(segment);
             return;
         }
-        Swordfish.getNotes(arg);
+        Swordfish.notesWindow = new BrowserWindow({
+            parent: Swordfish.mainWindow,
+            width: 450,
+            height: 300,
+            minimizable: false,
+            maximizable: false,
+            resizable: true,
+            show: false,
+            alwaysOnTop: true,
+            icon: this.iconPath,
+            webPreferences: {
+                nodeIntegration: true,
+                contextIsolation: false
+            }
+        });
+        Swordfish.notesWindow.setMenu(null);
+        let filePath: string = Swordfish.path.join(app.getAppPath(), 'html', 'notes.html');
+        let fileUrl: URL = new URL('file://' + filePath);
+        Swordfish.notesWindow.loadURL(fileUrl.href);
+        Swordfish.notesWindow.addListener('closed', () => {
+            try {
+                Swordfish.mainWindow?.focus();
+                Swordfish.mainWindow?.webContents.send('notes-closed');
+            } catch (e) {
+                // ignore
+            }
+        });
+        Swordfish.notesWindow.once('ready-to-show', () => {
+            Swordfish.notesWindow.show();
+            Swordfish.notesWindow.webContents.send('note-params', segment);
+            Swordfish.getNotes(segment);
+            Swordfish.mainWindow.webContents.send('notes-requested');
+        });
+        Swordfish.setLocation(this.notesWindow, 'notes.html');
     }
 
-    static getNotes(arg: any): void {
-        if (!Swordfish.notesParam) {
-            return;
-        }
-        Swordfish.sendRequest('/projects/getNotes', arg,
+    static getNotes(segment: FullId): void {
+        Swordfish.sendRequest('/projects/getNotes', segment,
             (data: any) => {
                 if (data.status === 'Success') {
-                    Swordfish.notesEvent.sender.send('note-params', arg);
-                    Swordfish.notesEvent.sender.send('set-notes', data.notes);
+                    Swordfish.notesWindow.webContents.send('set-notes', data.notes);
                 } else {
                     Swordfish.showMessage({ type: 'error', message: data.reason });
                 }
@@ -5637,8 +5627,12 @@ export class Swordfish {
         );
     }
 
-    static showAddNote(arg: any): void {
-        Swordfish.notesParam = arg;
+    static showAddNote(segmentId: FullId): void {
+        if (Swordfish.addNoteWindow && !Swordfish.addNoteWindow.isDestroyed()) {
+            Swordfish.addNoteWindow.focus();
+            Swordfish.addNoteWindow.webContents.send('note-params', segmentId);
+            return;
+        }
         Swordfish.addNoteWindow = new BrowserWindow({
             parent: Swordfish.notesWindow,
             width: 350,
@@ -5646,7 +5640,6 @@ export class Swordfish {
             minimizable: false,
             maximizable: false,
             resizable: true,
-            modal: true,
             show: false,
             icon: this.iconPath,
             webPreferences: {
@@ -5654,23 +5647,31 @@ export class Swordfish {
                 contextIsolation: false
             }
         });
-        Swordfish.notesParam = arg;
         Swordfish.addNoteWindow.setMenu(null);
-        let filePath = Swordfish.path.join(app.getAppPath(), 'html', 'addNote.html');
+        let filePath: string = Swordfish.path.join(app.getAppPath(), 'html', 'addNote.html');
         let fileUrl: URL = new URL('file://' + filePath);
         Swordfish.addNoteWindow.loadURL(fileUrl.href);
         Swordfish.addNoteWindow.once('ready-to-show', () => {
             Swordfish.addNoteWindow.show();
+            Swordfish.addNoteWindow.webContents.send('note-params', segmentId);
         });
         this.addNoteWindow.on('close', () => {
-            this.notesWindow.focus();
-            this.notesWindow.reload();
+            let parent: BrowserWindow | null = this.notesWindow;
+            if (parent) {
+                parent.focus();
+            }
         });
         Swordfish.setLocation(this.addNoteWindow, 'addNote.html');
     }
 
-    static showEditNote(arg: any): void {
-        Swordfish.notesParam = arg;
+    static showEditNote(segmentId: FullId, noteId: string, noteText: string): void {
+        if (Swordfish.addNoteWindow && !Swordfish.addNoteWindow.isDestroyed()) {
+            Swordfish.addNoteWindow.focus();
+            Swordfish.addNoteWindow.webContents.send('note-params', segmentId);
+            Swordfish.addNoteWindow.webContents.send('set-note', noteText);
+            Swordfish.addNoteWindow.webContents.send('set-note-id', noteId);
+            return;
+        }
         Swordfish.addNoteWindow = new BrowserWindow({
             parent: Swordfish.notesWindow,
             width: 350,
@@ -5678,7 +5679,6 @@ export class Swordfish {
             minimizable: false,
             maximizable: false,
             resizable: true,
-            modal: true,
             show: false,
             icon: this.iconPath,
             webPreferences: {
@@ -5686,30 +5686,52 @@ export class Swordfish {
                 contextIsolation: false
             }
         });
-        Swordfish.notesParam = arg;
         Swordfish.addNoteWindow.setMenu(null);
-        let filePath = Swordfish.path.join(app.getAppPath(), 'html', 'addNote.html');
+        let filePath: string = Swordfish.path.join(app.getAppPath(), 'html', 'addNote.html');
         let fileUrl: URL = new URL('file://' + filePath);
         Swordfish.addNoteWindow.loadURL(fileUrl.href);
         Swordfish.addNoteWindow.once('ready-to-show', () => {
             Swordfish.addNoteWindow.show();
-            Swordfish.addNoteWindow.webContents.send('set-note', arg);
+            Swordfish.addNoteWindow.webContents.send('note-params', segmentId);
+            Swordfish.addNoteWindow.webContents.send('set-note', noteText);
+            Swordfish.addNoteWindow.webContents.send('set-note-id', noteId);
         });
         this.addNoteWindow.on('close', () => {
-            this.notesWindow.focus();
-            this.notesWindow.reload();
+            let parent: BrowserWindow | null = this.notesWindow;
+            if (parent) {
+                parent.focus();
+            }
         });
         Swordfish.setLocation(this.addNoteWindow, 'addNote.html');
     }
 
-    static addNote(arg: any): void {
+    static addNote(segment: FullId, note: string): void {
         Swordfish.addNoteWindow.close();
-        Swordfish.sendRequest('/projects/addNote', arg,
+        let params: any = segment;
+        params.noteText = note;
+        Swordfish.sendRequest('/projects/addNote', params,
             (data: any) => {
                 if (data.status === 'Success') {
-                    Swordfish.notesEvent.sender.send('note-params', arg);
-                    Swordfish.notesEvent.sender.send('set-notes', data);
-                    Swordfish.mainWindow.webContents.send('notes-added', arg);
+                    Swordfish.notesWindow.webContents.send('set-notes', data.notes);
+                } else {
+                    Swordfish.showMessage({ type: 'error', message: data.reason });
+                }
+            },
+            (reason: string) => {
+                Swordfish.showMessage({ type: 'error', message: reason });
+            }
+        );
+    }
+
+    static updateNote(segment: FullId, note: string, noteId: string): void {
+        Swordfish.addNoteWindow.close();
+        let params: any = segment;
+        params.noteText = note;
+        params.noteId = noteId;
+        Swordfish.sendRequest('/projects/addNote', params,
+            (data: any) => {
+                if (data.status === 'Success') {
+                    Swordfish.notesWindow.webContents.send('set-notes', data.notes);
                 } else {
                     Swordfish.showMessage({ type: 'error', message: data.reason });
                 }
@@ -5724,8 +5746,7 @@ export class Swordfish {
         Swordfish.sendRequest('/projects/removeNote', arg,
             (data: any) => {
                 if (data.status === 'Success') {
-                    Swordfish.notesEvent.sender.send('note-params', arg);
-                    Swordfish.notesEvent.sender.send('set-notes', data);
+                    Swordfish.notesWindow.webContents.send('set-notes', data.notes);
                     if (data.notes.length === 0) {
                         Swordfish.mainWindow.webContents.send('notes-removed', arg);
                     }
@@ -5737,85 +5758,87 @@ export class Swordfish {
                 Swordfish.showMessage({ type: 'error', message: reason });
             }
         );
-        this.notesWindow.focus();
-        this.notesWindow.reload();
     }
 
-    static showFileInfo(arg: any): void {
-        if (!Swordfish.fileInfoWindow || Swordfish.fileInfoWindow.isDestroyed()) {
-            Swordfish.fileInfoWindow = new BrowserWindow({
-                parent: Swordfish.mainWindow,
-                width: 600,
-                height: 440,
-                minimizable: false,
-                maximizable: false,
-                resizable: true,
-                show: false,
-                alwaysOnTop: true,
-                icon: this.iconPath,
-                webPreferences: {
-                    nodeIntegration: true,
-                    contextIsolation: false
-                }
-            });
-            Swordfish.fileInfoWindow.setMenu(null);
-            let filePath = Swordfish.path.join(app.getAppPath(), 'html', 'fileInfo.html');
-            let fileUrl: URL = new URL('file://' + filePath);
-            Swordfish.fileInfoWindow.loadURL(fileUrl.href);
-            Swordfish.fileInfoWindow.once('ready-to-show', () => {
-                Swordfish.fileInfoWindow.show();
-                Swordfish.fileInfoWindow.webContents.send('set-file-info', arg);
-            });
-            Swordfish.fileInfoWindow.addListener('closed', () => {
-                Swordfish.mainWindow?.focus();
-            });
-            Swordfish.setLocation(this.fileInfoWindow, 'fileInfo.html');
+    static showFileInfo(fileInfo: any): void {
+        if (Swordfish.fileInfoWindow && !Swordfish.fileInfoWindow.isDestroyed()) {
+            // focus the existing window
+            Swordfish.fileInfoWindow.focus();
+            Swordfish.fileInfoWindow.webContents.send('set-file-info', fileInfo);
             return;
         }
-        Swordfish.fileInfoWindow.webContents.send('set-file-info', arg);
-        Swordfish.fileInfoWindow.focus();
+        Swordfish.fileInfoWindow = new BrowserWindow({
+            parent: Swordfish.mainWindow,
+            width: 600,
+            height: 440,
+            minimizable: false,
+            maximizable: false,
+            resizable: true,
+            show: false,
+            alwaysOnTop: true,
+            icon: this.iconPath,
+            webPreferences: {
+                nodeIntegration: true,
+                contextIsolation: false
+            }
+        });
+        Swordfish.fileInfoWindow.setMenu(null);
+        let filePath: string = Swordfish.path.join(app.getAppPath(), 'html', 'fileInfo.html');
+        let fileUrl: URL = new URL('file://' + filePath);
+        Swordfish.fileInfoWindow.loadURL(fileUrl.href);
+        Swordfish.fileInfoWindow.once('ready-to-show', () => {
+            Swordfish.fileInfoWindow.show();
+            Swordfish.fileInfoWindow.webContents.send('set-file-info', fileInfo);
+        });
+        Swordfish.fileInfoWindow.addListener('closed', () => {
+            Swordfish.mainWindow?.focus();
+        });
+        Swordfish.setLocation(this.fileInfoWindow, 'fileInfo.html');
     }
 
     static showMetadata(metaId: MetaId): void {
-        if (!Swordfish.metadataWindow || Swordfish.metadataWindow.isDestroyed()) {
-            Swordfish.metadataWindow = new BrowserWindow({
-                parent: Swordfish.mainWindow,
-                width: 500,
-                height: 440,
-                minWidth:400,
-                minHeight: 380,
-                minimizable: false,
-                maximizable: false,
-                resizable: true,
-                show: false,
-                alwaysOnTop: true,
-                icon: this.iconPath,
-                webPreferences: {
-                    nodeIntegration: true,
-                    contextIsolation: false
-                }
-            });
-            Swordfish.metadataWindow.setMenu(null);
-            let filePath = Swordfish.path.join(app.getAppPath(), 'html', 'metadataDialog.html');
-            let fileUrl: URL = new URL('file://' + filePath);
-            Swordfish.metadataWindow.loadURL(fileUrl.href);
-            Swordfish.metadataWindow.addListener('closed', () => {
-                try {
-                    Swordfish.mainWindow?.focus();
-                    Swordfish.mainWindow?.webContents.send('metadata-closed');
-                } catch (e) {
-                    // ignore
-                }
-            });
-            Swordfish.metadataWindow.once('ready-to-show', () => {
-                Swordfish.metadataWindow.show();
-                Swordfish.metadataWindow.webContents.send('set-data', metaId);
-                Swordfish.mainWindow.webContents.send('metadata-requested');
-            });
-            Swordfish.setLocation(this.metadataWindow, 'metadataDialog.html');
+        if (Swordfish.metadataWindow && !Swordfish.metadataWindow.isDestroyed()) {
+            // focus the existing window
+            Swordfish.metadataWindow.focus();
+            Swordfish.metadataWindow.webContents.send('set-data', metaId);
             return;
         }
-        Swordfish.metadataWindow.webContents.send('set-data', metaId);
+        Swordfish.metadataWindow = new BrowserWindow({
+            parent: Swordfish.mainWindow,
+            width: 500,
+            height: 440,
+            minWidth: 400,
+            minHeight: 380,
+            minimizable: false,
+            maximizable: false,
+            resizable: true,
+            show: false,
+            alwaysOnTop: true,
+            icon: this.iconPath,
+            webPreferences: {
+                nodeIntegration: true,
+                contextIsolation: false
+            }
+        });
+        Swordfish.metadataWindow.setMenu(null);
+        let filePath: string = Swordfish.path.join(app.getAppPath(), 'html', 'metadataDialog.html');
+        let fileUrl: URL = new URL('file://' + filePath);
+        Swordfish.metadataWindow.loadURL(fileUrl.href);
+        Swordfish.metadataWindow.addListener('closed', () => {
+            try {
+                Swordfish.mainWindow?.focus();
+                Swordfish.mainWindow?.webContents.send('metadata-closed');
+            } catch (e) {
+                // ignore
+            }
+        });
+        Swordfish.metadataWindow.once('ready-to-show', () => {
+            Swordfish.metadataWindow.show();
+            Swordfish.metadataWindow.webContents.send('set-data', metaId);
+            Swordfish.mainWindow.webContents.send('metadata-requested');
+        });
+        Swordfish.setLocation(this.metadataWindow, 'metadataDialog.html');
+        return;
     }
 
     static getMetadata(arg: MetaId): void {
@@ -5835,16 +5858,22 @@ export class Swordfish {
         );
     }
 
-    static showAddMetaGroup(): void {
-        // Swordfish.metadataParam = arg;
+    static showAddMetaGroup(metaId: MetaId): void {
+        if (Swordfish.addMetaGroupWindow && !Swordfish.addMetaGroupWindow.isDestroyed()) {
+            // focus the existing window
+            Swordfish.addMetaGroupWindow.focus();
+            Swordfish.addMetaGroupWindow.webContents.send('set-data', metaId);
+            return;
+        }
         Swordfish.addMetaGroupWindow = new BrowserWindow({
             parent: Swordfish.metadataWindow,
-            width: 600,
-            height: 400,
+            width: 500,
+            height: 440,
+            minWidth: 400,
+            minHeight: 380,
             minimizable: false,
             maximizable: false,
             resizable: true,
-            modal: true,
             show: false,
             icon: this.iconPath,
             webPreferences: {
@@ -5853,29 +5882,35 @@ export class Swordfish {
             }
         });
         Swordfish.addMetaGroupWindow.setMenu(null);
-        let filePath = Swordfish.path.join(app.getAppPath(), 'html', 'addMetaGroup.html');
+        let filePath: string = Swordfish.path.join(app.getAppPath(), 'html', 'addMetaGroup.html');
         let fileUrl: URL = new URL('file://' + filePath);
         Swordfish.addMetaGroupWindow.loadURL(fileUrl.href);
         Swordfish.addMetaGroupWindow.once('ready-to-show', () => {
             Swordfish.addMetaGroupWindow.show();
+            Swordfish.addMetaGroupWindow.webContents.send('set-data', metaId);
         });
         this.addMetaGroupWindow.on('close', () => {
-            this.metadataWindow.focus();
-            this.metadataWindow.reload();
+            let parent: BrowserWindow | null = this.addMetaGroupWindow?.getParentWindow();
+            parent?.focus();
         });
         Swordfish.setLocation(this.addMetaGroupWindow, 'addMetaGroup.html');
     }
 
-    static showEditMetaGroup(): void {
-        // Swordfish.metadataParam = arg;
+    static showEditMetaGroup(metaId: MetaId, metaGroup: MetaGroup): void {
+        if (Swordfish.addMetaGroupWindow && !Swordfish.addMetaGroupWindow.isDestroyed()) {
+            // focus the existing window
+            Swordfish.addMetaGroupWindow.focus();
+            Swordfish.addMetaGroupWindow.webContents.send('set-data', metaId);
+            Swordfish.addMetaGroupWindow.webContents.send('set-metaGroup', metaGroup);
+            return;
+        }
         Swordfish.addMetaGroupWindow = new BrowserWindow({
             parent: Swordfish.metadataWindow,
-            width: 600,
-            height: 400,
+            width: 560,
+            height: 480,
             minimizable: false,
             maximizable: false,
             resizable: true,
-            modal: true,
             show: false,
             icon: this.iconPath,
             webPreferences: {
@@ -5884,15 +5919,17 @@ export class Swordfish {
             }
         });
         Swordfish.addMetaGroupWindow.setMenu(null);
-        let filePath = Swordfish.path.join(app.getAppPath(), 'html', 'addMetaGroup.html');
+        let filePath: string = Swordfish.path.join(app.getAppPath(), 'html', 'addMetaGroup.html');
         let fileUrl: URL = new URL('file://' + filePath);
         Swordfish.addMetaGroupWindow.loadURL(fileUrl.href);
         Swordfish.addMetaGroupWindow.once('ready-to-show', () => {
             Swordfish.addMetaGroupWindow.show();
+            Swordfish.addMetaGroupWindow.webContents.send('set-data', metaId);
+            Swordfish.addMetaGroupWindow.webContents.send('set-metaGroup', metaGroup);
         });
         this.addMetaGroupWindow.on('close', () => {
-            this.metadataWindow.focus();
-            this.metadataWindow.reload();
+            let parent: BrowserWindow | null = this.addMetaGroupWindow?.getParentWindow();
+            parent?.focus();
         });
         Swordfish.setLocation(this.addMetaGroupWindow, 'addMetaGroup.html');
     }
@@ -5931,7 +5968,6 @@ export class Swordfish {
             }
         );
         this.metadataWindow.focus();
-        this.metadataWindow.reload();
     }
 
     static showAddMetaDialog(): void {
@@ -5951,7 +5987,7 @@ export class Swordfish {
             }
         });
         Swordfish.addMetaDialogWindow.setMenu(null);
-        let filePath = Swordfish.path.join(app.getAppPath(), 'html', 'addMetaDialog.html');
+        let filePath: string = Swordfish.path.join(app.getAppPath(), 'html', 'addMetaDialog.html');
         let fileUrl: URL = new URL('file://' + filePath);
         Swordfish.addMetaDialogWindow.loadURL(fileUrl.href);
         Swordfish.addMetaDialogWindow.once('ready-to-show', () => {
@@ -5959,7 +5995,6 @@ export class Swordfish {
         });
         this.addMetaDialogWindow.on('close', () => {
             this.metadataWindow.focus();
-            this.metadataWindow.reload();
         });
         Swordfish.setLocation(this.addMetaDialogWindow, 'addMetaDialog.html');
     }
@@ -5982,7 +6017,7 @@ export class Swordfish {
             }
         });
         Swordfish.addMetaDialogWindow.setMenu(null);
-        let filePath = Swordfish.path.join(app.getAppPath(), 'html', 'addMetaDialog.html');
+        let filePath: string = Swordfish.path.join(app.getAppPath(), 'html', 'addMetaDialog.html');
         let fileUrl: URL = new URL('file://' + filePath);
         Swordfish.addMetaDialogWindow.loadURL(fileUrl.href);
         Swordfish.addMetaDialogWindow.once('ready-to-show', () => {
@@ -5990,7 +6025,6 @@ export class Swordfish {
         });
         this.addMetaDialogWindow.on('close', () => {
             this.metadataWindow.focus();
-            this.metadataWindow.reload();
         });
         Swordfish.setLocation(this.addMetaDialogWindow, 'addMetaDialog.html');
     }
@@ -6029,11 +6063,10 @@ export class Swordfish {
             }
         );
         this.metadataWindow.focus();
-        this.metadataWindow.reload();
     }
 
     static downloadLatest(): void {
-        let downloadsFolder = app.getPath('downloads');
+        let downloadsFolder: string = app.getPath('downloads');
         let url: URL = new URL(Swordfish.downloadLink);
         let path: string = url.pathname;
         path = path.substring(path.lastIndexOf('/') + 1);
@@ -6048,7 +6081,7 @@ export class Swordfish {
         Swordfish.mainWindow.webContents.send('set-status', 'Downloading...');
         Swordfish.updatesWindow.close();
         request.on('response', (response: IncomingMessage) => {
-            let fileSize = Number.parseInt(response.headers['content-length'] as string);
+            let fileSize: number = Number.parseInt(response.headers['content-length'] as string);
             let received: number = 0;
             response.on('data', (chunk: Buffer) => {
                 received += chunk.length;
@@ -6104,7 +6137,7 @@ export class Swordfish {
             }
         });
         Swordfish.gettingStartedWindow.setMenu(null);
-        let filePath = Swordfish.path.join(app.getAppPath(), 'html', 'gettingStarted.html');
+        let filePath: string = Swordfish.path.join(app.getAppPath(), 'html', 'gettingStarted.html');
         let fileUrl: URL = new URL('file://' + filePath);
         Swordfish.gettingStartedWindow.loadURL(fileUrl.href);
         Swordfish.gettingStartedWindow.once('ready-to-show', () => {
@@ -6149,7 +6182,7 @@ export class Swordfish {
             }
         });
         Swordfish.editXmlFilterWindow.setMenu(null);
-        let filePath = Swordfish.path.join(app.getAppPath(), 'html', 'filterConfig.html');
+        let filePath: string = Swordfish.path.join(app.getAppPath(), 'html', 'filterConfig.html');
         let fileUrl: URL = new URL('file://' + filePath);
         Swordfish.editXmlFilterWindow.loadURL(fileUrl.href);
         Swordfish.editXmlFilterWindow.once('ready-to-show', () => {
@@ -6240,7 +6273,7 @@ export class Swordfish {
             }
         });
         Swordfish.configElementWindow.setMenu(null);
-        let filePath = Swordfish.path.join(app.getAppPath(), 'html', 'elementConfig.html');
+        let filePath: string = Swordfish.path.join(app.getAppPath(), 'html', 'elementConfig.html');
         let fileUrl: URL = new URL('file://' + filePath);
         Swordfish.configElementWindow.loadURL(fileUrl.href);
         Swordfish.configElementWindow.once('ready-to-show', () => {
@@ -6349,7 +6382,7 @@ export class Swordfish {
             }
         });
         Swordfish.addXmlConfigurationWindow.setMenu(null);
-        let filePath = Swordfish.path.join(app.getAppPath(), 'html', 'addXmlConfiguration.html');
+        let filePath: string = Swordfish.path.join(app.getAppPath(), 'html', 'addXmlConfiguration.html');
         let fileUrl: URL = new URL('file://' + filePath);
         Swordfish.addXmlConfigurationWindow.loadURL(fileUrl.href);
         Swordfish.addXmlConfigurationWindow.once('ready-to-show', () => {

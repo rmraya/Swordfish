@@ -96,7 +96,7 @@ class TmMatches {
         this.matches.clear();
     }
 
-    add(match: Match) {
+    add(match: Match): void {
         this.matches.set(match.matchId, match);
         let tab = new Tab(match.matchId, match.similarity + '%', false, this.tabHolder);
 

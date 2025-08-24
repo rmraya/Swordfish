@@ -93,7 +93,7 @@ class FilterSegments {
         this.electron.ipcRenderer.send('filter-options', params);
     }
 
-    setParams(arg: any) {
+    setParams(arg: any): void {
         (document.getElementById('filterText') as HTMLInputElement).value = arg.filterText;
         (document.getElementById('source') as HTMLInputElement).checked = (arg.filterLanguage === 'source');
         (document.getElementById('target') as HTMLInputElement).checked = (arg.filterLanguage === 'target');

@@ -43,7 +43,7 @@ class BrowseDatabases {
         }, 200);
     }
 
-    setDatabases(arg: any) {
+    setDatabases(arg: any): void {
         this.databases = arg;
         let tbody = document.getElementById('tbody') as HTMLTableSectionElement;
         let length = this.databases.memories.length;

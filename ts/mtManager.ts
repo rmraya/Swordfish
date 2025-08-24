@@ -92,7 +92,7 @@ export class MTManager {
         }
     }
 
-    translateProject(project: string, exportedFile: string, currentSegment: SegmentId) {
+    translateProject(project: string, exportedFile: string, currentSegment: SegmentId): void {
         this.currentSegment = currentSegment;
         let parser: SAXParser = new SAXParser();
         let handler: MTContentHandler = new MTContentHandler(this, project);
@@ -100,7 +100,7 @@ export class MTManager {
         parser.parseFile(exportedFile);
     }
 
-    translateElement(source: XMLElement, project: string, file: string, unit: string, segment: string, terms: { source: string, target: string }[]) {
+    translateElement(source: XMLElement, project: string, file: string, unit: string, segment: string, terms: { source: string, target: string }[]): void {
         let promises: Promise<MTMatch>[] = [];
         for (let mtEngine of this.mtEngines) {
             if (mtEngine.handlesTags()) {
@@ -237,7 +237,7 @@ export class MTManager {
         });
     }
 
-    translateSegment(params: any) {
+    translateSegment(params: any): void {
         Swordfish.mainWindow.webContents.send('start-waiting');
         Swordfish.mainWindow.webContents.send('set-status', 'Getting Translations');
         this.getSegment(params, (segment: any) => {
@@ -376,7 +376,7 @@ export class MTManager {
         let result: Language[] = [];
         for (let lang of langs) {
             try {
-                let l:Language | undefined = LanguageUtils.getLanguage(lang, 'en');
+                let l: Language | undefined = LanguageUtils.getLanguage(lang, 'en');
                 if (l) {
                     result.push(l);
                 }

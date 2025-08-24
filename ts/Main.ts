@@ -629,7 +629,7 @@ class Main {
         }
     }
 
-    drawFiles(files: any[]) {
+    drawFiles(files: any[]): void {
         let selected = Main.tabHolder.getSelected();
         if (Main.translationViews.has(selected)) {
             (Main.translationViews.get(selected) as TranslationView).drawFiles(files);
@@ -939,14 +939,14 @@ class Main {
         }
     }
 
-    setSorting(args: any) {
+    setSorting(args: any): void {
         let selected = Main.tabHolder.getSelected();
         if (Main.translationViews.has(selected)) {
             (Main.translationViews.get(selected) as TranslationView).setSorting(args);
         }
     }
 
-    setFilters(args: any) {
+    setFilters(args: any): void {
         let selected = Main.tabHolder.getSelected();
         if (Main.translationViews.has(selected)) {
             (Main.translationViews.get(selected) as TranslationView).setFilters(args);
@@ -1252,7 +1252,7 @@ class Main {
 
     notesRemoved(arg: any): void {
         if (Main.translationViews.has(arg.project)) {
-            (Main.translationViews.get(arg.project) as TranslationView).notesRemoved(arg);
+            (Main.translationViews.get(arg.project) as TranslationView).notesRemoved();
         }
     }
 

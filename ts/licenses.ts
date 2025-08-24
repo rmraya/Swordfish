@@ -53,7 +53,7 @@ class Licenses {
         }, 200);
     }
 
-    openLicense(type: string) {
-        this.electron.ipcRenderer.send('open-license', type );
+    openLicense(type: string): void {
+        this.electron.ipcRenderer.send('open-license', type);
     }
 }

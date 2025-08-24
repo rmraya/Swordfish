@@ -24,12 +24,11 @@ class Notes {
         this.electron.ipcRenderer.on('set-theme', (event: Electron.IpcRendererEvent, theme: string) => {
             (document.getElementById('theme') as HTMLLinkElement).href = theme;
         });
-        this.electron.ipcRenderer.send('get-initial-notes');
-        this.electron.ipcRenderer.on('set-notes', (event: Electron.IpcRendererEvent, arg: Note[]) => {
-            this.setNotes(arg);
+        this.electron.ipcRenderer.on('set-notes', (event: Electron.IpcRendererEvent, notes: Note[]) => {
+            this.setNotes(notes);
         });
-        this.electron.ipcRenderer.on('note-params', (event: Electron.IpcRendererEvent, arg: FullId) => {
-            this.segmentData = arg;
+        this.electron.ipcRenderer.on('note-params', (event: Electron.IpcRendererEvent, segment: FullId) => {
+            this.segmentData = segment;
         });
         (document.getElementById('addNote') as HTMLAnchorElement).addEventListener('click', () => {
             this.addNote();
@@ -66,6 +65,7 @@ class Notes {
     }
 
     setNotes(notes: Note[]): void {
+        let selected: string = this.tabHolder.getSelected();
         this.tabHolder.clear();
         this.notes = notes;
         let length = notes.length;
@@ -75,6 +75,9 @@ class Notes {
             tab.getContainer().style.padding = '8px';
             tab.getContainer().style.width = 'calc(100% - 16px)';
             this.tabHolder.addTab(tab);
+        }
+        if (selected && this.tabHolder.has(selected)) {
+            this.tabHolder.selectTab(selected);
         }
         setTimeout(() => {
             this.electron.ipcRenderer.send('set-height', { window: 'notes', width: document.body.clientWidth, height: document.body.clientHeight });
@@ -86,7 +89,6 @@ class Notes {
         this.electron.ipcRenderer.send('show-add-note', this.segmentData);
     }
 
-    // TODO: change to edit
     editNote(): void {
         let selected: string = this.tabHolder.getSelected();
         if (selected) {
@@ -94,8 +96,8 @@ class Notes {
             params.noteId = selected;
             let tab: Tab | undefined = this.tabHolder.getTab(selected);
             if (tab) {
-                params.note = tab.getContainer().innerText;
-                this.electron.ipcRenderer.send('show-edit-note', params);
+                let noteText: string = tab.getContainer().innerText;
+                this.electron.ipcRenderer.send('show-edit-note', {segmentId: this.segmentData, noteId: selected, noteText: noteText});
             }
         }
     }

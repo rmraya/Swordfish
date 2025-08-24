@@ -14,20 +14,23 @@ class AddNote {
 
     electron = require('electron');
 
-    segmentData: any;
+    segmentData: FullId = { project: '', file: '', unit: '', segment: '' };
+    noteId: string = '';
 
     constructor() {
         this.electron.ipcRenderer.send('get-theme');
         this.electron.ipcRenderer.on('set-theme', (event: Electron.IpcRendererEvent, theme: string) => {
             (document.getElementById('theme') as HTMLLinkElement).href = theme;
         });
-        this.electron.ipcRenderer.send('get-note-params');
-        this.electron.ipcRenderer.on('note-params', (event: Electron.IpcRendererEvent, arg: any) => {
-            this.segmentData = arg;
-            if (arg.note) {
-                (document.getElementById('area') as HTMLTextAreaElement).value = arg.note;
-                (document.getElementById('addButton') as HTMLButtonElement).innerText = 'Update Note';
-            }
+        this.electron.ipcRenderer.on('note-params', (event: Electron.IpcRendererEvent, segmentId: FullId) => {
+            this.segmentData = segmentId;
+        });
+        this.electron.ipcRenderer.on('set-note', (event: Electron.IpcRendererEvent, note: string) => {
+            (document.getElementById('area') as HTMLTextAreaElement).value = note;
+            (document.getElementById('addButton') as HTMLButtonElement).innerText = 'Update Note';
+        });
+        this.electron.ipcRenderer.on('set-note-id', (event: Electron.IpcRendererEvent, noteId: string) => {
+            this.noteId = noteId;
         });
         document.addEventListener('keydown', (event: KeyboardEvent) => {
             if (event.code === 'Escape') {
@@ -49,7 +52,10 @@ class AddNote {
             this.electron.ipcRenderer.send('show-message', { type: 'warning', message: 'Enter note text', parent: 'addNote' });
             return;
         }
-        this.segmentData.noteText = noteText;
-        this.electron.ipcRenderer.send('add-note', this.segmentData);
+        if (this.noteId !== '') {
+            this.electron.ipcRenderer.send('update-note', { segment: this.segmentData, note: noteText, noteId: this.noteId });
+        } else {
+            this.electron.ipcRenderer.send('add-note', { segment: this.segmentData, note: noteText });
+        }
     }
 }

@@ -648,15 +648,17 @@ class PreferencesDialog {
             '<option value="es-US">Spanish (United States)</option>';
         td.appendChild(this.defaultSpanish);
 
+        let languagesButtonArea: HTMLDivElement = document.createElement('div');
+        languagesButtonArea.classList.add('buttonArea');
+        container.appendChild(languagesButtonArea);
+
         let languagesButton = document.createElement('button');
         languagesButton.innerText = 'Available Spellchecker Languages';
-        languagesButton.style.marginTop = '10px';
-        languagesButton.style.marginLeft = '8px';
         languagesButton.addEventListener('click', () => {
             this.electron.ipcRenderer.send('show-spellchecker-langs');
             languagesButton.blur();
         });
-        container.appendChild(languagesButton);
+        languagesButtonArea.appendChild(languagesButton);
 
         this.defaultEnglish.value = spellchecker.defaultEnglish;
         this.defaultPortuguese.value = spellchecker.defaultPortuguese;
@@ -667,7 +669,7 @@ class PreferencesDialog {
         container.style.paddingTop = '10px';
 
         let div: HTMLDivElement = document.createElement('div');
-        div.style.margin = '0px 4px';
+        div.style.margin = '0px';
         container.appendChild(div);
 
         let advHolder: TabHolder = new TabHolder(div, 'advHolder');
@@ -812,10 +814,14 @@ class PreferencesDialog {
         td.innerHTML = '<button id="browseSRX" class="dark">Browse...</button>';
         tr.appendChild(td);
 
+        let rowsHolder: HTMLDivElement = document.createElement('div');
+        rowsHolder.style.margin = '0px 4px';
+        container.appendChild(rowsHolder);
+
         let row1: HTMLDivElement = document.createElement('div');
         row1.classList.add('row');
         row1.classList.add('middle');
-        container.appendChild(row1);
+        rowsHolder.appendChild(row1);
 
         this.paragraphSegmentation = document.createElement('input');
         this.paragraphSegmentation.type = 'checkbox';
@@ -831,7 +837,7 @@ class PreferencesDialog {
         let row2: HTMLDivElement = document.createElement('div');
         row2.classList.add('row');
         row2.classList.add('middle');
-        container.appendChild(row2);
+        rowsHolder.appendChild(row2);
 
         this.acceptUnconfirmed = document.createElement('input');
         this.acceptUnconfirmed.type = 'checkbox';
@@ -847,7 +853,7 @@ class PreferencesDialog {
         let row3: HTMLDivElement = document.createElement('div');
         row3.classList.add('row');
         row3.classList.add('middle');
-        container.appendChild(row3);
+        rowsHolder.appendChild(row3);
 
         this.fuzzyTermSearches = document.createElement('input');
         this.fuzzyTermSearches.type = 'checkbox';
@@ -863,7 +869,7 @@ class PreferencesDialog {
         let row4: HTMLDivElement = document.createElement('div');
         row4.classList.add('row');
         row4.classList.add('middle');
-        container.appendChild(row4);
+        rowsHolder.appendChild(row4);
 
         this.caseSensitiveTermSearches = document.createElement('input');
         this.caseSensitiveTermSearches.type = 'checkbox';
@@ -879,7 +885,7 @@ class PreferencesDialog {
         let row5: HTMLDivElement = document.createElement('div');
         row5.classList.add('row');
         row5.classList.add('middle');
-        container.appendChild(row5);
+        rowsHolder.appendChild(row5);
 
         this.caseSensitiveMatches = document.createElement('input');
         this.caseSensitiveMatches.type = 'checkbox';
@@ -895,7 +901,7 @@ class PreferencesDialog {
         let row6: HTMLDivElement = document.createElement('div');
         row6.classList.add('row');
         row6.classList.add('middle');
-        container.appendChild(row6);
+        rowsHolder.appendChild(row6);
 
         this.autoConfirm = document.createElement('input');
         this.autoConfirm.type = 'checkbox';
@@ -962,8 +968,7 @@ class PreferencesDialog {
         tableDiv.appendChild(this.filtersTable);
 
         let buttonArea: HTMLDivElement = document.createElement('div');
-        buttonArea.classList.add('fill_width');
-        buttonArea.classList.add('butonArea');
+        buttonArea.classList.add('buttonArea');
         container.appendChild(buttonArea);
 
         let addButton: HTMLButtonElement = document.createElement('button');

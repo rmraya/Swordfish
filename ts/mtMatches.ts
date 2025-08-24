@@ -84,7 +84,7 @@ class MtMatches {
         this.matches.clear();
     }
 
-    add(match: Match) {
+    add(match: Match): void {
         this.matches.set(match.matchId, match);
         let tab = new Tab(match.matchId, match.origin, false, this.tabHolder);
 

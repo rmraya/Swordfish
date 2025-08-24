@@ -317,7 +317,6 @@ class TranslationView {
     }
 
     selectFile(file: string): void {
-        console.log('Selecting file:', file);
         let selectedFile = this.filesContainer.querySelector(`[data-file="${file}"]`);
         if (selectedFile) {
             this.filesContainer.getElementsByClassName('selectedFile')[0]?.classList.remove('selectedFile');
@@ -327,29 +326,36 @@ class TranslationView {
 
     drawFiles(files: any[]): void {
         this.filesContainer.innerHTML = '';
+
+        let filesTable: HTMLTableElement = document.createElement('table');
+        filesTable.className = 'filesTable';
+        this.filesContainer.appendChild(filesTable);
+
         for (const file of files) {
             let sourceFile: string = file.sourceFile;
             let detailsArray: any[] = file.files;
 
             if (detailsArray.length === 1) {
-                let fileDiv = document.createElement('div');
-                fileDiv.className = 'fileContainer';
-                fileDiv.setAttribute('data-file', detailsArray[0].file);
+                let tr: HTMLTableRowElement = document.createElement('tr');
+                tr.classList.add('selectedFile');
+                tr.setAttribute('data-file', detailsArray[0].file);
+                filesTable.appendChild(tr);
 
+                let td: HTMLTableCellElement = document.createElement('td');
                 let infoSpan: HTMLSpanElement = document.createElement('span');
                 infoSpan.classList.add('iconTooltip');
                 infoSpan.classList.add('sourceSymbol');
-                infoSpan.classList.add('bottomAlign');
                 infoSpan.innerHTML = TranslationView.FILE_INFO + '<small class="tooltiptext">File Info</small>';
                 infoSpan.addEventListener('click', () => {
                     this.showFileInfo(detailsArray[0]);
                 });
-                fileDiv.appendChild(infoSpan);
+                td.appendChild(infoSpan);
+                tr.appendChild(td);
 
+                td = document.createElement('td');
                 let metaSpan: HTMLSpanElement = document.createElement('span');
                 metaSpan.classList.add('iconTooltip');
                 metaSpan.classList.add('sourceSymbol');
-                metaSpan.classList.add('bottomAlign');
                 metaSpan.addEventListener('click', () => {
                     this.showFileMetadata(detailsArray[0]);
                 });
@@ -358,42 +364,46 @@ class TranslationView {
                 } else {
                     metaSpan.innerHTML = TranslationView.NO_METADATA + '<small class="tooltiptext">File Metadata</small>';
                 }
-                fileDiv.appendChild(metaSpan);
+                td.appendChild(metaSpan);
+                tr.appendChild(td);
 
-                let label: HTMLLabelElement = document.createElement('label');
-                label.innerText = sourceFile;
-                fileDiv.appendChild(label);
-                this.filesContainer.appendChild(fileDiv);
+                td = document.createElement('td');
+                td.classList.add('noWrap');
+                td.innerText = sourceFile;
+                tr.appendChild(td);
             } else {
-                let fileDiv = document.createElement('div');
-                fileDiv.className = 'fileContainer';
-                this.filesContainer.appendChild(fileDiv);
+                let tr: HTMLTableRowElement = document.createElement('tr');
+                tr.classList.add('sourceFile');
 
-                let sourceSpan: HTMLSpanElement = document.createElement('span');
-                sourceSpan.className = 'sourceFile';
-                sourceSpan.innerText = sourceFile;
-                fileDiv.appendChild(sourceSpan);
+                let td: HTMLTableCellElement = document.createElement('td');
+                td.classList.add('middle');
+                td.classList.add('noWrap');
+                td.innerText = sourceFile;
+                td.colSpan = 3;
+                tr.appendChild(td);
+                filesTable.appendChild(tr);
 
                 for (const details of detailsArray) {
-                    let detailsDiv = document.createElement('div');
-                    detailsDiv.className = 'fileContainer';
-                    detailsDiv.setAttribute('data-file', details.file);
-                    this.filesContainer.appendChild(detailsDiv);
 
+                    let tr: HTMLTableRowElement = document.createElement('tr');
+                    tr.setAttribute('data-file', details.file);
+                    filesTable.appendChild(tr);
+
+                    let td: HTMLTableCellElement = document.createElement('td');
                     let infoSpan: HTMLSpanElement = document.createElement('span');
                     infoSpan.classList.add('iconTooltip');
                     infoSpan.classList.add('sourceSymbol');
-                    infoSpan.classList.add('bottomAlign');
                     infoSpan.innerHTML = TranslationView.FILE_INFO + '<small class="tooltiptext">File Info</small>';
                     infoSpan.addEventListener('click', () => {
                         this.showFileInfo(details);
                     });
-                    detailsDiv.appendChild(infoSpan);
+                    td.appendChild(infoSpan);
+                    tr.appendChild(td);
 
+                    td = document.createElement('td');
                     let metaSpan: HTMLSpanElement = document.createElement('span');
                     metaSpan.classList.add('iconTooltip');
                     metaSpan.classList.add('sourceSymbol');
-                    metaSpan.classList.add('bottomAlign');
                     metaSpan.addEventListener('click', () => {
                         this.showFileMetadata(details);
                     });
@@ -402,11 +412,14 @@ class TranslationView {
                     } else {
                         metaSpan.innerHTML = TranslationView.NO_METADATA + '<small class="tooltiptext">File Metadata</small>';
                     }
-                    detailsDiv.appendChild(metaSpan);
+                    td.appendChild(metaSpan);
+                    tr.appendChild(td);
 
-                    let label: HTMLSpanElement = document.createElement('span');
-                    label.innerText = details.original;
-                    detailsDiv.appendChild(label);
+                    td = document.createElement('td');
+                    td.classList.add('middle');
+                    td.classList.add('noWrap');
+                    td.innerText = details.original;
+                    tr.appendChild(td);
                 }
             }
         }
@@ -417,21 +430,7 @@ class TranslationView {
     }
 
     showFileMetadata(details: any) {
-        let metadata: any = details.metadata;
-        let data: any[] = metadata.data;
-        let array: any[] = [];
-        for (let i = 0; i < data.length; i++) {
-            let meta: any = data[i];
-            let category: string = meta.category || '';
-            if (category === 'format' || category === 'tool' || category === 'PI' || category === 'sourceFile' || category === 'document') {
-                continue; // Skip standard metadata categories
-            }
-            array.push(meta);
-        }
-        let json: any = { data: array };
-        json.project = this.projectId;
-        json.file = details.file;
-        this.electron.ipcRenderer.send('show-metadata', json);
+        this.electron.ipcRenderer.send('show-metadata', { project: this.projectId, file: details.file });
     }
 
     showFileInfo(details: any) {
@@ -1126,17 +1125,29 @@ class TranslationView {
         let width: number = (this.translationArea.clientWidth - numbersWidth - status) / 2;
 
         let numberTh: HTMLTableCellElement = document.getElementById('numberTh' + this.projectId) as HTMLTableCellElement;
-        numberTh.style.width = (100 * numbersWidth / this.translationArea.clientWidth) + '%';
+        if (numberTh) {
+            numberTh.style.width = (100 * numbersWidth / this.translationArea.clientWidth) + '%';
+        }
         let translateTh: HTMLTableCellElement = document.getElementById('translateTh' + this.projectId) as HTMLTableCellElement;
-        translateTh.style.width = (100 * 32 / this.translationArea.clientWidth) + '%';
+        if (translateTh) {
+            translateTh.style.width = (100 * 32 / this.translationArea.clientWidth) + '%';
+        }
         let matchTh: HTMLTableCellElement = document.getElementById('matchTh' + this.projectId) as HTMLTableCellElement;
-        matchTh.style.width = (100 * (40 * this.zoom + 8) / this.translationArea.clientWidth) + '%';
+        if (matchTh) {
+            matchTh.style.width = (100 * (40 * this.zoom + 8) / this.translationArea.clientWidth) + '%';
+        }
         let finalTh: HTMLTableCellElement = document.getElementById('finalTh' + this.projectId) as HTMLTableCellElement;
-        finalTh.style.width = (100 * 35 / this.translationArea.clientWidth) + '%';
+        if (finalTh) {
+            finalTh.style.width = (100 * 35 / this.translationArea.clientWidth) + '%';
+        }
         let sourceTh: HTMLTableCellElement = document.getElementById('sourceTh' + this.projectId) as HTMLTableCellElement;
-        sourceTh.style.width = (100 * width / this.translationArea.clientWidth) + '%';
+        if (sourceTh) {
+            sourceTh.style.width = (100 * width / this.translationArea.clientWidth) + '%';
+        }
         let targetTh: HTMLTableCellElement = document.getElementById('targetTh' + this.projectId) as HTMLTableCellElement;
-        targetTh.style.width = (100 * width / this.translationArea.clientWidth) + '%';
+        if (targetTh) {
+            targetTh.style.width = (100 * width / this.translationArea.clientWidth) + '%';
+        }
     }
 
     toggleFilesPanel() {
@@ -1446,7 +1457,7 @@ class TranslationView {
             if (row.hasNotes) {
                 let span: HTMLSpanElement = document.createElement('span');
                 span.innerHTML = TranslationView.NOTES_SPAN;
-                span.addEventListener('click', (event: MouseEvent) => {
+                span.addEventListener('click', () => {
                     this.electron.ipcRenderer.send('show-notes', {
                         project: this.projectId,
                         file: row.file,
@@ -1620,7 +1631,7 @@ class TranslationView {
                     if (hasNotes) {
                         let span: HTMLSpanElement = document.createElement('span');
                         span.innerHTML = TranslationView.NOTES_SPAN;
-                        span.addEventListener('click', (event: MouseEvent) => {
+                        span.addEventListener('click', () => {
                             this.electron.ipcRenderer.send('show-notes', {
                                 project: this.projectId,
                                 file: this.currentId.file,
@@ -1640,7 +1651,7 @@ class TranslationView {
                 if (hasNotes) {
                     let span: HTMLSpanElement = document.createElement('span');
                     span.innerHTML = TranslationView.NOTES_SPAN;
-                    span.addEventListener('click', (event: MouseEvent) => {
+                    span.addEventListener('click', () => {
                         this.electron.ipcRenderer.send('show-notes', {
                             project: this.projectId,
                             file: this.currentId.file,
@@ -1658,7 +1669,7 @@ class TranslationView {
                     if (hasNotes) {
                         let span: HTMLSpanElement = document.createElement('span');
                         span.innerHTML = TranslationView.NOTES_SPAN;
-                        span.addEventListener('click', (event: MouseEvent) => {
+                        span.addEventListener('click', () => {
                             this.electron.ipcRenderer.send('show-notes', {
                                 project: this.projectId,
                                 file: this.currentId.file,
@@ -1678,7 +1689,7 @@ class TranslationView {
                     if (hasNotes) {
                         let span: HTMLSpanElement = document.createElement('span');
                         span.innerHTML = TranslationView.NOTES_SPAN;
-                        span.addEventListener('click', (event: MouseEvent) => {
+                        span.addEventListener('click', () => {
                             this.electron.ipcRenderer.send('show-notes', {
                                 project: this.projectId,
                                 file: this.currentId.file,
@@ -1965,7 +1976,7 @@ class TranslationView {
                 if (hasNotes) {
                     let span: HTMLSpanElement = document.createElement('span');
                     span.innerHTML = TranslationView.NOTES_SPAN;
-                    span.addEventListener('click', (event: MouseEvent) => {
+                    span.addEventListener('click', () => {
                         this.electron.ipcRenderer.send('show-notes', {
                             project: this.projectId,
                             file: this.currentId.file,
@@ -1983,7 +1994,7 @@ class TranslationView {
                 if (hasNotes) {
                     let span: HTMLSpanElement = document.createElement('span');
                     span.innerHTML = TranslationView.NOTES_SPAN;
-                    span.addEventListener('click', (event: MouseEvent) => {
+                    span.addEventListener('click', () => {
                         this.electron.ipcRenderer.send('show-notes', {
                             project: this.projectId,
                             file: this.currentId.file,
@@ -2482,7 +2493,7 @@ class TranslationView {
             this.electron.ipcRenderer.send('show-message', { type: 'warning', message: 'Select glossary' });
             return;
         }
-        this.electron.ipcRenderer.send('show-term-search', { glossary: this.glossSelect.value });
+        this.electron.ipcRenderer.send('show-term-search', this.glossSelect.value);
     }
 
     addTerm(): void {
@@ -2914,7 +2925,7 @@ class TranslationView {
         this.metadataVisible = arg;
     }
 
-    notesRemoved(arg: any): void {
+    notesRemoved(): void {
         let currentState: HTMLTableCellElement = this.currentRow?.getElementsByClassName('state')[0] as HTMLTableCellElement;
         if (currentState.innerHTML.includes(TranslationView.NOTE_FRAGMENT)) {
             if (currentState.classList.contains('final')) {
@@ -2943,7 +2954,7 @@ class TranslationView {
             }
             let span: HTMLSpanElement = document.createElement('span');
             span.innerHTML = TranslationView.NOTES_SPAN;
-            span.addEventListener('click', (event: MouseEvent) => {
+            span.addEventListener('click', () => {
                 this.electron.ipcRenderer.send('show-notes', {
                     project: this.projectId,
                     file: this.currentId.file,

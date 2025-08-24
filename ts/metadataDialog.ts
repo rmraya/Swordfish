@@ -10,31 +10,33 @@
  *     Maxprograms - initial API and implementation
  *******************************************************************************/
 
-class MetaData {
+class MetaDataDialog {
 
     electron = require('electron');
 
     tabHolder: TabHolder;
     counter: number = 1;
     metaId: MetaId = { project: '', file: '' };
+    metadata: MetaData = { project: '', file: '', data: [] };
 
     constructor() {
         this.electron.ipcRenderer.send('get-theme');
         this.electron.ipcRenderer.on('set-theme', (event: Electron.IpcRendererEvent, theme: string) => {
             (document.getElementById('theme') as HTMLLinkElement).href = theme;
         });
-        this.electron.ipcRenderer.on('set-data', (event: Electron.IpcRendererEvent, arg: MetaId) => {
-            this.metaId = arg;
-            this.electron.ipcRenderer.send('get-metadata', arg);
+        this.electron.ipcRenderer.on('set-data', (event: Electron.IpcRendererEvent, metaId: MetaId) => {
+            this.metaId = metaId;
+            this.electron.ipcRenderer.send('get-metadata', metaId);
         });
-        this.electron.ipcRenderer.on('set-metadata', (event: Electron.IpcRendererEvent, arg: any) => {
-            this.setMetadata(arg);
+        this.electron.ipcRenderer.on('set-metadata', (event: Electron.IpcRendererEvent, metadata: MetaData) => {
+            this.metadata = metadata;
+            this.setMetadata();
         });
         (document.getElementById('addMetaGroup') as HTMLButtonElement).addEventListener('click', () => {
-            this.electron.ipcRenderer.send('show-add-metaGroup');
+            this.electron.ipcRenderer.send('show-add-metaGroup', this.metaId);
         });
         (document.getElementById('editMetaGroup') as HTMLButtonElement).addEventListener('click', () => {
-            this.electron.ipcRenderer.send('show-edit-metaGroup');
+            this.editMetaGroup();
         });
 
         document.addEventListener('keydown', (event: KeyboardEvent) => {
@@ -56,6 +58,23 @@ class MetaData {
         }, 200);
     }
 
+    editMetaGroup(): void {
+        let tab: string = this.tabHolder.getSelected();
+        if (!tab) {
+            return;
+        }
+        let length: number = this.metadata.data ? this.metadata.data.length : 0;
+        for (let i: number = 0; i < length; i++) {
+            let groupId: string | undefined = this.metadata.data[i].id;
+            let id: string = groupId ? groupId : 'Group_' + this.counter++;
+            if (id === tab) {
+                let metaGroup :MetaGroup = this.metadata.data[i];
+                this.electron.ipcRenderer.send('show-edit-metaGroup', { metaId: this.metaId, metaGroup: metaGroup });
+                break;
+            }
+        }
+    }
+    
     resize(): void {
         let main: HTMLDivElement = document.getElementById('main') as HTMLDivElement;
         let buttons: HTMLDivElement = document.getElementById('buttons') as HTMLDivElement;
@@ -68,18 +87,19 @@ class MetaData {
             let tab: HTMLDivElement = tabs[i] as HTMLDivElement;
             let attributesContainer: HTMLDivElement = attributesContainers[i] as HTMLDivElement;
             let tableContainer: HTMLDivElement = tableContainers[i] as HTMLDivElement;
-            tableContainer.style.height = (main.clientHeight - (tab.clientHeight + attributesContainer.clientHeight + buttons.clientHeight)) + 'px';
+            tableContainer.style.height = (main.clientHeight - (tab.clientHeight + attributesContainer.clientHeight)) + 'px';
         }
     }
 
-    setMetadata(metadata: MetaData): void {
+    setMetadata(): void {
 
         this.tabHolder.clear();
 
-        let data: any[] = metadata.data;
+        let data: MetaGroup[] = this.metadata.data;
         let length: number = data ? data.length : 0;
         for (let i: number = 0; i < length; i++) {
-            let id: string = data[i].id ? data[i].id : 'Group_' + this.counter++;
+            let groupId: string | undefined = data[i].id;
+            let id: string = groupId ? groupId : 'Group_' + this.counter++;
             let tab: Tab = new Tab(id, id, false, this.tabHolder);
 
             let holder: HTMLDivElement = tab.getContainer();
@@ -102,7 +122,8 @@ class MetaData {
 
             let categoryValue: HTMLTableCellElement = document.createElement('td');
             categoryValue.style.width = '45%';
-            categoryValue.textContent = data[i].category ? data[i].category : '';
+            let groupCategory: string | undefined = data[i].category;
+            categoryValue.textContent = groupCategory ? groupCategory : '';
             attributesRow.appendChild(categoryValue);
 
             let appliesTo: HTMLTableCellElement = document.createElement('td');
@@ -112,7 +133,8 @@ class MetaData {
 
             let appliesToValue: HTMLTableCellElement = document.createElement('td');
             appliesToValue.style.width = '45%';
-            appliesToValue.textContent = data[i].appliesTo ? data[i].appliesTo : '';
+            let groupAppliesTo: 'source' | 'target' | 'ignorable' | undefined = data[i].appliesTo;
+            appliesToValue.textContent = groupAppliesTo ? groupAppliesTo : '';
             attributesRow.appendChild(appliesToValue);
 
             let tableContainer: HTMLDivElement = document.createElement('div');
@@ -127,44 +149,31 @@ class MetaData {
             tableContainer.appendChild(table);
 
             let colgroup: HTMLTableColElement = document.createElement('colgroup');
-            let col1: HTMLTableColElement = document.createElement('col');
-            col1.style.width = '20px';
             let col2: HTMLTableColElement = document.createElement('col');
             let col3: HTMLTableColElement = document.createElement('col');
             col3.classList.add('fill_width');
-            colgroup.appendChild(col1);
             colgroup.appendChild(col2);
             colgroup.appendChild(col3);
             table.appendChild(colgroup);
 
             let header: HTMLTableSectionElement = document.createElement('thead')
-            let headerCell1: HTMLTableCellElement = document.createElement('th')
-            let checkbox: HTMLInputElement = document.createElement('input');
-            checkbox.type = 'checkbox';
-            headerCell1.innerHTML = checkbox.outerHTML;
             let headerCell2: HTMLTableCellElement = document.createElement('th');
             headerCell2.classList.add('left');
             headerCell2.textContent = 'Type';
             let headerCell3: HTMLTableCellElement = document.createElement('th');
             headerCell3.classList.add('left');
+            headerCell3.classList.add('fill_width');
             headerCell3.textContent = 'Value';
-            header.appendChild(headerCell1);
             header.appendChild(headerCell2);
             header.appendChild(headerCell3);
             table.appendChild(header);
 
             let tbody: HTMLTableSectionElement = document.createElement('tbody');
             table.appendChild(tbody);
-            let metaArray: Array<{ type: string, value: string }> = data[i].meta;
+            let metaArray: Array<MetaEntry> = data[i].meta;
             for (let j: number = 0; j < metaArray.length; j++) {
                 let row: HTMLTableRowElement = document.createElement('tr');
                 tbody.appendChild(row);
-                let checkbox: HTMLInputElement = document.createElement('input');
-                checkbox.type = 'checkbox';
-                let cell1: HTMLTableCellElement = document.createElement('td');
-                cell1.innerHTML = checkbox.outerHTML;
-                row.appendChild(cell1);
-                cell1.classList.add('middle');
                 let cell2: HTMLTableCellElement = document.createElement('td');
                 cell2.classList.add('middle');
                 cell2.classList.add('noWrap');
@@ -175,28 +184,6 @@ class MetaData {
                 cell3.textContent = metaArray[j].value;
                 row.appendChild(cell3);
             }
-
-            let entryButtons: HTMLDivElement = document.createElement('div');
-            entryButtons.classList.add('buttonArea');
-            holder.appendChild(entryButtons);
-
-            let addButton: HTMLButtonElement = document.createElement('button');
-            addButton.textContent = 'Add Entry';
-            addButton.addEventListener('click', () => {
-                this.electron.ipcRenderer.send('show-add-metaDialog');
-            });
-            entryButtons.appendChild(addButton);
-
-            let editButton: HTMLButtonElement = document.createElement('button');
-            editButton.textContent = 'Edit Entry';
-            editButton.addEventListener('click', () => {
-                this.electron.ipcRenderer.send('show-edit-metaDialog');
-            });
-            entryButtons.appendChild(editButton);
-
-            let removeButton: HTMLButtonElement = document.createElement('button');
-            removeButton.textContent = 'Remove Entry';
-            entryButtons.appendChild(removeButton);
 
             this.tabHolder.addTab(tab);
         }

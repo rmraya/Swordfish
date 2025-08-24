@@ -1018,10 +1018,11 @@ svg.stats {
 	cursor: pointer;
 }
 
-.bottomAlign {
-	margin-bottom: -4px;
-}
-
 .selectedFile {
 	background-color: var(--ClassicBlue20);
+}
+
+.filesTable td {
+	padding: 0;
+	vertical-align: top;
 }

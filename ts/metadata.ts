@@ -11,28 +11,28 @@
  *******************************************************************************/
 
 interface MetaId {
-    project:string;
+    project: string;
     file: string;
     unit?: string;
     segment?: string;
 }
 
 interface MetaData {
-    project:string;
+    project: string;
     file: string;
     unit?: string;
     segment?: string;
-    data: [
-        {
-            id: string;
-            category: string;
-            appliesTo: string;
-            meta: [
-                {
-                    type: string;
-                    value: string;
-                }
-            ]
-        }
-    ]
+    data: Array<MetaGroup>;
+}
+
+interface MetaEntry {
+    type: string;
+    value: string;
+}
+
+interface MetaGroup {
+    id?: string;
+    category?: string;
+    appliesTo?: 'source' | 'target' | 'ignorable';
+    meta: Array<MetaEntry>;
 }

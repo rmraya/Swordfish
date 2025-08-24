@@ -7,12 +7,12 @@
     <link rel="stylesheet" type="text/css" href="../css/fonts.css">
 </head>
 
-<body class="dialogBody" onload="new AddMetaGroup();">
+<body class="dialogBody" style="height: 100vh;" onload="new AddMetaGroup();">
     <div class="paddedArea">
-        <table class="fill_width">
+        <table class="fill_width" id="attributesTable">
             <tr>
-                <td class="middle"><label for="metaGroup" class="noWrap">ID:</label></td>
-                <td class="middle fill_width"><input id="metaGroup" class="table_input"></td>
+                <td class="middle"><label for="groupId" class="noWrap">ID:</label></td>
+                <td class="middle fill_width"><input id="groupId" class="table_input"></td>
             </tr>
             <tr>
                 <td class="middle"><label for="category" class="noWrap">Category:</label></td>
@@ -30,9 +30,31 @@
                 </td>
             </tr>
         </table>
+        <div class="divContainer" style="height: 250px;" id="tableContainer">
+            <table class="stripes" style="width: 100%; border-collapse: collapse;">
+                <colgroup>
+                    <col style="width: 20px;">
+                    <col>
+                    <col class="fill_width">
+                </colgroup>
+                <thead>
+                    <th width="20px">&nbsp;</th>
+                    <th class="left">Type</th>
+                    <th class="left">Value</th>
+                </thead>
+                <tbody id="tbody">
+
+                </tbody>
+            </table>
+        </div>
     </div>
-    <div class="buttonArea">
-        <button id="saveGroup">Save</button>
+    <div class="buttonArea" id="entryButtons">
+        <button id="addEntry">Add Entry</button>
+        <button id="editEntry">Edit Entry</button>
+        <button id="removeEntry">Remove Entry</button>
+    </div>
+    <div class="buttonArea" id="saveButtons">
+        <button id="saveGroup">Save Group</button>
     </div>
     <script src="../js/addMetaGroup.js"></script>
 </body>
