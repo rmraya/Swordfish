@@ -227,6 +227,8 @@ public class ProjectsHandler implements HttpHandler {
 				response = getNotes(request);
 			} else if ("/projects/getMetadata".equals(url)) {
 				response = getMetadata(request);
+			} else if ("/projects/saveMetadata".equals(url)) {
+				response = saveMetadata(request);
 			} else if ("/projects/getFiles".equals(url)) {
 				response = getFiles(request);
 			} else if ("/projects/addNote".equals(url)) {
@@ -1932,6 +1934,22 @@ public class ProjectsHandler implements HttpHandler {
 					result = json;
 					result.put("data", metadata.getJSONArray("data"));
 				}
+			}
+		} catch (SQLException | JSONException e) {
+			e.printStackTrace();
+			logger.log(Level.ERROR, e);
+			result.put(Constants.REASON, e.getMessage());
+		}
+		return result;
+	}
+
+	private JSONObject saveMetadata(String request) {
+		JSONObject result = new JSONObject();
+		JSONObject json = new JSONObject(request);
+		try {
+			String project = json.getString("project");
+			if (projectStores.containsKey(project)) {
+				projectStores.get(project).saveMetadata(json);
 			}
 		} catch (SQLException | JSONException e) {
 			e.printStackTrace();

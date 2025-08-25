@@ -15,7 +15,6 @@ class MetaDataDialog {
     electron = require('electron');
 
     tabHolder: TabHolder;
-    counter: number = 1;
     metaId: MetaId = { project: '', file: '' };
     metadata: MetaData = { project: '', file: '', data: [] };
 
@@ -32,15 +31,39 @@ class MetaDataDialog {
             this.metadata = metadata;
             this.setMetadata();
         });
+        this.electron.ipcRenderer.on('add-metaGroup', (event: Electron.IpcRendererEvent, metaGroup: MetaGroup) => {
+            if (!this.metadata) {
+                this.metadata = { project: '', file: '', data: [] };
+            }
+            if (!this.metadata.data) {
+                this.metadata.project = this.metaId.project;
+                this.metadata.file = this.metaId.file;
+                if (this.metaId.unit) {
+                    this.metadata.unit = this.metaId.unit;
+                }
+                if (this.metaId.segment) {
+                    this.metadata.segment = this.metaId.segment;
+                }
+                this.metadata.data = [];
+            }
+            this.metadata.data.push(metaGroup);
+            this.setMetadata();
+            this.electron.ipcRenderer.send('save-metadata', { metaId: this.metaId, metadata: this.metadata });
+        });
+        this.electron.ipcRenderer.on('edit-metaGroup', (event: Electron.IpcRendererEvent, metaGroup: MetaGroup) => {
+            this.updateMetaGroup(metaGroup);
+        });
         (document.getElementById('addMetaGroup') as HTMLButtonElement).addEventListener('click', () => {
-            this.electron.ipcRenderer.send('show-add-metaGroup', this.metaId);
+            this.electron.ipcRenderer.send('show-add-metaGroup');
         });
         (document.getElementById('editMetaGroup') as HTMLButtonElement).addEventListener('click', () => {
             this.editMetaGroup();
         });
-
+        (document.getElementById('removeMetaGroup') as HTMLButtonElement).addEventListener('click', () => {
+            this.removeMetaGroup();
+        });
         document.addEventListener('keydown', (event: KeyboardEvent) => {
-            if (event.code === 'Escape' || event.code === 'F2') {
+            if (event.code === 'Escape') {
                 this.electron.ipcRenderer.send('close-metadata');
             }
         });
@@ -64,17 +87,74 @@ class MetaDataDialog {
             return;
         }
         let length: number = this.metadata.data ? this.metadata.data.length : 0;
+        let counter: number = 1;
+        let tabSet: Set<string> = new Set<string>();
         for (let i: number = 0; i < length; i++) {
             let groupId: string | undefined = this.metadata.data[i].id;
-            let id: string = groupId ? groupId : 'Group_' + this.counter++;
+            let id: string = groupId ? groupId : 'Group_' + counter++;
+            while (tabSet.has(id)) {
+                id = id + '*';
+            }
+            tabSet.add(id);
             if (id === tab) {
-                let metaGroup :MetaGroup = this.metadata.data[i];
-                this.electron.ipcRenderer.send('show-edit-metaGroup', { metaId: this.metaId, metaGroup: metaGroup });
+                let metaGroup: MetaGroup = this.metadata.data[i];
+                this.electron.ipcRenderer.send('show-edit-metaGroup', metaGroup);
                 break;
             }
         }
     }
-    
+
+    removeMetaGroup(): void {
+        console.log('removing meta group');
+        let tab: string = this.tabHolder.getSelected();
+        if (!tab) {
+            console.error('No tab selected for removal');
+            return;
+        }
+        console.log('selected tab for removal:', tab);
+        let length: number = this.metadata.data ? this.metadata.data.length : 0;
+        let counter: number = 1;
+        let tabSet: Set<string> = new Set<string>();
+        for (let i: number = 0; i < length; i++) {
+            let groupId: string | undefined = this.metadata.data[i].id;
+            let id: string = groupId ? groupId : 'Group_' + counter++;
+            while (tabSet.has(id)) {
+                id = id + '*';
+            }
+            tabSet.add(id); if (id === tab) {
+                console.log('removing meta group:', id);
+                this.metadata.data.splice(i, 1);
+                this.setMetadata();
+                this.electron.ipcRenderer.send('save-metadata', { metaId: this.metaId, metadata: this.metadata });
+                break;
+            }
+        }
+    }
+
+    updateMetaGroup(metaGroup: MetaGroup): void {
+        let tab: string = this.tabHolder.getSelected();
+        if (!tab) {
+            return;
+        }
+        let length: number = this.metadata.data ? this.metadata.data.length : 0;
+        let counter: number = 1;
+        let tabSet: Set<string> = new Set<string>();
+        for (let i: number = 0; i < length; i++) {
+            let groupId: string | undefined = this.metadata.data[i].id;
+            let id: string = groupId ? groupId : 'Group_' + counter++;
+            while (tabSet.has(id)) {
+                id = id + '*';
+            }
+            tabSet.add(id);
+            if (id === tab) {
+                this.metadata.data[i] = metaGroup;
+                this.setMetadata();
+                break;
+            }
+        }
+        this.electron.ipcRenderer.send('save-metadata', { metaId: this.metaId, metadata: this.metadata });
+    }
+
     resize(): void {
         let main: HTMLDivElement = document.getElementById('main') as HTMLDivElement;
         let buttons: HTMLDivElement = document.getElementById('buttons') as HTMLDivElement;
@@ -92,17 +172,22 @@ class MetaDataDialog {
     }
 
     setMetadata(): void {
-
         this.tabHolder.clear();
-
         let data: MetaGroup[] = this.metadata.data;
         let length: number = data ? data.length : 0;
+        let counter: number = 1;
+        let tabSet: Set<string> = new Set<string>();
         for (let i: number = 0; i < length; i++) {
             let groupId: string | undefined = data[i].id;
-            let id: string = groupId ? groupId : 'Group_' + this.counter++;
+            let id: string = groupId ? groupId : 'Group_' + counter++;
+            while (tabSet.has(id)) {
+                id = id + '*';
+            }
+            tabSet.add(id);
             let tab: Tab = new Tab(id, id, false, this.tabHolder);
 
             let holder: HTMLDivElement = tab.getContainer();
+            holder.classList.add('paddedArea');
 
             let attributesContainer: HTMLDivElement = document.createElement('div');
             attributesContainer.classList.add('attributesContainer');
@@ -133,7 +218,7 @@ class MetaDataDialog {
 
             let appliesToValue: HTMLTableCellElement = document.createElement('td');
             appliesToValue.style.width = '45%';
-            let groupAppliesTo: 'source' | 'target' | 'ignorable' | undefined = data[i].appliesTo;
+            let groupAppliesTo: string | undefined = data[i].appliesTo;
             appliesToValue.textContent = groupAppliesTo ? groupAppliesTo : '';
             attributesRow.appendChild(appliesToValue);
 
@@ -184,7 +269,6 @@ class MetaDataDialog {
                 cell3.textContent = metaArray[j].value;
                 row.appendChild(cell3);
             }
-
             this.tabHolder.addTab(tab);
         }
 

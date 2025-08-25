@@ -399,8 +399,11 @@ class Main {
         Main.electron.ipcRenderer.on('notes-requested', () => {
             this.notesRequested();
         });
-        Main.electron.ipcRenderer.on('metadata-requested', () => {
-            this.metadataRequested();
+        Main.electron.ipcRenderer.on('metadata-requested', (event: Electron.IpcRendererEvent, metaId: MetaId) => {
+            this.metadataRequested(metaId);
+        });
+        Main.electron.ipcRenderer.on('show-metadata', () => {
+            this.showMetadata();
         });
         Main.electron.ipcRenderer.on('notes-closed', () => {
             this.notesClosed();
@@ -408,11 +411,11 @@ class Main {
         Main.electron.ipcRenderer.on('metadata-closed', () => {
             this.metadataClosed();
         });
-        Main.electron.ipcRenderer.on('notes-removed', (event: Electron.IpcRendererEvent, arg: any) => {
-            this.notesRemoved(arg);
+        Main.electron.ipcRenderer.on('notes-removed', (event: Electron.IpcRendererEvent, segmentId: FullId) => {
+            this.notesRemoved(segmentId);
         });
-        Main.electron.ipcRenderer.on('notes-added', (event: Electron.IpcRendererEvent, arg: any) => {
-            this.notesAdded(arg);
+        Main.electron.ipcRenderer.on('notes-added', (event: Electron.IpcRendererEvent, segmentId: FullId) => {
+            this.notesAdded(segmentId);
         });
         Main.electron.ipcRenderer.on('edit-source', () => {
             this.editSource();
@@ -1222,11 +1225,17 @@ class Main {
         }
     }
 
-    metadataRequested(): void {
+    metadataRequested(metaId: MetaId): void {
         let selected = Main.tabHolder.getSelected();
         for (let key of Main.translationViews.keys()) {
             (Main.translationViews.get(key) as TranslationView).showingMetadata(true);
         }
+        if (metaId.unit && Main.translationViews.has(selected)) {
+            (Main.translationViews.get(selected) as TranslationView).showMetadata();
+        }
+    }
+    showMetadata(): void {
+        let selected = Main.tabHolder.getSelected();
         if (Main.translationViews.has(selected)) {
             (Main.translationViews.get(selected) as TranslationView).showMetadata();
         }
@@ -1250,15 +1259,15 @@ class Main {
         }
     }
 
-    notesRemoved(arg: any): void {
-        if (Main.translationViews.has(arg.project)) {
-            (Main.translationViews.get(arg.project) as TranslationView).notesRemoved();
+    notesRemoved(segmentId: FullId): void {
+        if (Main.translationViews.has(segmentId.project)) {
+            (Main.translationViews.get(segmentId.project) as TranslationView).notesRemoved();
         }
     }
 
-    notesAdded(arg: any): void {
-        if (Main.translationViews.has(arg.project)) {
-            (Main.translationViews.get(arg.project) as TranslationView).notesAdded();
+    notesAdded(segmentId: FullId): void {
+        if (Main.translationViews.has(segmentId.project)) {
+            (Main.translationViews.get(segmentId.project) as TranslationView).notesAdded();
         }
     }
 }

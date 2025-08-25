@@ -852,8 +852,8 @@ export class Swordfish {
         ipcMain.on('update-note', (event: IpcMainEvent, arg: { segment: FullId, note: string, noteId: string }) => {
             Swordfish.updateNote(arg.segment, arg.note, arg.noteId);
         });
-        ipcMain.on('remove-note', (event: IpcMainEvent, arg: any) => {
-            Swordfish.removeNote(arg);
+        ipcMain.on('remove-note', (event: IpcMainEvent, arg: { segmentId: FullId, noteId: string }) => {
+            Swordfish.removeNote(arg.segmentId, arg.noteId);
         });
         ipcMain.on('show-file-info', (event: IpcMainEvent, fileInfo: any) => {
             Swordfish.showFileInfo(fileInfo);
@@ -870,11 +870,11 @@ export class Swordfish {
         ipcMain.on('close-metadata', () => {
             Swordfish.metadataWindow.close();
         });
-        ipcMain.on('show-add-metaGroup', (event: IpcMainEvent, metaId: MetaId) => {
-            Swordfish.showAddMetaGroup(metaId);
+        ipcMain.on('show-add-metaGroup', () => {
+            Swordfish.showAddMetaGroup();
         });
-        ipcMain.on('show-edit-metaGroup', (event: IpcMainEvent, arg: { metaId: MetaId, metaGroup: MetaGroup }) => {
-            Swordfish.showEditMetaGroup(arg.metaId, arg.metaGroup);
+        ipcMain.on('show-edit-metaGroup', (event: IpcMainEvent, metaGroup: MetaGroup) => {
+            Swordfish.showEditMetaGroup(metaGroup);
         });
         ipcMain.on('close-add-metaGroup', () => {
             Swordfish.addMetaGroupWindow.close();
@@ -882,23 +882,29 @@ export class Swordfish {
         ipcMain.on('add-metadata', (event: IpcMainEvent, arg: any) => {
             Swordfish.addMetaGroup(arg);
         });
-        ipcMain.on('remove-metaGroup', (event: IpcMainEvent, arg: any) => {
-            Swordfish.removeMetaGroup(arg);
-        });
         ipcMain.on('show-add-metaDialog', () => {
             Swordfish.showAddMetaDialog();
         });
-        ipcMain.on('show-edit-metaDialog', () => {
-            Swordfish.showEditMetaDialog();
+        ipcMain.on('add-meta', (event: IpcMainEvent, meta: MetaEntry) => {
+            Swordfish.addMeta(meta);
+        });
+        ipcMain.on('edit-meta', (event: IpcMainEvent, meta: MetaEntry) => {
+            Swordfish.editMeta(meta);
+        });
+        ipcMain.on('show-edit-metaDialog', (event: IpcMainEvent, meta: MetaEntry) => {
+            Swordfish.showEditMetaDialog(meta);
+        });
+        ipcMain.on('add-metaGroup', (event: IpcMainEvent, metaGroup: MetaGroup) => {
+            Swordfish.addMetaGroup(metaGroup);
+        });
+        ipcMain.on('edit-metaGroup', (event: IpcMainEvent, metaGroup: MetaGroup) => {
+            Swordfish.editMetaGroup(metaGroup);
+        });
+        ipcMain.on('save-metadata', (event: IpcMainEvent, arg: { metaId: MetaId, metadata: MetaData }) => {
+            Swordfish.saveMetadata(arg.metaId, arg.metadata);
         });
         ipcMain.on('close-add-metaDialog', () => {
             Swordfish.addMetaDialogWindow.close();
-        });
-        ipcMain.on('add-meta', (event: IpcMainEvent, arg: any) => {
-            Swordfish.addMeta(arg);
-        });
-        ipcMain.on('remove-meta', (event: IpcMainEvent, arg: any) => {
-            Swordfish.removeMeta(arg);
         });
         ipcMain.on('get-versions', (event: IpcMainEvent) => {
             event.sender.send('set-versions', { current: app.getVersion(), latest: Swordfish.latestVersion });
@@ -3719,6 +3725,10 @@ export class Swordfish {
                     break;
                 case 'spaceAnalysis': parent = Swordfish.spaceAnalysisWindow;
                     break;
+                case 'addMetaDialog': parent = Swordfish.addMetaDialogWindow;
+                    break;
+                case 'addMetaGroupDialog': parent = Swordfish.addMetaGroupWindow;
+                    break;
                 default: parent = Swordfish.mainWindow;
             }
         }
@@ -5553,16 +5563,16 @@ export class Swordfish {
     }
 
     static toggleCustomMetadata(): void {
-        if (Swordfish.metadataWindow && !Swordfish.metadataWindow.isDestroyed()) {
+        if (Swordfish.metadataWindow && !Swordfish.metadataWindow.isDestroyed() && Swordfish.metadataWindow.isVisible()) {
             Swordfish.metadataWindow.close();
             Swordfish.mainWindow?.webContents.send('metadata-closed');
             return;
         }
-        Swordfish.mainWindow.webContents.send('metadata-requested');
+        Swordfish.mainWindow.webContents.send('show-metadata');
     }
 
     static toggleNotes(): void {
-        if (Swordfish.notesWindow && !Swordfish.notesWindow.isDestroyed()) {
+        if (Swordfish.notesWindow && !Swordfish.notesWindow.isDestroyed() && Swordfish.notesWindow.isVisible()) {
             Swordfish.notesWindow.close();
             Swordfish.mainWindow?.webContents.send('notes-closed');
             return;
@@ -5571,7 +5581,7 @@ export class Swordfish {
     }
 
     static showNotes(segment: FullId): void {
-        if (Swordfish.notesWindow && !Swordfish.notesWindow.isDestroyed()) {
+        if (Swordfish.notesWindow && !Swordfish.notesWindow.isDestroyed() && Swordfish.notesWindow.isVisible()) {
             Swordfish.notesWindow.webContents.send('note-params', segment);
             Swordfish.getNotes(segment);
             return;
@@ -5656,7 +5666,7 @@ export class Swordfish {
             Swordfish.addNoteWindow.webContents.send('note-params', segmentId);
         });
         this.addNoteWindow.on('close', () => {
-            let parent: BrowserWindow | null = this.notesWindow;
+            let parent: BrowserWindow | null = this.addNoteWindow?.getParentWindow();
             if (parent) {
                 parent.focus();
             }
@@ -5697,7 +5707,7 @@ export class Swordfish {
             Swordfish.addNoteWindow.webContents.send('set-note-id', noteId);
         });
         this.addNoteWindow.on('close', () => {
-            let parent: BrowserWindow | null = this.notesWindow;
+            let parent: BrowserWindow | null = this.addNoteWindow?.getParentWindow();
             if (parent) {
                 parent.focus();
             }
@@ -5705,14 +5715,15 @@ export class Swordfish {
         Swordfish.setLocation(this.addNoteWindow, 'addNote.html');
     }
 
-    static addNote(segment: FullId, note: string): void {
+    static addNote(segmentId: FullId, note: string): void {
         Swordfish.addNoteWindow.close();
-        let params: any = segment;
+        let params: any = segmentId;
         params.noteText = note;
         Swordfish.sendRequest('/projects/addNote', params,
             (data: any) => {
                 if (data.status === 'Success') {
                     Swordfish.notesWindow.webContents.send('set-notes', data.notes);
+                    Swordfish.mainWindow.webContents.send('notes-added', segmentId);
                 } else {
                     Swordfish.showMessage({ type: 'error', message: data.reason });
                 }
@@ -5742,13 +5753,15 @@ export class Swordfish {
         );
     }
 
-    static removeNote(arg: any): void {
-        Swordfish.sendRequest('/projects/removeNote', arg,
+    static removeNote(segmentId: FullId, noteId: string): void {
+        let params: any = segmentId;
+        params.noteId = noteId;
+        Swordfish.sendRequest('/projects/removeNote', params,
             (data: any) => {
                 if (data.status === 'Success') {
                     Swordfish.notesWindow.webContents.send('set-notes', data.notes);
                     if (data.notes.length === 0) {
-                        Swordfish.mainWindow.webContents.send('notes-removed', arg);
+                        Swordfish.mainWindow.webContents.send('notes-removed', segmentId);
                     }
                 } else {
                     Swordfish.showMessage({ type: 'error', message: data.reason });
@@ -5761,7 +5774,7 @@ export class Swordfish {
     }
 
     static showFileInfo(fileInfo: any): void {
-        if (Swordfish.fileInfoWindow && !Swordfish.fileInfoWindow.isDestroyed()) {
+        if (Swordfish.fileInfoWindow && !Swordfish.fileInfoWindow.isDestroyed() && Swordfish.fileInfoWindow.isVisible()) {
             // focus the existing window
             Swordfish.fileInfoWindow.focus();
             Swordfish.fileInfoWindow.webContents.send('set-file-info', fileInfo);
@@ -5797,7 +5810,7 @@ export class Swordfish {
     }
 
     static showMetadata(metaId: MetaId): void {
-        if (Swordfish.metadataWindow && !Swordfish.metadataWindow.isDestroyed()) {
+        if (Swordfish.metadataWindow && !Swordfish.metadataWindow.isDestroyed() && Swordfish.metadataWindow.isVisible()) {
             // focus the existing window
             Swordfish.metadataWindow.focus();
             Swordfish.metadataWindow.webContents.send('set-data', metaId);
@@ -5835,7 +5848,7 @@ export class Swordfish {
         Swordfish.metadataWindow.once('ready-to-show', () => {
             Swordfish.metadataWindow.show();
             Swordfish.metadataWindow.webContents.send('set-data', metaId);
-            Swordfish.mainWindow.webContents.send('metadata-requested');
+            Swordfish.mainWindow.webContents.send('metadata-requested', metaId);
         });
         Swordfish.setLocation(this.metadataWindow, 'metadataDialog.html');
         return;
@@ -5858,11 +5871,28 @@ export class Swordfish {
         );
     }
 
-    static showAddMetaGroup(metaId: MetaId): void {
-        if (Swordfish.addMetaGroupWindow && !Swordfish.addMetaGroupWindow.isDestroyed()) {
+    static saveMetadata(metaId: MetaId, metadata: MetaData): void {
+        let params: any = metaId;
+        params.metadata = metadata;
+        Swordfish.sendRequest('/projects/saveMetadata', params,
+            (data: any) => {
+                if (data.status === 'Success') {
+                    // TODO update segment or file 
+
+                } else {
+                    Swordfish.showMessage({ type: 'error', message: data.reason });
+                }
+            },
+            (reason: string) => {
+                Swordfish.showMessage({ type: 'error', message: reason });
+            }
+        );
+    }
+
+    static showAddMetaGroup(): void {
+        if (Swordfish.addMetaGroupWindow && !Swordfish.addMetaGroupWindow.isDestroyed() && Swordfish.addMetaGroupWindow.isVisible()) {
             // focus the existing window
             Swordfish.addMetaGroupWindow.focus();
-            Swordfish.addMetaGroupWindow.webContents.send('set-data', metaId);
             return;
         }
         Swordfish.addMetaGroupWindow = new BrowserWindow({
@@ -5887,7 +5917,6 @@ export class Swordfish {
         Swordfish.addMetaGroupWindow.loadURL(fileUrl.href);
         Swordfish.addMetaGroupWindow.once('ready-to-show', () => {
             Swordfish.addMetaGroupWindow.show();
-            Swordfish.addMetaGroupWindow.webContents.send('set-data', metaId);
         });
         this.addMetaGroupWindow.on('close', () => {
             let parent: BrowserWindow | null = this.addMetaGroupWindow?.getParentWindow();
@@ -5896,11 +5925,10 @@ export class Swordfish {
         Swordfish.setLocation(this.addMetaGroupWindow, 'addMetaGroup.html');
     }
 
-    static showEditMetaGroup(metaId: MetaId, metaGroup: MetaGroup): void {
-        if (Swordfish.addMetaGroupWindow && !Swordfish.addMetaGroupWindow.isDestroyed()) {
+    static showEditMetaGroup(metaGroup: MetaGroup): void {
+        if (Swordfish.addMetaGroupWindow && !Swordfish.addMetaGroupWindow.isDestroyed() && Swordfish.addMetaGroupWindow.isVisible()) {
             // focus the existing window
             Swordfish.addMetaGroupWindow.focus();
-            Swordfish.addMetaGroupWindow.webContents.send('set-data', metaId);
             Swordfish.addMetaGroupWindow.webContents.send('set-metaGroup', metaGroup);
             return;
         }
@@ -5924,7 +5952,6 @@ export class Swordfish {
         Swordfish.addMetaGroupWindow.loadURL(fileUrl.href);
         Swordfish.addMetaGroupWindow.once('ready-to-show', () => {
             Swordfish.addMetaGroupWindow.show();
-            Swordfish.addMetaGroupWindow.webContents.send('set-data', metaId);
             Swordfish.addMetaGroupWindow.webContents.send('set-metaGroup', metaGroup);
         });
         this.addMetaGroupWindow.on('close', () => {
@@ -5934,51 +5961,34 @@ export class Swordfish {
         Swordfish.setLocation(this.addMetaGroupWindow, 'addMetaGroup.html');
     }
 
-    static addMetaGroup(arg: any): void {
+    static addMetaGroup(metaGroup: MetaGroup): void {
+        let parent: BrowserWindow | null = this.addMetaGroupWindow?.getParentWindow();
+        if (parent) {
+            parent.webContents.send('add-metaGroup', metaGroup);
+        }
         Swordfish.addMetaGroupWindow.close();
-        Swordfish.sendRequest('/projects/addMetaGroup', arg,
-            (data: any) => {
-                if (data.status === 'Success') {
-                    Swordfish.metadataEvent.sender.send('set-metadata', data);
-                    Swordfish.mainWindow.webContents.send('metadata-added', arg);
-                } else {
-                    Swordfish.showMessage({ type: 'error', message: data.reason });
-                }
-            },
-            (reason: string) => {
-                Swordfish.showMessage({ type: 'error', message: reason });
-            }
-        );
     }
 
-    static removeMetaGroup(arg: any): void {
-        Swordfish.sendRequest('/projects/removeMetaGroup', arg,
-            (data: any) => {
-                if (data.status === 'Success') {
-                    Swordfish.metadataEvent.sender.send('set-metadata', data);
-                    if (data.metadata.length === 0) {
-                        Swordfish.mainWindow.webContents.send('metaGroup-removed', arg);
-                    }
-                } else {
-                    Swordfish.showMessage({ type: 'error', message: data.reason });
-                }
-            },
-            (reason: string) => {
-                Swordfish.showMessage({ type: 'error', message: reason });
-            }
-        );
-        this.metadataWindow.focus();
+    static editMetaGroup(metaGroup: MetaGroup): void {
+        let parent: BrowserWindow | null = this.addMetaGroupWindow?.getParentWindow();
+        if (parent) {
+            parent.webContents.send('edit-metaGroup', metaGroup);
+        }
+        Swordfish.addMetaGroupWindow.close();
     }
 
     static showAddMetaDialog(): void {
+        if (Swordfish.addMetaDialogWindow && !Swordfish.addMetaDialogWindow.isDestroyed()) {
+            Swordfish.addMetaDialogWindow.focus();
+            return;
+        }
         Swordfish.addMetaDialogWindow = new BrowserWindow({
-            parent: Swordfish.metadataWindow,
+            parent: Swordfish.addMetaGroupWindow,
             width: 400,
-            height: 300,
+            height: 160,
             minimizable: false,
             maximizable: false,
             resizable: true,
-            modal: true,
             show: false,
             icon: this.iconPath,
             webPreferences: {
@@ -5994,21 +6004,25 @@ export class Swordfish {
             Swordfish.addMetaDialogWindow.show();
         });
         this.addMetaDialogWindow.on('close', () => {
-            this.metadataWindow.focus();
+            let parent: BrowserWindow | null = this.addMetaDialogWindow?.getParentWindow();
+            parent?.focus();
         });
         Swordfish.setLocation(this.addMetaDialogWindow, 'addMetaDialog.html');
     }
 
-    static showEditMetaDialog(): void {
-        // Swordfish.metadataParam = arg;
+    static showEditMetaDialog(meta: MetaEntry): void {
+        if (Swordfish.addMetaDialogWindow && !Swordfish.addMetaDialogWindow.isDestroyed()) {
+            Swordfish.addMetaDialogWindow.webContents.send('set-meta', meta);
+            Swordfish.addMetaDialogWindow.focus();
+            return;
+        }
         Swordfish.addMetaDialogWindow = new BrowserWindow({
-            parent: Swordfish.metadataWindow,
+            parent: Swordfish.addMetaGroupWindow,
             width: 400,
-            height: 300,
+            height: 160,
             minimizable: false,
             maximizable: false,
             resizable: true,
-            modal: true,
             show: false,
             icon: this.iconPath,
             webPreferences: {
@@ -6022,47 +6036,29 @@ export class Swordfish {
         Swordfish.addMetaDialogWindow.loadURL(fileUrl.href);
         Swordfish.addMetaDialogWindow.once('ready-to-show', () => {
             Swordfish.addMetaDialogWindow.show();
+            Swordfish.addMetaDialogWindow.webContents.send('set-meta', meta);
         });
         this.addMetaDialogWindow.on('close', () => {
-            this.metadataWindow.focus();
+            let parent: BrowserWindow | null = this.addMetaDialogWindow?.getParentWindow();
+            parent?.focus();
         });
         Swordfish.setLocation(this.addMetaDialogWindow, 'addMetaDialog.html');
     }
 
-    static addMeta(arg: any): void {
-        Swordfish.addMetaGroupWindow.close();
-        Swordfish.sendRequest('/projects/addMeta', arg,
-            (data: any) => {
-                if (data.status === 'Success') {
-                    Swordfish.metadataEvent.sender.send('set-metadata', data);
-                    Swordfish.mainWindow.webContents.send('metadata-added', arg);
-                } else {
-                    Swordfish.showMessage({ type: 'error', message: data.reason });
-                }
-            },
-            (reason: string) => {
-                Swordfish.showMessage({ type: 'error', message: reason });
-            }
-        );
+    static addMeta(meta: MetaEntry): void {
+        let parent: BrowserWindow | null = this.addMetaDialogWindow?.getParentWindow();
+        if (parent) {
+            parent.webContents.send('add-meta', meta);
+        }
+        Swordfish.addMetaDialogWindow.close();
     }
 
-    static removeMeta(arg: any): void {
-        Swordfish.sendRequest('/projects/removeMeta', arg,
-            (data: any) => {
-                if (data.status === 'Success') {
-                    Swordfish.metadataEvent.sender.send('set-metadata', data);
-                    if (data.metadata.length === 0) {
-                        Swordfish.mainWindow.webContents.send('meta-removed', arg);
-                    }
-                } else {
-                    Swordfish.showMessage({ type: 'error', message: data.reason });
-                }
-            },
-            (reason: string) => {
-                Swordfish.showMessage({ type: 'error', message: reason });
-            }
-        );
-        this.metadataWindow.focus();
+    static editMeta(meta: MetaEntry): void {
+        let parent: BrowserWindow | null = this.addMetaDialogWindow?.getParentWindow();
+        if (parent) {
+            parent.webContents.send('edit-meta', meta);
+        }
+        Swordfish.addMetaDialogWindow.close();
     }
 
     static downloadLatest(): void {

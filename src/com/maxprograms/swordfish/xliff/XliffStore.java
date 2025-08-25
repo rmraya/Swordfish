@@ -945,6 +945,81 @@ public class XliffStore {
 		return array;
 	}
 
+	public synchronized void saveMetadata(JSONObject json) throws SQLException {
+		if (json.has("unit")) {
+			JSONArray array = json.getJSONObject("metadata").getJSONArray("data");
+			JSONObject data = new JSONObject();
+			data.put("data", array);
+			if (array.length() == 0) {
+				// Remove existing metadata
+				try (PreparedStatement deleteMetadata = conn
+						.prepareStatement("DELETE FROM metadata WHERE file=? AND unitId=?")) {
+					deleteMetadata.setString(1, json.getString("file"));
+					deleteMetadata.setString(2, json.getString("unit"));
+					deleteMetadata.executeUpdate();
+				}
+			} else if (hasMetadata(json.getString("file"), json.getString("unit"))) {
+				// Update existing metadata
+				try (PreparedStatement updateMetadata = conn
+						.prepareStatement("UPDATE metadata SET metadata=? WHERE file=? AND unitId=?")) {
+					updateMetadata.setString(1, data.toString());
+					updateMetadata.setString(2, json.getString("file"));
+					updateMetadata.setString(3, json.getString("unit"));
+					updateMetadata.executeUpdate();
+				}
+			} else {
+				// Insert new metadata
+				try (PreparedStatement insertMetadata = conn
+						.prepareStatement("INSERT INTO metadata (file, unitId, metadata) VALUES (?, ?, ?)")) {
+					insertMetadata.setString(1, json.getString("file"));
+					insertMetadata.setString(2, json.getString("unit"));
+					insertMetadata.setString(3, data.toString());
+					insertMetadata.executeUpdate();
+				}
+			}
+			conn.commit();
+		} else if (json.has("file")) {
+			// Update file-level metadata
+			String previousMetadata = null;
+			try (PreparedStatement getMetadata = conn
+					.prepareStatement("SELECT metadata FROM filesdata WHERE file=?")) {
+				getMetadata.setString(1, json.getString("file"));
+				try (ResultSet rs = getMetadata.executeQuery()) {
+					while (rs.next()) {
+						previousMetadata = rs.getString(1);
+					}
+				}
+			}
+			JSONObject previousJson = previousMetadata != null ? new JSONObject(previousMetadata) : new JSONObject();
+			JSONArray previousData = previousJson.has("data") ? previousJson.getJSONArray("data") : new JSONArray();
+			JSONArray newData = new JSONArray();
+			// Preserve standard metadata categories
+			for (int i = 0; i < previousData.length(); i++) {
+				JSONObject group = previousData.getJSONObject(i);
+				if (group.has("category")) {
+					String category = group.getString("category");
+					if (category.equals("format") || category.equals("tool") || category.equals("PI")
+							|| category.equals("sourceFile") || category.equals("document")) {
+						newData.put(group);
+					}
+				}
+			}
+			JSONArray incomingData = json.getJSONObject("metadata").getJSONArray("data");
+			for (int i = 0; i < incomingData.length(); i++) {
+				newData.put(incomingData.getJSONObject(i));
+			}
+			JSONObject data = new JSONObject();
+			data.put("data", newData);
+			try (PreparedStatement updateFileData = conn
+					.prepareStatement("UPDATE filesdata SET metadata=? WHERE file=?")) {
+				updateFileData.setString(1, data.toString());
+				updateFileData.setString(2, json.getString("file"));
+				updateFileData.executeUpdate();
+			}
+			conn.commit();
+		}
+	}
+
 	public synchronized JSONObject getMetadata(JSONObject json) throws SQLException {
 		JSONObject result = null;
 		if (json.has("unit")) {
@@ -2554,11 +2629,50 @@ public class XliffStore {
 			throws SQLException, SAXException, IOException, ParserConfigurationException {
 		if ("file".equals(e.getName())) {
 			currentFile = e.getAttributeValue("id");
+			JSONObject fileData = new JSONObject();
+			fileData.put("file", currentFile);
+			JSONObject metadata = getMetadata(fileData);
+			if (metadata != null && metadata.getJSONArray("data").length() > 0) {
+				Element oldMetadata = e.getChild("mda:metadata");
+				if (oldMetadata == null) {
+					oldMetadata = new Element("mda:metadata");
+					List<XMLNode> content = e.getContent();
+					content.add(0, oldMetadata);
+					e.setContent(content);
+				}
+				List<Element> children = oldMetadata.getChildren();
+				List<XMLNode> newContent = new Vector<>();
+				for (Element child : children) {
+					String category = child.getAttributeValue("category");
+					if (category.equals("format") || category.equals("tool") || category.equals("PI")
+							|| category.equals("sourceFile") || category.equals("document")) {
+						newContent.add(child);
+					}
+				}
+				oldMetadata.setContent(newContent);
+				insertMetadata(oldMetadata, metadata);
+			}
 			index = 0;
 		}
 		if ("unit".equals(e.getName())) {
 			tagCount = 0;
 			currentUnit = e.getAttributeValue("id");
+			JSONObject unitData = new JSONObject();
+			unitData.put("file", currentFile);
+			unitData.put("unit", currentUnit);
+			JSONObject metadata = getMetadata(unitData);
+			Element oldMetadata = e.getChild("mda:metadata");
+			if (oldMetadata == null) {
+				oldMetadata = new Element("mda:metadata");
+				List<XMLNode> content = e.getContent();
+				content.add(0, oldMetadata);
+				e.setContent(content);
+			}
+			if (metadata != null && metadata.getJSONArray("data").length() > 0) {
+				insertMetadata(oldMetadata, metadata);
+			} else {
+				e.removeChild(oldMetadata);
+			}
 			Element glossary = getUnitTerms(currentFile, currentUnit);
 			if (glossary != null) {
 				insertGlossary(e, glossary);
@@ -2669,6 +2783,44 @@ public class XliffStore {
 		Iterator<Element> it = children.iterator();
 		while (it.hasNext()) {
 			recurseUpdating(it.next());
+		}
+	}
+
+	private void insertMetadata(Element oldMetadata, JSONObject metadata) throws JSONException {
+		JSONArray array = metadata.getJSONArray("data");
+		for (int i = 0; i < array.length(); i++) {
+			JSONObject group = array.getJSONObject(i);
+			Element metaGroup = new Element("mda:metaGroup");
+			if (group.has("id")) {
+				metaGroup.setAttribute("id", group.getString("id"));
+			}
+			if (group.has("category")) {
+				metaGroup.setAttribute("category", group.getString("category"));
+			}
+			if (group.has("appliesTo")) {
+				metaGroup.setAttribute("appliesTo", group.getString("appliesTo"));
+			}
+			JSONArray entries = group.getJSONArray("meta");
+			for (int j = 0; j < entries.length(); j++) {
+				JSONObject entry = entries.getJSONObject(j);
+				Element meta = new Element("mda:meta");
+				meta.setAttribute("type", entry.getString("type"));
+				meta.setText(entry.getString("value"));
+				metaGroup.addContent(meta);
+			}
+			oldMetadata.addContent(metaGroup);
+		}
+		// remove duplicates
+		List<Element> oldChildren = oldMetadata.getChildren();
+		oldMetadata.setContent(new Vector<>());
+		Set<Integer> hashes = new HashSet<>();
+		for (Element e : oldChildren) {
+			Indenter.indent(e, 2);
+			int hash = e.toString().hashCode();
+			if (!hashes.contains(hash)) {
+				hashes.add(hash);
+				oldMetadata.addContent(e);
+			}
 		}
 	}
 

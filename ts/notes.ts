@@ -105,9 +105,7 @@ class Notes {
     removeNote(): void {
         let selected: string = this.tabHolder.getSelected();
         if (selected) {
-            let params: any = this.segmentData;
-            params.noteId = selected;
-            this.electron.ipcRenderer.send('remove-note', params);
+            this.electron.ipcRenderer.send('remove-note', {segmentId: this.segmentData, noteId: selected});
         }
     }
 }

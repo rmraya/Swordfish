@@ -14,21 +14,27 @@ class AddMetaGroup {
 
     electron = require('electron');
 
-    segmentData: MetaId = { project: '', file: '' };
+    metaEntries: MetaEntry[] = [];
+    selectedMeta: number[] = [];
+    editing: boolean = false;
 
     constructor() {
         this.electron.ipcRenderer.send('get-theme');
         this.electron.ipcRenderer.on('set-theme', (event: Electron.IpcRendererEvent, theme: string) => {
             (document.getElementById('theme') as HTMLLinkElement).href = theme;
         });
-        this.electron.ipcRenderer.on('set-data', (event: Electron.IpcRendererEvent, data: MetaId) => {
-            this.segmentData = data;
-        });
         this.electron.ipcRenderer.on('set-metaGroup', (event: Electron.IpcRendererEvent, data: MetaGroup) => {
             this.setMetaGroup(data);
         });
+        this.electron.ipcRenderer.on('add-meta', (event: Electron.IpcRendererEvent, meta: MetaEntry) => {
+            this.addMeta(meta);
+        });
+
+        this.electron.ipcRenderer.on('edit-meta', (event: Electron.IpcRendererEvent, meta: MetaEntry) => {
+            this.editMeta(meta);
+        });
         document.addEventListener('keydown', (event: KeyboardEvent) => {
-            if (event.code === 'Escape' || event.code === 'F2') {
+            if (event.code === 'Escape') {
                 this.electron.ipcRenderer.send('close-add-metaGroup');
             }
         });
@@ -44,6 +50,7 @@ class AddMetaGroup {
         (document.getElementById('saveGroup') as HTMLButtonElement).addEventListener('click', () => {
             this.saveGroup();
         });
+        (document.getElementById('groupId') as HTMLInputElement).focus();
         window.addEventListener('resize', () => {
             this.resize();
         });
@@ -63,11 +70,17 @@ class AddMetaGroup {
         if (data.appliesTo) {
             (document.getElementById('appliesTo') as HTMLSelectElement).value = data.appliesTo;
         }
-        // Meta Entries
+        this.metaEntries = data.meta;
+        this.displayEntries();
+        this.editing = true;
+    }
+
+    displayEntries() {
         let tbody: HTMLTableSectionElement = document.getElementById('tbody') as HTMLTableSectionElement;
         tbody.innerHTML = '';
-        for (let i: number = 0; i < data.meta.length; i++) {
-            let entry: MetaEntry = data.meta[i];
+        this.selectedMeta = [];
+        for (let i: number = 0; i < this.metaEntries.length; i++) {
+            let entry: MetaEntry = this.metaEntries[i];
             let tr: HTMLTableRowElement = document.createElement('tr');
             tbody.appendChild(tr);
 
@@ -75,7 +88,16 @@ class AddMetaGroup {
             cell.classList.add('middle');
             let checkbox: HTMLInputElement = document.createElement('input');
             checkbox.type = 'checkbox';
-            checkbox.id = '' + i;
+            checkbox.addEventListener('change', (event: Event) => {
+                if (checkbox.checked) {
+                    this.selectedMeta.push(i);
+                } else {
+                    const index = this.selectedMeta.indexOf(i);
+                    if (index > -1) {
+                        this.selectedMeta.splice(index, 1);
+                    }
+                }
+            });
             cell.appendChild(checkbox);
             tr.appendChild(cell);
 
@@ -96,15 +118,73 @@ class AddMetaGroup {
     }
 
     editEntry(): void {
+        if (this.metaEntries.length === 0) {
+            return;
+        }
+        if (this.selectedMeta.length === 0) {
+            this.electron.ipcRenderer.send('show-message', { type: 'warning', message: 'Select entry', parent: 'addMetaGroupDialog' });
+            return;
+        }
+        if (this.selectedMeta.length !== 1) {
+            this.electron.ipcRenderer.send('show-message', { type: 'warning', message: 'Select one entry', parent: 'addMetaGroupDialog' });
+            return;
+        }
+        this.electron.ipcRenderer.send('show-edit-metaDialog', this.metaEntries[this.selectedMeta[0]]);
     }
 
     removeEntry(): void {
+        if (this.selectedMeta.length === 0) {
+            return;
+        }
+        this.selectedMeta.sort((a, b) => b - a);
+        for (let index of this.selectedMeta) {
+            this.metaEntries.splice(index, 1);
+        }
+        this.selectedMeta = [];
+        this.displayEntries();
+    }
+
+    addMeta(entry: MetaEntry): void {
+        this.metaEntries.push(entry);
+        this.displayEntries();
+    }
+
+    editMeta(entry: MetaEntry): void {
+        if (this.selectedMeta.length === 0) {
+            return;
+        }
+        this.metaEntries[this.selectedMeta[0]] = entry;
+        this.displayEntries();
     }
 
     saveGroup(): void {
-        let id: string = (document.getElementById('groupId') as HTMLInputElement).value;
-        let category: string = (document.getElementById('category') as HTMLInputElement).value;
-        let appliesTo: string = (document.getElementById('appliesTo') as HTMLSelectElement).value;
+        if (this.metaEntries.length === 0) {
+            this.electron.ipcRenderer.send('show-message', { type: 'warning', message: 'Add entries', parent: 'addMetaGroupDialog' });
+            return;
+        }
+        let id: string | undefined = (document.getElementById('groupId') as HTMLInputElement).value;
+        if (id === '') {
+            id = undefined;
+        } else {
+            if (!AddMeta.isNMToken(id)) {
+            this.electron.ipcRenderer.send('show-message', { type: 'warning', message: 'Invalid ID', parent: 'addMetaGroupDialog' });
+            return;
+        }
+        }
+        let category: string | undefined = (document.getElementById('category') as HTMLInputElement).value;
+        if (category === '') {
+            category = undefined;
+        }
+        let appliesTo: string | undefined = (document.getElementById('appliesTo') as HTMLSelectElement).value;
+        if (appliesTo === 'none') {
+            appliesTo = undefined;
+        }
+        let metaGroup: MetaGroup = { id: id, category: category, appliesTo: appliesTo, meta: this.metaEntries };
+        if (!this.editing) {
+            this.electron.ipcRenderer.send('add-metaGroup', metaGroup);
+        } else {
+            this.electron.ipcRenderer.send('edit-metaGroup', metaGroup);
+        }
     }
 
     resize(): void {
