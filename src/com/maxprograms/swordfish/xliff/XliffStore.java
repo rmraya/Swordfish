@@ -315,6 +315,8 @@ public class XliffStore {
 			parseDocument();
 			conn.commit();
 			indexSegments();
+		} else if (!filesDataExists) {
+			harvestFilesData();
 		}
 	}
 
@@ -434,6 +436,39 @@ public class XliffStore {
 		insertNoteStmt.close();
 		insertSegmentStmt.close();
 		insertFileData.close();
+	}
+
+	private void harvestFilesData() throws SQLException, IOException, SAXException, ParserConfigurationException {
+		document = builder.build(xliffFile);
+		insertFileData = conn.prepareStatement("INSERT INTO filesdata (file, original, sourceFile, metadata) VALUES (?,?,?,?)");
+		recurseFiles(document.getRootElement());
+		insertFileData.close();
+		conn.commit();
+	}
+
+	private void recurseFiles(Element e) throws SQLException, IOException {
+		if ("file".equals(e.getName())) {
+			currentFile = e.getAttributeValue("id");
+			Element metadata = e.getChild("mda:metadata");
+			if (metadata != null) {
+				String sourceFile = getSourceFile(metadata);
+				if (sourceFile == null) {
+					sourceFile = e.getAttributeValue("original");
+				}
+				insertFileData.setString(1, currentFile);
+				insertFileData.setString(2, e.getAttributeValue("original"));
+				insertFileData.setString(3, sourceFile);
+				JSONObject json = getJsonMetadata(metadata);
+				insertFileData.setString(4, json.toString(2));
+				insertFileData.execute();
+			}
+			return;
+		}
+		List<Element> children = e.getChildren();
+		Iterator<Element> it = children.iterator();
+		while (it.hasNext()) {
+			recurseFiles(it.next());
+		}
 	}
 
 	private void recurse(Element e) throws SQLException, IOException {

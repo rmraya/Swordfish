@@ -835,7 +835,7 @@ export class Swordfish {
             Swordfish.showNotes(segment);
         });
         ipcMain.on('close-notes', () => {
-            Swordfish.notesWindow.close();
+            Swordfish.notesWindow?.close();
         });
         ipcMain.on('show-add-note', (event: IpcMainEvent, segmentId: FullId) => {
             Swordfish.showAddNote(segmentId);
@@ -868,7 +868,7 @@ export class Swordfish {
             Swordfish.getMetadata(metaId);
         });
         ipcMain.on('close-metadata', () => {
-            Swordfish.metadataWindow.close();
+            Swordfish.metadataWindow?.close();
         });
         ipcMain.on('show-add-metaGroup', () => {
             Swordfish.showAddMetaGroup();

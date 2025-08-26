@@ -337,7 +337,6 @@ class TranslationView {
 
             if (detailsArray.length === 1) {
                 let tr: HTMLTableRowElement = document.createElement('tr');
-                tr.classList.add('selectedFile');
                 tr.setAttribute('data-file', detailsArray[0].file);
                 filesTable.appendChild(tr);
 
@@ -836,6 +835,8 @@ class TranslationView {
     close(): void {
         this.rowsObserver?.disconnect();
         this.observer?.disconnect();
+        this.electron.ipcRenderer.send('close-notes');
+        this.electron.ipcRenderer.send('close-metadata');
     }
 
     getContainer(): HTMLDivElement {
