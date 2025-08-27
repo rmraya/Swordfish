@@ -17,6 +17,7 @@ import { appendFileSync, existsSync, lstatSync, mkdirSync, readFileSync, readdir
 import { MTUtils } from "mtengines/dist";
 import { XMLElement } from "typesxml";
 import { Locations, Point } from "./locations";
+import { Rect, Sizes } from "./windowSizes";
 import { MTManager } from "./mtManager";
 
 export class Swordfish {
@@ -174,6 +175,7 @@ export class Swordfish {
     ls: ChildProcessWithoutNullStreams;
 
     static locations: Locations;
+    static sizes: Sizes;
 
     constructor() {
         if (!app.requestSingleInstanceLock()) {
@@ -207,6 +209,8 @@ export class Swordfish {
 
         this.loadDefaults();
         Swordfish.locations = new Locations(Swordfish.path.join(app.getPath('appData'), app.name, 'locations.json'));
+        Swordfish.sizes = new Sizes(Swordfish.path.join(app.getPath('appData'), app.name, 'sizes.json'));
+
         Swordfish.loadPreferences();
 
         app.on('ready', () => {
@@ -5624,6 +5628,7 @@ export class Swordfish {
             Swordfish.mainWindow.webContents.send('notes-requested');
         });
         Swordfish.setLocation(this.notesWindow, 'notes.html');
+        Swordfish.monitorSize(this.notesWindow, 'notes.html');
     }
 
     static getNotes(segment: FullId): void {
@@ -5855,6 +5860,7 @@ export class Swordfish {
             Swordfish.mainWindow.webContents.send('metadata-requested', metaId);
         });
         Swordfish.setLocation(this.metadataWindow, 'metadataDialog.html');
+        Swordfish.monitorSize(this.metadataWindow, 'metadataDialog.html');
         return;
     }
 
@@ -6423,6 +6429,19 @@ export class Swordfish {
         window.addListener('moved', () => {
             let bounds: Rectangle = window.getBounds();
             Swordfish.locations.setLocation(key, bounds.x, bounds.y);
+        });
+    }
+
+    static monitorSize(window: BrowserWindow, key: string): void {
+        if (Swordfish.sizes.hasSize(key)) {
+            let size: Rect | undefined = Swordfish.sizes.getSize(key);
+            if (size) {
+                window.setContentSize(size.width, size.height, true);
+            }
+        }
+        window.addListener('resized', () => {
+            let bounds: number[] = window.getContentSize();
+            Swordfish.sizes.setSize(key, bounds[0], bounds[1]);
         });
     }
 

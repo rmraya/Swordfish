@@ -40,21 +40,13 @@ class FileInfoDialog {
         let id: number = 0;
         let main: HTMLDivElement = document.getElementById('main') as HTMLDivElement;
         main.innerHTML = '';
+
         let topTable: HTMLTableElement = document.createElement('table');
         topTable.classList.add('stripes');
+        main.appendChild(topTable);
+
         let row: HTMLTableRowElement = document.createElement('tr');
         let cell: HTMLTableCellElement = document.createElement('td');
-        cell.innerText = 'File ID';
-        cell.classList.add('noWrap');
-        cell.classList.add('middle');
-        row.appendChild(cell);
-        cell = document.createElement('td');
-        cell.innerText = details.id;
-        cell.classList.add('noWrap');
-        row.appendChild(cell);
-        topTable.appendChild(row);
-        row = document.createElement('tr');
-        cell = document.createElement('td');
         cell.innerText = 'Original File';
         cell.classList.add('noWrap');
         row.appendChild(cell);
@@ -63,7 +55,6 @@ class FileInfoDialog {
         cell.classList.add('noWrap');
         row.appendChild(cell);
         topTable.appendChild(row);
-        main.appendChild(topTable);
 
         let metadata: any[] = details.metadata;
         for (const item of metadata) {

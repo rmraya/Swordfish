@@ -480,9 +480,15 @@ public class XliffStore {
 			index = 0;
 			Element metadata = e.getChild("mda:metadata");
 			if (metadata != null) {
+				String sourceFile = getSourceFile(metadata);
+				String original = e.getAttributeValue("original");
+				File originalFile = new File(original);
+				if (sourceFile.equals(originalFile.getName())) {
+					original = originalFile.getName();
+				}
 				insertFileData.setString(1, currentFile);
-				insertFileData.setString(2, e.getAttributeValue("original"));
-				insertFileData.setString(3, getSourceFile(metadata));
+				insertFileData.setString(2, original);
+				insertFileData.setString(3, sourceFile);
 				JSONObject json = getJsonMetadata(metadata);
 				insertFileData.setString(4, json.toString(2));
 				insertFileData.execute();

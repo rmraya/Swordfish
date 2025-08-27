@@ -341,9 +341,10 @@ class TranslationView {
                 filesTable.appendChild(tr);
 
                 let td: HTMLTableCellElement = document.createElement('td');
+                td.style.width = '24px';
                 let infoSpan: HTMLSpanElement = document.createElement('span');
                 infoSpan.classList.add('iconTooltip');
-                infoSpan.classList.add('sourceSymbol');
+                infoSpan.classList.add('sourceSymbol');                
                 infoSpan.innerHTML = TranslationView.FILE_INFO + '<small class="tooltiptext">File Info</small>';
                 infoSpan.addEventListener('click', () => {
                     this.showFileInfo(detailsArray[0]);
@@ -352,6 +353,7 @@ class TranslationView {
                 tr.appendChild(td);
 
                 td = document.createElement('td');
+                td.style.width = '24px';
                 let metaSpan: HTMLSpanElement = document.createElement('span');
                 metaSpan.classList.add('iconTooltip');
                 metaSpan.classList.add('sourceSymbol');
@@ -389,6 +391,7 @@ class TranslationView {
                     filesTable.appendChild(tr);
 
                     let td: HTMLTableCellElement = document.createElement('td');
+                    td.style.width = '24px';
                     let infoSpan: HTMLSpanElement = document.createElement('span');
                     infoSpan.classList.add('iconTooltip');
                     infoSpan.classList.add('sourceSymbol');
@@ -400,6 +403,7 @@ class TranslationView {
                     tr.appendChild(td);
 
                     td = document.createElement('td');
+                    td.style.width = '24px';
                     let metaSpan: HTMLSpanElement = document.createElement('span');
                     metaSpan.classList.add('iconTooltip');
                     metaSpan.classList.add('sourceSymbol');
