@@ -1025,20 +1025,35 @@ public class ProjectsHandler implements HttpHandler {
 		List<Element> files = root.getChildren("file");
 		for (Element file : files) {
 			Element metadata = file.getChild("mda:metadata");
-			Element group = new Element("mda:metaGroup");
-			group.setAttribute("category", "sourceFile");
-			metadata.addContent(group);
-			Element meta = new Element("mda:meta");
-			meta.setAttribute("type", "sourceFile");
-			meta.addContent(name);
-			group.addContent(meta);
-			Indenter.indent(metadata, 2);
+			if (!hasSourceMeta(metadata)) {
+				Element group = new Element("mda:metaGroup");
+				group.setAttribute("category", "sourceFile");
+				metadata.addContent(group);
+				Element meta = new Element("mda:meta");
+				meta.setAttribute("type", "sourceFile");
+				meta.addContent(name);
+				group.addContent(meta);
+				Indenter.indent(metadata, 2);
+			}
 		}
 		try (FileOutputStream out = new FileOutputStream(xliff)) {
 			XMLOutputter outputter = new XMLOutputter();
 			outputter.preserveSpace(true);
 			outputter.output(doc, out);
 		}
+	}
+
+	private boolean hasSourceMeta(Element metadata) {
+		if (metadata == null) {
+			return false;
+		}
+		List<Element> metaGroups = metadata.getChildren("mda:metaGroup");
+		for (Element group : metaGroups) {
+			if ("sourceFile".equals(group.getAttributeValue("category"))) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 	private void loadPreferences() throws IOException {

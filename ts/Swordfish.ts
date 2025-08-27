@@ -5933,6 +5933,7 @@ export class Swordfish {
             parent?.focus();
         });
         Swordfish.setLocation(this.addMetaGroupWindow, 'addMetaGroup.html');
+        Swordfish.monitorSize(this.addMetaGroupWindow, 'addMetaGroup.html');
     }
 
     static showEditMetaGroup(metaGroup: MetaGroup): void {
@@ -5969,6 +5970,7 @@ export class Swordfish {
             parent?.focus();
         });
         Swordfish.setLocation(this.addMetaGroupWindow, 'addMetaGroup.html');
+        Swordfish.monitorSize(this.addMetaGroupWindow, 'addMetaGroup.html');
     }
 
     static addMetaGroup(metaGroup: MetaGroup): void {
