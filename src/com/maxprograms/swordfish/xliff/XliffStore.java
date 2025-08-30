@@ -440,7 +440,8 @@ public class XliffStore {
 
 	private void harvestFilesData() throws SQLException, IOException, SAXException, ParserConfigurationException {
 		document = builder.build(xliffFile);
-		insertFileData = conn.prepareStatement("INSERT INTO filesdata (file, original, sourceFile, metadata) VALUES (?,?,?,?)");
+		insertFileData = conn
+				.prepareStatement("INSERT INTO filesdata (file, original, sourceFile, metadata) VALUES (?,?,?,?)");
 		recurseFiles(document.getRootElement());
 		insertFileData.close();
 		conn.commit();
@@ -2710,7 +2711,30 @@ public class XliffStore {
 				e.setContent(content);
 			}
 			if (metadata != null && metadata.getJSONArray("data").length() > 0) {
-				insertMetadata(oldMetadata, metadata);
+				oldMetadata.setContent(new Vector<>());
+				JSONArray array = metadata.getJSONArray("data");
+				for (int i = 0; i < array.length(); i++) {
+					JSONObject group = array.getJSONObject(i);
+					Element metaGroup = new Element("mda:metaGroup");
+					if (group.has("id")) {
+						metaGroup.setAttribute("id", group.getString("id"));
+					}
+					if (group.has("category")) {
+						metaGroup.setAttribute("category", group.getString("category"));
+					}
+					if (group.has("appliesTo")) {
+						metaGroup.setAttribute("appliesTo", group.getString("appliesTo"));
+					}
+					JSONArray entries = group.getJSONArray("meta");
+					for (int j = 0; j < entries.length(); j++) {
+						JSONObject entry = entries.getJSONObject(j);
+						Element meta = new Element("mda:meta");
+						meta.setAttribute("type", entry.getString("type"));
+						meta.setText(entry.getString("value"));
+						metaGroup.addContent(meta);
+					}
+					oldMetadata.addContent(metaGroup);
+				}
 			} else {
 				e.removeChild(oldMetadata);
 			}
