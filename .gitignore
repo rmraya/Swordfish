@@ -12,4 +12,5 @@ legal/
 lib/
 js/
 release
-/node_modules/
+node_modules/
+build/
