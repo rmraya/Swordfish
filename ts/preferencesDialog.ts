@@ -23,6 +23,7 @@ class PreferencesDialog {
     tgtLangSelect: HTMLSelectElement = document.createElement('select');
     themeColor: HTMLSelectElement = document.createElement('select');
     zoomFactor: HTMLSelectElement = document.createElement('select');
+    userNameInput: HTMLInputElement = document.createElement('input');
 
     projectFolder: HTMLInputElement = document.createElement('input');
     memoriesFolder: HTMLInputElement = document.createElement('input');
@@ -189,6 +190,7 @@ class PreferencesDialog {
         this.srcLangSelect.value = preferences.srcLang;
         this.tgtLangSelect.value = preferences.tgtLang;
         this.zoomFactor.value = preferences.zoomFactor;
+        this.userNameInput.value = preferences.userName;
         this.projectFolder.value = preferences.projectsFolder;
         this.memoriesFolder.value = preferences.memoriesFolder;
         this.glossariesFolder.value = preferences.glossariesFolder;
@@ -351,6 +353,7 @@ class PreferencesDialog {
             tgtLang: this.tgtLangSelect.value,
             theme: this.themeColor.value,
             zoomFactor: this.zoomFactor.value,
+            userName: this.userNameInput.value,
             catalog: this.defaultCatalog.value,
             projectsFolder: this.projectFolder.value,
             memoriesFolder: this.memoriesFolder.value,
@@ -546,6 +549,25 @@ class PreferencesDialog {
         this.pageRows.style.width = this.zoomFactor.clientWidth + 'px';
         td.appendChild(this.pageRows);
 
+        tr = document.createElement('tr');
+        langsTable.appendChild(tr);
+
+        td = document.createElement('td');
+        td.classList.add('middle');
+        td.classList.add('noWrap');
+        tr.appendChild(td);
+
+        let userNameLabel: HTMLLabelElement = document.createElement('label');
+        userNameLabel.setAttribute('for', 'userNameInput');
+        userNameLabel.innerText = 'Default User Name';
+        td.appendChild(userNameLabel);
+
+        td = document.createElement('td');
+        td.classList.add('middle');
+        tr.appendChild(td);
+
+        this.userNameInput.id = 'userNameInput';
+        td.appendChild(this.userNameInput);
     }
 
     populateSpellcheckTab(container: HTMLDivElement, spellchecker: any): void {

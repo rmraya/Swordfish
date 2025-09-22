@@ -34,6 +34,7 @@ class Tab {
         } else {
             this.label.innerText = description;
         }
+        this.label.classList.add('noWrap');
         this.label.addEventListener('click', () => {
             this.parent.selectTab(this.id);
         });

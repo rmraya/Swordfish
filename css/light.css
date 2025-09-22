@@ -122,6 +122,11 @@ thead tr {
 	border: none !important;
 }
 
+.alternate tr:nth-child(even) {
+	background-color: var(--gray30);
+	height: fit-content;
+}
+
 .stripes tr {
 	border-top: 2px solid var(--gray50);
 	border-bottom: 2px solid var(--gray50);
@@ -557,7 +562,7 @@ th svg {
 	flex-flow: row;
 	color: var(--black);
 	margin: 0px;
-	padding: 0px 0px 0px 8px;
+	padding: 4px 0px 0px 8px;
 	border-bottom: 1px solid var(--gray50);
 }
 
@@ -576,8 +581,10 @@ th svg {
 .selectedTab {
 	background: var(--gray50);
 	color: var(--black);
+	border-top: 1px solid var(--gray60) !important;
 	border-left: 1px solid var(--gray60) !important;
 	border-right: 1px solid var(--gray60) !important;
+	border-radius: 4px 4px 0px 0px;
 }
 
 .tab:hover {
@@ -620,6 +627,7 @@ th svg {
 	margin: 0;
 	padding-top: 0px;
 	padding-left: 4px;
+	padding-right: 4px;
 	border-radius: 4px 4px 0px 0px;
 	background: var(--ClassicBlue90);
 	color: var(--gray10);
@@ -627,6 +635,7 @@ th svg {
 	overflow: hidden;
 	height: 26px;
 	vertical-align: middle;
+	text-align: center;
 }
 
 .titlepanel a svg {
@@ -774,6 +783,20 @@ th svg {
 	z-index: 100;
 }
 
+.rightPanelTooltip {
+	background-color: var(--ClassicBlue30);
+	color: var(--black);
+	visibility: hidden;
+	padding: 4px;
+	border-radius: 4px;
+	white-space: nowrap;
+	/* Position the tooltip */
+	position: absolute;
+	top: 0;
+	left: 0;
+	z-index: 100;
+}
+
 .highlight {
 	color: var(--gray40);
 }
@@ -786,6 +809,16 @@ th svg {
 .bordered {
 	border: 1px solid var(--black) !important;
 	border-radius: 2px;
+}
+
+.borderedArea {
+	border: 1px solid var(--ClassicBlue90) !important;
+	border-radius: 4px;
+	padding: 4px;
+	width: calc(100% - 28px);
+	margin-top: 4px;
+	margin-bottom: 4px;
+	margin-left: 8px;
 }
 
 .error {
@@ -811,8 +844,8 @@ div.stats {
 
 span.stats {
 	margin-top: 4px;
-	padding-left: 4px;
-	padding-right: 4px;
+	padding-left: 2px;
+	padding-right: 2px;
 }
 
 svg.stats {
@@ -1025,4 +1058,9 @@ svg.stats {
 .filesTable td {
 	padding: 0;
 	vertical-align: top;
+}
+
+.fileName:hover {
+	cursor: pointer;
+	background-color: var(--ClassicBlue30);
 }

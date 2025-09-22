@@ -51,7 +51,7 @@ class GoTo {
     goToSegment(): void {
         let value: string = this.segInput.value;
         if (value.length > 0) {
-            this.electron.ipcRenderer.send('go-to-segment', { segment: Number.parseInt(value, 10) });
+            this.electron.ipcRenderer.send('go-to-segment',  Number.parseInt(value, 10) );
             return;
         }
         this.electron.ipcRenderer.send('show-message', { type: 'warning', message: 'Enter segment number', parent: 'goTo' });

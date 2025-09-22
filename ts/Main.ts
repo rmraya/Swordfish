@@ -81,9 +81,6 @@ class Main {
         Main.electron.ipcRenderer.on('set-rows-page', (event: Electron.IpcRendererEvent, rows: number) => {
             Main.rowsPage = rows;
         });
-        Main.electron.ipcRenderer.on('request-theme', () => {
-            Main.electron.ipcRenderer.send('get-theme');
-        });
         window.addEventListener('resize', () => {
             Main.resizePanels();
         });
@@ -201,8 +198,8 @@ class Main {
         Main.electron.ipcRenderer.on('go-to', () => {
             this.goToSegment();
         });
-        Main.electron.ipcRenderer.on('open-segment', (event: Electron.IpcRendererEvent, arg: any) => {
-            this.openSegment(arg);
+        Main.electron.ipcRenderer.on('open-segment', (event: Electron.IpcRendererEvent, seg: number) => {
+            this.openSegment(seg);
         });
         Main.electron.ipcRenderer.on('previous-page', () => {
             this.previousPage();
@@ -396,6 +393,9 @@ class Main {
         Main.electron.ipcRenderer.on('toggle-files-panel', () => {
             this.toggleFilesPanel();
         });
+        Main.electron.ipcRenderer.on('toggle-right-panels', () => {
+            this.toggleRightPanels();
+        });
         Main.electron.ipcRenderer.on('notes-requested', () => {
             this.notesRequested();
         });
@@ -403,13 +403,13 @@ class Main {
             this.metadataRequested(metaId);
         });
         Main.electron.ipcRenderer.on('show-metadata', () => {
-            this.showMetadata();
+            this.showReviewComments();
         });
         Main.electron.ipcRenderer.on('notes-closed', () => {
             this.notesClosed();
         });
-        Main.electron.ipcRenderer.on('metadata-closed', () => {
-            this.metadataClosed();
+        Main.electron.ipcRenderer.on('review-comments-closed', () => {
+            this.reviewCommentsClosed();
         });
         Main.electron.ipcRenderer.on('notes-removed', (event: Electron.IpcRendererEvent, segmentId: FullId) => {
             this.notesRemoved(segmentId);
@@ -635,7 +635,7 @@ class Main {
     drawFiles(files: any[]): void {
         let selected = Main.tabHolder.getSelected();
         if (Main.translationViews.has(selected)) {
-            (Main.translationViews.get(selected) as TranslationView).drawFiles(files);
+            (Main.translationViews.get(selected) as TranslationView).setFiles(files);
         }
     }
 
@@ -1106,10 +1106,10 @@ class Main {
         }
     }
 
-    openSegment(arg: any): void {
+    openSegment(seg: number): void {
         let selected = Main.tabHolder.getSelected();
         if (Main.translationViews.has(selected)) {
-            (Main.translationViews.get(selected) as TranslationView).openSegment(arg);
+            (Main.translationViews.get(selected) as TranslationView).openSegment(seg);
         }
     }
 
@@ -1228,16 +1228,17 @@ class Main {
     metadataRequested(metaId: MetaId): void {
         let selected = Main.tabHolder.getSelected();
         for (let key of Main.translationViews.keys()) {
-            (Main.translationViews.get(key) as TranslationView).showingMetadata(true);
+            (Main.translationViews.get(key) as TranslationView).showingReviewComments(true);
         }
         if (metaId.unit && Main.translationViews.has(selected)) {
-            (Main.translationViews.get(selected) as TranslationView).showMetadata();
+            (Main.translationViews.get(selected) as TranslationView).showReviewComments();
         }
     }
-    showMetadata(): void {
+    
+    showReviewComments(): void {
         let selected = Main.tabHolder.getSelected();
         if (Main.translationViews.has(selected)) {
-            (Main.translationViews.get(selected) as TranslationView).showMetadata();
+            (Main.translationViews.get(selected) as TranslationView).showReviewComments();
         }
     }
 
@@ -1247,15 +1248,21 @@ class Main {
         }
     }
 
+    toggleRightPanels(): void {
+        for (let key of Main.translationViews.keys()) {
+            (Main.translationViews.get(key) as TranslationView).toggleRightPanels();
+        }
+    }
+
     notesClosed(): void {
         for (let key of Main.translationViews.keys()) {
             (Main.translationViews.get(key) as TranslationView).showingNotes(false);
         }
     }
 
-    metadataClosed(): void {
+    reviewCommentsClosed(): void {
         for (let key of Main.translationViews.keys()) {
-            (Main.translationViews.get(key) as TranslationView).showingMetadata(false);
+            (Main.translationViews.get(key) as TranslationView).showingReviewComments(false);
         }
     }
 

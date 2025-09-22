@@ -227,10 +227,14 @@ public class ProjectsHandler implements HttpHandler {
 				response = getNotes(request);
 			} else if ("/projects/getMetadata".equals(url)) {
 				response = getMetadata(request);
+			} else if ("/projects/getCustomMetadata".equals(url)) {
+				response = getCustomMetadata(request);
 			} else if ("/projects/saveMetadata".equals(url)) {
 				response = saveMetadata(request);
 			} else if ("/projects/getFiles".equals(url)) {
 				response = getFiles(request);
+			} else if ("/projects/getFileStart".equals(url)) {
+				response = getFileStart(request);
 			} else if ("/projects/addNote".equals(url)) {
 				response = addNote(request);
 			} else if ("/projects/removeNote".equals(url)) {
@@ -1938,6 +1942,21 @@ public class ProjectsHandler implements HttpHandler {
 		return result;
 	}
 
+	private JSONObject getFileStart(String request) {
+		JSONObject result = new JSONObject();
+		JSONObject json = new JSONObject(request);
+		try {
+			String project = json.getString("project");
+			if (projectStores.containsKey(project)) {
+				result.put("start", projectStores.get(project).getFileStart(json.getString("file")));
+			}
+		} catch (SQLException | JSONException e) {
+			logger.log(Level.ERROR, e);
+			result.put(Constants.REASON, e.getMessage());
+		}
+		return result;
+	}
+
 	private JSONObject getMetadata(String request) {
 		JSONObject result = new JSONObject();
 		JSONObject json = new JSONObject(request);
@@ -1958,6 +1977,26 @@ public class ProjectsHandler implements HttpHandler {
 		return result;
 	}
 
+	private JSONObject getCustomMetadata(String request) {
+		JSONObject result = new JSONObject();
+		JSONObject json = new JSONObject(request);
+		try {
+			String project = json.getString("project");
+			if (projectStores.containsKey(project)) {
+				JSONObject metadata = projectStores.get(project).getCustomMetadata(json);
+				if (metadata != null && metadata.has("data")) {
+					result = json;
+					result.put("data", metadata.getJSONArray("data"));
+				}
+			}
+		} catch (SQLException | JSONException e) {
+			e.printStackTrace();
+			logger.log(Level.ERROR, e);
+			result.put(Constants.REASON, e.getMessage());
+		}
+		return result;
+	}
+	
 	private JSONObject saveMetadata(String request) {
 		JSONObject result = new JSONObject();
 		JSONObject json = new JSONObject(request);

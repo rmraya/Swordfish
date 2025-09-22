@@ -18,6 +18,7 @@ interface Preferences {
     projectsFolder: string;
     memoriesFolder: string;
     glossariesFolder: string;
+    userName: string;
     catalog: string;
     srx: string;
     paragraphSegmentation: boolean;

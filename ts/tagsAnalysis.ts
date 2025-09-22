@@ -48,7 +48,7 @@ class TagAnalysis {
             this.electron.ipcRenderer.send('show-message', { type: 'warning', message: 'Select a segment', parent: 'tagsAnalysis' });
             return;
         }
-        this.electron.ipcRenderer.send('go-to-segment', { segment: Number.parseInt(selectedRows[0].id, 10) });
+        this.electron.ipcRenderer.send('go-to-segment', Number.parseInt(selectedRows[0].id, 10));
     }
 
     setErrors(data: any): void {
@@ -66,7 +66,7 @@ class TagAnalysis {
                 this.clicked(tr);
             });
             tr.addEventListener('dblclick', () => {
-                this.electron.ipcRenderer.send('go-to-segment', { segment: line.index });
+                this.electron.ipcRenderer.send('go-to-segment', line.index);
             });
             table.appendChild(tr);
             let cell: HTMLTableCellElement = document.createElement('td');

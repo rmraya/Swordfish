@@ -182,6 +182,7 @@ class ThreeVerticalPanels {
     rightWidth: number = 0;
 
     expandedLeft: number = 0;
+    expandedRight: number = 0;
 
     weights: number[];
 
@@ -193,7 +194,7 @@ class ThreeVerticalPanels {
 
         this.left = document.createElement('div');
         this.left.style.width = '33%';
-        this.left.style.minWidth = '32px';
+        this.left.style.minWidth = '40px';
         this.left.addEventListener('dragover', (event: DragEvent) => {
             event.preventDefault();
         });
@@ -237,7 +238,7 @@ class ThreeVerticalPanels {
 
         this.right = document.createElement('div');
         this.right.style.width = '33%';
-        this.right.style.minWidth = '4px';
+        this.right.style.minWidth = '40px';
         this.right.addEventListener('dragover', (event: DragEvent) => {
             event.preventDefault();
         });
@@ -345,6 +346,23 @@ class ThreeVerticalPanels {
 
     setExpandedLeft(width: number) {
         this.expandedLeft = width;
+    }
+
+    expandRight() {
+        this.center.style.width = (this.center.clientWidth - this.expandedRight + 40) + 'px';
+        this.right.style.width = this.expandedRight + 'px';
+        this.weights = [this.left.clientWidth, this.center.clientWidth, this.right.clientWidth];
+    }
+
+    collapseRight() {
+        this.expandedRight = this.right.clientWidth;
+        this.center.style.width = (this.center.clientWidth + this.right.clientWidth - 40) + 'px';
+        this.right.style.width = '40px';
+        this.weights = [this.left.clientWidth, this.center.clientWidth, this.right.clientWidth];
+    }
+
+    setExpandedRight(width: number) {
+        this.expandedRight = width;
     }
 
 }

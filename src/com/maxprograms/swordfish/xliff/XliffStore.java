@@ -56,6 +56,7 @@ import org.xml.sax.SAXException;
 
 import com.maxprograms.converters.Join;
 import com.maxprograms.converters.Merge;
+import com.maxprograms.converters.Utils;
 import com.maxprograms.languages.Language;
 import com.maxprograms.languages.LanguageUtils;
 import com.maxprograms.stats.RepetitionAnalysis;
@@ -105,7 +106,6 @@ public class XliffStore {
 
 	private File database;
 	private Connection conn;
-	private PreparedStatement insertFile;
 	private PreparedStatement insertUnit;
 	private PreparedStatement insertSegmentStmt;
 	private PreparedStatement insertMatch;
@@ -251,7 +251,7 @@ public class XliffStore {
 					CREATE TABLE metadata (
 					    file VARCHAR(50),
 					    unitId VARCHAR(256) NOT NULL,
-					    metadata TEXT NOT NULL,
+					    customdata TEXT NOT NULL,
 					    PRIMARY KEY(file, unitId)
 					    );""";
 			try (Statement create = conn.createStatement()) {
@@ -276,6 +276,7 @@ public class XliffStore {
 					original VARCHAR(256) NOT NULL,
 					sourceFile VARCHAR(256) NOT NULL,
 					metadata TEXT NOT NULL,
+					customdata TEXT NOT NULL,
 					PRIMARY KEY(file)
 					);""";
 			try (Statement create = conn.createStatement()) {
@@ -307,7 +308,8 @@ public class XliffStore {
 		getSegment = conn.prepareStatement("SELECT source, target FROM segments WHERE file=? AND unitId=? AND segId=?");
 		getChild = conn.prepareStatement("SELECT child FROM segments WHERE file=? AND unitId=? AND segId=?");
 		getContext = conn.prepareStatement("SELECT unitId, segId FROM segments WHERE file=? AND child=?");
-		insertMetadata = conn.prepareStatement("INSERT INTO metadata (file, unitId,  metadata) VALUES(?,?,?)");
+		insertMetadata = conn
+				.prepareStatement("INSERT INTO metadata (file, unitId,  customdata) VALUES(?,?,?)");
 
 		stmt = conn.createStatement();
 		if (needsLoading) {
@@ -393,15 +395,16 @@ public class XliffStore {
 				CREATE TABLE metadata (
 				    file VARCHAR(50),
 				    unitId VARCHAR(256) NOT NULL,
-				    metadata TEXT NOT NULL,
+				    customdata TEXT NOT NULL,
 				    PRIMARY KEY(file, unitId)
 				    );""";
 		String filesMetadata = """
 				CREATE TABLE filesdata (
 				    file VARCHAR(50),
 				    original VARCHAR(256) NOT NULL,
-					sourceFile VARCHAR(256) NOT NULL,
+				    sourceFile VARCHAR(256) NOT NULL,
 				    metadata TEXT NOT NULL,
+				    customdata TEXT NOT NULL,
 				    PRIMARY KEY(file)
 				    );""";
 		try (Statement create = conn.createStatement()) {
@@ -422,16 +425,15 @@ public class XliffStore {
 		insertSegmentStmt = conn.prepareStatement(sql);
 	}
 
-	private void parseDocument() throws SQLException, IOException {
-		insertFile = conn.prepareStatement("INSERT INTO files (id, name) VALUES (?,?)");
+	private void parseDocument() throws SQLException, IOException, SAXException, ParserConfigurationException {
 		insertUnit = conn.prepareStatement("INSERT INTO units (file, unitId, data, compressed) VALUES (?,?,?,?)");
 		insertFileData = conn
-				.prepareStatement("INSERT INTO filesdata (file, original, sourceFile, metadata) VALUES (?,?,?,?)");
+				.prepareStatement(
+						"INSERT INTO filesdata (file, original, sourceFile, metadata, customData) VALUES (?,?,?,?,?)");
 		prepareInsertSegment();
 		insertNoteStmt = conn
 				.prepareStatement("INSERT INTO notes (file, unitId, segId, noteId, note) values (?,?,?,?,?)");
 		recurse(document.getRootElement());
-		insertFile.close();
 		insertUnit.close();
 		insertNoteStmt.close();
 		insertSegmentStmt.close();
@@ -441,28 +443,45 @@ public class XliffStore {
 	private void harvestFilesData() throws SQLException, IOException, SAXException, ParserConfigurationException {
 		document = builder.build(xliffFile);
 		insertFileData = conn
-				.prepareStatement("INSERT INTO filesdata (file, original, sourceFile, metadata) VALUES (?,?,?,?)");
+				.prepareStatement(
+						"INSERT INTO filesdata (file, original, sourceFile, metadata, customdata) VALUES (?,?,?,?,?)");
 		recurseFiles(document.getRootElement());
 		insertFileData.close();
 		conn.commit();
 	}
 
-	private void recurseFiles(Element e) throws SQLException, IOException {
+	private void recurseFiles(Element e) throws SQLException, IOException, SAXException, ParserConfigurationException {
 		if ("file".equals(e.getName())) {
 			currentFile = e.getAttributeValue("id");
-			Element metadata = e.getChild("mda:metadata");
-			if (metadata != null) {
-				String sourceFile = getSourceFile(metadata);
-				if (sourceFile == null) {
-					sourceFile = e.getAttributeValue("original");
-				}
-				insertFileData.setString(1, currentFile);
-				insertFileData.setString(2, e.getAttributeValue("original"));
-				insertFileData.setString(3, sourceFile);
-				JSONObject json = getJsonMetadata(metadata);
-				insertFileData.setString(4, json.toString(2));
-				insertFileData.execute();
+			String sourceFile = e.getAttributeValue("original");
+			Element metaData = e.getChild("mda:metadata");
+			String metadataString = "";
+			if (metaData != null) {
+				JSONObject json = getJsonMetadata(metaData);
+				metadataString = json.toString(2);
 			}
+			String customMetadata = "";
+			List<PI> pis = e.getPI("metadata");
+			if (!pis.isEmpty()) {
+				Element metadata = toMetadata(pis.get(0).getData());
+				JSONObject json = getJsonMetadata(metadata);
+				customMetadata = json.toString(2);
+			}
+			List<PI> ts = e.getPI("ts");
+			if (!ts.isEmpty()) {
+				JSONObject json = new JSONObject(ts.get(0).getData());
+				if (json.has("original")) {
+					sourceFile = json.getString("original");
+				} else if (json.has("id")) {
+					sourceFile = json.getString("id");
+				}
+			}
+			insertFileData.setString(1, currentFile);
+			insertFileData.setString(2, e.getAttributeValue("original"));
+			insertFileData.setString(3, sourceFile);
+			insertFileData.setString(4, metadataString);
+			insertFileData.setString(5, customMetadata);
+			insertFileData.execute();
 			return;
 		}
 		List<Element> children = e.getChildren();
@@ -472,28 +491,58 @@ public class XliffStore {
 		}
 	}
 
-	private void recurse(Element e) throws SQLException, IOException {
+	private Element toMetadata(String string) throws SAXException, IOException, ParserConfigurationException {
+		Element metadata = new Element("mda:metadata");
+		Element nameSpaced = Utils.toElement(string.replace("mda:", ""));
+		metadata.setAttributes(nameSpaced.getAttributes());
+		List<Element> children = nameSpaced.getChildren();
+		for (Element child : children) {
+			Element cloned = new Element("mda:" + child.getName());
+			cloned.setAttributes(child.getAttributes());
+			metadata.addContent(cloned);
+			List<Element> grandChildren = child.getChildren();
+			for (Element grandChild : grandChildren) {
+				Element grandCloned = new Element("mda:" + grandChild.getName());
+				grandCloned.setAttributes(grandChild.getAttributes());
+				grandCloned.setText(grandChild.getText());
+				cloned.addContent(grandCloned);
+			}
+		}
+		return metadata;
+	}
+
+	private void recurse(Element e) throws SQLException, IOException, SAXException, ParserConfigurationException {
 		if ("file".equals(e.getName())) {
 			currentFile = e.getAttributeValue("id");
-			insertFile.setString(1, currentFile);
-			insertFile.setString(2, e.getAttributeValue("original"));
-			insertFile.execute();
-			index = 0;
-			Element metadata = e.getChild("mda:metadata");
-			if (metadata != null) {
-				String sourceFile = getSourceFile(metadata);
-				String original = e.getAttributeValue("original");
-				File originalFile = new File(original);
-				if (sourceFile.equals(originalFile.getName())) {
-					original = originalFile.getName();
-				}
-				insertFileData.setString(1, currentFile);
-				insertFileData.setString(2, original);
-				insertFileData.setString(3, sourceFile);
-				JSONObject json = getJsonMetadata(metadata);
-				insertFileData.setString(4, json.toString(2));
-				insertFileData.execute();
+			String sourceFile = e.getAttributeValue("original");
+			Element metaData = e.getChild("mda:metadata");
+			String metadataString = "";
+			if (metaData != null) {
+				JSONObject json = getJsonMetadata(metaData);
+				metadataString = json.toString(2);
 			}
+			String customMetadata = "";
+			List<PI> pis = e.getPI("metadata");
+			if (!pis.isEmpty()) {
+				Element metadata = toMetadata(pis.get(0).getData());
+				JSONObject json = getJsonMetadata(metadata);
+				customMetadata = json.toString(2);
+			}
+			List<PI> ts = e.getPI("ts");
+			if (!ts.isEmpty()) {
+				JSONObject json = new JSONObject(ts.get(0).getData());
+				if (json.has("original")) {
+					sourceFile = json.getString("original");
+				} else if (json.has("id")) {
+					sourceFile = json.getString("id");
+				}
+			}
+			insertFileData.setString(1, currentFile);
+			insertFileData.setString(2, e.getAttributeValue("original"));
+			insertFileData.setString(3, sourceFile);
+			insertFileData.setString(4, metadataString);
+			insertFileData.setString(5, customMetadata);
+			insertFileData.execute();
 		}
 		if ("unit".equals(e.getName())) {
 			tagCount = 0;
@@ -539,10 +588,12 @@ public class XliffStore {
 					}
 				}
 			}
-			Element metadata = e.getChild("mda:metadata");
-			if (metadata != null) {
+			String customMetadataString = "";
+			List<PI> pis = e.getPI("metadata");
+			if (!pis.isEmpty()) {
+				Element customData = toMetadata(pis.get(0).getData());
 				JSONObject json = new JSONObject();
-				List<Element> groups = metadata.getChildren("mda:metaGroup");
+				List<Element> groups = customData.getChildren("mda:metaGroup");
 				JSONArray groupsArray = new JSONArray();
 				for (Element group : groups) {
 					JSONObject groupJson = new JSONObject();
@@ -568,11 +619,12 @@ public class XliffStore {
 					// OpenXLIFF doesn't use nested metaGroups, so we can ignore them
 				}
 				json.put("data", groupsArray);
-				insertMetadata.setString(1, currentFile);
-				insertMetadata.setString(2, currentUnit);
-				insertMetadata.setString(3, json.toString(2));
-				insertMetadata.execute();
+				customMetadataString = json.toString(2);
 			}
+			insertMetadata.setString(1, currentFile);
+			insertMetadata.setString(2, currentUnit);
+			insertMetadata.setString(3, customMetadataString);
+			insertMetadata.execute();
 			if (tagCount > 0) {
 				String dataString = data.toString();
 				insertUnit.setString(1, currentFile);
@@ -661,21 +713,6 @@ public class XliffStore {
 		if ("xliff".equals(e.getName())) {
 			conn.commit();
 		}
-	}
-
-	private String getSourceFile(Element metadata) {
-		List<Element> groups = metadata.getChildren("mda:metaGroup");
-		for (Element group : groups) {
-			if ("sourceFile".equals(group.getAttributeValue("category"))) {
-				List<Element> items = group.getChildren("mda:meta");
-				for (Element item : items) {
-					if ("sourceFile".equals(item.getAttributeValue("type"))) {
-						return item.getText();
-					}
-				}
-			}
-		}
-		return null;
 	}
 
 	private JSONObject getJsonMetadata(Element metadata) {
@@ -988,22 +1025,26 @@ public class XliffStore {
 	}
 
 	public synchronized void saveMetadata(JSONObject json) throws SQLException {
+		JSONArray array = json.getJSONObject("metadata").getJSONArray("data");
+		JSONObject data = new JSONObject();
+		data.put("data", array);
 		if (json.has("unit")) {
-			JSONArray array = json.getJSONObject("metadata").getJSONArray("data");
-			JSONObject data = new JSONObject();
-			data.put("data", array);
-			if (array.length() == 0) {
-				// Remove existing metadata
-				try (PreparedStatement deleteMetadata = conn
-						.prepareStatement("DELETE FROM metadata WHERE file=? AND unitId=?")) {
-					deleteMetadata.setString(1, json.getString("file"));
-					deleteMetadata.setString(2, json.getString("unit"));
-					deleteMetadata.executeUpdate();
+			boolean exists = false;
+			try (PreparedStatement verify = conn
+					.prepareStatement("SELECT customdata FROM metadata WHERE file=? AND unitId=?")) {
+				verify.setString(1, json.getString("file"));
+				verify.setString(2, json.getString("unit"));
+				try (ResultSet rs = verify.executeQuery()) {
+					while (rs.next()) {
+						exists = true;
+						break;
+					}
 				}
-			} else if (hasMetadata(json.getString("file"), json.getString("unit"))) {
+			}
+			if (exists) {
 				// Update existing metadata
 				try (PreparedStatement updateMetadata = conn
-						.prepareStatement("UPDATE metadata SET metadata=? WHERE file=? AND unitId=?")) {
+						.prepareStatement("UPDATE metadata SET customdata=? WHERE file=? AND unitId=?")) {
 					updateMetadata.setString(1, data.toString());
 					updateMetadata.setString(2, json.getString("file"));
 					updateMetadata.setString(3, json.getString("unit"));
@@ -1011,62 +1052,32 @@ public class XliffStore {
 				}
 			} else {
 				// Insert new metadata
-				try (PreparedStatement insertMetadata = conn
-						.prepareStatement("INSERT INTO metadata (file, unitId, metadata) VALUES (?, ?, ?)")) {
-					insertMetadata.setString(1, json.getString("file"));
-					insertMetadata.setString(2, json.getString("unit"));
-					insertMetadata.setString(3, data.toString());
-					insertMetadata.executeUpdate();
+				try (PreparedStatement insertNewMetadata = conn
+						.prepareStatement("INSERT INTO metadata (file, unitId, customdata) VALUES (?, ?, ?)")) {
+					insertNewMetadata.setString(1, json.getString("file"));
+					insertNewMetadata.setString(2, json.getString("unit"));
+					insertNewMetadata.setString(3, data.toString());
+					insertNewMetadata.executeUpdate();
 				}
 			}
 			conn.commit();
 		} else if (json.has("file")) {
-			// Update file-level metadata
-			String previousMetadata = null;
-			try (PreparedStatement getMetadata = conn
-					.prepareStatement("SELECT metadata FROM filesdata WHERE file=?")) {
-				getMetadata.setString(1, json.getString("file"));
-				try (ResultSet rs = getMetadata.executeQuery()) {
-					while (rs.next()) {
-						previousMetadata = rs.getString(1);
-					}
-				}
-			}
-			JSONObject previousJson = previousMetadata != null ? new JSONObject(previousMetadata) : new JSONObject();
-			JSONArray previousData = previousJson.has("data") ? previousJson.getJSONArray("data") : new JSONArray();
-			JSONArray newData = new JSONArray();
-			// Preserve standard metadata categories
-			for (int i = 0; i < previousData.length(); i++) {
-				JSONObject group = previousData.getJSONObject(i);
-				if (group.has("category")) {
-					String category = group.getString("category");
-					if (category.equals("format") || category.equals("tool") || category.equals("PI")
-							|| category.equals("sourceFile") || category.equals("document")) {
-						newData.put(group);
-					}
-				}
-			}
-			JSONArray incomingData = json.getJSONObject("metadata").getJSONArray("data");
-			for (int i = 0; i < incomingData.length(); i++) {
-				newData.put(incomingData.getJSONObject(i));
-			}
-			JSONObject data = new JSONObject();
-			data.put("data", newData);
-			try (PreparedStatement updateFileData = conn
-					.prepareStatement("UPDATE filesdata SET metadata=? WHERE file=?")) {
-				updateFileData.setString(1, data.toString());
-				updateFileData.setString(2, json.getString("file"));
-				updateFileData.executeUpdate();
+			// Update existing metadata
+			try (PreparedStatement updateMetadata = conn
+					.prepareStatement("UPDATE filesdata SET customdata=? WHERE file=?")) {
+				updateMetadata.setString(1, data.toString());
+				updateMetadata.setString(2, json.getString("file"));
+				updateMetadata.executeUpdate();
 			}
 			conn.commit();
 		}
 	}
 
-	public synchronized JSONObject getMetadata(JSONObject json) throws SQLException {
+	public synchronized JSONObject getCustomMetadata(JSONObject json) throws SQLException {
 		JSONObject result = null;
 		if (json.has("unit")) {
 			try (PreparedStatement getMetadata = conn
-					.prepareStatement("SELECT metadata FROM metadata WHERE file=? AND unitId=?")) {
+					.prepareStatement("SELECT customdata FROM metadata WHERE file=? AND unitId=?")) {
 				String file = json.getString("file");
 				String unit = json.getString("unit");
 				getMetadata.setString(1, file);
@@ -1074,35 +1085,90 @@ public class XliffStore {
 				try (ResultSet rs = getMetadata.executeQuery()) {
 					while (rs.next()) {
 						String data = rs.getString(1);
-						result = new JSONObject(data);
+						if (!data.isEmpty()) {
+							result = new JSONObject(data);
+						}
 					}
 				}
 			}
 		} else if (json.has("file")) {
 			String file = json.getString("file");
 			try (PreparedStatement getFileData = conn
-					.prepareStatement("SELECT original, sourceFile, metadata FROM filesdata WHERE file=?")) {
+					.prepareStatement("SELECT original, sourceFile, customdata FROM filesdata WHERE file=?")) {
 				getFileData.setString(1, file);
 				try (ResultSet rs = getFileData.executeQuery()) {
 					while (rs.next()) {
 						String data = rs.getString(3);
-						result = new JSONObject(data);
-						JSONArray dataArray = result.getJSONArray("data");
-						JSONArray array = new JSONArray();
-						for (int i = 0; i < dataArray.length(); i++) {
-							JSONObject group = dataArray.getJSONObject(i);
-							if (group.has("category")) {
-								String category = group.getString("category");
-								if (category.equals("format") || category.equals("tool") || category.equals("PI")
-										|| category.equals("sourceFile") || category.equals("document")) {
-									continue; // Skip standard metadata categories
-								}
+						if (!data.isEmpty()) {
+							result = new JSONObject(data);
+							JSONArray dataArray = result.getJSONArray("data");
+							JSONArray array = new JSONArray();
+							for (int i = 0; i < dataArray.length(); i++) {
+								JSONObject group = dataArray.getJSONObject(i);
 								array.put(group);
-							} else {
-								array.put(group); // Include groups without category
 							}
+							result.put("data", array);
 						}
-						result.put("data", array);
+					}
+				}
+			}
+		}
+		return result;
+	}
+
+	public int getFileStart(String file) throws SQLException {
+		int result = -1;
+		try (PreparedStatement prepStmt = conn.prepareStatement("""
+            SELECT row_num FROM (
+                    SELECT file, unitId, ROW_NUMBER() OVER (ORDER BY file, unitId) AS row_num FROM segments
+                ) sub WHERE file = ? ORDER BY row_num LIMIT 1;
+                """)) {
+			prepStmt.setString(1, file);
+			try (ResultSet rs = prepStmt.executeQuery()) {
+				while (rs.next()) {
+					result = rs.getInt(1);
+				}
+			}
+		}
+		return result;
+	}
+
+	public synchronized JSONObject getMetadata(JSONObject json) throws SQLException {
+		JSONObject result = null;
+		if (json.has("unit")) {
+			try (PreparedStatement getMetadata = conn
+					.prepareStatement("SELECT customdata FROM metadata WHERE file=? AND unitId=?")) {
+				String file = json.getString("file");
+				String unit = json.getString("unit");
+				getMetadata.setString(1, file);
+				getMetadata.setString(2, unit);
+				try (ResultSet rs = getMetadata.executeQuery()) {
+					while (rs.next()) {
+						String data = rs.getString(1);
+						if (!data.isEmpty()) {
+							result = new JSONObject(data);
+						}
+					}
+				}
+			}
+		} else if (json.has("file")) {
+			String file = json.getString("file");
+			try (PreparedStatement getFileData = conn
+					.prepareStatement("SELECT original, sourceFile, customdata FROM filesdata WHERE file=?")) {
+				getFileData.setString(1, file);
+				try (ResultSet rs = getFileData.executeQuery()) {
+					while (rs.next()) {
+						String data = rs.getString(3);
+						if (!data.isEmpty()) {
+							result = new JSONObject(data);
+							JSONArray dataArray = result.getJSONArray("data");
+							JSONArray array = new JSONArray();
+							for (int i = 0; i < dataArray.length(); i++) {
+								JSONObject group = dataArray.getJSONObject(i);
+								array.put(group);
+							}
+							result.put("data", array);
+						}
 					}
 				}
 			}
@@ -2674,25 +2740,22 @@ public class XliffStore {
 			JSONObject fileData = new JSONObject();
 			fileData.put("file", currentFile);
 			JSONObject metadata = getMetadata(fileData);
-			if (metadata != null && metadata.getJSONArray("data").length() > 0) {
-				Element oldMetadata = e.getChild("mda:metadata");
-				if (oldMetadata == null) {
-					oldMetadata = new Element("mda:metadata");
-					List<XMLNode> content = e.getContent();
-					content.add(0, oldMetadata);
-					e.setContent(content);
+			List<PI> oldPIs = e.getPI("metadata");
+			if (metadata == null) {
+				if (!oldPIs.isEmpty()) {
+					// remove existing metadata
+					e.removePI("metadata");
 				}
-				List<Element> children = oldMetadata.getChildren();
-				List<XMLNode> newContent = new Vector<>();
-				for (Element child : children) {
-					String category = child.getAttributeValue("category");
-					if (category.equals("format") || category.equals("tool") || category.equals("PI")
-							|| category.equals("sourceFile") || category.equals("document")) {
-						newContent.add(child);
-					}
+			} else {
+				if (!oldPIs.isEmpty()) {
+					// remove existing metadata
+					e.removePI("metadata");
 				}
-				oldMetadata.setContent(newContent);
-				insertMetadata(oldMetadata, metadata);
+				// add current metadata
+				PI pi = new PI("metadata", metadata.toString());
+				List<XMLNode> content = e.getContent();
+				content.add(0, pi);
+				e.setContent(content);
 			}
 			index = 0;
 		}
@@ -2703,41 +2766,24 @@ public class XliffStore {
 			unitData.put("file", currentFile);
 			unitData.put("unit", currentUnit);
 			JSONObject metadata = getMetadata(unitData);
-			Element oldMetadata = e.getChild("mda:metadata");
-			if (oldMetadata == null) {
-				oldMetadata = new Element("mda:metadata");
-				List<XMLNode> content = e.getContent();
-				content.add(0, oldMetadata);
-				e.setContent(content);
-			}
-			if (metadata != null && metadata.getJSONArray("data").length() > 0) {
-				oldMetadata.setContent(new Vector<>());
-				JSONArray array = metadata.getJSONArray("data");
-				for (int i = 0; i < array.length(); i++) {
-					JSONObject group = array.getJSONObject(i);
-					Element metaGroup = new Element("mda:metaGroup");
-					if (group.has("id")) {
-						metaGroup.setAttribute("id", group.getString("id"));
-					}
-					if (group.has("category")) {
-						metaGroup.setAttribute("category", group.getString("category"));
-					}
-					if (group.has("appliesTo")) {
-						metaGroup.setAttribute("appliesTo", group.getString("appliesTo"));
-					}
-					JSONArray entries = group.getJSONArray("meta");
-					for (int j = 0; j < entries.length(); j++) {
-						JSONObject entry = entries.getJSONObject(j);
-						Element meta = new Element("mda:meta");
-						meta.setAttribute("type", entry.getString("type"));
-						meta.setText(entry.getString("value"));
-						metaGroup.addContent(meta);
-					}
-					oldMetadata.addContent(metaGroup);
+			List<PI> oldPIs = e.getPI("metadata");
+			if (metadata == null) {
+				if (!oldPIs.isEmpty()) {
+					// remove existing metadata
+					e.removePI("metadata");
 				}
 			} else {
-				e.removeChild(oldMetadata);
+				if (!oldPIs.isEmpty()) {
+					// remove existing metadata
+					e.removePI("metadata");
+				}
+				// add current metadata
+				PI pi = new PI("metadata", metadata.toString());
+				List<XMLNode> content = e.getContent();
+				content.add(0, pi);
+				e.setContent(content);
 			}
+			// glossary
 			Element glossary = getUnitTerms(currentFile, currentUnit);
 			if (glossary != null) {
 				insertGlossary(e, glossary);
@@ -2848,44 +2894,6 @@ public class XliffStore {
 		Iterator<Element> it = children.iterator();
 		while (it.hasNext()) {
 			recurseUpdating(it.next());
-		}
-	}
-
-	private void insertMetadata(Element oldMetadata, JSONObject metadata) throws JSONException {
-		JSONArray array = metadata.getJSONArray("data");
-		for (int i = 0; i < array.length(); i++) {
-			JSONObject group = array.getJSONObject(i);
-			Element metaGroup = new Element("mda:metaGroup");
-			if (group.has("id")) {
-				metaGroup.setAttribute("id", group.getString("id"));
-			}
-			if (group.has("category")) {
-				metaGroup.setAttribute("category", group.getString("category"));
-			}
-			if (group.has("appliesTo")) {
-				metaGroup.setAttribute("appliesTo", group.getString("appliesTo"));
-			}
-			JSONArray entries = group.getJSONArray("meta");
-			for (int j = 0; j < entries.length(); j++) {
-				JSONObject entry = entries.getJSONObject(j);
-				Element meta = new Element("mda:meta");
-				meta.setAttribute("type", entry.getString("type"));
-				meta.setText(entry.getString("value"));
-				metaGroup.addContent(meta);
-			}
-			oldMetadata.addContent(metaGroup);
-		}
-		// remove duplicates
-		List<Element> oldChildren = oldMetadata.getChildren();
-		oldMetadata.setContent(new Vector<>());
-		Set<Integer> hashes = new HashSet<>();
-		for (Element e : oldChildren) {
-			Indenter.indent(e, 2);
-			int hash = e.toString().hashCode();
-			if (!hashes.contains(hash)) {
-				hashes.add(hash);
-				oldMetadata.addContent(e);
-			}
 		}
 	}
 
@@ -5587,7 +5595,7 @@ public class XliffStore {
 	public JSONArray getFiles() throws JSONException, SQLException {
 		JSONArray result = new JSONArray();
 		try (PreparedStatement getFiles = conn.prepareStatement(
-				"SELECT file, original, metadata FROM filesdata WHERE sourceFile = ? ORDER BY original")) {
+				"SELECT file, original, metadata, customdata FROM filesdata WHERE sourceFile = ? ORDER BY original")) {
 			try (Statement sourceGroup = conn.createStatement()) {
 				try (ResultSet rs1 = sourceGroup
 						.executeQuery("SELECT DISTINCT sourceFile FROM filesdata ORDER BY sourceFile")) {
@@ -5603,10 +5611,13 @@ public class XliffStore {
 								String file = rs2.getString(1);
 								String original = rs2.getString(2);
 								String metadata = rs2.getString(3);
+								String customData = rs2.getString(4);
 								JSONObject row = new JSONObject();
 								row.put("file", file);
 								row.put("original", original);
 								row.put("metadata", metadata.isEmpty() ? new JSONObject() : new JSONObject(metadata));
+								row.put("customdata",
+										customData.isEmpty() ? new JSONObject() : new JSONObject(customData));
 								files.put(row);
 							}
 						}

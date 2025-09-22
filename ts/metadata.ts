@@ -33,6 +33,6 @@ interface MetaEntry {
 interface MetaGroup {
     id?: string;
     category?: string;
-    appliesTo?: string; // 'source' | 'target' | 'ignorable';
+    appliesTo?: string;
     meta: Array<MetaEntry>;
 }

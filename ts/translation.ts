@@ -34,17 +34,19 @@ class TranslationView {
     static SVG_COLLAPSE: string = '<svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px">' +
         '<path d="M300-640v320l160-160-160-160ZM200-120q-33 0-56.5-23.5T120-200v-560q0-33 23.5-56.5T200-840h560q33 0 56.5 23.5T840-760v560q0 33-23.5 56.5T760-120H200Zm440-80h120v-560H640v560Zm-80 0v-560H200v560h360Zm80 0h120-120Z"/>' +
         '</svg>';
-    static SVG_METADATA: string = "<svg xmlns='http://www.w3.org/2000/svg' height='24px' viewBox='0 -960 960 960' width='24px'><path d='M240-160q-33 0-56.5-23.5T160-240q0-33 23.5-56.5T240-320q33 0 56.5 23.5T320-240q0 33-23.5 56.5T240-160Zm0-240q-33 0-56.5-23.5T160-480q0-33 23.5-56.5T240-560q33 0 56.5 23.5T320-480q0 33-23.5 56.5T240-400Zm0-240q-33 0-56.5-23.5T160-720q0-33 23.5-56.5T240-800q33 0 56.5 23.5T320-720q0 33-23.5 56.5T240-640Zm240 480q-33 0-56.5-23.5T400-240q0-33 23.5-56.5T480-320q33 0 56.5 23.5T560-240q0 33-23.5 56.5T480-160Zm0-240q-33 0-56.5-23.5T400-480q0-33 23.5-56.5T480-560q33 0 56.5 23.5T560-480q0 33-23.5 56.5T480-400Zm0-240q-33 0-56.5-23.5T400-720q0-35 24.5-57.5T483-800q-2 10-2.5 19.5T480-760q0 31 6.5 60.5T505-644q-6 2-12 3t-13 1Zm280 80q-83 0-141.5-58.5T560-760q0-83 58.5-141.5T760-960q83 0 141.5 58.5T960-760q0 83-58.5 141.5T760-560Zm-40 400q-33 0-56.5-23.5T640-240q0-33 23.5-56.5T720-320q33 0 56.5 23.5T800-240q0 33-23.5 56.5T720-160Zm0-240q-33 0-56.5-23.5T640-480q0-7 1-13t3-12q26 12 55.5 18.5T760-480q11 0 20.5-.5T800-483q0 34-22.5 58.5T720-400Zm40-240q8 0 14-6t6-14q0-8-6-14t-14-6q-8 0-14 6t-6 14q0 8 6 14t14 6Zm-20-80h40v-160h-40v160Z'/></svg>";
+    static SVG_COMMENT: string = '<svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px"><path d="M200-200h360v-200h200v-360H200v560Zm0 80q-33 0-56.5-23.5T120-200v-560q0-33 23.5-56.5T200-840h560q33 0 56.5 23.5T840-760v400L600-120H200Zm80-280v-80h200v80H280Zm0-160v-80h400v80H280Zm-80 360v-560 560Z"/></svg>';
+    static SVG_EDIT_COMMENT: string = '<svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px"><path d="M657-121 544-234l56-56 57 57 127-127 56 56-183 183Zm-537 1v-80h360v80H120Zm0-160v-80h360v80H120Zm0-160v-80h720v80H120Zm0-160v-80h720v80H120Zm0-160v-80h720v80H120Z"/></svg>';
 
     static FILE_INFO: string = "<svg xmlns='http://www.w3.org/2000/svg' height='20px' viewBox='0 -960 960 960' width='20px'><path d='M444-288h72v-240h-72v240Zm35.79-312q15.21 0 25.71-10.29t10.5-25.5q0-15.21-10.29-25.71t-25.5-10.5q-15.21 0-25.71 10.29t-10.5 25.5q0 15.21 10.29 25.71t25.5 10.5Zm.49 504Q401-96 331-126t-122.5-82.5Q156-261 126-330.96t-30-149.5Q96-560 126-629.5q30-69.5 82.5-122T330.96-834q69.96-30 149.5-30t149.04 30q69.5 30 122 82.5T834-629.28q30 69.73 30 149Q864-401 834-331t-82.5 122.5Q699-156 629.28-126q-69.73 30-149 30Zm-.28-72q130 0 221-91t91-221q0-130-91-221t-221-91q-130 0-221 91t-91 221q0 130 91 221t221 91Zm0-312Z'/></svg>";
-    static HAS_METADATA: string = "<svg xmlns='http://www.w3.org/2000/svg' height='20px' viewBox='0 -960 960 960' width='20px'><path d='M263.79-192Q234-192 213-213.21t-21-51Q192-294 213.21-315t51-21Q294-336 315-314.79t21 51Q336-234 314.79-213t-51 21Zm0-216Q234-408 213-429.21t-21-51Q192-510 213.21-531t51-21Q294-552 315-530.79t21 51Q336-450 314.79-429t-51 21Zm0-216Q234-624 213-645.21t-21-51Q192-726 213.21-747t51-21Q294-768 315-746.79t21 51Q336-666 314.79-645t-51 21Zm216 432Q450-192 429-213.21t-21-51Q408-294 429.21-315t51-21Q510-336 531-314.79t21 51Q552-234 530.79-213t-51 21Zm0-216Q450-408 429-429.21t-21-51Q408-510 429.21-531t51-21Q510-552 531-530.79t21 51Q552-450 530.79-429t-51 21Zm.21-216q-29.7 0-50.85-21.15Q408-666.3 408-696q0-30 21-51t51-21q7 0 12.5 1t11.5 3q0 32 7.54 61.15Q519.08-673.69 533-648q-10 11-23.58 17.5Q495.84-624 480-624Zm287.77 48Q688-576 632-632.23q-56-56.22-56-136Q576-848 632.23-904q56.22-56 136-56Q848-960 904-903.77q56 56.22 56 136Q960-688 903.77-632q-56.22 56-136 56Zm-71.98 384Q666-192 645-213.21t-21-51Q624-294 645.21-315t51-21Q726-336 747-314.79t21 51Q768-234 746.79-213t-51 21Zm.21-216q-29.7 0-50.85-21.15Q624-450.3 624-480q0-15.84 6.5-29.42Q637-523 648-533q26 14 55 21t61 8q2 6 3 11.5t1 12.5q0 30-21 51t-51 21Zm72-264q9.6 0 16.8-7.2 7.2-7.2 7.2-16.8 0-9.6-7.2-16.8-7.2-7.2-16.8-7.2-9.6 0-16.8 7.2-7.2 7.2-7.2 16.8 0 9.6 7.2 16.8 7.2 7.2 16.8 7.2Zm-24-96h48v-96h-48v96Z'/></svg>";
-    static NO_METADATA: string = "<svg xmlns='http://www.w3.org/2000/svg' height='20px' viewBox='0 -960 960 960' width='20px'><path d='M263.79-192Q234-192 213-213.21t-21-51Q192-294 213.21-315t51-21Q294-336 315-314.79t21 51Q336-234 314.79-213t-51 21Zm216 0Q450-192 429-213.21t-21-51Q408-294 429.21-315t51-21Q510-336 531-314.79t21 51Q552-234 530.79-213t-51 21Zm216 0Q666-192 645-213.21t-21-51Q624-294 645.21-315t51-21Q726-336 747-314.79t21 51Q768-234 746.79-213t-51 21Zm-432-216Q234-408 213-429.21t-21-51Q192-510 213.21-531t51-21Q294-552 315-530.79t21 51Q336-450 314.79-429t-51 21Zm216 0Q450-408 429-429.21t-21-51Q408-510 429.21-531t51-21Q510-552 531-530.79t21 51Q552-450 530.79-429t-51 21Zm216 0Q666-408 645-429.21t-21-51Q624-510 645.21-531t51-21Q726-552 747-530.79t21 51Q768-450 746.79-429t-51 21Zm-432-216Q234-624 213-645.21t-21-51Q192-726 213.21-747t51-21Q294-768 315-746.79t21 51Q336-666 314.79-645t-51 21Zm216 0Q450-624 429-645.21t-21-51Q408-726 429.21-747t51-21Q510-768 531-746.79t21 51Q552-666 530.79-645t-51 21Zm216 0Q666-624 645-645.21t-21-51Q624-726 645.21-747t51-21Q726-768 747-746.79t21 51Q768-666 746.79-645t-51 21Z'/></svg>";
+    static HAS_COMMENT: string = '<svg xmlns="http://www.w3.org/2000/svg" height="20px" viewBox="0 -960 960 960" width="20px"><path d="M288-288h288v-72H288v72Zm0-156h384v-72H288v72Zm0-156h384v-72H288v72Zm-72 456q-29.7 0-50.85-21.15Q144-186.3 144-216v-528q0-29.7 21.15-50.85Q186.3-816 216-816h528q29.7 0 50.85 21.15Q816-773.7 816-744v528q0 29.7-21.15 50.85Q773.7-144 744-144H216Zm0-72h528v-528H216v528Zm0-528v528-528Z"/></svg>';
+    static NO_COMMENT: string = '<svg xmlns="http://www.w3.org/2000/svg" height="20px" viewBox="0 -960 960 960" width="20px"><path d="M204-120q-34.65 0-59.32-24.68Q120-169.35 120-204v-552q0-34.65 24.68-59.33Q169.35-840 204-840h552q34.65 0 59.33 24.67Q840-790.65 840-756v552q0 34.65-24.67 59.32Q790.65-120 756-120H204Zm0-84h552v-552H204v552Zm0 0v-552 552Z"/></svg>';
 
     static LOCK_SPAN: string = "<span class='iconTooltip'>" + this.SVG_LOCK + " <small class='tooltiptext'>Locked segment</small></span>";
     static FINAL_SPAN: string = "<span class='iconTooltip'>" + this.SVG_FINAL + " <small class='tooltiptext'>Confirmed</small></span>";
     static TRANSLATED_SPAN: string = "<span class='iconTooltip'>" + this.SVG_TRANSLATED + " <small class='tooltiptext'>Draft</small></span>";
     static NOTES_SPAN: string = "<span class='iconTooltip'>" + this.SVG_NOTE + " <small class='tooltiptext'>Segment has notes</small></span>";
-    static METADATA_SPAN: string = "<span class='iconTooltip'>" + this.SVG_METADATA + " <small class='tooltiptext'>Segment has metadata</small></span>";
+    static COMMENT_SPAN: string = this.SVG_COMMENT + " <small class='tooltiptext'>Review comments</small>";
+    static EDIT_COMMENT_SPAN: string = this.SVG_EDIT_COMMENT + '<span class="tooltiptext bottomTooltip">Show/Hide Review Comments</span>';
     static SPACE_WARNING: string = "<span class='iconTooltip'>" + this.SVG_WARNING + " <small class='tooltiptext'>Space errors</small></span>";
     static TAG_WARNING: string = "<span class='iconTooltip'>" + this.SVG_WARNING + " <small class='tooltiptext'>Tag errors</small></span>";
     static SPACE_TAG_WARNING: string = "<span class='iconTooltip'>" + this.SVG_WARNING + " <small class='tooltiptext'>Tag and space errors</small></span>";
@@ -82,9 +84,17 @@ class TranslationView {
     currentContent: string = '';
     currentId: SegmentId = { id: '', file: '', unit: '' };
     sourceTags: Map<string, string>;
+    files: any[] = [];
 
     collapseFilesButton: HTMLAnchorElement;
     expandFilesButton: HTMLAnchorElement;
+
+    collapseRightButton: HTMLAnchorElement;
+    expandRightButton: HTMLAnchorElement;
+
+    matchesContainer: HTMLDivElement = document.createElement('div');
+    termsContainer: HTMLDivElement = document.createElement('div');
+    mtContainer: HTMLDivElement = document.createElement('div');
 
     filterButton: HTMLAnchorElement;
     sortButton: HTMLAnchorElement;
@@ -110,7 +120,7 @@ class TranslationView {
     returnNumber: number = -1;
 
     notesVisible: boolean = false;
-    metadataVisible: boolean = false;
+    commentsVisible: boolean = false;
 
     constructor(tab: Tab, projectId: string, sourceLang: string, targetLang: string, rows: number) {
         this.container = tab.getContainer();
@@ -136,13 +146,16 @@ class TranslationView {
         this.collapseFilesButton = document.createElement('a');
         this.expandFilesButton = document.createElement('a');
 
+        this.collapseRightButton = document.createElement('a');
+        this.expandRightButton = document.createElement('a');
+
         this.mainArea = document.createElement('div');
         this.mainArea.id = 'main' + projectId;
         this.mainArea.style.display = 'flex';
         this.container.appendChild(this.mainArea);
 
         this.verticalPanels = new ThreeVerticalPanels(this.mainArea);
-        this.verticalPanels.setWeights([18, 62, 20]);
+        this.verticalPanels.setWeights([16, 64, 20]);
 
         this.filesPanel = this.verticalPanels.leftPanel();
         this.filesPanel.style.height = '100%';
@@ -324,14 +337,20 @@ class TranslationView {
         this.filesContainer.querySelector(`[data-file="${file}"]`)?.classList.add('selectedFile');
     }
 
-    drawFiles(files: any[]): void {
+    setFiles(files: any[]): void {
+        console.log('set files', JSON.stringify(files, null, 2));
+        this.files = files;
+        this.drawFiles();
+    }
+
+    drawFiles(): void {
         this.filesContainer.innerHTML = '';
 
         let filesTable: HTMLTableElement = document.createElement('table');
         filesTable.className = 'filesTable';
         this.filesContainer.appendChild(filesTable);
 
-        for (const file of files) {
+        for (const file of this.files) {
             let sourceFile: string = file.sourceFile;
             let detailsArray: any[] = file.files;
 
@@ -344,7 +363,7 @@ class TranslationView {
                 td.style.width = '24px';
                 let infoSpan: HTMLSpanElement = document.createElement('span');
                 infoSpan.classList.add('iconTooltip');
-                infoSpan.classList.add('sourceSymbol');                
+                infoSpan.classList.add('sourceSymbol');
                 infoSpan.innerHTML = TranslationView.FILE_INFO + '<small class="tooltiptext">File Info</small>';
                 infoSpan.addEventListener('click', () => {
                     this.showFileInfo(detailsArray[0]);
@@ -360,16 +379,20 @@ class TranslationView {
                 metaSpan.addEventListener('click', () => {
                     this.showFileMetadata(detailsArray[0]);
                 });
-                if (this.hasCustomMetadata(detailsArray[0].metadata)) {
-                    metaSpan.innerHTML = TranslationView.HAS_METADATA + '<small class="tooltiptext">File Metadata</small>';
+                if (this.hasCustomMetadata(detailsArray[0].customdata)) {
+                    metaSpan.innerHTML = TranslationView.HAS_COMMENT + '<small class="tooltiptext">Review Comments</small>';
                 } else {
-                    metaSpan.innerHTML = TranslationView.NO_METADATA + '<small class="tooltiptext">File Metadata</small>';
+                    metaSpan.innerHTML = TranslationView.NO_COMMENT + '<small class="tooltiptext">Review Comments</small>';
                 }
                 td.appendChild(metaSpan);
                 tr.appendChild(td);
 
                 td = document.createElement('td');
                 td.classList.add('noWrap');
+                td.classList.add('fileName');
+                td.addEventListener('click', () => {
+                    this.electron.ipcRenderer.send('goto-file', { project: this.projectId, file: detailsArray[0].file });
+                });
                 td.innerText = sourceFile;
                 tr.appendChild(td);
             } else {
@@ -385,7 +408,6 @@ class TranslationView {
                 filesTable.appendChild(tr);
 
                 for (const details of detailsArray) {
-
                     let tr: HTMLTableRowElement = document.createElement('tr');
                     tr.setAttribute('data-file', details.file);
                     filesTable.appendChild(tr);
@@ -410,10 +432,10 @@ class TranslationView {
                     metaSpan.addEventListener('click', () => {
                         this.showFileMetadata(details);
                     });
-                    if (this.hasCustomMetadata(details.metadata)) {
-                        metaSpan.innerHTML = TranslationView.HAS_METADATA + '<small class="tooltiptext">File Metadata</small>';
+                    if (this.hasCustomMetadata(details.customdata)) {
+                        metaSpan.innerHTML = TranslationView.HAS_COMMENT + '<small class="tooltiptext">File Metadata</small>';
                     } else {
-                        metaSpan.innerHTML = TranslationView.NO_METADATA + '<small class="tooltiptext">File Metadata</small>';
+                        metaSpan.innerHTML = TranslationView.NO_COMMENT + '<small class="tooltiptext">File Metadata</small>';
                     }
                     td.appendChild(metaSpan);
                     tr.appendChild(td);
@@ -421,7 +443,11 @@ class TranslationView {
                     td = document.createElement('td');
                     td.classList.add('middle');
                     td.classList.add('noWrap');
+                    td.classList.add('fileName');
                     td.innerText = details.original;
+                    td.addEventListener('click', () => {
+                        this.electron.ipcRenderer.send('goto-file', { project: this.projectId, file: details.file });
+                    });
                     tr.appendChild(td);
                 }
             }
@@ -430,6 +456,11 @@ class TranslationView {
             let file: string = this.currentRow.getAttribute('data-file') || '';
             this.selectFile(file);
         }
+        setTimeout(() => {
+            if (filesTable.getElementsByTagName('tr').length === 1) {
+                this.collapseFilesButton.click();
+            }
+        }, 150);
     }
 
     showFileMetadata(details: any) {
@@ -456,22 +487,8 @@ class TranslationView {
     }
 
     hasCustomMetadata(metadata: any): boolean {
-        let categories: string[] = ['format', 'tool', 'PI', 'sourceFile', 'document'];
-        let data: any[] = metadata.data;
-        for (let i = 0; i < data.length; i++) {
-            let meta: any = data[i];
-            if (meta.category) {
-                if (!categories.includes(meta.category)) {
-                    return true;
-                }
-            }
-            if (meta.id || meta.appliesTo) {
-                if (!categories.includes(meta.id)) {
-                    return true;
-                }
-            }
-        }
-        return false;
+        let keys: string[] = Object.keys(metadata);
+        return keys.length > 0;
     }
 
     setZoom(zoom: string): void {
@@ -561,6 +578,19 @@ class TranslationView {
             this.electron.ipcRenderer.send('show-go-to-window');
         });
         this.topBar.appendChild(goToLink);
+
+        let goToSource: HTMLAnchorElement = document.createElement('a');
+        goToSource.classList.add('tooltip');
+        goToSource.classList.add('bottomTooltip');
+        goToSource.innerHTML = '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">' +
+            '<path d="M2 9V6.9H13V9H2ZM2 4.1V2H13V4.1H2Z"/>' +
+            '<path d="M15.7 22L13.4833 16.5167L8 14.3V13.2111L22 8L16.7889 22H15.7ZM16.2056 19.1222L19.3556 10.6444L10.8778 13.7944L14.6889 15.3111L16.2056 19.1222Z"/>' +
+            '</svg>' +
+            '<span class="tooltiptext bottomTooltip">Go To Next Segment With Same Source</span>';
+        goToSource.addEventListener('click', () => {
+            // TODO
+        });
+        this.topBar.appendChild(goToSource);
 
         let splitButton: HTMLAnchorElement = document.createElement('a');
         splitButton.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 0 24 24" width="24">'
@@ -665,13 +695,10 @@ class TranslationView {
         this.topBar.appendChild(notesButton);
 
         let metadataButton: HTMLAnchorElement = document.createElement('a');
-        metadataButton.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px">' +
-            '<path d="M240-160q-33 0-56.5-23.5T160-240q0-33 23.5-56.5T240-320q33 0 56.5 23.5T320-240q0 33-23.5 56.5T240-160Zm0-240q-33 0-56.5-23.5T160-480q0-33 23.5-56.5T240-560q33 0 56.5 23.5T320-480q0 33-23.5 56.5T240-400Zm0-240q-33 0-56.5-23.5T160-720q0-33 23.5-56.5T240-800q33 0 56.5 23.5T320-720q0 33-23.5 56.5T240-640Zm240 0q-33 0-56.5-23.5T400-720q0-33 23.5-56.5T480-800q33 0 56.5 23.5T560-720q0 33-23.5 56.5T480-640Zm240 0q-33 0-56.5-23.5T640-720q0-33 23.5-56.5T720-800q33 0 56.5 23.5T800-720q0 33-23.5 56.5T720-640ZM480-400q-33 0-56.5-23.5T400-480q0-33 23.5-56.5T480-560q33 0 56.5 23.5T560-480q0 33-23.5 56.5T480-400Zm40 240v-123l221-220q9-9 20-13t22-4q12 0 23 4.5t20 13.5l37 37q8 9 12.5 20t4.5 22q0 11-4 22.5T863-380L643-160H520Zm300-263-37-37 37 37ZM580-220h38l121-122-18-19-19-18-122 121v38Zm141-141-19-18 37 37-18-19Z"/>' +
-            '</svg>' +
-            '<span class="tooltiptext bottomTooltip">Show/Hide Metadata</span>';
+        metadataButton.innerHTML = TranslationView.EDIT_COMMENT_SPAN;
         metadataButton.className = 'tooltip bottomTooltip';
         metadataButton.addEventListener('click', () => {
-            this.showMetadata();
+            this.showReviewComments();
         });
         this.topBar.appendChild(metadataButton);
 
@@ -776,10 +803,15 @@ class TranslationView {
         });
         this.topBar.appendChild(iateSearchButton);
 
-        let filler: HTMLSpanElement = document.createElement('span');
-        filler.innerHTML = '&nbsp;';
-        filler.className = 'fill_width';
-        this.topBar.appendChild(filler);
+        let filler1: HTMLSpanElement = document.createElement('span');
+        filler1.innerHTML = '&nbsp;';
+        filler1.className = 'fill_width';
+        this.topBar.appendChild(filler1);
+
+        let filler2: HTMLSpanElement = document.createElement('span');
+        filler2.innerHTML = '&nbsp;';
+        filler2.className = 'fill_width';
+        this.topBar.appendChild(filler2);
 
         let memLabel: HTMLLabelElement = document.createElement('label');
         memLabel.style.marginTop = '4px';
@@ -840,7 +872,7 @@ class TranslationView {
         this.rowsObserver?.disconnect();
         this.observer?.disconnect();
         this.electron.ipcRenderer.send('close-notes');
-        this.electron.ipcRenderer.send('close-metadata');
+        this.electron.ipcRenderer.send('close-review-comments');
     }
 
     getContainer(): HTMLDivElement {
@@ -971,7 +1003,7 @@ class TranslationView {
         let firstLink: HTMLAnchorElement = document.createElement('a');
         firstLink.classList.add('tooltip');
         firstLink.classList.add('topTooltip');
-        firstLink.innerHTML = '<svg width="24" height="24" viewBox="0 0 24 24">' +
+        firstLink.innerHTML = '<svg width="16" height="24" viewBox="3 0 19 24">' +
             '<path d="M18.41 16.59L13.82 12l4.59-4.59L17 6l-6 6 6 6zM6 6h2v12H6z" />' +
             '</svg>' +
             '<span class="tooltiptext topTooltip">First Page</span>';
@@ -983,7 +1015,7 @@ class TranslationView {
         let previousLink: HTMLAnchorElement = document.createElement('a');
         previousLink.classList.add('tooltip');
         previousLink.classList.add('topTooltip');
-        previousLink.innerHTML = '<svg width="24" height="24" viewBox="0 0 24 24">' +
+        previousLink.innerHTML = '<svg width="16" height="24" viewBox="3 0 19 24">' +
             '<path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z" />' + '</svg>' +
             '<span class="tooltiptext topTooltip">Previous Page</span>';
         previousLink.addEventListener('click', () => {
@@ -1031,7 +1063,7 @@ class TranslationView {
         let nextLink: HTMLAnchorElement = document.createElement('a');
         nextLink.classList.add('tooltip');
         nextLink.classList.add('topTooltip');
-        nextLink.innerHTML = '<svg width="24" height="24" viewBox="0 0 24 24">' +
+        nextLink.innerHTML = '<svg width="16" height="24" viewBox="3 0 19 24">' +
             '<path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z" />' + '</svg>' +
             '<span class="tooltiptext topTooltip">Next Page</span>';
         nextLink.addEventListener('click', () => {
@@ -1042,7 +1074,7 @@ class TranslationView {
         let lastLink: HTMLAnchorElement = document.createElement('a');
         lastLink.classList.add('tooltip');
         lastLink.classList.add('topTooltip');
-        lastLink.innerHTML = '<svg width="24" height="24" viewBox="0 0 24 24">' +
+        lastLink.innerHTML = '<svg width="16" height="24" viewBox="3 0 19 24">' +
             '<path d="M5.59 7.41L10.18 12l-4.59 4.59L7 18l6-6-6-6zM16 6h2v12h-2z" />' + '</svg>' +
             '<span class="tooltiptext topTooltip">Last Page</span>';
         lastLink.addEventListener('click', () => {
@@ -1155,11 +1187,19 @@ class TranslationView {
         }
     }
 
-    toggleFilesPanel() {
+    toggleFilesPanel(): void {
         if (this.collapseFilesButton.classList.contains('hidden')) {
             this.expandFilesButton.click();
         } else {
             this.collapseFilesButton.click();
+        }
+    }
+
+    toggleRightPanels(): void {
+        if (this.collapseRightButton.classList.contains('hidden')) {
+            this.expandRightButton.click();
+        } else {
+            this.collapseRightButton.click();
         }
     }
 
@@ -1273,18 +1313,81 @@ class TranslationView {
 
         let memoryTitle: HTMLDivElement = document.createElement('div');
         memoryTitle.classList.add('titlepanel');
-        memoryTitle.innerText = 'Translation Memory';
+        memoryTitle.style.display = 'flex';
         panelsContainer.appendChild(memoryTitle);
-        let matchesContainer: HTMLDivElement = document.createElement('div');
-        matchesContainer.classList.add('fill_width');
-        panelsContainer.appendChild(matchesContainer);
-        this.tmMatches = new TmMatches(matchesContainer, this.projectId);
+
+        let filler: HTMLSpanElement = document.createElement('span');
+        filler.classList.add('fill_width');
+        filler.innerText = 'Translation Memory';
+        memoryTitle.appendChild(filler);
+
+        this.collapseRightButton.innerHTML = TranslationView.SVG_COLLAPSE;
+        this.collapseRightButton.style.marginLeft = '-2px';
+        this.collapseRightButton.addEventListener('click', () => {
+            filler.classList.add('hidden');
+            this.collapseRightButton.classList.add('hidden');
+            this.expandRightButton.classList.remove('hidden');
+            this.matchesContainer.classList.add('hidden');
+            this.mtContainer.classList.add('hidden');
+            this.termsContainer.classList.add('hidden');
+            this.verticalPanels.collapseRight();
+        });
+        this.collapseRightButton.addEventListener('mouseenter', () => {
+            const rect = this.collapseRightButton.getBoundingClientRect();
+            collapseTooltip.style.top = rect.top + 'px';
+            collapseTooltip.style.left = (rect.left + rect.width + 4) + 'px';
+            collapseTooltip.style.visibility = 'visible';
+        });
+        this.collapseRightButton.addEventListener('mouseleave', () => {
+            collapseTooltip.style.visibility = 'hidden';
+        });
+        memoryTitle.prepend(this.collapseRightButton);
+
+        this.expandRightButton.classList.add('hidden');
+        this.expandRightButton.innerHTML = TranslationView.SVG_EXPAND;
+        this.expandRightButton.style.marginLeft = '-2px';
+        this.expandRightButton.style.marginRight = '0px';
+        this.expandRightButton.addEventListener('click', () => {
+            filler.classList.remove('hidden');
+            this.collapseRightButton.classList.remove('hidden');
+            this.expandRightButton.classList.add('hidden');
+            this.matchesContainer.classList.remove('hidden');
+            this.mtContainer.classList.remove('hidden');
+            this.termsContainer.classList.remove('hidden');
+            this.verticalPanels.expandRight();
+        });
+        this.expandRightButton.addEventListener('mouseenter', () => {
+            const rect = this.expandRightButton.getBoundingClientRect();
+            expandTooltip.style.top = (rect.top) + 'px';
+            expandTooltip.style.left = (rect.right - rect.width - 6 - expandTooltip.clientWidth) + 'px';
+            expandTooltip.style.visibility = 'visible';
+        });
+        this.expandRightButton.addEventListener('mouseleave', () => {
+            expandTooltip.style.visibility = 'hidden';
+        });
+        memoryTitle.prepend(this.expandRightButton);
+
+        let collapseTooltip: HTMLDivElement = document.createElement('div');
+        collapseTooltip.classList.add('rightPanelTooltip');
+        collapseTooltip.innerText = 'Collapse Right Panels';
+        collapseTooltip.style.visibility = 'hidden';
+        panelsContainer.appendChild(collapseTooltip);
+
+        let expandTooltip: HTMLDivElement = document.createElement('div');
+        expandTooltip.classList.add('rightPanelTooltip');
+        expandTooltip.innerText = 'Expand Right Panels';
+        expandTooltip.style.visibility = 'hidden';
+        panelsContainer.appendChild(expandTooltip);
+
+        this.matchesContainer.classList.add('fill_width');
+        panelsContainer.appendChild(this.matchesContainer);
+        this.tmMatches = new TmMatches(this.matchesContainer, this.projectId);
 
         let config: MutationObserverInit = { attributes: true, childList: false, subtree: false };
         let observer: MutationObserver = new MutationObserver((mutationsList) => {
             for (let mutation of mutationsList) {
                 if (mutation.type === 'attributes') {
-                    matchesContainer.style.height = (panelsContainer.clientHeight - memoryTitle.clientHeight) + 'px';
+                    this.matchesContainer.style.height = (panelsContainer.clientHeight - memoryTitle.clientHeight) + 'px';
                 }
             }
         });
@@ -1298,18 +1401,27 @@ class TranslationView {
 
         let machineTitle: HTMLDivElement = document.createElement('div');
         machineTitle.classList.add('titlepanel');
-        machineTitle.innerText = 'Machine Translation';
+        machineTitle.style.display = 'flex';
         panelsContainer.appendChild(machineTitle);
-        let mtContainer: HTMLDivElement = document.createElement('div');
-        mtContainer.classList.add('fill_width');
-        panelsContainer.appendChild(mtContainer);
-        this.mtMatches = new MtMatches(mtContainer, this.projectId);
+
+        let blankFiller: HTMLSpanElement = document.createElement('span');
+        blankFiller.innerHTML = TranslationView.SVG_BLANK;
+        machineTitle.appendChild(blankFiller);
+
+        let Title: HTMLSpanElement = document.createElement('span');
+        Title.classList.add('fill_width');
+        Title.innerText = 'Machine Translation';
+        machineTitle.appendChild(Title);
+
+        this.mtContainer.classList.add('fill_width');
+        panelsContainer.appendChild(this.mtContainer);
+        this.mtMatches = new MtMatches(this.mtContainer, this.projectId);
 
         let config: MutationObserverInit = { attributes: true, childList: false, subtree: false };
         let observer: MutationObserver = new MutationObserver((mutationsList) => {
             for (let mutation of mutationsList) {
                 if (mutation.type === 'attributes') {
-                    mtContainer.style.height = (panelsContainer.clientHeight - machineTitle.clientHeight) + 'px';
+                    this.mtContainer.style.height = (panelsContainer.clientHeight - machineTitle.clientHeight) + 'px';
                 }
             }
         });
@@ -1323,19 +1435,27 @@ class TranslationView {
 
         let termsTitle: HTMLDivElement = document.createElement('div');
         termsTitle.classList.add('titlepanel');
-        termsTitle.innerText = 'Terms';
+        termsTitle.style.display = 'flex';
         panelsContainer.appendChild(termsTitle);
 
-        let termsContainer: HTMLDivElement = document.createElement('div');
-        termsContainer.classList.add('fill_width');
-        panelsContainer.appendChild(termsContainer);
-        this.termsPanel = new TermsPanel(termsContainer, this.projectId);
+        let blankFiller: HTMLSpanElement = document.createElement('span');
+        blankFiller.innerHTML = TranslationView.SVG_BLANK;
+        termsTitle.appendChild(blankFiller);
+
+        let Title: HTMLSpanElement = document.createElement('span');
+        Title.classList.add('fill_width');
+        Title.innerText = 'Terms';
+        termsTitle.appendChild(Title);
+
+        this.termsContainer.classList.add('fill_width');
+        panelsContainer.appendChild(this.termsContainer);
+        this.termsPanel = new TermsPanel(this.termsContainer, this.projectId);
 
         let config: MutationObserverInit = { attributes: true, childList: false, subtree: false };
         let observer: MutationObserver = new MutationObserver((mutationsList) => {
             for (let mutation of mutationsList) {
                 if (mutation.type === 'attributes') {
-                    termsContainer.style.height = (panelsContainer.clientHeight - termsTitle.clientHeight) + 'px';
+                    this.termsContainer.style.height = (panelsContainer.clientHeight - termsTitle.clientHeight) + 'px';
                 }
             }
         });
@@ -1423,7 +1543,8 @@ class TranslationView {
             }
             if (row.hasMetadata) {
                 let span: HTMLSpanElement = document.createElement('span');
-                span.innerHTML = TranslationView.METADATA_SPAN;
+                span.innerHTML = TranslationView.COMMENT_SPAN;
+                span.classList.add('iconTooltip');
                 span.addEventListener('click', (event: MouseEvent) => {
                     let metaId: MetaId = {
                         project: this.projectId,
@@ -1504,8 +1625,9 @@ class TranslationView {
             return;
         }
         this.selectRow(rows[0]);
-
-        this.electron.ipcRenderer.send('get-project-files', this.projectId);
+        if (this.files.length === 0) {
+            this.electron.ipcRenderer.send('get-project-files', this.projectId);
+        }
     }
 
     static isBiDi(code: string): boolean {
@@ -1876,8 +1998,8 @@ class TranslationView {
         if (this.notesVisible) {
             this.showNotes();
         }
-        if (this.metadataVisible) {
-            this.showMetadata();
+        if (this.commentsVisible) {
+            this.showReviewComments();
         }
         this.centerRow(this.currentRow);
         this.currentCell.focus();
@@ -2625,13 +2747,13 @@ class TranslationView {
         this.saveEdit({ next: 'previous', confirm: false });
     }
 
-    openSegment(arg: any): void {
-        if (this.currentPage * this.rowsPage <= arg.segment && arg.segment < (this.currentPage + 1) * this.rowsPage) {
-            this.saveEdit({ next: 'number', confirm: false, segment: arg.segment });
+    openSegment(seg: number): void {
+        if (this.currentPage * this.rowsPage <= seg && seg < (this.currentPage + 1) * this.rowsPage) {
+            this.saveEdit({ next: 'number', confirm: false, segment: seg });
         } else {
-            let page = Math.floor(arg.segment / this.rowsPage) + 1;
+            let page = Math.floor(seg / this.rowsPage) + 1;
             if (page >= 0 && page <= this.maxPage) {
-                this.returnNumber = arg.segment;
+                this.returnNumber = seg;
                 this.currentPage = page - 1;
                 let pageInput: HTMLInputElement = document.getElementById('page' + this.projectId) as HTMLInputElement;
                 pageInput.value = '' + (this.currentPage + 1);
@@ -2856,7 +2978,8 @@ class TranslationView {
                 }
                 if (arg.hasMetadata) {
                     let span: HTMLSpanElement = document.createElement('span');
-                    span.innerHTML = TranslationView.METADATA_SPAN;
+                    span.classList.add('iconTooltip');
+                    span.innerHTML = TranslationView.COMMENT_SPAN;
                     span.addEventListener('click', (event: MouseEvent) => {
                         let metaId: MetaId = {
                             project: arg.project,
@@ -2886,7 +3009,9 @@ class TranslationView {
                 }
                 if (arg.hasMetadata) {
                     let span: HTMLSpanElement = document.createElement('span');
-                    span.innerHTML = TranslationView.METADATA_SPAN;
+                    span.classList.add('iconTooltip');
+                    span.innerHTML = TranslationView.COMMENT_SPAN;
+                    span.classList.add('iconTooltip');
                     span.addEventListener('click', (event: MouseEvent) => {
                         let metaId: MetaId = {
                             project: arg.project,
@@ -2912,7 +3037,7 @@ class TranslationView {
         });
     }
 
-    showMetadata(): void {
+    showReviewComments(): void {
         let data: MetaId = {
             project: this.projectId,
             file: this.currentId.file,
@@ -2926,8 +3051,8 @@ class TranslationView {
         this.notesVisible = arg;
     }
 
-    showingMetadata(arg: boolean): void {
-        this.metadataVisible = arg;
+    showingReviewComments(arg: boolean): void {
+        this.commentsVisible = arg;
     }
 
     notesRemoved(): void {

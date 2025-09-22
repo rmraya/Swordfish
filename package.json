@@ -20,12 +20,13 @@
         "url": "https://github.com/rmraya/Swordfish.git"
     },
     "devDependencies": {
-        "electron": "^37.4.0",
+        "electron": "^38.1.2",
+        "@electron/packager": "^18.4.4",
         "typescript": "^5.9.2"
     },
     "dependencies": {
-        "mtengines": "^3.2.0",
+        "mtengines": "^3.3.0",
         "typesxml": "^1.8.0",
-        "typesbcp47": "^1.9.0"
+        "typesbcp47": "^1.10.0"
     }
 }
