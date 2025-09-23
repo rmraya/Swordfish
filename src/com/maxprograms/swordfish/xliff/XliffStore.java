@@ -1136,6 +1136,41 @@ public class XliffStore {
 		return result;
 	}
 
+	public int getSameSource(String file, String unit, String segment) throws SQLException {
+		int result = -1;
+		String source = "";
+		int currentIdx = -1;
+
+		// Step 1: Get the source text AND index of current segment
+		try (PreparedStatement prepStmt = conn.prepareStatement(
+				"SELECT sourceText, idx FROM segments WHERE file=? AND unitId=? AND segId=? AND type='S'")) {
+			prepStmt.setString(1, file);
+			prepStmt.setString(2, unit);
+			prepStmt.setString(3, segment);
+			try (ResultSet rs = prepStmt.executeQuery()) {
+				if (rs.next()) {
+					source = rs.getString(1);
+					currentIdx = rs.getInt(2);
+				}
+			}
+		}
+
+		// Step 2: Find the next segment with same source that has higher idx
+		if (!source.isEmpty() && currentIdx != -1) {
+			try (PreparedStatement prepStmt = conn.prepareStatement(
+					"SELECT idx FROM segments WHERE sourceText = ? AND type='S' AND idx > ? ORDER BY idx LIMIT 1")) {
+				prepStmt.setString(1, source);
+				prepStmt.setInt(2, currentIdx);
+				try (ResultSet rs = prepStmt.executeQuery()) {
+					if (rs.next()) {
+						result = rs.getInt(1) + 1; // +1 because UI displays 1-based indexing
+					}
+				}
+			}
+		}
+		return result;
+	}
+
 	public synchronized JSONObject getMetadata(JSONObject json) throws SQLException {
 		JSONObject result = null;
 		if (json.has("unit")) {

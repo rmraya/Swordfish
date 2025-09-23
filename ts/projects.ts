@@ -861,7 +861,6 @@ class ProjectsView {
     generateImage(svg: string): SVGElement | undefined {
         let div: HTMLDivElement = document.createElement('div');
         div.innerHTML = svg;
-        console.log(div.innerHTML);
         let svgElement: SVGElement | null = div.firstElementChild as SVGElement;
         if (svgElement) {
             return svgElement;

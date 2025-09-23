@@ -350,6 +350,9 @@ export class Swordfish {
             Swordfish.mainWindow.focus();
             Swordfish.mainWindow.webContents.send('open-segment', seg);
         });
+        ipcMain.on('go-to-same-source', (event: IpcMainEvent, currentSegment: FullId) => {
+            Swordfish.goToSameSource(currentSegment);
+        });
         ipcMain.on('get-project-param', (event: IpcMainEvent) => {
             Swordfish.projectParam ? event.sender.send('set-project', Swordfish.projectParam) : event.preventDefault();
         });
@@ -1102,7 +1105,7 @@ export class Swordfish {
             { label: 'Edit Previous Segment', accelerator: 'PageUp', click: () => { Swordfish.mainWindow.webContents.send('previous-segment'); } },
             { label: 'Edit Next Segment', accelerator: 'PageDown', click: () => { Swordfish.mainWindow.webContents.send('next-segment'); } },
             { label: 'Go To Segment...', accelerator: 'CmdOrCtrl+G', click: () => { Swordfish.mainWindow.webContents.send('go-to'); } },
-            { label: 'Go To Next Segment With Same Source ', accelerator: 'CmdOrCtrl+Shift+G', click: () => { Swordfish.mainWindow.webContents.send('next-same-source'); } },//TODO
+            { label: 'Go To Next Segment With Same Source ', accelerator: 'CmdOrCtrl+Shift+G', click: () => { Swordfish.mainWindow.webContents.send('next-same-source'); } },
             new MenuItem({ type: 'separator' }),
             { label: 'Edit Source Text', accelerator: 'Alt+F2', click: () => { Swordfish.mainWindow.webContents.send('edit-source'); } },
             new MenuItem({ type: 'separator' }),
@@ -4569,6 +4572,22 @@ export class Swordfish {
             this.mainWindow.focus();
         });
         Swordfish.setLocation(this.tagsWindow, 'tags.html');
+    }
+
+    static goToSameSource(currentSegment: FullId): void {
+        Swordfish.sendRequest('/projects/getSameSource', { project: currentSegment.project, file: currentSegment.file, unit: currentSegment.unit, segment: currentSegment.segment }, (data: any) => {
+            if (data.status === Swordfish.SUCCESS) {
+                if (data.next !== -1) {
+                    Swordfish.mainWindow.webContents.send('open-segment', data.next);
+                } else {
+                    Swordfish.showMessage({ type: 'info', message: 'No more segments with the same source' });
+                }
+            } else {
+                Swordfish.showMessage({ type: 'error', message: data.reason });
+            }
+        }, (reason: string) => {
+            Swordfish.showMessage({ type: 'error', message: reason });
+        });
     }
 
     static goToFile({ project, file }: { project: string, file: string }): void {

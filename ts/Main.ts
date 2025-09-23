@@ -198,6 +198,9 @@ class Main {
         Main.electron.ipcRenderer.on('go-to', () => {
             this.goToSegment();
         });
+        Main.electron.ipcRenderer.on('next-same-source', () => {
+            this.goToSameSource();
+        });
         Main.electron.ipcRenderer.on('open-segment', (event: Electron.IpcRendererEvent, seg: number) => {
             this.openSegment(seg);
         });
@@ -1099,6 +1102,13 @@ class Main {
         }
     }
 
+    goToSameSource(): void {
+        let selected = Main.tabHolder.getSelected();
+        if (Main.translationViews.has(selected)) {
+            (Main.translationViews.get(selected) as TranslationView).goToSameSource();
+        }
+    }
+
     goToSegment(): void {
         let selected = Main.tabHolder.getSelected();
         if (Main.translationViews.has(selected)) {
@@ -1234,7 +1244,7 @@ class Main {
             (Main.translationViews.get(selected) as TranslationView).showReviewComments();
         }
     }
-    
+
     showReviewComments(): void {
         let selected = Main.tabHolder.getSelected();
         if (Main.translationViews.has(selected)) {

@@ -587,7 +587,7 @@ class TranslationView {
             '</svg>' +
             '<span class="tooltiptext bottomTooltip">Go To Next Segment With Same Source</span>';
         goToSource.addEventListener('click', () => {
-            // TODO
+            this.goToSameSource();
         });
         this.topBar.appendChild(goToSource);
 
@@ -2744,6 +2744,11 @@ class TranslationView {
 
     gotoPrevious(): void {
         this.saveEdit({ next: 'previous', confirm: false });
+    }
+
+    goToSameSource(): void {
+        let segment: FullId = { project: this.projectId, file: this.currentId.file, unit: this.currentId.unit, segment: this.currentId.id };
+        this.electron.ipcRenderer.send('go-to-same-source', segment);
     }
 
     openSegment(seg: number): void {

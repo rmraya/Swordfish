@@ -235,6 +235,8 @@ public class ProjectsHandler implements HttpHandler {
 				response = getFiles(request);
 			} else if ("/projects/getFileStart".equals(url)) {
 				response = getFileStart(request);
+			} else if ("/projects/getSameSource".equals(url)) {
+				response = getSameSource(request);
 			} else if ("/projects/addNote".equals(url)) {
 				response = addNote(request);
 			} else if ("/projects/removeNote".equals(url)) {
@@ -1957,6 +1959,23 @@ public class ProjectsHandler implements HttpHandler {
 		return result;
 	}
 
+	private JSONObject getSameSource(String request) {
+		JSONObject result = new JSONObject();
+		JSONObject json = new JSONObject(request);
+		try {
+			String project = json.getString("project");
+			if (projectStores.containsKey(project)) {
+				result.put("next",
+						projectStores.get(project).getSameSource(json.getString("file"), json.getString("unit"),
+								json.getString("segment")));
+			}
+		} catch (SQLException | JSONException e) {
+			logger.log(Level.ERROR, e);
+			result.put(Constants.REASON, e.getMessage());
+		}
+		return result;
+	}
+
 	private JSONObject getMetadata(String request) {
 		JSONObject result = new JSONObject();
 		JSONObject json = new JSONObject(request);
@@ -1996,7 +2015,7 @@ public class ProjectsHandler implements HttpHandler {
 		}
 		return result;
 	}
-	
+
 	private JSONObject saveMetadata(String request) {
 		JSONObject result = new JSONObject();
 		JSONObject json = new JSONObject(request);
