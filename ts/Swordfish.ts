@@ -368,6 +368,15 @@ export class Swordfish {
         ipcMain.on('get-svg', (event: IpcMainEvent, svgName: string) => {
             event.sender.send('set-svg', Swordfish.getSvgIcon(svgName));
         });
+        ipcMain.on('get-projects-svg', (event: IpcMainEvent, svgName: string) => {
+            event.sender.send('set-projects-svg', Swordfish.getSvgIcon(svgName));
+        });
+        ipcMain.on('get-memories-svg', (event: IpcMainEvent, svgName: string) => {
+            event.sender.send('set-memories-svg', Swordfish.getSvgIcon(svgName));
+        });
+        ipcMain.on('get-glossaries-svg', (event: IpcMainEvent, svgName: string) => {
+            event.sender.send('set-glossaries-svg', Swordfish.getSvgIcon(svgName));
+        });
         ipcMain.on('select-source-files', (event: IpcMainEvent) => {
             this.selectSourceFiles(event);
         });

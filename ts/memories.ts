@@ -232,6 +232,13 @@ class MemoriesView {
             this.displayMemories();
         });
 
+        this.electron.ipcRenderer.on('set-memories-svg', (event: Electron.IpcRendererEvent, svg: string) => {
+            let emptyMemories = document.getElementById('emptyMemories') as HTMLTableCellElement;
+            if (emptyMemories) {
+                emptyMemories.innerHTML = svg + '<p>No Memories Yet</p>';
+            }
+        });
+
         this.loadMemories();
 
         this.watchSizes();
@@ -371,6 +378,18 @@ class MemoriesView {
             return 0;
         });
         this.tbody.innerHTML = '';
+        if (this.memories.length === 0) {
+            let tr = document.createElement('tr');
+            this.tbody.appendChild(tr);
+            let td = document.createElement('td');
+            td.id = 'emptyMemories';
+            td.classList.add('svgContainer');
+            td.classList.add('center');
+            td.colSpan = 8;
+            tr.appendChild(td);
+            this.electron.ipcRenderer.send('get-memories-svg', 'no_memories.svg');
+            return;
+        }
         let length = this.memories.length;
         for (let i = 0; i < length; i++) {
             let mem = this.memories[i];

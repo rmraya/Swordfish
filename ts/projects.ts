@@ -11,6 +11,7 @@
  *******************************************************************************/
 
 class ProjectsView {
+
     electron = require('electron');
 
     container: HTMLDivElement;
@@ -303,6 +304,13 @@ class ProjectsView {
         this.electron.ipcRenderer.on('set-projects', (event: Electron.IpcRendererEvent, arg: any) => {
             this.projects = arg;
             this.displayProjects();
+        });
+
+        this.electron.ipcRenderer.on('set-projects-svg', (event: Electron.IpcRendererEvent, svg: string) => {
+            let emptyProjects = document.getElementById('emptyProjects') as HTMLTableCellElement;
+            if (emptyProjects) {
+                emptyProjects.innerHTML = svg + '<p>No Projects Yet</p';
+            }
         });
 
         // finish setup
@@ -661,6 +669,19 @@ class ProjectsView {
             return 0;
         });
         this.tbody.innerHTML = '';
+        if (this.projects.length === 0) {
+            let tr = document.createElement('tr');
+            this.tbody.appendChild(tr);
+            let td = document.createElement('td');
+            td.id = 'emptyProjects';
+            td.classList.add('svgContainer');
+            td.classList.add('center');
+            td.colSpan = 8;
+            tr.appendChild(td);
+            this.electron.ipcRenderer.send('get-projects-svg', 'no_projects.svg');
+            Main.resizePanels();
+            return;
+        }
         let length = this.projects.length;
         for (let i = 0; i < length; i++) {
             let p: Project = this.projects[i];
@@ -835,5 +856,16 @@ class ProjectsView {
                 this.electron.ipcRenderer.send('show-apply-tm', { project: key, memory: project.memory });
             }
         }
+    }
+
+    generateImage(svg: string): SVGElement | undefined {
+        let div: HTMLDivElement = document.createElement('div');
+        div.innerHTML = svg;
+        console.log(div.innerHTML);
+        let svgElement: SVGElement | null = div.firstElementChild as SVGElement;
+        if (svgElement) {
+            return svgElement;
+        }
+        return undefined;
     }
 }

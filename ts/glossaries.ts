@@ -240,6 +240,13 @@ class GlossariesView {
             this.displayGlossaries();
         });
 
+        this.electron.ipcRenderer.on('set-glossaries-svg', (event: Electron.IpcRendererEvent, svg: string) => {
+            let emptyGlossaries = document.getElementById('emptyGlossaries') as HTMLTableCellElement;
+            if (emptyGlossaries) {
+                emptyGlossaries.innerHTML = svg + '<p>No Glossaries Yet</p>';
+            }
+        });
+
         this.loadGlossaries();
 
         this.watchSizes();
@@ -379,6 +386,18 @@ class GlossariesView {
             return 0;
         });
         this.tbody.innerHTML = '';
+        if (this.glossaries.length === 0) {
+            let tr = document.createElement('tr');
+            this.tbody.appendChild(tr);
+            let td = document.createElement('td');
+            td.id = 'emptyGlossaries';
+            td.classList.add('svgContainer');
+            td.classList.add('center');
+            td.colSpan = 8;
+            tr.appendChild(td);
+            this.electron.ipcRenderer.send('get-glossaries-svg', 'no_glossaries.svg');
+            return;
+        }
         let length = this.glossaries.length;
         for (let i = 0; i < length; i++) {
             let gloss: Memory = this.glossaries[i];
