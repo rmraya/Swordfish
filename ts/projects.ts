@@ -765,7 +765,6 @@ class ProjectsView {
         canvas.style.font = this.tbody.style.font;
         let context = canvas.getContext('2d');
         if (!context) {
-            console.log('no context');
             return 50;
         }
         let longString: string = '';

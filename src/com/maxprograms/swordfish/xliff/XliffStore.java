@@ -1002,7 +1002,10 @@ public class XliffStore {
 		json.put("file", file);
 		json.put("unit", unit);
 		JSONObject metadata = getMetadata(json);
-		return metadata != null;
+		if (metadata == null) {
+			return false;
+		}
+		return metadata.has("data") && metadata.getJSONArray("data").length() > 0;
 	}
 
 	public synchronized JSONArray getNotes(String file, String unit, String segId) throws SQLException {
@@ -1119,10 +1122,10 @@ public class XliffStore {
 	public int getFileStart(String file) throws SQLException {
 		int result = -1;
 		try (PreparedStatement prepStmt = conn.prepareStatement("""
-            SELECT row_num FROM (
-                    SELECT file, unitId, ROW_NUMBER() OVER (ORDER BY file, unitId) AS row_num FROM segments
-                ) sub WHERE file = ? ORDER BY row_num LIMIT 1;
-                """)) {
+				SELECT row_num FROM (
+				        SELECT file, unitId, ROW_NUMBER() OVER (ORDER BY file, unitId) AS row_num FROM segments
+				    ) sub WHERE file = ? ORDER BY row_num LIMIT 1;
+				    """)) {
 			prepStmt.setString(1, file);
 			try (ResultSet rs = prepStmt.executeQuery()) {
 				while (rs.next()) {

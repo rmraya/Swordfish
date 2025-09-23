@@ -88,6 +88,7 @@ export class Swordfish {
         glossariesFolder: Swordfish.path.join(app.getPath('appData'), app.name, 'glossaries'),
         catalog: Swordfish.path.join(app.getAppPath(), 'catalog', 'catalog.xml'),
         srx: Swordfish.path.join(app.getAppPath(), 'srx', 'default.srx'),
+        reviewModel: Swordfish.path.join(app.getAppPath(), 'review', 'default.json'),
         paragraphSegmentation: false,
         acceptUnconfirmed: false,
         fuzzyTermSearches: false,
@@ -364,6 +365,9 @@ export class Swordfish {
         ipcMain.on('get-languages', (event: IpcMainEvent) => {
             this.getLanguages(event);
         });
+        ipcMain.on('get-svg', (event: IpcMainEvent, svgName: string) => {
+            event.sender.send('set-svg', Swordfish.getSvgIcon(svgName));
+        });
         ipcMain.on('select-source-files', (event: IpcMainEvent) => {
             this.selectSourceFiles(event);
         });
@@ -566,6 +570,9 @@ export class Swordfish {
         });
         ipcMain.on('browse-catalog', (event: IpcMainEvent) => {
             this.browseCatalog(event);
+        });
+        ipcMain.on('browse-review-model', (event: IpcMainEvent) => {
+            this.browseReviewModel(event);
         });
         ipcMain.on('get-mt-languages', (event: IpcMainEvent) => {
             this.getMtLanguages(event);
@@ -886,6 +893,9 @@ export class Swordfish {
         });
         ipcMain.on('show-add-comment', (event: IpcMainEvent, metaId: MetaId) => {
             Swordfish.showAddComment(metaId);
+        });
+        ipcMain.on('get-content-model', (event: IpcMainEvent, from: string) => {
+            Swordfish.getContentModel(from);
         });
         ipcMain.on('save-comment', (event: IpcMainEvent, arg: { metaId: MetaId, comment: ReviewComment }) => {
             Swordfish.saveComment(arg.metaId, arg.comment);
@@ -1559,6 +1569,9 @@ export class Swordfish {
                 }
                 if (!json.hasOwnProperty('userName')) {
                     json.userName = Swordfish.os.userInfo().username;
+                }
+                if (!json.hasOwnProperty('reviewModel')) {
+                    json.reviewModel = Swordfish.path.join(app.getAppPath(), 'review', 'default.json');
                 }
                 Swordfish.currentPreferences = json;
                 if (!Swordfish.currentPreferences.projectsFolder || !existsSync(Swordfish.currentPreferences.projectsFolder)) {
@@ -2717,6 +2730,24 @@ export class Swordfish {
         }).then((value: Electron.OpenDialogReturnValue) => {
             if (!value.canceled) {
                 event.sender.send('set-srx', value.filePaths[0]);
+            }
+        }).catch((error: Error) => {
+            console.error(error.message);
+        });
+    }
+
+    browseReviewModel(event: IpcMainEvent): void {
+        dialog.showOpenDialog({
+            title: 'Review Model',
+            defaultPath: Swordfish.currentPreferences.reviewModel,
+            properties: ['openFile'],
+            filters: [
+                { name: 'JSON File', extensions: ['json'] },
+                { name: 'Any File', extensions: ['*'] }
+            ]
+        }).then((value: Electron.OpenDialogReturnValue) => {
+            if (!value.canceled) {
+                event.sender.send('set-review-model', value.filePaths[0]);
             }
         }).catch((error: Error) => {
             console.error(error.message);
@@ -5965,6 +5996,20 @@ export class Swordfish {
         Swordfish.monitorSize(this.addCommentWindow, 'addComment.html');
     }
 
+    static getContentModel(from: string): void {
+        if (existsSync(Swordfish.currentPreferences.reviewModel)) {
+            let contentModel: any = JSON.parse(readFileSync(Swordfish.currentPreferences.reviewModel, 'utf8'));
+            if (from === 'commentsDialog') {
+                this.addCommentWindow.webContents.send('set-content-model', contentModel);
+            }
+            if (from === 'addReply') {
+                this.addReplyWindow.webContents.send('set-content-model', contentModel);
+            }
+        } else {
+            Swordfish.showMessage({ type: 'error', message: 'Content model file not found: ' + Swordfish.currentPreferences.reviewModel });
+        }
+    }
+
     static saveComment(metaId: MetaId, comment: ReviewComment): void {
         Swordfish.addCommentWindow.close();
         Swordfish.reviewCommentsWindow.webContents.send('add-comment', comment);
@@ -5976,7 +6021,6 @@ export class Swordfish {
     }
 
     static showEditComment(metaId: MetaId, comment: ReviewComment): void {
-        console.log('Editing comment', metaId, comment);
         if (Swordfish.addCommentWindow && !Swordfish.addCommentWindow.isDestroyed() && Swordfish.addCommentWindow.isVisible()) {
             // focus the existing window
             Swordfish.addCommentWindow.focus();
@@ -6051,7 +6095,7 @@ export class Swordfish {
     }
 
     static showEditReply(metaId: MetaId, reply: CommentReply): void {
-if (Swordfish.addReplyWindow && !Swordfish.addReplyWindow.isDestroyed() && Swordfish.addReplyWindow.isVisible()) {
+        if (Swordfish.addReplyWindow && !Swordfish.addReplyWindow.isDestroyed() && Swordfish.addReplyWindow.isVisible()) {
             Swordfish.addReplyWindow.close();
         }
         Swordfish.addReplyWindow = new BrowserWindow({
@@ -6432,6 +6476,16 @@ if (Swordfish.addReplyWindow && !Swordfish.addReplyWindow.isDestroyed() && Sword
             }
         );
     }
+
+    static getSvgIcon(svgName: string): string {
+        let svgPath: string = Swordfish.path.join(app.getAppPath(), 'images', svgName);
+        let svg: string = '';
+        if (existsSync(svgPath)) {
+            svg = readFileSync(svgPath, 'utf8');
+        }
+        return svg;
+    }
+
 
     static setLocation(window: BrowserWindow, key: string): void {
         if (Swordfish.locations.hasLocation(key)) {

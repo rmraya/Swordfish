@@ -29,6 +29,7 @@ class PreferencesDialog {
     memoriesFolder: HTMLInputElement = document.createElement('input');
     glossariesFolder: HTMLInputElement = document.createElement('input');
     defaultSRX: HTMLInputElement = document.createElement('input');
+    defaultReviewModel: HTMLInputElement = document.createElement('input');
     defaultCatalog: HTMLInputElement = document.createElement('input');
     paragraphSegmentation: HTMLInputElement = document.createElement('input');
     acceptUnconfirmed: HTMLInputElement = document.createElement('input');
@@ -149,6 +150,9 @@ class PreferencesDialog {
         (document.getElementById('browseSRX') as HTMLButtonElement).addEventListener('click', () => {
             this.electron.ipcRenderer.send('browse-srx');
         });
+        (document.getElementById('browseReviewModel') as HTMLButtonElement).addEventListener('click', () => {
+            this.electron.ipcRenderer.send('browse-review-model');
+        });
         (document.getElementById('browseCatalog') as HTMLButtonElement).addEventListener('click', () => {
             this.electron.ipcRenderer.send('browse-catalog');
         });
@@ -157,6 +161,9 @@ class PreferencesDialog {
         });
         this.electron.ipcRenderer.on('set-srx', (event: Electron.IpcRendererEvent, arg: string) => {
             this.defaultSRX.value = arg;
+        });
+        this.electron.ipcRenderer.on('set-review-model', (event: Electron.IpcRendererEvent, arg: string) => {
+            this.defaultReviewModel.value = arg;
         });
         this.electron.ipcRenderer.on('set-projects-folder', (event: Electron.IpcRendererEvent, arg: string) => {
             this.projectFolder.value = arg;
@@ -195,6 +202,7 @@ class PreferencesDialog {
         this.memoriesFolder.value = preferences.memoriesFolder;
         this.glossariesFolder.value = preferences.glossariesFolder;
         this.defaultSRX.value = preferences.srx;
+        this.defaultReviewModel.value = preferences.reviewModel;
         this.defaultCatalog.value = preferences.catalog;
         this.acceptUnconfirmed.checked = preferences.acceptUnconfirmed;
         this.paragraphSegmentation.checked = preferences.paragraphSegmentation;
@@ -359,6 +367,7 @@ class PreferencesDialog {
             memoriesFolder: this.memoriesFolder.value,
             glossariesFolder: this.glossariesFolder.value,
             srx: this.defaultSRX.value,
+            reviewModel: this.defaultReviewModel.value,
             paragraphSegmentation: this.paragraphSegmentation.checked,
             acceptUnconfirmed: this.acceptUnconfirmed.checked,
             fuzzyTermSearches: this.fuzzyTermSearches.checked,
@@ -834,6 +843,35 @@ class PreferencesDialog {
         td = document.createElement('td');
         td.classList.add('middle');
         td.innerHTML = '<button id="browseSRX" class="dark">Browse...</button>';
+        tr.appendChild(td);
+
+        tr = document.createElement('tr');
+        table.appendChild(tr);
+
+        td = document.createElement('td');
+        td.classList.add('middle');
+        td.classList.add('noWrap');
+        tr.appendChild(td);
+
+        let reviewModelLabel: HTMLLabelElement = document.createElement('label');
+        reviewModelLabel.setAttribute('for', 'defaultReviewModel');
+        reviewModelLabel.innerText = 'Default Review Model';
+        td.appendChild(reviewModelLabel);
+
+        td = document.createElement('td');
+        td.classList.add('middle');
+        td.classList.add('fill_width');
+        tr.appendChild(td);
+
+        this.defaultReviewModel = document.createElement('input');
+        this.defaultReviewModel.id = 'defaultReviewModel';
+        this.defaultReviewModel.type = 'text';
+        this.defaultReviewModel.classList.add('fill_width');
+        td.appendChild(this.defaultReviewModel);
+
+        td = document.createElement('td');
+        td.classList.add('middle');
+        td.innerHTML = '<button id="browseReviewModel" class="dark">Browse...</button>';
         tr.appendChild(td);
 
         let rowsHolder: HTMLDivElement = document.createElement('div');

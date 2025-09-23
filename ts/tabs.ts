@@ -125,6 +125,14 @@ class TabHolder {
         return this.tabsHolder.clientHeight;
     }
 
+    setEmptyMessage(svgImage: string, emptyText: string): void {
+        this.contentHolder.innerHTML = '<div style="width: 100%; height: 100%; display: flex; align-items: center; flex-direction: column; justify-content: center;">' +
+            '<div class="svgContainer">' +
+            svgImage +
+            '</div>' +
+            '<p style="font-size: 20px;">' + emptyText + '</p></div>';
+    }
+
     clear(): void {
         this.labels.forEach((value) => {
             this.tabsHolder.removeChild(value);

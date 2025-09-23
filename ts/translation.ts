@@ -338,7 +338,6 @@ class TranslationView {
     }
 
     setFiles(files: any[]): void {
-        console.log('set files', JSON.stringify(files, null, 2));
         this.files = files;
         this.drawFiles();
     }

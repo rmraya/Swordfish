@@ -10,42 +10,38 @@
  *     Maxprograms - initial API and implementation
  *******************************************************************************/
 
+class CommentField {
+    storeAs: string;
+    value: string;
+
+    constructor(storeAs: string, value: string) {
+        this.storeAs = storeAs;
+        this.value = value;
+    }
+}
+
 class CommentReply {
 
     replyId: string;
     repliesTo: string;
-    commentId: string;
-    userName: string;
-    commentText: string;
+    fields: CommentField[];
 
-    constructor(replyId: string, repliesTo: string, commentId: string, userName: string, comment: string) {        
+    constructor(replyId: string, repliesTo: string, fields: CommentField[]) {
         this.replyId = replyId;
         this.repliesTo = repliesTo;
-        this.commentId = commentId;
-        this.userName = userName;
-        this.commentText = comment;
+        this.fields = fields;
     }
 }
 
 class ReviewComment {
 
-    id: string
-    commentId: string;
-    category: string;
-    severity: string;
-    appliesTo: string;
-    userName: string;
-    commentText: string;
+    id: string;
+    fields: CommentField[];
     replies: CommentReply[];
 
-    constructor(id: string, commentId: string, category: string, severity: string, appliesTo: string, userName: string, comment: string) {
+    constructor(id: string, fields: CommentField[]) {
         this.id = id;
-        this.commentId = commentId;
-        this.category = category;
-        this.severity = severity;
-        this.appliesTo = appliesTo;
-        this.userName = userName;
-        this.commentText = comment;
+        this.fields = fields;
         this.replies = [];
     }
 

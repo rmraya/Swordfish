@@ -1064,3 +1064,10 @@ svg.stats {
 	cursor: pointer;
 	background-color: var(--ClassicBlue30);
 }
+
+.svgContainer svg {
+	color: var(--black) !important;
+	fill: var(--black) !important;
+	stroke: var(--black) !important;
+	stroke-width: 2 !important;
+}

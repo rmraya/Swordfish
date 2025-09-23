@@ -54,7 +54,9 @@ class CommentsDialog {
         this.electron.ipcRenderer.on('add-reply', (event: Electron.IpcRendererEvent, reply: CommentReply) => {
             this.addReply(reply);
         });
-
+        this.electron.ipcRenderer.on('set-svg', (event: Electron.IpcRendererEvent, svg: string) => {
+            this.tabHolder.setEmptyMessage(svg, 'No comments yet');
+        });
         let main: HTMLDivElement = document.getElementById('main') as HTMLDivElement;
         main.classList.add('fill_width');
 
@@ -90,11 +92,14 @@ class CommentsDialog {
         main.innerHTML = '';
         this.comments = [];
         this.tabHolder = new TabHolder(document.getElementById('main') as HTMLDivElement, 'tabHolder');
-        let reviewComments: ReviewComment[] = this.parseComments(this.metadata);
-        let length: number = reviewComments ? reviewComments.length : 0;
+        this.parseComments(this.metadata);
+        let length: number = this.comments.length;
         let counter: number = 1;
+        if (length === 0) {
+            this.electron.ipcRenderer.send('get-svg', 'no_comment.svg');
+        }
         for (let i: number = 0; i < length; i++) {
-            let groupId: string = reviewComments[i].id;
+            let groupId: string = this.comments[i].id;
             let id: string = groupId ? groupId : 'Comment_' + counter++;
 
             let tab: Tab = new Tab(id, id, false, this.tabHolder);
@@ -112,79 +117,21 @@ class CommentsDialog {
             commentTable.classList.add('alternate');
             commentContainer.appendChild(commentTable);
 
-            let tr: HTMLTableRowElement = document.createElement('tr');
-            commentTable.appendChild(tr);
+            let fields: CommentField[] = this.comments[i].fields;
+            for (let field of fields) {
+                let tr: HTMLTableRowElement = document.createElement('tr');
+                commentTable.appendChild(tr);
 
-            let td: HTMLTableCellElement = document.createElement('td');
-            td.textContent = 'Comment ID';
-            td.classList.add('noWrap');
-            tr.appendChild(td);
+                let td: HTMLTableCellElement = document.createElement('td');
+                td.textContent = field.storeAs;
+                td.classList.add('noWrap');
+                tr.appendChild(td);
 
-            td = document.createElement('td');
-            td.textContent = reviewComments[i].commentId;
-            tr.appendChild(td);
-
-            tr = document.createElement('tr');
-            commentTable.appendChild(tr);
-
-            td = document.createElement('td');
-            td.textContent = 'Category';
-            tr.appendChild(td);
-
-            td = document.createElement('td');
-            td.textContent = reviewComments[i].category;
-            td.classList.add('fill_width');
-            tr.appendChild(td);
-
-            tr = document.createElement('tr');
-            commentTable.appendChild(tr);
-
-            td = document.createElement('td');
-            td.textContent = 'Severity';
-            tr.appendChild(td);
-
-            td = document.createElement('td');
-            td.textContent = reviewComments[i].severity;
-            td.classList.add('fill_width');
-            tr.appendChild(td);
-
-            tr = document.createElement('tr');
-            commentTable.appendChild(tr);
-
-            td = document.createElement('td');
-            td.textContent = 'Applies To';
-            td.classList.add('noWrap');
-            tr.appendChild(td);
-
-            td = document.createElement('td');
-            td.textContent = reviewComments[i].appliesTo;
-            td.classList.add('fill_width');
-            tr.appendChild(td);
-
-            tr = document.createElement('tr');
-            commentTable.appendChild(tr);
-
-            td = document.createElement('td');
-            td.textContent = 'User Name';
-            td.classList.add('noWrap');
-            tr.appendChild(td);
-
-            td = document.createElement('td');
-            td.textContent = reviewComments[i].userName;
-            td.classList.add('fill_width');
-            tr.appendChild(td);
-
-            tr = document.createElement('tr');
-            commentTable.appendChild(tr);
-
-            td = document.createElement('td');
-            td.textContent = 'Comment';
-            tr.appendChild(td);
-
-            td = document.createElement('td');
-            td.textContent = reviewComments[i].commentText;
-            td.classList.add('fill_width');
-            tr.appendChild(td);
+                td = document.createElement('td');
+                td.textContent = field.value;
+                td.classList.add('fill_width');
+                tr.appendChild(td);
+            }
 
             let commentButtons: HTMLDivElement = document.createElement('div');
             commentButtons.classList.add('buttonArea');
@@ -193,11 +140,12 @@ class CommentsDialog {
             let addReply: HTMLButtonElement = document.createElement('button');
             addReply.textContent = 'Add Reply';
             addReply.addEventListener('click', () => {
-                this.electron.ipcRenderer.send('show-add-reply', { metaId: this.metaId, commentId: reviewComments[i].id });
+                this.electron.ipcRenderer.send('show-add-reply', { metaId: this.metaId, commentId: this.comments[i].id });
             });
             commentButtons.appendChild(addReply);
 
-            for (let j: number = 0; j < reviewComments[i].replies.length; j++) {
+            for (let j: number = 0; j < this.comments[i].replies.length; j++) {
+                let reply: CommentReply = this.comments[i].replies[j];
                 let replyContainer: HTMLDivElement = document.createElement('div');
                 replyContainer.classList.add('borderedArea');
                 groupHolder.appendChild(replyContainer);
@@ -207,53 +155,20 @@ class CommentsDialog {
                 replyTable.classList.add('alternate');
                 replyContainer.appendChild(replyTable);
 
-                tr = document.createElement('tr');
-                replyTable.appendChild(tr);
+                for (let field of reply.fields) {
+                    let tr: HTMLTableRowElement = document.createElement('tr');
+                    replyTable.appendChild(tr);
 
-                td = document.createElement('td');
-                td.textContent = 'Reply ID';
-                tr.appendChild(td);
+                    let td: HTMLTableCellElement = document.createElement('td');
+                    td.textContent = field.storeAs;
+                    td.classList.add('noWrap');
+                    tr.appendChild(td);
 
-                td = document.createElement('td');
-                td.textContent = reviewComments[i].replies[j].replyId;
-                tr.appendChild(td);
-
-                tr = document.createElement('tr');
-                replyTable.appendChild(tr);
-
-                td = document.createElement('td');
-                td.textContent = 'Comment ID';
-                td.classList.add('noWrap');
-                tr.appendChild(td);
-
-                td = document.createElement('td');
-                td.textContent = reviewComments[i].replies[j].commentId;
-                tr.appendChild(td);
-
-                tr = document.createElement('tr');
-                replyTable.appendChild(tr);
-
-                td = document.createElement('td');
-                td.textContent = 'User Name';
-                td.classList.add('noWrap');
-                tr.appendChild(td);
-
-                td = document.createElement('td');
-                td.textContent = reviewComments[i].replies[j].userName;
-                td.classList.add('fill_width');
-                tr.appendChild(td);
-
-                tr = document.createElement('tr');
-                replyTable.appendChild(tr);
-
-                td = document.createElement('td');
-                td.textContent = 'Comment';
-                tr.appendChild(td);
-
-                td = document.createElement('td');
-                td.textContent = reviewComments[i].replies[j].commentText;
-                td.classList.add('fill_width');
-                tr.appendChild(td);
+                    td = document.createElement('td');
+                    td.textContent = field.value;
+                    td.classList.add('fill_width');
+                    tr.appendChild(td);
+                }
 
                 let replyButtons: HTMLDivElement = document.createElement('div');
                 replyButtons.classList.add('buttonArea');
@@ -262,15 +177,14 @@ class CommentsDialog {
                 let editComment: HTMLButtonElement = document.createElement('button');
                 editComment.textContent = 'Edit Reply';
                 editComment.addEventListener('click', () => {
-                    console.log(JSON.stringify(reviewComments[i].replies[j]));
-                    this.electron.ipcRenderer.send('show-edit-reply', { metaId: this.metaId, reply: reviewComments[i].replies[j] });
+                    this.electron.ipcRenderer.send('show-edit-reply', { metaId: this.metaId, reply: this.comments[i].replies[j] });
                 });
                 replyButtons.appendChild(editComment);
 
                 let removeComment: HTMLButtonElement = document.createElement('button');
                 removeComment.textContent = 'Remove Reply';
                 removeComment.addEventListener('click', () => {
-                    this.removeReply(reviewComments[i].id, reviewComments[i].replies[j].replyId);
+                    this.removeReply(this.comments[i].id, this.comments[i].replies[j].replyId);
                 });
                 replyButtons.appendChild(removeComment);
             }
@@ -346,38 +260,32 @@ class CommentsDialog {
         this.electron.ipcRenderer.send('save-metadata', { metaId: this.metaId, metadata: this.metadata });
     }
 
-    parseComments(metadata: MetaData): ReviewComment[] {
+    parseComments(metadata: MetaData): void {
+        this.comments = [];
         if (!metadata || !metadata.data) {
-            return this.comments;
+            return;
         }
-
-        let data: any[] = metadata.data;
+        let data: MetaGroup[] = metadata.data;
         for (let i = 0; i < data.length; i++) {
-            let item = data[i];
-            let groupId: string = item.id ? item.id : 'c' + (i + 1);
-            let userName: string = this.getMetaValue(item, 'Username');
-            let commentId: string = this.getMetaValue(item, 'AMCommentId');
-            let commentText: string = this.getMetaValue(item, 'CommentText');
-            let repliesTo: string = this.getMetaValue(item, 'ReplyTo');
-            if (repliesTo !== '') {
-                // is reply
-                let reply = new CommentReply(groupId, repliesTo, commentId, userName, commentText);
+            let metaGroup: MetaGroup = data[i];
+            let repliesTo: string = this.getRepliesTo(metaGroup);
+            let fields: CommentField[] = this.parseFields(metaGroup.meta);
+
+            if (repliesTo === '') {
+                // handle comment
+                let comment: ReviewComment = new ReviewComment(metaGroup.id ? metaGroup.id : '', fields);
+                this.comments.push(comment);
+            } else {
+                // handle reply
+                let reply: CommentReply = new CommentReply(metaGroup.id ? metaGroup.id : '', repliesTo, fields);
                 for (let j = 0; j < this.comments.length; j++) {
                     if (this.comments[j].id === repliesTo) {
                         this.comments[j].addReply(reply);
                         break;
                     }
                 }
-            } else {
-                // is comment
-                let severity: string = this.getMetaValue(item, 'Severity');
-                let category: string = this.getMetaValue(item, 'Category');
-                let appliesTo: string = this.getMetaValue(item, 'AppliesTo');
-                let comment = new ReviewComment(groupId, commentId, category, severity, appliesTo, userName, commentText);
-                this.comments.push(comment);
             }
         }
-        return this.comments;
     }
 
     getMetaValue(item: any, type: string): string {
@@ -390,52 +298,31 @@ class CommentsDialog {
         return '';
     }
 
-    addReply(reply: CommentReply): void {
-        console.log(JSON.stringify(reply, null, 2));
-        if (reply.replyId === '') {
-            let length: number = this.metadata.data.length;
-            let max: number = 0;
-            let prefix: string = '';
-            for (let i: number = 0; i < length; i++) {
-                let group: MetaGroup = this.metadata.data[i];
-                let id: string | undefined = group.id;
-                if (id) {
-                    prefix = id.substring(0, 2);
-                    let num: number = parseInt(id.substring(2), 10);
-                    max = Math.max(max, num);
-                }
-            }
-            let metaGroup: MetaGroup = { id: prefix + (max + 1), meta: [] };
-            metaGroup.meta.push({ type: 'AMCommentId', value: reply.commentId });
-            metaGroup.meta.push({ type: 'Username', value: reply.userName });
-            metaGroup.meta.push({ type: 'CommentText', value: reply.commentText });
-            metaGroup.meta.push({ type: 'ReplyTo', value: reply.repliesTo });
-            this.metadata.data.push(metaGroup);
-            this.selectedTab = this.tabHolder.getSelected();
-            this.electron.ipcRenderer.send('save-metadata', { metaId: this.metaId, metadata: this.metadata });
-        } else {
-            let length:number = this.metadata.data.length;
-            for (let i=0 ; i<length;i++) {
-                let group: MetaGroup = this.metadata.data[i];
-                if (group.id === reply.replyId) {
-                    group.meta = [];
-                    group.meta.push({ type: 'AMCommentId', value: reply.commentId });
-                    group.meta.push({ type: 'Username', value: reply.userName });
-                    group.meta.push({ type: 'CommentText', value: reply.commentText });
-                    group.meta.push({ type: 'ReplyTo', value: reply.repliesTo });
-                    this.selectedTab = reply.repliesTo;
-                    this.electron.ipcRenderer.send('save-metadata', { metaId: this.metaId, metadata: this.metadata });
-                }
+    getRepliesTo(item: MetaGroup): string {
+        let meta: MetaEntry[] = item.meta;
+        for (let i = 0; i < meta.length; i++) {
+            if (meta[i].type === 'ReplyTo') {
+                return meta[i].value;
             }
         }
+        return '';
+    }
 
+    parseFields(meta: MetaEntry[]): CommentField[] {
+        let fields: CommentField[] = [];
+        for (let i = 0; i < meta.length; i++) {
+            let entry: MetaEntry = meta[i];
+            let field: CommentField = new CommentField(entry.type, entry.value);
+            fields.push(field);
+        }
+        return fields;
     }
 
     addComment(comment: ReviewComment): void {
         if (!this.metadata || !this.metadata.data) {
             this.metadata = { project: this.metaId.project, file: this.metaId.file, data: [] };
         }
-        let length: number = this.metadata ? this.metadata.data?.length : 0;
+        let length: number = this.metadata.data.length;
         let max: number = 0;
         let prefix: string = '';
         for (let i: number = 0; i < length; i++) {
@@ -443,12 +330,10 @@ class CommentsDialog {
             if (group.id === comment.id) {
                 // already exists
                 group.meta = [];
-                group.meta.push({ type: 'AMCommentId', value: comment.commentId });
-                group.meta.push({ type: 'Username', value: comment.userName });
-                group.meta.push({ type: 'CommentText', value: comment.commentText });
-                group.meta.push({ type: 'Severity', value: comment.severity });
-                group.meta.push({ type: 'Category', value: comment.category });
-                group.meta.push({ type: 'AppliesTo', value: comment.appliesTo });
+                let fields: CommentField[] = comment.fields;
+                for (let field of fields) {
+                    group.meta.push({ type: field.storeAs, value: field.value });
+                }
                 this.selectedTab = comment.id;
                 this.electron.ipcRenderer.send('save-metadata', { metaId: this.metaId, metadata: this.metadata });
                 return;
@@ -464,14 +349,57 @@ class CommentsDialog {
             prefix = this.metaId.unit ? "uc" : "gc";
         }
         let metaGroup: MetaGroup = { id: prefix + (max + 1), meta: [] };
-        metaGroup.meta.push({ type: 'AMCommentId', value: comment.commentId });
-        metaGroup.meta.push({ type: 'Username', value: comment.userName });
-        metaGroup.meta.push({ type: 'CommentText', value: comment.commentText });
-        metaGroup.meta.push({ type: 'Severity', value: comment.severity });
-        metaGroup.meta.push({ type: 'Category', value: comment.category });
-        metaGroup.meta.push({ type: 'AppliesTo', value: comment.appliesTo });
+        let fields: CommentField[] = comment.fields;
+        for (let field of fields) {
+            metaGroup.meta.push({ type: field.storeAs, value: field.value });
+        }
         this.metadata.data.push(metaGroup);
         this.selectedTab = prefix + (max + 1);
+        this.electron.ipcRenderer.send('save-metadata', { metaId: this.metaId, metadata: this.metadata });
+    }
+
+    addReply(reply: CommentReply): void {
+        if (!this.metadata || !this.metadata.data) {
+            // can't be a reply without a comment
+            //send an error message and return
+            this.electron.ipcRenderer.send('show-message', { type: 'error', message: 'Cannot add a reply without a comment', parent: 'commentsDialog' });
+            return;
+        }
+        let length: number = this.metadata.data.length;
+        let max: number = 0;
+        let prefix: string = '';
+        for (let i: number = 0; i < length; i++) {
+            let group: MetaGroup = this.metadata.data[i];
+            if (group.id === reply.replyId) {
+                // already exists
+                group.meta = [];
+                group.meta.push({ type: 'ReplyTo', value: reply.repliesTo });
+                let fields: CommentField[] = reply.fields;
+                for (let field of fields) {
+                    group.meta.push({ type: field.storeAs, value: field.value });
+                }
+                this.selectedTab = reply.repliesTo;
+                this.electron.ipcRenderer.send('save-metadata', { metaId: this.metaId, metadata: this.metadata });
+                return;
+            }
+            let id: string | undefined = group.id;
+            if (id) {
+                prefix = id.substring(0, 2);
+                let num: number = parseInt(id.substring(2), 10);
+                max = Math.max(max, num);
+            }
+        }
+        if (prefix === '') {
+            prefix = this.metaId.unit ? "uc" : "gc  ";
+        }
+        let metaGroup: MetaGroup = { id: prefix + (max + 1), meta: [] };
+        metaGroup.meta.push({ type: 'ReplyTo', value: reply.repliesTo });
+        let fields: CommentField[] = reply.fields;
+        for (let field of fields) {
+            metaGroup.meta.push({ type: field.storeAs, value: field.value });
+        }
+        this.metadata.data.push(metaGroup);
+        this.selectedTab = reply.repliesTo;
         this.electron.ipcRenderer.send('save-metadata', { metaId: this.metaId, metadata: this.metadata });
     }
 }

@@ -21,6 +21,7 @@ interface Preferences {
     userName: string;
     catalog: string;
     srx: string;
+    reviewModel: string;
     paragraphSegmentation: boolean;
     acceptUnconfirmed: boolean;
     fuzzyTermSearches: boolean;

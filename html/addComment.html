@@ -9,64 +9,10 @@
 
 <body class="dialogBody" onload="new AddComment();">
     <div class="paddedArea">
-        <table class="fill_width">
-            <tr>
-                <td class="middle"><label for="commentId" class="noWrap">ID</label></td>
-                <td class="middle fill_width"><input id="commentId" class="table_input"></td>
-            </tr>
-
-            <tr>
-                <td class="middle"><label for="category" class="noWrap">Category</label></td>
-                <td class="middle fill_width">
-                    <select id="category" class="table_select">
-                        <option value="none"></option>
-                        <option value="informational">Informational</option>
-                        <option value="national">National Adaptation</option>
-                        <option value="translation" selected>Translation Verification</option>
-                        <option value="layout">Layout</option>
-                        <option value="country">Within-Country Communication</option>
-                    </select>
-                </td>
-            </tr>
-
-            <tr>
-                <td class="middle"><label for="severity" class="noWrap">Severity</label></td>
-                <td class="middle fill_width">
-                    <select id="severity" class="table_select">
-                        <option value="none" selected></option>
-                        <option value="code1">Code 1</option>
-                        <option value="code2">Code 2</option>
-                        <option value="code3">Code 3</option>
-                        <option value="code1?">Code 1?</option>
-                    </select>
-                </td>
-            </tr>
-
-            <tr>
-                <td class="middle"><label for="appliesTo" class="noWrap">Applies To</label></td>
-                <td class="middle fill_width">
-                    <select id="appliesTo" class="table_select">
-                        <option value="none"></option>
-                        <option value="source">Source</option>
-                        <option value="target" selected>Target</option>
-                        <option value="ignorable">Ignorable</option>
-                    </select>
-                </td>
-            </tr>
-
-            <tr>
-                <td class="middle"><label for="username" class="noWrap">User Name</label></td>
-                <td class="middle fill_width"><input id="username" class="table_input"></td>
-            </tr>
+        <table class="fill_width" id="main">
 
         </table>
-
-        <div>
-            <label for="comment" class="noWrap">Comment</label>
-            <textarea id="comment" class="fill_width" style="height: 80px;"></textarea>
-        </div>
     </div>
-
     <div class="buttonArea" id="saveButtons">
         <button id="saveComment">Save Comment</button>
     </div>
