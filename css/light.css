@@ -127,6 +127,14 @@ thead tr {
 	height: fit-content;
 }
 
+.alternate tr:nth-child(even) td:nth-last-child(1) {
+	border-left: 2px solid var(--gray10);
+}
+
+.alternate tr:nth-child(odd) td:nth-last-child(1) {
+	border-left: 2px solid var(--gray50);
+}
+
 .stripes tr {
 	border-top: 2px solid var(--gray50);
 	border-bottom: 2px solid var(--gray50);
@@ -1069,5 +1077,4 @@ svg.stats {
 	color: var(--black) !important;
 	fill: var(--black) !important;
 	stroke: var(--black) !important;
-	stroke-width: 2 !important;
 }
