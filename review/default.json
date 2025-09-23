@@ -1,0 +1,203 @@
+{
+    "unitComents": [
+        {
+            "id": "Category",
+            "elementType": "select",
+            "options": [
+                {
+                    "value": "none",
+                    "text": ""
+                },
+                {
+                    "value": "00",
+                    "text": "Mistranslation"
+                },
+                {
+                    "value": "01",
+                    "text": "Accuracy"
+                },
+                {
+                    "value": "02",
+                    "text": "Terminology"
+                },
+                {
+                    "value": "03",
+                    "text": "Style"
+                },
+                {
+                    "value": "04",
+                    "text": "Consistency"
+                },
+                {
+                    "value": "05",
+                    "text": "Grammar"
+                },
+                {
+                    "value": "06",
+                    "text": "Spelling"
+                },
+                {
+                    "value": "07",
+                    "text": "Punctuation"
+                },
+                {
+                    "value": "08",
+                    "text": "Semantics"
+                },
+                {
+                    "value": "09",
+                    "text": "Country-specific usage"
+                },
+                {
+                    "value": "10",
+                    "text": "Other"
+                }
+            ],
+            "label": "Category",
+            "storeAs": "category",
+            "required": false
+        },
+        {
+            "id": "Severity",
+            "elementType": "select",
+            "options": [
+                {
+                    "value": "none",
+                    "text": ""
+                },
+                {
+                    "value": "minor",
+                    "text": "Minor"
+                },
+                {
+                    "value": "major",
+                    "text": "Major"
+                },
+                {
+                    "value": "critical",
+                    "text": "Critical"
+                }
+            ],
+            "label": "Severity",
+            "storeAs": "severity",
+            "required": false
+        },
+        {
+            "id": "appliesTo",
+            "elementType": "select",
+            "options": [
+                {
+                    "value": "none",
+                    "text": ""
+                },
+                {
+                    "value": "source",
+                    "text": "Source"
+                },
+                {
+                    "value": "target",
+                    "text": "Target"
+                }
+            ],
+            "label": "Applies To",
+            "storeAs": "appliesTo",
+            "required": false
+        },
+        {
+            "id": "UserName",
+            "elementType": "input",
+            "label": "User Name",
+            "storeAs": "userName",
+            "default": "@USERNAME",
+            "required": false
+        },
+        {
+            "id": "Comment",
+            "elementType": "textarea",
+            "label": "Comment",
+            "storeAs": "comment",
+            "required": true
+        }
+    ],
+    "unitReplies": [
+        {
+            "id": "status",
+            "elementType": "select",
+            "options": [
+                {
+                    "value": "none",
+                    "text": ""
+                },
+                {
+                    "value": "fixed",
+                    "text": "Fixed"
+                },
+                {
+                    "value": "ignore",
+                    "text": "Ignore"
+                },
+                {
+                    "value": "wontfix",
+                    "text": "Won't Fix"
+                },
+                {
+                    "value": "nothing",
+                    "text": "Nothing to do"
+                }
+
+            ],
+            "label": "Status",
+            "storeAs": "status",
+            "required": false
+        },
+        {
+            "id": "UserName",
+            "elementType": "input",
+            "label": "User Name",
+            "storeAs": "userName",
+            "default": "@USERNAME",
+            "required": false
+        },
+        {
+            "id": "Comment",
+            "elementType": "textarea",
+            "label": "Comment",
+            "storeAs": "comment",
+            "required": true
+        }
+    ],
+    "fileComments": [
+        {
+            "id": "UserName",
+            "elementType": "input",
+            "label": "User Name",
+            "storeAs": "userName",
+            "default": "@USERNAME",
+            "required": false
+        },
+        {
+            "id": "Comment",
+            "elementType": "textarea",
+            "label": "Comment",
+            "storeAs": "comment",
+            "required": true
+        }
+    ],
+    "fileReplies": [
+        {
+            "id": "UserName",
+            "elementType": "input",
+            "label": "User Name",
+            "storeAs": "userName",
+            "default": "@USERNAME",
+            "required": false
+        },
+        {
+            "id": "Comment",
+            "elementType": "textarea",
+            "label": "Comment",
+            "storeAs": "comment",
+            "required": true
+        }
+    ]
+}
