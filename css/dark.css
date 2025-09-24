@@ -2,7 +2,7 @@
 @import "./neutrals.css";
 
 :root {
-	--error-color: #960303;
+	--error-color: #d50000;
 	--even-unit: #1a46a7;
 	--odd-unit: #e20606;
 	--orange: #ff9800;
@@ -825,10 +825,6 @@ th svg {
 	margin-left: 8px;
 }
 
-.error {
-	color: var(--error-color) !important;
-}
-
 .preserve {
 	white-space: pre-wrap;
 }
@@ -1073,4 +1069,9 @@ svg.stats {
 	color: var(--gray10) !important;
 	fill: var(--gray10) !important;
 	stroke: var(--gray10) !important;
+}
+
+.required {
+	color: var(--error-color);
+	margin-left: 2px;
 }

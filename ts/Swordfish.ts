@@ -1606,6 +1606,10 @@ export class Swordfish {
                     Swordfish.currentPreferences.srx = Swordfish.path.join(app.getAppPath(), 'srx', 'default.srx');
                     writeFileSync(Swordfish.path.join(app.getPath('appData'), app.name, 'preferences.json'), JSON.stringify(Swordfish.currentPreferences, null, 2));
                 }
+                if (!existsSync(Swordfish.currentPreferences.reviewModel)) {
+                    Swordfish.currentPreferences.reviewModel = Swordfish.path.join(app.getAppPath(), 'review', 'default.json');
+                    writeFileSync(Swordfish.path.join(app.getPath('appData'), app.name, 'preferences.json'), JSON.stringify(Swordfish.currentPreferences, null, 2));
+                }
                 if (Swordfish.mainWindow) {
                     Swordfish.mainWindow.webContents.send('set-rows-page', Swordfish.currentPreferences.pageRows);
                 }

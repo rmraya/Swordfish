@@ -47,6 +47,12 @@ class CommentsDialog {
             if (event.code === 'Escape') {
                 this.electron.ipcRenderer.send('close-review-comments');
             }
+            if (event.code === 'PageUp' && (event.ctrlKey || event.metaKey)) {
+                this.tabHolder.selectPrevious();
+            }
+            if (event.code === 'PageDown' && (event.ctrlKey || event.metaKey)) {
+                this.tabHolder.selectNext();
+            }
         });
         this.electron.ipcRenderer.on('add-comment', (event: Electron.IpcRendererEvent, comment: ReviewComment) => {
             this.addComment(comment);

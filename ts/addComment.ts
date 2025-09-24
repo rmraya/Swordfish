@@ -71,6 +71,13 @@ class AddComment {
                 label.textContent = field.label;
                 td.appendChild(label);
 
+                if (field.required === true) {
+                    let span: HTMLSpanElement = document.createElement('span');
+                    span.classList.add('required');
+                    span.textContent = '*';
+                    td.appendChild(span);
+                }
+
                 td = document.createElement('td');
                 td.classList.add('middle');
                 td.classList.add('fill_width');
@@ -103,6 +110,13 @@ class AddComment {
                 label.textContent = field.label;
                 td.appendChild(label);
 
+                if (field.required === true) {
+                    let span: HTMLSpanElement = document.createElement('span');
+                    span.classList.add('required');
+                    span.textContent = '*';
+                    td.appendChild(span);
+                }
+
                 td = document.createElement('td');
                 td.classList.add('middle');
                 td.classList.add('fill_width');
@@ -134,6 +148,13 @@ class AddComment {
                 label.className = 'noWrap';
                 label.textContent = field.label;
                 td.appendChild(label);
+
+                if (field.required === true) {
+                    let span: HTMLSpanElement = document.createElement('span');
+                    span.classList.add('required');
+                    span.textContent = '*';
+                    td.appendChild(span);
+                }
 
                 let textarea: HTMLTextAreaElement = document.createElement('textarea');
                 textarea.id = field.storeAs;

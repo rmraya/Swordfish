@@ -829,10 +829,6 @@ th svg {
 	margin-left: 8px;
 }
 
-.error {
-	color: var(--error-color) !important;
-}
-
 .preserve {
 	white-space: pre-wrap;
 }
@@ -1077,4 +1073,9 @@ svg.stats {
 	color: var(--white) !important;
 	fill: var(--white) !important;
 	stroke: var(--white) !important;
+}
+
+.required {
+	color: var(--error-color);
+	margin-left: 2px;
 }
