@@ -9,7 +9,7 @@
  * Contributors:
  *     Maxprograms - initial API and implementation
  *******************************************************************************/
-import { Catalog, ContentHandler, XMLAttribute, XMLElement } from "typesxml";
+import { Catalog, ContentHandler, Grammar, XMLAttribute, XMLElement } from "typesxml";
 import { MTManager } from "./mtManager";
 
 export class MTContentHandler implements ContentHandler {
@@ -132,6 +132,10 @@ export class MTContentHandler implements ContentHandler {
 
     translate(segment: XMLElement): void {
         let source: XMLElement = segment.getChild('source') as XMLElement;
-        this.mtManager.translateElement(source, this.project, this.file, this.unit, this.segment,[]);
+        this.mtManager.translateElement(source, this.project, this.file, this.unit, this.segment, []);
+    }
+
+    getGrammar(): Grammar | undefined {
+        return undefined;
     }
 }
