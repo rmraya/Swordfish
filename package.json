@@ -24,8 +24,8 @@
         "typescript": "^5.9.3"
     },
     "dependencies": {
-        "mtengines": "^3.6.0",
-        "typesxml": "^1.12.0",
-        "typesbcp47": "^1.12.0"
+        "mtengines": "^3.8.0",
+        "typesxml": "^1.14.0",
+        "typesbcp47": "^1.13.0"
     }
 }

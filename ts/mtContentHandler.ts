@@ -138,4 +138,8 @@ export class MTContentHandler implements ContentHandler {
     getGrammar(): Grammar | undefined {
         return undefined;
     }
+
+    setGrammar(grammar: Grammar | undefined): void {
+        // do nothing
+    }
 }
