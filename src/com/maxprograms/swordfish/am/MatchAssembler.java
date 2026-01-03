@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007 - 2025 Maxprograms.
+ * Copyright (c) 2007-2026 Maxprograms.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 1.0
@@ -25,9 +25,13 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.UUID;
 import java.util.Vector;
 
 import javax.xml.parsers.ParserConfigurationException;
+
+import org.json.JSONObject;
+import org.xml.sax.SAXException;
 
 import com.maxprograms.languages.Language;
 import com.maxprograms.languages.LanguageUtils;
@@ -46,9 +50,6 @@ import com.maxprograms.xml.SAXBuilder;
 import com.maxprograms.xml.TextNode;
 import com.maxprograms.xml.XMLNode;
 import com.maxprograms.xml.XMLUtils;
-
-import org.json.JSONObject;
-import org.xml.sax.SAXException;
 
 public class MatchAssembler {
 
@@ -145,8 +146,8 @@ public class MatchAssembler {
                     properties.put("creationtool", Constants.APPNAME);
                     properties.put("creationtoolversion", Constants.VERSION);
 
-                    Match newMatch = new Match(uncleanElement(newSource), uncleanElement(newTarget), similarity, "Auto",
-                            properties);
+                    Match newMatch = new Match(UUID.randomUUID().toString(), uncleanElement(newSource),
+                            uncleanElement(newTarget), similarity, "Auto", properties);
                     result.add(newMatch);
                 }
             }
@@ -207,7 +208,8 @@ public class MatchAssembler {
                 properties.put("creationtool", Constants.APPNAME);
                 properties.put("creationtoolversion", Constants.VERSION);
 
-                Match newMatch = new Match(uncleanElement(newSource), uncleanElement(newTarget), 0, "Auto", properties);
+                Match newMatch = new Match(UUID.randomUUID().toString(), uncleanElement(newSource),
+                        uncleanElement(newTarget), 0, "Auto", properties);
                 result.add(newMatch);
             }
         }

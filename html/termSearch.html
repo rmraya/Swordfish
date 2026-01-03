@@ -7,7 +7,8 @@
     <link rel="stylesheet" type="text/css" href="../css/fonts.css">
 </head>
 
-<body class="dialogBody" onload="new TermSearch();">
+<body class="dialogBody">
+    <div class="paddedArea">
     <table class="fill_width">
         <tr>
             <td class="middle noWrap">
@@ -53,11 +54,15 @@
             </td>
         </tr>
     </table>
+    </div>
     <div class="buttonArea">
         <button id="searchButton">Search Term</button>
     </div>
 
-    <script src="../js/termSearch.js"></script>
+    <script>
+        const { TermSearch } = require('../js/termSearch.js');
+        new TermSearch();
+    </script>
 </body>
 
 </html>

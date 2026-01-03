@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007 - 2025 Maxprograms.
+ * Copyright (c) 2007-2026 Maxprograms.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 1.0
@@ -10,9 +10,12 @@
  *     Maxprograms - initial API and implementation
  *******************************************************************************/
 
-class MtMatches {
+import { ipcRenderer } from "electron";
+import { Match } from "./match.js";
+import { Tab, TabHolder } from "./tabs.js";
+import { TranslationView } from "./translation.js";
 
-    electron = require('electron');
+export class MtMatches {
 
     container: HTMLDivElement;
     projectId: string;
@@ -51,7 +54,7 @@ class MtMatches {
             '<span class="tooltiptext bottomTooltip">Get Machine Translations</span>';
         requestTranslation.className = 'tooltip bottomTooltip';
         requestTranslation.addEventListener('click', () => {
-            this.electron.ipcRenderer.send('get-mt-matches');
+            ipcRenderer.send('get-mt-matches');
         });
         toolbar.appendChild(requestTranslation);
 
@@ -60,11 +63,11 @@ class MtMatches {
             '<span class="tooltiptext bottomTooltip">Get Auto-Translation</span>';
         autoTranslate.className = 'tooltip bottomTooltip';
         autoTranslate.addEventListener('click', () => {
-            this.electron.ipcRenderer.send('get-am-matches');
+            ipcRenderer.send('get-am-matches');
         });
         toolbar.appendChild(autoTranslate);
 
-        this.electron.ipcRenderer.on('accept-mt-match', () => {
+        ipcRenderer.on('accept-mt-match', () => {
             this.acceptTranslation();
         });
 
@@ -84,7 +87,7 @@ class MtMatches {
         this.matches.clear();
     }
 
-    add(match: Match) {
+    add(match: Match): void {
         this.matches.set(match.matchId, match);
         let tab = new Tab(match.matchId, match.origin, false, this.tabHolder);
 
@@ -108,7 +111,7 @@ class MtMatches {
         let selected: string = this.tabHolder.getSelected();
         let match: Match | undefined = this.matches.get(selected);
         if (match) {
-            this.electron.ipcRenderer.send('accept-match', match);
+            ipcRenderer.send('accept-match', match);
         }
     }
 

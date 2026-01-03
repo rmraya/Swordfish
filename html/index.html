@@ -8,22 +8,16 @@
     <link rel="stylesheet" type="text/css" href="../css/fonts.css">
 </head>
 
-<body onload="new Main();" style="overflow: hidden;">
+<body style="overflow: hidden;">
 
     <div id="mainContainer" style="overflow: hidden;"></div>
 
     <div id="status" class="status" style="display:none;"></div>
 
-    <script src="../js/tabs.js"></script>
-    <script src="../js/divider.js"></script>
-    <script src="../js/projects.js"></script>
-    <script src="../js/memories.js"></script>
-    <script src="../js/glossaries.js"></script>
-    <script src="../js/Main.js"></script>
-    <script src="../js/mtMatches.js"></script>
-    <script src="../js/tmMatches.js"></script>
-    <script src="../js/termsPanel.js"></script>
-    <script src="../js/translation.js"></script>
+    <script>
+        const { Main } = require('../js/Main.js');
+        new Main();
+    </script>
 </body>
 
 </html>

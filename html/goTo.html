@@ -7,18 +7,23 @@
     <link rel="stylesheet" type="text/css" href="../css/fonts.css">
 </head>
 
-<body class="dialogBody" onload="new GoTo();">
-    <table class="fill_width">
-        <tr>
-            <td class="middle noWrap"><label for="segInput">Segment Number</label></td>
-            <td class="middle fill_width"><input id="segInput" class="table_input">
-            </td>
-        </tr>
-    </table>
+<body class="dialogBody">
+    <div class="paddedArea">
+        <table class="fill_width">
+            <tr>
+                <td class="middle noWrap"><label for="segInput">Segment Number</label></td>
+                <td class="middle fill_width"><input id="segInput" class="table_input">
+                </td>
+            </tr>
+        </table>
+    </div>
     <div class="buttonArea">
         <button id="goToButton">Go To Segment</button>
     </div>
-    <script src="../js/goTo.js"></script>
+    <script>
+        const { GoTo } = require('../js/goTo.js');
+        new GoTo();
+    </script>
 </body>
 
 </html>

@@ -7,13 +7,18 @@
     <link rel="stylesheet" type="text/css" href="../css/fonts.css">
 </head>
 
-<body class="dialogBody" onload="new PromptDialog();">
-    <textarea id="promptInput" class="fill_width" style="height: 450px;"></textarea>
+<body class="dialogBody">
+    <div class="paddedArea">
+        <textarea id="promptInput" class="fill_width" style="height: 450px;"></textarea>
+    </div>
     <div class="buttonArea">
         <button id="copyButton">Copy Prompt to Clipboard</button>
         <button id="pasteButton">Insert AI Response in Segment</button>
     </div>
-    <script src="../js/promptDialog.js"></script>
+    <script>
+        const { PromptDialog } = require('../js/promptDialog.js');
+        new PromptDialog();
+    </script>
 </body>
 
 </html>

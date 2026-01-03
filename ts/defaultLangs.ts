@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007 - 2025 Maxprograms.
+ * Copyright (c) 2007-2026 Maxprograms.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 1.0
@@ -10,17 +10,18 @@
  *     Maxprograms - initial API and implementation
  *******************************************************************************/
 
-class DefaultLanguages {
+import { ipcRenderer, IpcRendererEvent } from "electron";
+import { LanguageInterface } from "./language.js";
 
-    electron = require('electron');
+export class DefaultLanguages {
 
     constructor() {
-        this.electron.ipcRenderer.send('get-theme');
-        this.electron.ipcRenderer.send('get-languages');
-        this.electron.ipcRenderer.on('set-languages', (event: Electron.IpcRendererEvent, arg: any) => {
+        ipcRenderer.send('get-theme');
+        ipcRenderer.send('get-languages');
+        ipcRenderer.on('set-languages', (event: IpcRendererEvent, arg: any) => {
             this.setLanguages(arg);
         });
-        this.electron.ipcRenderer.on('set-theme', (event: Electron.IpcRendererEvent, theme: string) => {
+        ipcRenderer.on('set-theme', (event: IpcRendererEvent, theme: string) => {
             (document.getElementById('theme') as HTMLLinkElement).href = theme;
         });
         (document.getElementById('save') as HTMLButtonElement).addEventListener('click', () => {
@@ -28,7 +29,7 @@ class DefaultLanguages {
         });
         document.addEventListener('keydown', (event: KeyboardEvent) => {
             if (event.code === 'Escape') {
-                this.electron.ipcRenderer.send('close-defaultLangs');
+                ipcRenderer.send('close-defaultLangs');
             }
             if (event.code === 'Enter' || event.code === 'NumpadEnter') {
                 this.savePreferences();
@@ -36,7 +37,7 @@ class DefaultLanguages {
         });
         (document.getElementById('srcLangSelect') as HTMLSelectElement).focus();
         setTimeout(() => {
-            this.electron.ipcRenderer.send('set-height', { window: 'defaultLangs', width: document.body.clientWidth, height: document.body.clientHeight });
+            ipcRenderer.send('set-height', { window: 'defaultLangs', width: document.body.clientWidth, height: document.body.clientHeight });
         }, 200);
     }
 
@@ -48,7 +49,7 @@ class DefaultLanguages {
         }
         (document.getElementById('srcLangSelect') as HTMLSelectElement).innerHTML = languageOptions;
         (document.getElementById('tgtLangSelect') as HTMLSelectElement).innerHTML = languageOptions;
-        this.electron.ipcRenderer.send('get-preferences');
+        ipcRenderer.send('get-preferences');
     }
 
     savePreferences(): void {
@@ -56,6 +57,6 @@ class DefaultLanguages {
             srcLang: (document.getElementById('srcLangSelect') as HTMLSelectElement).value,
             tgtLang: (document.getElementById('tgtLangSelect') as HTMLSelectElement).value,
         }
-        this.electron.ipcRenderer.send('save-languages', prefs);
+        ipcRenderer.send('save-languages', prefs);
     }
 }

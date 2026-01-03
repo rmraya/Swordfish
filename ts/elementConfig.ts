@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007 - 2025 Maxprograms.
+ * Copyright (c) 2007-2026 Maxprograms.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 1.0
@@ -10,32 +10,33 @@
  *     Maxprograms - initial API and implementation
  *******************************************************************************/
 
-class ElementConfig {
+import { ipcRenderer, IpcRendererEvent } from "electron";
 
-    electron = require('electron');
+export class ElementConfig {
+
     elementConfig: any;
 
     constructor() {
-        this.electron.ipcRenderer.send('get-theme');
-        this.electron.ipcRenderer.send('get-version');
-        this.electron.ipcRenderer.on('set-theme', (event: Electron.IpcRendererEvent, theme: string) => {
+        ipcRenderer.send('get-theme');
+        ipcRenderer.send('get-version');
+        ipcRenderer.on('set-theme', (event: IpcRendererEvent, theme: string) => {
             (document.getElementById('theme') as HTMLLinkElement).href = theme;
         });
         document.addEventListener('keydown', (event: KeyboardEvent) => {
             if (event.code === 'Escape') {
-                this.electron.ipcRenderer.send('close-elementConfig');
+                ipcRenderer.send('close-elementConfig');
             }
             if (event.code === 'Enter' || event.code === 'NumpadEnter') {
                 this.saveElement();
             }
         });
         (document.getElementById('save') as HTMLButtonElement).addEventListener('click', () => { this.saveElement(); });
-        this.electron.ipcRenderer.send('get-elementConfig');
-        this.electron.ipcRenderer.on('set-elementConfig', (event: Electron.IpcRendererEvent, arg: any) => {
+        ipcRenderer.send('get-elementConfig');
+        ipcRenderer.on('set-elementConfig', (event: IpcRendererEvent, arg: any) => {
             this.setValues(arg);
         })
         setTimeout(() => {
-            this.electron.ipcRenderer.send('set-height', { window: 'configElement', width: document.body.clientWidth, height: document.body.clientHeight });
+            ipcRenderer.send('set-height', { window: 'configElement', width: document.body.clientWidth, height: document.body.clientHeight });
         }, 200);
     }
 
@@ -63,7 +64,7 @@ class ElementConfig {
     saveElement(): void {
         let name: string = (document.getElementById('name') as HTMLInputElement).value;
         if (name === '') {
-            this.electron.ipcRenderer.send('show-message', { type: 'warning', message: 'Enter element name', parent: 'elementConfig' });
+            ipcRenderer.send('show-message', { type: 'warning', message: 'Enter element name', parent: 'elementConfig' });
             return;
         }
         this.elementConfig.name = name;
@@ -72,9 +73,9 @@ class ElementConfig {
         this.elementConfig.attributes = (document.getElementById('attributes') as HTMLInputElement).value;
         this.elementConfig.keepSpace = (document.getElementById('keep') as HTMLInputElement).checked ? 'yes': '';        
         if (this.elementConfig.type === 'inline' && this.elementConfig.inline === '') {
-            this.electron.ipcRenderer.send('show-message', { type: 'warning', message: 'Select inline type', parent: 'elementConfig' });
+            ipcRenderer.send('show-message', { type: 'warning', message: 'Select inline type', parent: 'elementConfig' });
             return;
         }
-        this.electron.ipcRenderer.send('save-elementConfig', this.elementConfig);
+        ipcRenderer.send('save-elementConfig', this.elementConfig);
     }
 }

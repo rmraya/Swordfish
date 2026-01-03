@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007 - 2025 Maxprograms.
+ * Copyright (c) 2007-2026 Maxprograms.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 1.0
@@ -10,10 +10,12 @@
  *     Maxprograms - initial API and implementation
  *******************************************************************************/
 
+import { ipcRenderer } from "electron";
+import { Match } from "./match.js";
+import { Tab, TabHolder } from "./tabs.js";
+import { TranslationView } from "./translation.js";
 
-class TmMatches {
-
-    electron = require('electron');
+export class TmMatches {
 
     container: HTMLDivElement;
     projectId: string;
@@ -53,7 +55,7 @@ class TmMatches {
             '<span class="tooltiptext bottomTooltip">Get Translations from Memory</span>';
         requestTranslation.className = 'tooltip bottomTooltip';
         requestTranslation.addEventListener('click', () => {
-            this.electron.ipcRenderer.send('search-memory');
+            ipcRenderer.send('search-memory');
         });
         toolbar.appendChild(requestTranslation);
 
@@ -72,10 +74,10 @@ class TmMatches {
         this.origin.style.marginLeft = '10px';
         toolbar.appendChild(this.origin);
 
-        this.electron.ipcRenderer.on('accept-tm-match', () => {
+        ipcRenderer.on('accept-tm-match', () => {
             this.acceptTranslation();
         });
-        this.electron.ipcRenderer.on('fix-selected-match', () => {
+        ipcRenderer.on('fix-selected-match', () => {
             this.fixMatch();
         });
 
@@ -96,7 +98,7 @@ class TmMatches {
         this.matches.clear();
     }
 
-    add(match: Match) {
+    add(match: Match): void {
         this.matches.set(match.matchId, match);
         let tab = new Tab(match.matchId, match.similarity + '%', false, this.tabHolder);
 
@@ -165,7 +167,7 @@ class TmMatches {
         }
         let selected: string = this.tabHolder.getSelected();
         let match: Match = this.matches.get(selected) as Match;
-        this.electron.ipcRenderer.send('accept-match', match);
+        ipcRenderer.send('accept-match', match);
     }
 
     fixMatch(): void {
@@ -174,7 +176,7 @@ class TmMatches {
         }
         let selected: string = this.tabHolder.getSelected();
         let match: Match = this.matches.get(selected) as Match;
-        this.electron.ipcRenderer.send('fix-match', match);
+        ipcRenderer.send('fix-match', match);
     }
 
     nextMatch(): void {

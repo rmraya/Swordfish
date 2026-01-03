@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007 - 2025 Maxprograms.
+ * Copyright (c) 2007-2026 Maxprograms.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 1.0
@@ -10,7 +10,9 @@
  *     Maxprograms - initial API and implementation
  *******************************************************************************/
 
-interface Project {
+import { SourceFile } from "./sourceFile.js";
+
+export interface Project {
     id: string;
     description: string;
     status: string;
@@ -25,4 +27,5 @@ interface Project {
     glossary: string;
     svg: string;
     version: string;
+    review?: boolean;
 }

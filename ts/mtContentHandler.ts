@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007 - 2025 Maxprograms.
+ * Copyright (c) 2007-2026 Maxprograms.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 1.0
@@ -9,8 +9,9 @@
  * Contributors:
  *     Maxprograms - initial API and implementation
  *******************************************************************************/
+
 import { Catalog, ContentHandler, Grammar, XMLAttribute, XMLElement } from "typesxml";
-import { MTManager } from "./mtManager";
+import { MTManager } from "./mtManager.js";
 
 export class MTContentHandler implements ContentHandler {
 
@@ -22,11 +23,14 @@ export class MTContentHandler implements ContentHandler {
     srcLang: string = '';
     tgtLang: string = '';
 
+    pendingTranslations: Promise<void>[];
+
     stack: Array<XMLElement>
 
-    constructor(mtManager: MTManager, project: string) {
+    constructor(mtManager: MTManager, project: string, pendingTranslations: Promise<void>[]) {
         this.mtManager = mtManager;
         this.project = project;
+        this.pendingTranslations = pendingTranslations;
         this.stack = new Array<XMLElement>();
     }
 
@@ -35,6 +39,10 @@ export class MTContentHandler implements ContentHandler {
     }
 
     setCatalog(catalog: Catalog): void {
+        // do nothing
+    }
+
+    setValidating(validating: boolean): void {
         // do nothing
     }
 
@@ -132,7 +140,8 @@ export class MTContentHandler implements ContentHandler {
 
     translate(segment: XMLElement): void {
         let source: XMLElement = segment.getChild('source') as XMLElement;
-        this.mtManager.translateElement(source, this.project, this.file, this.unit, this.segment, []);
+        let promise: Promise<void> = this.mtManager.translateElement(source, this.project, this.file, this.unit, this.segment, []);
+        this.pendingTranslations.push(promise);
     }
 
     getGrammar(): Grammar | undefined {

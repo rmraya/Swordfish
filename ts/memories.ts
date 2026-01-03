@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007 - 2025 Maxprograms.
+ * Copyright (c) 2007-2026 Maxprograms.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 1.0
@@ -10,10 +10,12 @@
  *     Maxprograms - initial API and implementation
  *******************************************************************************/
 
-class MemoriesView {
+import { ipcRenderer, IpcRendererEvent } from "electron";
+import { Memory } from "./memory.js";
 
-    electron = require('electron');
+export class MemoriesView {
 
+    
     container: HTMLDivElement;
     topBar: HTMLDivElement;
     tableContainer: HTMLDivElement;
@@ -227,9 +229,16 @@ class MemoriesView {
         this.tbody = document.createElement('tbody');
         memoriesTable.appendChild(this.tbody);
 
-        this.electron.ipcRenderer.on('set-memories', (event: Electron.IpcRendererEvent, arg: any) => {
+        ipcRenderer.on('set-memories', (event: IpcRendererEvent, arg: any) => {
             this.memories = arg;
             this.displayMemories();
+        });
+
+        ipcRenderer.on('set-memories-svg', (event: IpcRendererEvent, svg: string) => {
+            let emptyMemories = document.getElementById('emptyMemories') as HTMLTableCellElement;
+            if (emptyMemories) {
+                emptyMemories.innerHTML = svg + '<p>No Memories Yet</p>';
+            }
         });
 
         this.loadMemories();
@@ -261,42 +270,42 @@ class MemoriesView {
     }
 
     loadMemories(): void {
-        this.electron.ipcRenderer.send('get-memories');
+        ipcRenderer.send('get-memories');
     }
 
     addMemory(): void {
-        this.electron.ipcRenderer.send('show-add-memory');
+        ipcRenderer.send('show-add-memory');
     }
 
     removeMemory(): void {
         if (this.selected.size === 0) {
-            this.electron.ipcRenderer.send('show-message', { type: 'warning', message: 'Select memory' });
+            ipcRenderer.send('show-message', { type: 'warning', message: 'Select memory' });
             return;
         }
         let memories: string[] = [];
         for (let key of this.selected.keys()) {
             memories.push(key);
         }
-        this.electron.ipcRenderer.send('remove-memories', memories);
+        ipcRenderer.send('remove-memories', memories);
     }
 
     importTMX(): void {
         if (this.selected.size === 0) {
-            this.electron.ipcRenderer.send('show-message', { type: 'warning', message: 'Select memory' });
+            ipcRenderer.send('show-message', { type: 'warning', message: 'Select memory' });
             return;
         }
         if (this.selected.size > 1) {
-            this.electron.ipcRenderer.send('show-message', { type: 'warning', message: 'Select one memory' });
+            ipcRenderer.send('show-message', { type: 'warning', message: 'Select one memory' });
             return;
         }
         for (let key of this.selected.keys()) {
-            this.electron.ipcRenderer.send('show-import-tmx', key);
+            ipcRenderer.send('show-import-tmx', key);
         }
     }
 
     exportTMX(): void {
         if (this.selected.size === 0) {
-            this.electron.ipcRenderer.send('show-message', { type: 'warning', message: 'Select memory' });
+            ipcRenderer.send('show-message', { type: 'warning', message: 'Select memory' });
             return;
         }
         let memories: any[] = [];
@@ -304,7 +313,7 @@ class MemoriesView {
             let mem = { memory: key, name: (this.selected.get(key) as Memory).name }
             memories.push(mem);
         }
-        this.electron.ipcRenderer.send('export-memories', memories);
+        ipcRenderer.send('export-memories', memories);
     }
 
     displayMemories() {
@@ -371,6 +380,18 @@ class MemoriesView {
             return 0;
         });
         this.tbody.innerHTML = '';
+        if (this.memories.length === 0) {
+            let tr = document.createElement('tr');
+            this.tbody.appendChild(tr);
+            let td = document.createElement('td');
+            td.id = 'emptyMemories';
+            td.classList.add('svgContainer');
+            td.classList.add('center');
+            td.colSpan = 8;
+            tr.appendChild(td);
+            ipcRenderer.send('get-memories-svg', 'no_memories.svg');
+            return;
+        }
         let length = this.memories.length;
         for (let i = 0; i < length; i++) {
             let mem = this.memories[i];
@@ -454,17 +475,17 @@ class MemoriesView {
 
     concordanceSearch(): void {
         if (this.selected.size === 0) {
-            this.electron.ipcRenderer.send('show-message', { type: 'warning', message: 'Select memory' });
+            ipcRenderer.send('show-message', { type: 'warning', message: 'Select memory' });
             return;
         }
         let memories: string[] = [];
         for (let key of this.selected.keys()) {
             memories.push(key);
         }
-        this.electron.ipcRenderer.send('concordance-search', memories );
+        ipcRenderer.send('concordance-search', memories );
     }
 
     browseRemoteTM(): void {
-        this.electron.ipcRenderer.send('show-server-settings', { type: 'memory' });
+        ipcRenderer.send('show-server-settings', { type: 'memory' });
     }
 }

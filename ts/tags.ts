@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007 - 2025 Maxprograms.
+ * Copyright (c) 2007-2026 Maxprograms.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 1.0
@@ -10,16 +10,16 @@
  *     Maxprograms - initial API and implementation
  *******************************************************************************/
 
-class Tags {
+import { ipcRenderer, IpcRendererEvent } from "electron";
 
-    electron = require('electron');
+export class Tags {
 
     tagsList: number[] = [];
     tagInput: HTMLInputElement;
 
     constructor() {
-        this.electron.ipcRenderer.send('get-theme');
-        this.electron.ipcRenderer.on('set-theme', (event: Electron.IpcRendererEvent, theme: string) => {
+        ipcRenderer.send('get-theme');
+        ipcRenderer.on('set-theme', (event: IpcRendererEvent, theme: string) => {
             (document.getElementById('theme') as HTMLLinkElement).href = theme;
         });
         this.tagInput = document.getElementById('tagInput') as HTMLInputElement;
@@ -28,19 +28,19 @@ class Tags {
         });
         this.tagInput.focus();
         setTimeout(() => {
-            this.electron.ipcRenderer.send('set-height', { window: 'tags', width: document.body.clientWidth, height: document.body.clientHeight });
+            ipcRenderer.send('set-height', { window: 'tags', width: document.body.clientWidth, height: document.body.clientHeight });
         }, 200);
     }
 
     parseKey(event: KeyboardEvent): void {
         let code: string = event.code;
         if (code === 'Escape') {
-            this.electron.ipcRenderer.send('close-tags');
+            ipcRenderer.send('close-tags');
         }
         if (code === 'Enter' || code === 'NumpadEnter') {
             let value: string = this.tagInput.value;
             if (value.length > 0) {
-                this.electron.ipcRenderer.send('forward-tag', { tag: Number.parseInt(value, 10) });
+                ipcRenderer.send('forward-tag', { tag: Number.parseInt(value, 10) });
                 this.tagInput.value = '';
             }
         }

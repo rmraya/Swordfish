@@ -7,79 +7,83 @@
     <link rel="stylesheet" type="text/css" href="../css/fonts.css">
 </head>
 
-<body class="dialogBody" onload="new EditProject();">
-    <table class="fill_width">
-        <tr>
-            <td class="middle">
-                <label for="nameInput">Name</label>
-            </td>
-            <td class="fill_width middle">
-                <input type="text" id="nameInput" class="table_input">
-            </td>
-        </tr>
-    </table>
+<body class="dialogBody">
+    <div class="paddedArea">
+        <table class="fill_width">
+            <tr>
+                <td class="middle">
+                    <label for="nameInput">Name</label>
+                </td>
+                <td class="fill_width middle">
+                    <input type="text" id="nameInput" class="table_input">
+                </td>
+            </tr>
+        </table>
 
-    <table>
-        <tr>
-            <td style="width:50%; padding:0;">
-                <table class="fill_width">
-                    <tr style="height: 2.5em;">
-                        <td class="middle noWrap">
-                            <label for="srcLangSelect">Source Language</label>
-                        </td>
-                        <td class="fill_width middle form_height">
-                            <select id="srcLangSelect" class="fill_width">
-        
-                            </select>
-                        </td>
-                    </tr>
-                    <tr style="height: 2.5em;">
-                        <td class="middle noWrap">
-                            <label for="tgtLangSelect">Target Language</label>
-                        </td>
-                        <td class="fill_width middle form_height">
-                            <select id="tgtLangSelect" class="fill_width">
-        
-                            </select>
-                        </td>
-                    </tr>
-                </table>
-            </td>
-            <td style="width:50%; padding:0;">
-                <table class="fill_width">
-                    <tr style="height: 2.5em;">
-                        <td class="middle">
-                            <label for="subjectInput">Subject</label>
-                        </td>
-                        <td class="fill_width middle form_height">
-                            <input list="subjects" id="subjectInput" class="table_input middle" >
-                            <datalist id="subjects">
-                                <option value="none">
-                            </datalist>
-                        </td>
-                    </tr>
-                    <tr style="height: 2.5em;">
-                        <td class="middle">
-                            <label for="clientInput">Client</label>
-                        </td>
-                        <td class="fill_width middle form_height">
-                            <input list="clients" id="clientInput" class="table_input middle" >
-                            <datalist id="clients">
-                                <option value="none">
-                            </datalist>
-                        </td>
-                    </tr>
-                </table>
-            </td>
-        </tr>
-    </table>
+        <table>
+            <tr>
+                <td style="width:50%; padding:0;">
+                    <table class="fill_width">
+                        <tr style="height: 2.5em;">
+                            <td class="middle noWrap">
+                                <label for="srcLangSelect">Source Language</label>
+                            </td>
+                            <td class="fill_width middle form_height">
+                                <select id="srcLangSelect" class="fill_width">
 
+                                </select>
+                            </td>
+                        </tr>
+                        <tr style="height: 2.5em;">
+                            <td class="middle noWrap">
+                                <label for="tgtLangSelect">Target Language</label>
+                            </td>
+                            <td class="fill_width middle form_height">
+                                <select id="tgtLangSelect" class="fill_width">
+
+                                </select>
+                            </td>
+                        </tr>
+                    </table>
+                </td>
+                <td style="width:50%; padding:0;">
+                    <table class="fill_width">
+                        <tr style="height: 2.5em;">
+                            <td class="middle">
+                                <label for="subjectInput">Subject</label>
+                            </td>
+                            <td class="fill_width middle form_height">
+                                <input list="subjects" id="subjectInput" class="table_input middle">
+                                <datalist id="subjects">
+                                    <option value="none">
+                                </datalist>
+                            </td>
+                        </tr>
+                        <tr style="height: 2.5em;">
+                            <td class="middle">
+                                <label for="clientInput">Client</label>
+                            </td>
+                            <td class="fill_width middle form_height">
+                                <input list="clients" id="clientInput" class="table_input middle">
+                                <datalist id="clients">
+                                    <option value="none">
+                                </datalist>
+                            </td>
+                        </tr>
+                    </table>
+                </td>
+            </tr>
+        </table>
+    </div>
     <div class="buttonArea">
         <span class="fill_width">&nbsp;</span>
         <button id="updateProjectButton">Update Project</button>
     </div>
-    
-    <script src="../js/editProject.js"></script>
+
+    <script>
+        const { EditProject } = require('../js/editProject.js');
+        new EditProject();
+    </script>
 </body>
 
 </html>

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007 - 2025 Maxprograms.
+ * Copyright (c) 2007-2026 Maxprograms.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 1.0
@@ -10,17 +10,17 @@
  *     Maxprograms - initial API and implementation
  *******************************************************************************/
 
-class SortSegments {
+import { ipcRenderer, IpcRendererEvent } from "electron";
 
-    electron = require('electron');
+export class SortSegments {
 
     constructor() {
-        this.electron.ipcRenderer.send('get-theme');
-        this.electron.ipcRenderer.on('set-theme', (event: Electron.IpcRendererEvent, theme: string) => {
+        ipcRenderer.send('get-theme');
+        ipcRenderer.on('set-theme', (event: IpcRendererEvent, theme: string) => {
             (document.getElementById('theme') as HTMLLinkElement).href = theme;
         });
-        this.electron.ipcRenderer.send('get-sort-params');
-        this.electron.ipcRenderer.on('set-params', (event: Electron.IpcRendererEvent, arg: any) => {
+        ipcRenderer.send('get-sort-params');
+        ipcRenderer.on('set-params', (event: IpcRendererEvent, arg: any) => {
             this.setParams(arg);
         });
         document.addEventListener('keydown', (event: KeyboardEvent) => {
@@ -46,7 +46,7 @@ class SortSegments {
             (document.getElementById('target') as HTMLInputElement).disabled = true;
         });
         setTimeout(() => {
-            this.electron.ipcRenderer.send('set-height', { window: 'sortSegments', width: document.body.clientWidth, height: document.body.clientHeight });
+            ipcRenderer.send('set-height', { window: 'sortSegments', width: document.body.clientWidth, height: document.body.clientHeight });
         }, 200);
     }
 
@@ -73,10 +73,10 @@ class SortSegments {
             sortOption = (document.getElementById('source') as HTMLInputElement).checked ? 'source' : 'target';
         }
         let sortDesc: boolean = (document.getElementById('descending') as HTMLInputElement).checked;
-        this.electron.ipcRenderer.send('sort-options', { sortOption: sortOption, sortDesc: sortDesc });
+        ipcRenderer.send('sort-options', { sortOption: sortOption, sortDesc: sortDesc });
     }
 
     clearSorting(): void {
-        this.electron.ipcRenderer.send('sort-options', { sortOption: 'none', sortDesc: false });
+        ipcRenderer.send('sort-options', { sortOption: 'none', sortDesc: false });
     }
 }

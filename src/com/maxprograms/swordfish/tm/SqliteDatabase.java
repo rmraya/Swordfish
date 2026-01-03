@@ -516,7 +516,7 @@ public class SqliteDatabase implements ITmEngine {
                                             Element prop = pt.next();
                                             propsMap.put(prop.getAttributeValue("type"), prop.getText());
                                         }
-                                        Match match = new Match(source, target, distance, dbname, propsMap);
+                                        Match match = new Match(tuid, source, target, distance, dbname, propsMap);
                                         result.add(match);
                                     }
                                 }

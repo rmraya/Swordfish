@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007 - 2025 Maxprograms.
+ * Copyright (c) 2007-2026 Maxprograms.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 1.0
@@ -34,6 +34,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
+import java.util.UUID;
 import java.util.Vector;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
@@ -59,7 +60,8 @@ public class RemoteDatabase implements ITmEngine {
     private String ticket;
     private SAXBuilder builder;
 
-    public RemoteDatabase(String server, String user, String password, String dbname) throws IOException, URISyntaxException {
+    public RemoteDatabase(String server, String user, String password, String dbname)
+            throws IOException, URISyntaxException {
         if (server.endsWith("/")) {
             server = server.substring(0, server.length() - 1);
         }
@@ -135,7 +137,8 @@ public class RemoteDatabase implements ITmEngine {
     }
 
     @Override
-    public int storeTMX(String tmxFile, String project, String customer, String subject) throws IOException, URISyntaxException {
+    public int storeTMX(String tmxFile, String project, String customer, String subject)
+            throws IOException, URISyntaxException {
         File zipFile = zip(tmxFile);
         String uploaded = upload(zipFile);
         JSONObject params = new JSONObject();
@@ -382,7 +385,8 @@ public class RemoteDatabase implements ITmEngine {
     }
 
     @Override
-    public Element getTu(String tuid) throws IOException, SAXException, ParserConfigurationException, URISyntaxException {
+    public Element getTu(String tuid)
+            throws IOException, SAXException, ParserConfigurationException, URISyntaxException {
         JSONObject params = new JSONObject();
         params.put("command", "getTu");
         params.put("memory", dbname);
@@ -392,7 +396,8 @@ public class RemoteDatabase implements ITmEngine {
     }
 
     @Override
-    public void removeTu(String tuid) throws IOException, SAXException, ParserConfigurationException, URISyntaxException {
+    public void removeTu(String tuid)
+            throws IOException, SAXException, ParserConfigurationException, URISyntaxException {
         JSONObject params = new JSONObject();
         params.put("command", "removeTu");
         params.put("memory", dbname);
@@ -409,6 +414,7 @@ public class RemoteDatabase implements ITmEngine {
     }
 
     private Match toMatch(JSONObject json) throws SAXException, IOException, ParserConfigurationException {
+        String id = json.has("id") ? json.getString("id") : UUID.randomUUID().toString();
         Element source = toElement(json.getString("source"));
         Element target = toElement(json.getString("target"));
         int similarity = json.getInt("similarity");
@@ -423,7 +429,7 @@ public class RemoteDatabase implements ITmEngine {
                 properties.put(key, props.getString(key));
             }
         }
-        return new Match(source, target, similarity, origin, properties);
+        return new Match(id, source, target, similarity, origin, properties);
     }
 
     private Element toElement(String string) throws SAXException, IOException, ParserConfigurationException {

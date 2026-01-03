@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Review Comments</title>
+    <link rel="stylesheet" type="text/css" href="../css/layout.css">
+    <link id="theme" rel="stylesheet" type="text/css" href="../css/light.css">
+    <link rel="stylesheet" type="text/css" href="../css/fonts.css">
+</head>
+
+<body style="overflow: hidden;">
+    <div id="main">
+        <!-- metadata -->
+    </div>
+
+    <div id="buttons" class="buttonArea">
+        <button id="addComment">Add Comment</button>
+        <button id="editComment">Edit Comment</button>
+        <button id="removeComment">Remove Comment</button>
+    </div>
+
+    <script>
+        const { CommentsDialog } = require('../js/commentsDialog.js');
+        new CommentsDialog();
+    </script>
+</body>
+
+</html>

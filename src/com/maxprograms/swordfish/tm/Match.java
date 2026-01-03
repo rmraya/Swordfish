@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007 - 2025 Maxprograms.
+ * Copyright (c) 2007-2026 Maxprograms.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 1.0
@@ -16,24 +16,28 @@ import java.io.IOException;
 import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.UUID;
 
 import javax.xml.parsers.ParserConfigurationException;
-
-import com.maxprograms.swordfish.xliff.XliffUtils;
-import com.maxprograms.xml.Element;
 
 import org.json.JSONObject;
 import org.xml.sax.SAXException;
 
+import com.maxprograms.swordfish.xliff.XliffUtils;
+import com.maxprograms.xml.Element;
+
 public class Match implements Comparable<Match> {
 
+	private String id;
 	private Element source;
 	private Element target;
 	private int similarity;
 	private String origin;
 	private Map<String, String> properties;
 
-	public Match(Element source, Element target, int similarity, String origin, Map<String, String> properties) {
+	public Match(String id, Element source, Element target, int similarity, String origin,
+			Map<String, String> properties) {
+		this.id = id;
 		this.source = source;
 		this.target = target;
 		this.similarity = similarity;
@@ -42,6 +46,11 @@ public class Match implements Comparable<Match> {
 	}
 
 	public Match(JSONObject json) throws SAXException, IOException, ParserConfigurationException {
+		if (json.has("id")) {
+			id = json.getString("id");
+		} else {
+			id = UUID.randomUUID().toString();
+		}
 		source = XliffUtils.buildElement(json.getString("source"));
 		target = XliffUtils.buildElement(json.getString("target"));
 		similarity = json.getInt("similarity");
@@ -59,6 +68,7 @@ public class Match implements Comparable<Match> {
 
 	public JSONObject toJSON() {
 		JSONObject result = new JSONObject();
+		result.put("id", id);
 		result.put("source", source.toString());
 		result.put("target", target.toString());
 		result.put("similarity", similarity);
@@ -73,6 +83,14 @@ public class Match implements Comparable<Match> {
 			result.put("properties", props);
 		}
 		return result;
+	}
+
+	public String getId() {
+		return id;
+	}
+
+	public void setId(String id) {
+		this.id = id;
 	}
 
 	public Element getSource() {
@@ -139,8 +157,9 @@ public class Match implements Comparable<Match> {
 	@Override
 	public boolean equals(Object obj) {
 		if (obj instanceof Match m) {
-			return source.equals(m.getSource()) && target.equals(m.getTarget()) && similarity == m.getSimilarity()
-					&& origin.equals(m.getOrigin()) && properties.equals(m.getProperties());
+			return id.equals(m.getId()) && source.equals(m.getSource()) && target.equals(m.getTarget())
+					&& similarity == m.getSimilarity() && origin.equals(m.getOrigin())
+					&& properties.equals(m.getProperties());
 		}
 		return false;
 	}

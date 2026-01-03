@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007 - 2025 Maxprograms.
+ * Copyright (c) 2007-2026 Maxprograms.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 1.0
@@ -10,15 +10,15 @@
  *     Maxprograms - initial API and implementation
  *******************************************************************************/
 
-class ReplaceText {
+import { ipcRenderer, IpcRendererEvent } from "electron";
 
-    electron = require('electron');
+export class ReplaceText {
 
     project: string = '';
 
     constructor() {
-        this.electron.ipcRenderer.send('get-theme');
-        this.electron.ipcRenderer.on('set-theme', (event: Electron.IpcRendererEvent, theme: string) => {
+        ipcRenderer.send('get-theme');
+        ipcRenderer.on('set-theme', (event: IpcRendererEvent, theme: string) => {
             (document.getElementById('theme') as HTMLLinkElement).href = theme;
         });
         document.addEventListener('keydown', (event: KeyboardEvent) => {
@@ -26,11 +26,11 @@ class ReplaceText {
                 this.replaceText();
             }
             if (event.code === 'Escape') {
-                this.electron.ipcRenderer.send('close-replaceText');
+                ipcRenderer.send('close-replaceText');
             }
         });
-        this.electron.ipcRenderer.send('get-project-param');
-        this.electron.ipcRenderer.on('set-project', (event: Electron.IpcRendererEvent, project: string) => {
+        ipcRenderer.send('get-project-param');
+        ipcRenderer.on('set-project', (event: IpcRendererEvent, project: string) => {
             this.project = project;
         });
         (document.getElementById('replace') as HTMLButtonElement).addEventListener('click', () => {
@@ -38,7 +38,7 @@ class ReplaceText {
         });
         (document.getElementById('searchText') as HTMLInputElement).focus();
         setTimeout(() => {
-            this.electron.ipcRenderer.send('set-height', { window: 'replaceText', width: document.body.clientWidth, height: document.body.clientHeight });
+            ipcRenderer.send('set-height', { window: 'replaceText', width: document.body.clientWidth, height: document.body.clientHeight });
         }, 200);
     }
 
@@ -46,7 +46,7 @@ class ReplaceText {
         let searchInput: HTMLInputElement = document.getElementById('searchText') as HTMLInputElement;
         let searchText: string = searchInput.value;
         if (searchText === '') {
-            this.electron.ipcRenderer.send('show-message', { type: 'warning', message: 'Enter text to search', parent: 'replaceText' });
+            ipcRenderer.send('show-message', { type: 'warning', message: 'Enter text to search', parent: 'replaceText' });
             return;
         }
         let replaceInput: HTMLInputElement = document.getElementById('replaceText') as HTMLInputElement;
@@ -54,7 +54,7 @@ class ReplaceText {
         let regExp: HTMLInputElement = document.getElementById('regularExpression') as HTMLInputElement;
         let caseSensitive: HTMLInputElement = document.getElementById('caseSensitive') as HTMLInputElement;
 
-        this.electron.ipcRenderer.send('search-replace', {
+        ipcRenderer.send('search-replace', {
             project: this.project,
             searchText: searchText,
             replaceText: replaceText,

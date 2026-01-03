@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007 - 2025 Maxprograms.
+ * Copyright (c) 2007-2026 Maxprograms.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 1.0
@@ -10,8 +10,11 @@
  *     Maxprograms - initial API and implementation
  *******************************************************************************/
 
-class ProjectsView {
-    electron = require('electron');
+import { ipcRenderer, IpcRendererEvent, webUtils } from "electron";
+import { Main } from "./Main.js";
+import { Project } from "./project.js";
+
+export class ProjectsView {
 
     container: HTMLDivElement;
     topBar: HTMLDivElement;
@@ -33,7 +36,7 @@ class ProjectsView {
 
         let addFileButton = document.createElement('a');
         addFileButton.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path d="m 21,16.166667 h -2.454545 v -2.5 h -1.636364 v 2.5 h -2.454546 v 1.666666 h 2.454546 v 2.5 h 1.636364 v -2.5 H 21 Z m -5.727273,4.166666 V 22 H 3 V 2 h 8.336455 c 2.587909,0 8.027181,6.0191667 8.027181,8.011667 V 12 h -1.636363 v -1.285833 c 0,-3.4225003 -4.909091,-2.0475003 -4.909091,-2.0475003 0,0 1.242,-5 -2.158364,-5 H 4.6363636 V 20.333333 Z" /></svg>' +
-            '<span class="tooltiptext bottomTooltip">Translate Single File</span>';
+            '<span class="tooltiptext bottomTooltip">Translate/Review Single File</span>';
         addFileButton.className = 'tooltip bottomTooltip';
         addFileButton.addEventListener('click', () => {
             this.addFile();
@@ -60,7 +63,7 @@ class ProjectsView {
 
         let translateButton = document.createElement('a');
         translateButton.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 0 24 24" width="24"><path d="M12.87 15.07l-2.54-2.51.03-.03c1.74-1.94 2.98-4.17 3.71-6.53H17V4h-7V2H8v2H1v1.99h11.17C11.5 7.92 10.44 9.75 9 11.35 8.07 10.32 7.3 9.19 6.69 8h-2c.73 1.63 1.73 3.17 2.98 4.56l-5.09 5.02L4 19l5-5 3.11 3.11.76-2.04zM18.5 10h-2L12 22h2l1.12-3h4.75L21 22h2l-4.5-12zm-2.62 7l1.62-4.33L19.12 17h-3.24z"/></svg>' +
-            '<span class="tooltiptext bottomTooltip">Translate Project</span>';
+            '<span class="tooltiptext bottomTooltip">Translate/Review Project</span>';
         translateButton.className = 'tooltip bottomTooltip';
         translateButton.addEventListener('click', () => {
             this.openProjects();
@@ -70,7 +73,7 @@ class ProjectsView {
 
         let exportTranslations = document.createElement('a');
         exportTranslations.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 0 24 24" width="24"><path d="M19 12v7H5v-7H3v7c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2v-7h-2zm-6 .67l2.59-2.58L17 11.5l-5 5-5-5 1.41-1.41L11 12.67V3h2v9.67z"/></svg>' +
-            '<span class="tooltiptext bottomTooltip">Export Translations</span>';
+            '<span class="tooltiptext bottomTooltip">Export Translations/Reviews</span>';
         exportTranslations.className = 'tooltip bottomTooltip';
         exportTranslations.addEventListener('click', () => {
             this.exportTranslations();
@@ -98,7 +101,7 @@ class ProjectsView {
 
         let exportXliffButton = document.createElement('a');
         exportXliffButton.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" enable-background="new 0 0 24 24" height="24" viewBox="0 0 24 24" width="24"><g><path d="M19,12v7H5v-7H3v7c0,1.1,0.9,2,2,2h14c1.1,0,2-0.9,2-2v-7H19z"/><polygon points="14.1,4.9 14.1,3 21,3 21,9.9 19.1,9.9 19.1,6.3 9.4,16 8,14.4 17.7,4.9 "/></g></svg>' +
-            '<span class="tooltiptext bottomTooltip">Export as XLIFF 2.0</span>';
+            '<span class="tooltiptext bottomTooltip">Export XLIFF File for Review</span>';
         exportXliffButton.className = 'tooltip bottomTooltip';
         exportXliffButton.addEventListener('click', () => {
             this.exportXLIFF();
@@ -108,10 +111,10 @@ class ProjectsView {
 
         let importXliffButton = document.createElement('a');
         importXliffButton.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" enable-background="new 0 0 24 24" height="24" viewBox="0 0 24 24" width="24"><g><path d="M19,12v7H5v-7H3v7c0,1.1,0.9,2,2,2h14c1.1,0,2-0.9,2-2v-7H19z"/><polygon points="9,14.1 9,16 15.9,16 15.9,9.1 14,9.1 14,12.7 4.3,3 3,4.6 12.6,14.1 "/></g></svg>' +
-            '<span class="tooltiptext bottomTooltip">Update from XLIFF File</span>';
+            '<span class="tooltiptext bottomTooltip">Import Reviewed XLIFF File</span>';
         importXliffButton.className = 'tooltip bottomTooltip';
         importXliffButton.addEventListener('click', () => {
-            this.electron.ipcRenderer.send('import-xliff-review');
+            ipcRenderer.send('import-xliff-review');
         });
         this.topBar.appendChild(importXliffButton);
 
@@ -130,7 +133,7 @@ class ProjectsView {
             '<span class="tooltiptext bottomTooltip">Import Project</span>';
         importButton.className = 'tooltip bottomTooltip';
         importButton.addEventListener('click', () => {
-            this.electron.ipcRenderer.send('import-xliff');
+            ipcRenderer.send('import-xliff');
         });
         importButton.style.marginLeft = '10px';
         this.topBar.appendChild(importButton);
@@ -195,6 +198,23 @@ class ProjectsView {
                 this.projectSortAscending = !this.projectSortAscending;
             } else {
                 this.projectSortFielD = 'status';
+                this.projectSortAscending = true;
+            }
+            this.displayProjects();
+        });
+        headerRow.appendChild(th);
+
+        th = document.createElement('th');
+        th.classList.add('noWrap');
+        th.innerHTML = 'Type';
+        th.id = 'project-type';
+        th.addEventListener('click', () => {
+            (document.getElementById('project-' + this.projectSortFielD) as HTMLTableCellElement).classList.remove('arrow-down');
+            (document.getElementById('project-' + this.projectSortFielD) as HTMLTableCellElement).classList.remove('arrow-up');
+            if (this.projectSortFielD === 'type') {
+                this.projectSortAscending = !this.projectSortAscending;
+            } else {
+                this.projectSortFielD = 'type';
                 this.projectSortAscending = true;
             }
             this.displayProjects();
@@ -300,9 +320,16 @@ class ProjectsView {
 
         // event listeners
 
-        this.electron.ipcRenderer.on('set-projects', (event: Electron.IpcRendererEvent, arg: any) => {
+        ipcRenderer.on('set-projects', (event: IpcRendererEvent, arg: any) => {
             this.projects = arg;
             this.displayProjects();
+        });
+
+        ipcRenderer.on('set-projects-svg', (event: IpcRendererEvent, svg: string) => {
+            let emptyProjects = document.getElementById('emptyProjects') as HTMLTableCellElement;
+            if (emptyProjects) {
+                emptyProjects.innerHTML = svg + '<p>No Projects Yet</p';
+            }
         });
 
         // finish setup
@@ -341,11 +368,11 @@ class ProjectsView {
         let filesList: string[] = [];
         if (event.dataTransfer) {
             for (const f of event.dataTransfer.files) {
-                filesList.push(this.electron.webUtils.getPathForFile(f));
+                filesList.push(webUtils.getPathForFile(f));
             }
         }
         if (filesList.length > 0) {
-            this.electron.ipcRenderer.send('files-dropped', filesList);
+            ipcRenderer.send('files-dropped', filesList);
         }
         container.style.opacity = '1';
     }
@@ -367,33 +394,33 @@ class ProjectsView {
     }
 
     loadProjects(arg: any): void {
-        this.electron.ipcRenderer.send('get-projects');
+        ipcRenderer.send('get-projects');
         if (arg.open) {
             this.shouldOpen = arg.open;
         }
     }
 
     addFile(): void {
-        this.electron.ipcRenderer.send('show-add-file');
+        ipcRenderer.send('show-add-file');
     }
 
     addProject(): void {
-        this.electron.ipcRenderer.send('show-add-project');
+        ipcRenderer.send('show-add-project');
     }
 
     editProject() {
         let selected: Map<string, Project> = this.getSelectedProjects();
         if (selected.size === 0) {
-            this.electron.ipcRenderer.send('show-message', { type: 'warning', message: 'Select project' });
+            ipcRenderer.send('show-message', { type: 'warning', message: 'Select project' });
             return;
         }
         if (selected.size > 1) {
-            this.electron.ipcRenderer.send('show-message', { type: 'warning', message: 'Select one project' });
+            ipcRenderer.send('show-message', { type: 'warning', message: 'Select one project' });
             return;
         }
         for (let key of selected.keys()) {
             let project: Project = selected.get(key) as Project;
-            this.electron.ipcRenderer.send('show-edit-project', project);
+            ipcRenderer.send('show-edit-project', project);
         }
     }
 
@@ -436,13 +463,13 @@ class ProjectsView {
     openProjects(): void {
         let selected = this.getSelectedProjects();
         if (selected.size === 0) {
-            this.electron.ipcRenderer.send('show-message', { type: 'warning', message: 'Select project' });
+            ipcRenderer.send('show-message', { type: 'warning', message: 'Select project' });
             return;
         }
         for (let key of selected.keys()) {
             let project: Project | undefined = selected.get(key);
             if (project) {
-                this.electron.ipcRenderer.send('add-tab', project);
+                ipcRenderer.send('add-tab', project);
             }
         }
     }
@@ -450,37 +477,37 @@ class ProjectsView {
     exportTranslations(): void {
         let selected = this.getSelectedProjects();
         if (selected.size === 0) {
-            this.electron.ipcRenderer.send('show-message', { type: 'warning', message: 'Select project' });
+            ipcRenderer.send('show-message', { type: 'warning', message: 'Select project' });
             return;
         }
         if (selected.size > 1) {
-            this.electron.ipcRenderer.send('show-message', { type: 'warning', message: 'Select one project' });
+            ipcRenderer.send('show-message', { type: 'warning', message: 'Select one project' });
             return;
         }
         for (let key of selected.keys()) {
-            this.electron.ipcRenderer.send('export-translations', selected.get(key));
+            ipcRenderer.send('export-translations', selected.get(key));
         }
     }
 
     generateStatistics(): void {
         let selected = this.getSelectedProjects();
         if (selected.size === 0) {
-            this.electron.ipcRenderer.send('show-message', { type: 'warning', message: 'Select project' });
+            ipcRenderer.send('show-message', { type: 'warning', message: 'Select project' });
             return;
         }
         if (selected.size > 1) {
-            this.electron.ipcRenderer.send('show-message', { type: 'warning', message: 'Select one project' });
+            ipcRenderer.send('show-message', { type: 'warning', message: 'Select one project' });
             return;
         }
         for (let key of selected.keys()) {
-            this.electron.ipcRenderer.send('generate-statistics', { project: key });
+            ipcRenderer.send('generate-statistics', { project: key });
         }
     }
 
     removeProjects(): void {
         let selected = this.getSelectedProjects();
         if (selected.size === 0) {
-            this.electron.ipcRenderer.send('show-message', { type: 'warning', message: 'Select project' });
+            ipcRenderer.send('show-message', { type: 'warning', message: 'Select project' });
             return;
         }
         let projects: string[] = [];
@@ -490,27 +517,27 @@ class ProjectsView {
             } else {
                 let project: Project | undefined = this.getProject(key);
                 if (project) {
-                    this.electron.ipcRenderer.send('show-message', { type: 'warning', message: 'Project "' + project.description + '" is open' });
+                    ipcRenderer.send('show-message', { type: 'warning', message: 'Project "' + project.description + '" is open' });
                 }
             }
         }
-        this.electron.ipcRenderer.send('remove-projects', { projects: projects });
+        ipcRenderer.send('remove-projects', { projects: projects });
     }
 
     exportXLIFF(): void {
         let selected = this.getSelectedProjects();
         if (selected.size === 0) {
-            this.electron.ipcRenderer.send('show-message', { type: 'warning', message: 'Select project' });
+            ipcRenderer.send('show-message', { type: 'warning', message: 'Select project' });
             return;
         }
         if (selected.size > 1) {
-            this.electron.ipcRenderer.send('show-message', { type: 'warning', message: 'Select one project' });
+            ipcRenderer.send('show-message', { type: 'warning', message: 'Select one project' });
             return;
         }
         for (let key of selected.keys()) {
             let project: Project | undefined = selected.get(key);
             if (project) {
-                this.electron.ipcRenderer.send('export-xliff-review', { projectId: key, description: project.description });
+                ipcRenderer.send('export-xliff-review', { projectId: key, description: project.description });
             }
         }
     }
@@ -518,17 +545,17 @@ class ProjectsView {
     exportProject(): void {
         let selected = this.getSelectedProjects();
         if (selected.size === 0) {
-            this.electron.ipcRenderer.send('show-message', { type: 'warning', message: 'Select project' });
+            ipcRenderer.send('show-message', { type: 'warning', message: 'Select project' });
             return;
         }
         if (selected.size > 1) {
-            this.electron.ipcRenderer.send('show-message', { type: 'warning', message: 'Select one project' });
+            ipcRenderer.send('show-message', { type: 'warning', message: 'Select one project' });
             return;
         }
         for (let key of selected.keys()) {
             let project: Project | undefined = selected.get(key);
             if (project) {
-                this.electron.ipcRenderer.send('export-xliff', { projectId: key, description: project.description });
+                ipcRenderer.send('export-xliff', { projectId: key, description: project.description });
             }
         }
     }
@@ -536,17 +563,17 @@ class ProjectsView {
     exportTMX(): void {
         let selected = this.getSelectedProjects();
         if (selected.size === 0) {
-            this.electron.ipcRenderer.send('show-message', { type: 'warning', message: 'Select project' });
+            ipcRenderer.send('show-message', { type: 'warning', message: 'Select project' });
             return;
         }
         if (selected.size > 1) {
-            this.electron.ipcRenderer.send('show-message', { type: 'warning', message: 'Select one project' });
+            ipcRenderer.send('show-message', { type: 'warning', message: 'Select one project' });
             return;
         }
         for (let key of selected.keys()) {
             let project: Project | undefined = selected.get(key);
             if (project) {
-                this.electron.ipcRenderer.send('export-tmx-file', { projectId: key, description: project.description });
+                ipcRenderer.send('export-tmx-file', { projectId: key, description: project.description });
             }
         }
     }
@@ -554,17 +581,17 @@ class ProjectsView {
     exportMatches(): void {
         let selected = this.getSelectedProjects();
         if (selected.size === 0) {
-            this.electron.ipcRenderer.send('show-message', { type: 'warning', message: 'Select project' });
+            ipcRenderer.send('show-message', { type: 'warning', message: 'Select project' });
             return;
         }
         if (selected.size > 1) {
-            this.electron.ipcRenderer.send('show-message', { type: 'warning', message: 'Select one project' });
+            ipcRenderer.send('show-message', { type: 'warning', message: 'Select one project' });
             return;
         }
         for (let key of selected.keys()) {
             let project: Project | undefined = selected.get(key);
             if (project) {
-                this.electron.ipcRenderer.send('export-tm-matches', { projectId: key, description: project.description });
+                ipcRenderer.send('export-tm-matches', { projectId: key, description: project.description });
             }
         }
     }
@@ -572,17 +599,17 @@ class ProjectsView {
     exportTerms(): void {
         let selected = this.getSelectedProjects();
         if (selected.size === 0) {
-            this.electron.ipcRenderer.send('show-message', { type: 'warning', message: 'Select project' });
+            ipcRenderer.send('show-message', { type: 'warning', message: 'Select project' });
             return;
         }
         if (selected.size > 1) {
-            this.electron.ipcRenderer.send('show-message', { type: 'warning', message: 'Select one project' });
+            ipcRenderer.send('show-message', { type: 'warning', message: 'Select one project' });
             return;
         }
         for (let key of selected.keys()) {
             let project: Project | undefined = selected.get(key);
             if (project) {
-                this.electron.ipcRenderer.send('export-terms', { projectId: key, description: project.description });
+                ipcRenderer.send('export-terms', { projectId: key, description: project.description });
             }
         }
     }
@@ -600,6 +627,17 @@ class ProjectsView {
                     return this.projectSortAscending ? -1 : 1;
                 }
                 if (a.description.toLocaleLowerCase() > b.description.toLocaleLowerCase()) {
+                    return this.projectSortAscending ? 1 : -1;
+                }
+                return 0;
+            }
+            if (this.projectSortFielD === 'type') {
+                let a_type = a.review ? 'Review' : 'Translation';
+                let b_type = b.review ? 'Review' : 'Translation';
+                if (a_type < b_type) {
+                    return this.projectSortAscending ? -1 : 1;
+                }
+                if (a_type > b_type) {
                     return this.projectSortAscending ? 1 : -1;
                 }
                 return 0;
@@ -661,6 +699,19 @@ class ProjectsView {
             return 0;
         });
         this.tbody.innerHTML = '';
+        if (this.projects.length === 0) {
+            let tr = document.createElement('tr');
+            this.tbody.appendChild(tr);
+            let td = document.createElement('td');
+            td.id = 'emptyProjects';
+            td.classList.add('svgContainer');
+            td.classList.add('center');
+            td.colSpan = 8;
+            tr.appendChild(td);
+            ipcRenderer.send('get-projects-svg', 'no_projects.svg');
+            Main.resizePanels();
+            return;
+        }
         let length = this.projects.length;
         for (let i = 0; i < length; i++) {
             let p: Project = this.projects[i];
@@ -717,6 +768,12 @@ class ProjectsView {
             tr.append(td);
 
             td = document.createElement('td');
+            td.classList.add('center');
+            td.classList.add('list');
+            td.innerText = p.review ? 'Review' : 'Translation';
+            tr.append(td);
+
+            td = document.createElement('td');
             td.innerText = p.sourceLang;
             td.classList.add('center');
             td.classList.add('list');
@@ -753,6 +810,7 @@ class ProjectsView {
             this.openProjects();
             this.shouldOpen = '';
         }
+        Main.resizePanels();
     }
 
     calcChars(): number {
@@ -764,7 +822,6 @@ class ProjectsView {
         canvas.style.font = this.tbody.style.font;
         let context = canvas.getContext('2d');
         if (!context) {
-            console.log('no context');
             return 50;
         }
         let longString: string = '';
@@ -807,33 +864,43 @@ class ProjectsView {
     exportHTML(): void {
         let selected = this.getSelectedProjects();
         if (selected.size === 0) {
-            this.electron.ipcRenderer.send('show-message', { type: 'warning', message: 'Select project' });
+            ipcRenderer.send('show-message', { type: 'warning', message: 'Select project' });
             return;
         }
         if (selected.size > 1) {
-            this.electron.ipcRenderer.send('show-message', { type: 'warning', message: 'Select one project' });
+            ipcRenderer.send('show-message', { type: 'warning', message: 'Select one project' });
             return;
         }
         for (let key of selected.keys()) {
-            this.electron.ipcRenderer.send('export-project-html', { project: key });
+            ipcRenderer.send('export-project-html', key);
         }
     }
 
     applyTranslationMemoryAll(): void {
         let selected = this.getSelectedProjects();
         if (selected.size === 0) {
-            this.electron.ipcRenderer.send('show-message', { type: 'warning', message: 'Select project' });
+            ipcRenderer.send('show-message', { type: 'warning', message: 'Select project' });
             return;
         }
         if (selected.size > 1) {
-            this.electron.ipcRenderer.send('show-message', { type: 'warning', message: 'Select one project' });
+            ipcRenderer.send('show-message', { type: 'warning', message: 'Select one project' });
             return;
         }
         for (let key of selected.keys()) {
             let project: Project | undefined = selected.get(key);
             if (project) {
-                this.electron.ipcRenderer.send('show-apply-tm', { project: key, memory: project.memory });
+                ipcRenderer.send('show-apply-tm', { project: key, memory: project.memory });
             }
         }
+    }
+
+    generateImage(svg: string): SVGElement | undefined {
+        let div: HTMLDivElement = document.createElement('div');
+        div.innerHTML = svg;
+        let svgElement: SVGElement | null = div.firstElementChild as SVGElement;
+        if (svgElement) {
+            return svgElement;
+        }
+        return undefined;
     }
 }

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007 - 2025 Maxprograms.
+ * Copyright (c) 2007-2026 Maxprograms.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 1.0
@@ -10,9 +10,10 @@
  *     Maxprograms - initial API and implementation
  *******************************************************************************/
 
-class GlossariesView {
+import { ipcRenderer, IpcRendererEvent } from "electron";
+import { Memory } from "./memory.js";
 
-    electron = require('electron');
+export class GlossariesView {
 
     container: HTMLDivElement;
     topBar: HTMLDivElement;
@@ -235,9 +236,16 @@ class GlossariesView {
         this.tbody = document.createElement('tbody');
         glossariesTable.appendChild(this.tbody);
 
-        this.electron.ipcRenderer.on('set-glossaries', (event: Electron.IpcRendererEvent, arg: any) => {
+        ipcRenderer.on('set-glossaries', (event: IpcRendererEvent, arg: any) => {
             this.glossaries = arg;
             this.displayGlossaries();
+        });
+
+        ipcRenderer.on('set-glossaries-svg', (event: IpcRendererEvent, svg: string) => {
+            let emptyGlossaries = document.getElementById('emptyGlossaries') as HTMLTableCellElement;
+            if (emptyGlossaries) {
+                emptyGlossaries.innerHTML = svg + '<p>No Glossaries Yet</p>';
+            }
         });
 
         this.loadGlossaries();
@@ -269,38 +277,38 @@ class GlossariesView {
     }
 
     addGlossary(): void {
-        this.electron.ipcRenderer.send('show-add-glossary');
+        ipcRenderer.send('show-add-glossary');
     }
 
     removeGlossary(): void {
         if (this.selected.size === 0) {
-            this.electron.ipcRenderer.send('show-message', { type: 'warning', message: 'Select glossary' });
+            ipcRenderer.send('show-message', { type: 'warning', message: 'Select glossary' });
             return;
         }
         let glossaries: string[] = [];
         for (let key of this.selected.keys()) {
             glossaries.push(key);
         }
-        this.electron.ipcRenderer.send('remove-glossaries', glossaries);
+        ipcRenderer.send('remove-glossaries', glossaries);
     }
 
     importGlossary(): void {
         if (this.selected.size === 0) {
-            this.electron.ipcRenderer.send('show-message', { type: 'warning', message: 'Select glossary' });
+            ipcRenderer.send('show-message', { type: 'warning', message: 'Select glossary' });
             return;
         }
         if (this.selected.size > 1) {
-            this.electron.ipcRenderer.send('show-message', { type: 'warning', message: 'Select one glossary' });
+            ipcRenderer.send('show-message', { type: 'warning', message: 'Select one glossary' });
             return;
         }
         for (let key of this.selected.keys()) {
-            this.electron.ipcRenderer.send('show-import-glossary', key);
+            ipcRenderer.send('show-import-glossary', key);
         }
     }
 
     exportGlossary(): void {
         if (this.selected.size === 0) {
-            this.electron.ipcRenderer.send('show-message', { type: 'warning', message: 'Select glossary' });
+            ipcRenderer.send('show-message', { type: 'warning', message: 'Select glossary' });
             return;
         }
         let glossaries: any[] = [];
@@ -308,11 +316,11 @@ class GlossariesView {
             let mem = { glossary: key, name: (this.selected.get(key) as Memory).name }
             glossaries.push(mem);
         }
-        this.electron.ipcRenderer.send('export-glossaries', glossaries);
+        ipcRenderer.send('export-glossaries', glossaries);
     }
 
     loadGlossaries(): void {
-        this.electron.ipcRenderer.send('get-glossaries');
+        ipcRenderer.send('get-glossaries');
     }
 
     displayGlossaries() {
@@ -379,6 +387,18 @@ class GlossariesView {
             return 0;
         });
         this.tbody.innerHTML = '';
+        if (this.glossaries.length === 0) {
+            let tr = document.createElement('tr');
+            this.tbody.appendChild(tr);
+            let td = document.createElement('td');
+            td.id = 'emptyGlossaries';
+            td.classList.add('svgContainer');
+            td.classList.add('center');
+            td.colSpan = 8;
+            tr.appendChild(td);
+            ipcRenderer.send('get-glossaries-svg', 'no_glossaries.svg');
+            return;
+        }
         let length = this.glossaries.length;
         for (let i = 0; i < length; i++) {
             let gloss: Memory = this.glossaries[i];
@@ -462,33 +482,33 @@ class GlossariesView {
 
     searchTerm(): void {
         if (this.selected.size === 0) {
-            this.electron.ipcRenderer.send('show-message', { type: 'warning', message: 'Select glossary' });
+            ipcRenderer.send('show-message', { type: 'warning', message: 'Select glossary' });
             return;
         }
         if (this.selected.size > 1) {
-            this.electron.ipcRenderer.send('show-message', { type: 'warning', message: 'Select one glossary' });
+            ipcRenderer.send('show-message', { type: 'warning', message: 'Select one glossary' });
             return;
         }
         for (let key of this.selected.keys()) {
-            this.electron.ipcRenderer.send('show-term-search', { glossary: key });
+            ipcRenderer.send('show-term-search', key as string);
         }
     }
 
     addTerm(): void {
         if (this.selected.size === 0) {
-            this.electron.ipcRenderer.send('show-message', { type: 'warning', message: 'Select glossary' });
+            ipcRenderer.send('show-message', { type: 'warning', message: 'Select glossary' });
             return;
         }
         if (this.selected.size > 1) {
-            this.electron.ipcRenderer.send('show-message', { type: 'warning', message: 'Select one glossary' });
+            ipcRenderer.send('show-message', { type: 'warning', message: 'Select one glossary' });
             return;
         }
         for (let key of this.selected.keys()) {
-            this.electron.ipcRenderer.send('show-add-term', { glossary: key });
+            ipcRenderer.send('show-add-term', key);
         }
     }
 
     browseRemoteTM(): void {
-        this.electron.ipcRenderer.send('show-server-settings', { type: 'glossary' });
+        ipcRenderer.send('show-server-settings', { type: 'glossary' });
     }
 }

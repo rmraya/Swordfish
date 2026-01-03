@@ -7,30 +7,33 @@
     <link rel="stylesheet" type="text/css" href="../css/fonts.css">
 </head>
 
-<body class="dialogBody" onload="new Updates();">
-
-    <div class="row">
-        <img src="../icons/icon.png" width="120" style="padding: 10px;" />
-        <div>
-            <p class="center">An updated version of Swordfish is available</p>
-            <table>
-                <tr>
-                    <td class="noWrap">Installed Version:</td>
-                    <td id="current" class="fill_width">5.0.0</td>
-                </tr>
-                <tr>
-                    <td class="noWrap">Latest version:</td>
-                    <td id="latest" class="fill_width">5.0.0</td>
-                </tr>
-            </table>
+<body class="dialogBody">
+    <div class="paddedArea">
+        <div class="row">
+            <img src="../images/icon.png" width="120" style="padding: 10px;" />
+            <div>
+                <p class="center">An updated version of Swordfish is available</p>
+                <table>
+                    <tr>
+                        <td class="noWrap">Installed Version:</td>
+                        <td id="current" class="fill_width">5.0.0</td>
+                    </tr>
+                    <tr>
+                        <td class="noWrap">Latest version:</td>
+                        <td id="latest" class="fill_width">5.0.0</td>
+                    </tr>
+                </table>
+            </div>
         </div>
     </div>
-
     <div class="buttonArea">
         <button id="release">View Release History</button>
         <button id="download">Download Update</button>
     </div>
-    <script src="../js/updates.js"></script>
+    <script>
+        const { Updates } = require('../js/updates.js');
+        new Updates();
+    </script>
 </body>
 
 </html>

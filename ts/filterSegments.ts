@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007 - 2025 Maxprograms.
+ * Copyright (c) 2007-2026 Maxprograms.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 1.0
@@ -10,17 +10,17 @@
  *     Maxprograms - initial API and implementation
  *******************************************************************************/
 
-class FilterSegments {
+import { ipcRenderer, IpcRendererEvent } from "electron";
 
-    electron = require('electron');
+export class FilterSegments {
 
     constructor() {
-        this.electron.ipcRenderer.send('get-theme');
-        this.electron.ipcRenderer.on('set-theme', (event: Electron.IpcRendererEvent, theme: string) => {
+        ipcRenderer.send('get-theme');
+        ipcRenderer.on('set-theme', (event: IpcRendererEvent, theme: string) => {
             (document.getElementById('theme') as HTMLLinkElement).href = theme;
         });
-        this.electron.ipcRenderer.send('get-filter-params');
-        this.electron.ipcRenderer.on('set-params', (event: Electron.IpcRendererEvent, arg: any) => {
+        ipcRenderer.send('get-filter-params');
+        ipcRenderer.on('set-params', (event: IpcRendererEvent, arg: any) => {
             this.setParams(arg);
         });
         document.addEventListener('keydown', (event: KeyboardEvent) => {
@@ -47,14 +47,14 @@ class FilterSegments {
         });
         (document.getElementById('filterText') as HTMLInputElement).focus();
         setTimeout(() => {
-            this.electron.ipcRenderer.send('set-height', { window: 'filterSegments', width: document.body.clientWidth, height: document.body.clientHeight });
+            ipcRenderer.send('set-height', { window: 'filterSegments', width: document.body.clientWidth, height: document.body.clientHeight });
         }, 200);
     }
 
     filterSegments(): void {
         let filterText: string = (document.getElementById('filterText') as HTMLInputElement).value;
         if (filterText === '') {
-            this.electron.ipcRenderer.send('show-message', { type: 'warning', message: 'Enter text to search', parent: 'filterSegments' });
+            ipcRenderer.send('show-message', { type: 'warning', message: 'Enter text to search', parent: 'filterSegments' });
             return;
         }
         let filterLanguage: string = 'source';
@@ -65,7 +65,7 @@ class FilterSegments {
         let showTranslated: boolean = (document.getElementById('showTranslated') as HTMLInputElement).checked;
         let showConfirmed: boolean = (document.getElementById('showConfirmed') as HTMLInputElement).checked;
         if (!(showUntranslated || showTranslated || showConfirmed)) {
-            this.electron.ipcRenderer.send('show-message', { type: 'warning', message: 'Select segments to display', parent: 'filterSegments' });
+            ipcRenderer.send('show-message', { type: 'warning', message: 'Select segments to display', parent: 'filterSegments' });
             return;
         }
         let params: any = {
@@ -77,7 +77,7 @@ class FilterSegments {
             showTranslated: showTranslated,
             showConfirmed: showConfirmed
         }
-        this.electron.ipcRenderer.send('filter-options', params);
+        ipcRenderer.send('filter-options', params);
     }
 
     clearFilter(): void {
@@ -90,10 +90,10 @@ class FilterSegments {
             showTranslated: true,
             showConfirmed: true
         }
-        this.electron.ipcRenderer.send('filter-options', params);
+        ipcRenderer.send('filter-options', params);
     }
 
-    setParams(arg: any) {
+    setParams(arg: any): void {
         (document.getElementById('filterText') as HTMLInputElement).value = arg.filterText;
         (document.getElementById('source') as HTMLInputElement).checked = (arg.filterLanguage === 'source');
         (document.getElementById('target') as HTMLInputElement).checked = (arg.filterLanguage === 'target');

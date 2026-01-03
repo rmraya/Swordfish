@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007 - 2025 Maxprograms.
+ * Copyright (c) 2007-2026 Maxprograms.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 1.0
@@ -10,46 +10,46 @@
  *     Maxprograms - initial API and implementation
  *******************************************************************************/
 
-class ImportGlossary {
+import { ipcRenderer, IpcRendererEvent } from "electron";
 
-    electron = require('electron');
+export class ImportGlossary {
 
     glossary: string = '';
 
     constructor() {
-        this.electron.ipcRenderer.send('get-theme');
-        this.electron.ipcRenderer.on('set-theme', (event: Electron.IpcRendererEvent, theme: string) => {
+        ipcRenderer.send('get-theme');
+        ipcRenderer.on('set-theme', (event: IpcRendererEvent, theme: string) => {
             (document.getElementById('theme') as HTMLLinkElement).href = theme;
         });
-        this.electron.ipcRenderer.send('get-project-names');
-        this.electron.ipcRenderer.on('set-project-names', (event: Electron.IpcRendererEvent, projects: string[]) => {
+        ipcRenderer.send('get-project-names');
+        ipcRenderer.on('set-project-names', (event: IpcRendererEvent, projects: string[]) => {
             this.setProjectNames(projects);
         });
-        this.electron.ipcRenderer.send('get-clients');
-        this.electron.ipcRenderer.on('set-clients', (event: Electron.IpcRendererEvent, clients: string[]) => {
+        ipcRenderer.send('get-clients');
+        ipcRenderer.on('set-clients', (event: IpcRendererEvent, clients: string[]) => {
             this.setClients(clients);
         });
-        this.electron.ipcRenderer.send('get-subjects');
-        this.electron.ipcRenderer.on('set-subjects', (event: Electron.IpcRendererEvent, subjects: string[]) => {
+        ipcRenderer.send('get-subjects');
+        ipcRenderer.on('set-subjects', (event: IpcRendererEvent, subjects: string[]) => {
             this.setSubjects(subjects);
         });
         document.addEventListener('keydown', (event: KeyboardEvent) => {
             if (event.code === 'Escape') {
-                this.electron.ipcRenderer.send('close-importGlossary');
+                ipcRenderer.send('close-importGlossary');
             }
             if (event.code === 'Enter' || event.code === 'NumpadEnter') {
                 this.importGlossary();
             }
         });
-        this.electron.ipcRenderer.send('get-glossary-param');
-        this.electron.ipcRenderer.on('set-glossary', (event: Electron.IpcRendererEvent, glossary: string) => {
+        ipcRenderer.send('get-glossary-param');
+        ipcRenderer.on('set-glossary', (event: IpcRendererEvent, glossary: string) => {
             this.glossary = glossary;
         });
         (document.getElementById('browse') as HTMLButtonElement).addEventListener('click', () => {
-            this.electron.ipcRenderer.send('get-glossary-file');
+            ipcRenderer.send('get-glossary-file');
             (document.getElementById('browse') as HTMLButtonElement).blur();
         });
-        this.electron.ipcRenderer.on('set-glossary-file', (event: Electron.IpcRendererEvent, arg: any) => {
+        ipcRenderer.on('set-glossary-file', (event: IpcRendererEvent, arg: any) => {
             (document.getElementById('file') as HTMLInputElement).value = arg;
         });
         (document.getElementById('importGlossary') as HTMLButtonElement).addEventListener('click', () => {
@@ -57,7 +57,7 @@ class ImportGlossary {
         });
         (document.getElementById('file') as HTMLInputElement).focus();
         setTimeout(() => {
-            this.electron.ipcRenderer.send('set-height', { window: 'importGlossary', width: document.body.clientWidth, height: document.body.clientHeight });
+            ipcRenderer.send('set-height', { window: 'importGlossary', width: document.body.clientWidth, height: document.body.clientHeight });
         }, 200);
     }
 
@@ -91,7 +91,7 @@ class ImportGlossary {
     importGlossary(): void {
         let file: string = (document.getElementById('file') as HTMLInputElement).value;
         if (file === '') {
-            this.electron.ipcRenderer.send('show-message', { type: 'warning', message: 'Select glossary file', parent: 'importGlossary' });
+            ipcRenderer.send('show-message', { type: 'warning', message: 'Select glossary file', parent: 'importGlossary' });
             return;
         }
         let params = {
@@ -101,6 +101,6 @@ class ImportGlossary {
             subject: (document.getElementById('subjectInput') as HTMLInputElement).value,
             client: (document.getElementById('clientInput') as HTMLInputElement).value
         }
-        this.electron.ipcRenderer.send('import-glossary-file', params);
+        ipcRenderer.send('import-glossary-file', params);
     }
 }

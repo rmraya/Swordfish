@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007 - 2025 Maxprograms.
+ * Copyright (c) 2007-2026 Maxprograms.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 1.0
@@ -10,13 +10,13 @@
  *     Maxprograms - initial API and implementation
  *******************************************************************************/
 
-class SpaceAnalysis {
+import { ipcRenderer, IpcRendererEvent } from "electron";
 
-    electron = require('electron');
+export class SpaceAnalysis {
 
     constructor() {
-        this.electron.ipcRenderer.send('get-theme');
-        this.electron.ipcRenderer.on('set-theme', (event: Electron.IpcRendererEvent, theme: string) => {
+        ipcRenderer.send('get-theme');
+        ipcRenderer.on('set-theme', (event: IpcRendererEvent, theme: string) => {
             (document.getElementById('theme') as HTMLLinkElement).href = theme;
         });
         document.addEventListener('keydown', (event: KeyboardEvent) => {
@@ -24,34 +24,34 @@ class SpaceAnalysis {
                 this.gotoSegment();
             }
             if (event.code === 'Escape') {
-                this.electron.ipcRenderer.send('close-spaceAnalysis');
+                ipcRenderer.send('close-spaceAnalysis');
             }
         });
-        this.electron.ipcRenderer.on('set-spaceErrors', (event: Electron.IpcRendererEvent, arg: any) => {
+        ipcRenderer.on('set-spaceErrors', (event: IpcRendererEvent, arg: any) => {
             this.setErrors(arg);
         });
         (document.getElementById('goTo') as HTMLButtonElement).addEventListener('click', () => {
             this.gotoSegment();
         });
         (document.getElementById('fixAll') as HTMLButtonElement).addEventListener('click', () => {
-            this.electron.ipcRenderer.send('fix-spaceErrors');
+            ipcRenderer.send('fix-spaceErrors');
         });
         (document.getElementById('refresh') as HTMLButtonElement).addEventListener('click', () => {
-            this.electron.ipcRenderer.send('get-spaceErrors');
+            ipcRenderer.send('get-spaceErrors');
         });
-        this.electron.ipcRenderer.send('get-spaceErrors');
+        ipcRenderer.send('get-spaceErrors');
         setTimeout(() => {
-            this.electron.ipcRenderer.send('set-height', { window: 'spaceAnalysis', width: document.body.clientWidth, height: document.body.clientHeight });
+            ipcRenderer.send('set-height', { window: 'spaceAnalysis', width: document.body.clientWidth, height: document.body.clientHeight });
         }, 200);
     }
 
     gotoSegment(): void {
         let selectedRows: HTMLCollectionOf<Element> = document.getElementsByClassName('selected');
         if (selectedRows.length === 0) {
-            this.electron.ipcRenderer.send('show-message', { type: 'warning', message: 'Select a segment', parent: 'spaceAnalysis' });
+            ipcRenderer.send('show-message', { type: 'warning', message: 'Select a segment', parent: 'spaceAnalysis' });
             return;
         }
-        this.electron.ipcRenderer.send('go-to-segment', { segment: Number.parseInt(selectedRows[0].id, 10) });
+        ipcRenderer.send('go-to-segment', Number.parseInt(selectedRows[0].id, 10));
     }
 
     setErrors(data: any): void {
@@ -59,7 +59,7 @@ class SpaceAnalysis {
         table.innerHTML = '';
         let length = data.errors.length;
         if (length === 0) {
-            this.electron.ipcRenderer.send('show-message', { type: 'info', message: 'There are no space errors', parent: 'spaceAnalysis' });
+            ipcRenderer.send('show-message', { type: 'info', message: 'There are no space errors', parent: 'spaceAnalysis' });
         }
         for (let i = 0; i < length; i++) {
             let line: any = data.errors[i];
@@ -69,7 +69,7 @@ class SpaceAnalysis {
                 this.clicked(tr);
             });
             tr.addEventListener('dblclick', () => {
-                this.electron.ipcRenderer.send('go-to-segment', { segment: line.index });
+                ipcRenderer.send('go-to-segment', line.index);
             });
             table.appendChild(tr);
             let cell: HTMLTableCellElement = document.createElement('td');

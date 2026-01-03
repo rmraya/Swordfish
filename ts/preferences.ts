@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007 - 2025 Maxprograms.
+ * Copyright (c) 2007-2026 Maxprograms.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 1.0
@@ -10,7 +10,7 @@
  *     Maxprograms - initial API and implementation
  *******************************************************************************/
 
-interface Preferences {
+export interface Preferences {
     theme: string;
     zoomFactor: string;
     srcLang: string;
@@ -18,8 +18,10 @@ interface Preferences {
     projectsFolder: string;
     memoriesFolder: string;
     glossariesFolder: string;
+    userName: string;
     catalog: string;
     srx: string;
+    reviewModel: string;
     paragraphSegmentation: boolean;
     acceptUnconfirmed: boolean;
     fuzzyTermSearches: boolean;

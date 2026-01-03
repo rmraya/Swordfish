@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007 - 2025 Maxprograms.
+ * Copyright (c) 2007-2026 Maxprograms.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 1.0
@@ -10,9 +10,9 @@
  *     Maxprograms - initial API and implementation
  *******************************************************************************/
 
-class ImportXLIFF {
+import { ipcRenderer, IpcRendererEvent } from "electron";
 
-    electron = require('electron');
+export class ImportXLIFF {
 
     memSelect: HTMLSelectElement;
     glossSelect: HTMLSelectElement;
@@ -21,39 +21,39 @@ class ImportXLIFF {
         this.memSelect = document.getElementById('memorySelect') as HTMLSelectElement;
         this.glossSelect = document.getElementById('glossarySelect') as HTMLSelectElement;
 
-        this.electron.ipcRenderer.send('get-theme');
-        this.electron.ipcRenderer.on('set-theme', (event: Electron.IpcRendererEvent, theme: string) => {
+        ipcRenderer.send('get-theme');
+        ipcRenderer.on('set-theme', (event: IpcRendererEvent, theme: string) => {
             (document.getElementById('theme') as HTMLLinkElement).href = theme;
         });
-        this.electron.ipcRenderer.send('get-clients');
-        this.electron.ipcRenderer.on('set-clients', (event: Electron.IpcRendererEvent, clients: string[]) => {
+        ipcRenderer.send('get-clients');
+        ipcRenderer.on('set-clients', (event: IpcRendererEvent, clients: string[]) => {
             this.setClients(clients);
         });
-        this.electron.ipcRenderer.send('get-subjects');
-        this.electron.ipcRenderer.on('set-subjects', (event: Electron.IpcRendererEvent, subjects: string[]) => {
+        ipcRenderer.send('get-subjects');
+        ipcRenderer.on('set-subjects', (event: IpcRendererEvent, subjects: string[]) => {
             this.setSubjects(subjects);
         });
-        this.electron.ipcRenderer.send('get-memories');
-        this.electron.ipcRenderer.on('set-memories', (event: Electron.IpcRendererEvent, arg: any) => {
+        ipcRenderer.send('get-memories');
+        ipcRenderer.on('set-memories', (event: IpcRendererEvent, arg: any) => {
             this.setMemories(arg);
         });
-        this.electron.ipcRenderer.send('get-glossaries');
-        this.electron.ipcRenderer.on('set-glossaries', (event: Electron.IpcRendererEvent, arg: any) => {
+        ipcRenderer.send('get-glossaries');
+        ipcRenderer.on('set-glossaries', (event: IpcRendererEvent, arg: any) => {
             this.setGlossaries(arg);
         });
         document.addEventListener('keydown', (event: KeyboardEvent) => {
             if (event.code === 'Escape') {
-                this.electron.ipcRenderer.send('close-importXliff');
+                ipcRenderer.send('close-importXliff');
             }
             if (event.code === 'Enter' || event.code === 'NumpadEnter') {
                 this.importXLIFF();
             }
         });
         (document.getElementById('browse') as HTMLButtonElement).addEventListener('click', () => {
-            this.electron.ipcRenderer.send('browse-xliff-import');
+            ipcRenderer.send('browse-xliff-import');
             (document.getElementById('browse') as HTMLButtonElement).blur();
         });
-        this.electron.ipcRenderer.on('set-xliff', (event: Electron.IpcRendererEvent, arg: any) => {
+        ipcRenderer.on('set-xliff', (event: IpcRendererEvent, arg: any) => {
             (document.getElementById('xliff') as HTMLInputElement).value = arg;
         });
         (document.getElementById('importXliff') as HTMLButtonElement).addEventListener('click', () => {
@@ -61,7 +61,7 @@ class ImportXLIFF {
         });
         (document.getElementById('projectInput') as HTMLInputElement).focus();
         setTimeout(() => {
-            this.electron.ipcRenderer.send('set-height', { window: 'importXliff', width: document.body.clientWidth, height: document.body.clientHeight });
+            ipcRenderer.send('set-height', { window: 'importXliff', width: document.body.clientWidth, height: document.body.clientHeight });
         }, 200);
     }
 
@@ -86,12 +86,12 @@ class ImportXLIFF {
     importXLIFF(): void {
         let project: string = (document.getElementById('projectInput') as HTMLInputElement).value;
         if (project === '') {
-            this.electron.ipcRenderer.send('show-message', { type: 'warning', message: 'Enter project name', parent: 'importXliff' });
+            ipcRenderer.send('show-message', { type: 'warning', message: 'Enter project name', parent: 'importXliff' });
             return;
         }
         let xliff: string = (document.getElementById('xliff') as HTMLInputElement).value;
         if (xliff === '') {
-            this.electron.ipcRenderer.send('show-message', { type: 'warning', message: 'Select XLIFF file', parent: 'importXliff' });
+            ipcRenderer.send('show-message', { type: 'warning', message: 'Select XLIFF file', parent: 'importXliff' });
             return;
         }
         let memory: string = this.memSelect.value;
@@ -104,7 +104,7 @@ class ImportXLIFF {
             memory: memory,
             glossary: glossary
         }
-        this.electron.ipcRenderer.send('import-xliff-file', params);
+        ipcRenderer.send('import-xliff-file', params);
     }
 
     setMemories(memories: any[]): void {

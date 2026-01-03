@@ -8,7 +8,7 @@
     <link rel="stylesheet" type="text/css" href="../css/fonts.css">
 </head>
 
-<body style="margin:0; padding:0; overflow-y:hidden;" onload="new IatePlugin();">
+<body style="margin:0; padding:0; overflow-y:hidden;">
 
     <div class="radiobar" id="toolbar">
         <input type="radio" id="basic" name="case" value="basic" class="middle" checked>
@@ -37,7 +37,10 @@
 
     </iframe>
 
-    <script src="../js/iatePlugin.js"></script>
+    <script>
+        const { IatePlugin } = require('../js/iatePlugin.js');
+        new IatePlugin();
+    </script>
 </body>
 
 </html>

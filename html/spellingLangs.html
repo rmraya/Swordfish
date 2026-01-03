@@ -7,13 +7,18 @@
     <link rel="stylesheet" type="text/css" href="../css/fonts.css">
 </head>
 
-<body class="dialogBody" onload="new SpellcheckerLanguages();">
-    <div id="tableContainer" class="divContainer">
-        <table id="langsTable" class="fill_width stripes">
+<body class="dialogBody">
+    <div class="paddedArea">
+        <div id="tableContainer" class="divContainer">
+            <table id="langsTable" class="fill_width stripes">
 
-        </table>
+            </table>
+        </div>
     </div>
-    <script src="../js/spellingLangs.js"></script>
+    <script>
+        const { SpellcheckerLanguages } = require('../js/spellingLangs.js');
+        new SpellcheckerLanguages();
+    </script>
 </body>
 
 </html>

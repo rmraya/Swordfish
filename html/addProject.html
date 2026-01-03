@@ -7,119 +7,123 @@
     <link rel="stylesheet" type="text/css" href="../css/fonts.css">
 </head>
 
-<body class="dialogBody" onload="new AddProject();">
-    <table class="fill_width">
-        <tr>
-            <td class="middle">
-                <label for="nameInput">Name</label>
-            </td>
-            <td class="fill_width middle">
-                <input type="text" id="nameInput" class="table_input">
-            </td>
-        </tr>
-    </table>
-
-    <table>
-        <tr>
-            <td style="width:50%; padding:0;">
-                <table class="fill_width">
-                    <tr style="height: 2.5em;">
-                        <td class="middle noWrap">
-                            <label for="srcLangSelect">Source Language</label>
-                        </td>
-                        <td class="fill_width middle form_height">
-                            <select id="srcLangSelect" class="fill_width">
-        
-                            </select>
-                        </td>
-                    </tr>
-                    <tr style="height: 2.5em;">
-                        <td class="middle noWrap">
-                            <label for="tgtLangSelect">Target Language</label>
-                        </td>
-                        <td class="fill_width middle form_height">
-                            <select id="tgtLangSelect" class="fill_width">
-        
-                            </select>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td class=" noWrap">
-                            <label for="memorySelect">Default Memory</label>
-                        </td>
-                        <td class="fill_width ">
-                            <select id="memorySelect" class="fill_width">
-
-                            </select>
-                            <input type="checkbox" id="applyTM" class="middle">
-                            <label for="applyTM" class="middle">Apply Translation Memory</label>
-                        </td>
-                    </tr>
-                </table>
-            </td>
-            <td style="width:50%; padding:0;">
-                <table class="fill_width">
-                    <tr style="height: 2.5em;">
-                        <td class="middle">
-                            <label for="subjectInput">Subject</label>
-                        </td>
-                        <td class="fill_width middle form_height">
-                            <input list="subjects" id="subjectInput" class="table_input middle" >
-                            <datalist id="subjects">
-                                <option value="none">
-                            </datalist>
-                        </td>
-                    </tr>
-                    <tr style="height: 2.5em;">
-                        <td class="middle">
-                            <label for="clientInput">Client</label>
-                        </td>
-                        <td class="fill_width middle form_height">
-                            <input list="clients" id="clientInput" class="table_input middle" >
-                            <datalist id="clients">
-                                <option value="none">
-                            </datalist>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td class=" noWrap">
-                            <label for="glossarySelect">Default Glossary</label>
-                        </td>
-                        <td class="fill_width" style="padding-right: 8px;">
-                            <select id="glossarySelect" class="fill_width"  >
-
-                            </select>
-                            <input type="checkbox" id="searchTerms" class="middle">
-                            <label for="searchTerms" class="middle">Search Terms</label>
-                        </td>
-                    </tr>
-                </table>
-            </td>
-        </tr>
-    </table>
-    <div class="bordered divContainer" style="height: 260px; width:calc(100% - 20px); margin-left: 10px;" id="tablePanel">
-        <table class="stripes">
-            <thead>
-                <tr class="noWrap">
-                    <th style="min-width: 20px;">&nbsp;</th>
-                    <th class="fill_width" style="text-align: left; max-width: 400px;">File Name</th>
-                    <th style="min-width: 200px;">File Type</th>
-                    <th style="min-width: 150px;">Character Set</th>
-                </tr>
-            </thead>
-            <tbody id="tableBody">
-                <tr></tr>
-            </tbody>
+<body class="dialogBody">
+    <div class="paddedArea">
+        <table class="fill_width">
+            <tr>
+                <td class="middle">
+                    <label for="nameInput">Name</label>
+                </td>
+                <td class="fill_width middle">
+                    <input type="text" id="nameInput" class="table_input">
+                </td>
+            </tr>
         </table>
-    </div>
 
+        <table>
+            <tr>
+                <td style="width:50%; padding:0;">
+                    <table class="fill_width">
+                        <tr style="height: 2.5em;">
+                            <td class="middle noWrap">
+                                <label for="srcLangSelect">Source Language</label>
+                            </td>
+                            <td class="fill_width middle form_height">
+                                <select id="srcLangSelect" class="fill_width">
+
+                                </select>
+                            </td>
+                        </tr>
+                        <tr style="height: 2.5em;">
+                            <td class="middle noWrap">
+                                <label for="tgtLangSelect">Target Language</label>
+                            </td>
+                            <td class="fill_width middle form_height">
+                                <select id="tgtLangSelect" class="fill_width">
+
+                                </select>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class=" noWrap">
+                                <label for="memorySelect">Default Memory</label>
+                            </td>
+                            <td class="fill_width ">
+                                <select id="memorySelect" class="fill_width">
+
+                                </select>
+                                <input type="checkbox" id="applyTM" class="middle">
+                                <label for="applyTM" class="middle">Apply Translation Memory</label>
+                            </td>
+                        </tr>
+                    </table>
+                </td>
+                <td style="width:50%; padding:0;">
+                    <table class="fill_width">
+                        <tr style="height: 2.5em;">
+                            <td class="middle">
+                                <label for="subjectInput">Subject</label>
+                            </td>
+                            <td class="fill_width middle form_height">
+                                <input list="subjects" id="subjectInput" class="table_input middle">
+                                <datalist id="subjects">
+                                    <option value="none">
+                                </datalist>
+                            </td>
+                        </tr>
+                        <tr style="height: 2.5em;">
+                            <td class="middle">
+                                <label for="clientInput">Client</label>
+                            </td>
+                            <td class="fill_width middle form_height">
+                                <input list="clients" id="clientInput" class="table_input middle">
+                                <datalist id="clients">
+                                    <option value="none">
+                                </datalist>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class=" noWrap">
+                                <label for="glossarySelect">Default Glossary</label>
+                            </td>
+                            <td class="fill_width" style="padding-right: 8px;">
+                                <select id="glossarySelect" class="fill_width">
+
+                                </select>
+                                <input type="checkbox" id="searchTerms" class="middle">
+                                <label for="searchTerms" class="middle">Search Terms</label>
+                            </td>
+                        </tr>
+                    </table>
+                </td>
+            </tr>
+        </table>
+        <div class="bordered divContainer" style="height: 260px; width:calc(100% - 20px); margin-left: 10px;"
+            id="tablePanel">
+            <table class="stripes">
+                <thead>
+                    <tr class="noWrap">
+                        <th style="min-width: 20px;">&nbsp;</th>
+                        <th class="fill_width" style="text-align: left; max-width: 400px;">File Name</th>
+                        <th style="min-width: 200px;">File Type</th>
+                        <th style="min-width: 150px;">Character Set</th>
+                    </tr>
+                </thead>
+                <tbody id="tableBody">
+                    <tr></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
     <div class="buttonArea">
         <button id="addFilesButton">Add Files</button>
-        <span class="fill_width">&nbsp;</span>
         <button id="addProjectButton">Create Project</button>
     </div>
-    
-    <script src="../js/addProject.js"></script>
+
+    <script>
+        const { AddProject } = require('../js/addProject.js');
+        new AddProject();
+    </script>
 </body>
 
 </html>

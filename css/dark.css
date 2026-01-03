@@ -2,12 +2,12 @@
 @import "./neutrals.css";
 
 :root {
-	--error-color: #960303;
+	--error-color: #d50000;
 	--even-unit: #1a46a7;
 	--odd-unit: #e20606;
 	--orange: #ff9800;
 	--teal: #009688;
-	
+
 	scrollbar-color: var(--ClassicBlue80) var(--gray150);
 	scrollbar-width: thin;
 }
@@ -20,7 +20,7 @@ body {
 }
 
 .hdivider {
-	width: 2px;
+	width: 4px;
 	background: transparent;
 	background-image: url(data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMiIgaGVpZ2h0PSIyMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4gCjxyZWN0IHg9IjAiIHk9IjAiIHdpZHRoPSIyIiBoZWlnaHQ9IjQiIGZpbGw9IndoaXRlIiAvPiAKPHJlY3QgeD0iMCIgeT0iNCIgd2lkdGg9IjIiIGhlaWdodD0iNCIgZmlsbD0idHJhbnNwYXJlbnQiIC8+IAo8cmVjdCB4PSIwIiB5PSI4IiB3aWR0aD0iMiIgaGVpZ2h0PSI0IiBmaWxsPSJ3aGl0ZSIgLz4gCjxyZWN0IHg9IjAiIHk9IjEyIiB3aWR0aD0iMiIgaGVpZ2h0PSI0IiBmaWxsPSJ0cmFuc3BhcmVudCIgLz4gCjxyZWN0IHg9IjAiIHk9IjE2IiB3aWR0aD0iMiIgaGVpZ2h0PSI0IiBmaWxsPSJ3aGl0ZSIgLz4gCjwvc3ZnPg==);
 	background-repeat: no-repeat;
@@ -41,7 +41,7 @@ body {
 
 .vdivider {
 	width: 100%;
-	height: 2px;
+	height: 4px;
 	background: transparent;
 	background-image: url(data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAiIGhlaWdodD0iMiIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4gCjxyZWN0IHg9IjAiIHk9IjAiIHdpZHRoPSI0IiBoZWlnaHQ9IjIiIGZpbGw9IndoaXRlIiAvPiAKPHJlY3QgeD0iNCIgeT0iMCIgd2lkdGg9IjQiIGhlaWdodD0iMiIgZmlsbD0idHJhbnNwYXJlbnQiIC8+IAo8cmVjdCB4PSI4IiB5PSIwIiB3aWR0aD0iNCIgaGVpZ2h0PSIyIiBmaWxsPSJ3aGl0ZSIgLz4gCjxyZWN0IHg9IjEyIiB5PSIwIiB3aWR0aD0iNCIgaGVpZ2h0PSIyIiBmaWxsPSJ0cmFuc3BhcmVudCIgLz4gCjxyZWN0IHg9IjE2IiB5PSIwIiB3aWR0aD0iNCIgaGVpZ2h0PSIyIiBmaWxsPSJ3aGl0ZSIgLz4gCjwvc3ZnPg==);
 	background-repeat: no-repeat;
@@ -57,6 +57,10 @@ body {
 	background-image: url(data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAiIGhlaWdodD0iMiIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4gCjxyZWN0IHg9IjAiIHk9IjAiIHdpZHRoPSI0IiBoZWlnaHQ9IjIiIGZpbGw9ImJsYWNrIiAvPiAKPHJlY3QgeD0iNCIgeT0iMCIgd2lkdGg9IjQiIGhlaWdodD0iMiIgZmlsbD0idHJhbnNwYXJlbnQiIC8+IAo8cmVjdCB4PSI4IiB5PSIwIiB3aWR0aD0iNCIgaGVpZ2h0PSIyIiBmaWxsPSJibGFjayIgLz4gCjxyZWN0IHg9IjEyIiB5PSIwIiB3aWR0aD0iNCIgaGVpZ2h0PSIyIiBmaWxsPSJ0cmFuc3BhcmVudCIgLz4gCjxyZWN0IHg9IjE2IiB5PSIwIiB3aWR0aD0iNCIgaGVpZ2h0PSIyIiBmaWxsPSJibGFjayIgLz4gCjwvc3ZnPg==);
 	background-repeat: no-repeat;
 	background-position: center;
+}
+
+.dragging {
+	background-color: var(--ClassicBlue50);
 }
 
 .wait {
@@ -116,6 +120,19 @@ thead tr {
 	background: inherit !important;
 	color: inherit !important;
 	border: none !important;
+}
+
+.alternate tr:nth-child(even) {
+	background-color: var(--gray150);
+	height: fit-content;
+}
+
+.alternate tr:nth-child(even) td:nth-last-child(1) {
+	border-left: 2px solid var(--gray190);
+}
+
+.alternate tr:nth-child(odd) td:nth-last-child(1) {
+	border-left: 2px solid var(--gray130);
 }
 
 tbody {
@@ -190,6 +207,31 @@ th {
 .stripes tr {
 	border-top: 2px solid var(--gray110);
 	border-bottom: 2px solid var(--gray110);
+}
+
+.nestedTable {
+	border: none;
+}
+
+.nestedTable tr {
+	border-top: none;
+	border-bottom: none;
+}
+
+.nestedTable td {
+	border: 2px solid var(--gray110);
+}
+
+.nestedTable tr:first-child td {
+	border-top: none;
+}
+
+.nestedTable tr:last-child td {
+	border-bottom: none;
+}
+
+.nopadding {
+	padding: 0 !important;
 }
 
 .currentRow {
@@ -428,6 +470,8 @@ label {
 	flex-direction: row;
 	padding: 8px 16px;
 	justify-content: flex-end;
+	background-color: var(--gray130);
+	border-top: 1px solid var(--gray150);
 }
 
 .inputArea {
@@ -526,7 +570,7 @@ th svg {
 	flex-flow: row;
 	color: var(--gray30);
 	margin: 0px;
-	padding: 0px 0px 0px 8px;
+	padding: 4px 0px 0px 8px;
 	border-bottom: 1px solid var(--gray130);
 }
 
@@ -545,8 +589,10 @@ th svg {
 .selectedTab {
 	background: var(--gray130);
 	color: var(--gray10);
+	border-top: 1px solid var(--gray150) !important;
 	border-left: 1px solid var(--gray150) !important;
 	border-right: 1px solid var(--gray150) !important;
+	border-radius: 4px 4px 0px 0px;
 }
 
 .tab:hover {
@@ -587,15 +633,23 @@ th svg {
 
 .titlepanel {
 	margin: 0;
-	padding-top: 0;
+	padding-top: 0px;
 	padding-left: 4px;
+	padding-right: 4px;
 	border-radius: 4px 4px 0px 0px;
 	background: var(--ClassicBlue90);
 	color: var(--white);
 	white-space: nowrap;
-	overflow-x: hidden;
+	overflow: hidden;
 	height: 26px;
 	vertical-align: middle;
+	text-align: center;
+}
+
+.titlepanel a svg {
+	color: var(--white);
+	fill: var(--white);
+	stroke: var(--white);
 }
 
 .roundedBottom {
@@ -635,43 +689,43 @@ th svg {
 
 /* Tooltip arrow */
 .bottomTooltip .tooltiptext::before {
-  content: "";
-  position: absolute;
-  bottom: 100%;
-  left: 8px;
-  border-width: 8px;
-  border-style: solid;
-  border-color: transparent transparent var(--ClassicBlue30) transparent;
+	content: "";
+	position: absolute;
+	bottom: 100%;
+	left: 8px;
+	border-width: 8px;
+	border-style: solid;
+	border-color: transparent transparent var(--ClassicBlue30) transparent;
 }
 
 .bottomRightTooltip .tooltiptext::before {
-  content: "";
-  position: absolute;
-  bottom: 100%;
-  right: 8px;
-  border-width: 8px;
-  border-style: solid;
-  border-color: transparent transparent var(--ClassicBlue30) transparent;
+	content: "";
+	position: absolute;
+	bottom: 100%;
+	right: 8px;
+	border-width: 8px;
+	border-style: solid;
+	border-color: transparent transparent var(--ClassicBlue30) transparent;
 }
 
 .bottomCenterTooltip .tooltiptext::before {
-  content: "";
-  position: absolute;
-  bottom: 100%;
-  left: 80px;
-  border-width: 8px;
-  border-style: solid;
-  border-color: transparent transparent var(--ClassicBlue30) transparent;
+	content: "";
+	position: absolute;
+	bottom: 100%;
+	left: 80px;
+	border-width: 8px;
+	border-style: solid;
+	border-color: transparent transparent var(--ClassicBlue30) transparent;
 }
 
 .topTooltip .tooltiptext::after {
-  content: "";
-  position: absolute;
-  top: 100%;
-  left: 8px;
-  border-width: 8px;
-  border-style: solid;
-  border-color: var(--ClassicBlue30) transparent transparent transparent;
+	content: "";
+	position: absolute;
+	top: 100%;
+	left: 8px;
+	border-width: 8px;
+	border-style: solid;
+	border-color: var(--ClassicBlue30) transparent transparent transparent;
 }
 
 .topTooltip .tooltiptext {
@@ -679,8 +733,23 @@ th svg {
 	left: 0px;
 }
 
+.topRightTooltip .tooltiptext::after {
+	content: "";
+	position: absolute;
+	top: 100%;
+	right: 8px;
+	border-width: 8px;
+	border-style: solid;
+	border-color: var(--ClassicBlue30) transparent transparent transparent;
+}
+
+.topRightTooltip .tooltiptext {
+	bottom: 130%;
+	right: 0px;
+}
+
 .bottomTooltip .tooltiptext {
-	top: 140%;
+	top: 130%;
 	left: 0px;
 }
 
@@ -719,6 +788,34 @@ th svg {
 	visibility: visible;
 }
 
+.filesTooltip {
+	background-color: var(--ClassicBlue30);
+	color: var(--black);
+	visibility: hidden;
+	padding: 4px;
+	border-radius: 4px;
+	white-space: nowrap;
+	/* Position the tooltip */
+	position: absolute;
+	top: 0;
+	left: 0;
+	z-index: 100;
+}
+
+.rightPanelTooltip {
+	background-color: var(--ClassicBlue30);
+	color: var(--black);
+	visibility: hidden;
+	padding: 4px;
+	border-radius: 4px;
+	white-space: nowrap;
+	/* Position the tooltip */
+	position: absolute;
+	top: 0;
+	left: 0;
+	z-index: 100;
+}
+
 .highlight {
 	color: var(--gray40);
 }
@@ -733,8 +830,14 @@ th svg {
 	border-radius: 2px;
 }
 
-.error {
-	color: var(--error-color) !important;
+.borderedArea {
+	border: 1px solid var(--ClassicBlue90) !important;
+	border-radius: 4px;
+	padding: 4px;
+	width: calc(100% - 28px);
+	margin-top: 4px;
+	margin-bottom: 4px;
+	margin-left: 8px;
 }
 
 .preserve {
@@ -756,8 +859,8 @@ div.stats {
 
 span.stats {
 	margin-top: 4px;
-	padding-left: 4px;
-	padding-right: 4px;
+	padding-left: 2px;
+	padding-right: 2px;
 }
 
 svg.stats {
@@ -819,6 +922,19 @@ svg.stats {
 	margin-bottom: 8px;
 	border-radius: 4px;
 	width: calc(100% - 12px);
+	height: calc(100% - 16px);
+	overflow-y: hidden;
+	overflow-x: hidden;
+	background: var(--gray160);
+}
+
+.translationPanel {
+	margin-top: 8px;
+	margin-right: 4px;
+	margin-left: 4px;
+	margin-bottom: 8px;
+	border-radius: 4px;
+	width: calc(100% - 8px);
 	height: calc(100% - 16px);
 	overflow-y: auto;
 	overflow-x: hidden;
@@ -902,6 +1018,75 @@ svg.stats {
 }
 
 .dialogBody {
-	padding: 8px 0px 16px 8px;
+	padding: 0;
+	margin: 0;
 	overflow-y: hidden;
+}
+
+.borderBottom {
+	border-bottom: 1px solid var(--gray50);
+}
+
+.fileContainer {
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+	width: 100%;
+	overflow: visible;
+	margin-left: 8px;
+	padding: 0;
+	text-align: center;
+	text-wrap: nowrap;
+}
+
+.fileContainer input {
+	background-color: var(--gray20);
+	border: none;
+	outline: none;
+	padding: 2px 1px;
+}
+
+.fileContainer label {
+	padding: 2px 1px;
+	white-space: nowrap;
+}
+
+.sourceFile {
+	font-style: italic;
+	margin-top: 4px;
+	padding: 2px 1px;
+	color: var(--ClassicBlue30);
+	text-align: left;
+}
+
+.sourceSymbol {
+	color: var(--white);
+	margin-left: 2px;
+	margin-right: 2px;
+	cursor: pointer;
+}
+
+.selectedFile {
+	background: var(--ClassicBlue90);
+}
+
+.filesTable td {
+	padding: 0;
+	vertical-align: top;
+}
+
+.fileName:hover {
+	cursor: pointer;
+	background-color: var(--ClassicBlue100);
+}
+
+.svgContainer svg {
+	color: var(--gray10) !important;
+	fill: var(--gray10) !important;
+	stroke: var(--gray10) !important;
+}
+
+.required {
+	color: var(--error-color);
+	margin-left: 2px;
 }

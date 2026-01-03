@@ -1,19 +1,21 @@
 {
     "compilerOptions": {
-        "target": "ES6",
-        "module": "commonjs",
+        "target": "esnext",
+        "module": "NodeNext",
+        "moduleResolution": "NodeNext",
         "noImplicitAny": true,
-        "strictFunctionTypes": true,
-        "noImplicitReturns": true,
-        "sourceMap": false,
-        "outDir": "js",
+        "skipLibCheck": true,
+        "allowUnreachableCode": false,
+        "noImplicitThis": true,
+        "sourceMap": true,
+        "declaration": true,
+        "outDir": "./js",
         "baseUrl": ".",
         "paths": {
             "*": [
                 "node_modules/*"
             ]
         },
-        "forceConsistentCasingInFileNames": true,
         "strict": true
     },
     "include": [

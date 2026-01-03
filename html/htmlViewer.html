@@ -7,11 +7,14 @@
     <link rel="stylesheet" type="text/css" href="../css/fonts.css">
 </head>
 
-<body style="margin:0px; padding:0; width:100vw; height: 100vh;" onload="new HtmlViewer();">
+<body style="margin:0px; padding:0; width:100vw; height: 100vh;">
     <div id="content" class="divContainer">
 
     </div>
-    <script src="../js/htmlViewer.js"></script>
+    <script>
+        const { HtmlViewer } = require('../js/htmlViewer.js');
+        new HtmlViewer();
+    </script>
 </body>
 
 </html>

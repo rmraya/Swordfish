@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007 - 2025 Maxprograms.
+ * Copyright (c) 2007-2026 Maxprograms.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 1.0
@@ -10,9 +10,11 @@
  *     Maxprograms - initial API and implementation
  *******************************************************************************/
 
-class TermsPanel {
+import { ipcRenderer } from "electron";
+import { Term } from "./term.js";
+import { TranslationView } from "./translation.js";
 
-    electron = require('electron');
+export class TermsPanel {
 
     container: HTMLDivElement;
     projectId: string;
@@ -48,7 +50,7 @@ class TermsPanel {
             '<span class="tooltiptext topTooltip">Get Glossary Terms</span>';
         getTerms.className = 'tooltip topTooltip ';
         getTerms.addEventListener('click', () => {
-            this.electron.ipcRenderer.send('request-apply-terminology');
+            ipcRenderer.send('request-apply-terminology');
         });
         toolbar.appendChild(getTerms);
 

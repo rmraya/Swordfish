@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007 - 2025 Maxprograms.
+ * Copyright (c) 2007-2026 Maxprograms.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 1.0
@@ -10,9 +10,19 @@
  *     Maxprograms - initial API and implementation
  *******************************************************************************/
 
-class TranslationView {
+import { ipcRenderer, IpcRendererEvent } from "electron";
+import { ThreeHorizontalPanels, ThreeVerticalPanels } from "./divider.js";
+import { Main } from "./Main.js";
+import { Match } from "./match.js";
+import { MetaId } from "./metadata.js";
+import { MtMatches } from "./mtMatches.js";
+import { Segment } from "./segment.js";
+import { FullId, SegmentId } from "./segmentId.js";
+import { Tab } from "./tabs.js";
+import { TermsPanel } from "./termsPanel.js";
+import { TmMatches } from "./tmMatches.js";
 
-    electron = require('electron');
+export class TranslationView {
 
     static SVG_BLANK: string = "<svg xmlns='http://www.w3.org/2000/svg' height='24' viewBox='0 0 24 24' width='24'></svg>";
     static SVG_UNTRANSLATED: string = "<svg xmlns='http://www.w3.org/2000/svg' height='24' viewBox='0 0 24 24' width='24'>" +
@@ -28,24 +38,51 @@ class TranslationView {
         "<path d='M11 15h2v2h-2v-2zm0-8h2v6h-2V7zm.99-5C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8z'/></svg>";
     static SVG_NOTE: string = "<svg xmlns='http://www.w3.org/2000/svg' height='24' viewBox='0 0 24 24' width='24'>" +
         "<path d='M20 2H4c-1.1 0-1.99.9-1.99 2L2 22l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm0 14H5.17l-.59.59-.58.58V4h16v12zm-9-4h2v2h-2zm0-6h2v4h-2z'/></svg>";
+    static SVG_EXPAND: string = '<svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px">' +
+        '<path d="M460-320v-320L300-480l160 160ZM200-120q-33 0-56.5-23.5T120-200v-560q0-33 23.5-56.5T200-840h560q33 0 56.5 23.5T840-760v560q0 33-23.5 56.5T760-120H200Zm440-80h120v-560H640v560Zm-80 0v-560H200v560h360Zm80 0h120-120Z"/>' +
+        '</svg>';
+    static SVG_COLLAPSE: string = '<svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px">' +
+        '<path d="M300-640v320l160-160-160-160ZM200-120q-33 0-56.5-23.5T120-200v-560q0-33 23.5-56.5T200-840h560q33 0 56.5 23.5T840-760v560q0 33-23.5 56.5T760-120H200Zm440-80h120v-560H640v560Zm-80 0v-560H200v560h360Zm80 0h120-120Z"/>' +
+        '</svg>';
+    static SVG_VERTICAL_EXPAND: string = '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">' +
+        '<path d="M16 12.5H8L12 16.5L16 12.5ZM21 19C21 19.55 20.8042 20.0208 20.4125 20.4125C20.0208 20.8042 19.55 21 19 21H5C4.45 21 3.97917 20.8042 3.5875 20.4125C3.19583 20.0208 3 19.55 3 19V5C3 4.45 3.19583 3.97917 3.5875 3.5875C3.97917 3.19583 4.45 3 5 3H19C19.55 3 20.0208 3.19583 20.4125 3.5875C20.8042 3.97917 21 4.45 21 5V19ZM19 8V5H5V8H19ZM19 10H5V19H19V10Z"/>' +
+        '</svg>';
+    static SVG_VERTICAL_COLLAPSE: string = '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">' +
+        '<path d="M8 16.5H16L12 12.5L8 16.5ZM21 19C21 19.55 20.8042 20.0208 20.4125 20.4125C20.0208 20.8042 19.55 21 19 21H5C4.45 21 3.97917 20.8042 3.5875 20.4125C3.19583 20.0208 3 19.55 3 19V5C3 4.45 3.19583 3.97917 3.5875 3.5875C3.97917 3.19583 4.45 3 5 3H19C19.55 3 20.0208 3.19583 20.4125 3.5875C20.8042 3.97917 21 4.45 21 5V19ZM19 8V5H5V8H19ZM19 10H5V19H19V10Z"/>' +
+        '</svg>';
+    static SVG_COMMENT: string = '<svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px"><path d="M200-200h360v-200h200v-360H200v560Zm0 80q-33 0-56.5-23.5T120-200v-560q0-33 23.5-56.5T200-840h560q33 0 56.5 23.5T840-760v400L600-120H200Zm80-280v-80h200v80H280Zm0-160v-80h400v80H280Zm-80 360v-560 560Z"/></svg>';
+    static SVG_EDIT_COMMENT: string = '<svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px"><path d="M657-121 544-234l56-56 57 57 127-127 56 56-183 183Zm-537 1v-80h360v80H120Zm0-160v-80h360v80H120Zm0-160v-80h720v80H120Zm0-160v-80h720v80H120Zm0-160v-80h720v80H120Z"/></svg>';
+
+    static FILE_INFO: string = "<svg xmlns='http://www.w3.org/2000/svg' height='20px' viewBox='0 -960 960 960' width='20px'><path d='M444-288h72v-240h-72v240Zm35.79-312q15.21 0 25.71-10.29t10.5-25.5q0-15.21-10.29-25.71t-25.5-10.5q-15.21 0-25.71 10.29t-10.5 25.5q0 15.21 10.29 25.71t25.5 10.5Zm.49 504Q401-96 331-126t-122.5-82.5Q156-261 126-330.96t-30-149.5Q96-560 126-629.5q30-69.5 82.5-122T330.96-834q69.96-30 149.5-30t149.04 30q69.5 30 122 82.5T834-629.28q30 69.73 30 149Q864-401 834-331t-82.5 122.5Q699-156 629.28-126q-69.73 30-149 30Zm-.28-72q130 0 221-91t91-221q0-130-91-221t-221-91q-130 0-221 91t-91 221q0 130 91 221t221 91Zm0-312Z'/></svg>";
+    static HAS_COMMENT: string = '<svg xmlns="http://www.w3.org/2000/svg" height="20px" viewBox="0 -960 960 960" width="20px"><path d="M288-288h288v-72H288v72Zm0-156h384v-72H288v72Zm0-156h384v-72H288v72Zm-72 456q-29.7 0-50.85-21.15Q144-186.3 144-216v-528q0-29.7 21.15-50.85Q186.3-816 216-816h528q29.7 0 50.85 21.15Q816-773.7 816-744v528q0 29.7-21.15 50.85Q773.7-144 744-144H216Zm0-72h528v-528H216v528Zm0-528v528-528Z"/></svg>';
+    static NO_COMMENT: string = '<svg xmlns="http://www.w3.org/2000/svg" height="20px" viewBox="0 -960 960 960" width="20px"><path d="M204-120q-34.65 0-59.32-24.68Q120-169.35 120-204v-552q0-34.65 24.68-59.33Q169.35-840 204-840h552q34.65 0 59.33 24.67Q840-790.65 840-756v552q0 34.65-24.67 59.32Q790.65-120 756-120H204Zm0-84h552v-552H204v552Zm0 0v-552 552Z"/></svg>';
 
     static LOCK_SPAN: string = "<span class='iconTooltip'>" + this.SVG_LOCK + " <small class='tooltiptext'>Locked segment</small></span>";
     static FINAL_SPAN: string = "<span class='iconTooltip'>" + this.SVG_FINAL + " <small class='tooltiptext'>Confirmed</small></span>";
     static TRANSLATED_SPAN: string = "<span class='iconTooltip'>" + this.SVG_TRANSLATED + " <small class='tooltiptext'>Draft</small></span>";
     static NOTES_SPAN: string = "<span class='iconTooltip'>" + this.SVG_NOTE + " <small class='tooltiptext'>Segment has notes</small></span>";
+    static COMMENT_SPAN: string = this.SVG_COMMENT + " <small class='tooltiptext'>Review comments</small>";
+    static EDIT_COMMENT_SPAN: string = this.SVG_EDIT_COMMENT + '<span class="tooltiptext bottomTooltip">Show/Hide Review Comments</span>';
     static SPACE_WARNING: string = "<span class='iconTooltip'>" + this.SVG_WARNING + " <small class='tooltiptext'>Space errors</small></span>";
     static TAG_WARNING: string = "<span class='iconTooltip'>" + this.SVG_WARNING + " <small class='tooltiptext'>Tag errors</small></span>";
     static SPACE_TAG_WARNING: string = "<span class='iconTooltip'>" + this.SVG_WARNING + " <small class='tooltiptext'>Tag and space errors</small></span>";
 
     static LOCK_FRAGMENT: string = 'M18 8h-1V6c0-2.76-2';
     static NOTE_FRAGMENT: string = 'M20 2H4c-1.1 0-1.99';
+    static readonly MIN_PANEL_WIDTH: number = 40;
+    static readonly MIN_SUBPANEL_HEIGHT: number = 40;
 
     container: HTMLDivElement;
     topBar: HTMLDivElement;
     observer: MutationObserver | undefined;
     rowsObserver: MutationObserver | undefined;
+    filesPanelWidthObserver: MutationObserver | undefined;
+    rightPanelWidthObserver: MutationObserver | undefined;
 
+    verticalPanels: ThreeVerticalPanels;
     mainArea: HTMLDivElement;
+    filesPanel: HTMLDivElement;
+    filesContainer: HTMLDivElement = document.createElement('div');
     translationArea: HTMLDivElement;
     rightPanel: HTMLDivElement;
 
@@ -67,6 +104,30 @@ class TranslationView {
     currentContent: string = '';
     currentId: SegmentId = { id: '', file: '', unit: '' };
     sourceTags: Map<string, string>;
+    files: any[] = [];
+
+    collapseFilesButton: HTMLAnchorElement;
+    expandFilesButton: HTMLAnchorElement;
+
+    collapseRightButton: HTMLAnchorElement;
+    expandRightButton: HTMLAnchorElement;
+
+    collapseMatchesButton: HTMLAnchorElement;
+    expandMatchesButton: HTMLAnchorElement;
+    collapseMtButton: HTMLAnchorElement;
+    expandMtButton: HTMLAnchorElement;
+    collapseTermsButton: HTMLAnchorElement;
+    expandTermsButton: HTMLAnchorElement;
+
+    rightHorizontalPanels: ThreeHorizontalPanels | undefined;
+
+    matchesHiddenBeforePanelCollapse: boolean = false;
+    mtHiddenBeforePanelCollapse: boolean = false;
+    termsHiddenBeforePanelCollapse: boolean = false;
+
+    matchesContainer: HTMLDivElement = document.createElement('div');
+    termsContainer: HTMLDivElement = document.createElement('div');
+    mtContainer: HTMLDivElement = document.createElement('div');
 
     filterButton: HTMLAnchorElement;
     sortButton: HTMLAnchorElement;
@@ -92,6 +153,7 @@ class TranslationView {
     returnNumber: number = -1;
 
     notesVisible: boolean = false;
+    commentsVisible: boolean = false;
 
     constructor(tab: Tab, projectId: string, sourceLang: string, targetLang: string, rows: number) {
         this.container = tab.getContainer();
@@ -114,18 +176,35 @@ class TranslationView {
 
         this.buildTopBar();
 
+        this.collapseFilesButton = document.createElement('a');
+        this.expandFilesButton = document.createElement('a');
+
+        this.collapseRightButton = document.createElement('a');
+        this.expandRightButton = document.createElement('a');
+
+        this.collapseMatchesButton = document.createElement('a');
+        this.expandMatchesButton = document.createElement('a');
+        this.collapseMtButton = document.createElement('a');
+        this.expandMtButton = document.createElement('a');
+        this.collapseTermsButton = document.createElement('a');
+        this.expandTermsButton = document.createElement('a');
+
         this.mainArea = document.createElement('div');
         this.mainArea.id = 'main' + projectId;
         this.mainArea.style.display = 'flex';
         this.container.appendChild(this.mainArea);
 
-        let verticalPanels: VerticalSplit = new VerticalSplit(this.mainArea);
-        verticalPanels.setWeights([75, 25]);
+        this.verticalPanels = new ThreeVerticalPanels(this.mainArea);
+        this.verticalPanels.setWeights([16, 64, 20]);
 
-        this.translationArea = verticalPanels.leftPanel();
+        this.filesPanel = this.verticalPanels.leftPanel();
+        this.filesPanel.style.height = '100%';
+
+        this.translationArea = this.verticalPanels.centerPanel();
         this.translationArea.style.height = '100%';
 
-        this.rightPanel = verticalPanels.rightPanel();
+        this.rightPanel = this.verticalPanels.rightPanel();
+        this.rightPanel.style.height = '100%';
 
         this.container.addEventListener('keydown', (event: KeyboardEvent) => {
             if (event.key === 'PageDown' && !(event.ctrlKey || event.metaKey)) {
@@ -249,22 +328,23 @@ class TranslationView {
             }
         });
 
+        this.buildFilesArea();
         this.buildTranslationArea();
         this.buildRightSide();
 
-        this.electron.ipcRenderer.on('set-segments-count', (event: Electron.IpcRendererEvent, arg: any) => {
+        ipcRenderer.on('set-segments-count', (event: IpcRendererEvent, arg: any) => {
             if (arg.project === this.projectId) {
                 this.setSegmentsCount(arg.count);
             }
         });
-        this.electron.ipcRenderer.on('set-segments', (event: Electron.IpcRendererEvent, arg: any) => {
+        ipcRenderer.on('set-segments', (event: IpcRendererEvent, arg: any) => {
             if (arg.project === this.projectId) {
                 this.setSegments(arg.segments);
             }
         });
-        this.electron.ipcRenderer.on('count-changed', (event: Electron.IpcRendererEvent, arg: any) => {
+        ipcRenderer.on('count-changed', (event: IpcRendererEvent, arg: any) => {
             if (arg.project === this.projectId) {
-                this.electron.ipcRenderer.send('get-segments-count', { project: this.projectId });
+                ipcRenderer.send('get-segments-count', { project: this.projectId });
             }
         });
         this.watchSizes();
@@ -273,20 +353,181 @@ class TranslationView {
             this.setSize();
         }, 200);
 
-        this.electron.ipcRenderer.send('get-segments-count', { project: this.projectId });
-        this.electron.ipcRenderer.send('get-project-memories', { project: this.projectId });
-        this.electron.ipcRenderer.send('get-project-glossaries', { project: this.projectId });
-        this.electron.ipcRenderer.on('request-memories', () => {
-            this.electron.ipcRenderer.send('get-project-memories', { project: this.projectId });
+        ipcRenderer.send('get-segments-count', { project: this.projectId });
+        ipcRenderer.send('get-project-memories', { project: this.projectId });
+        ipcRenderer.send('get-project-glossaries', { project: this.projectId });
+        ipcRenderer.on('request-memories', () => {
+            ipcRenderer.send('get-project-memories', { project: this.projectId });
         });
-        this.electron.ipcRenderer.on('request-glossaries', () => {
-            this.electron.ipcRenderer.send('get-project-glossaries', { project: this.projectId });
+        ipcRenderer.on('request-glossaries', () => {
+            ipcRenderer.send('get-project-glossaries', { project: this.projectId });
         });
-        this.electron.ipcRenderer.send('get-zoom');
-        this.electron.ipcRenderer.on('set-zoom', (event: Electron.IpcRendererEvent, arg: any) => {
+        ipcRenderer.send('get-zoom');
+        ipcRenderer.on('set-zoom', (event: IpcRendererEvent, arg: any) => {
             this.setZoom(arg.zoom);
         });
         this.setSpellChecker();
+    }
+
+    selectFile(file: string): void {
+        let selectedFile = this.filesContainer.querySelector(`[data-file="${file}"]`);
+        if (selectedFile) {
+            this.filesContainer.getElementsByClassName('selectedFile')[0]?.classList.remove('selectedFile');
+        }
+        this.filesContainer.querySelector(`[data-file="${file}"]`)?.classList.add('selectedFile');
+    }
+
+    setFiles(files: any[]): void {
+        this.files = files;
+        this.drawFiles();
+    }
+
+    drawFiles(): void {
+        this.filesContainer.innerHTML = '';
+
+        let filesTable: HTMLTableElement = document.createElement('table');
+        filesTable.className = 'filesTable';
+        this.filesContainer.appendChild(filesTable);
+
+        for (const file of this.files) {
+            let sourceFile: string = file.sourceFile;
+            let detailsArray: any[] = file.files;
+
+            if (detailsArray.length === 1) {
+                let tr: HTMLTableRowElement = document.createElement('tr');
+                tr.setAttribute('data-file', detailsArray[0].file);
+                filesTable.appendChild(tr);
+
+                let td: HTMLTableCellElement = document.createElement('td');
+                td.style.width = '24px';
+                let infoSpan: HTMLSpanElement = document.createElement('span');
+                infoSpan.classList.add('iconTooltip');
+                infoSpan.classList.add('sourceSymbol');
+                infoSpan.innerHTML = TranslationView.FILE_INFO + '<small class="tooltiptext">File Info</small>';
+                infoSpan.addEventListener('click', () => {
+                    this.showFileInfo(detailsArray[0]);
+                });
+                td.appendChild(infoSpan);
+                tr.appendChild(td);
+
+                td = document.createElement('td');
+                td.style.width = '24px';
+                let metaSpan: HTMLSpanElement = document.createElement('span');
+                metaSpan.classList.add('iconTooltip');
+                metaSpan.classList.add('sourceSymbol');
+                metaSpan.addEventListener('click', () => {
+                    this.showFileMetadata(detailsArray[0]);
+                });
+                if (this.hasCustomMetadata(detailsArray[0].customdata)) {
+                    metaSpan.innerHTML = TranslationView.HAS_COMMENT + '<small class="tooltiptext">Review Comments</small>';
+                } else {
+                    metaSpan.innerHTML = TranslationView.NO_COMMENT + '<small class="tooltiptext">Review Comments</small>';
+                }
+                td.appendChild(metaSpan);
+                tr.appendChild(td);
+
+                td = document.createElement('td');
+                td.classList.add('noWrap');
+                td.classList.add('fileName');
+                td.addEventListener('click', () => {
+                    ipcRenderer.send('goto-file', { project: this.projectId, file: detailsArray[0].file });
+                });
+                td.innerText = sourceFile;
+                tr.appendChild(td);
+            } else {
+                let tr: HTMLTableRowElement = document.createElement('tr');
+                tr.classList.add('sourceFile');
+
+                let td: HTMLTableCellElement = document.createElement('td');
+                td.classList.add('middle');
+                td.classList.add('noWrap');
+                td.innerText = sourceFile;
+                td.colSpan = 3;
+                tr.appendChild(td);
+                filesTable.appendChild(tr);
+
+                for (const details of detailsArray) {
+                    let tr: HTMLTableRowElement = document.createElement('tr');
+                    tr.setAttribute('data-file', details.file);
+                    filesTable.appendChild(tr);
+
+                    let td: HTMLTableCellElement = document.createElement('td');
+                    td.style.width = '24px';
+                    let infoSpan: HTMLSpanElement = document.createElement('span');
+                    infoSpan.classList.add('iconTooltip');
+                    infoSpan.classList.add('sourceSymbol');
+                    infoSpan.innerHTML = TranslationView.FILE_INFO + '<small class="tooltiptext">File Info</small>';
+                    infoSpan.addEventListener('click', () => {
+                        this.showFileInfo(details);
+                    });
+                    td.appendChild(infoSpan);
+                    tr.appendChild(td);
+
+                    td = document.createElement('td');
+                    td.style.width = '24px';
+                    let metaSpan: HTMLSpanElement = document.createElement('span');
+                    metaSpan.classList.add('iconTooltip');
+                    metaSpan.classList.add('sourceSymbol');
+                    metaSpan.addEventListener('click', () => {
+                        this.showFileMetadata(details);
+                    });
+                    if (this.hasCustomMetadata(details.customdata)) {
+                        metaSpan.innerHTML = TranslationView.HAS_COMMENT + '<small class="tooltiptext">File Metadata</small>';
+                    } else {
+                        metaSpan.innerHTML = TranslationView.NO_COMMENT + '<small class="tooltiptext">File Metadata</small>';
+                    }
+                    td.appendChild(metaSpan);
+                    tr.appendChild(td);
+
+                    td = document.createElement('td');
+                    td.classList.add('middle');
+                    td.classList.add('noWrap');
+                    td.classList.add('fileName');
+                    td.innerText = details.original;
+                    td.addEventListener('click', () => {
+                        ipcRenderer.send('goto-file', { project: this.projectId, file: details.file });
+                    });
+                    tr.appendChild(td);
+                }
+            }
+        }
+        if (this.currentRow) {
+            let file: string = this.currentRow.getAttribute('data-file') || '';
+            this.selectFile(file);
+        }
+        setTimeout(() => {
+            if (filesTable.getElementsByTagName('tr').length === 1) {
+                this.collapseFilesButton.click();
+            }
+        }, 150);
+    }
+
+    showFileMetadata(details: any) {
+        ipcRenderer.send('show-metadata', { project: this.projectId, file: details.file });
+    }
+
+    showFileInfo(details: any) {
+        let metadata: any = details.metadata;
+        let data: any[] = metadata.data;
+        let array: any[] = [];
+        for (let i = 0; i < data.length; i++) {
+            let meta: any = data[i];
+            let category: string = meta.category || '';
+            if (category === 'format' || category === 'tool' || category === 'PI' || category === 'sourceFile' || category === 'document') {
+                array.push(meta);
+            }
+        }
+        let info: any = {
+            original: details.original,
+            id: details.file,
+            metadata: array
+        };
+        ipcRenderer.send('show-file-info', info);
+    }
+
+    hasCustomMetadata(metadata: any): boolean {
+        let keys: string[] = Object.keys(metadata);
+        return keys.length > 0;
     }
 
     setZoom(zoom: string): void {
@@ -306,7 +547,7 @@ class TranslationView {
         exportTranslations.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 0 24 24" width="24">'
             + '<path d="M19 12v7H5v-7H3v7c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2v-7h-2zm-6 .67l2.59-2.58L17 11.5l-5 5-5-5 1.41-1.41L11 12.67V3h2v9.67z"/>' +
             '</svg>' +
-            '<span class="tooltiptext bottomTooltip">Export Translations</span>';
+            '<span class="tooltiptext bottomTooltip">Export Translations/Reviews</span>';
         exportTranslations.className = 'tooltip bottomTooltip';
         exportTranslations.addEventListener('click', () => {
             this.exportTranslations();
@@ -373,9 +614,22 @@ class TranslationView {
             '</svg>' +
             '<span class="tooltiptext bottomTooltip">Go To Segment...</span>';
         goToLink.addEventListener('click', () => {
-            this.electron.ipcRenderer.send('show-go-to-window');
+            ipcRenderer.send('show-go-to-window');
         });
         this.topBar.appendChild(goToLink);
+
+        let goToSource: HTMLAnchorElement = document.createElement('a');
+        goToSource.classList.add('tooltip');
+        goToSource.classList.add('bottomTooltip');
+        goToSource.innerHTML = '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">' +
+            '<path d="M2 9V6.9H13V9H2ZM2 4.1V2H13V4.1H2Z"/>' +
+            '<path d="M15.7 22L13.4833 16.5167L8 14.3V13.2111L22 8L16.7889 22H15.7ZM16.2056 19.1222L19.3556 10.6444L10.8778 13.7944L14.6889 15.3111L16.2056 19.1222Z"/>' +
+            '</svg>' +
+            '<span class="tooltiptext bottomTooltip">Go To Next Segment With Same Source</span>';
+        goToSource.addEventListener('click', () => {
+            this.goToSameSource();
+        });
+        this.topBar.appendChild(goToSource);
 
         let splitButton: HTMLAnchorElement = document.createElement('a');
         splitButton.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 0 24 24" width="24">'
@@ -479,6 +733,14 @@ class TranslationView {
         });
         this.topBar.appendChild(notesButton);
 
+        let metadataButton: HTMLAnchorElement = document.createElement('a');
+        metadataButton.innerHTML = TranslationView.EDIT_COMMENT_SPAN;
+        metadataButton.className = 'tooltip bottomTooltip';
+        metadataButton.addEventListener('click', () => {
+            this.showReviewComments();
+        });
+        this.topBar.appendChild(metadataButton);
+
         let addTermButton: HTMLAnchorElement = document.createElement('a');
         addTermButton.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 0 24 24" width="24">' +
             '<path d="M14 10H2v2h12v-2zm0-4H2v2h12V6zm4 8v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zM2 16h8v-2H2v2z"/>' +
@@ -510,7 +772,7 @@ class TranslationView {
         tagsAnalysisButton.className = 'tooltip bottomTooltip';
         tagsAnalysisButton.style.marginLeft = '10px';
         tagsAnalysisButton.addEventListener('click', () => {
-            Main.electron.ipcRenderer.send('analyze-tags', this.projectId);
+            ipcRenderer.send('analyze-tags', this.projectId);
         });
         this.topBar.appendChild(tagsAnalysisButton);
 
@@ -521,7 +783,7 @@ class TranslationView {
             '<span class="tooltiptext bottomTooltip">Check Initial/Trailing Spaces</span>';
         spaceAnalysisButton.className = 'tooltip bottomTooltip';
         spaceAnalysisButton.addEventListener('click', () => {
-            Main.electron.ipcRenderer.send('analyze-spaces', this.projectId);
+            ipcRenderer.send('analyze-spaces', this.projectId);
         });
         this.topBar.appendChild(spaceAnalysisButton);
 
@@ -561,7 +823,7 @@ class TranslationView {
             '<span class="tooltiptext bottomTooltip">Insert AI Response in Segment</span>';
         insertAiTransltionButton.className = 'tooltip bottomTooltip';
         insertAiTransltionButton.addEventListener('click', () => {
-            this.electron.ipcRenderer.send('paste-response');
+            ipcRenderer.send('paste-response');
         });
         this.topBar.appendChild(insertAiTransltionButton);
 
@@ -576,14 +838,19 @@ class TranslationView {
         iateSearchButton.className = 'tooltip bottomTooltip';
         iateSearchButton.style.marginLeft = '10px';
         iateSearchButton.addEventListener('click', () => {
-            this.electron.ipcRenderer.send('search-iate');
+            ipcRenderer.send('search-iate');
         });
         this.topBar.appendChild(iateSearchButton);
 
-        let filler: HTMLSpanElement = document.createElement('span');
-        filler.innerHTML = '&nbsp;';
-        filler.className = 'fill_width';
-        this.topBar.appendChild(filler);
+        let filler1: HTMLSpanElement = document.createElement('span');
+        filler1.innerHTML = '&nbsp;';
+        filler1.className = 'fill_width';
+        this.topBar.appendChild(filler1);
+
+        let filler2: HTMLSpanElement = document.createElement('span');
+        filler2.innerHTML = '&nbsp;';
+        filler2.className = 'fill_width';
+        this.topBar.appendChild(filler2);
 
         let memLabel: HTMLLabelElement = document.createElement('label');
         memLabel.style.marginTop = '4px';
@@ -595,7 +862,7 @@ class TranslationView {
         this.memSelect.style.marginTop = '4px';
         this.memSelect.style.minWidth = '180px';
         this.memSelect.addEventListener('change', () => {
-            this.electron.ipcRenderer.send('set-project-memory', { project: this.projectId, memory: this.memSelect.value });
+            ipcRenderer.send('set-project-memory', { project: this.projectId, memory: this.memSelect.value });
         });
         this.topBar.appendChild(this.memSelect);
 
@@ -623,7 +890,7 @@ class TranslationView {
         this.glossSelect.style.marginTop = '4px';
         this.glossSelect.style.minWidth = '180px';
         this.glossSelect.addEventListener('change', () => {
-            this.electron.ipcRenderer.send('set-project-glossary', { project: this.projectId, glossary: this.glossSelect.value });
+            ipcRenderer.send('set-project-glossary', { project: this.projectId, glossary: this.glossSelect.value });
         });
         this.topBar.appendChild(this.glossSelect);
 
@@ -643,6 +910,8 @@ class TranslationView {
     close(): void {
         this.rowsObserver?.disconnect();
         this.observer?.disconnect();
+        ipcRenderer.send('close-notes');
+        ipcRenderer.send('close-review-comments');
     }
 
     getContainer(): HTMLDivElement {
@@ -672,7 +941,7 @@ class TranslationView {
 
     exportTranslations() {
         this.saveEdit({ next: 'none', confirm: false });
-        this.electron.ipcRenderer.send('export-open-project', { project: this.projectId });
+        ipcRenderer.send('export-open-project', { project: this.projectId });
     }
 
     setSegmentsCount(count: number): void {
@@ -706,13 +975,12 @@ class TranslationView {
             sortOption: this.sortOption,
             sortDesc: this.sortDesc
         };
-        this.electron.ipcRenderer.send('get-segments', params);
+        ipcRenderer.send('get-segments', params);
     }
 
     buildTranslationArea(): void {
-
         let leftPanel: HTMLDivElement = document.createElement('div');
-        leftPanel.classList.add('leftPaddedPanel');
+        leftPanel.classList.add('translationPanel');
         this.translationArea.appendChild(leftPanel);
 
         let tableContainer: HTMLDivElement = document.createElement('div');
@@ -774,7 +1042,7 @@ class TranslationView {
         let firstLink: HTMLAnchorElement = document.createElement('a');
         firstLink.classList.add('tooltip');
         firstLink.classList.add('topTooltip');
-        firstLink.innerHTML = '<svg width="24" height="24" viewBox="0 0 24 24">' +
+        firstLink.innerHTML = '<svg width="16" height="24" viewBox="3 0 19 24">' +
             '<path d="M18.41 16.59L13.82 12l4.59-4.59L17 6l-6 6 6 6zM6 6h2v12H6z" />' +
             '</svg>' +
             '<span class="tooltiptext topTooltip">First Page</span>';
@@ -786,7 +1054,7 @@ class TranslationView {
         let previousLink: HTMLAnchorElement = document.createElement('a');
         previousLink.classList.add('tooltip');
         previousLink.classList.add('topTooltip');
-        previousLink.innerHTML = '<svg width="24" height="24" viewBox="0 0 24 24">' +
+        previousLink.innerHTML = '<svg width="16" height="24" viewBox="3 0 19 24">' +
             '<path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z" />' + '</svg>' +
             '<span class="tooltiptext topTooltip">Previous Page</span>';
         previousLink.addEventListener('click', () => {
@@ -797,7 +1065,6 @@ class TranslationView {
         let pageLabel: HTMLLabelElement = document.createElement('label');
         pageLabel.innerText = 'Page';
         pageLabel.setAttribute('for', 'page' + this.projectId);
-        pageLabel.style.marginLeft = '10px';
         pageLabel.style.marginTop = '4px';
         statusArea.appendChild(pageLabel);
 
@@ -809,9 +1076,9 @@ class TranslationView {
         let pageInput: HTMLInputElement = document.createElement('input');
         pageInput.id = 'page' + this.projectId;
         pageInput.type = 'number';
-        pageInput.style.marginLeft = '10px';
+        pageInput.style.marginLeft = '4px';
         pageInput.style.marginTop = '4px';
-        pageInput.style.width = '50px';
+        pageInput.style.width = '40px';
         pageInput.value = '0';
         pageInput.addEventListener('change', () => {
             let page = Number.parseInt(pageInput.value, 10);
@@ -827,7 +1094,7 @@ class TranslationView {
         pagesSpan.id = 'pages' + this.projectId;
         pagesSpan.classList.add('noWrap');
         pagesSpan.innerText = 'of'
-        pagesSpan.style.marginLeft = '10px';
+        pagesSpan.style.marginLeft = '4px';
         pagesSpan.style.marginTop = '4px';
         pagesSpan.innerText = '0';
         statusArea.appendChild(pagesSpan);
@@ -835,7 +1102,7 @@ class TranslationView {
         let nextLink: HTMLAnchorElement = document.createElement('a');
         nextLink.classList.add('tooltip');
         nextLink.classList.add('topTooltip');
-        nextLink.innerHTML = '<svg width="24" height="24" viewBox="0 0 24 24">' +
+        nextLink.innerHTML = '<svg width="16" height="24" viewBox="3 0 19 24">' +
             '<path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z" />' + '</svg>' +
             '<span class="tooltiptext topTooltip">Next Page</span>';
         nextLink.addEventListener('click', () => {
@@ -846,7 +1113,7 @@ class TranslationView {
         let lastLink: HTMLAnchorElement = document.createElement('a');
         lastLink.classList.add('tooltip');
         lastLink.classList.add('topTooltip');
-        lastLink.innerHTML = '<svg width="24" height="24" viewBox="0 0 24 24">' +
+        lastLink.innerHTML = '<svg width="16" height="24" viewBox="3 0 19 24">' +
             '<path d="M5.59 7.41L10.18 12l-4.59 4.59L7 18l6-6-6-6zM16 6h2v12h-2z" />' + '</svg>' +
             '<span class="tooltiptext topTooltip">Last Page</span>';
         lastLink.addEventListener('click', () => {
@@ -857,7 +1124,6 @@ class TranslationView {
         let rowsLabel: HTMLLabelElement = document.createElement('label');
         rowsLabel.innerText = 'Rows/Page';
         rowsLabel.setAttribute('for', 'rows_page' + this.projectId);
-        rowsLabel.style.marginLeft = '10px';
         rowsLabel.style.marginTop = '4px';
         statusArea.appendChild(rowsLabel);
 
@@ -869,9 +1135,8 @@ class TranslationView {
         let rowsInput: HTMLInputElement = document.createElement('input');
         rowsInput.id = 'rows_page' + this.projectId;
         rowsInput.type = 'number';
-        rowsInput.style.marginLeft = '10px';
         rowsInput.style.marginTop = '4px';
-        rowsInput.style.width = '50px';
+        rowsInput.style.width = '44px';
         rowsInput.value = '' + this.rowsPage;
         rowsInput.addEventListener('change', () => {
             this.rowsPage = Number.parseInt(rowsInput.value, 10);
@@ -936,17 +1201,152 @@ class TranslationView {
         let width: number = (this.translationArea.clientWidth - numbersWidth - status) / 2;
 
         let numberTh: HTMLTableCellElement = document.getElementById('numberTh' + this.projectId) as HTMLTableCellElement;
-        numberTh.style.width = (100 * numbersWidth / this.translationArea.clientWidth) + '%';
+        if (numberTh) {
+            numberTh.style.width = (100 * numbersWidth / this.translationArea.clientWidth) + '%';
+        }
         let translateTh: HTMLTableCellElement = document.getElementById('translateTh' + this.projectId) as HTMLTableCellElement;
-        translateTh.style.width = (100 * 32 / this.translationArea.clientWidth) + '%';
+        if (translateTh) {
+            translateTh.style.width = (100 * 32 / this.translationArea.clientWidth) + '%';
+        }
         let matchTh: HTMLTableCellElement = document.getElementById('matchTh' + this.projectId) as HTMLTableCellElement;
-        matchTh.style.width = (100 * (40 * this.zoom + 8) / this.translationArea.clientWidth) + '%';
+        if (matchTh) {
+            matchTh.style.width = (100 * (40 * this.zoom + 8) / this.translationArea.clientWidth) + '%';
+        }
         let finalTh: HTMLTableCellElement = document.getElementById('finalTh' + this.projectId) as HTMLTableCellElement;
-        finalTh.style.width = (100 * 35 / this.translationArea.clientWidth) + '%';
+        if (finalTh) {
+            finalTh.style.width = (100 * 35 / this.translationArea.clientWidth) + '%';
+        }
         let sourceTh: HTMLTableCellElement = document.getElementById('sourceTh' + this.projectId) as HTMLTableCellElement;
-        sourceTh.style.width = (100 * width / this.translationArea.clientWidth) + '%';
+        if (sourceTh) {
+            sourceTh.style.width = (100 * width / this.translationArea.clientWidth) + '%';
+        }
         let targetTh: HTMLTableCellElement = document.getElementById('targetTh' + this.projectId) as HTMLTableCellElement;
-        targetTh.style.width = (100 * width / this.translationArea.clientWidth) + '%';
+        if (targetTh) {
+            targetTh.style.width = (100 * width / this.translationArea.clientWidth) + '%';
+        }
+    }
+
+    toggleFilesPanel(): void {
+        if (this.collapseFilesButton.classList.contains('hidden')) {
+            this.expandFilesButton.click();
+        } else {
+            this.collapseFilesButton.click();
+        }
+    }
+
+    toggleRightPanels(): void {
+        if (this.collapseRightButton.classList.contains('hidden')) {
+            this.expandRightButton.click();
+        } else {
+            this.collapseRightButton.click();
+        }
+    }
+
+    buildFilesArea(): void {
+        let panelsContainer: HTMLDivElement = document.createElement('div');
+        panelsContainer.classList.add('leftPaddedPanel');
+        this.filesPanel.appendChild(panelsContainer);
+
+        let filesTitle: HTMLDivElement = document.createElement('div');
+        filesTitle.classList.add('titlepanel');
+        filesTitle.classList.add('row');
+        panelsContainer.appendChild(filesTitle);
+
+        let filler: HTMLSpanElement = document.createElement('span');
+        filler.classList.add('fill_width');
+        filler.innerText = 'Files';
+        filesTitle.appendChild(filler);
+
+        this.collapseFilesButton.innerHTML = TranslationView.SVG_EXPAND;
+        this.collapseFilesButton.style.marginRight = '4px';
+        this.collapseFilesButton.addEventListener('click', () => {
+            filler.classList.add('hidden');
+            this.toggleButtonVisibility(this.collapseFilesButton, false);
+            this.toggleButtonVisibility(this.expandFilesButton, true);
+            this.filesContainer.classList.add('hidden');
+            this.verticalPanels.collapseLeft();
+
+            if (this.filesPanelWidthObserver) {
+                this.filesPanelWidthObserver.disconnect();
+                this.filesPanelWidthObserver = undefined;
+            }
+
+            const observer: MutationObserver = new MutationObserver((mutationsList: MutationRecord[]) => {
+                for (const mutation of mutationsList) {
+                    if (mutation.type !== 'attributes' || mutation.attributeName !== 'style') {
+                        continue;
+                    }
+
+                    const panelWidth: number = this.filesPanel.clientWidth;
+                    if (panelWidth > TranslationView.MIN_PANEL_WIDTH) {
+                        filler.classList.remove('hidden');
+                        this.filesContainer.classList.remove('hidden');
+                        this.toggleButtonVisibility(this.collapseFilesButton, true);
+                        this.toggleButtonVisibility(this.expandFilesButton, false);
+                        observer.disconnect();
+                        this.filesPanelWidthObserver = undefined;
+                        break;
+                    }
+                }
+            });
+
+            observer.observe(this.filesPanel, { attributes: true, attributeFilter: ['style'] });
+            this.filesPanelWidthObserver = observer;
+        });
+        this.collapseFilesButton.addEventListener('mouseenter', () => {
+            const rect = this.collapseFilesButton.getBoundingClientRect();
+            collapseTooltip.style.top = rect.top + 'px';
+            collapseTooltip.style.left = (rect.left + rect.width + 4) + 'px';
+            collapseTooltip.style.visibility = 'visible';
+        });
+        this.collapseFilesButton.addEventListener('mouseleave', () => {
+            collapseTooltip.style.visibility = 'hidden';
+        });
+        filesTitle.appendChild(this.collapseFilesButton);
+
+        this.toggleButtonVisibility(this.expandFilesButton, false);
+        this.expandFilesButton.innerHTML = TranslationView.SVG_COLLAPSE;
+        this.expandFilesButton.style.marginRight = '4px';
+        this.expandFilesButton.style.marginLeft = '-2px';
+        this.expandFilesButton.addEventListener('click', () => {
+            filler.classList.remove('hidden');
+            this.toggleButtonVisibility(this.collapseFilesButton, true);
+            this.toggleButtonVisibility(this.expandFilesButton, false);
+            this.filesContainer.classList.remove('hidden');
+            this.verticalPanels.expandLeft();
+        });
+        this.expandFilesButton.addEventListener('mouseenter', () => {
+            const rect = this.expandFilesButton.getBoundingClientRect();
+            expandTooltip.style.top = (rect.top) + 'px';
+            expandTooltip.style.left = (rect.left + rect.width + 6) + 'px';
+            expandTooltip.style.visibility = 'visible';
+        });
+        this.expandFilesButton.addEventListener('mouseleave', () => {
+            expandTooltip.style.visibility = 'hidden';
+        });
+        filesTitle.appendChild(this.expandFilesButton);
+
+        let collapseTooltip: HTMLDivElement = document.createElement('div');
+        collapseTooltip.classList.add('filesTooltip');
+        collapseTooltip.innerText = 'Collapse Files Panel';
+        collapseTooltip.style.visibility = 'hidden';
+        panelsContainer.appendChild(collapseTooltip);
+
+        let expandTooltip: HTMLDivElement = document.createElement('div');
+        expandTooltip.classList.add('filesTooltip');
+        expandTooltip.innerText = 'Expand Files Panel';
+        expandTooltip.style.visibility = 'hidden';
+        panelsContainer.appendChild(expandTooltip);
+
+        this.filesContainer.classList.add('fill_width');
+        this.filesContainer.classList.add('roundedBottom');
+        this.filesContainer.classList.add('divContainer');
+
+        panelsContainer.appendChild(this.filesContainer);
+
+        setTimeout(() => {
+            this.filesContainer.style.height = 'calc(100% - ' + filesTitle.clientHeight + 'px)';
+        }, 200);
     }
 
     buildRightSide(): void {
@@ -966,10 +1366,19 @@ class TranslationView {
         observer.observe(this.rightPanel, config);
 
         let horizontalSplit: ThreeHorizontalPanels = new ThreeHorizontalPanels(panelsContainer);
+        this.rightHorizontalPanels = horizontalSplit;
+        horizontalSplit.topPanel().dataset.collapsed = 'false';
+        horizontalSplit.centerPanel().dataset.collapsed = 'false';
+        horizontalSplit.bottomPanel().dataset.collapsed = 'false';
 
         this.createMemoryArea(horizontalSplit.topPanel());
         this.createTermsArea(horizontalSplit.bottomPanel());
         this.createMachineArea(horizontalSplit.centerPanel());
+
+        this.updateRightPanelsLayout();
+        this.toggleButtonVisibility(this.expandMatchesButton, false);
+        this.toggleButtonVisibility(this.expandMtButton, false);
+        this.toggleButtonVisibility(this.expandTermsButton, false);
     }
 
     createMemoryArea(topPanel: HTMLDivElement): void {
@@ -979,18 +1388,188 @@ class TranslationView {
 
         let memoryTitle: HTMLDivElement = document.createElement('div');
         memoryTitle.classList.add('titlepanel');
-        memoryTitle.innerText = 'Translation Memory';
+        memoryTitle.style.overflow = 'visible';
+        memoryTitle.style.display = 'flex';
         panelsContainer.appendChild(memoryTitle);
-        let matchesContainer: HTMLDivElement = document.createElement('div');
-        matchesContainer.classList.add('fill_width');
-        panelsContainer.appendChild(matchesContainer);
-        this.tmMatches = new TmMatches(matchesContainer, this.projectId);
+
+        let filler: HTMLSpanElement = document.createElement('span');
+        filler.classList.add('fill_width');
+        filler.innerText = 'Translation Memory';
+        memoryTitle.appendChild(filler);
+
+        this.expandMatchesButton.className = 'tooltip bottomRightTooltip';
+        this.expandMatchesButton.innerHTML = TranslationView.SVG_VERTICAL_EXPAND + '<span class="tooltiptext bottomRightTooltip">Expand Translation Memory</span>';
+        this.expandMatchesButton.style.marginLeft = '4px';
+        this.toggleButtonVisibility(this.expandMatchesButton, false);
+        this.expandMatchesButton.addEventListener('click', () => {
+            if (!this.matchesContainer.classList.contains('hidden')) {
+                return;
+            }
+            this.matchesContainer.classList.remove('hidden');
+            this.rightHorizontalPanels?.expandTop();
+            this.updateRightPanelsLayout();
+            this.matchesHiddenBeforePanelCollapse = false;
+        });
+        memoryTitle.appendChild(this.expandMatchesButton);
+
+        this.collapseMatchesButton.className = 'tooltip bottomRightTooltip';
+        this.collapseMatchesButton.innerHTML = TranslationView.SVG_VERTICAL_COLLAPSE + '<span class="tooltiptext bottomRightTooltip">Collapse Translation Memory</span>';
+        this.collapseMatchesButton.style.marginLeft = '4px';
+        this.collapseMatchesButton.style.marginLeft = '4px';
+        this.collapseMatchesButton.addEventListener('click', () => {
+            if (this.matchesContainer.classList.contains('hidden')) {
+                return;
+            }
+            this.matchesContainer.classList.add('hidden');
+            this.rightHorizontalPanels?.collapseTop();
+            this.updateRightPanelsLayout();
+            this.matchesHiddenBeforePanelCollapse = true;
+        });
+        memoryTitle.appendChild(this.collapseMatchesButton);
+
+        this.collapseRightButton.innerHTML = TranslationView.SVG_COLLAPSE;
+        this.collapseRightButton.style.marginLeft = '-2px';
+        this.collapseRightButton.addEventListener('click', () => {
+            filler.classList.add('hidden');
+            this.toggleButtonVisibility(this.collapseRightButton, false);
+            this.toggleButtonVisibility(this.expandRightButton, true);
+            this.matchesHiddenBeforePanelCollapse = this.matchesContainer.classList.contains('hidden');
+            this.mtHiddenBeforePanelCollapse = this.mtContainer.classList.contains('hidden');
+            this.termsHiddenBeforePanelCollapse = this.termsContainer.classList.contains('hidden');
+            this.matchesContainer.classList.add('hidden');
+            this.mtContainer.classList.add('hidden');
+            this.termsContainer.classList.add('hidden');
+            this.updateRightPanelsLayout(true);
+            this.verticalPanels.collapseRight();
+
+            if (this.rightPanelWidthObserver) {
+                this.rightPanelWidthObserver.disconnect();
+                this.rightPanelWidthObserver = undefined;
+            }
+
+            const observer: MutationObserver = new MutationObserver((mutationsList: MutationRecord[]) => {
+                for (const mutation of mutationsList) {
+                    if (mutation.type !== 'attributes' || mutation.attributeName !== 'style') {
+                        continue;
+                    }
+
+                    const panelWidth: number = this.rightPanel.clientWidth;
+                    if (panelWidth > TranslationView.MIN_PANEL_WIDTH) {
+                        filler.classList.remove('hidden');
+                        if (this.matchesHiddenBeforePanelCollapse) {
+                            this.matchesContainer.classList.add('hidden');
+                        } else {
+                            this.matchesContainer.classList.remove('hidden');
+                        }
+                        if (this.mtHiddenBeforePanelCollapse) {
+                            this.mtContainer.classList.add('hidden');
+                        } else {
+                            this.mtContainer.classList.remove('hidden');
+                        }
+                        if (this.termsHiddenBeforePanelCollapse) {
+                            this.termsContainer.classList.add('hidden');
+                        } else {
+                            this.termsContainer.classList.remove('hidden');
+                        }
+                        this.updateRightPanelsLayout();
+                        this.toggleButtonVisibility(this.collapseRightButton, true);
+                        this.toggleButtonVisibility(this.expandRightButton, false);
+                        this.matchesHiddenBeforePanelCollapse = this.matchesContainer.classList.contains('hidden');
+                        this.mtHiddenBeforePanelCollapse = this.mtContainer.classList.contains('hidden');
+                        this.termsHiddenBeforePanelCollapse = this.termsContainer.classList.contains('hidden');
+                        observer.disconnect();
+                        this.rightPanelWidthObserver = undefined;
+                        break;
+                    }
+                }
+            });
+
+            observer.observe(this.rightPanel, { attributes: true, attributeFilter: ['style'] });
+            this.rightPanelWidthObserver = observer;
+        });
+        this.collapseRightButton.addEventListener('mouseenter', () => {
+            const rect = this.collapseRightButton.getBoundingClientRect();
+            collapseTooltip.style.top = rect.top + 'px';
+            collapseTooltip.style.left = (rect.left + rect.width + 4) + 'px';
+            collapseTooltip.style.visibility = 'visible';
+        });
+        this.collapseRightButton.addEventListener('mouseleave', () => {
+            collapseTooltip.style.visibility = 'hidden';
+        });
+        memoryTitle.prepend(this.collapseRightButton);
+
+        this.toggleButtonVisibility(this.expandRightButton, false);
+        this.expandRightButton.innerHTML = TranslationView.SVG_EXPAND;
+        this.expandRightButton.style.marginLeft = '-2px';
+        this.expandRightButton.style.marginRight = '0px';
+        this.expandRightButton.addEventListener('click', () => {
+            if (this.rightPanelWidthObserver) {
+                this.rightPanelWidthObserver.disconnect();
+                this.rightPanelWidthObserver = undefined;
+            }
+            filler.classList.remove('hidden');
+            this.toggleButtonVisibility(this.collapseRightButton, true);
+            this.toggleButtonVisibility(this.expandRightButton, false);
+            if (this.matchesHiddenBeforePanelCollapse) {
+                this.matchesContainer.classList.add('hidden');
+            } else {
+                this.matchesContainer.classList.remove('hidden');
+            }
+            if (this.mtHiddenBeforePanelCollapse) {
+                this.mtContainer.classList.add('hidden');
+            } else {
+                this.mtContainer.classList.remove('hidden');
+            }
+            if (this.termsHiddenBeforePanelCollapse) {
+                this.termsContainer.classList.add('hidden');
+            } else {
+                this.termsContainer.classList.remove('hidden');
+            }
+            this.updateRightPanelsLayout();
+            this.matchesHiddenBeforePanelCollapse = this.matchesContainer.classList.contains('hidden');
+            this.mtHiddenBeforePanelCollapse = this.mtContainer.classList.contains('hidden');
+            this.termsHiddenBeforePanelCollapse = this.termsContainer.classList.contains('hidden');
+            this.verticalPanels.expandRight();
+        });
+        this.expandRightButton.addEventListener('mouseenter', () => {
+            const rect = this.expandRightButton.getBoundingClientRect();
+            expandTooltip.style.top = (rect.top) + 'px';
+            expandTooltip.style.left = (rect.right - rect.width - 6 - expandTooltip.clientWidth) + 'px';
+            expandTooltip.style.visibility = 'visible';
+        });
+        this.expandRightButton.addEventListener('mouseleave', () => {
+            expandTooltip.style.visibility = 'hidden';
+        });
+        memoryTitle.prepend(this.expandRightButton);
+
+        let collapseTooltip: HTMLDivElement = document.createElement('div');
+        collapseTooltip.classList.add('rightPanelTooltip');
+        collapseTooltip.innerText = 'Collapse Right Panels';
+        collapseTooltip.style.visibility = 'hidden';
+        panelsContainer.appendChild(collapseTooltip);
+
+        let expandTooltip: HTMLDivElement = document.createElement('div');
+        expandTooltip.classList.add('rightPanelTooltip');
+        expandTooltip.innerText = 'Expand Right Panels';
+        expandTooltip.style.visibility = 'hidden';
+        panelsContainer.appendChild(expandTooltip);
+
+        this.matchesContainer.classList.add('fill_width');
+        panelsContainer.appendChild(this.matchesContainer);
+        this.tmMatches = new TmMatches(this.matchesContainer, this.projectId);
 
         let config: MutationObserverInit = { attributes: true, childList: false, subtree: false };
         let observer: MutationObserver = new MutationObserver((mutationsList) => {
             for (let mutation of mutationsList) {
                 if (mutation.type === 'attributes') {
-                    matchesContainer.style.height = (panelsContainer.clientHeight - memoryTitle.clientHeight) + 'px';
+                    const availableHeight: number = panelsContainer.clientHeight - memoryTitle.clientHeight;
+                    this.matchesContainer.style.height = availableHeight + 'px';
+                    if (this.matchesContainer.classList.contains('hidden') && availableHeight > TranslationView.MIN_SUBPANEL_HEIGHT) {
+                        this.matchesContainer.classList.remove('hidden');
+                        this.rightHorizontalPanels?.expandTop();
+                        this.matchesHiddenBeforePanelCollapse = false;
+                        this.updateRightPanelsLayout();
+                    }
                 }
             }
         });
@@ -1004,18 +1583,65 @@ class TranslationView {
 
         let machineTitle: HTMLDivElement = document.createElement('div');
         machineTitle.classList.add('titlepanel');
-        machineTitle.innerText = 'Machine Translation';
+        machineTitle.style.overflow = 'visible';
+        machineTitle.style.display = 'flex';
         panelsContainer.appendChild(machineTitle);
-        let mtContainer: HTMLDivElement = document.createElement('div');
-        mtContainer.classList.add('fill_width');
-        panelsContainer.appendChild(mtContainer);
-        this.mtMatches = new MtMatches(mtContainer, this.projectId);
+
+        let blankFiller: HTMLSpanElement = document.createElement('span');
+        blankFiller.innerHTML = TranslationView.SVG_BLANK;
+        machineTitle.appendChild(blankFiller);
+
+        let Title: HTMLSpanElement = document.createElement('span');
+        Title.classList.add('fill_width');
+        Title.innerText = 'Machine Translation';
+        machineTitle.appendChild(Title);
+
+        this.expandMtButton.className = 'tooltip bottomRightTooltip';
+        this.expandMtButton.innerHTML = TranslationView.SVG_VERTICAL_EXPAND + '<span class="tooltiptext bottomRightTooltip">Expand Machine Translation</span>';
+        this.expandMtButton.style.marginLeft = '4px';
+        this.toggleButtonVisibility(this.expandMtButton, false);
+        this.expandMtButton.addEventListener('click', () => {
+            if (!this.mtContainer.classList.contains('hidden')) {
+                return;
+            }
+            this.mtContainer.classList.remove('hidden');
+            this.rightHorizontalPanels?.expandCenter();
+            this.updateRightPanelsLayout();
+            this.mtHiddenBeforePanelCollapse = false;
+        });
+        machineTitle.appendChild(this.expandMtButton);
+
+        this.collapseMtButton.className = 'tooltip bottomRightTooltip';
+        this.collapseMtButton.innerHTML = TranslationView.SVG_VERTICAL_COLLAPSE + '<span class="tooltiptext bottomRightTooltip">Collapse Machine Translation</span>';
+        this.collapseMtButton.style.marginLeft = '4px';
+        this.collapseMtButton.style.marginLeft = '4px';
+        this.collapseMtButton.addEventListener('click', () => {
+            if (this.mtContainer.classList.contains('hidden')) {
+                return;
+            }
+            this.mtContainer.classList.add('hidden');
+            this.rightHorizontalPanels?.collapseCenter();
+            this.updateRightPanelsLayout();
+            this.mtHiddenBeforePanelCollapse = true;
+        });
+        machineTitle.appendChild(this.collapseMtButton);
+
+        this.mtContainer.classList.add('fill_width');
+        panelsContainer.appendChild(this.mtContainer);
+        this.mtMatches = new MtMatches(this.mtContainer, this.projectId);
 
         let config: MutationObserverInit = { attributes: true, childList: false, subtree: false };
         let observer: MutationObserver = new MutationObserver((mutationsList) => {
             for (let mutation of mutationsList) {
                 if (mutation.type === 'attributes') {
-                    mtContainer.style.height = (panelsContainer.clientHeight - machineTitle.clientHeight) + 'px';
+                    const availableHeight: number = panelsContainer.clientHeight - machineTitle.clientHeight;
+                    this.mtContainer.style.height = availableHeight + 'px';
+                    if (this.mtContainer.classList.contains('hidden') && availableHeight > TranslationView.MIN_SUBPANEL_HEIGHT) {
+                        this.mtContainer.classList.remove('hidden');
+                        this.rightHorizontalPanels?.expandCenter();
+                        this.mtHiddenBeforePanelCollapse = false;
+                        this.updateRightPanelsLayout();
+                    }
                 }
             }
         });
@@ -1029,27 +1655,125 @@ class TranslationView {
 
         let termsTitle: HTMLDivElement = document.createElement('div');
         termsTitle.classList.add('titlepanel');
-        termsTitle.innerText = 'Terms';
+        termsTitle.style.overflow = 'visible';
+        termsTitle.style.display = 'flex';
         panelsContainer.appendChild(termsTitle);
 
-        let termsContainer: HTMLDivElement = document.createElement('div');
-        termsContainer.classList.add('fill_width');
-        panelsContainer.appendChild(termsContainer);
-        this.termsPanel = new TermsPanel(termsContainer, this.projectId);
+        let blankFiller: HTMLSpanElement = document.createElement('span');
+        blankFiller.innerHTML = TranslationView.SVG_BLANK;
+        termsTitle.appendChild(blankFiller);
+
+        let Title: HTMLSpanElement = document.createElement('span');
+        Title.classList.add('fill_width');
+        Title.innerText = 'Terms';
+        termsTitle.appendChild(Title);
+
+        this.expandTermsButton.className = 'tooltip topRightTooltip';
+        this.expandTermsButton.innerHTML = TranslationView.SVG_VERTICAL_EXPAND + '<span class="tooltiptext topRightTooltip">Expand Terms</span>';
+        this.expandTermsButton.style.marginLeft = '4px';
+        this.toggleButtonVisibility(this.expandTermsButton, false);
+        this.expandTermsButton.addEventListener('click', () => {
+            if (!this.termsContainer.classList.contains('hidden')) {
+                return;
+            }
+            this.termsContainer.classList.remove('hidden');
+            this.rightHorizontalPanels?.expandBottom();
+            this.updateRightPanelsLayout();
+            this.termsHiddenBeforePanelCollapse = false;
+        });
+        termsTitle.appendChild(this.expandTermsButton);
+
+        this.collapseTermsButton.className = 'tooltip bottomRightTooltip';
+        this.collapseTermsButton.innerHTML = TranslationView.SVG_VERTICAL_COLLAPSE + '<span class="tooltiptext bottomRightTooltip">Collapse Terms</span>';
+        this.collapseTermsButton.style.marginLeft = '4px';
+        this.collapseTermsButton.addEventListener('click', () => {
+            if (this.termsContainer.classList.contains('hidden')) {
+                return;
+            }
+            this.termsContainer.classList.add('hidden');
+            this.rightHorizontalPanels?.collapseBottom();
+            this.updateRightPanelsLayout();
+            this.termsHiddenBeforePanelCollapse = true;
+        });
+        termsTitle.appendChild(this.collapseTermsButton);
+
+        this.termsContainer.classList.add('fill_width');
+        panelsContainer.appendChild(this.termsContainer);
+        this.termsPanel = new TermsPanel(this.termsContainer, this.projectId);
 
         let config: MutationObserverInit = { attributes: true, childList: false, subtree: false };
         let observer: MutationObserver = new MutationObserver((mutationsList) => {
             for (let mutation of mutationsList) {
                 if (mutation.type === 'attributes') {
-                    termsContainer.style.height = (panelsContainer.clientHeight - termsTitle.clientHeight) + 'px';
+                    const availableHeight: number = panelsContainer.clientHeight - termsTitle.clientHeight;
+                    this.termsContainer.style.height = availableHeight + 'px';
+                    if (this.termsContainer.classList.contains('hidden') && availableHeight > TranslationView.MIN_SUBPANEL_HEIGHT) {
+                        this.termsContainer.classList.remove('hidden');
+                        this.rightHorizontalPanels?.expandBottom();
+                        this.termsHiddenBeforePanelCollapse = false;
+                        this.updateRightPanelsLayout();
+                    }
                 }
             }
         });
         observer.observe(bottomPanel, config);
     }
 
+    toggleButtonVisibility(button: HTMLAnchorElement, visible: boolean): void {
+        if (visible) {
+            button.classList.remove('hidden');
+            button.hidden = false;
+            button.style.display = 'inline-flex';
+        } else {
+            button.classList.add('hidden');
+            button.hidden = true;
+            button.style.display = 'none';
+        }
+    }
+
+    updateRightPanelsLayout(skipAutoRestore: boolean = false): void {
+        const matchesHidden: boolean = this.matchesContainer.classList.contains('hidden');
+        const mtHidden: boolean = this.mtContainer.classList.contains('hidden');
+        const termsHidden: boolean = this.termsContainer.classList.contains('hidden');
+
+        if (!skipAutoRestore && matchesHidden && mtHidden && termsHidden) {
+            this.matchesContainer.classList.remove('hidden');
+            this.mtContainer.classList.remove('hidden');
+            this.termsContainer.classList.remove('hidden');
+            this.matchesHiddenBeforePanelCollapse = false;
+            this.mtHiddenBeforePanelCollapse = false;
+            this.termsHiddenBeforePanelCollapse = false;
+            if (this.rightHorizontalPanels) {
+                this.rightHorizontalPanels.topPanel().dataset.collapsed = 'false';
+                this.rightHorizontalPanels.centerPanel().dataset.collapsed = 'false';
+                this.rightHorizontalPanels.bottomPanel().dataset.collapsed = 'false';
+                this.rightHorizontalPanels.expandedTop = 0;
+                this.rightHorizontalPanels.expandedCenter = 0;
+                this.rightHorizontalPanels.expandedBottom = 0;
+                this.rightHorizontalPanels.setWeights([33.3, 33.3, 33.4]);
+            }
+            this.updateRightPanelsLayout(true);
+            return;
+        }
+
+        const toggleButtons = (hidden: boolean, collapseButton: HTMLAnchorElement, expandButton: HTMLAnchorElement): void => {
+            this.toggleButtonVisibility(collapseButton, !hidden);
+            this.toggleButtonVisibility(expandButton, hidden);
+        };
+
+        toggleButtons(matchesHidden, this.collapseMatchesButton, this.expandMatchesButton);
+        toggleButtons(mtHidden, this.collapseMtButton, this.expandMtButton);
+        toggleButtons(termsHidden, this.collapseTermsButton, this.expandTermsButton);
+
+        if (this.rightHorizontalPanels) {
+            this.rightHorizontalPanels.topPanel().dataset.collapsed = matchesHidden ? 'true' : 'false';
+            this.rightHorizontalPanels.centerPanel().dataset.collapsed = mtHidden ? 'true' : 'false';
+            this.rightHorizontalPanels.bottomPanel().dataset.collapsed = termsHidden ? 'true' : 'false';
+        }
+    }
+
     generateStatistics(): void {
-        this.electron.ipcRenderer.send('generate-statistics', { project: this.projectId });
+        ipcRenderer.send('generate-statistics', { project: this.projectId });
     }
 
     setSegments(arg: Segment[]): void {
@@ -1057,7 +1781,7 @@ class TranslationView {
         this.tbody.parentElement?.scrollTo({ top: 0, left: 0, behavior: 'smooth' });
         let length: number = arg.length;
         if (length === 0 && this.filterButton.classList.contains('active')) {
-            this.electron.ipcRenderer.send('show-message', { type: 'warning', message: 'Nothing to display, consider clearing current filter' });
+            ipcRenderer.send('show-message', { type: 'warning', message: 'Nothing to display, consider clearing current filter' });
             this.container.classList.remove('wait');
             return;
         }
@@ -1084,7 +1808,7 @@ class TranslationView {
 
             if (row.index + 1 === this.returnNumber) {
                 returnRow = tr;
-                this.electron.ipcRenderer.send('close-go-to');
+                ipcRenderer.send('close-go-to');
             }
 
             if (length > 1 && ((i > 0 && arg[i - 1].unit === row.unit) || (i < length - 1 && arg[i + 1].unit === row.unit))) {
@@ -1127,6 +1851,21 @@ class TranslationView {
                     td.innerHTML = TranslationView.SPACE_TAG_WARNING;
                 }
             }
+            if (row.hasMetadata) {
+                let span: HTMLSpanElement = document.createElement('span');
+                span.innerHTML = TranslationView.COMMENT_SPAN;
+                span.classList.add('iconTooltip');
+                span.addEventListener('click', (event: MouseEvent) => {
+                    let metaId: MetaId = {
+                        project: this.projectId,
+                        file: row.file,
+                        unit: row.unit,
+                        segment: row.segment
+                    };
+                    ipcRenderer.send('show-metadata', metaId);
+                });
+                td.appendChild(span);
+            }
             tr.appendChild(td);
 
             td = document.createElement('td');
@@ -1152,7 +1891,17 @@ class TranslationView {
                 td.innerHTML = TranslationView.FINAL_SPAN;
             }
             if (row.hasNotes) {
-                td.innerHTML = td.innerHTML + TranslationView.NOTES_SPAN;
+                let span: HTMLSpanElement = document.createElement('span');
+                span.innerHTML = TranslationView.NOTES_SPAN;
+                span.addEventListener('click', () => {
+                    ipcRenderer.send('show-notes', {
+                        project: this.projectId,
+                        file: row.file,
+                        unit: row.unit,
+                        segment: row.segment
+                    });
+                });
+                td.appendChild(span);
             }
             tr.appendChild(td);
 
@@ -1186,6 +1935,9 @@ class TranslationView {
             return;
         }
         this.selectRow(rows[0]);
+        if (this.files.length === 0) {
+            ipcRenderer.send('get-project-files', this.projectId);
+        }
     }
 
     static isBiDi(code: string): boolean {
@@ -1235,7 +1987,7 @@ class TranslationView {
     }
 
     getMachineTranslations(): void {
-        this.electron.ipcRenderer.send('machine-translate', {
+        ipcRenderer.send('machine-translate', {
             project: this.projectId,
             file: this.currentId.file,
             unit: this.currentId.unit,
@@ -1252,14 +2004,14 @@ class TranslationView {
 
     getAssembledMatches(): void {
         if (this.memSelect.value === 'none') {
-            this.electron.ipcRenderer.send('show-message', { type: 'warning', message: 'Select memory' });
+            ipcRenderer.send('show-message', { type: 'warning', message: 'Select memory' });
             return;
         }
         if (this.glossSelect.value === 'none') {
-            this.electron.ipcRenderer.send('show-message', { type: 'warning', message: 'Select glossary' });
+            ipcRenderer.send('show-message', { type: 'warning', message: 'Select glossary' });
             return;
         }
-        this.electron.ipcRenderer.send('assemble-matches', {
+        ipcRenderer.send('assemble-matches', {
             project: this.projectId,
             file: this.currentId.file,
             unit: this.currentId.unit,
@@ -1271,10 +2023,10 @@ class TranslationView {
 
     getTmMatches(): void {
         if (this.memSelect.value === 'none') {
-            this.electron.ipcRenderer.send('show-message', { type: 'warning', message: 'Select memory' });
+            ipcRenderer.send('show-message', { type: 'warning', message: 'Select memory' });
             return;
         }
-        this.electron.ipcRenderer.send('tm-translate', {
+        ipcRenderer.send('tm-translate', {
             project: this.projectId,
             file: this.currentId.file,
             unit: this.currentId.unit,
@@ -1314,7 +2066,17 @@ class TranslationView {
                     currentState.classList.add('translated');
                     currentState.innerHTML = TranslationView.TRANSLATED_SPAN;
                     if (hasNotes) {
-                        currentState.innerHTML = currentState.innerHTML + TranslationView.NOTES_SPAN;
+                        let span: HTMLSpanElement = document.createElement('span');
+                        span.innerHTML = TranslationView.NOTES_SPAN;
+                        span.addEventListener('click', () => {
+                            ipcRenderer.send('show-notes', {
+                                project: this.projectId,
+                                file: this.currentId.file,
+                                unit: this.currentId.unit,
+                                segment: this.currentId.id,
+                            });
+                        });
+                        currentState.appendChild(span);
                     }
                 }
             }
@@ -1324,26 +2086,60 @@ class TranslationView {
                 currentState.classList.add('final');
                 currentState.innerHTML = TranslationView.FINAL_SPAN;
                 if (hasNotes) {
-                    currentState.innerHTML = currentState.innerHTML + TranslationView.NOTES_SPAN;
+                    let span: HTMLSpanElement = document.createElement('span');
+                    span.innerHTML = TranslationView.NOTES_SPAN;
+                    span.addEventListener('click', () => {
+                        ipcRenderer.send('show-notes', {
+                            project: this.projectId,
+                            file: this.currentId.file,
+                            unit: this.currentId.unit,
+                            segment: this.currentId.id,
+                        });
+                    });
+                    currentState.appendChild(span);
                 }
             } else {
                 if (translation === '') {
                     currentState.classList.remove('final');
                     currentState.classList.remove('translated');
                     currentState.classList.add('initial');
-                    currentState.innerHTML = hasNotes ? TranslationView.NOTES_SPAN : TranslationView.SVG_BLANK;
+                    if (hasNotes) {
+                        let span: HTMLSpanElement = document.createElement('span');
+                        span.innerHTML = TranslationView.NOTES_SPAN;
+                        span.addEventListener('click', () => {
+                            ipcRenderer.send('show-notes', {
+                                project: this.projectId,
+                                file: this.currentId.file,
+                                unit: this.currentId.unit,
+                                segment: this.currentId.id,
+                            });
+                        });
+                        currentState.appendChild(span);
+                    } else {
+                        currentState.innerHTML = TranslationView.SVG_BLANK;
+                    }
                 } else {
                     currentState.classList.remove('final');
                     currentState.classList.remove('initial');
                     currentState.classList.add('translated');
                     currentState.innerHTML = TranslationView.TRANSLATED_SPAN;
                     if (hasNotes) {
-                        currentState.innerHTML = currentState.innerHTML + TranslationView.NOTES_SPAN;
+                        let span: HTMLSpanElement = document.createElement('span');
+                        span.innerHTML = TranslationView.NOTES_SPAN;
+                        span.addEventListener('click', () => {
+                            ipcRenderer.send('show-notes', {
+                                project: this.projectId,
+                                file: this.currentId.file,
+                                unit: this.currentId.unit,
+                                segment: this.currentId.id,
+                            });
+                        });
+                        currentState.appendChild(span);
                     }
                 }
             }
 
-            this.electron.ipcRenderer.send('save-translation', {
+            ipcRenderer.send('save-translation', {
                 project: this.projectId,
                 file: this.currentId.file,
                 unit: this.currentId.unit,
@@ -1373,7 +2169,7 @@ class TranslationView {
             }
             let row: HTMLTableRowElement = (rows[index] as HTMLTableRowElement);
             this.selectRow(row);
-            this.electron.ipcRenderer.send('close-go-to');
+            ipcRenderer.send('close-go-to');
         }
         if (next === 'next' && this.currentRow) {
             let index: number = this.currentRow.rowIndex;
@@ -1404,7 +2200,7 @@ class TranslationView {
                 }
             }
             if (!found) {
-                this.electron.ipcRenderer.send('show-message', { type: 'warning', message: 'No more untranslated segments on this page' });
+                ipcRenderer.send('show-message', { type: 'warning', message: 'No more untranslated segments on this page' });
             }
         }
         if (next === 'unconfirmed' && this.currentRow) {
@@ -1420,7 +2216,7 @@ class TranslationView {
                 }
             }
             if (!found) {
-                this.electron.ipcRenderer.send('show-message', { type: 'warning', message: 'No more unconfirmed segments on this page' });
+                ipcRenderer.send('show-message', { type: 'warning', message: 'No more unconfirmed segments on this page' });
             }
         }
     }
@@ -1481,6 +2277,8 @@ class TranslationView {
         let file: string = this.currentRow.getAttribute('data-file') as string;
         let unit: string = this.currentRow.getAttribute('data-unit') as string;
 
+        this.selectFile(file);
+
         this.currentId = { id: id, file: file, unit: unit };
         let source: HTMLTableCellElement = this.currentRow.getElementsByClassName('source')[0] as HTMLTableCellElement;
         this.sourceTags = this.getTags(source);
@@ -1505,12 +2303,14 @@ class TranslationView {
             unit: this.currentId.unit,
             segment: this.currentId.id
         };
-        this.electron.ipcRenderer.send('get-matches', params);
-        this.electron.ipcRenderer.send('get-terms', params);
+        ipcRenderer.send('get-matches', params);
+        ipcRenderer.send('get-terms', params);
         if (this.notesVisible) {
             this.showNotes();
         }
-
+        if (this.commentsVisible) {
+            this.showReviewComments();
+        }
         this.centerRow(this.currentRow);
         this.currentCell.focus();
     }
@@ -1519,14 +2319,14 @@ class TranslationView {
         if (this.currentRow) {
             let currentState: HTMLTableCellElement = this.currentRow.getElementsByClassName('state')[0] as HTMLTableCellElement;
             if (currentState.classList.contains('final')) {
-                this.electron.ipcRenderer.send('show-message', { type: 'warning', message: 'Confirmed segment' });
+                ipcRenderer.send('show-message', { type: 'warning', message: 'Confirmed segment' });
                 return;
             }
 
             let currentTranslate: HTMLTableCellElement = this.currentRow.getElementsByClassName('translate')[0] as HTMLTableCellElement;
             let isLocked: boolean = currentTranslate.innerHTML.includes(TranslationView.LOCK_FRAGMENT);
             if (isLocked) {
-                this.electron.ipcRenderer.send('show-message', { type: 'warning', message: 'Locked segment' });
+                ipcRenderer.send('show-message', { type: 'warning', message: 'Locked segment' });
                 return;
             }
             let segmentId: any = this.currentId;
@@ -1565,7 +2365,7 @@ class TranslationView {
             return;
         }
         source.innerHTML = this.highlightSpaces(newSource);
-        this.electron.ipcRenderer.send('save-source', {
+        ipcRenderer.send('save-source', {
             project: this.projectId,
             file: segmentId.file,
             unit: segmentId.unit,
@@ -1598,7 +2398,7 @@ class TranslationView {
             let currentState: HTMLTableCellElement = this.currentRow.getElementsByClassName('state')[0] as HTMLTableCellElement;
             this.currentCell = this.currentRow.getElementsByClassName('target')[0] as HTMLTableCellElement;
             if (currentTranslate.innerHTML.includes(TranslationView.LOCK_FRAGMENT)) {
-                this.electron.ipcRenderer.send('show-message', { type: 'warning', message: 'Locked segment' });
+                ipcRenderer.send('show-message', { type: 'warning', message: 'Locked segment' });
                 return;
             }
             let hasNotes = currentState.innerHTML.includes(TranslationView.NOTE_FRAGMENT);
@@ -1610,12 +2410,36 @@ class TranslationView {
             currentState.classList.remove('final');
             if (source.innerHTML === '') {
                 currentState.classList.add('initial');
-                currentState.innerHTML = hasNotes ? TranslationView.NOTES_SPAN : TranslationView.SVG_BLANK;
+                if (hasNotes) {
+                    let span: HTMLSpanElement = document.createElement('span');
+                    span.innerHTML = TranslationView.NOTES_SPAN;
+                    span.addEventListener('click', () => {
+                        ipcRenderer.send('show-notes', {
+                            project: this.projectId,
+                            file: this.currentId.file,
+                            unit: this.currentId.unit,
+                            segment: this.currentId.id,
+                        });
+                    });
+                    currentState.appendChild(span);
+                } else {
+                    currentState.innerHTML = TranslationView.SVG_BLANK;
+                }
             } else {
                 currentState.classList.add('translated');
                 currentState.innerHTML = TranslationView.TRANSLATED_SPAN;
                 if (hasNotes) {
-                    currentState.innerHTML = currentState.innerHTML + TranslationView.NOTES_SPAN;
+                    let span: HTMLSpanElement = document.createElement('span');
+                    span.innerHTML = TranslationView.NOTES_SPAN;
+                    span.addEventListener('click', () => {
+                        ipcRenderer.send('show-notes', {
+                            project: this.projectId,
+                            file: this.currentId.file,
+                            unit: this.currentId.unit,
+                            segment: this.currentId.id,
+                        });
+                    });
+                    currentState.appendChild(span);
                 }
             }
             this.currentCell.focus();
@@ -1626,22 +2450,31 @@ class TranslationView {
         let currentTranslate: HTMLTableCellElement = this.currentRow?.getElementsByClassName('translate')[0] as HTMLTableCellElement;
         let isLocked: boolean = currentTranslate.innerHTML.includes(TranslationView.LOCK_FRAGMENT);
         if (isLocked) {
-            this.electron.ipcRenderer.send('show-message', { type: 'warning', message: 'Locked segment' });
+            ipcRenderer.send('show-message', { type: 'warning', message: 'Locked segment' });
             return;
         }
         if (arg.tag) {
             let tag: string = '' + arg.tag;
             if (this.sourceTags.has(tag) && this.currentRow) {
                 let target: HTMLTableCellElement = this.currentRow.getElementsByClassName('target')[0] as HTMLTableCellElement;
+                let selection: Selection | null = document.getSelection();
+                let savedRange: Range | null = null;
+                if (selection && selection.rangeCount > 0) {
+                    savedRange = selection.getRangeAt(0).cloneRange();
+                }
                 let targetTags: Map<string, string> = this.getTags(target);
                 if (targetTags.has(tag)) {
                     this.removeTag(tag);
                 }
+                if (savedRange && selection) {
+                    selection.removeAllRanges();
+                    selection.addRange(savedRange);
+                }
                 let svg: string = this.sourceTags.get(tag) as string;
-                document.execCommand('insertHTML', false, svg);
+                Main.insertHtmlAtSelection(svg);
             }
         } else {
-            this.electron.ipcRenderer.send('show-tag-window');
+            ipcRenderer.send('show-tag-window');
         }
     }
 
@@ -1705,21 +2538,79 @@ class TranslationView {
     }
 
     setTarget(arg: any): void {
-        this.currentCell = this.currentRow?.getElementsByClassName('target')[0] as HTMLTableCellElement;
-        if (this.currentCell.innerHTML === arg.target) {
-            return;
+        let rows: HTMLCollectionOf<HTMLTableRowElement> = this.tbody.getElementsByTagName('tr');
+        let length: number = rows.length;
+        for (let i: number = 0; i < length; i++) {
+            let row: HTMLTableRowElement = rows[i];
+            if (row.getAttribute('data-file') === arg.file && row.getAttribute('data-unit') === arg.unit
+                && row.getAttribute('data-id') === arg.segment) {
+                let targetCell: HTMLTableCellElement = row.getElementsByClassName('target')[0] as HTMLTableCellElement;
+                if (targetCell.innerHTML === arg.target) {
+                    return;
+                }
+                targetCell.innerHTML = arg.target;
+                if (row === this.currentRow) {
+                    this.currentCell = targetCell;
+                }
+
+                let stateCell: HTMLTableCellElement = row.getElementsByClassName('state')[0] as HTMLTableCellElement;
+                let hadNotes: boolean = stateCell.innerHTML.includes(TranslationView.NOTE_FRAGMENT);
+                let hadComments: boolean = stateCell.innerHTML.includes(TranslationView.SVG_COMMENT);
+                let wasFinal: boolean = stateCell.classList.contains('final');
+
+                if (arg.target === '') {
+                    stateCell.classList.remove('translated');
+                    stateCell.classList.remove('final');
+                    stateCell.classList.add('initial');
+                    stateCell.innerHTML = TranslationView.SVG_BLANK;
+                } else if (wasFinal) {
+                    stateCell.classList.remove('initial');
+                    stateCell.classList.remove('translated');
+                    stateCell.classList.add('final');
+                    stateCell.innerHTML = TranslationView.FINAL_SPAN;
+                } else {
+                    stateCell.classList.remove('initial');
+                    stateCell.classList.remove('final');
+                    stateCell.classList.add('translated');
+                    stateCell.innerHTML = TranslationView.TRANSLATED_SPAN;
+                }
+
+                if (hadNotes) {
+                    let span: HTMLSpanElement = document.createElement('span');
+                    span.innerHTML = TranslationView.NOTES_SPAN;
+                    span.addEventListener('click', () => {
+                        ipcRenderer.send('show-notes', {
+                            project: arg.project,
+                            file: arg.file,
+                            unit: arg.unit,
+                            segment: arg.segment,
+                        });
+                    });
+                    stateCell.appendChild(span);
+                }
+
+                if (hadComments || arg.hasMetadata) {
+                    let span: HTMLSpanElement = document.createElement('span');
+                    span.classList.add('iconTooltip');
+                    span.innerHTML = TranslationView.COMMENT_SPAN;
+                    span.addEventListener('click', () => {
+                        let metaId: MetaId = {
+                            project: arg.project,
+                            file: arg.file,
+                            unit: arg.unit,
+                            segment: arg.segment
+                        };
+                        ipcRenderer.send('show-metadata', metaId);
+                    });
+                    stateCell.appendChild(span);
+                }
+
+                if (row === this.currentRow) {
+                    targetCell.focus();
+                }
+                break;
+            }
         }
-        this.currentCell.innerHTML = arg.target;
-        let currentState: HTMLTableCellElement = this.currentRow?.getElementsByClassName('state')[0] as HTMLTableCellElement;
-        currentState.classList.remove('final');
-        if (arg.target === '') {
-            currentState.classList.add('initial');
-            currentState.innerHTML = TranslationView.SVG_BLANK;
-        } else {
-            currentState.classList.add('translated');
-            currentState.innerHTML = TranslationView.TRANSLATED_SPAN;
-        }
-        this.currentCell.focus();
     }
 
     setProjectMemories(arg: any): void {
@@ -1756,7 +2647,7 @@ class TranslationView {
     }
 
     setSpellChecker(): void {
-        this.electron.ipcRenderer.send('spell-language', this.tgtLang);
+        ipcRenderer.send('spell-language', this.tgtLang);
     }
 
     sortSegments(): void {
@@ -1765,7 +2656,7 @@ class TranslationView {
             sortOption: this.sortOption,
             sortDesc: this.sortDesc
         };
-        this.electron.ipcRenderer.send('show-sort-segments', params);
+        ipcRenderer.send('show-sort-segments', params);
     }
 
     filterSegments(): void {
@@ -1779,7 +2670,7 @@ class TranslationView {
             showTranslated: this.showTranslated,
             showConfirmed: this.showConfirmed
         };
-        this.electron.ipcRenderer.send('show-filter-segments', params);
+        ipcRenderer.send('show-filter-segments', params);
     }
 
     setSorting(args: any): void {
@@ -1824,7 +2715,7 @@ class TranslationView {
             unit: this.currentId.unit,
             id: this.currentId.id
         }
-        this.electron.ipcRenderer.send('show-apply-tm', { project: this.projectId, memory: this.memSelect.value });
+        ipcRenderer.send('show-apply-tm', { project: this.projectId, memory: this.memSelect.value });
     }
 
     rememberSegment(): void {
@@ -1841,7 +2732,7 @@ class TranslationView {
             unit: this.currentId.unit,
             id: this.currentId.id
         }
-        this.electron.ipcRenderer.send('remove-translations', { project: this.projectId });
+        ipcRenderer.send('remove-translations', { project: this.projectId });
     }
 
     removeAllMatches(): void {
@@ -1850,7 +2741,7 @@ class TranslationView {
             unit: this.currentId.unit,
             id: this.currentId.id
         }
-        this.electron.ipcRenderer.send('remove-all-matches', { project: this.projectId });
+        ipcRenderer.send('remove-all-matches', { project: this.projectId });
     }
 
     removeAllMachineTranslations(): void {
@@ -1859,7 +2750,7 @@ class TranslationView {
             unit: this.currentId.unit,
             id: this.currentId.id
         }
-        this.electron.ipcRenderer.send('remove-machine-translations', { project: this.projectId });
+        ipcRenderer.send('remove-machine-translations', { project: this.projectId });
     }
 
     unconfirmAllTranslations(): void {
@@ -1868,11 +2759,11 @@ class TranslationView {
             unit: this.currentId.unit,
             id: this.currentId.id
         }
-        this.electron.ipcRenderer.send('unconfirm-translations', { project: this.projectId });
+        ipcRenderer.send('unconfirm-translations', { project: this.projectId });
     }
 
     pseudoTranslate(): void {
-        this.electron.ipcRenderer.send('pseudo-translate', { project: this.projectId });
+        ipcRenderer.send('pseudo-translate', { project: this.projectId });
     }
 
     copyAllSources(): void {
@@ -1881,7 +2772,7 @@ class TranslationView {
             unit: this.currentId.unit,
             id: this.currentId.id
         }
-        this.electron.ipcRenderer.send('copy-sources', { project: this.projectId });
+        ipcRenderer.send('copy-sources', { project: this.projectId });
     }
 
     confirmAllTranslations(): void {
@@ -1890,7 +2781,7 @@ class TranslationView {
             unit: this.currentId.unit,
             id: this.currentId.id
         }
-        this.electron.ipcRenderer.send('confirm-translations', { project: this.projectId, memory: this.memSelect.value });
+        ipcRenderer.send('confirm-translations', { project: this.projectId, memory: this.memSelect.value });
     }
 
     acceptAll100Matches(): void {
@@ -1899,7 +2790,7 @@ class TranslationView {
             unit: this.currentId.unit,
             id: this.currentId.id
         }
-        this.electron.ipcRenderer.send('accept-100-matches', { project: this.projectId });
+        ipcRenderer.send('accept-100-matches', { project: this.projectId });
     }
 
     insertNextTag(): void {
@@ -1922,13 +2813,22 @@ class TranslationView {
             let targetTags = this.getTags(target);
             let length = this.sourceTags.size + 1;
             let tags: string = '';
+            let selection: Selection | null = document.getSelection();
+            let savedRange: Range | null = null;
+            if (selection && selection.rangeCount > 0) {
+                savedRange = selection.getRangeAt(0).cloneRange();
+            }
             for (let i = 1; i < length; i++) {
                 if (!targetTags.has('' + i)) {
                     tags = tags + this.sourceTags.get('' + i);
                 }
             }
             if (tags !== '') {
-                document.execCommand('insertHTML', false, tags);
+                if (savedRange && selection) {
+                    selection.removeAllRanges();
+                    selection.addRange(savedRange);
+                }
+                Main.insertHtmlAtSelection(tags);
             }
         }
     }
@@ -1941,7 +2841,7 @@ class TranslationView {
                 id: this.currentId.id
             }
         }
-        this.electron.ipcRenderer.send('fix-segment-tags', {
+        ipcRenderer.send('fix-segment-tags', {
             srcLang: this.srcLang,
             tgtLang: this.tgtLang,
             project: this.projectId,
@@ -1959,7 +2859,7 @@ class TranslationView {
                 id: this.currentId.id
             }
         }
-        this.electron.ipcRenderer.send('open-prompt', {
+        ipcRenderer.send('open-prompt', {
             srcLang: this.srcLang,
             tgtLang: this.tgtLang,
             project: this.projectId,
@@ -1977,7 +2877,7 @@ class TranslationView {
                 id: this.currentId.id
             }
         }
-        this.electron.ipcRenderer.send('generate-prompt', {
+        ipcRenderer.send('generate-prompt', {
             srcLang: this.srcLang,
             tgtLang: this.tgtLang,
             project: this.projectId,
@@ -1988,7 +2888,7 @@ class TranslationView {
     }
 
     insertAiResponse(response: string): void {
-        this.electron.ipcRenderer.send('insert-response', {
+        ipcRenderer.send('insert-response', {
             project: this.projectId,
             file: this.currentId.file,
             unit: this.currentId.unit,
@@ -2014,14 +2914,13 @@ class TranslationView {
             for (let img of images) {
                 if (tag === img.getAttribute('data-id')) {
                     target.removeChild(img);
-                    return;
                 }
             }
         }
     }
 
     replaceText(): void {
-        this.electron.ipcRenderer.send('show-replaceText', { project: this.projectId });
+        ipcRenderer.send('show-replaceText', { project: this.projectId });
     }
 
     applyMachineTranslationsAll(): void {
@@ -2030,7 +2929,7 @@ class TranslationView {
             unit: this.currentId.unit,
             id: this.currentId.id
         }
-        this.electron.ipcRenderer.send('apply-mt-all', {
+        ipcRenderer.send('apply-mt-all', {
             project: this.projectId, srcLang: this.srcLang, tgtLang: this.tgtLang, currentSegment: {
                 file: this.currentId.file,
                 unit: this.currentId.unit,
@@ -2041,11 +2940,11 @@ class TranslationView {
 
     assembleMatchesAll(): void {
         if (this.memSelect.value === 'none') {
-            this.electron.ipcRenderer.send('show-message', { type: 'warning', message: 'Select memory' });
+            ipcRenderer.send('show-message', { type: 'warning', message: 'Select memory' });
             return;
         }
         if (this.glossSelect.value === 'none') {
-            this.electron.ipcRenderer.send('show-message', { type: 'warning', message: 'Select glossary' });
+            ipcRenderer.send('show-message', { type: 'warning', message: 'Select glossary' });
             return;
         }
         this.returnTo = {
@@ -2053,7 +2952,7 @@ class TranslationView {
             unit: this.currentId.unit,
             id: this.currentId.id
         }
-        this.electron.ipcRenderer.send('assemble-matches-all', {
+        ipcRenderer.send('assemble-matches-all', {
             project: this.projectId,
             memory: this.memSelect.value,
             glossary: this.glossSelect.value
@@ -2061,7 +2960,7 @@ class TranslationView {
     }
 
     removeAssembleMatches(): void {
-        this.electron.ipcRenderer.send('remove-assembled-matches', { project: this.projectId });
+        ipcRenderer.send('remove-assembled-matches', { project: this.projectId });
     }
 
     acceptAllMachineTranslations(): void {
@@ -2070,7 +2969,7 @@ class TranslationView {
             unit: this.currentId.unit,
             id: this.currentId.id
         }
-        this.electron.ipcRenderer.send('accept-mt-all', { project: this.projectId });
+        ipcRenderer.send('accept-mt-all', { project: this.projectId });
     }
 
     setProjectGlossaries(arg: any): void {
@@ -2095,31 +2994,31 @@ class TranslationView {
 
     concordanceSearch(): void {
         if (this.memSelect.value === 'none') {
-            this.electron.ipcRenderer.send('show-message', { type: 'warning', message: 'Select memory' });
+            ipcRenderer.send('show-message', { type: 'warning', message: 'Select memory' });
             return;
         }
-        this.electron.ipcRenderer.send('concordance-search', [this.memSelect.value]);
+        ipcRenderer.send('concordance-search', [this.memSelect.value]);
     }
 
     searchTerm(): void {
         if (this.glossSelect.value === 'none') {
-            this.electron.ipcRenderer.send('show-message', { type: 'warning', message: 'Select glossary' });
+            ipcRenderer.send('show-message', { type: 'warning', message: 'Select glossary' });
             return;
         }
-        this.electron.ipcRenderer.send('show-term-search', { glossary: this.glossSelect.value });
+        ipcRenderer.send('show-term-search', this.glossSelect.value);
     }
 
     addTerm(): void {
         if (this.glossSelect.value === 'none') {
-            this.electron.ipcRenderer.send('show-message', { type: 'warning', message: 'Select glossary' });
+            ipcRenderer.send('show-message', { type: 'warning', message: 'Select glossary' });
             return;
         }
-        this.electron.ipcRenderer.send('show-add-term', this.glossSelect.value);
+        ipcRenderer.send('show-add-term', this.glossSelect.value);
     }
 
     applyTerminologyAll(): void {
         if (this.glossSelect.value === 'none') {
-            this.electron.ipcRenderer.send('show-message', { type: 'warning', message: 'Select glossary' });
+            ipcRenderer.send('show-message', { type: 'warning', message: 'Select glossary' });
             return;
         }
         this.returnTo = {
@@ -2127,19 +3026,19 @@ class TranslationView {
             unit: this.currentId.unit,
             id: this.currentId.id
         }
-        this.electron.ipcRenderer.send('get-project-terms', { project: this.projectId, glossary: this.glossSelect.value });
+        ipcRenderer.send('get-project-terms', { project: this.projectId, glossary: this.glossSelect.value });
     }
 
     applyTerminology(): void {
         if (this.glossSelect.value === 'none') {
-            this.electron.ipcRenderer.send('show-message', { type: 'warning', message: 'Select glossary' });
+            ipcRenderer.send('show-message', { type: 'warning', message: 'Select glossary' });
             return;
         }
         if (!this.currentCell) {
-            this.electron.ipcRenderer.send('show-message', { type: 'warning', message: 'Select segment' });
+            ipcRenderer.send('show-message', { type: 'warning', message: 'Select segment' });
             return;
         }
-        this.electron.ipcRenderer.send('get-segment-terms', {
+        ipcRenderer.send('get-segment-terms', {
             project: this.projectId,
             file: this.currentId.file,
             unit: this.currentId.unit,
@@ -2157,14 +3056,14 @@ class TranslationView {
                 term = this.termsPanel.getSelected();
             }
             if (term !== '') {
-                this.electron.ipcRenderer.send('paste-text', term);
+                ipcRenderer.send('paste-text', term);
             }
         }
     }
 
     toggleLock(): void {
         if (this.currentRow) {
-            this.electron.ipcRenderer.send('lock-segment', {
+            ipcRenderer.send('lock-segment', {
                 project: this.projectId,
                 file: this.currentId.file,
                 unit: this.currentId.unit,
@@ -2176,7 +3075,7 @@ class TranslationView {
             this.selectRow(this.currentRow);
             return;
         }
-        this.electron.ipcRenderer.send('show-message', { type: 'warning', message: 'Select segment' });
+        ipcRenderer.send('show-message', { type: 'warning', message: 'Select segment' });
     }
 
     highlightSpaces(text: string): string {
@@ -2233,13 +3132,18 @@ class TranslationView {
         this.saveEdit({ next: 'previous', confirm: false });
     }
 
-    openSegment(arg: any): void {
-        if (this.currentPage * this.rowsPage <= arg.segment && arg.segment < (this.currentPage + 1) * this.rowsPage) {
-            this.saveEdit({ next: 'number', confirm: false, segment: arg.segment });
+    goToSameSource(): void {
+        let segment: FullId = { project: this.projectId, file: this.currentId.file, unit: this.currentId.unit, segment: this.currentId.id };
+        ipcRenderer.send('go-to-same-source', segment);
+    }
+
+    openSegment(seg: number): void {
+        if (this.currentPage * this.rowsPage <= seg && seg < (this.currentPage + 1) * this.rowsPage) {
+            this.saveEdit({ next: 'number', confirm: false, segment: seg });
         } else {
-            let page = Math.floor(arg.segment / this.rowsPage) + 1;
+            let page = Math.floor(seg / this.rowsPage) + 1;
             if (page >= 0 && page <= this.maxPage) {
-                this.returnNumber = arg.segment;
+                this.returnNumber = seg;
                 this.currentPage = page - 1;
                 let pageInput: HTMLInputElement = document.getElementById('page' + this.projectId) as HTMLInputElement;
                 pageInput.value = '' + (this.currentPage + 1);
@@ -2265,20 +3169,20 @@ class TranslationView {
     }
 
     exportHTML(): void {
-        this.electron.ipcRenderer.send('export-project-html', { project: this.projectId });
+        ipcRenderer.send('export-project-html', this.projectId);
     }
 
     changeCase(): void {
         if (!this.currentCell) {
-            this.electron.ipcRenderer.send('show-message', { type: 'warning', message: 'Select segment' });
+            ipcRenderer.send('show-message', { type: 'warning', message: 'Select segment' });
             return;
         }
         let translation = this.currentCell.innerText.trim();
         if (translation === '') {
-            this.electron.ipcRenderer.send('show-message', { type: 'warning', message: 'Empty target' });
+            ipcRenderer.send('show-message', { type: 'warning', message: 'Empty target' });
             return;
         }
-        this.electron.ipcRenderer.send('show-change-case');
+        ipcRenderer.send('show-change-case');
     }
 
     caseChanged(arg: any): void {
@@ -2339,13 +3243,13 @@ class TranslationView {
     splitSegment(): void {
         let currentState: HTMLTableCellElement = this.currentRow?.getElementsByClassName('state')[0] as HTMLTableCellElement;
         if (currentState.classList.contains('final')) {
-            this.electron.ipcRenderer.send('show-message', { type: 'warning', message: 'Confirmed segment' });
+            ipcRenderer.send('show-message', { type: 'warning', message: 'Confirmed segment' });
             return;
         }
         let currentTranslate: HTMLTableCellElement = this.currentRow?.getElementsByClassName('translate')[0] as HTMLTableCellElement;
         let isLocked: boolean = currentTranslate.innerHTML.includes(TranslationView.LOCK_FRAGMENT);
         if (isLocked) {
-            this.electron.ipcRenderer.send('show-message', { type: 'warning', message: 'Locked segment' });
+            ipcRenderer.send('show-message', { type: 'warning', message: 'Locked segment' });
             return;
         }
         if (this.currentRow) {
@@ -2390,7 +3294,7 @@ class TranslationView {
                         unit: this.currentId.unit,
                         id: this.currentId.id + '-1'
                     }
-                    this.electron.ipcRenderer.send('split-at', {
+                    ipcRenderer.send('split-at', {
                         project: this.projectId,
                         file: this.currentId.file,
                         unit: this.currentId.unit,
@@ -2407,24 +3311,24 @@ class TranslationView {
         if (this.currentRow) {
             let currentState: HTMLTableCellElement = this.currentRow.getElementsByClassName('state')[0] as HTMLTableCellElement;
             if (currentState.classList.contains('final')) {
-                this.electron.ipcRenderer.send('show-message', { type: 'warning', message: 'Confirmed segment' });
+                ipcRenderer.send('show-message', { type: 'warning', message: 'Confirmed segment' });
                 return;
             }
             let currentTranslate: HTMLTableCellElement = this.currentRow.getElementsByClassName('translate')[0] as HTMLTableCellElement;
             let isLocked: boolean = currentTranslate.innerHTML.includes(TranslationView.LOCK_FRAGMENT);
             if (isLocked) {
-                this.electron.ipcRenderer.send('show-message', { type: 'warning', message: 'Locked segment' });
+                ipcRenderer.send('show-message', { type: 'warning', message: 'Locked segment' });
                 return;
             }
             let nextRow: HTMLTableRowElement = this.currentRow.nextElementSibling as HTMLTableRowElement;
             if (nextRow) {
                 if (this.currentRow.getAttribute('data-file') === nextRow.getAttribute('data-file') && this.currentRow.getAttribute('data-unit') === nextRow.getAttribute('data-unit')) {
                     if (nextRow.getElementsByClassName('state')[0].classList.contains('final')) {
-                        this.electron.ipcRenderer.send('show-message', { type: 'warning', message: 'Confirmed segment' });
+                        ipcRenderer.send('show-message', { type: 'warning', message: 'Confirmed segment' });
                         return;
                     }
                     if (nextRow.getElementsByClassName('translate')[0].innerHTML.includes(TranslationView.LOCK_FRAGMENT)) {
-                        this.electron.ipcRenderer.send('show-message', { type: 'warning', message: 'Locked segment' });
+                        ipcRenderer.send('show-message', { type: 'warning', message: 'Locked segment' });
                         return;
                     }
                     this.returnTo = {
@@ -2432,7 +3336,7 @@ class TranslationView {
                         unit: this.currentId.unit,
                         id: this.currentId.id
                     }
-                    this.electron.ipcRenderer.send('merge-at', {
+                    ipcRenderer.send('merge-at', {
                         project: this.projectId,
                         file: this.currentId.file,
                         unit: this.currentId.unit,
@@ -2440,7 +3344,7 @@ class TranslationView {
                     });
                     return;
                 }
-                this.electron.ipcRenderer.send('show-message', { type: 'warning', message: 'Segments from different paragraphs' });
+                ipcRenderer.send('show-message', { type: 'warning', message: 'Segments from different paragraphs' });
             }
         }
     }
@@ -2462,6 +3366,21 @@ class TranslationView {
                 if (arg.tagErrors && arg.spaceErrors) {
                     td.innerHTML = TranslationView.SPACE_TAG_WARNING;
                 }
+                if (arg.hasMetadata) {
+                    let span: HTMLSpanElement = document.createElement('span');
+                    span.classList.add('iconTooltip');
+                    span.innerHTML = TranslationView.COMMENT_SPAN;
+                    span.addEventListener('click', (event: MouseEvent) => {
+                        let metaId: MetaId = {
+                            project: arg.project,
+                            file: arg.file,
+                            unit: arg.unit,
+                            segment: arg.segment
+                        };
+                        ipcRenderer.send('show-metadata', metaId);
+                    });
+                    td.appendChild(span);
+                }
                 break;
             }
         }
@@ -2478,13 +3397,29 @@ class TranslationView {
                 if (!td.innerHTML.includes(TranslationView.LOCK_FRAGMENT)) {
                     td.innerHTML = TranslationView.SVG_BLANK;
                 }
+                if (arg.hasMetadata) {
+                    let span: HTMLSpanElement = document.createElement('span');
+                    span.classList.add('iconTooltip');
+                    span.innerHTML = TranslationView.COMMENT_SPAN;
+                    span.classList.add('iconTooltip');
+                    span.addEventListener('click', (event: MouseEvent) => {
+                        let metaId: MetaId = {
+                            project: arg.project,
+                            file: arg.file,
+                            unit: arg.unit,
+                            segment: arg.segment
+                        };
+                        ipcRenderer.send('show-metadata', metaId);
+                    });
+                    td.appendChild(span);
+                }
                 break;
             }
         }
     }
 
     showNotes(): void {
-        this.electron.ipcRenderer.send('show-notes', {
+        ipcRenderer.send('show-notes', {
             project: this.projectId,
             file: this.currentId.file,
             unit: this.currentId.unit,
@@ -2492,11 +3427,25 @@ class TranslationView {
         });
     }
 
+    showReviewComments(): void {
+        let data: MetaId = {
+            project: this.projectId,
+            file: this.currentId.file,
+            unit: this.currentId.unit,
+            segment: this.currentId.id
+        };
+        ipcRenderer.send('show-metadata', data);
+    }
+
     showingNotes(arg: boolean): void {
         this.notesVisible = arg;
     }
 
-    notesRemoved(arg: any): void {
+    showingReviewComments(arg: boolean): void {
+        this.commentsVisible = arg;
+    }
+
+    notesRemoved(): void {
         let currentState: HTMLTableCellElement = this.currentRow?.getElementsByClassName('state')[0] as HTMLTableCellElement;
         if (currentState.innerHTML.includes(TranslationView.NOTE_FRAGMENT)) {
             if (currentState.classList.contains('final')) {
@@ -2515,14 +3464,25 @@ class TranslationView {
         let currentState: HTMLTableCellElement = this.currentRow?.getElementsByClassName('state')[0] as HTMLTableCellElement;
         if (!currentState.innerHTML.includes(TranslationView.NOTE_FRAGMENT)) {
             if (currentState.classList.contains('final')) {
-                currentState.innerHTML = TranslationView.FINAL_SPAN + TranslationView.NOTES_SPAN;
+                currentState.innerHTML = TranslationView.FINAL_SPAN;
             }
             if (currentState.classList.contains('initial')) {
-                currentState.innerHTML = TranslationView.SVG_BLANK + TranslationView.NOTES_SPAN;
+                currentState.innerHTML = TranslationView.SVG_BLANK;
             }
             if (currentState.classList.contains('translated')) {
-                currentState.innerHTML = TranslationView.TRANSLATED_SPAN + TranslationView.NOTES_SPAN;
+                currentState.innerHTML = TranslationView.TRANSLATED_SPAN;
             }
+            let span: HTMLSpanElement = document.createElement('span');
+            span.innerHTML = TranslationView.NOTES_SPAN;
+            span.addEventListener('click', () => {
+                ipcRenderer.send('show-notes', {
+                    project: this.projectId,
+                    file: this.currentId.file,
+                    unit: this.currentId.unit,
+                    segment: this.currentId.id,
+                });
+            });
+            currentState.appendChild(span);
         }
     }
 
@@ -2539,7 +3499,7 @@ class TranslationView {
                     td.innerHTML = arg.target;
                     let newTags: number = td.getElementsByTagName('img').length;
                     if (oldTags !== newTags) {
-                        this.electron.ipcRenderer.send('show-notification', 'Extra tags were removed');
+                        ipcRenderer.send('show-notification', 'Extra tags were removed');
                     }
                 }, 600);
                 break;

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007 - 2025 Maxprograms.
+ * Copyright (c) 2007-2026 Maxprograms.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 1.0
@@ -14,13 +14,13 @@ package com.maxprograms.swordfish;
 
 public class Constants {
 
-    private Constants() {
+	private Constants() {
 		// empty for security
 	}
 
 	public static final String APPNAME = "Swordfish";
-	public static final String VERSION = "5.14.2";
-	public static final String BUILD = "20250715_1958";
+	public static final String VERSION = "5.15.0";
+	public static final String BUILD = "20251219_0723";
 
 	public static final String REASON = "reason";
 	public static final String STATUS = "status";
@@ -37,10 +37,10 @@ public class Constants {
 	public static final String NULLSTORE = "Null Store";
 
 	public static final String INITIAL = "initial";
-    public static final String TRANSLATED = "translated";
-    public static final String REVIEWED = "reviewed";
+	public static final String TRANSLATED = "translated";
+	public static final String REVIEWED = "reviewed";
 	public static final String FINAL = "final";
-	
+
 	public static final String TM = "tm";
 	public static final String MT = "mt";
 	public static final String AM = "am";
