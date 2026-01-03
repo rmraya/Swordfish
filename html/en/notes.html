@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Notes</title>
+    <link rel="stylesheet" type="text/css" href="../../css/layout.css">
+    <link id="theme" rel="stylesheet" type="text/css" href="../../css/light.css">
+    <link rel="stylesheet" type="text/css" href="../../css/fonts.css">
+</head>
+
+<body style="overflow: hidden;">
+    <div id="main" style="width: 100%; height: 100%;">
+        <!-- notes tabs -->
+    </div>
+    <div id="noteButtons" class="buttonArea">
+        <button id="addNote">Add Note</button>
+        <button id="editNote">Edit Note</button>
+        <button id="removeNote">Remove Note</button>
+    </div>
+
+    <script>
+        const { Notes } = require('../../js/notes.js');
+        new Notes();
+    </script>
+</body>
+
+</html>

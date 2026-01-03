@@ -363,6 +363,7 @@ export class PreferencesDialog {
             srcLang: this.srcLangSelect.value,
             tgtLang: this.tgtLangSelect.value,
             theme: this.themeColor.value,
+            appLang: 'en', // Application language preference hardcoded to 'en' for now
             zoomFactor: this.zoomFactor.value,
             userName: this.userNameInput.value,
             catalog: this.defaultCatalog.value,

@@ -83,6 +83,7 @@ export class Swordfish {
     static currentDefaults: Rectangle;
     static currentPreferences: Preferences = {
         theme: 'system',
+        appLang: 'en',
         zoomFactor: '1.0',
         srcLang: 'none',
         tgtLang: 'none',
@@ -222,7 +223,7 @@ export class Swordfish {
 
         app.on('ready', () => {
             Swordfish.createWindow();
-            let filePath: string = join(app.getAppPath(), 'html', 'index.html');
+            let filePath: string = join(app.getAppPath(), 'html', Swordfish.currentPreferences.appLang, 'index.html');
             let fileUrl: URL = new URL('file://' + filePath);
             Swordfish.mainWindow.loadURL(fileUrl.href);
             Swordfish.mainWindow.on('resize', () => {
@@ -1589,6 +1590,9 @@ export class Swordfish {
                 if (!json.hasOwnProperty('reviewModel')) {
                     json.reviewModel = join(app.getAppPath(), 'review', 'default.json');
                 }
+                if (!json.hasOwnProperty('appLang')) {
+                    json.appLang = 'en';
+                }
                 Swordfish.currentPreferences = json;
                 if (!Swordfish.currentPreferences.projectsFolder || !existsSync(Swordfish.currentPreferences.projectsFolder)) {
                     Swordfish.currentPreferences.projectsFolder = join(app.getPath('appData'), app.name, 'projects');
@@ -1695,7 +1699,7 @@ export class Swordfish {
         });
         this.sortParams = params;
         this.sortSegmentsWindow.setMenu(null);
-        let filePath: string = join(app.getAppPath(), 'html', 'sortSegments.html');
+        let filePath: string = join(app.getAppPath(), 'html', Swordfish.currentPreferences.appLang, 'sortSegments.html');
         let fileUrl: URL = new URL('file://' + filePath);
         this.sortSegmentsWindow.loadURL(fileUrl.href);
         this.sortSegmentsWindow.once('ready-to-show', () => {
@@ -1724,7 +1728,7 @@ export class Swordfish {
         });
         this.filterParams = params;
         this.filterSegmentsWindow.setMenu(null);
-        let filePath: string = join(app.getAppPath(), 'html', 'filterSegments.html');
+        let filePath: string = join(app.getAppPath(), 'html', Swordfish.currentPreferences.appLang, 'filterSegments.html');
         let fileUrl: URL = new URL('file://' + filePath);
         this.filterSegmentsWindow.loadURL(fileUrl.href);
         this.filterSegmentsWindow.once('ready-to-show', () => {
@@ -1765,7 +1769,7 @@ export class Swordfish {
             }
         });
         this.addProjectWindow.setMenu(null);
-        let filePath: string = join(app.getAppPath(), 'html', 'addProject.html');
+        let filePath: string = join(app.getAppPath(), 'html', Swordfish.currentPreferences.appLang, 'addProject.html');
         let fileUrl: URL = new URL('file://' + filePath);
         this.addProjectWindow.loadURL(fileUrl.href);
         this.addProjectWindow.once('ready-to-show', () => {
@@ -1794,7 +1798,7 @@ export class Swordfish {
             }
         });
         this.editProjectWindow.setMenu(null);
-        let filePath: string = join(app.getAppPath(), 'html', 'editProject.html');
+        let filePath: string = join(app.getAppPath(), 'html', Swordfish.currentPreferences.appLang, 'editProject.html');
         let fileUrl: URL = new URL('file://' + filePath);
         this.editProjectWindow.loadURL(fileUrl.href);
         this.editProjectWindow.once('ready-to-show', () => {
@@ -1961,7 +1965,7 @@ export class Swordfish {
                     }
                 });
                 this.addFileWindow.setMenu(null);
-                let filePath: string = join(app.getAppPath(), 'html', 'addFile.html');
+                let filePath: string = join(app.getAppPath(), 'html', Swordfish.currentPreferences.appLang, 'addFile.html');
                 let fileUrl: URL = new URL('file://' + filePath);
                 this.addFileWindow.loadURL(fileUrl.href);
                 this.addFileWindow.once('ready-to-show', () => {
@@ -2207,7 +2211,7 @@ export class Swordfish {
         });
         this.typeParam = type;
         this.serverSettingsWindow.setMenu(null);
-        let filePath: string = join(app.getAppPath(), 'html', 'serverSettings.html');
+        let filePath: string = join(app.getAppPath(), 'html', Swordfish.currentPreferences.appLang, 'serverSettings.html');
         let fileUrl: URL = new URL('file://' + filePath);
         this.serverSettingsWindow.loadURL(fileUrl.href);
         this.serverSettingsWindow.once('ready-to-show', () => {
@@ -2235,7 +2239,7 @@ export class Swordfish {
             }
         });
         this.browseDatabasesWindow.setMenu(null);
-        let filePath: string = join(app.getAppPath(), 'html', 'browseDatabases.html');
+        let filePath: string = join(app.getAppPath(), 'html', Swordfish.currentPreferences.appLang, 'browseDatabases.html');
         let fileUrl: URL = new URL('file://' + filePath);
         this.browseDatabasesWindow.loadURL(fileUrl.href);
         this.browseDatabasesWindow.once('ready-to-show', () => {
@@ -2305,7 +2309,7 @@ export class Swordfish {
             }
         });
         this.addMemoryWindow.setMenu(null);
-        let filePath: string = join(app.getAppPath(), 'html', 'addMemory.html');
+        let filePath: string = join(app.getAppPath(), 'html', Swordfish.currentPreferences.appLang, 'addMemory.html');
         let fileUrl: URL = new URL('file://' + filePath);
         this.addMemoryWindow.loadURL(fileUrl.href);
         this.addMemoryWindow.once('ready-to-show', () => {
@@ -2379,7 +2383,7 @@ export class Swordfish {
             }
         });
         Swordfish.aboutWindow.setMenu(null);
-        let filePath: string = join(app.getAppPath(), 'html', 'about.html');
+        let filePath: string = join(app.getAppPath(), 'html', Swordfish.currentPreferences.appLang, 'about.html');
         let fileUrl: URL = new URL('file://' + filePath);
         Swordfish.aboutWindow.loadURL(fileUrl.href);
         Swordfish.aboutWindow.once('ready-to-show', () => {
@@ -2405,7 +2409,7 @@ export class Swordfish {
                 title = 'Eclipse Public License 1.0';
                 break;
             case "electron":
-                licenseFile = 'txt';
+                licenseFile = 'electron.txt';
                 title = 'MIT License';
                 break;
             case "MapDB":
@@ -2469,7 +2473,7 @@ export class Swordfish {
             }
         });
         this.preferencesWindow.setMenu(null);
-        let filePath: string = join(app.getAppPath(), 'html', 'preferencesDialog.html');
+        let filePath: string = join(app.getAppPath(), 'html', Swordfish.currentPreferences.appLang, 'preferencesDialog.html');
         let fileUrl: URL = new URL('file://' + filePath);
         this.preferencesWindow.loadURL(fileUrl.href);
         this.preferencesWindow.once('ready-to-show', () => {
@@ -2499,7 +2503,7 @@ export class Swordfish {
             }
         });
         this.systemInfoWindow.setMenu(null);
-        let filePath: string = join(app.getAppPath(), 'html', 'systemInfo.html');
+        let filePath: string = join(app.getAppPath(), 'html', Swordfish.currentPreferences.appLang, 'systemInfo.html');
         let fileUrl: URL = new URL('file://' + filePath);
         this.systemInfoWindow.loadURL(fileUrl.href);
         this.systemInfoWindow.once('ready-to-show', () => {
@@ -2547,7 +2551,7 @@ export class Swordfish {
             }
         });
         this.licensesWindow.setMenu(null);
-        let filePath: string = join(app.getAppPath(), 'html', 'licenses.html');
+        let filePath: string = join(app.getAppPath(), 'html', Swordfish.currentPreferences.appLang, 'licenses.html');
         let fileUrl: URL = new URL('file://' + filePath);
         this.licensesWindow.loadURL(fileUrl.href);
         this.licensesWindow.once('ready-to-show', () => {
@@ -2633,7 +2637,7 @@ export class Swordfish {
                                 }
                             });
                             Swordfish.updatesWindow.setMenu(null);
-                            let filePath: string = join(app.getAppPath(), 'html', 'updates.html');
+                            let filePath: string = join(app.getAppPath(), 'html', Swordfish.currentPreferences.appLang, 'updates.html');
                             let fileUrl: URL = new URL('file://' + filePath);
                             Swordfish.updatesWindow.loadURL(fileUrl.href);
                             Swordfish.updatesWindow.once('ready-to-show', () => {
@@ -2857,7 +2861,7 @@ export class Swordfish {
             }
         });
         this.defaultLangsWindow.setMenu(null);
-        let filePath: string = join(app.getAppPath(), 'html', 'defaultLangs.html');
+        let filePath: string = join(app.getAppPath(), 'html', Swordfish.currentPreferences.appLang, 'defaultLangs.html');
         let fileUrl: URL = new URL('file://' + filePath);
         this.defaultLangsWindow.loadURL(fileUrl.href);
         this.defaultLangsWindow.once('ready-to-show', () => {
@@ -3005,7 +3009,7 @@ export class Swordfish {
         });
         this.memoryParam = memory;
         this.importTmxWindow.setMenu(null);
-        let filePath: string = join(app.getAppPath(), 'html', 'importTmx.html');
+        let filePath: string = join(app.getAppPath(), 'html', Swordfish.currentPreferences.appLang, 'importTmx.html');
         let fileUrl: URL = new URL('file://' + filePath);
         this.importTmxWindow.loadURL(fileUrl.href);
         this.importTmxWindow.once('ready-to-show', () => {
@@ -3034,7 +3038,7 @@ export class Swordfish {
         });
         this.selectedGlossary = glossary;
         this.importGlossaryWindow.setMenu(null);
-        let filePath: string = join(app.getAppPath(), 'html', 'importGlossary.html');
+        let filePath: string = join(app.getAppPath(), 'html', Swordfish.currentPreferences.appLang, 'importGlossary.html');
         let fileUrl: URL = new URL('file://' + filePath);
         this.importGlossaryWindow.loadURL(fileUrl.href);
         this.importGlossaryWindow.once('ready-to-show', () => {
@@ -3553,7 +3557,7 @@ export class Swordfish {
         }
         Swordfish.projectParam = arg.project;
         this.applyTmWindow.setMenu(null);
-        let filePath: string = join(app.getAppPath(), 'html', 'applyTm.html');
+        let filePath: string = join(app.getAppPath(), 'html', Swordfish.currentPreferences.appLang, 'applyTm.html');
         let fileUrl: URL = new URL('file://' + filePath);
         this.applyTmWindow.loadURL(fileUrl.href);
         this.applyTmWindow.once('ready-to-show', () => {
@@ -3694,7 +3698,7 @@ export class Swordfish {
             }
         });
         Swordfish.spellingLangsWindow.setMenu(null);
-        let filePath: string = join(app.getAppPath(), 'html', 'spellingLangs.html');
+        let filePath: string = join(app.getAppPath(), 'html', Swordfish.currentPreferences.appLang, 'spellingLangs.html');
         let fileUrl: URL = new URL('file://' + filePath);
         Swordfish.spellingLangsWindow.loadURL(fileUrl.href);
         Swordfish.spellingLangsWindow.once('ready-to-show', () => {
@@ -4122,7 +4126,7 @@ export class Swordfish {
             }
         });
         this.addGlossaryWindow.setMenu(null);
-        let filePath: string = join(app.getAppPath(), 'html', 'addGlossary.html');
+        let filePath: string = join(app.getAppPath(), 'html', Swordfish.currentPreferences.appLang, 'addGlossary.html');
         let fileUrl: URL = new URL('file://' + filePath);
         this.addGlossaryWindow.loadURL(fileUrl.href);
         this.addGlossaryWindow.once('ready-to-show', () => {
@@ -4154,7 +4158,7 @@ export class Swordfish {
             }
         });
         this.importXliffWindow.setMenu(null);
-        let filePath: string = join(app.getAppPath(), 'html', 'importXliff.html');
+        let filePath: string = join(app.getAppPath(), 'html', Swordfish.currentPreferences.appLang, 'importXliff.html');
         let fileUrl: URL = new URL('file://' + filePath);
         this.importXliffWindow.loadURL(fileUrl.href);
         this.importXliffWindow.once('ready-to-show', () => {
@@ -4248,7 +4252,7 @@ export class Swordfish {
                 }
             });
             this.addFileWindow.setMenu(null);
-            let filePath: string = join(app.getAppPath(), 'html', 'addFile.html');
+            let filePath: string = join(app.getAppPath(), 'html', Swordfish.currentPreferences.appLang, 'addFile.html');
             let fileUrl: URL = new URL('file://' + filePath);
             this.addFileWindow.loadURL(fileUrl.href);
             this.addFileWindow.once('ready-to-show', () => {
@@ -4646,7 +4650,7 @@ export class Swordfish {
             }
         });
         this.tagsWindow.setMenu(null);
-        let filePath: string = join(app.getAppPath(), 'html', 'tags.html');
+        let filePath: string = join(app.getAppPath(), 'html', Swordfish.currentPreferences.appLang, 'tags.html');
         let fileUrl: URL = new URL('file://' + filePath);
         this.tagsWindow.loadURL(fileUrl.href);
         this.tagsWindow.once('ready-to-show', () => {
@@ -4702,7 +4706,7 @@ export class Swordfish {
             }
         });
         this.goToWindow.setMenu(null);
-        let filePath: string = join(app.getAppPath(), 'html', 'goTo.html');
+        let filePath: string = join(app.getAppPath(), 'html', Swordfish.currentPreferences.appLang, 'goTo.html');
         let fileUrl: URL = new URL('file://' + filePath);
         this.goToWindow.loadURL(fileUrl.href);
         this.goToWindow.once('ready-to-show', () => {
@@ -4737,7 +4741,7 @@ export class Swordfish {
         });
         this.projectParam = arg.project;
         this.replaceTextWindow.setMenu(null);
-        let filePath: string = join(app.getAppPath(), 'html', 'replaceText.html');
+        let filePath: string = join(app.getAppPath(), 'html', Swordfish.currentPreferences.appLang, 'replaceText.html');
         let fileUrl: URL = new URL('file://' + filePath);
         this.replaceTextWindow.loadURL(fileUrl.href);
         this.replaceTextWindow.once('ready-to-show', () => {
@@ -5003,7 +5007,7 @@ export class Swordfish {
         });
         Swordfish.concordanceMemories = memories;
         this.concordanceSearchWindow.setMenu(null);
-        let filePath: string = join(app.getAppPath(), 'html', 'concordanceSearch.html');
+        let filePath: string = join(app.getAppPath(), 'html', Swordfish.currentPreferences.appLang, 'concordanceSearch.html');
         let fileUrl: URL = new URL('file://' + filePath);
         this.concordanceSearchWindow.loadURL(fileUrl.href);
         this.concordanceSearchWindow.once('ready-to-show', () => {
@@ -5075,7 +5079,7 @@ export class Swordfish {
         Swordfish.htmlTitle = 'Concordance Search';
         Swordfish.htmlId = htmlViewerWindow.id;
         htmlViewerWindow.setMenu(null);
-        let filePath: string = join(app.getAppPath(), 'html', 'htmlViewer.html');
+        let filePath: string = join(app.getAppPath(), 'html', Swordfish.currentPreferences.appLang, 'htmlViewer.html');
         let fileUrl: URL = new URL('file://' + filePath);
         htmlViewerWindow.loadURL(fileUrl.href);
         htmlViewerWindow.once('ready-to-show', () => {
@@ -5102,7 +5106,7 @@ export class Swordfish {
             }
         });
         this.iatePluginWindow.setMenu(null);
-        let filePath: string = join(app.getAppPath(), 'html', 'iatePlugin.html');
+        let filePath: string = join(app.getAppPath(), 'html', Swordfish.currentPreferences.appLang, 'iatePlugin.html');
         let fileUrl: URL = new URL('file://' + filePath);
         this.iatePluginWindow.loadURL(fileUrl.href);
         this.iatePluginWindow.once('ready-to-show', () => {
@@ -5131,7 +5135,7 @@ export class Swordfish {
         });
         this.selectedGlossary = glossary;
         this.termSearchWindow.setMenu(null);
-        let filePath: string = join(app.getAppPath(), 'html', 'termSearch.html');
+        let filePath: string = join(app.getAppPath(), 'html', Swordfish.currentPreferences.appLang, 'termSearch.html');
         let fileUrl: URL = new URL('file://' + filePath);
         this.termSearchWindow.loadURL(fileUrl.href);
         this.termSearchWindow.once('ready-to-show', () => {
@@ -5173,7 +5177,7 @@ export class Swordfish {
                 Swordfish.htmlContent = data.html;
                 Swordfish.htmlId = htmlViewerWindow.id;
                 htmlViewerWindow.setMenu(null);
-                let filePath: string = join(app.getAppPath(), 'html', 'htmlViewer.html');
+                let filePath: string = join(app.getAppPath(), 'html', Swordfish.currentPreferences.appLang, 'htmlViewer.html');
                 let fileUrl: URL = new URL('file://' + filePath);
                 htmlViewerWindow.loadURL(fileUrl.href);
                 htmlViewerWindow.once('ready-to-show', () => {
@@ -5207,7 +5211,7 @@ export class Swordfish {
         });
         this.selectedGlossary = glossary;
         this.addTermWindow.setMenu(null);
-        let filePath: string = join(app.getAppPath(), 'html', 'addTerm.html');
+        let filePath: string = join(app.getAppPath(), 'html', Swordfish.currentPreferences.appLang, 'addTerm.html');
         let fileUrl: URL = new URL('file://' + filePath);
         this.addTermWindow.loadURL(fileUrl.href);
         this.addTermWindow.once('ready-to-show', () => {
@@ -5368,7 +5372,7 @@ export class Swordfish {
             }
         });
         Swordfish.spaceAnalysisWindow.setMenu(null);
-        let filePath: string = join(app.getAppPath(), 'html', 'spaceAnalysis.html');
+        let filePath: string = join(app.getAppPath(), 'html', Swordfish.currentPreferences.appLang, 'spaceAnalysis.html');
         let fileUrl: URL = new URL('file://' + filePath);
         Swordfish.spaceAnalysisWindow.loadURL(fileUrl.href);
         Swordfish.spaceAnalysisWindow.once('ready-to-show', () => {
@@ -5397,7 +5401,7 @@ export class Swordfish {
             }
         });
         Swordfish.tagsAnalysisWindow.setMenu(null);
-        let filePath: string = join(app.getAppPath(), 'html', 'tagsAnalysis.html');
+        let filePath: string = join(app.getAppPath(), 'html', Swordfish.currentPreferences.appLang, 'tagsAnalysis.html');
         let fileUrl: URL = new URL('file://' + filePath);
         Swordfish.tagsAnalysisWindow.loadURL(fileUrl.href);
         Swordfish.tagsAnalysisWindow.once('ready-to-show', () => {
@@ -5540,7 +5544,7 @@ export class Swordfish {
                 }
             });
             this.promptWindow.setMenu(null);
-            let filePath: string = join(app.getAppPath(), 'html', 'promptDialog.html');
+            let filePath: string = join(app.getAppPath(), 'html', Swordfish.currentPreferences.appLang, 'promptDialog.html');
             let fileUrl: URL = new URL('file://' + filePath);
             this.promptWindow.loadURL(fileUrl.href);
         }
@@ -5702,7 +5706,7 @@ export class Swordfish {
             }
         });
         this.changeCaseWindow.setMenu(null);
-        let filePath: string = join(app.getAppPath(), 'html', 'changeCase.html');
+        let filePath: string = join(app.getAppPath(), 'html', Swordfish.currentPreferences.appLang, 'changeCase.html');
         let fileUrl: URL = new URL('file://' + filePath);
         this.changeCaseWindow.loadURL(fileUrl.href);
         this.changeCaseWindow.once('ready-to-show', () => {
@@ -5801,7 +5805,7 @@ export class Swordfish {
             }
         });
         Swordfish.notesWindow.setMenu(null);
-        let filePath: string = join(app.getAppPath(), 'html', 'notes.html');
+        let filePath: string = join(app.getAppPath(), 'html', Swordfish.currentPreferences.appLang, 'notes.html');
         let fileUrl: URL = new URL('file://' + filePath);
         Swordfish.notesWindow.loadURL(fileUrl.href);
         Swordfish.notesWindow.addListener('closed', () => {
@@ -5858,7 +5862,7 @@ export class Swordfish {
             }
         });
         Swordfish.addNoteWindow.setMenu(null);
-        let filePath: string = join(app.getAppPath(), 'html', 'addNote.html');
+        let filePath: string = join(app.getAppPath(), 'html', Swordfish.currentPreferences.appLang, 'addNote.html');
         let fileUrl: URL = new URL('file://' + filePath);
         Swordfish.addNoteWindow.loadURL(fileUrl.href);
         Swordfish.addNoteWindow.once('ready-to-show', () => {
@@ -5897,7 +5901,7 @@ export class Swordfish {
             }
         });
         Swordfish.addNoteWindow.setMenu(null);
-        let filePath: string = join(app.getAppPath(), 'html', 'addNote.html');
+        let filePath: string = join(app.getAppPath(), 'html', Swordfish.currentPreferences.appLang, 'addNote.html');
         let fileUrl: URL = new URL('file://' + filePath);
         Swordfish.addNoteWindow.loadURL(fileUrl.href);
         Swordfish.addNoteWindow.once('ready-to-show', () => {
@@ -5996,7 +6000,7 @@ export class Swordfish {
             }
         });
         Swordfish.fileInfoWindow.setMenu(null);
-        let filePath: string = join(app.getAppPath(), 'html', 'fileInfo.html');
+        let filePath: string = join(app.getAppPath(), 'html', Swordfish.currentPreferences.appLang, 'fileInfo.html');
         let fileUrl: URL = new URL('file://' + filePath);
         Swordfish.fileInfoWindow.loadURL(fileUrl.href);
         Swordfish.fileInfoWindow.once('ready-to-show', () => {
@@ -6033,7 +6037,7 @@ export class Swordfish {
             }
         });
         Swordfish.reviewCommentsWindow.setMenu(null);
-        let filePath: string = join(app.getAppPath(), 'html', 'commentsDialog.html');
+        let filePath: string = join(app.getAppPath(), 'html', Swordfish.currentPreferences.appLang, 'commentsDialog.html');
         let fileUrl: URL = new URL('file://' + filePath);
         Swordfish.reviewCommentsWindow.loadURL(fileUrl.href);
         Swordfish.reviewCommentsWindow.addListener('closed', () => {
@@ -6111,7 +6115,7 @@ export class Swordfish {
             }
         });
         Swordfish.addCommentWindow.setMenu(null);
-        let filePath: string = join(app.getAppPath(), 'html', 'addComment.html');
+        let filePath: string = join(app.getAppPath(), 'html', Swordfish.currentPreferences.appLang, 'addComment.html');
         let fileUrl: URL = new URL('file://' + filePath);
         Swordfish.addCommentWindow.loadURL(fileUrl.href);
         Swordfish.addCommentWindow.once('ready-to-show', () => {
@@ -6173,7 +6177,7 @@ export class Swordfish {
             }
         });
         Swordfish.addCommentWindow.setMenu(null);
-        let filePath: string = join(app.getAppPath(), 'html', 'addComment.html');
+        let filePath: string = join(app.getAppPath(), 'html', Swordfish.currentPreferences.appLang, 'addComment.html');
         let fileUrl: URL = new URL('file://' + filePath);
         Swordfish.addCommentWindow.loadURL(fileUrl.href);
         Swordfish.addCommentWindow.once('ready-to-show', () => {
@@ -6208,7 +6212,7 @@ export class Swordfish {
             }
         });
         Swordfish.addReplyWindow.setMenu(null);
-        let filePath: string = join(app.getAppPath(), 'html', 'addReply.html');
+        let filePath: string = join(app.getAppPath(), 'html', Swordfish.currentPreferences.appLang, 'addReply.html');
         let fileUrl: URL = new URL('file://' + filePath);
         Swordfish.addReplyWindow.loadURL(fileUrl.href);
         Swordfish.addReplyWindow.once('ready-to-show', () => {
@@ -6243,7 +6247,7 @@ export class Swordfish {
             }
         });
         Swordfish.addReplyWindow.setMenu(null);
-        let filePath: string = join(app.getAppPath(), 'html', 'addReply.html');
+        let filePath: string = join(app.getAppPath(), 'html', Swordfish.currentPreferences.appLang, 'addReply.html');
         let fileUrl: URL = new URL('file://' + filePath);
         Swordfish.addReplyWindow.loadURL(fileUrl.href);
         Swordfish.addReplyWindow.once('ready-to-show', () => {
@@ -6331,7 +6335,7 @@ export class Swordfish {
             }
         });
         Swordfish.gettingStartedWindow.setMenu(null);
-        let filePath: string = join(app.getAppPath(), 'html', 'gettingStarted.html');
+        let filePath: string = join(app.getAppPath(), 'html', Swordfish.currentPreferences.appLang, 'gettingStarted.html');
         let fileUrl: URL = new URL('file://' + filePath);
         Swordfish.gettingStartedWindow.loadURL(fileUrl.href);
         Swordfish.gettingStartedWindow.once('ready-to-show', () => {
@@ -6376,7 +6380,7 @@ export class Swordfish {
             }
         });
         Swordfish.editXmlFilterWindow.setMenu(null);
-        let filePath: string = join(app.getAppPath(), 'html', 'filterConfig.html');
+        let filePath: string = join(app.getAppPath(), 'html', Swordfish.currentPreferences.appLang, 'filterConfig.html');
         let fileUrl: URL = new URL('file://' + filePath);
         Swordfish.editXmlFilterWindow.loadURL(fileUrl.href);
         Swordfish.editXmlFilterWindow.once('ready-to-show', () => {
@@ -6467,7 +6471,7 @@ export class Swordfish {
             }
         });
         Swordfish.configElementWindow.setMenu(null);
-        let filePath: string = join(app.getAppPath(), 'html', 'elementConfig.html');
+        let filePath: string = join(app.getAppPath(), 'html', Swordfish.currentPreferences.appLang, 'elementConfig.html');
         let fileUrl: URL = new URL('file://' + filePath);
         Swordfish.configElementWindow.loadURL(fileUrl.href);
         Swordfish.configElementWindow.once('ready-to-show', () => {
@@ -6576,7 +6580,7 @@ export class Swordfish {
             }
         });
         Swordfish.addXmlConfigurationWindow.setMenu(null);
-        let filePath: string = join(app.getAppPath(), 'html', 'addXmlConfiguration.html');
+        let filePath: string = join(app.getAppPath(), 'html', Swordfish.currentPreferences.appLang, 'addXmlConfiguration.html');
         let fileUrl: URL = new URL('file://' + filePath);
         Swordfish.addXmlConfigurationWindow.loadURL(fileUrl.href);
         Swordfish.addXmlConfigurationWindow.once('ready-to-show', () => {

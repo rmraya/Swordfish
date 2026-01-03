@@ -9,9 +9,9 @@
  * Contributors:
  *     Maxprograms - initial API and implementation
  *******************************************************************************/
-import { ipcRenderer, IpcRendererEvent } from 'electron';
-import {ReviewComment, CommentField} from './reviewComments.js';
-import { MetaId } from './metadata.js';
+import { ipcRenderer, IpcRendererEvent } from "electron";
+import {ReviewComment, CommentField} from "./reviewComments.js";
+import { MetaId } from "./metadata.js";
 
 export class AddComment {
 

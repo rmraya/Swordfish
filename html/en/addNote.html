@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <title id="version">Note</title>
+    <link id="theme" rel="stylesheet" type="text/css" href="../../css/light.css">
+    <link rel="stylesheet" type="text/css" href="../../css/fonts.css">
+</head>
+
+<body class="dialogBody">
+    <div class="paddedArea">
+        <textarea id="area" class="fill_width" style="height: 80px;"></textarea>
+    </div>
+    <div class="buttonArea">
+        <button id="addButton">Add Note</button>
+    </div>
+    <script>
+        const { AddNote } = require('../../js/addNote.js');
+        new AddNote();
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <title>Filter Segments</title>
+    <link id="theme" rel="stylesheet" type="text/css" href="../../css/light.css">
+    <link rel="stylesheet" type="text/css" href="../../css/fonts.css">
+</head>
+
+<body class="dialogBody">
+    <div class="paddedArea">
+        <table>
+            <tr>
+                <td class="noWrap middle"><label for="filterText" class="noWrap">Text to Search</label></td>
+                <td class="middle fill_width"><input type="text" id="filterText" class="table_input"></td>
+            </tr>
+            <tr>
+                <td class="noWrap"><label class="middle noWrap">Search In</label></td>
+                <td class="middle">
+                    <input type="radio" id="source" name="where" value="source" class="middle" checked>
+                    <label for="source" class="middle">Source</label>
+                    <input type="radio" id="target" name="where" value="target" class="middle">
+                    <label for="target" class="middle">Target</label>
+                </td>
+            </tr>
+
+            <tr>
+                <td class="noWrap"><label class="middle">Options</label></td>
+                <td>
+                    <input type="checkbox" id="caseSensitive" class="middle">
+                    <label for="caseSensitive" class="middle noWrap">Case Sensitive Search</label><br>
+                    <input type="checkbox" id="isRegExp" class="middle">
+                    <label for="isRegExp" class="middle noWrap">Regular Expression</label>
+                </td>
+            </tr>
+            <tr>
+                <td class="noWrap"><label class="middle">Display</label></td>
+                <td>
+                    <input type="checkbox" id="showUntranslated" class="middle" checked>
+                    <label for="showUntranslated" class="middle">Untranslated Segments</label><br>
+                    <input type="checkbox" id="showTranslated" class="middle" checked>
+                    <label for="showTranslated" class="middle">Translated Segments</label><br>
+                    <input type="checkbox" id="showConfirmed" class="middle" checked>
+                    <label for="showConfirmed" class="middle">Confirmed Segments</label>
+                </td>
+            </tr>
+        </table>
+    </div>
+    <div class="buttonArea">
+        <button id="clearFilter">Clear Filter</button>
+        <button id="filterSegments">Filter Segments</button>
+    </div>
+
+    <script>
+        const { FilterSegments } = require('../../js/filterSegments.js');
+        new FilterSegments();
+    </script>
+</body>
+
+</html>

@@ -99,7 +99,7 @@ export class IatePlugin {
             this.harvestLanguages();
             loadingDiv.style.display = 'flex';
             iateFrame.style.display = 'none';
-            iateFrame.src = './iate/basic_search.html';
+            iateFrame.src = '../iate/basic_search.html';
             iateFrame.style.height = '480px';
             this.setSize();
         });
@@ -107,7 +107,7 @@ export class IatePlugin {
             this.harvestLanguages();
             loadingDiv.style.display = 'flex';
             iateFrame.style.display = 'none';
-            iateFrame.src = './iate/advanced_search.html';
+            iateFrame.src = '../iate/advanced_search.html';
             iateFrame.style.height = '600px';
             this.setSize();
         });
@@ -117,7 +117,7 @@ export class IatePlugin {
             iateFrame.style.height = (window.innerHeight - toolbarHeight) + 'px';
         });
         setTimeout(() => {
-            iateFrame.src = './iate/basic_search.html';
+            iateFrame.src = '../iate/basic_search.html';
             iateFrame.style.height = '480px';
             this.setSize();
         }, 200);

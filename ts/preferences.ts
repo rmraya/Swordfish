@@ -12,6 +12,7 @@
 
 export interface Preferences {
     theme: string;
+    appLang: string;
     zoomFactor: string;
     srcLang: string;
     tgtLang: string;
