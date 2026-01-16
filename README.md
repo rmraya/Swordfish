@@ -1,6 +1,6 @@
 # Swordfish
 
-![Swordfish logo](icons/icon.png)
+![Swordfish logo](images/icon.png)
 
 An advanced CAT (Computer Aided Translation) tool based on XLIFF Standard that supports MS Office, DITA, HTML and other document formats.
 
