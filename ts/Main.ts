@@ -171,6 +171,9 @@ export class Main {
         ipcRenderer.on('export-tmx', () => {
             this.memoriesView.exportTMX();
         });
+        ipcRenderer.on('import-sdltm', () => {
+            this.memoriesView.importSDLTM();
+        });
         ipcRenderer.on('import-glossary', () => {
             this.glossariesView.importGlossary();
         });

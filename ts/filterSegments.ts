@@ -53,10 +53,6 @@ export class FilterSegments {
 
     filterSegments(): void {
         let filterText: string = (document.getElementById('filterText') as HTMLInputElement).value;
-        if (filterText === '') {
-            ipcRenderer.send('show-message', { type: 'warning', message: 'Enter text to search', parent: 'filterSegments' });
-            return;
-        }
         let filterLanguage: string = 'source';
         if ((document.getElementById('target') as HTMLInputElement).checked) {
             filterLanguage = 'target';
@@ -64,8 +60,24 @@ export class FilterSegments {
         let showUntranslated: boolean = (document.getElementById('showUntranslated') as HTMLInputElement).checked;
         let showTranslated: boolean = (document.getElementById('showTranslated') as HTMLInputElement).checked;
         let showConfirmed: boolean = (document.getElementById('showConfirmed') as HTMLInputElement).checked;
-        if (!(showUntranslated || showTranslated || showConfirmed)) {
-            ipcRenderer.send('show-message', { type: 'warning', message: 'Select segments to display', parent: 'filterSegments' });
+        let showReviewed: boolean = (document.getElementById('showReviewed') as HTMLInputElement).checked;
+        let trimmedText: string = filterText.trim();
+        let anyDisplaySelected: boolean = showUntranslated || showTranslated || showConfirmed || showReviewed;
+        let allDisplaySelected: boolean = showUntranslated && showTranslated && showConfirmed && showReviewed;
+        if (trimmedText === '' && !anyDisplaySelected) {
+            ipcRenderer.send('show-message', {
+                type: 'warning',
+                message: 'Enter text to search or select at least one display option',
+                parent: 'filterSegments'
+            });
+            return;
+        }
+        if (trimmedText === '' && allDisplaySelected) {
+            ipcRenderer.send('show-message', {
+                type: 'warning',
+                message: 'Enter text to search or deselect one of the display options to filter segments',
+                parent: 'filterSegments'
+            });
             return;
         }
         let params: any = {
@@ -75,7 +87,8 @@ export class FilterSegments {
             regExp: (document.getElementById('isRegExp') as HTMLInputElement).checked,
             showUntranslated: showUntranslated,
             showTranslated: showTranslated,
-            showConfirmed: showConfirmed
+            showConfirmed: showConfirmed,
+            showReviewed: showReviewed
         }
         ipcRenderer.send('filter-options', params);
     }
@@ -88,7 +101,8 @@ export class FilterSegments {
             regExp: false,
             showUntranslated: true,
             showTranslated: true,
-            showConfirmed: true
+            showConfirmed: true,
+            showReviewed: true
         }
         ipcRenderer.send('filter-options', params);
     }
@@ -108,5 +122,6 @@ export class FilterSegments {
         (document.getElementById('showUntranslated') as HTMLInputElement).checked = arg.showUntranslated;
         (document.getElementById('showTranslated') as HTMLInputElement).checked = arg.showTranslated;
         (document.getElementById('showConfirmed') as HTMLInputElement).checked = arg.showConfirmed;
+        (document.getElementById('showReviewed') as HTMLInputElement).checked = arg.showReviewed;
     }
 }

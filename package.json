@@ -25,8 +25,9 @@
         "typescript": "^5.9.3"
     },
     "dependencies": {
-        "mtengines": "^4.0.0",
-        "typesxml": "^1.16.0",
-        "typesbcp47": "^1.15.0"
+        "mtengines": "^4.3.0",
+        "sdltm": "^1.9.0",
+        "typesbcp47": "^1.17.0",
+        "typesxml": "^1.17.0"
     }
 }

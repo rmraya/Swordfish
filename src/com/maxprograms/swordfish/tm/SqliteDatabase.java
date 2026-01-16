@@ -60,7 +60,6 @@ public class SqliteDatabase implements ITmEngine {
     Logger logger = System.getLogger(SqliteDatabase.class.getName());
 
     private String dbname;
-    private String creationDate;
     private File databaseFolder;
     private File database;
     private Connection conn;
@@ -74,13 +73,14 @@ public class SqliteDatabase implements ITmEngine {
     private String currSubject;
     private String currCustomer;
     private FileOutputStream output;
+    private String creationId;
 
     private TMXReader reader;
 
     public SqliteDatabase(String dbname, String workFolder) throws IOException, SQLException {
         this.dbname = dbname;
-        creationDate = TMUtils.tmxDate();
-
+        JSONObject json = TmsServer.getPreferences();
+        creationId = json.getString("userName");
         File wfolder = new File(workFolder);
         databaseFolder = new File(wfolder, dbname);
         if (!databaseFolder.exists()) {
@@ -547,7 +547,6 @@ public class SqliteDatabase implements ITmEngine {
         currProject = project;
         currSubject = subject;
         currCustomer = customer;
-        creationDate = TMUtils.creationDate();
 
         reader = new TMXReader(this);
         reader.parse(new File(tmxFile).toURI().toURL());
@@ -565,6 +564,11 @@ public class SqliteDatabase implements ITmEngine {
             tuid = nextId();
             tu.setAttribute("tuid", tuid);
         }
+        Element oldTu = tuDb.getTu(tuid);
+        tu.setAttribute("creationdate",
+                oldTu.hasAttribute("creationdate") ? oldTu.getAttributeValue("creationdate") : TMUtils.creationDate());
+        tu.setAttribute("creationid",
+                oldTu.hasAttribute("creationid") ? oldTu.getAttributeValue("creationid") : creationId);
 
         Hashtable<String, String> props = new Hashtable<>();
         List<Element> properties = tu.getChildren("prop");
@@ -612,9 +616,6 @@ public class SqliteDatabase implements ITmEngine {
         if (proj != null) {
             tuDb.storeProject(proj);
         }
-        if (tu.getAttributeValue("creationdate").isEmpty()) {
-            tu.setAttribute("creationdate", creationDate);
-        }
 
         storeTUV.setString(1, tuid);
 
@@ -625,6 +626,8 @@ public class SqliteDatabase implements ITmEngine {
             if (lang != null && !tuLangs.contains(lang)) {
                 if (exists(tuid, lang)) {
                     delete(tuid, lang);
+                    tu.setAttribute("changedate", TMUtils.creationDate());
+                    tu.setAttribute("changeid", creationId);
                 }
                 Element seg = tuv.getChild("seg");
                 String puretext = TMUtils.extractText(seg);

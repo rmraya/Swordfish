@@ -11,8 +11,8 @@
  *******************************************************************************/
 
 import { ipcRenderer, IpcRendererEvent } from "electron";
+import { Language } from "typesbcp47";
 import { FileInfo } from "./fileInfo.js";
-import { LanguageInterface } from "./language.js";
 
 export class AddProject {
 
@@ -180,7 +180,7 @@ export class AddProject {
     }
 
     setLanguages(arg: any): void {
-        let array: LanguageInterface[] = arg.languages;
+        let array: Language[] = arg.languages;
         let languageOptions: string = '<option value="none">Select Language</option>';
         for (let lang of array) {
             languageOptions = languageOptions + '<option value="' + lang.code + '">' + lang.description + '</option>';

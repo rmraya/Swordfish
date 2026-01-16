@@ -65,6 +65,12 @@ export interface Preferences {
         srcLang: string;
         tgtLang: string;
     };
+    mistral: {
+        enabled: boolean;
+        apiKey: string;
+        model: string;
+        fixTags: boolean;
+    };
     spellchecker: {
         defaultEnglish: string;
         defaultPortuguese: string;

@@ -886,10 +886,14 @@ public class XliffStore {
 
 	public synchronized List<JSONObject> getSegments(int start, int count, String filterText, String filterLanguage,
 			boolean caseSensitiveFilter, boolean regExp, boolean showUntranslated, boolean showTranslated,
-			boolean showConfirmed, String sortOption, boolean sortDesc)
+			boolean showConfirmed, boolean showReviewed, String sortOption, boolean sortDesc)
 			throws SQLException, SAXException, IOException, ParserConfigurationException, DataFormatException {
 		List<JSONObject> result = new Vector<>();
 		StringBuilder queryBuilder = new StringBuilder();
+		if (filterText == null) {
+			filterText = "";
+		}
+		boolean restrictByState = showUntranslated || showTranslated || showConfirmed;
 		queryBuilder.append(
 				"SELECT file, unitId, segId, child, source, target, tags, state, space, translate, idx FROM segments WHERE type='S'");
 		if (!filterText.isEmpty()) {
@@ -923,6 +927,8 @@ public class XliffStore {
 				queryBuilder.append(escape(filterText));
 				queryBuilder.append(caseSensitiveFilter ? "*'" : "%'");
 			}
+		}
+		if (restrictByState) {
 			if (!showUntranslated) {
 				queryBuilder.append(" AND state <> 'initial'");
 			}
@@ -988,6 +994,14 @@ public class XliffStore {
 					tagErrors = hasTagErrors(source, target);
 					spaceErrors = hasSpaceErrors(source, target);
 				}
+				boolean hasMetadata = hasMetadata(file, unit);
+				boolean reviewOnly = showReviewed && !restrictByState;
+				if (reviewOnly && !hasMetadata) {
+					continue;
+				}
+				if (!showReviewed && hasMetadata) {
+					continue;
+				}
 				tagsMap = new Hashtable<>();
 				JSONObject row = new JSONObject();
 				row.put("index", idx);
@@ -1002,7 +1016,7 @@ public class XliffStore {
 				row.put("target", addHtmlTags(target, filterText, caseSensitiveFilter, regExp, tagsData, segPreserve));
 				row.put("match", getBestMatch(file, unit, segId));
 				row.put("hasNotes", hasNotes(file, unit, segId));
-				row.put("hasMetadata", hasMetadata(file, unit));
+				row.put("hasMetadata", hasMetadata);
 				row.put("tagErrors", tagErrors);
 				row.put("spaceErrors", spaceErrors);
 				result.add(row);
@@ -2129,17 +2143,19 @@ public class XliffStore {
 						Matcher matcher = pattern.matcher(s);
 						if (matcher.find()) {
 							StringBuilder sb = new StringBuilder();
+							int lastEnd = 0;
 							do {
 								int start = matcher.start();
 								int end = matcher.end();
-								sb.append(XliffUtils.cleanString(s.substring(0, start)));
-								sb.append("<span " + XliffUtils.STYLE + ">");
-								sb.append(XliffUtils.cleanString(s.substring(start, end)));
-								sb.append("</span>");
-								s = s.substring(end);
-								matcher = pattern.matcher(s);
+								sb.append(XliffUtils.cleanString(s.substring(lastEnd, start)));
+								if (end > start) {
+									sb.append("<span " + XliffUtils.STYLE + ">");
+									sb.append(XliffUtils.cleanString(s.substring(start, end)));
+									sb.append("</span>");
+								}
+								lastEnd = end;
 							} while (matcher.find());
-							sb.append(XliffUtils.cleanString(s));
+							sb.append(XliffUtils.cleanString(s.substring(lastEnd)));
 							text.append(sb.toString());
 						} else {
 							text.append(XliffUtils.cleanString(s));
@@ -4317,9 +4333,9 @@ public class XliffStore {
 		} else {
 			queryBuilder.append(caseSensitive ? "targetText GLOB '*" : "targetText LIKE '%");
 			queryBuilder.append(escape(searchText));
-			queryBuilder.append(caseSensitive ? "*" : "%'");
+			queryBuilder.append(caseSensitive ? "*'" : "%'");
 		}
-		queryBuilder.append(" AND translate='Y'");
+		queryBuilder.append(" AND translate='Y';");
 		try (ResultSet rs = stmt.executeQuery(queryBuilder.toString())) {
 			while (rs.next()) {
 				String file = rs.getString(1);
@@ -5089,7 +5105,9 @@ public class XliffStore {
 			writeString(out, " table {border-collapse: collapse; width: 100%; border-top: 1px solid #cfd8dc;}\n");
 			writeString(out, " tr {border-bottom: 1px solid #cfd8dc;}\n");
 			writeString(out, " td {padding: 4px;}\n");
+			writeString(out, " th {color: #fefefe; background: #0f4c81;}\n");
 			writeString(out, " .center {text-align: center;}\n");
+			writeString(out, " .flex {display: flex;}\n");
 			writeString(out, " .orange {border-right: 3px solid #f57c00;}\n");
 			writeString(out, " .green {border-right: 3px solid #009688;}\n");
 			writeString(out, " .grey {border-right: 3px solid #cfd8dc;}\n");
@@ -5108,6 +5126,7 @@ public class XliffStore {
 			writeString(out, "<tr>\n");
 			writeString(out, "<th>#</th>\n");
 			writeString(out, "<th>" + LanguageUtils.getLanguage(srcLang).toString() + "</th>\n");
+			writeString(out, "<th>%</th>\n");
 			writeString(out, "<th>" + SVG_BLANK + "</th>\n");
 			writeString(out, "<th>" + LanguageUtils.getLanguage(tgtLang).toString() + "</th>\n");
 			writeString(out, "</tr>\n");
@@ -5116,7 +5135,7 @@ public class XliffStore {
 			String targetDir = LanguageUtils.isBiDi(tgtLang) ? " dir=\"rtl\"" : "";
 
 			try (ResultSet rs = stmt.executeQuery(
-					"SELECT source, target, state, space, translate, file, child FROM segments WHERE type='S' ORDER BY file, child")) {
+					"SELECT source, target, state, space, translate, file, unitid, segid, child FROM segments WHERE type='S' ORDER BY file, child")) {
 				int count = 1;
 				JSONObject tagsData = new JSONObject();
 				while (rs.next()) {
@@ -5127,6 +5146,12 @@ public class XliffStore {
 					boolean locked = "N".equals(rs.getString(5));
 					Element source = XliffUtils.buildElement(src);
 					Element target = XliffUtils.buildElement(tgt);
+
+					String file = rs.getString(6);
+					String unit = rs.getString(7);
+					String segment = rs.getString(8);
+					int bestMatch = getBestMatch(file, unit, segment);
+
 					String box = SVG_BLANK;
 					String border = "grey";
 					if (segState.equals("translated")) {
@@ -5151,6 +5176,7 @@ public class XliffStore {
 									+ XliffUtils.highlightSpaces(
 											removeSvg(addHtmlTags(source, "", false, false, tagsData, segPreserve)))
 									+ "</td>\n");
+					writeString(out, "<td class=\"center\"> " + (bestMatch > 0 ? bestMatch + "%" : "&nbsp;")  + "</td>\n");
 					writeString(out, "<td class=\"center " + border + "\"> " + box + "</td>\n");
 					writeString(out,
 							"<td class=\"text " + space + "\"" + targetDir + ">"
@@ -5165,6 +5191,7 @@ public class XliffStore {
 			writeString(out, "</html>");
 		}
 		return output.getAbsolutePath();
+
 	}
 
 	private static void writeString(FileOutputStream out, String string) throws IOException {

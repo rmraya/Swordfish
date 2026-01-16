@@ -13,11 +13,11 @@
 import { ipcRenderer, IpcRendererEvent } from "electron";
 import { Preferences } from "./preferences.js";
 import { Tab, TabHolder } from "./tabs.js";
-import { LanguageInterface } from "./language.js";
+import { Language } from "typesbcp47";
 
 export class PreferencesDialog {
 
-    static readonly defaultWidth: number = 640;
+    static readonly defaultWidth: number = 680;
 
     tabHolder: TabHolder;
     spellcheckTab: Tab;
@@ -58,13 +58,18 @@ export class PreferencesDialog {
 
     enableChatGPT: HTMLInputElement = document.createElement('input');
     chatGPTKey: HTMLInputElement = document.createElement('input');
-    chatGPTModel: HTMLSelectElement = document.createElement('select');
+    chatGPTModel: HTMLInputElement = document.createElement('input');
     chatGptFixTags: HTMLInputElement = document.createElement('input');
 
     enableAnthropic: HTMLInputElement = document.createElement('input');
     anthropicKey: HTMLInputElement = document.createElement('input');
-    anthropicModel: HTMLSelectElement = document.createElement('select');
+    anthropicModel: HTMLInputElement = document.createElement('input');
     anthropicFixTags: HTMLInputElement = document.createElement('input');
+
+    enableMistral: HTMLInputElement = document.createElement('input');
+    mistralKey: HTMLInputElement = document.createElement('input');
+    mistralModel: HTMLInputElement = document.createElement('input');
+    mistralFixTags: HTMLInputElement = document.createElement('input');
 
     enableModernmt: HTMLInputElement = document.createElement('input');
     modernmtKey: HTMLInputElement = document.createElement('input');
@@ -82,6 +87,8 @@ export class PreferencesDialog {
 
     filtersTable: HTMLTableElement = document.createElement('table');
     selected: Map<string, string>;
+    modelSuggestionsLoaded: boolean = false;
+    modelSuggestionsLoading: boolean = false;
 
     constructor() {
 
@@ -100,6 +107,7 @@ export class PreferencesDialog {
 
         let mtTab: Tab = new Tab('mtTab', 'Machine Translation', false, this.tabHolder);
         mtTab.getLabelDiv().addEventListener('click', () => {
+            this.requestModelSuggestions();
             setTimeout(() => {
                 ipcRenderer.send('set-height', { window: 'preferences', width: PreferencesDialog.defaultWidth, height: document.body.clientHeight });
             }, 200);
@@ -138,8 +146,21 @@ export class PreferencesDialog {
         ipcRenderer.on('set-theme', (event: IpcRendererEvent, theme: string) => {
             (document.getElementById('theme') as HTMLLinkElement).href = theme;
         });
+        ipcRenderer.on('start-waiting', () => {
+            document.body.classList.add('wait');
+        });
+        ipcRenderer.on('end-waiting', () => {
+            document.body.classList.remove('wait');
+        });
         ipcRenderer.on('set-preferences', (event: IpcRendererEvent, preferences: any) => {
             this.setPreferences(preferences);
+        });
+        ipcRenderer.on('set-ai-models', (event: IpcRendererEvent, models: { ChatGPT?: string[], Claude?: string[], Mistral?: string[] }) => {
+            this.applyModelSuggestions(models);
+        });
+        ipcRenderer.on('ai-models-error', () => {
+            this.modelSuggestionsLoading = false;
+            this.modelSuggestionsLoaded = false;
         });
         (document.getElementById('browseProjects') as HTMLButtonElement).addEventListener('click', () => {
             ipcRenderer.send('browse-projects');
@@ -279,6 +300,19 @@ export class PreferencesDialog {
             this.anthropicFixTags.disabled = !this.enableAnthropic.checked;
         });
 
+        this.enableMistral.checked = preferences.mistral.enabled;
+        this.mistralKey.value = preferences.mistral.apiKey;
+        this.mistralModel.value = preferences.mistral.model;
+        this.mistralKey.disabled = !preferences.mistral.enabled;
+        this.mistralModel.disabled = !preferences.mistral.enabled;
+        this.mistralFixTags.checked = preferences.mistral.fixTags;
+        this.mistralFixTags.disabled = !preferences.mistral.enabled;
+        this.enableMistral.addEventListener('change', () => {
+            this.mistralKey.disabled = !this.enableMistral.checked;
+            this.mistralModel.disabled = !this.enableMistral.checked;
+            this.mistralFixTags.disabled = !this.enableMistral.checked;
+        });
+
         this.enableModernmt.checked = preferences.modernmt.enabled;
         this.modernmtKey.value = preferences.modernmt.apiKey;
         this.modernmtSrcLang.value = preferences.modernmt.srcLang;
@@ -345,8 +379,17 @@ export class PreferencesDialog {
             return;
         }
 
-        if (this.enableAnthropic.checked && this.anthropicModel.value === 'none') {
-            ipcRenderer.send('show-message', { type: 'warning', message: 'Select Anthropic model', parent: 'preferences' });
+        if (this.enableMistral.checked && this.mistralKey.value === '') {
+            ipcRenderer.send('show-message', { type: 'warning', message: 'Enter Mistral API key', parent: 'preferences' });
+            return;
+        }
+        if (this.enableMistral.checked && this.mistralModel.value.trim() === '') {
+            ipcRenderer.send('show-message', { type: 'warning', message: 'Enter Mistral model', parent: 'preferences' });
+            return;
+        }
+
+        if (this.enableAnthropic.checked && this.anthropicModel.value.trim() === '') {
+            ipcRenderer.send('show-message', { type: 'warning', message: 'Enter Anthropic model', parent: 'preferences' });
             return;
         }
 
@@ -407,6 +450,12 @@ export class PreferencesDialog {
                 apiKey: this.anthropicKey.value,
                 model: this.anthropicModel.value,
                 fixTags: this.anthropicFixTags.checked
+            },
+            mistral: {
+                enabled: this.enableMistral.checked,
+                apiKey: this.mistralKey.value,
+                model: this.mistralModel.value,
+                fixTags: this.mistralFixTags.checked
             },
             modernmt: {
                 enabled: this.enableModernmt.checked,
@@ -1116,6 +1165,15 @@ export class PreferencesDialog {
         mtHolder.addTab(chatGptTab);
         this.populateChatGptTab(chatGptTab.getContainer());
 
+        let mistralTab: Tab = new Tab('mistralTab', 'Mistral', false, mtHolder);
+        mistralTab.getLabelDiv().addEventListener('click', () => {
+            setTimeout(() => {
+                ipcRenderer.send('set-height', { window: 'preferences', width: PreferencesDialog.defaultWidth, height: document.body.clientHeight });
+            }, 200);
+        });
+        mtHolder.addTab(mistralTab);
+        this.populateMistralTab(mistralTab.getContainer());
+
         let anthropicTab: Tab = new Tab('anthropicTab', 'Anthropic', false, mtHolder);
         anthropicTab.getLabelDiv().addEventListener('click', () => {
             setTimeout(() => {
@@ -1371,24 +1429,17 @@ export class PreferencesDialog {
         td = document.createElement('td');
         td.classList.add('middle');
         td.classList.add('fill_width');
-        let AVAILABLE_MODELS: [string, string][] = [
-            ['gpt-4o', 'gpt-4o'],
-            ['gpt-4', 'gpt-4'],
-            ['gpt-4-turbo', 'gpt-4-turbo'],
-            ['gpt-3.5-turbo', 'gpt-3.5-turbo'],
-            ['gpt-3.5-turbo-16k', 'gpt-3.5-turbo-16k'],
-            ['gpt-3.5-turbo-instruct', 'gpt-3.5-turbo-instruct'],
-            ['gpt-4-turbo-preview', 'gpt-4-turbo-preview'],
-            ['gpt-4o-mini', 'gpt-4o-mini'],
-            ['chatgpt-4o-latest', 'chatgpt-4o-latest']
-        ];
-        let selectHTML = '<select id="chatGPTModel" class="table_select"><option value="none">Select Model</option>';
-        for (let [value, label] of AVAILABLE_MODELS) {
-            selectHTML += `<option value="${value}">${label}</option>`;
-        }
-        selectHTML += '</select>';
-        td.innerHTML = selectHTML;
+        let chatGptModelInput: HTMLInputElement = document.createElement('input');
+        chatGptModelInput.type = 'text';
+        chatGptModelInput.id = 'chatGPTModel';
+        chatGptModelInput.classList.add('table_input');
+        chatGptModelInput.setAttribute('list', 'chatGptModelsList');
+        td.appendChild(chatGptModelInput);
         tr.appendChild(td);
+
+        let chatGptDatalist: HTMLDataListElement = document.createElement('datalist');
+        chatGptDatalist.id = 'chatGptModelsList';
+        container.appendChild(chatGptDatalist);
 
         let tagsRow: HTMLDivElement = document.createElement('div');
         tagsRow.classList.add('row');
@@ -1400,6 +1451,9 @@ export class PreferencesDialog {
         this.chatGptFixTags.addEventListener('change', () => {
             if (this.chatGptFixTags.checked) {
                 this.anthropicFixTags.checked = false;
+                if (this.mistralFixTags) {
+                    this.mistralFixTags.checked = false;
+                }
             }
         });
         tagsRow.appendChild(this.chatGptFixTags);
@@ -1412,7 +1466,86 @@ export class PreferencesDialog {
 
         this.enableChatGPT = document.getElementById('enableChatGPT') as HTMLInputElement;
         this.chatGPTKey = document.getElementById('chatGPTKey') as HTMLInputElement;
-        this.chatGPTModel = document.getElementById('chatGPTModel') as HTMLSelectElement;
+        this.chatGPTModel = document.getElementById('chatGPTModel') as HTMLInputElement;
+    }
+
+    populateMistralTab(container: HTMLDivElement): void {
+        container.style.paddingTop = '10px';
+
+        let mistralDiv: HTMLDivElement = document.createElement('div');
+        mistralDiv.classList.add('middle');
+        mistralDiv.classList.add('row');
+        mistralDiv.style.paddingLeft = '4px';
+        mistralDiv.innerHTML = '<input type="checkbox" id="enableMistral"><label for="enableMistral" style="padding-top:4px;">Enable Mistral Translation</label>';
+        container.appendChild(mistralDiv);
+
+        let infoTable: HTMLTableElement = document.createElement('table');
+        infoTable.classList.add('fill_width');
+        container.appendChild(infoTable);
+
+        let tr: HTMLTableRowElement = document.createElement('tr');
+        infoTable.appendChild(tr);
+
+        let td: HTMLTableCellElement = document.createElement('td');
+        td.classList.add('middle');
+        td.classList.add('noWrap');
+        td.innerHTML = '<label for="mistralKey">API Key</label>'
+        tr.appendChild(td);
+
+        td = document.createElement('td');
+        td.classList.add('middle');
+        td.classList.add('fill_width');
+        td.innerHTML = '<input type="text" id="mistralKey" class="table_input"/>';
+        tr.appendChild(td);
+
+        tr = document.createElement('tr');
+        infoTable.appendChild(tr);
+
+        td = document.createElement('td');
+        td.classList.add('middle');
+        td.classList.add('noWrap');
+        td.innerHTML = '<label for="mistralModel">Mistral Model</label>'
+        tr.appendChild(td);
+
+        td = document.createElement('td');
+        td.classList.add('middle');
+        td.classList.add('fill_width');
+        let mistralModelInput: HTMLInputElement = document.createElement('input');
+        mistralModelInput.type = 'text';
+        mistralModelInput.id = 'mistralModel';
+        mistralModelInput.classList.add('table_input');
+        mistralModelInput.setAttribute('list', 'mistralModelsList');
+        td.appendChild(mistralModelInput);
+        tr.appendChild(td);
+
+        let mistralDatalist: HTMLDataListElement = document.createElement('datalist');
+        mistralDatalist.id = 'mistralModelsList';
+        container.appendChild(mistralDatalist);
+
+        let tagsRow: HTMLDivElement = document.createElement('div');
+        tagsRow.classList.add('row');
+        tagsRow.classList.add('middle');
+        container.appendChild(tagsRow);
+
+        this.mistralFixTags.id = 'mistralFixTags';
+        this.mistralFixTags.type = 'checkbox';
+        this.mistralFixTags.addEventListener('change', () => {
+            if (this.mistralFixTags.checked) {
+                this.chatGptFixTags.checked = false;
+                this.anthropicFixTags.checked = false;
+            }
+        });
+        tagsRow.appendChild(this.mistralFixTags);
+
+        let fixLabel: HTMLLabelElement = document.createElement('label');
+        fixLabel.innerText = 'Use to Fix Tags';
+        fixLabel.setAttribute('for', 'mistralFixTags');
+        fixLabel.style.paddingTop = '4px';
+        tagsRow.appendChild(fixLabel);
+
+        this.enableMistral = document.getElementById('enableMistral') as HTMLInputElement;
+        this.mistralKey = document.getElementById('mistralKey') as HTMLInputElement;
+        this.mistralModel = document.getElementById('mistralModel') as HTMLInputElement;
     }
 
     populateAnthropicTab(container: HTMLDivElement): void {
@@ -1446,27 +1579,20 @@ export class PreferencesDialog {
         td.innerHTML = '<label for="anthropicModel">Anthropic Model</label>'
         tr.appendChild(td);
 
-        let AVAILABLE_MODELS: [string, string][] = [
-            ['claude-haiku-4-5-20251001', 'Claude Haiku 4.5'],
-            ['claude-sonnet-4-5-20250929', 'Claude Sonnet 4.5'],
-            ['claude-opus-4-1-20250805', 'Claude Opus 4.1'],
-            ['claude-opus-4-20250514', 'Claude Opus 4'],
-            ['claude-sonnet-4-20250514', 'Claude Sonnet 4'],
-            ['claude-3-7-sonnet-20250219', 'Claude Sonnet 3.7'],
-            ['claude-3-5-haiku-20241022', 'Claude Haiku 3.5'],
-            ['claude-3-haiku-20240307', 'Claude Haiku 3'],
-            ['claude-3-opus-20240229', 'Claude Opus 3']
-        ];
         td = document.createElement('td');
         td.classList.add('middle');
         td.classList.add('fill_width');
-        let selectHTML = '<select id="anthropicModel" class="table_select"><option value="none">Select Model</option>';
-        for (let [value, label] of AVAILABLE_MODELS) {
-            selectHTML += `<option value="${value}">${label}</option>`;
-        }
-        selectHTML += '</select>';
-        td.innerHTML = selectHTML;
+        let anthropicModelInput: HTMLInputElement = document.createElement('input');
+        anthropicModelInput.type = 'text';
+        anthropicModelInput.id = 'anthropicModel';
+        anthropicModelInput.classList.add('table_input');
+        anthropicModelInput.setAttribute('list', 'anthropicModelsList');
+        td.appendChild(anthropicModelInput);
         tr.appendChild(td);
+
+        let anthropicDatalist: HTMLDataListElement = document.createElement('datalist');
+        anthropicDatalist.id = 'anthropicModelsList';
+        container.appendChild(anthropicDatalist);
 
         let tagsRow: HTMLDivElement = document.createElement('div');
         tagsRow.classList.add('row');
@@ -1479,6 +1605,9 @@ export class PreferencesDialog {
         this.anthropicFixTags.addEventListener('change', () => {
             if (this.anthropicFixTags.checked) {
                 this.chatGptFixTags.checked = false;
+                if (this.mistralFixTags) {
+                    this.mistralFixTags.checked = false;
+                }
             }
         });
 
@@ -1490,7 +1619,7 @@ export class PreferencesDialog {
 
         this.enableAnthropic = document.getElementById('enableAnthropic') as HTMLInputElement;
         this.anthropicKey = document.getElementById('anthropicKey') as HTMLInputElement;
-        this.anthropicModel = document.getElementById('anthropicModel') as HTMLSelectElement;
+        this.anthropicModel = document.getElementById('anthropicModel') as HTMLInputElement;
     }
 
     populateModernmtTab(container: HTMLDivElement): void {
@@ -1558,6 +1687,38 @@ export class PreferencesDialog {
         this.modernmtTgtLang = document.getElementById('modernmtTgtLang') as HTMLSelectElement;
     }
 
+    requestModelSuggestions(): void {
+        if (this.modelSuggestionsLoaded || this.modelSuggestionsLoading) {
+            return;
+        }
+        this.modelSuggestionsLoading = true;
+        ipcRenderer.send('get-ai-models');
+    }
+
+    applyModelSuggestions(models: { ChatGPT?: string[], Claude?: string[], Mistral?: string[] }): void {
+        this.modelSuggestionsLoading = false;
+        this.modelSuggestionsLoaded = true;
+        this.populateModelList('chatGptModelsList', models.ChatGPT);
+        this.populateModelList('anthropicModelsList', models.Claude);
+        this.populateModelList('mistralModelsList', models.Mistral);
+    }
+
+    populateModelList(listId: string, options?: string[]): void {
+        if (!options || options.length === 0) {
+            return;
+        }
+        let datalist: HTMLDataListElement | null = document.getElementById(listId) as HTMLDataListElement;
+        if (!datalist) {
+            return;
+        }
+        datalist.innerHTML = '';
+        for (let value of options) {
+            let option: HTMLOptionElement = document.createElement('option');
+            option.value = value;
+            datalist.appendChild(option);
+        }
+    }
+
     setMtLanguages(arg: any): void {
         this.googleSrcLang.innerHTML = this.getOptions(arg.google.srcLangs);
         this.googleTgtLang.innerHTML = this.getOptions(arg.google.tgtLangs);
@@ -1578,7 +1739,7 @@ export class PreferencesDialog {
         document.body.classList.remove("wait");
     }
 
-    getOptions(array: LanguageInterface[]): string {
+    getOptions(array: Language[]): string {
         let languageOptions: string = '<option value="none">Select Language</option>';
         for (let lang of array) {
             languageOptions = languageOptions + '<option value="' + lang.code + '">' + lang.description + '</option>';
@@ -1663,5 +1824,6 @@ export class PreferencesDialog {
         }
         ipcRenderer.send('export-xmlFilters', { files: selectedFiles });
     }
+
 }
 

@@ -138,6 +138,7 @@ export class TranslationView {
     showUntranslated: boolean = true;
     showTranslated: boolean = true;
     showConfirmed: boolean = true;
+    showReviewed: boolean = true;
 
     sortOption: string = 'none';
     sortDesc: boolean = false;
@@ -972,6 +973,7 @@ export class TranslationView {
             showUntranslated: this.showUntranslated,
             showTranslated: this.showTranslated,
             showConfirmed: this.showConfirmed,
+            showReviewed: this.showReviewed,
             sortOption: this.sortOption,
             sortDesc: this.sortDesc
         };
@@ -2668,7 +2670,8 @@ export class TranslationView {
             regExp: this.regExp,
             showUntranslated: this.showUntranslated,
             showTranslated: this.showTranslated,
-            showConfirmed: this.showConfirmed
+            showConfirmed: this.showConfirmed,
+            showReviewed: this.showReviewed
         };
         ipcRenderer.send('show-filter-segments', params);
     }
@@ -2689,7 +2692,15 @@ export class TranslationView {
     }
 
     setFilters(args: any): void {
-        if (this.filterText === '' && args.filterText === '') {
+        const sameFilters = this.filterText === args.filterText
+            && this.filterLanguage === args.filterLanguage
+            && this.caseSensitiveFilter === args.caseSensitiveFilter
+            && this.regExp === args.regExp
+            && this.showUntranslated === args.showUntranslated
+            && this.showTranslated === args.showTranslated
+            && this.showConfirmed === args.showConfirmed
+            && this.showReviewed === args.showReviewed;
+        if (sameFilters) {
             return;
         }
         this.filterText = args.filterText;
@@ -2699,11 +2710,17 @@ export class TranslationView {
         this.showUntranslated = args.showUntranslated;
         this.showTranslated = args.showTranslated;
         this.showConfirmed = args.showConfirmed;
+        this.showReviewed = args.showReviewed;
         this.saveEdit({ confirm: false, next: 'none' });
-        if (this.filterText === '') {
-            this.filterButton.classList.remove('active');
-        } else {
+        const hasActiveFilter = this.filterText.trim() !== ''
+            || !this.showUntranslated
+            || !this.showTranslated
+            || !this.showConfirmed
+            || !this.showReviewed;
+        if (hasActiveFilter) {
             this.filterButton.classList.add('active');
+        } else {
+            this.filterButton.classList.remove('active');
         }
         this.currentPage = 0;
         this.getSegments();

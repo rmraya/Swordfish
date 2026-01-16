@@ -11,11 +11,13 @@
  *******************************************************************************/
 
 import { BrowserWindow, ClientRequest, IncomingMessage, IpcMainEvent, Menu, MenuItem, MessageBoxOptions, MessageBoxReturnValue, Notification, OpenDialogReturnValue, Rectangle, SaveDialogReturnValue, Size, app, clipboard, dialog, ipcMain, nativeTheme, net, screen, session, shell } from "electron";
-import { MTUtils } from "mtengines";
+import { AnthropicTranslator, ChatGPTTranslator, MTUtils, MistralTranslator } from "mtengines";
 import { ChildProcessWithoutNullStreams, execFileSync, spawn } from "node:child_process";
 import { appendFileSync, existsSync, lstatSync, mkdirSync, readFileSync, readdirSync, rmSync, unlinkSync, writeFileSync } from "node:fs";
 import { userInfo } from "node:os";
 import { join } from "node:path";
+import { TMReader } from "sdltm";
+import { LanguageUtils } from "typesbcp47";
 import { XMLElement } from "typesxml";
 import { Locations, Point } from "./locations.js";
 import { Match } from "./match.js";
@@ -35,6 +37,7 @@ export class Swordfish {
     static licensesWindow: BrowserWindow;
     static addMemoryWindow: BrowserWindow;
     static importTmxWindow: BrowserWindow;
+    static importSdltmWindow: BrowserWindow;
     static importXliffWindow: BrowserWindow;
     static addProjectWindow: BrowserWindow;
     static editProjectWindow: BrowserWindow;
@@ -128,6 +131,12 @@ export class Swordfish {
             enabled: false,
             apiKey: '',
             model: 'claude-3-7-sonnet-latest',
+            fixTags: false
+        },
+        mistral: {
+            enabled: false,
+            apiKey: '',
+            model: 'mistral-medium',
             fixTags: false
         },
         modernmt: {
@@ -234,8 +243,8 @@ export class Swordfish {
             });
             Swordfish.mainWindow.once('ready-to-show', () => {
                 Swordfish.mainWindow.setBounds(Swordfish.currentDefaults);
-                Swordfish.mainWindow.show();
-                Swordfish.startup();
+                            Swordfish.mainWindow.show();
+                            Swordfish.startup();
             });
         });
 
@@ -331,8 +340,8 @@ export class Swordfish {
         ipcMain.on('close-licenses', () => {
             Swordfish.licensesWindow.close();
         });
-        ipcMain.on('save-preferences', (event: IpcMainEvent, arg: Preferences) => {
-            Swordfish.savePreferences(arg);
+        ipcMain.on('save-preferences', async (event: IpcMainEvent, arg: Preferences) => {
+            await Swordfish.savePreferences(arg);
         });
         ipcMain.on('save-languages', (event: IpcMainEvent, arg: any) => {
             Swordfish.savelanguages(arg);
@@ -457,6 +466,9 @@ export class Swordfish {
         ipcMain.on('show-import-tmx', (event: IpcMainEvent, arg: any) => {
             Swordfish.showImportTMX(arg);
         });
+        ipcMain.on('show-import-sdltm', (event: IpcMainEvent, arg: any) => {
+            Swordfish.showImportSDLTM(arg);
+        });
         ipcMain.on('get-memory-param', (event: IpcMainEvent) => {
             Swordfish.memoryParam ? event.sender.send('set-memory', Swordfish.memoryParam) : event.preventDefault();
         });
@@ -492,6 +504,15 @@ export class Swordfish {
         });
         ipcMain.on('get-tmx-file', (event: IpcMainEvent) => {
             this.getTmxFile(event);
+        });
+        ipcMain.on('get-sdltm-file', (event: IpcMainEvent) => {
+            this.getSdltmFile(event);
+        });
+        ipcMain.on('import-sdltm-file', (event: IpcMainEvent, arg: any) => {
+            Swordfish.importSdltmFile(arg);
+        });
+        ipcMain.on('close-importSdltm', () => {
+            Swordfish.importSdltmWindow.close();
         });
         ipcMain.on('concordance-search', (event: IpcMainEvent, memories: string[]) => {
             Swordfish.showConcordanceWindow(memories);
@@ -593,6 +614,9 @@ export class Swordfish {
         });
         ipcMain.on('get-mt-languages', (event: IpcMainEvent) => {
             this.getMtLanguages(event);
+        });
+        ipcMain.on('get-ai-models', (event: IpcMainEvent) => {
+            this.getAiModels(event);
         });
         ipcMain.on('open-license', (event: IpcMainEvent, type: string) => {
             Swordfish.openLicense(type);
@@ -962,9 +986,9 @@ export class Swordfish {
         ipcMain.on('show-support', () => {
             Swordfish.showSupportGroup();
         });
-        ipcMain.on('show-getting-started', (event: IpcMainEvent, arg: any) => {
+        ipcMain.on('show-getting-started', async (event: IpcMainEvent, arg: any) => {
             Swordfish.currentPreferences.showGuide = arg.showGuide;
-            Swordfish.savePreferences(Swordfish.currentPreferences);
+            await Swordfish.savePreferences(Swordfish.currentPreferences);
         });
         ipcMain.on('get-show guide', (event: IpcMainEvent) => {
             event.sender.send('set-show guide', { showGuide: Swordfish.currentPreferences.showGuide });
@@ -1201,7 +1225,9 @@ export class Swordfish {
             { label: 'Concordance Search', accelerator: 'CmdOrCtrl+Y', click: () => { Swordfish.mainWindow.webContents.send('concordance-requested'); } },
             new MenuItem({ type: 'separator' }),
             { label: 'Import TMX File', click: () => { Swordfish.mainWindow.webContents.send('import-tmx'); } },
-            { label: 'Export Memory as TMX File', click: () => { Swordfish.mainWindow.webContents.send('export-tmx'); } }
+            { label: 'Export Memory as TMX File', click: () => { Swordfish.mainWindow.webContents.send('export-tmx'); } },
+            new MenuItem({ type: 'separator' }),
+            { label: 'Import SDLTM File', click: () => { Swordfish.mainWindow.webContents.send('import-sdltm'); } }
         ]);
         let glossariesMenu: Menu = Menu.buildFromTemplate([
             { label: 'Add Glossary', click: () => { Swordfish.showAddGlossary(); } },
@@ -1471,6 +1497,9 @@ export class Swordfish {
         if ('importTmx' === arg.window) {
             Swordfish.importTmxWindow.setContentSize(arg.width, arg.height, true);
         }
+        if ('importSdltm' === arg.window) {
+            Swordfish.importSdltmWindow.setContentSize(arg.width, arg.height, true);
+        }
         if ('concordanceSearch' === arg.window) {
             Swordfish.concordanceSearchWindow.setContentSize(arg.width, arg.height, true);
         }
@@ -1590,6 +1619,9 @@ export class Swordfish {
                 if (!json.hasOwnProperty('reviewModel')) {
                     json.reviewModel = join(app.getAppPath(), 'review', 'default.json');
                 }
+                if (!json.hasOwnProperty('mistral')) {
+                    json.mistral = { enabled: false, apiKey: '', model: 'mistral-medium', fixTags: false };
+                }
                 if (!json.hasOwnProperty('appLang')) {
                     json.appLang = 'en';
                 }
@@ -1660,7 +1692,21 @@ export class Swordfish {
         }
     }
 
-    static savePreferences(preferences: Preferences): void {
+    static async savePreferences(preferences: Preferences): Promise<void> {
+        let validationError: string | null = null;
+        let aiValidationNeeded: boolean = preferences.chatGpt.enabled || preferences.mistral.enabled || preferences.anthropic.enabled;
+        if (aiValidationNeeded) {
+            Swordfish.setPreferencesValidationWait(true);
+            try {
+                validationError = await Swordfish.validateAiModels(preferences);
+            } finally {
+                Swordfish.setPreferencesValidationWait(false);
+            }
+        }
+        if (validationError) {
+            Swordfish.showMessage({ type: 'error', message: validationError, parent: 'preferences' });
+            return;
+        }
         if (Swordfish.preferencesWindow) {
             Swordfish.preferencesWindow.close();
         }
@@ -1679,6 +1725,81 @@ export class Swordfish {
         }
         if (reloadGlossaries) {
             Swordfish.mainWindow.webContents.send('request-glossaries');
+        }
+    }
+
+    private static async validateAiModels(preferences: Preferences): Promise<string | null> {
+        let models: any = {};
+        try {
+            let modelsPath: string = join(app.getAppPath(), 'models', 'models.json');
+            if (!existsSync(modelsPath)) {
+                throw new Error('AI models catalog not found.');
+            }
+            let modelsContent: string = readFileSync(modelsPath, 'utf-8');
+            models = JSON.parse(modelsContent);
+            if (!(models && Array.isArray(models.ChatGPT) && Array.isArray(models.Mistral) && Array.isArray(models.Claude))) {
+                throw new Error('Invalid AI models catalog.');
+            }
+        } catch (error) {
+            console.error('Unable to load AI models catalog: ', error);
+            throw new Error('Unable to load AI models catalog.');
+        }
+
+        if (preferences.chatGpt.enabled) {
+            preferences.chatGpt.model = preferences.chatGpt.model.trim().toLowerCase();
+            if (!models.ChatGPT.includes(preferences.chatGpt.model)) {
+                try {
+                    let chatGptTranslator: ChatGPTTranslator = new ChatGPTTranslator(preferences.chatGpt.apiKey);
+                    let models: string[][] = await chatGptTranslator.getAvailableModels();
+                    let chatGptValid: boolean = models.some((modelInfo: string[]) => modelInfo[0] === preferences.chatGpt.model);
+                    if (!chatGptValid) {
+                        return 'ChatGPT Model ' + preferences.chatGpt.model + ' is not valid.';
+                    }
+                } catch (error: any) {
+                    return 'Unable to validate ChatGPT model: ' + (error instanceof Error ? error.message : String(error));
+                }
+            }
+        }
+        if (preferences.mistral.enabled) {
+            preferences.mistral.model = preferences.mistral.model.trim().toLowerCase();
+            if (!models.Mistral.includes(preferences.mistral.model)) {
+                try {
+                    let mistralTranslator: MistralTranslator = new MistralTranslator(preferences.mistral.apiKey);
+                    let models: string[][] = await mistralTranslator.getAvailableModels();
+                    let mistralValid: boolean = models.some((model: string[]) => model[0] === preferences.mistral.model);
+                    if (!mistralValid) {
+                        return 'Mistral Model ' + preferences.mistral.model + ' is not valid.';
+                    }
+                } catch (error: any) {
+                    return 'Unable to validate Mistral model: ' + (error instanceof Error ? error.message : String(error));
+                }
+            }
+        }
+        if (preferences.anthropic.enabled) {
+            preferences.anthropic.model = preferences.anthropic.model.trim().toLowerCase();
+            if (!models.Claude.includes(preferences.anthropic.model)) {
+                try {
+                    let anthropicTranslator: AnthropicTranslator = new AnthropicTranslator(preferences.anthropic.apiKey);
+                    let models: string[][] = await anthropicTranslator.getAvailableModels();
+                    let anthropicValid: boolean = models.some((model: string[]) => model[0] === preferences.anthropic.model);
+                    if (!anthropicValid) {
+                        return 'Anthropic Model ' + preferences.anthropic.model + ' is not valid.';
+                    }
+                } catch (error: any) {
+                    return 'Unable to validate Anthropic model: ' + (error instanceof Error ? error.message : String(error));
+                }
+            }
+        }
+        return null;
+    }
+
+    private static setPreferencesValidationWait(isWaiting: boolean): void {
+        let channel: string = isWaiting ? 'start-waiting' : 'end-waiting';
+        if (Swordfish.mainWindow && !Swordfish.mainWindow.isDestroyed()) {
+            Swordfish.mainWindow.webContents.send(channel);
+        }
+        if (Swordfish.preferencesWindow && !Swordfish.preferencesWindow.isDestroyed()) {
+            Swordfish.preferencesWindow.webContents.send(channel);
         }
     }
 
@@ -2173,21 +2294,52 @@ export class Swordfish {
     }
 
     getLanguages(event: IpcMainEvent): void {
-        Swordfish.sendRequest('/services/getLanguages', {},
-            (data: any) => {
-                data.srcLang = Swordfish.currentPreferences.srcLang;
-                data.tgtLang = Swordfish.currentPreferences.tgtLang;
-                event.sender.send('set-languages', data);
-            },
-            (reason: string) => {
-                Swordfish.showMessage({ type: 'error', message: reason });
-            }
-        );
+        try {
+            let locale: string = Swordfish.currentPreferences.appLang ? Swordfish.currentPreferences.appLang : 'en';
+            let languages = LanguageUtils.getCommonLanguages(locale);
+            let payload = {
+                languages: languages.map((language) => {
+                    return {
+                        code: language.getCode(),
+                        description: language.getDescription(),
+                        suppressedScript: language.getSuppressedScript()
+                    };
+                }),
+                srcLang: Swordfish.currentPreferences.srcLang,
+                tgtLang: Swordfish.currentPreferences.tgtLang
+            };
+            event.sender.send('set-languages', payload);
+        } catch (error) {
+            let message: string = error instanceof Error ? error.message : 'Unknown error loading languages';
+            Swordfish.showMessage({ type: 'error', message: 'Unable to load languages: ' + message });
+        }
     }
 
     getMtLanguages(event: IpcMainEvent): void {
         let mtManager: MTManager = new MTManager(Swordfish.currentPreferences, '', '');
         event.sender.send('set-mt-languages', mtManager.getMTLanguages());
+    }
+
+    getAiModels(event: IpcMainEvent): void {
+        try {
+            let modelsPath: string = join(app.getAppPath(), 'models', 'models.json');
+            if (!existsSync(modelsPath)) {
+                Swordfish.showMessage({ type: 'error', message: 'Unable to load AI model suggestions: models.json not found', parent: 'preferences' });
+                event.sender.send('ai-models-error');
+                return;
+            }
+            let modelsContent: string = readFileSync(modelsPath, 'utf-8');
+            let models: any = JSON.parse(modelsContent);
+            if (!(models && Array.isArray(models.ChatGPT) && Array.isArray(models.Mistral) && Array.isArray(models.Claude))) {
+                throw new Error('Invalid AI models catalog.');
+            }
+            event.sender.send('set-ai-models', models);
+        } catch (error) {
+            console.error('Unable to load AI model suggestions', error);
+            let message: string = error instanceof Error ? error.message : 'Unknown error loading models';
+            Swordfish.showMessage({ type: 'error', message: 'Unable to load AI model suggestions: ' + message, parent: 'preferences' });
+            event.sender.send('ai-models-error');
+        }
     }
 
     static viewMemories(): void {
@@ -2460,11 +2612,11 @@ export class Swordfish {
         this.mainWindow.webContents.send('start-waiting');
         this.preferencesWindow = new BrowserWindow({
             parent: this.mainWindow,
-            width: 640,
+            width: 700,
             height: 340,
             minimizable: false,
             maximizable: false,
-            resizable: false,
+            resizable: true,
             show: false,
             icon: this.iconPath,
             webPreferences: {
@@ -2992,6 +3144,35 @@ export class Swordfish {
         );
     }
 
+    static showImportSDLTM(memory: string): void {
+        this.importSdltmWindow = new BrowserWindow({
+            parent: this.mainWindow,
+            width: 600,
+            height: 290,
+            minimizable: false,
+            maximizable: false,
+            resizable: false,
+            show: false,
+            icon: this.iconPath,
+            webPreferences: {
+                nodeIntegration: true,
+                contextIsolation: false
+            }
+        });
+        this.memoryParam = memory;
+        this.importSdltmWindow.setMenu(null);
+        let filePath: string = join(app.getAppPath(), 'html', Swordfish.currentPreferences.appLang, 'importSdltm.html');
+        let fileUrl: URL = new URL('file://' + filePath);
+        this.importSdltmWindow.loadURL(fileUrl.href);
+        this.importSdltmWindow.once('ready-to-show', () => {
+            this.importSdltmWindow.show();
+        });
+        this.importSdltmWindow.on('close', () => {
+            this.mainWindow.focus();
+        });
+        Swordfish.setLocation(this.importSdltmWindow, 'importSdltm.html');
+    }
+
     static showImportTMX(memory: string): void {
         this.importTmxWindow = new BrowserWindow({
             parent: this.mainWindow,
@@ -3050,8 +3231,31 @@ export class Swordfish {
         Swordfish.setLocation(this.importGlossaryWindow, 'importGlossary.html');
     }
 
+    static importSdltmFile(arg: any): void {
+        let sdltmFile: string = arg.sdltm;
+        let tmxFile: string = join(app.getPath('temp'), 'convertedTmx.tmx');
+        Swordfish.importSdltmWindow.close();
+        Swordfish.mainWindow.webContents.send('start-waiting');
+        Swordfish.mainWindow.webContents.send('set-status', 'Converting SDLTM File');
+        new TMReader(sdltmFile, tmxFile, { 'productName': app.getName(), 'version': app.getVersion() }, (data: any) => {
+            if (data.status === 'Success') {
+                arg.tmx = tmxFile;
+                Swordfish.importTmxFile(arg);
+                return;
+            }
+            if (data.status === 'Error') {
+                console.error(data.reason);
+                Swordfish.mainWindow.webContents.send('end-waiting');
+                Swordfish.mainWindow.webContents.send('set-status', '');
+                Swordfish.showMessage({ type: 'error', message: data.reason });
+            }
+        });
+    }
+
     static importTmxFile(arg: any): void {
-        Swordfish.importTmxWindow.close();
+        if (Swordfish.importTmxWindow && !Swordfish.importTmxWindow.isDestroyed()) {
+            Swordfish.importTmxWindow.close();
+        }
         Swordfish.mainWindow.webContents.send('start-waiting');
         Swordfish.mainWindow.webContents.send('set-status', 'Importing TMX File');
         Swordfish.sendRequest('/memories/import', arg,
@@ -3073,6 +3277,13 @@ export class Swordfish {
                             Swordfish.mainWindow.webContents.send('set-status', '');
                             clearInterval(intervalObject);
                             Swordfish.showMessage({ type: 'info', message: 'Imported ' + Swordfish.currentStatus.imported + ' segments.' });
+                            if (arg.sdltm) {
+                                try {
+                                    unlinkSync(arg.tmx);
+                                } catch (error) {
+                                    console.error('Error deleting temporary TMX file: ' + error);
+                                }
+                            }
                             return;
                         }
                     }
@@ -3124,6 +3335,20 @@ export class Swordfish {
         }).then((value: OpenDialogReturnValue) => {
             if (!value.canceled) {
                 event.sender.send('set-tmx-file', value.filePaths[0]);
+            }
+        });
+    }
+
+    getSdltmFile(event: IpcMainEvent): void {
+        dialog.showOpenDialog({
+            properties: ['openFile'],
+            filters: [
+                { name: 'SDLTM File', extensions: ['sdltm'] },
+                { name: 'Any File', extensions: ['*'] }
+            ]
+        }).then((value: OpenDialogReturnValue) => {
+            if (!value.canceled) {
+                event.sender.send('set-sdltm-file', value.filePaths[0]);
             }
         });
     }
@@ -3772,6 +3997,8 @@ export class Swordfish {
                 case 'importGlossary': parent = Swordfish.importGlossaryWindow;
                     break;
                 case 'importTmx': parent = Swordfish.importTmxWindow;
+                    break;
+                case 'importSdltm': parent = Swordfish.importSdltmWindow;
                     break;
                 case 'importXliff': parent = Swordfish.importXliffWindow;
                     break;
@@ -5592,11 +5819,11 @@ export class Swordfish {
     }
 
     static fixTags(args: any): void {
-        if (!(Swordfish.currentPreferences.chatGpt.enabled || Swordfish.currentPreferences.anthropic.enabled)) {
+        if (!(Swordfish.currentPreferences.chatGpt.enabled || Swordfish.currentPreferences.anthropic.enabled || Swordfish.currentPreferences.mistral.enabled)) {
             Swordfish.showMessage({ type: 'error', message: 'No AI engine is currently enabled' });
             return;
         }
-        if (!(Swordfish.currentPreferences.chatGpt.fixTags || Swordfish.currentPreferences.anthropic.fixTags)) {
+        if (!(Swordfish.currentPreferences.chatGpt.fixTags || Swordfish.currentPreferences.anthropic.fixTags || Swordfish.currentPreferences.mistral.fixTags)) {
             Swordfish.showMessage({ type: 'error', message: 'No AI engine is currently configured to fix tags' });
             return;
         }
@@ -5638,7 +5865,7 @@ export class Swordfish {
     }
 
     static fixMatch(match: Match): void {
-        if (!(Swordfish.currentPreferences.chatGpt.enabled || Swordfish.currentPreferences.anthropic.enabled)) {
+        if (!(Swordfish.currentPreferences.chatGpt.enabled || Swordfish.currentPreferences.anthropic.enabled || Swordfish.currentPreferences.mistral.enabled)) {
             Swordfish.showMessage({ type: 'error', message: 'No AI engine is currently enabled' });
             return;
         }

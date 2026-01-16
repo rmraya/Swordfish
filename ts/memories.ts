@@ -15,7 +15,6 @@ import { Memory } from "./memory.js";
 
 export class MemoriesView {
 
-    
     container: HTMLDivElement;
     topBar: HTMLDivElement;
     tableContainer: HTMLDivElement;
@@ -71,6 +70,16 @@ export class MemoriesView {
             this.exportTMX();
         });
         this.topBar.appendChild(exportButton);
+
+        let importSdltm = document.createElement('a');
+        importSdltm.innerHTML = '<svg version="1.1" width="24" height="24" xmlns="http://www.w3.org/2000/svg" x="0px" y="0px" viewBox="0 0 24 24" style="enable-background:new 0 0 24 24;" xml:space="preserve"> <path d="M20.8,6.8V4.4c0-0.1,0.1-0.6-0.3-1c-0.3-0.4-0.7-0.5-0.8-0.5c-3.8,0-7.5,0-11.3,0C8.2,3,7.9,3.1,7.6,3.4 	C7.4,3.7,7.3,4,7.3,4.1c0,0.6,0,1.1-0.1,1.7h1.5V4.7c0,0,0-0.1,0.1-0.2C8.9,4.4,8.9,4.3,9,4.3c1.7,0,3.4,0,5,0c0,0.5,0,1,0,1.5 	c0.3,0,0.6,0,1,0.1c0.2,0,0.8,0.2,1.3,0.7c0.4,0.4,0.6,0.9,0.6,1.1c0,1.7,0,3,0,3.3c0,0.1,0,0.3-0.2,0.6c-0.1,0.1-0.2,0.3-0.2,0.3 	c0.1,0.1,0.2,0.2,0.3,0.4c0,0,0.1,0.1,0.1,0.3c0.1,0.3,0.1,1.6,0.1,3.4c0,0.1-0.1,0.4-0.2,0.6c-0.1,0.2-0.2,0.3-0.3,0.4 	c0.1,0.1,0.3,0.4,0.4,0.7c0.1,0.4,0.1,0.7,0.1,0.8h2.4c0.8,0,1.4-0.6,1.4-1.4v-2.4c0-0.8-0.6-1.4-1.4-1.4c0.8,0,1.4-0.6,1.4-1.4V9.6 	c0-0.8-0.6-1.4-1.4-1.4C20.1,8.2,20.8,7.6,20.8,6.8z"/> <path d="M16.2,10.6V8.2c0-0.8-0.6-1.4-1.4-1.4H4c-0.8,0-1.4,0.6-1.4,1.4v2.4C2.7,11.3,3.3,12,4,12c-0.8,0-1.4,0.6-1.4,1.4v2.4 	c0,0.8,0.6,1.4,1.4,1.4c-0.8,0-1.4,0.6-1.4,1.4V21c0,0.8,0.6,1.4,1.4,1.4h10.8c0.8,0,1.4-0.6,1.4-1.4v-2.4c0-0.8-0.6-1.4-1.4-1.4 	c0.8,0,1.4-0.6,1.4-1.4v-2.4c0-0.8-0.6-1.4-1.4-1.4C15.6,12,16.2,11.3,16.2,10.6z M9.4,20.9h-5c0,0-0.1,0-0.2-0.1 	c0-0.1-0.1-0.1-0.1-0.2c0-0.6,0-1.1,0-1.7c0,0,0-0.1,0-0.2c0,0,0.1-0.1,0.2-0.1c0.3,0,4.7,0,5,0V20.9z M9.4,15.7h-5 	c0,0-0.1,0-0.2-0.1c0-0.1-0.1-0.1-0.1-0.2c0-0.6,0-1.1,0-1.7c0,0,0-0.1,0-0.2c0,0,0.1-0.1,0.2-0.1c0.3,0,4.7,0,5,0V15.7z M9.4,10.5 	h-5c0,0-0.1,0-0.2-0.1c0-0.1-0.1-0.1-0.1-0.2c0-0.6,0-1.1,0-1.7c0,0,0-0.1,0-0.2c0,0,0.1-0.1,0.2-0.1c0.3,0,4.7,0,5,0V10.5z"/></svg>' +
+            '<span class="tooltiptext bottomTooltip">Import SDLTM File</span>';
+        importSdltm.className = 'tooltip bottomTooltip';
+        importSdltm.style.marginLeft = '10px';
+        importSdltm.addEventListener('click', () => {
+            this.importSDLTM();
+        });
+        this.topBar.appendChild(importSdltm);
 
         let concordanceButton = document.createElement('a');
         concordanceButton.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path d="M21.172 24l-7.387-7.387c-1.388.874-3.024 1.387-4.785 1.387-4.971 0-9-4.029-9-9s4.029-9 9-9 9 4.029 9 9c0 1.761-.514 3.398-1.387 4.785l7.387 7.387-2.828 2.828zm-12.172-8c3.859 0 7-3.14 7-7s-3.141-7-7-7-7 3.14-7 7 3.141 7 7 7z"/></svg>' +
@@ -316,6 +325,20 @@ export class MemoriesView {
         ipcRenderer.send('export-memories', memories);
     }
 
+    importSDLTM(): void {
+        if (this.selected.size === 0) {
+            ipcRenderer.send('show-message', { type: 'warning', message: 'Select memory' });
+            return;
+        }
+        if (this.selected.size > 1) {
+            ipcRenderer.send('show-message', { type: 'warning', message: 'Select one memory' });
+            return;
+        }
+        for (let key of this.selected.keys()) {
+            ipcRenderer.send('show-import-sdltm', key);
+        }
+    }
+
     displayMemories() {
         if (this.memoriesSortAscending) {
             (document.getElementById('memory-' + this.memoriesSortFielD) as HTMLTableCellElement).classList.add('arrow-up');
@@ -482,7 +505,7 @@ export class MemoriesView {
         for (let key of this.selected.keys()) {
             memories.push(key);
         }
-        ipcRenderer.send('concordance-search', memories );
+        ipcRenderer.send('concordance-search', memories);
     }
 
     browseRemoteTM(): void {

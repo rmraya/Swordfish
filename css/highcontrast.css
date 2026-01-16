@@ -344,13 +344,83 @@ input[type=number] {
 }
 
 input[type=radio] {
-	width: 1em;
-	height: 1em;
-	margin-top: 0.2em;
-	margin-bottom: 0.2em;
-	margin-left: 1em;
-	margin-right: 0;
-	padding: 0;
+	appearance: none;
+	-webkit-appearance: none;
+	width: 20px;
+	height: 20px;
+	border: none;
+	background-color: transparent;
+	background-repeat: no-repeat;
+	background-position: center;
+	background-size: auto;
+	/* unchecked: original radio.svg at native size */
+	background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' height='20px' viewBox='0 -960 960 960' width='20px' fill='%236DBBFF'><path d='M480.28-96Q401-96 331-126t-122.5-82.5Q156-261 126-330.96t-30-149.5Q96-560 126-629.5q30-69.5 82.5-122T330.96-834q69.96-30 149.5-30t149.04 30q69.5 30 122 82.5T834-629.28q30 69.73 30 149Q864-401 834-331t-82.5 122.5Q699-156 629.28-126q-69.73 30-149 30Zm-.28-72q130 0 221-91t91-221q0-130-91-221t-221-91q-130 0-221 91t-91 221q0 130 91 221t221 91Z'/></svg>");
+}
+input[type=radio]:checked {
+	appearance: none;
+	-webkit-appearance: none;
+	width: 20px;
+	height: 20px;
+	border: none;
+	background-color: transparent;
+	background-repeat: no-repeat;
+	background-position: center;
+	background-size: auto;
+	/* checked: original selectedradio.svg at native size */
+	background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' height='20px' viewBox='0 -960 960 960' width='20px' fill='%236DBBFF'><path d='M480.23-288Q560-288 616-344.23q56-56.22 56-136Q672-560 615.77-616q-56.22-56-136-56Q400-672 344-615.77q-56 56.22-56 136Q288-400 344.23-344q56.22 56 136 56Zm.05 192Q401-96 331-126t-122.5-82.5Q156-261 126-330.96t-30-149.5Q96-560 126-629.5q30-69.5 82.5-122T330.96-834q69.96-30 149.5-30t149.04 30q69.5 30 122 82.5T834-629.28q30 69.73 30 149Q864-401 834-331t-82.5 122.5Q699-156 629.28-126q-69.73 30-149 30Zm-.05-72q130 0 221-91t91-221q0-130-91-221t-221-91q-130 0-221 91t-91 221q0 130 91 221t221 91Z'/></svg>");
+}
+
+input[type=checkbox] {
+	appearance: none;
+	-webkit-appearance: none;
+	width: 20px;
+	height: 20px;
+	border: none;
+	background-color: transparent;
+	background-repeat: no-repeat;
+	background-position: center;
+	background-size: auto;
+	/* unchecked: original checkbox.svg at native size */
+	background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' height='20px' viewBox='0 -960 960 960' width='20px' fill='%236DBBFF'><path d='M216-144q-29.7 0-50.85-21.15Q144-186.3 144-216v-528q0-29.7 21.15-50.85Q186.3-816 216-816h528q29.7 0 50.85 21.15Q816-773.7 816-744v528q0 29.7-21.15 50.85Q773.7-144 744-144H216Zm0-72h528v-528H216v528Z'/></svg>");
+}
+input[type=checkbox]:checked {
+	appearance: none;
+	-webkit-appearance: none;
+	width: 20px;
+	height: 20px;
+	border: none;
+	background-color: transparent;
+	background-repeat: no-repeat;
+	background-position: center;
+	background-size: auto;
+	/* checked: original selectedbox.svg at native size */
+	background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' height='20px' viewBox='0 -960 960 960' width='20px' fill='%236DBBFF'><path d='m429-336 238-237-51-51-187 186-85-84-51 51 136 135ZM216-144q-29.7 0-50.85-21.15Q144-186.3 144-216v-528q0-29.7 21.15-50.85Q186.3-816 216-816h528q29.7 0 50.85 21.15Q816-773.7 816-744v528q0 29.7-21.15 50.85Q773.7-144 744-144H216Zm0-72h528v-528H216v528Zm0-528v528-528Z'/></svg>");
+}
+input[type=checkbox]:disabled {
+	appearance: none;
+	-webkit-appearance: none;
+	width: 20px;
+	height: 20px;
+	border: none;
+	background-color: transparent;
+	background-repeat: no-repeat;
+	background-position: center;
+	background-size: auto;
+	/* unchecked: original checkbox.svg at native size */
+	background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' height='20px' viewBox='0 -960 960 960' width='20px' fill='%235e5857'><path d='M216-144q-29.7 0-50.85-21.15Q144-186.3 144-216v-528q0-29.7 21.15-50.85Q186.3-816 216-816h528q29.7 0 50.85 21.15Q816-773.7 816-744v528q0 29.7-21.15 50.85Q773.7-144 744-144H216Zm0-72h528v-528H216v528Z'/></svg>");
+}
+input[type=checkbox]:disabled+label {
+	color: var(--gray130);
+}
+/* prevent general input:focus border from applying */
+input[type=checkbox]:focus {
+	outline: none;
+	border: none !important;
+}
+
+input[type=radio]:focus {
+	outline: none;
+	border: none !important;
 }
 
 select {

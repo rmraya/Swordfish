@@ -281,6 +281,11 @@ public class XliffUtils {
 			prop.setText(context[1]);
 			tu.addContent(prop);
 		}
+		Element meta = new Element("prop");
+		meta.setAttribute("type", "xliff-segment");
+		meta.setText(key);
+		tu.addContent(meta);
+
 		Element tuv = new Element("tuv");
 		tuv.setAttribute("xml:lang", srcLang);
 		tuv.setAttribute("creationdate", creationDate);

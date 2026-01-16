@@ -10,13 +10,13 @@
  *     Maxprograms - initial API and implementation
  *******************************************************************************/
 
-import { AnthropicTranslator, AzureTranslator, ChatGPTTranslator, DeepLTranslator, GoogleTranslator, MTEngine, MTMatch, MTUtils, ModernMTTranslator } from "mtengines";
+import { AnthropicTranslator, AzureTranslator, ChatGPTTranslator, DeepLTranslator, GoogleTranslator, MTEngine, MTMatch, MTUtils, MistralTranslator, ModernMTTranslator } from "mtengines";
 import { Language, LanguageUtils } from "typesbcp47";
 import { SAXParser, XMLElement } from "typesxml";
 import { MTContentHandler } from "./mtContentHandler.js";
+import { Preferences } from "./preferences.js";
 import { SegmentId } from "./segmentId.js";
 import { Swordfish } from "./Swordfish.js";
-import { Preferences } from "./preferences.js";
 
 type MTFailure = {
     engine: string;
@@ -83,6 +83,7 @@ export class MTManager {
             let chatGptTranslator: ChatGPTTranslator = new ChatGPTTranslator(preferences.chatGpt.apiKey, preferences.chatGpt.model);
             chatGptTranslator.setSourceLanguage(srcLang);
             chatGptTranslator.setTargetLanguage(tgtLang);
+            chatGptTranslator.setModel(preferences.chatGpt.model);
             this.mtEngines.push(chatGptTranslator);
             if (preferences.chatGpt.fixTags) {
                 this.tagFixer = chatGptTranslator;
@@ -92,6 +93,7 @@ export class MTManager {
             let anthropicTranslator: AnthropicTranslator = new AnthropicTranslator(preferences.anthropic.apiKey, preferences.anthropic.model);
             anthropicTranslator.setSourceLanguage(srcLang);
             anthropicTranslator.setTargetLanguage(tgtLang);
+            anthropicTranslator.setModel(preferences.anthropic.model);
             this.mtEngines.push(anthropicTranslator);
             if (preferences.anthropic.fixTags) {
                 this.tagFixer = anthropicTranslator;
@@ -102,6 +104,16 @@ export class MTManager {
             modernmtTranslator.setSourceLanguage(preferences.modernmt.srcLang);
             modernmtTranslator.setTargetLanguage(preferences.modernmt.tgtLang);
             this.mtEngines.push(modernmtTranslator);
+        }
+        if (preferences.mistral.enabled) {
+            let mistralTranslator: MistralTranslator = new MistralTranslator(preferences.mistral.apiKey);
+            mistralTranslator.setSourceLanguage(srcLang);
+            mistralTranslator.setTargetLanguage(tgtLang);
+            mistralTranslator.setModel(preferences.mistral.model);
+            this.mtEngines.push(mistralTranslator);
+            if (preferences.mistral.fixTags) {
+                this.tagFixer = mistralTranslator;
+            }
         }
     }
 

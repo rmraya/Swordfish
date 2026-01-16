@@ -11,7 +11,7 @@
  *******************************************************************************/
 
 import { ipcRenderer, IpcRendererEvent } from "electron";
-import { LanguageInterface } from "./language.js";
+import { Language } from "typesbcp47";
 
 export class ConcordanceSearch {
 
@@ -72,7 +72,7 @@ export class ConcordanceSearch {
     }
 
     setLanguages(arg: any): void {
-        let array: LanguageInterface[] = arg.languages;
+        let array: Language[] = arg.languages;
         let languageOptions: string = '<option value="none">Select Language</option>';
         for (let lang of array) {
             languageOptions = languageOptions + '<option value="' + lang.code + '">' + lang.description + '</option>';
