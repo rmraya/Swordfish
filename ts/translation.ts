@@ -198,6 +198,41 @@ export class TranslationView {
         this.verticalPanels = new ThreeVerticalPanels(this.mainArea);
         this.verticalPanels.setWeights([16, 64, 20]);
 
+        // Capture PageUp/PageDown for locked segments and navigate instead of scrolling
+        let keyNavHandler: (event: KeyboardEvent) => void = (event: KeyboardEvent) => {
+            if (!this.currentRow) {
+                return;
+            }
+            if (event.key === 'PageDown' || event.key === 'PageUp') {
+                let translateCell: HTMLTableCellElement = this.currentRow.getElementsByClassName('translate')[0] as HTMLTableCellElement;
+                let isLocked: boolean = translateCell && translateCell.innerHTML.includes(TranslationView.LOCK_FRAGMENT);
+                if (isLocked && !(event.ctrlKey || event.metaKey)) {
+                    event.preventDefault();
+                    if (event.key === 'PageDown') {
+                        this.gotoNext();
+                    } else {
+                        this.gotoPrevious();
+                    }
+                }
+            }
+        };
+        let keyNavObserver: MutationObserver = new MutationObserver((mutationsList) => {
+            for (let mutation of mutationsList) {
+                if (mutation.type === 'attributes' && mutation.attributeName === 'class') {
+                    let hidden: boolean = this.container.classList.contains('hidden');
+                    if (hidden) {
+                        document.removeEventListener('keydown', keyNavHandler, true);
+                    } else {
+                        document.addEventListener('keydown', keyNavHandler, true);
+                    }
+                }
+            }
+        });
+        keyNavObserver.observe(this.container, { attributes: true, childList: false, subtree: false });
+        if (!this.container.classList.contains('hidden')) {
+            document.addEventListener('keydown', keyNavHandler, true);
+        }
+
         this.filesPanel = this.verticalPanels.leftPanel();
         this.filesPanel.style.height = '100%';
 
