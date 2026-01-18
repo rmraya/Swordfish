@@ -16,7 +16,7 @@ import { ChildProcessWithoutNullStreams, execFileSync, spawn } from "node:child_
 import { appendFileSync, existsSync, lstatSync, mkdirSync, readFileSync, readdirSync, rmSync, unlinkSync, writeFileSync } from "node:fs";
 import { userInfo } from "node:os";
 import { join } from "node:path";
-import { TMReader } from "sdltm";
+import { TMReader, TMReaderResult } from "sdltm";
 import { LanguageUtils } from "typesbcp47";
 import { XMLElement } from "typesxml";
 import { Locations, Point } from "./locations.js";
