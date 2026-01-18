@@ -26,7 +26,7 @@
     },
     "dependencies": {
         "mtengines": "^4.3.0",
-        "sdltm": "^1.9.0",
+        "sdltm": "^2.0.0",
         "typesbcp47": "^1.17.0",
         "typesxml": "^1.17.0"
     }

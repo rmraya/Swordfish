@@ -243,8 +243,8 @@ export class Swordfish {
             });
             Swordfish.mainWindow.once('ready-to-show', () => {
                 Swordfish.mainWindow.setBounds(Swordfish.currentDefaults);
-                            Swordfish.mainWindow.show();
-                            Swordfish.startup();
+                Swordfish.mainWindow.show();
+                Swordfish.startup();
             });
         });
 
@@ -3237,18 +3237,21 @@ export class Swordfish {
         Swordfish.importSdltmWindow.close();
         Swordfish.mainWindow.webContents.send('start-waiting');
         Swordfish.mainWindow.webContents.send('set-status', 'Converting SDLTM File');
-        new TMReader(sdltmFile, tmxFile, { 'productName': app.getName(), 'version': app.getVersion() }, (data: any) => {
-            if (data.status === 'Success') {
+        const reader: TMReader = new TMReader({ 'productName': app.getName(), 'version': app.getVersion() });
+        reader.convert(sdltmFile, tmxFile).then((result: TMReaderResult) => {
+            Swordfish.mainWindow.webContents.send('end-waiting');
+            Swordfish.mainWindow.webContents.send('set-status', '');
+            if (result.status === 'Success') {
                 arg.tmx = tmxFile;
                 Swordfish.importTmxFile(arg);
-                return;
+            } else {
+                Swordfish.showMessage({ type: 'error', message: 'Error converting SDLTM file to TMX' });
             }
-            if (data.status === 'Error') {
-                console.error(data.reason);
-                Swordfish.mainWindow.webContents.send('end-waiting');
-                Swordfish.mainWindow.webContents.send('set-status', '');
-                Swordfish.showMessage({ type: 'error', message: data.reason });
-            }
+        }).catch((reason: any) => {
+            console.error(reason);
+            Swordfish.mainWindow.webContents.send('end-waiting');
+            Swordfish.mainWindow.webContents.send('set-status', '');
+            Swordfish.showMessage({ type: 'error', message: reason });
         });
     }
 
