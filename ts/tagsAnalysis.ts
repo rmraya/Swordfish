@@ -12,7 +12,7 @@
 
 import { ipcRenderer, IpcRendererEvent } from "electron";
 
-class TagAnalysis {
+export class TagAnalysis {
 
     constructor() {
         ipcRenderer.send('get-theme');
