@@ -103,6 +103,7 @@ export class Swordfish {
         caseSensitiveSearches: false,
         caseSensitiveMatches: true,
         autoConfirm: false,
+        matchThreshold: 60,
         google: {
             enabled: false,
             apiKey: '',
@@ -1199,10 +1200,10 @@ export class Swordfish {
             { label: 'New Project', accelerator: 'CmdOrCtrl+N', click: () => { Swordfish.showAddProject(); } },
             { label: 'Edit Project', click: () => { Swordfish.editProject(); } },
             { label: 'Translate Projects', click: () => { Swordfish.translateProjects(); } },
-            { label: 'Export Translations', accelerator: 'CmdOrCtrl+Alt+S', click: () => { Swordfish.mainWindow.webContents.send('export-translations'); } },
+            { label: 'Export Translations/Reviews', accelerator: 'CmdOrCtrl+Alt+S', click: () => { Swordfish.mainWindow.webContents.send('export-translations'); } },
             { label: 'Export Translations as TMX File', click: () => { Swordfish.mainWindow.webContents.send('export-translations-tmx'); } },
             new MenuItem({ type: 'separator' }),
-            { label: 'Export XLIFF File for review', click: () => { Swordfish.mainWindow.webContents.send('export-xliff-review'); } },
+            { label: 'Export XLIFF File for Review', click: () => { Swordfish.mainWindow.webContents.send('export-xliff-review'); } },
             { label: 'Import Reviewed XLIFF File', click: () => { Swordfish.importReviewedXLIFF() } },
             new MenuItem({ type: 'separator' }),
             { label: 'Export All Memory Matches as TMX', click: () => { Swordfish.mainWindow.webContents.send('export-matches'); } },
@@ -1587,46 +1588,57 @@ export class Swordfish {
             try {
                 let data: Buffer = readFileSync(preferencesFile);
                 let json: Preferences = JSON.parse(data.toString());
+                let needsSaving: boolean = false;
                 if (!json.hasOwnProperty('chatGpt')) {
                     json.chatGpt = { enabled: false, apiKey: '', model: 'o1-mini', fixTags: false };
+                    needsSaving = true;
                 }
                 if (!json.chatGpt.hasOwnProperty('fixTags')) {
                     json.chatGpt.fixTags = false;
+                    needsSaving = true;
                 }
                 if (!json.hasOwnProperty('anthropic')) {
                     json.anthropic = { enabled: false, apiKey: '', model: 'claude-3-5-sonnet-latest', fixTags: false };
+                    needsSaving = true;
                 }
                 if (!json.hasOwnProperty('caseSensitiveMatches')) {
                     json.caseSensitiveMatches = true;
+                    needsSaving = true;
                 }
                 if (!json.hasOwnProperty('modernmt')) {
-                    json.modernmt = {
-                        enabled: false,
-                        apiKey: '',
-                        srcLang: 'none',
-                        tgtLang: 'none'
-                    }
+                    json.modernmt = { enabled: false, apiKey: '', srcLang: 'none', tgtLang: 'none' }
+                    needsSaving = true;
                 }
                 if (!json.hasOwnProperty('pageRows')) {
                     json.pageRows = 500;
+                    needsSaving = true;
                 }
                 if (!json.hasOwnProperty('autoConfirm')) {
                     json.autoConfirm = false;
+                    needsSaving = true;
                 }
                 if (!json.hasOwnProperty('userName')) {
                     json.userName = userInfo().username;
+                    needsSaving = true;
                 }
                 if (!json.hasOwnProperty('reviewModel')) {
                     json.reviewModel = join(app.getAppPath(), 'review', 'default.json');
+                    needsSaving = true;
                 }
                 if (!json.hasOwnProperty('mistral')) {
                     json.mistral = { enabled: false, apiKey: '', model: 'mistral-medium', fixTags: false };
+                    needsSaving = true;
                 }
                 if (!json.hasOwnProperty('appLang')) {
                     json.appLang = 'en';
+                    needsSaving = true;
+                }
+                if (!json.hasOwnProperty('matchThreshold')) {
+                    json.matchThreshold = 60;
+                    needsSaving = true;
                 }
                 Swordfish.currentPreferences = json;
-                if (!Swordfish.currentPreferences.projectsFolder || !existsSync(Swordfish.currentPreferences.projectsFolder)) {
+                if (!Swordfish.currentPreferences.projectsFolder || !existsSync(Swordfish.currentPreferences.projectsFolder) || needsSaving) {
                     Swordfish.currentPreferences.projectsFolder = join(app.getPath('appData'), app.name, 'projects');
                     writeFileSync(join(app.getPath('appData'), app.name, 'preferences.json'), JSON.stringify(Swordfish.currentPreferences, null, 2));
                 }

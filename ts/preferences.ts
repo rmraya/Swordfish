@@ -29,6 +29,7 @@ export interface Preferences {
     caseSensitiveSearches: boolean;
     caseSensitiveMatches: boolean;
     autoConfirm: boolean;
+    matchThreshold: number;
     google: {
         enabled: boolean;
         apiKey: string;

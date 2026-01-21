@@ -74,13 +74,23 @@ public class SqliteDatabase implements ITmEngine {
     private String currCustomer;
     private FileOutputStream output;
     private String creationId;
+    private int matchThreshold;
 
     private TMXReader reader;
 
     public SqliteDatabase(String dbname, String workFolder) throws IOException, SQLException {
         this.dbname = dbname;
         JSONObject json = TmsServer.getPreferences();
-        creationId = json.getString("userName");
+        if (json.has("userName")) {
+            creationId = json.getString("userName");
+        } else {
+            creationId = System.getProperty("user.name");
+        }
+        if (json.has("matchThreshold")) {
+            matchThreshold = json.getInt("matchThreshold");
+        } else {
+            matchThreshold = 60;
+        }
         File wfolder = new File(workFolder);
         databaseFolder = new File(wfolder, dbname);
         if (!databaseFolder.exists()) {
@@ -155,7 +165,8 @@ public class SqliteDatabase implements ITmEngine {
         boolean caseSensitiveMatches = params.getBoolean("caseSensitiveMatches");
         for (int i = 0; i < segments.length(); i++) {
             JSONObject json = segments.getJSONObject(i);
-            List<Match> matches = searchTranslation(json.getString("pure"), srcLang, tgtLang, 60, caseSensitiveMatches);
+            List<Match> matches = searchTranslation(json.getString("pure"), srcLang, tgtLang, matchThreshold,
+                    caseSensitiveMatches);
             JSONArray array = new JSONArray();
             for (int j = 0; j < matches.size(); j++) {
                 array.put(matches.get(j).toJSON());

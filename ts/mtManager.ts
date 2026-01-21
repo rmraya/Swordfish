@@ -242,7 +242,17 @@ export class MTManager {
 
         let hadFailures: boolean = this.translationFailures.length > 0;
         if (hadFailures) {
-            this.notifyFailures(this.translationFailures);
+            // Count segments where all engines failed
+            let allEnginesFailedCount: number = this.translationFailures.filter(
+                (failure: MTFailure) => failure.engine === "All Engines Failed"
+            ).length;
+            
+            let userMessage: string = '';
+            if (allEnginesFailedCount > 0) {
+                userMessage = allEnginesFailedCount + " segment" + (allEnginesFailedCount === 1 ? " was" : "s were") + " not translated due to errors.";
+            }
+            
+            this.notifyFailures(this.translationFailures, userMessage);
         }
         this.resetFailures();
         this.currentProject = '';
@@ -255,10 +265,12 @@ export class MTManager {
             let matchPromises: Promise<MTMatch>[] = this.mtEngines.map((mtEngine: MTEngine) => this.getMatchForEngine(mtEngine, source, terms));
             let results = await Promise.allSettled(matchPromises);
             let translations: MTMatch[] = [];
+            let engineCount: number = 0;
             for (let i = 0; i < results.length; i++) {
                 let result = results[i];
                 let engine = this.mtEngines[i];
                 let engineName = this.getEngineName(engine);
+                engineCount++;
                 if (result.status === "fulfilled") {
                     translations.push(result.value);
                 } else {
@@ -274,12 +286,11 @@ export class MTManager {
                     srcLang: this.srcLang,
                     tgtLang: this.tgtLang,
                     translations: translations,
-                    currentSegment: {
-                        file: file,
-                        unit: unit,
-                        id: segment
-                    }
+                    currentSegment: this.currentSegment
                 });
+            } else if (engineCount > 0) {
+                // All engines failed for this segment - record as failure
+                this.recordFailure("All Engines Failed", segmentId, new Error("All translation engines failed for this segment"), project);
             }
         } catch (error: unknown) {
             this.recordFailure("translateElement", segmentId, error, project);

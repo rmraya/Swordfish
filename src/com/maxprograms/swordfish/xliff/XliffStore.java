@@ -140,6 +140,7 @@ public class XliffStore {
 	private static boolean caseSensitiveTermSearches;
 	private static boolean caseSensitiveMatches;
 	private static boolean autoConfirm;
+	private static int matchThreshold;
 
 	private int index;
 	private int nextId;
@@ -924,8 +925,8 @@ public class XliffStore {
 						queryBuilder.append(" AND targetText LIKE '%");
 					}
 				}
-				queryBuilder.append(escape(filterText));
-				queryBuilder.append(caseSensitiveFilter ? "*'" : "%'");
+				queryBuilder.append(caseSensitiveFilter ? escapeGlob(filterText) : escapeLike(filterText));
+				queryBuilder.append(caseSensitiveFilter ? "*'" : "%' ESCAPE '\\'");
 			}
 		}
 		if (restrictByState) {
@@ -1443,6 +1444,11 @@ public class XliffStore {
 			autoConfirm = false;
 		}
 		catalog = json.getString("catalog");
+		if (json.has("matchThreshold")) {
+			matchThreshold = json.getInt("matchThreshold");
+		} else {
+			matchThreshold = 60;
+		}
 	}
 
 	public synchronized JSONObject saveSegment(JSONObject json)
@@ -3220,7 +3226,7 @@ public class XliffStore {
 		String memory = json.getString("memory");
 		MemoriesHandler.open(memory);
 		ITmEngine tmEngine = MemoriesHandler.getEngine(memory);
-		List<Match> tmMatches = tmEngine.searchTranslation(pure, srcLang, tgtLang, 60, false);
+		List<Match> tmMatches = tmEngine.searchTranslation(pure, srcLang, tgtLang, matchThreshold, false);
 		MemoriesHandler.close(memory);
 
 		String glossary = json.getString("glossary");
@@ -3259,7 +3265,7 @@ public class XliffStore {
 				String segment = rs.getString(3);
 				String pure = rs.getString(4);
 				try {
-					List<Match> tmMatches = tmEngine.searchTranslation(pure, srcLang, tgtLang, 60, false);
+					List<Match> tmMatches = tmEngine.searchTranslation(pure, srcLang, tgtLang, matchThreshold, false);
 					Match match = MatchAssembler.assembleMatch(pure, tmMatches, glossEngine, srcLang, tgtLang);
 					if (match != null) {
 						Element matchSource = match.getSource();
@@ -3307,7 +3313,7 @@ public class XliffStore {
 		String memoryName = MemoriesHandler.getName(memory);
 		MemoriesHandler.open(memory);
 		ITmEngine engine = MemoriesHandler.getEngine(memory);
-		List<Match> matches = engine.searchTranslation(pure, srcLang, tgtLang, 60, caseSensitiveMatches);
+		List<Match> matches = engine.searchTranslation(pure, srcLang, tgtLang, matchThreshold, caseSensitiveMatches);
 		for (int i = 0; i < matches.size(); i++) {
 			Match m = matches.get(i);
 			XliffUtils.setTags(new JSONObject());
@@ -4332,8 +4338,8 @@ public class XliffStore {
 			queryBuilder.append("' ");
 		} else {
 			queryBuilder.append(caseSensitive ? "targetText GLOB '*" : "targetText LIKE '%");
-			queryBuilder.append(escape(searchText));
-			queryBuilder.append(caseSensitive ? "*'" : "%'");
+			queryBuilder.append(caseSensitive ? escapeGlob(searchText) : escapeLike(searchText));
+			queryBuilder.append(caseSensitive ? "*'" : "%' ESCAPE '\\'");
 		}
 		queryBuilder.append(" AND translate='Y';");
 		try (ResultSet rs = stmt.executeQuery(queryBuilder.toString())) {
@@ -4351,8 +4357,16 @@ public class XliffStore {
 		}
 	}
 
-	private String escape(String string) {
-		return string.replace("'", "''").replace("%", "\\%").replace("_", "\\_");
+	private String escapeLike(String string) {
+		return string.replace("'", "''").replace("\\", "\\\\").replace("%", "\\%").replace("_", "\\_");
+	}
+
+	private String escapeGlob(String string) {
+		return string.replace("'", "''")
+				.replace("[", "[[]")
+				.replace("]", "[]]")
+				.replace("*", "[*]")
+				.replace("?", "[?]");
 	}
 
 	private Element replaceText(Element target, String searchText, String replaceText, boolean isRegExp) {
@@ -5176,7 +5190,8 @@ public class XliffStore {
 									+ XliffUtils.highlightSpaces(
 											removeSvg(addHtmlTags(source, "", false, false, tagsData, segPreserve)))
 									+ "</td>\n");
-					writeString(out, "<td class=\"center\"> " + (bestMatch > 0 ? bestMatch + "%" : "&nbsp;")  + "</td>\n");
+					writeString(out,
+							"<td class=\"center\"> " + (bestMatch > 0 ? bestMatch + "%" : "&nbsp;") + "</td>\n");
 					writeString(out, "<td class=\"center " + border + "\"> " + box + "</td>\n");
 					writeString(out,
 							"<td class=\"text " + space + "\"" + targetDir + ">"

@@ -751,8 +751,33 @@ export class ProjectsView {
 
             td = document.createElement('td');
             td.classList.add('list');
-            if (p.description.length > maxChars && (p.description.indexOf('/') != -1 || p.description.indexOf('\\') != -1)) {
-                td.innerText = p.description.substring(0, 30) + ' ... ' + p.description.substring(p.description.length - maxChars);
+            if (p.description.length > maxChars) {
+                const ellipsis = '...';
+                const lastSlash = Math.max(p.description.lastIndexOf('/'), p.description.lastIndexOf('\\'));
+                if (lastSlash > 0) {
+                    // It's a path - try to keep the filename intact
+                    const separator = p.description.charAt(lastSlash);
+                    const filename = p.description.substring(lastSlash + 1);
+                    const pathStart = p.description.substring(0, Math.min(20, lastSlash));
+
+                    if (pathStart.length + ellipsis.length + separator.length + filename.length <= maxChars) {
+                        td.innerText = pathStart + ellipsis + separator + filename;
+                    } else {
+                        // Filename is too long, truncate it too
+                        const availableChars = maxChars - ellipsis.length;
+                        const startChars = Math.floor(availableChars * 0.3);
+                        const endChars = availableChars - startChars;
+                        td.innerText = p.description.substring(0, startChars) + ellipsis +
+                            p.description.substring(p.description.length - endChars);
+                    }
+                } else {
+                    // Not a path, regular truncation
+                    const availableChars = maxChars - ellipsis.length;
+                    const startChars = Math.floor(availableChars * 0.4);
+                    const endChars = availableChars - startChars;
+                    td.innerText = p.description.substring(0, startChars) + ellipsis +
+                        p.description.substring(p.description.length - endChars);
+                }
                 td.title = p.description;
             } else {
                 td.innerText = p.description;

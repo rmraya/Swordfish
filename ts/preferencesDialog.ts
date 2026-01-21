@@ -27,6 +27,7 @@ export class PreferencesDialog {
     themeColor: HTMLSelectElement = document.createElement('select');
     zoomFactor: HTMLSelectElement = document.createElement('select');
     userNameInput: HTMLInputElement = document.createElement('input');
+    matchThreshold: HTMLInputElement = document.createElement('input');
 
     projectFolder: HTMLInputElement = document.createElement('input');
     memoriesFolder: HTMLInputElement = document.createElement('input');
@@ -234,6 +235,7 @@ export class PreferencesDialog {
         this.caseSensitiveTermSearches.checked = preferences.caseSensitiveSearches;
         this.caseSensitiveMatches.checked = preferences.caseSensitiveMatches;
         this.autoConfirm.checked = preferences.autoConfirm;
+        this.matchThreshold.value = preferences.matchThreshold.toString();
 
         this.enableGoogle.checked = preferences.google.enabled;
         this.googleKey.value = preferences.google.apiKey;
@@ -344,6 +346,10 @@ export class PreferencesDialog {
     }
 
     savePreferences(): void {
+        if (this.matchThreshold.valueAsNumber < 0 || this.matchThreshold.valueAsNumber > 100) {
+            ipcRenderer.send('show-message', { type: 'warning', message: 'Set a match threshold between 0 and 100', parent: 'preferences' });
+            return;
+        }
         if (this.pageRows.valueAsNumber < 100 || this.pageRows.valueAsNumber > 2000) {
             ipcRenderer.send('show-message', { type: 'warning', message: 'Set a number of rows per page between 100 and 2000', parent: 'preferences' });
             return;
@@ -421,6 +427,7 @@ export class PreferencesDialog {
             caseSensitiveSearches: this.caseSensitiveTermSearches.checked,
             caseSensitiveMatches: this.caseSensitiveMatches.checked,
             autoConfirm: this.autoConfirm.checked,
+            matchThreshold: this.matchThreshold.valueAsNumber,
             google: {
                 enabled: this.enableGoogle.checked,
                 apiKey: this.googleKey.value,
@@ -532,6 +539,33 @@ export class PreferencesDialog {
         this.tgtLangSelect.classList.add('table_select');
         this.tgtLangSelect.id = 'tgtLangSelect';
         td.appendChild(this.tgtLangSelect);
+
+        tr = document.createElement('tr');
+        langsTable.appendChild(tr);
+
+        td = document.createElement('td');
+        td.classList.add('middle');
+        td.classList.add('noWrap');
+        tr.appendChild(td);
+
+        let matchThresholdLabel: HTMLLabelElement = document.createElement('label');
+        matchThresholdLabel.setAttribute('for', 'matchThreshold');
+        matchThresholdLabel.innerText = 'Match Threshold (%)';
+        td.appendChild(matchThresholdLabel);
+
+        td = document.createElement('td');
+        td.classList.add('middle');
+        td.classList.add('noWrap');
+        tr.appendChild(td);
+
+        this.matchThreshold = document.createElement('input');
+        this.matchThreshold.id = 'matchThreshold';
+        this.matchThreshold.type = 'number';
+        this.matchThreshold.min = '0';
+        this.matchThreshold.max = '100';
+        this.matchThreshold.step = '1';
+        this.matchThreshold.style.width = '48px';
+        td.appendChild(this.matchThreshold);
 
         tr = document.createElement('tr');
         langsTable.appendChild(tr);
