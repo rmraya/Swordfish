@@ -31,5 +31,6 @@
     <system systemId="http://www.imsglobal.org/xsd/imsqti_metadata_v2p2" uri="imsqti_metadata_v2p2.xsd" />
     <system systemId="http://www.imsglobal.org/xsd/qti/qtiv2p2/imsqti_metadata_v2p2.xsd" uri="imsqti_metadata_v2p2.xsd" />
     <system systemId="http://www.imsglobal.org/xsd/qti/qtiv2p2/qtiv2p2_csm_v2p2.xsd" uri="qtiv2p2_csm_v2p2.xsd" />
+    <system systemId="http://www.imsglobal.org/xsd/qti/qtiv2p2/imsqti_v2p2p1.xsd" uri="imsqti_v2p2p1.xsd" />
 
 </catalog>

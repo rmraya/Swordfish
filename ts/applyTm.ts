@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007 - 2025 Maxprograms.
+ * Copyright (c) 2007-2026 Maxprograms.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 1.0
@@ -10,9 +10,9 @@
  *     Maxprograms - initial API and implementation
  *******************************************************************************/
 
-class ApplyTM {
+import { ipcRenderer, IpcRendererEvent } from "electron";
 
-    electron = require('electron');
+export class ApplyTM {
 
     memSelect: HTMLSelectElement;
     penalty: HTMLInputElement;
@@ -23,28 +23,28 @@ class ApplyTM {
         this.penalty = document.getElementById('penalty') as HTMLInputElement;
         this.penalty.value = '0';
 
-        this.electron.ipcRenderer.send('get-theme');
-        this.electron.ipcRenderer.send('get-version');
-        this.electron.ipcRenderer.on('set-theme', (event: Electron.IpcRendererEvent, theme: string) => {
+        ipcRenderer.send('get-theme');
+        ipcRenderer.send('get-version');
+        ipcRenderer.on('set-theme', (event: IpcRendererEvent, theme: string) => {
             (document.getElementById('theme') as HTMLLinkElement).href = theme;
         });
         document.addEventListener('keydown', (event: KeyboardEvent) => {
             if (event.code === 'Escape') {
-                this.electron.ipcRenderer.send('close-apply-tm');
+                ipcRenderer.send('close-apply-tm');
             }
             if (event.code === 'Enter' || event.code === 'NumpadEnter') {
                 this.applyTM();
             }
         });
-        this.electron.ipcRenderer.send('get-memories');
-        this.electron.ipcRenderer.on('set-memories', (event: Electron.IpcRendererEvent, arg: any) => {
+        ipcRenderer.send('get-memories');
+        ipcRenderer.on('set-memories', (event: IpcRendererEvent, arg: any) => {
             this.setMemories(arg);
         });
-        this.electron.ipcRenderer.on('set-memory', (event: Electron.IpcRendererEvent, memory: string) => {
+        ipcRenderer.on('set-memory', (event: IpcRendererEvent, memory: string) => {
             this.memSelect.value = memory;
         });
-        this.electron.ipcRenderer.send('get-project-param');
-        this.electron.ipcRenderer.on('set-project', (event: Electron.IpcRendererEvent, project: string) => {
+        ipcRenderer.send('get-project-param');
+        ipcRenderer.on('set-project', (event: IpcRendererEvent, project: string) => {
             this.project = project;
         });
         this.penalty.addEventListener('keydown', (event: KeyboardEvent) => {
@@ -57,14 +57,14 @@ class ApplyTM {
             this.applyTM();
         });
         setTimeout(() => {
-            this.electron.ipcRenderer.send('set-height', { window: 'applyTm', width: document.body.clientWidth, height: document.body.clientHeight });
+            ipcRenderer.send('set-height', { window: 'applyTm', width: document.body.clientWidth, height: document.body.clientHeight });
         }, 200);
     }
 
     applyTM(): void {
         let mem: string = this.memSelect.value;
         if (mem === 'none') {
-            this.electron.ipcRenderer.send('show-message', { type: 'warning', message: 'Select memory', parent: 'applyTm' });
+            ipcRenderer.send('show-message', { type: 'warning', message: 'Select memory', parent: 'applyTm' });
             return;
         }
         if (this.penalty.value.length === 0) {
@@ -72,7 +72,7 @@ class ApplyTM {
         }
         let penalization: number = Number.parseInt(this.penalty.value);
         if (penalization > 59) {
-            this.electron.ipcRenderer.send('show-message', { type: 'warning', message: 'Penalization must be less than 60%', parent: 'applyTm' });
+            ipcRenderer.send('show-message', { type: 'warning', message: 'Penalization must be less than 60%', parent: 'applyTm' });
             return;
         }
         let params: any = {
@@ -80,7 +80,7 @@ class ApplyTM {
             memory: mem,
             penalization: penalization
         }
-        this.electron.ipcRenderer.send('search-memory-all', params);
+        ipcRenderer.send('search-memory-all', params);
     }
 
     setMemories(memories: any[]): void {
@@ -95,6 +95,6 @@ class ApplyTM {
         }
         this.memSelect.innerHTML = options;
         this.memSelect.value = 'none';
-        this.electron.ipcRenderer.send('get-memory-param');
+        ipcRenderer.send('get-memory-param');
     }
 }

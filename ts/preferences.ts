@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007 - 2025 Maxprograms.
+ * Copyright (c) 2007-2026 Maxprograms.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 1.0
@@ -10,22 +10,26 @@
  *     Maxprograms - initial API and implementation
  *******************************************************************************/
 
-interface Preferences {
+export interface Preferences {
     theme: string;
+    appLang: string;
     zoomFactor: string;
     srcLang: string;
     tgtLang: string;
     projectsFolder: string;
     memoriesFolder: string;
     glossariesFolder: string;
+    userName: string;
     catalog: string;
     srx: string;
+    reviewModel: string;
     paragraphSegmentation: boolean;
     acceptUnconfirmed: boolean;
     fuzzyTermSearches: boolean;
     caseSensitiveSearches: boolean;
     caseSensitiveMatches: boolean;
     autoConfirm: boolean;
+    matchThreshold: number;
     google: {
         enabled: boolean;
         apiKey: string;
@@ -61,6 +65,12 @@ interface Preferences {
         apiKey: string;
         srcLang: string;
         tgtLang: string;
+    };
+    mistral: {
+        enabled: boolean;
+        apiKey: string;
+        model: string;
+        fixTags: boolean;
     };
     spellchecker: {
         defaultEnglish: string;

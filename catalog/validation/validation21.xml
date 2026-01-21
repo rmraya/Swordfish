@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<catalog xmlns="urn:oasis:names:tc:entity:xmlns:xml:catalog">
+
+    <public publicId="-//OASIS//DTD XML Catalogs V1.1//EN" uri="../catalog/catalog.dtd" />
+    <system systemId="catalog.dtd" uri="../catalog/catalog.dtd" />
+    <uri name="urn:oasis:names:tc:entity:xmlns:xml:catalog" uri="../catalog/catalog.xsd" />
+    <system systemId="http://www.oasis-open.org/committees/entity/release/1.1/catalog.xsd"
+        uri="../catalog/catalog.xsd" />
+
+    <system systemId="http://www.w3.org/2001/xml.xsd" uri="../xml/xml.xsd" />
+    <system systemId="http://www.w3.org/XML/1998/namespace" uri="../xml/xml.xsd" />
+    <system systemId="http://www.w3.org/1999/XSL/Transform" uri="../xml/transform.xsd" />
+    <public publicId="-//W3C//DTD XMLSCHEMA 200102//EN" uri="../xml/XMLSchema.dtd" />
+    <public publicId="datatypes" uri="../xml/datatypes.dtd" />
+    <system systemId="http://www.w3.org/2001/XMLSchema-datatypes"
+        uri="../xml/XMLSchema-datatypes.xsd" />
+    <system systemId="http://www.w3.org/2001/XInclude" uri="../xinclude/xinclude.xsd" />
+    <system systemId="xinclude.mod" uri="../xinclude/xinclude.mod" />
+
+    <nextCatalog catalog="../xliff2.1/catalog.xml" />
+
+</catalog>

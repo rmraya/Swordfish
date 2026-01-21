@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007 - 2025 Maxprograms.
+ * Copyright (c) 2007-2026 Maxprograms.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 1.0
@@ -10,17 +10,17 @@
  *     Maxprograms - initial API and implementation
  *******************************************************************************/
 
-class FilterSegments {
+import { ipcRenderer, IpcRendererEvent } from "electron";
 
-    electron = require('electron');
+export class FilterSegments {
 
     constructor() {
-        this.electron.ipcRenderer.send('get-theme');
-        this.electron.ipcRenderer.on('set-theme', (event: Electron.IpcRendererEvent, theme: string) => {
+        ipcRenderer.send('get-theme');
+        ipcRenderer.on('set-theme', (event: IpcRendererEvent, theme: string) => {
             (document.getElementById('theme') as HTMLLinkElement).href = theme;
         });
-        this.electron.ipcRenderer.send('get-filter-params');
-        this.electron.ipcRenderer.on('set-params', (event: Electron.IpcRendererEvent, arg: any) => {
+        ipcRenderer.send('get-filter-params');
+        ipcRenderer.on('set-params', (event: IpcRendererEvent, arg: any) => {
             this.setParams(arg);
         });
         document.addEventListener('keydown', (event: KeyboardEvent) => {
@@ -47,16 +47,12 @@ class FilterSegments {
         });
         (document.getElementById('filterText') as HTMLInputElement).focus();
         setTimeout(() => {
-            this.electron.ipcRenderer.send('set-height', { window: 'filterSegments', width: document.body.clientWidth, height: document.body.clientHeight });
+            ipcRenderer.send('set-height', { window: 'filterSegments', width: document.body.clientWidth, height: document.body.clientHeight });
         }, 200);
     }
 
     filterSegments(): void {
         let filterText: string = (document.getElementById('filterText') as HTMLInputElement).value;
-        if (filterText === '') {
-            this.electron.ipcRenderer.send('show-message', { type: 'warning', message: 'Enter text to search', parent: 'filterSegments' });
-            return;
-        }
         let filterLanguage: string = 'source';
         if ((document.getElementById('target') as HTMLInputElement).checked) {
             filterLanguage = 'target';
@@ -64,8 +60,24 @@ class FilterSegments {
         let showUntranslated: boolean = (document.getElementById('showUntranslated') as HTMLInputElement).checked;
         let showTranslated: boolean = (document.getElementById('showTranslated') as HTMLInputElement).checked;
         let showConfirmed: boolean = (document.getElementById('showConfirmed') as HTMLInputElement).checked;
-        if (!(showUntranslated || showTranslated || showConfirmed)) {
-            this.electron.ipcRenderer.send('show-message', { type: 'warning', message: 'Select segments to display', parent: 'filterSegments' });
+        let showReviewed: boolean = (document.getElementById('showReviewed') as HTMLInputElement).checked;
+        let trimmedText: string = filterText.trim();
+        let anyDisplaySelected: boolean = showUntranslated || showTranslated || showConfirmed || showReviewed;
+        let allDisplaySelected: boolean = showUntranslated && showTranslated && showConfirmed && showReviewed;
+        if (trimmedText === '' && !anyDisplaySelected) {
+            ipcRenderer.send('show-message', {
+                type: 'warning',
+                message: 'Enter text to search or select at least one display option',
+                parent: 'filterSegments'
+            });
+            return;
+        }
+        if (trimmedText === '' && allDisplaySelected) {
+            ipcRenderer.send('show-message', {
+                type: 'warning',
+                message: 'Enter text to search or deselect one of the display options to filter segments',
+                parent: 'filterSegments'
+            });
             return;
         }
         let params: any = {
@@ -75,9 +87,10 @@ class FilterSegments {
             regExp: (document.getElementById('isRegExp') as HTMLInputElement).checked,
             showUntranslated: showUntranslated,
             showTranslated: showTranslated,
-            showConfirmed: showConfirmed
+            showConfirmed: showConfirmed,
+            showReviewed: showReviewed
         }
-        this.electron.ipcRenderer.send('filter-options', params);
+        ipcRenderer.send('filter-options', params);
     }
 
     clearFilter(): void {
@@ -88,12 +101,13 @@ class FilterSegments {
             regExp: false,
             showUntranslated: true,
             showTranslated: true,
-            showConfirmed: true
+            showConfirmed: true,
+            showReviewed: true
         }
-        this.electron.ipcRenderer.send('filter-options', params);
+        ipcRenderer.send('filter-options', params);
     }
 
-    setParams(arg: any) {
+    setParams(arg: any): void {
         (document.getElementById('filterText') as HTMLInputElement).value = arg.filterText;
         (document.getElementById('source') as HTMLInputElement).checked = (arg.filterLanguage === 'source');
         (document.getElementById('target') as HTMLInputElement).checked = (arg.filterLanguage === 'target');
@@ -108,5 +122,6 @@ class FilterSegments {
         (document.getElementById('showUntranslated') as HTMLInputElement).checked = arg.showUntranslated;
         (document.getElementById('showTranslated') as HTMLInputElement).checked = arg.showTranslated;
         (document.getElementById('showConfirmed') as HTMLInputElement).checked = arg.showConfirmed;
+        (document.getElementById('showReviewed') as HTMLInputElement).checked = arg.showReviewed;
     }
 }

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007 - 2025 Maxprograms.
+ * Copyright (c) 2007-2026 Maxprograms.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 1.0
@@ -10,20 +10,21 @@
  *     Maxprograms - initial API and implementation
  *******************************************************************************/
 
-class IatePlugin {
+import { ipcRenderer, IpcRendererEvent } from "electron";
 
-    electron = require('electron');
+export class IatePlugin {
+
     searchText: string = '';
     sourceLang: string = '';
     tgtLangs: string[] = [];
 
     constructor() {
-        this.electron.ipcRenderer.send('get-theme');
-        this.electron.ipcRenderer.on('set-theme', (event: Electron.IpcRendererEvent, theme: string) => {
+        ipcRenderer.send('get-theme');
+        ipcRenderer.on('set-theme', (event: IpcRendererEvent, theme: string) => {
             (document.getElementById('theme') as HTMLLinkElement).href = theme;
         });
-        this.electron.ipcRenderer.send('get-selection');
-        this.electron.ipcRenderer.on('set-selected-text', (event: Electron.IpcRendererEvent, arg: { selected: string, lang?: string, srcLang: string, tgtLang: string }) => {
+        ipcRenderer.send('get-selection');
+        ipcRenderer.on('set-selected-text', (event: IpcRendererEvent, arg: { selected: string, lang?: string, srcLang: string, tgtLang: string }) => {
             this.searchText = arg.selected;
             if (arg.lang && arg.lang === arg.tgtLang) {
                 let tmp: string = arg.srcLang;
@@ -84,7 +85,7 @@ class IatePlugin {
         });
         document.addEventListener('keydown', (event: KeyboardEvent) => {
             if (event.code === 'Escape') {
-                this.electron.ipcRenderer.send('close-iatePlugin');
+                ipcRenderer.send('close-iatePlugin');
             }
             if (event.code === 'Enter' || event.code === 'NumpadEnter') {
                 let iateFrame: HTMLIFrameElement = document.getElementById('iateFrame') as HTMLIFrameElement;
@@ -98,7 +99,7 @@ class IatePlugin {
             this.harvestLanguages();
             loadingDiv.style.display = 'flex';
             iateFrame.style.display = 'none';
-            iateFrame.src = './iate/basic_search.html';
+            iateFrame.src = '../iate/basic_search.html';
             iateFrame.style.height = '480px';
             this.setSize();
         });
@@ -106,7 +107,7 @@ class IatePlugin {
             this.harvestLanguages();
             loadingDiv.style.display = 'flex';
             iateFrame.style.display = 'none';
-            iateFrame.src = './iate/advanced_search.html';
+            iateFrame.src = '../iate/advanced_search.html';
             iateFrame.style.height = '600px';
             this.setSize();
         });
@@ -116,7 +117,7 @@ class IatePlugin {
             iateFrame.style.height = (window.innerHeight - toolbarHeight) + 'px';
         });
         setTimeout(() => {
-            iateFrame.src = './iate/basic_search.html';
+            iateFrame.src = '../iate/basic_search.html';
             iateFrame.style.height = '480px';
             this.setSize();
         }, 200);
@@ -124,7 +125,7 @@ class IatePlugin {
 
     setSize(): void {
         setTimeout(() => {
-            this.electron.ipcRenderer.send('set-height', { window: 'iatePlugin', width: document.body.clientWidth, height: document.body.clientHeight });
+            ipcRenderer.send('set-height', { window: 'iatePlugin', width: document.body.clientWidth, height: document.body.clientHeight });
         }, 200);
     }
 

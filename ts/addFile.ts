@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007 - 2025 Maxprograms.
+ * Copyright (c) 2007-2026 Maxprograms.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 1.0
@@ -10,9 +10,11 @@
  *     Maxprograms - initial API and implementation
  *******************************************************************************/
 
-class AddFile {
+import { ipcRenderer, IpcRendererEvent } from "electron";
+import { Language } from "typesbcp47";
+import { FileInfo } from "./fileInfo.js";
 
-    electron = require('electron');
+export class AddFile {
 
     selectedFile: string = '';
     homeFolder: string = '';
@@ -26,35 +28,35 @@ class AddFile {
         this.memSelect = document.getElementById('memorySelect') as HTMLSelectElement;
         this.glossSelect = document.getElementById('glossarySelect') as HTMLSelectElement;
 
-        this.electron.ipcRenderer.send('get-theme');
-        this.electron.ipcRenderer.on('set-theme', (event: Electron.IpcRendererEvent, theme: string) => {
+        ipcRenderer.send('get-theme');
+        ipcRenderer.on('set-theme', (event: IpcRendererEvent, theme: string) => {
             (document.getElementById('theme') as HTMLLinkElement).href = theme;
         });
-        this.electron.ipcRenderer.send('get-clients');
-        this.electron.ipcRenderer.on('set-clients', (event: Electron.IpcRendererEvent, clients: string[]) => {
+        ipcRenderer.send('get-clients');
+        ipcRenderer.on('set-clients', (event: IpcRendererEvent, clients: string[]) => {
             this.setClients(clients);
         });
-        this.electron.ipcRenderer.send('get-subjects');
-        this.electron.ipcRenderer.on('set-subjects', (event: Electron.IpcRendererEvent, subjects: string[]) => {
+        ipcRenderer.send('get-subjects');
+        ipcRenderer.on('set-subjects', (event: IpcRendererEvent, subjects: string[]) => {
             this.setSubjects(subjects);
         });
-        this.electron.ipcRenderer.send('get-languages');
-        this.electron.ipcRenderer.on('set-languages', (event: Electron.IpcRendererEvent, arg: any) => {
+        ipcRenderer.send('get-languages');
+        ipcRenderer.on('set-languages', (event: IpcRendererEvent, arg: any) => {
             this.setLanguages(arg);
         });
-        this.electron.ipcRenderer.send('get-types');
-        this.electron.ipcRenderer.on('set-types', (event: Electron.IpcRendererEvent, arg: any) => {
+        ipcRenderer.send('get-types');
+        ipcRenderer.on('set-types', (event: IpcRendererEvent, arg: any) => {
             this.setTypes(arg);
         });
-        this.electron.ipcRenderer.on('set-charsets', (event: Electron.IpcRendererEvent, arg: any) => {
+        ipcRenderer.on('set-charsets', (event: IpcRendererEvent, arg: any) => {
             this.setCharsets(arg);
         });
-        this.electron.ipcRenderer.send('get-memories');
-        this.electron.ipcRenderer.on('set-memories', (event: Electron.IpcRendererEvent, arg: any) => {
+        ipcRenderer.send('get-memories');
+        ipcRenderer.on('set-memories', (event: IpcRendererEvent, arg: any) => {
             this.setMemories(arg);
         });
-        this.electron.ipcRenderer.send('get-glossaries');
-        this.electron.ipcRenderer.on('set-glossaries', (event: Electron.IpcRendererEvent, arg: any) => {
+        ipcRenderer.send('get-glossaries');
+        ipcRenderer.on('set-glossaries', (event: IpcRendererEvent, arg: any) => {
             this.setGlossaries(arg);
         });
         document.addEventListener('keydown', (event: KeyboardEvent) => {
@@ -62,21 +64,21 @@ class AddFile {
                 this.addProject();
             }
             if (event.code === 'Escape') {
-                this.electron.ipcRenderer.send('close-addFile');
+                ipcRenderer.send('close-addFile');
             }
         });
-        this.electron.ipcRenderer.on('add-source-files', (event: Electron.IpcRendererEvent, files: FileInfo[]) => {
+        ipcRenderer.on('add-source-files', (event: IpcRendererEvent, files: FileInfo[]) => {
             this.addFile(files[0]);
         });
         (document.getElementById('addProjectButton') as HTMLButtonElement).addEventListener('click', () => {
             this.addProject();
         });
-        this.electron.ipcRenderer.send('get-home');
-        this.electron.ipcRenderer.on('set-home', (event: Electron.IpcRendererEvent, arg: any) => {
+        ipcRenderer.send('get-home');
+        ipcRenderer.on('set-home', (event: IpcRendererEvent, arg: any) => {
             this.homeFolder = arg;
         });
         setTimeout(() => {
-            this.electron.ipcRenderer.send('set-height', { window: 'addFile', width: document.body.clientWidth, height: document.body.clientHeight });
+            ipcRenderer.send('set-height', { window: 'addFile', width: document.body.clientWidth, height: document.body.clientHeight });
         }, 200);
     }
 
@@ -99,7 +101,7 @@ class AddFile {
     }
 
     setLanguages(arg: any): void {
-        let array: LanguageInterface[] = arg.languages;
+        let array: Language[] = arg.languages;
         let languageOptions: string = '<option value="none">Select Language</option>';
         for (let lang of array) {
             languageOptions = languageOptions + '<option value="' + lang.code + '">' + lang.description + '</option>';
@@ -116,7 +118,7 @@ class AddFile {
             this.typesOption = this.typesOption + '<option value="' + format.code + '">' + format.description + '</option>';
         }
         (document.getElementById('typeSelect') as HTMLSelectElement).innerHTML = this.typesOption;
-        this.electron.ipcRenderer.send('get-charsets');
+        ipcRenderer.send('get-charsets');
     }
 
     setCharsets(arg: any): void {
@@ -126,7 +128,7 @@ class AddFile {
             this.charsetOptions = this.charsetOptions + '<option value="' + arg.charsets[i].code + '">' + arg.charsets[i].description + '</option>';
         }
         (document.getElementById('charsetSelect') as HTMLSelectElement).innerHTML = this.charsetOptions;
-        this.electron.ipcRenderer.send('get-selected-file');
+        ipcRenderer.send('get-selected-file');
     }
 
     addFile(file: FileInfo): void {
@@ -157,35 +159,35 @@ class AddFile {
         let client: string = (document.getElementById('clientInput') as HTMLInputElement).value;
         let srcLang: string = (document.getElementById('srcLangSelect') as HTMLSelectElement).value;
         if (srcLang === 'none') {
-            this.electron.ipcRenderer.send('show-message', { type: 'warning', message: 'Select source language', parent: 'addFile' });
+            ipcRenderer.send('show-message', { type: 'warning', message: 'Select source language', parent: 'addFile' });
             return;
         }
         let tgtLang: string = (document.getElementById('tgtLangSelect') as HTMLSelectElement).value;
         if (tgtLang === 'none') {
-            this.electron.ipcRenderer.send('show-message', { type: 'warning', message: 'Select target language', parent: 'addFile' });
+            ipcRenderer.send('show-message', { type: 'warning', message: 'Select target language', parent: 'addFile' });
             return;
         }
         let type: string = (document.getElementById('typeSelect') as HTMLSelectElement).value;
         if (type === 'none') {
-            this.electron.ipcRenderer.send('show-message', { type: 'warning', message: 'Select file type', parent: 'addFile' });
+            ipcRenderer.send('show-message', { type: 'warning', message: 'Select file type', parent: 'addFile' });
             return;
         }
         let charset: string = (document.getElementById('charsetSelect') as HTMLSelectElement).value;
         if (charset === 'none') {
-            this.electron.ipcRenderer.send('show-message', { type: 'warning', message: 'Select character set', parent: 'addFile' });
+            ipcRenderer.send('show-message', { type: 'warning', message: 'Select character set', parent: 'addFile' });
             return;
         }
 
         let memory: string = this.memSelect.value;
         let applyTM: boolean = (document.getElementById('applyTM') as HTMLInputElement).checked;
         if (applyTM && memory === 'none') {
-            this.electron.ipcRenderer.send('show-message', { type: 'warning', message: 'Select memory' });
+            ipcRenderer.send('show-message', { type: 'warning', message: 'Select memory' });
             return;
         }
         let glossary: string = this.glossSelect.value;
         let searchTerms: boolean = (document.getElementById('searchTerms') as HTMLInputElement).checked;
         if (searchTerms && glossary === 'none') {
-            this.electron.ipcRenderer.send('show-message', { type: 'warning', message: 'Select glossary' });
+            ipcRenderer.send('show-message', { type: 'warning', message: 'Select glossary' });
             return;
         }
 
@@ -203,7 +205,7 @@ class AddFile {
             searchTerms: searchTerms,
             from: 'addFile'
         }
-        this.electron.ipcRenderer.send('create-project', params);
+        ipcRenderer.send('create-project', params);
     }
 
     setMemories(memories: any[]): void {

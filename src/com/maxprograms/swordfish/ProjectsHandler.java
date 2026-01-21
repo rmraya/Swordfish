@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007 - 2025 Maxprograms.
+ * Copyright (c) 2007-2026 Maxprograms.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 1.0
@@ -24,6 +24,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.nio.file.StandardCopyOption;
 import java.sql.SQLException;
 import java.text.MessageFormat;
 import java.time.LocalDate;
@@ -58,6 +59,11 @@ import com.maxprograms.swordfish.xliff.XliffUtils;
 import com.maxprograms.xliff2.Resegmenter;
 import com.maxprograms.xliff2.ToXliff2;
 import com.maxprograms.xml.CatalogBuilder;
+import com.maxprograms.xml.Document;
+import com.maxprograms.xml.Element;
+import com.maxprograms.xml.Indenter;
+import com.maxprograms.xml.SAXBuilder;
+import com.maxprograms.xml.XMLOutputter;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 
@@ -220,6 +226,18 @@ public class ProjectsHandler implements HttpHandler {
 				response = mergeSegment(request);
 			} else if ("/projects/getNotes".equals(url)) {
 				response = getNotes(request);
+			} else if ("/projects/getMetadata".equals(url)) {
+				response = getMetadata(request);
+			} else if ("/projects/getCustomMetadata".equals(url)) {
+				response = getCustomMetadata(request);
+			} else if ("/projects/saveMetadata".equals(url)) {
+				response = saveMetadata(request);
+			} else if ("/projects/getFiles".equals(url)) {
+				response = getFiles(request);
+			} else if ("/projects/getFileStart".equals(url)) {
+				response = getFileStart(request);
+			} else if ("/projects/getSameSource".equals(url)) {
+				response = getSameSource(request);
 			} else if ("/projects/addNote".equals(url)) {
 				response = addNote(request);
 			} else if ("/projects/removeNote".equals(url)) {
@@ -507,7 +525,10 @@ public class ProjectsHandler implements HttpHandler {
 		try {
 			Thread.ofVirtual().start(() -> {
 				try {
-					projectStores.get(project).exportXliff(output);
+					XliffStore store = projectStores.get(project);
+					store.updateXliff();
+					Files.copy(new File(store.getXliff()).toPath(), new File(output).toPath(),
+							StandardCopyOption.REPLACE_EXISTING);
 					XliffUtils.removeSkeleton(output, project);
 					obj.put(Constants.PROGRESS, Constants.COMPLETED);
 					processes.put(id, obj);
@@ -776,12 +797,13 @@ public class ProjectsHandler implements HttpHandler {
 		boolean showUntranslated = json.getBoolean("showUntranslated");
 		boolean showTranslated = json.getBoolean("showTranslated");
 		boolean showConfirmed = json.getBoolean("showConfirmed");
+		boolean showReviewed = json.getBoolean("showReviewed");
 		String sortOption = json.getString("sortOption");
 		boolean sortDesc = json.getBoolean("sortDesc");
 		try {
 			List<JSONObject> list = store.getSegments(json.getInt("start"), json.getInt("count"), filterText,
 					filterLanguage, caseSensitiveFilter, regExp, showUntranslated, showTranslated, showConfirmed,
-					sortOption, sortDesc);
+					showReviewed, sortOption, sortDesc);
 			JSONArray array = new JSONArray();
 			Iterator<JSONObject> it = list.iterator();
 			while (it.hasNext()) {
@@ -888,7 +910,7 @@ public class ProjectsHandler implements HttpHandler {
 			boolean searchTerms = json.getBoolean("searchTerms");
 
 			Project p = new Project(id, description, Project.NEW, sourceLang, targetLang, json.getString("client"),
-					json.getString("subject"), memory, glossary, LocalDate.now());
+					json.getString("subject"), memory, glossary, LocalDate.now(), false);
 
 			File projectFolder = new File(getWorkFolder(), id);
 			Files.createDirectories(projectFolder.toPath());
@@ -900,60 +922,83 @@ public class ProjectsHandler implements HttpHandler {
 						JSONObject file = files.getJSONObject(i);
 						String fullName = file.getString("file");
 						String shortName = fullName.substring(filesRoot.length());
-						if (shortName.startsWith("/") || shortName.startsWith("\\")) {
-							shortName = shortName.substring(1);
-						}
 						SourceFile sf = new SourceFile(shortName, FileFormats.getFullName(file.getString("type")),
 								file.getString("encoding"));
 						sourceFiles.add(sf);
-
-						boolean paragraph = paragraphSegmentation;
-						boolean mustResegment = false;
-						if (!paragraphSegmentation) {
-							mustResegment = true;
-							paragraph = true;
-						}
-
-						File source = new File(fullName);
-						File xliff = new File(projectFolder, shortName + ".xlf");
-						if (!xliff.getParentFile().exists()) {
-							Files.createDirectories(xliff.getParentFile().toPath());
-						}
-						File skl = new File(projectFolder, shortName + ".skl");
-
-						Map<String, String> params = new HashMap<>();
-						params.put("source", source.getAbsolutePath());
-						params.put("xliff", xliff.getAbsolutePath());
-						params.put("skeleton", skl.getAbsolutePath());
-						params.put("format", sf.getType());
-						params.put("catalog", catalogFile);
-						params.put("srcEncoding", sf.getEncoding());
-						params.put("paragraph", paragraph ? "yes" : "no");
-						params.put("srxFile", srxFile);
-						params.put("srcLang", json.getString("srcLang"));
-						params.put("tgtLang", json.getString("tgtLang"));
-						params.put("xmlfilter", json.getString("xmlfilter"));
-
-						List<String> res = Convert.run(params);
-
-						if ("0".equals(res.get(0))) {
-							res = ToXliff2.run(xliff, catalogFile, "2.1");
-							if (mustResegment && "0".equals(res.get(0))) {
-								res = Resegmenter.run(xliff.getAbsolutePath(), srxFile, json.getString("srcLang"),
-										CatalogBuilder.getCatalog(catalogFile));
+						if (FileFormats.getFullName(file.getString("type")).equals(FileFormats.XLIFF)
+								&& XliffUtils.isSwordfishReview(file.getString("file"))) {
+							if (files.length() != 1) {
+								try {
+									TmsServer.deleteFolder(projectFolder);
+								} catch (IOException e) {
+									logger.log(Level.ERROR, e);
+								}
+								throw new IOException(Messages.getString("ProjectsHandler.19"));
 							}
-						}
-						if (!"0".equals(res.get(0))) {
-							MessageFormat mf = new MessageFormat(Messages.getString("ProjectsHandler.11"));
-							logger.log(Level.ERROR, mf.format(new String[] { source.getAbsolutePath() }));
-							try {
-								TmsServer.deleteFolder(projectFolder);
-							} catch (IOException e) {
-								logger.log(Level.ERROR, e);
+							// file is already an XLIFF in Swordfish review format, just copy it
+							File source = new File(file.getString("file"));
+							File xliff = new File(projectFolder, shortName);
+							if (!xliff.getParentFile().exists()) {
+								Files.createDirectories(xliff.getParentFile().toPath());
 							}
-							throw new IOException(mf.format(new String[] { source.getAbsolutePath() }));
+							Files.copy(source.toPath(), xliff.toPath());
+							xliffs.add(xliff.getAbsolutePath());
+							p.setReview(true);
+						} else {
+							if (shortName.startsWith("/") || shortName.startsWith("\\")) {
+								shortName = shortName.substring(1);
+							}
+
+							boolean paragraph = paragraphSegmentation;
+							boolean mustResegment = false;
+							if (!paragraphSegmentation) {
+								mustResegment = true;
+								paragraph = true;
+							}
+
+							File source = new File(fullName);
+							File xliff = new File(projectFolder, shortName + ".xlf");
+							if (!xliff.getParentFile().exists()) {
+								Files.createDirectories(xliff.getParentFile().toPath());
+							}
+							File skl = new File(projectFolder, shortName + ".skl");
+
+							Map<String, String> params = new HashMap<>();
+							params.put("source", source.getAbsolutePath());
+							params.put("xliff", xliff.getAbsolutePath());
+							params.put("skeleton", skl.getAbsolutePath());
+							params.put("format", sf.getType());
+							params.put("catalog", catalogFile);
+							params.put("srcEncoding", sf.getEncoding());
+							params.put("paragraph", paragraph ? "yes" : "no");
+							params.put("srxFile", srxFile);
+							params.put("srcLang", json.getString("srcLang"));
+							params.put("tgtLang", json.getString("tgtLang"));
+							params.put("xmlfilter", json.getString("xmlfilter"));
+
+							List<String> res = Convert.run(params);
+
+							if ("0".equals(res.get(0))) {
+								res = ToXliff2.run(xliff, catalogFile, "2.1");
+								if (mustResegment && "0".equals(res.get(0))) {
+									res = Resegmenter.run(xliff.getAbsolutePath(), srxFile, json.getString("srcLang"),
+											CatalogBuilder.getCatalog(catalogFile));
+								}
+							}
+							if ("0".equals(res.get(0))) {
+								setSourceFile(xliff, source.getName());
+							} else {
+								MessageFormat mf = new MessageFormat(Messages.getString("ProjectsHandler.11"));
+								logger.log(Level.ERROR, mf.format(new String[] { source.getAbsolutePath() }));
+								try {
+									TmsServer.deleteFolder(projectFolder);
+								} catch (IOException e) {
+									logger.log(Level.ERROR, e);
+								}
+								throw new IOException(mf.format(new String[] { source.getAbsolutePath() }));
+							}
+							xliffs.add(xliff.getAbsolutePath());
 						}
-						xliffs.add(xliff.getAbsolutePath());
 					}
 					if (xliffs.size() > 1) {
 						File main = new File(projectFolder, p.getId() + ".xlf");
@@ -1003,6 +1048,44 @@ public class ProjectsHandler implements HttpHandler {
 			result.put(Constants.REASON, e.getMessage());
 		}
 		return result;
+	}
+
+	private void setSourceFile(File xliff, String name) throws SAXException, IOException, ParserConfigurationException {
+		SAXBuilder builder = new SAXBuilder();
+		Document doc = builder.build(xliff);
+		Element root = doc.getRootElement();
+		List<Element> files = root.getChildren("file");
+		for (Element file : files) {
+			Element metadata = file.getChild("mda:metadata");
+			if (!hasSourceMeta(metadata)) {
+				Element group = new Element("mda:metaGroup");
+				group.setAttribute("category", "sourceFile");
+				metadata.addContent(group);
+				Element meta = new Element("mda:meta");
+				meta.setAttribute("type", "sourceFile");
+				meta.addContent(name);
+				group.addContent(meta);
+				Indenter.indent(metadata, 2);
+			}
+		}
+		try (FileOutputStream out = new FileOutputStream(xliff)) {
+			XMLOutputter outputter = new XMLOutputter();
+			outputter.preserveSpace(true);
+			outputter.output(doc, out);
+		}
+	}
+
+	private boolean hasSourceMeta(Element metadata) {
+		if (metadata == null) {
+			return false;
+		}
+		List<Element> metaGroups = metadata.getChildren("mda:metaGroup");
+		for (Element group : metaGroups) {
+			if ("sourceFile".equals(group.getAttributeValue("category"))) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 	private void loadPreferences() throws IOException {
@@ -1329,12 +1412,12 @@ public class ProjectsHandler implements HttpHandler {
 							LanguageUtils.getLanguage(details.getString("sourceLang")),
 							LanguageUtils.getLanguage(details.getString("targetLang")), json.getString("client"),
 							json.getString("subject"), json.getString("memory"), json.getString("glossary"),
-							LocalDate.now());
+							LocalDate.now(), false);
 					p.setFiles(details.getJSONArray("files"));
 					File projectFolder = new File(getWorkFolder(), id);
 					Files.createDirectories(projectFolder.toPath());
 					File projectXliff = new File(projectFolder, xliffFile.getName());
-					Files.copy(xliffFile.toPath(), projectXliff.toPath());
+					Files.copy(xliffFile.toPath(), projectXliff.toPath(), StandardCopyOption.REPLACE_EXISTING);
 					Skeletons.extractSkeletons(xliffFile, projectXliff);
 					p.setXliff(projectXliff.getAbsolutePath());
 					XliffStore store = new XliffStore(p.getXliff(), p.getSourceLang().getCode(),
@@ -1872,14 +1955,121 @@ public class ProjectsHandler implements HttpHandler {
 		return result;
 	}
 
+	private JSONObject getFiles(String request) {
+		JSONObject result = new JSONObject();
+		JSONObject json = new JSONObject(request);
+		try {
+			String project = json.getString("project");
+			if (projectStores.containsKey(project)) {
+				result.put("files", projectStores.get(project).getFiles());
+			}
+		} catch (SQLException | JSONException e) {
+			logger.log(Level.ERROR, e);
+			result.put(Constants.REASON, e.getMessage());
+		}
+		return result;
+	}
+
+	private JSONObject getFileStart(String request) {
+		JSONObject result = new JSONObject();
+		JSONObject json = new JSONObject(request);
+		try {
+			String project = json.getString("project");
+			if (projectStores.containsKey(project)) {
+				result.put("start", projectStores.get(project).getFileStart(json.getString("file")));
+			}
+		} catch (SQLException | JSONException e) {
+			logger.log(Level.ERROR, e);
+			result.put(Constants.REASON, e.getMessage());
+		}
+		return result;
+	}
+
+	private JSONObject getSameSource(String request) {
+		JSONObject result = new JSONObject();
+		JSONObject json = new JSONObject(request);
+		try {
+			String project = json.getString("project");
+			if (projectStores.containsKey(project)) {
+				result.put("next",
+						projectStores.get(project).getSameSource(json.getString("file"), json.getString("unit"),
+								json.getString("segment")));
+			}
+		} catch (SQLException | JSONException e) {
+			logger.log(Level.ERROR, e);
+			result.put(Constants.REASON, e.getMessage());
+		}
+		return result;
+	}
+
+	private JSONObject getMetadata(String request) {
+		JSONObject result = new JSONObject();
+		JSONObject json = new JSONObject(request);
+		try {
+			String project = json.getString("project");
+			if (projectStores.containsKey(project)) {
+				JSONObject metadata = projectStores.get(project).getMetadata(json);
+				if (metadata != null && metadata.has("data")) {
+					result = json;
+					result.put("data", metadata.getJSONArray("data"));
+				}
+			}
+		} catch (SQLException | JSONException e) {
+			logger.log(Level.ERROR, e);
+			result.put(Constants.REASON, e.getMessage());
+		}
+		return result;
+	}
+
+	private JSONObject getCustomMetadata(String request) {
+		JSONObject result = new JSONObject();
+		JSONObject json = new JSONObject(request);
+		try {
+			String project = json.getString("project");
+			if (projectStores.containsKey(project)) {
+				JSONObject metadata = projectStores.get(project).getCustomMetadata(json);
+				if (metadata != null && metadata.has("data")) {
+					result = json;
+					result.put("data", metadata.getJSONArray("data"));
+				}
+			}
+		} catch (SQLException | JSONException e) {
+			logger.log(Level.ERROR, e);
+			result.put(Constants.REASON, e.getMessage());
+		}
+		return result;
+	}
+
+	private JSONObject saveMetadata(String request) {
+		JSONObject result = new JSONObject();
+		JSONObject json = new JSONObject(request);
+		try {
+			String project = json.getString("project");
+			if (projectStores.containsKey(project)) {
+				projectStores.get(project).saveMetadata(json);
+			}
+		} catch (SQLException | JSONException e) {
+			logger.log(Level.ERROR, e);
+			result.put(Constants.REASON, e.getMessage());
+		}
+		return result;
+	}
+
 	private JSONObject addNote(String request) {
 		JSONObject result = new JSONObject();
 		JSONObject json = new JSONObject(request);
 		try {
 			String project = json.getString("project");
 			if (projectStores.containsKey(project)) {
-				result.put("notes", projectStores.get(project).addNote(json.getString("file"), json.getString("unit"),
-						json.getString("segment"), json.getString("noteText")));
+				if (json.has("noteId")) {
+					result.put("notes",
+							projectStores.get(project).updateNote(json.getString("file"), json.getString("unit"),
+									json.getString("segment"), json.getString("noteText"), json.getString("noteId")));
+				} else {
+					result.put("notes",
+							projectStores.get(project).addNote(json.getString("file"), json.getString("unit"),
+									json.getString("segment"), json.getString("noteText")));
+				}
 			}
 		} catch (SQLException e) {
 			logger.log(Level.ERROR, e);
@@ -1902,5 +2092,57 @@ public class ProjectsHandler implements HttpHandler {
 			result.put(Constants.REASON, e.getMessage());
 		}
 		return result;
+	}
+
+	public static void removeMemories(JSONArray memories) throws IOException {
+		File home = getWorkFolder();
+		File list = new File(home, "projects.json");
+		if (!list.exists()) {
+			JSONObject json = new JSONObject();
+			json.put("projects", new JSONArray());
+			TmsServer.writeJSON(list, json);
+			return;
+		}
+		JSONObject projectsList = TmsServer.readJSON(list);
+		JSONArray array = projectsList.getJSONArray("projects");
+		boolean changed = false;
+		for (int i = 0; i < array.length(); i++) {
+			JSONObject project = array.getJSONObject(i);
+			if (memories.toList().contains(project.getString("memory"))) {
+				project.put("memory", "");
+				changed = true;
+			}
+		}
+		if (changed) {
+			TmsServer.writeJSON(list, projectsList);
+		}
+	}
+
+	public static void removeGlossaries(JSONArray glossaries) {
+		try {
+			File home = getWorkFolder();
+			File list = new File(home, "projects.json");
+			if (!list.exists()) {
+				JSONObject json = new JSONObject();
+				json.put("projects", new JSONArray());
+				TmsServer.writeJSON(list, json);
+				return;
+			}
+			JSONObject projectsList = TmsServer.readJSON(list);
+			JSONArray array = projectsList.getJSONArray("projects");
+			boolean changed = false;
+			for (int i = 0; i < array.length(); i++) {
+				JSONObject project = array.getJSONObject(i);
+				if (glossaries.toList().contains(project.getString("glossary"))) {
+					project.put("glossary", "");
+					changed = true;
+				}
+			}
+			if (changed) {
+				TmsServer.writeJSON(list, projectsList);
+			}
+		} catch (IOException e) {
+			logger.log(Level.ERROR, e);
+		}
 	}
 }

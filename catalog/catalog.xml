@@ -200,6 +200,28 @@
 	<nextCatalog catalog="docbook4.2/catalog.xml" />
 	<nextCatalog catalog="docbook4.1.2/catalog.xml" />
 
+
+	<!--    DocBook ISO entity mirrors    -->
+	<system systemId="http://www.oasis-open.org/docbook/xml/4.3/ent/iso-amsa.ent" uri="docbook4.3/ent/iso-amsa.ent" />
+	<system systemId="http://www.oasis-open.org/docbook/xml/4.3/ent/iso-amsb.ent" uri="docbook4.3/ent/iso-amsb.ent" />
+	<system systemId="http://www.oasis-open.org/docbook/xml/4.3/ent/iso-amsc.ent" uri="docbook4.3/ent/iso-amsc.ent" />
+	<system systemId="http://www.oasis-open.org/docbook/xml/4.3/ent/iso-amsn.ent" uri="docbook4.3/ent/iso-amsn.ent" />
+	<system systemId="http://www.oasis-open.org/docbook/xml/4.3/ent/iso-amso.ent" uri="docbook4.3/ent/iso-amso.ent" />
+	<system systemId="http://www.oasis-open.org/docbook/xml/4.3/ent/iso-amsr.ent" uri="docbook4.3/ent/iso-amsr.ent" />
+	<system systemId="http://www.oasis-open.org/docbook/xml/4.3/ent/iso-box.ent" uri="docbook4.3/ent/iso-box.ent" />
+	<system systemId="http://www.oasis-open.org/docbook/xml/4.3/ent/iso-cyr1.ent" uri="docbook4.3/ent/iso-cyr1.ent" />
+	<system systemId="http://www.oasis-open.org/docbook/xml/4.3/ent/iso-cyr2.ent" uri="docbook4.3/ent/iso-cyr2.ent" />
+	<system systemId="http://www.oasis-open.org/docbook/xml/4.3/ent/iso-dia.ent" uri="docbook4.3/ent/iso-dia.ent" />
+	<system systemId="http://www.oasis-open.org/docbook/xml/4.3/ent/iso-grk1.ent" uri="docbook4.3/ent/iso-grk1.ent" />
+	<system systemId="http://www.oasis-open.org/docbook/xml/4.3/ent/iso-grk2.ent" uri="docbook4.3/ent/iso-grk2.ent" />
+	<system systemId="http://www.oasis-open.org/docbook/xml/4.3/ent/iso-grk3.ent" uri="docbook4.3/ent/iso-grk3.ent" />
+	<system systemId="http://www.oasis-open.org/docbook/xml/4.3/ent/iso-grk4.ent" uri="docbook4.3/ent/iso-grk4.ent" />
+	<system systemId="http://www.oasis-open.org/docbook/xml/4.3/ent/iso-lat1.ent" uri="docbook4.3/ent/iso-lat1.ent" />
+	<system systemId="http://www.oasis-open.org/docbook/xml/4.3/ent/iso-lat2.ent" uri="docbook4.3/ent/iso-lat2.ent" />
+	<system systemId="http://www.oasis-open.org/docbook/xml/4.3/ent/iso-num.ent" uri="docbook4.3/ent/iso-num.ent" />
+	<system systemId="http://www.oasis-open.org/docbook/xml/4.3/ent/iso-pub.ent" uri="docbook4.3/ent/iso-pub.ent" />
+	<system systemId="http://www.oasis-open.org/docbook/xml/4.3/ent/iso-tech.ent" uri="docbook4.3/ent/iso-tech.ent" />
+
 	<!--    OASIS DITA    -->
 
 	<nextCatalog catalog="dita1.3/catalog.xml" />

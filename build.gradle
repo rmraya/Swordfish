@@ -1,0 +1,234 @@
+plugins {
+    id 'java'
+    id 'application'
+}
+
+defaultTasks 'dist'
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(21)
+    }
+}
+
+// No repositories needed since we're using local JARs
+repositories {
+    // Empty - using local JAR files only
+}
+
+dependencies {
+    implementation files('jars/bcp47j.jar')
+    implementation files('jars/json.jar')
+    implementation files('jars/jsoup.jar')
+    implementation files('jars/mapdb.jar')
+    implementation files('jars/openxliff.jar')
+    implementation files('jars/xmljava.jar')
+    implementation files('jars/sqlite-jdbc-3.50.3.0.jar')
+}
+
+application {
+    mainModule = 'swordfish'
+}
+
+sourceSets {
+    main {
+        java {
+            srcDirs = ['src']
+        }
+        resources {
+            srcDirs = ['src']
+            exclude '**/*.java'
+        }
+    }
+}
+
+compileJava {
+    outputs.upToDateWhen { false }  // Always rebuild
+    
+    doFirst {
+        // Create the output directory for compilation
+        delete 'out'
+        mkdir 'out'
+    }
+    
+    options.compilerArgs = ['--module-path', configurations.compileClasspath.asPath]
+    destinationDirectory = file('out')
+    
+    doLast {
+        // Copy all resource files from src to out directory (everything except .java files)
+        copy {
+            from 'src'
+            into 'out'
+            exclude '**/*.java'
+        }
+        println "✓ Java compilation and resource copying completed"
+    }
+}
+
+tasks.register('createJar', Jar) {
+    dependsOn compileJava
+    outputs.upToDateWhen { false }  // Always rebuild
+    description = 'Build swordfish.jar file'
+    group = 'build'
+    archiveBaseName = 'swordfish'
+    destinationDirectory = file('jars')
+    from 'out'
+    
+    doFirst {
+        // Delete existing JAR file
+        delete 'jars/swordfish.jar'
+    }
+    
+    // Include all files from out directory except Java source files
+    include '**/*'
+    exclude '**/*.java'
+    
+    manifest {
+        attributes(
+            'Automatic-Module-Name': 'swordfish',
+            'Module-Path': configurations.runtimeClasspath.asPath
+        )
+    }
+    
+    doLast {
+        println "✓ JAR created: ${archiveFile.get()}"
+    }
+}
+
+tasks.register('linkJava', Exec) {
+    dependsOn createJar
+    outputs.upToDateWhen { false }  // Always rebuild
+    
+    doFirst {
+        // Clean up previous dist directory before creating new one
+        delete 'dist'      
+    }
+        
+    // Cross-platform file separator handling
+    def pathSeparator = File.pathSeparator
+    def fileSeparator = File.separator
+    def javaHome = System.getProperty('java.home')
+    def jmodsPath = javaHome + fileSeparator + 'jmods'
+    def modulePath = 'jars' + pathSeparator + jmodsPath
+    
+    // Use jlink command - works cross-platform
+    commandLine 'jlink',
+        '--module-path', modulePath,
+        '--add-modules', 'swordfish',
+        '--output', 'dist',
+        '--verbose'
+    
+    doLast {
+        // Clean up jrt-fs.jar if it exists
+        def jrtFile = file('dist/lib/jrt-fs.jar')
+        if (jrtFile.exists()) {
+            delete jrtFile
+        }
+        println "✓ Runtime image created successfully"
+    }
+}
+
+tasks.register('copyWindows') {
+    dependsOn linkJava
+    outputs.upToDateWhen { false }  // Always rebuild
+    onlyIf { System.getProperty('os.name').toLowerCase().contains('windows') }
+    
+    doLast {
+        // Clean up existing directories first to avoid permission issues
+        delete 'bin', 'conf', 'include', 'legal', 'lib'
+        delete 'release'
+        
+        copy {
+            from 'dist/bin'
+            into 'bin'
+        }
+        copy {
+            from 'dist/conf'
+            into 'conf'
+        }
+        copy {
+            from 'dist/include'
+            into 'include'
+        }
+        copy {
+            from 'dist/legal'
+            into 'legal'
+        }
+        copy {
+            from 'dist/lib'
+            into 'lib'
+        }
+        copy {
+            from 'dist/release'
+            into '.'
+        }
+        delete 'dist'
+        delete 'build'
+        delete 'out'
+    }
+}
+
+tasks.register('copyUnix') {
+    dependsOn linkJava
+    outputs.upToDateWhen { false }  // Always rebuild
+    onlyIf { !System.getProperty('os.name').toLowerCase().contains('windows') }
+    
+    doLast {
+        // Clean up existing directories first to avoid permission issues
+        delete 'bin', 'conf', 'include', 'legal', 'lib'
+        delete 'release'
+        
+        copy {
+            from 'dist/bin'
+            into 'bin'
+        }
+        copy {
+            from 'dist/conf'
+            into 'conf'
+        }
+        copy {
+            from 'dist/include'
+            into 'include'
+        }
+        copy {
+            from 'dist/legal'
+            into 'legal'
+        }
+        copy {
+            from 'dist/lib'
+            into 'lib'
+        }
+        copy {
+            from 'dist/release'
+            into '.'
+        }
+        delete 'dist'
+        delete 'build'
+        delete 'out'
+    }
+}
+
+tasks.register('dist') {
+    dependsOn copyWindows, copyUnix
+    outputs.upToDateWhen { false }  // Always rebuild
+    description = 'Prepare distribution'
+    
+    doFirst {
+        println "✓ Starting distribution build..."
+    }
+    
+    doLast {
+        // Clean up JAR file after distribution is ready
+        delete 'jars/swordfish.jar'
+        println "✓ Distribution ready"
+    }
+}
+
+tasks.register('distclean', Delete) {
+    delete 'dist', 'bin', 'conf', 'include', 'legal', 'lib', 'release'
+}
+
+clean {
+    delete 'out', 'build'
+}
+

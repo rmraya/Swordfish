@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007 - 2025 Maxprograms.
+ * Copyright (c) 2007-2026 Maxprograms.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 1.0
@@ -10,25 +10,25 @@
  *     Maxprograms - initial API and implementation
  *******************************************************************************/
 
-class AddGlossary {
+import { ipcRenderer, IpcRendererEvent } from "electron";
 
-    electron = require('electron');
+export class AddGlossary {
 
     constructor() {
-        this.electron.ipcRenderer.send('get-theme');
-        this.electron.ipcRenderer.on('set-theme', (event: Electron.IpcRendererEvent, theme: string) => {
+        ipcRenderer.send('get-theme');
+        ipcRenderer.on('set-theme', (event: IpcRendererEvent, theme: string) => {
             (document.getElementById('theme') as HTMLLinkElement).href = theme;
         });
-        this.electron.ipcRenderer.send('get-project-names');
-        this.electron.ipcRenderer.on('set-project-names', (event: Electron.IpcRendererEvent, projects: string[]) => {
+        ipcRenderer.send('get-project-names');
+        ipcRenderer.on('set-project-names', (event: IpcRendererEvent, projects: string[]) => {
             this.setProjectNames(projects);
         });
-        this.electron.ipcRenderer.send('get-clients');
-        this.electron.ipcRenderer.on('set-clients', (event: Electron.IpcRendererEvent, clients: string[]) => {
+        ipcRenderer.send('get-clients');
+        ipcRenderer.on('set-clients', (event: IpcRendererEvent, clients: string[]) => {
             this.setClients(clients);
         });
-        this.electron.ipcRenderer.send('get-subjects');
-        this.electron.ipcRenderer.on('set-subjects', (event: Electron.IpcRendererEvent, subjects: string[]) => {
+        ipcRenderer.send('get-subjects');
+        ipcRenderer.on('set-subjects', (event: IpcRendererEvent, subjects: string[]) => {
             this.setSubjects(subjects);
         });
         document.addEventListener('keydown', (event: KeyboardEvent) => {
@@ -36,7 +36,7 @@ class AddGlossary {
                 this.addGlossary();
             }
             if (event.code === 'Escape') {
-                this.electron.ipcRenderer.send('close-addGlossary');
+                ipcRenderer.send('close-addGlossary');
             }
         });
         (document.getElementById('addGlossaryButton') as HTMLButtonElement).addEventListener('click', () => {
@@ -44,14 +44,14 @@ class AddGlossary {
         });
         (document.getElementById('nameInput') as HTMLInputElement).focus();
         setTimeout(() => {
-            this.electron.ipcRenderer.send('set-height', { window: 'addGlossary', width: document.body.clientWidth, height: document.body.clientHeight });
+            ipcRenderer.send('set-height', { window: 'addGlossary', width: document.body.clientWidth, height: document.body.clientHeight });
         }, 200);
     }
 
     addGlossary(): void {
         let name: string = (document.getElementById('nameInput') as HTMLInputElement).value;
         if (name === '') {
-            this.electron.ipcRenderer.send('show-message', { type: 'warning', message: 'Enter name', parent: 'addGlossary' });
+            ipcRenderer.send('show-message', { type: 'warning', message: 'Enter name', parent: 'addGlossary' });
             return;
         }
         let params: any = {
@@ -60,7 +60,7 @@ class AddGlossary {
             subject: (document.getElementById('subjectInput') as HTMLInputElement).value,
             client: (document.getElementById('clientInput') as HTMLInputElement).value
         }
-        this.electron.ipcRenderer.send('add-glossary', params);
+        ipcRenderer.send('add-glossary', params);
     }
 
     setProjectNames(projects: string[]): void {

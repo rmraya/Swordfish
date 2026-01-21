@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007 - 2025 Maxprograms.
+ * Copyright (c) 2007-2026 Maxprograms.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 1.0
@@ -10,15 +10,15 @@
  *     Maxprograms - initial API and implementation
  *******************************************************************************/
 
-class GoTo {
+import { ipcRenderer, IpcRendererEvent } from "electron";
 
-    electron = require('electron');
+export class GoTo {
 
     segInput: HTMLInputElement;
 
     constructor() {
-        this.electron.ipcRenderer.send('get-theme');
-        this.electron.ipcRenderer.on('set-theme', (event: Electron.IpcRendererEvent, theme: string) => {
+        ipcRenderer.send('get-theme');
+        ipcRenderer.on('set-theme', (event: IpcRendererEvent, theme: string) => {
             (document.getElementById('theme') as HTMLLinkElement).href = theme;
         });
         this.segInput = document.getElementById('segInput') as HTMLInputElement;
@@ -30,14 +30,14 @@ class GoTo {
         });
         (document.getElementById('segInput') as HTMLInputElement).focus();
         setTimeout(() => {
-            this.electron.ipcRenderer.send('set-height', { window: 'goTo', width: document.body.clientWidth, height: document.body.clientHeight });
+            ipcRenderer.send('set-height', { window: 'goTo', width: document.body.clientWidth, height: document.body.clientHeight });
         }, 200);
     }
 
     parseKey(event: KeyboardEvent): void {
         let code: string = event.code;
         if (code === 'Escape') {
-            this.electron.ipcRenderer.send('close-go-to');
+            ipcRenderer.send('close-go-to');
         }
         if (code === 'Enter' || code === 'NumpadEnter') {
             this.goToSegment();
@@ -51,10 +51,10 @@ class GoTo {
     goToSegment(): void {
         let value: string = this.segInput.value;
         if (value.length > 0) {
-            this.electron.ipcRenderer.send('go-to-segment', { segment: Number.parseInt(value, 10) });
+            ipcRenderer.send('go-to-segment',  Number.parseInt(value, 10) );
             return;
         }
-        this.electron.ipcRenderer.send('show-message', { type: 'warning', message: 'Enter segment number', parent: 'goTo' });
+        ipcRenderer.send('show-message', { type: 'warning', message: 'Enter segment number', parent: 'goTo' });
         (document.getElementById('segInput') as HTMLInputElement).focus();
     }
 }

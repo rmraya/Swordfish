@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007 - 2025 Maxprograms.
+ * Copyright (c) 2007-2026 Maxprograms.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 1.0
@@ -10,7 +10,7 @@
  *     Maxprograms - initial API and implementation
  *******************************************************************************/
 
-class Tab {
+export class Tab {
 
     id: string;
     label: HTMLAnchorElement;
@@ -34,6 +34,7 @@ class Tab {
         } else {
             this.label.innerText = description;
         }
+        this.label.classList.add('noWrap');
         this.label.addEventListener('click', () => {
             this.parent.selectTab(this.id);
         });
@@ -88,7 +89,7 @@ class Tab {
     }
 }
 
-class TabHolder {
+export class TabHolder {
 
     labels: Map<string, HTMLDivElement>;
     tabs: Map<string, Tab>;
@@ -124,6 +125,14 @@ class TabHolder {
         return this.tabsHolder.clientHeight;
     }
 
+    setEmptyMessage(svgImage: string, emptyText: string): void {
+        this.contentHolder.innerHTML = '<div style="width: 100%; height: 100%; display: flex; align-items: center; flex-direction: column; justify-content: center;">' +
+            '<div class="svgContainer">' +
+            svgImage +
+            '</div>' +
+            '<p style="font-size: 20px;">' + emptyText + '</p></div>';
+    }
+
     clear(): void {
         this.labels.forEach((value) => {
             this.tabsHolder.removeChild(value);
@@ -134,7 +143,7 @@ class TabHolder {
         });
         this.tabs.clear();
         this.tabsList = [];
-        this.selectedTab ='';
+        this.selectedTab = '';
     }
 
     addTab(tab: Tab): void {
@@ -153,7 +162,9 @@ class TabHolder {
         this.tabs.forEach((value, key) => {
             value.setSelected(tabId === key);
         });
-        this.selectedTab = tabId;
+        if (this.tabs.has(tabId)) {
+            this.selectedTab = tabId;
+        }
     }
 
     getSelected(): string {
@@ -181,6 +192,10 @@ class TabHolder {
 
     has(tabId: string): boolean {
         return this.labels.has(tabId);
+    }
+
+    getTab(tabId: string): Tab | undefined {
+        return this.tabs.get(tabId);
     }
 
     getTabsHolder(): HTMLDivElement {

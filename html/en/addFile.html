@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <title>Translate File</title>
+    <link id="theme" rel="stylesheet" type="text/css" href="../../css/light.css">
+    <link rel="stylesheet" type="text/css" href="../../css/fonts.css">
+</head>
+
+<body class="dialogBody">
+    <div class="paddedArea">
+        <table class="fill_width">
+            <tr>
+                <td class="fill_width"><span id="nameSpan">&nbsp;</span></td>
+            </tr>
+        </table>
+
+        <table class="fill_width">
+            <tr>
+                <td style="width:50%; padding:0px;">
+                    <table>
+                        <tr>
+                            <td class="middle noWrap">
+                                <label for="typeSelect">File Type</label>
+                            </td>
+                            <td class="fill_width middle form_height">
+                                <select id="typeSelect" class="fill_width">
+
+                                </select>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="middle noWrap">
+                                <label for="srcLangSelect">Source Language</label>
+                            </td>
+                            <td class="fill_width middle form_height">
+                                <select id="srcLangSelect" class="fill_width">
+
+                                </select>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="middle noWrap">
+                                <label for="tgtLangSelect">Target Language</label>
+                            </td>
+                            <td class="fill_width middle form_height">
+                                <select id="tgtLangSelect" class="fill_width">
+
+                                </select>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class=" noWrap">
+                                <label for="memorySelect">Default Memory</label>
+                            </td>
+                            <td class="fill_width ">
+                                <select id="memorySelect" class="fill_width">
+
+                                </select>
+                                <input type="checkbox" id="applyTM" class="middle">
+                                <label for="applyTM" class="middle">Apply Translation Memory</label>
+                            </td>
+                        </tr>
+                    </table>
+                </td>
+                <td style="width:50%; padding:0px;">
+                    <table>
+                        <tr>
+                            <td class="middle noWrap">
+                                <label for="charsetSelect">Character Set</label>
+                            </td>
+                            <td class="fill_width middle form_height">
+                                <select id="charsetSelect" class="fill_width">
+
+                                </select>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="middle">
+                                <label for="subjectInput">Subject</label>
+                            </td>
+                            <td class="fill_width middle form_height" style="padding-right: 10px;">
+                                <input list="subjects" id="subjectInput" class="middle fill_width">
+                                <datalist id="subjects">
+                                    <option value="none">
+                                </datalist>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="middle">
+                                <label for="clientInput">Client</label>
+                            </td>
+                            <td class="fill_width middle form_height" style="padding-right: 10px;">
+                                <input list="clients" id="clientInput" class="middle fill_width">
+                                <datalist id="clients">
+                                    <option value="none">
+                                </datalist>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class=" noWrap">
+                                <label for="glossarySelect">Default Glossary</label>
+                            </td>
+                            <td class="fill_width">
+                                <select id="glossarySelect" class="fill_width">
+
+                                </select>
+                                <input type="checkbox" id="searchTerms" class="middle">
+                                <label for="searchTerms" class="middle">Search Terms</label>
+                            </td>
+                        </tr>
+                    </table>
+                </td>
+            </tr>
+        </table>
+    </div>
+    <div class="buttonArea">
+        <button id="addProjectButton">Translate/Review File</button>
+    </div>
+
+    <script>
+        const { AddFile } = require('../../js/addFile.js');
+        new AddFile();
+    </script>
+</body>
+
+</html>

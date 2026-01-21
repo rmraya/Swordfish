@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007 - 2025 Maxprograms.
+ * Copyright (c) 2007-2026 Maxprograms.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 1.0
@@ -10,35 +10,35 @@
  *     Maxprograms - initial API and implementation
  *******************************************************************************/
 
-class HtmlViewer {
+import { ipcRenderer, IpcRendererEvent } from "electron";
 
-    electron = require('electron');
+export class HtmlViewer {
 
     id: number = -1;
 
     constructor() {
-        this.electron.ipcRenderer.send('get-theme');
-        this.electron.ipcRenderer.on('set-theme', (event: Electron.IpcRendererEvent, theme: string) => {
+        ipcRenderer.send('get-theme');
+        ipcRenderer.on('set-theme', (event: IpcRendererEvent, theme: string) => {
             (document.getElementById('theme') as HTMLLinkElement).href = theme;
         });
         document.addEventListener('keydown', (event: KeyboardEvent) => {
             if (event.code === 'Escape') {
-                this.electron.ipcRenderer.send('close-htmlViewer', this.id );
+                ipcRenderer.send('close-htmlViewer', this.id );
             }
         });
-        this.electron.ipcRenderer.send('get-html-content');
-        this.electron.ipcRenderer.on('set-content', (event: Electron.IpcRendererEvent, arg: any) => {
+        ipcRenderer.send('get-html-content');
+        ipcRenderer.on('set-content', (event: IpcRendererEvent, arg: any) => {
             let container: HTMLDivElement = document.getElementById('content') as HTMLDivElement;
             container.innerHTML = arg;
             container.style.width = document.body.clientWidth + 'px';
             container.style.height = document.body.clientHeight + 'px';
         });
-        this.electron.ipcRenderer.send('get-html-title');
-        this.electron.ipcRenderer.on('set-title', (event: Electron.IpcRendererEvent, title: string) => {
+        ipcRenderer.send('get-html-title');
+        ipcRenderer.on('set-title', (event: IpcRendererEvent, title: string) => {
             (document.getElementById('title') as HTMLTitleElement).innerText = title;
         });
-        this.electron.ipcRenderer.send('get-html-id');
-        this.electron.ipcRenderer.on('set-id', (event: Electron.IpcRendererEvent, id: number) => {
+        ipcRenderer.send('get-html-id');
+        ipcRenderer.on('set-id', (event: IpcRendererEvent, id: number) => {
             this.id = id;
         });
         window.addEventListener('resize', () => {

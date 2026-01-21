@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007 - 2025 Maxprograms.
+ * Copyright (c) 2007-2026 Maxprograms.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 1.0
@@ -10,24 +10,32 @@
  *     Maxprograms - initial API and implementation
  *******************************************************************************/
 
-class AddNote {
+import { ipcRenderer, IpcRendererEvent } from "electron";
+import { FullId } from "./segmentId.js";
 
-    electron = require('electron');
+export class AddNote {
 
-    segmentData: any;
+    segmentData: FullId = { project: '', file: '', unit: '', segment: '' };
+    noteId: string = '';
 
     constructor() {
-        this.electron.ipcRenderer.send('get-theme');
-        this.electron.ipcRenderer.on('set-theme', (event: Electron.IpcRendererEvent, theme: string) => {
+        ipcRenderer.send('get-theme');
+        ipcRenderer.on('set-theme', (event: IpcRendererEvent, theme: string) => {
             (document.getElementById('theme') as HTMLLinkElement).href = theme;
         });
-        this.electron.ipcRenderer.send('get-note-params');
-        this.electron.ipcRenderer.on('note-params', (event: Electron.IpcRendererEvent, arg: any) => {
-            this.segmentData = arg;
+        ipcRenderer.on('note-params', (event: IpcRendererEvent, segmentId: FullId) => {
+            this.segmentData = segmentId;
+        });
+        ipcRenderer.on('set-note', (event: IpcRendererEvent, note: string) => {
+            (document.getElementById('area') as HTMLTextAreaElement).value = note;
+            (document.getElementById('addButton') as HTMLButtonElement).innerText = 'Update Note';
+        });
+        ipcRenderer.on('set-note-id', (event: IpcRendererEvent, noteId: string) => {
+            this.noteId = noteId;
         });
         document.addEventListener('keydown', (event: KeyboardEvent) => {
             if (event.code === 'Escape') {
-                this.electron.ipcRenderer.send('close-add-note');
+                ipcRenderer.send('close-add-note');
             }
         });
         (document.getElementById('addButton') as HTMLButtonElement).addEventListener('click', () => {
@@ -35,17 +43,20 @@ class AddNote {
         });
         (document.getElementById('area') as HTMLTextAreaElement).focus();
         setTimeout(() => {
-            this.electron.ipcRenderer.send('set-height', { window: 'addNote', width: document.body.clientWidth, height: document.body.clientHeight });
+            ipcRenderer.send('set-height', { window: 'addNote', width: document.body.clientWidth, height: document.body.clientHeight });
         }, 200);
     }
 
     addNote(): void {
         let noteText: string = (document.getElementById('area') as HTMLTextAreaElement).value;
         if (noteText === '') {
-            this.electron.ipcRenderer.send('show-message', { type: 'warning', message: 'Enter note text', parent: 'addNote' });
+            ipcRenderer.send('show-message', { type: 'warning', message: 'Enter note text', parent: 'addNote' });
             return;
         }
-        this.segmentData.noteText = noteText;
-        this.electron.ipcRenderer.send('add-note', this.segmentData);
+        if (this.noteId !== '') {
+            ipcRenderer.send('update-note', { segment: this.segmentData, note: noteText, noteId: this.noteId });
+        } else {
+            ipcRenderer.send('add-note', { segment: this.segmentData, note: noteText });
+        }
     }
 }

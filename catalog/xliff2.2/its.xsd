@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" elementFormDefault="qualified"
-  xmlns:its="http://www.w3.org/2005/11/its" xmlns:xlf="urn:oasis:names:tc:xliff:document:2.0"
+  xmlns:its="http://www.w3.org/2005/11/its" xmlns:xlf="urn:oasis:names:tc:xliff:document:2.2"
   targetNamespace="http://www.w3.org/2005/11/its">
 
 

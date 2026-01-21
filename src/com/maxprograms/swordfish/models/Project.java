@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007 - 2025 Maxprograms.
+ * Copyright (c) 2007-2026 Maxprograms.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 1.0
@@ -47,9 +47,10 @@ public class Project implements Comparable<Project> {
 	private String memory;
 	private String glossary;
 	private String xliff;
+	private boolean review;
 
 	public Project(String id, String description, int status, Language sourceLang, Language targetLang, String client,
-			String subject, String memory, String glossary, LocalDate creationDate) {
+			String subject, String memory, String glossary, LocalDate creationDate, boolean review) {
 		this.id = id;
 		this.description = description;
 		this.status = status;
@@ -60,6 +61,7 @@ public class Project implements Comparable<Project> {
 		this.creationDate = creationDate;
 		this.memory = memory;
 		this.glossary = glossary;
+		this.review = review;
 	}
 
 	public String getXliff() {
@@ -93,6 +95,11 @@ public class Project implements Comparable<Project> {
 		}
 		memory = json.getString("memory");
 		glossary = json.getString("glossary");
+		if (json.has("review")) {
+			review = json.getBoolean("review");
+		} else {
+			review = false;
+		}
 	}
 
 	public JSONObject toJSON() throws IOException, JSONException {
@@ -114,6 +121,7 @@ public class Project implements Comparable<Project> {
 		json.put("xliff", Utils.getRelativePath(ProjectsHandler.getWorkFolder().getAbsolutePath(), xliff));
 		json.put("memory", memory);
 		json.put("glossary", glossary);
+		json.put("review", review);
 		return json;
 	}
 
@@ -212,6 +220,14 @@ public class Project implements Comparable<Project> {
 		this.subject = subject;
 	}
 
+	public void setReview(boolean review) {
+		this.review = review;
+	}
+
+	public boolean isReview() {
+		return review;
+	}
+	
 	@Override
 	public int compareTo(Project o) {
 		return creationDate.compareTo(o.getCreationDate());

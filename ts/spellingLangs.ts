@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007 - 2025 Maxprograms.
+ * Copyright (c) 2007-2026 Maxprograms.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 1.0
@@ -10,27 +10,27 @@
  *     Maxprograms - initial API and implementation
  *******************************************************************************/
 
-class SpellcheckerLanguages {
+import { ipcRenderer, IpcRendererEvent } from "electron";
 
-    electron = require('electron');
+export class SpellcheckerLanguages {
 
     constructor() {
-        this.electron.ipcRenderer.send('get-theme');
-        this.electron.ipcRenderer.on('set-theme', (event: Electron.IpcRendererEvent, theme: string) => {
+        ipcRenderer.send('get-theme');
+        ipcRenderer.on('set-theme', (event: IpcRendererEvent, theme: string) => {
             (document.getElementById('theme') as HTMLLinkElement).href = theme;
         });
-        this.electron.ipcRenderer.send('get-spellchecker-langs');
-        this.electron.ipcRenderer.on('set-spellchecker-langs', (event: Electron.IpcRendererEvent, arg: any) => {
+        ipcRenderer.send('get-spellchecker-langs');
+        ipcRenderer.on('set-spellchecker-langs', (event: IpcRendererEvent, arg: any) => {
             this.setLanguages(arg.languages);
         });
         document.addEventListener('keydown', (event: KeyboardEvent) => {
             if (event.code === 'Escape') {
-                this.electron.ipcRenderer.send('close-spellingLangs');
+                ipcRenderer.send('close-spellingLangs');
             }
         });
         (document.getElementById('tableContainer') as HTMLDivElement).style.height = '400px';
         setTimeout(() => {
-            this.electron.ipcRenderer.send('set-height', { window: 'spellingLangs', width: document.body.clientWidth, height: document.body.clientHeight });
+            ipcRenderer.send('set-height', { window: 'spellingLangs', width: document.body.clientWidth, height: document.body.clientHeight });
         }, 200);
     }
 

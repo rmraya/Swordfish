@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <title>Apply Translation Memory to All Segments</title>
+    <link id="theme" rel="stylesheet" type="text/css" href="../../css/light.css">
+    <link rel="stylesheet" type="text/css" href="../../css/fonts.css">
+</head>
+
+<body class="dialogBody">
+    <div class="paddedArea">
+        <table class="fill_width">
+            <tr>
+                <td class=" noWrap">
+                    <label for="memorySelect">Memory</label>
+                </td>
+                <td class="fill_width ">
+                    <select id="memorySelect" class="table_select">
+
+                    </select>
+                </td>
+            </tr>
+            <tr>
+                <td class="middle noWrap">
+                    <label for="penalty">Penalization</label>
+                </td>
+                <td class="middle fill_width">
+                    <input id="penalty" style="width: 50px;">&nbsp;%
+                </td>
+            </tr>
+        </table>
+    </div>
+    <div class="buttonArea">
+        <button id="applyTmButton">Apply Translation Memory</button>
+    </div>
+
+    <script>
+        const { ApplyTM } = require('../../js/applyTm.js');
+        new ApplyTM();
+    </script>
+</body>
+
+</html>

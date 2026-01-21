@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <title>Import Project File</title>
+    <link id="theme" rel="stylesheet" type="text/css" href="../../css/light.css">
+    <link rel="stylesheet" type="text/css" href="../../css/fonts.css">
+</head>
+
+<body class="dialogBody">
+    <div class="paddedArea">
+        <table class="fill_width">
+            <tr>
+                <td class="middle noWrap">
+                    <label for="projectInput">Project Name</label>
+                </td>
+                <td class="fill_width middle" colspan="2">
+                    <input id="projectInput" class="table_input middle">
+
+                </td>
+            </tr>
+            <tr>
+                <td class="middle">
+                    <label for="xliff" class="noWrap">Project File</label>
+                </td>
+                <td class="fill_width middle">
+                    <input id="xliff" class="fill_width middle">
+                </td>
+                <td class="middle"><button id="browse">Browse...</button></td>
+            </tr>
+
+            <tr>
+                <td class="middle">
+                    <label for="subjectInput">Subject</label>
+                </td>
+                <td class="fill_width middle" colspan="2">
+                    <input list="subjects" id="subjectInput" class="table_input middle">
+                    <datalist id="subjects">
+
+                    </datalist>
+                </td>
+            </tr>
+            <tr>
+                <td class="middle">
+                    <label for="clientInput">Client</label>
+                </td>
+                <td class="fill_width middle" colspan="2">
+                    <input list="clients" id="clientInput" class="table_input middle">
+                    <datalist id="clients">
+
+                    </datalist>
+                </td>
+            </tr>
+            <tr>
+                <td class="middle noWrap">
+                    <label for="memorySelect">Default Memory</label>
+                </td>
+                <td class="fill_width middle" colspan="2">
+                    <select id="memorySelect" class="table_select">
+
+                    </select>
+                </td>
+            </tr>
+            <tr>
+                <td class="middle noWrap">
+                    <label for="glossarySelect">Default Glossary</label>
+                </td>
+                <td class="fill_width middle" colspan="2">
+                    <select id="glossarySelect" class="table_select">
+
+                    </select>
+                </td>
+            </tr>
+
+        </table>
+    </div>
+    <div class="buttonArea">
+        <button id="importXliff">Import Project File</button>
+    </div>
+
+    <script>
+        const { ImportXLIFF } = require('../../js/importXliff.js');
+        new ImportXLIFF();
+    </script>
+</body>
+
+</html>
