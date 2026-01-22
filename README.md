@@ -8,7 +8,7 @@ Swordfish uses TM (Translation Memory) and MT (Machine Translation). Supports se
 
 ## Swordfish Videos
 
-- [Build Swordfish from Source Code](https://youtu.be/VQveu4BLElE)
+- [Build Swordfish from Source Code](https://youtu.be/xiHFxfqCleQ)
 - [Translate a Segment Using the AI Prompt Dialog](https://youtu.be/8S420n2QieM)
 - [Translate a Segment Using the AI Menu or Keyboard Shortcuts](https://youtu.be/FwsFZCjUajU)
 
