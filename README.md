@@ -51,7 +51,7 @@ Technical Support | Peer support at [Groups.io](https://groups.io/g/maxprograms/
 ## Requirements
 
 - JDK 21 or newer is required for compiling and building. Get it from [Adoptium](https://adoptium.net/).
-- Gradle 9.2.1 or newer. Get it from [https:/gradle.org](https:/gradle.org)
+- Gradle 9.2.1 or newer. Get it from [https://gradle.org](https://gradle.org)
 - Node.js 24.11.1 LTS or newer. Get it from [https://nodejs.org/](https://nodejs.org/)
 
 ## Building
