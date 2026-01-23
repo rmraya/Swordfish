@@ -109,6 +109,7 @@ public class XliffStore {
 	private File database;
 	private Connection conn;
 	private PreparedStatement insertUnit;
+	private PreparedStatement insertFile;
 	private PreparedStatement insertSegmentStmt;
 	private PreparedStatement insertMatch;
 	private PreparedStatement updateMatch;
@@ -287,6 +288,26 @@ public class XliffStore {
 			}
 			conn.commit();
 		}
+		
+		// populate files table if it's empty
+		sql = "SELECT COUNT(*) FROM files;";
+		boolean filesTableEmpty = false;
+		try (Statement st = conn.createStatement()) {
+			try (ResultSet rs = st.executeQuery(sql)) {
+				if (rs.next() && rs.getInt(1) == 0) {
+					filesTableEmpty = true;
+				}
+			}
+		}
+		if (filesTableEmpty && filesDataExists) {
+			logger.log(Level.INFO, "Files table is empty, populating from filesdata.");
+			sql = "INSERT INTO files (id, name) SELECT file, sourceFile FROM filesdata;";
+			try (Statement st = conn.createStatement()) {
+				st.execute(sql);
+			}
+			conn.commit();
+		}
+		
 		getUnitData = conn.prepareStatement("SELECT data, compressed FROM units WHERE file=? AND unitId=?");
 		getSource = conn.prepareStatement(
 				"SELECT source, sourceText, state, translate FROM segments WHERE file=? AND unitId=? AND segId=?");
@@ -437,6 +458,7 @@ public class XliffStore {
 		insertFileData = conn
 				.prepareStatement(
 						"INSERT INTO filesdata (file, original, sourceFile, metadata, customData) VALUES (?,?,?,?,?)");
+		insertFile = conn.prepareStatement("INSERT INTO files (id, name) VALUES (?,?)");
 		prepareInsertSegment();
 		insertNoteStmt = conn
 				.prepareStatement("INSERT INTO notes (file, unitId, segId, noteId, note) values (?,?,?,?,?)");
@@ -445,6 +467,7 @@ public class XliffStore {
 		insertNoteStmt.close();
 		insertSegmentStmt.close();
 		insertFileData.close();
+		insertFile.close();
 	}
 
 	private void harvestFilesData() throws SQLException, IOException, SAXException, ParserConfigurationException {
@@ -563,6 +586,9 @@ public class XliffStore {
 			insertFileData.setString(4, metadataString);
 			insertFileData.setString(5, customMetadata);
 			insertFileData.execute();
+			insertFile.setString(1, currentFile);
+			insertFile.setString(2, sourceFile);
+			insertFile.execute();
 		}
 		if ("unit".equals(e.getName())) {
 			tagCount = 0;
@@ -902,7 +928,7 @@ public class XliffStore {
 				try {
 					Pattern.compile(filterText);
 				} catch (PatternSyntaxException e) {
-					throw new IOException("Invalid regular expression");
+					throw new IOException(Messages.getString("XliffStore.47"));
 				}
 				if ("source".equals(filterLanguage)) {
 					queryBuilder.append(" AND sourceText REGEXP '");
@@ -4331,7 +4357,7 @@ public class XliffStore {
 			try {
 				Pattern.compile(searchText);
 			} catch (PatternSyntaxException e) {
-				throw new IOException("Invalid regular expression");
+				throw new IOException(Messages.getString("XliffStore.47"));
 			}
 			queryBuilder.append(" targetText REGEXP '");
 			queryBuilder.append(searchText);

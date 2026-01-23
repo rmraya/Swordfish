@@ -1,7 +1,7 @@
 {
     "name": "swordfish",
     "productName": "Swordfish",
-    "version": "5.15.0",
+    "version": "5.15.1",
     "description": "Swordfish Translation Editor",
     "main": "js/Swordfish.js",
     "type": "module",
