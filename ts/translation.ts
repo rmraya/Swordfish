@@ -1877,6 +1877,7 @@ export class TranslationView {
             td.innerHTML = TranslationView.SVG_BLANK;
             if (!row.translate) {
                 td.innerHTML = TranslationView.LOCK_SPAN;
+                tr.classList.add('locked');
             } else if (row.tagErrors || row.spaceErrors) {
                 if (row.tagErrors) {
                     td.innerHTML = TranslationView.TAG_WARNING;
@@ -2230,7 +2231,7 @@ export class TranslationView {
             for (let i: number = this.currentRow.rowIndex; i < length; i++) {
                 let row: HTMLTableRowElement = (rows[i] as HTMLTableRowElement);
                 let cell: HTMLTableCellElement = row.getElementsByClassName('state')[0] as HTMLTableCellElement;
-                if (cell.classList.contains('initial')) {
+                if (cell.classList.contains('initial') && !row.innerHTML.includes(TranslationView.LOCK_FRAGMENT)) {
                     found = true;
                     this.selectRow(row);
                     break;
@@ -2246,7 +2247,7 @@ export class TranslationView {
             for (let i: number = this.currentRow.rowIndex; i < length; i++) {
                 let row: HTMLTableRowElement = (rows[i] as HTMLTableRowElement);
                 let cell: HTMLTableCellElement = row.getElementsByClassName('state')[0] as HTMLTableCellElement;
-                if (cell.classList.contains('translated')) {
+                if (cell.classList.contains('translated') && !row.innerHTML.includes(TranslationView.LOCK_FRAGMENT)) {
                     found = true;
                     this.selectRow(row);
                     break;
@@ -2254,6 +2255,25 @@ export class TranslationView {
             }
             if (!found) {
                 ipcRenderer.send('show-message', { type: 'warning', message: 'No more unconfirmed segments on this page' });
+            }
+        }
+        if (next === 'needsAction' && this.currentRow) {
+            let found: boolean = false;
+            let length: number = rows.length;
+            for (let i: number = this.currentRow.rowIndex; i < length; i++) {
+                let row: HTMLTableRowElement = (rows[i] as HTMLTableRowElement);
+                let cell: HTMLTableCellElement = row.getElementsByClassName('state')[0] as HTMLTableCellElement;
+                if (cell.classList.contains('locked')) {
+                    continue;
+                }
+                if ((cell.classList.contains('initial') || cell.classList.contains('translated')) && !row.innerHTML.includes(TranslationView.LOCK_FRAGMENT)) {
+                    found = true;
+                    this.selectRow(row);
+                    break;
+                }
+            }
+            if (!found) {
+                ipcRenderer.send('show-message', { type: 'warning', message: 'No more segments needing action on this page' });
             }
         }
     }
@@ -2271,6 +2291,10 @@ export class TranslationView {
 
     nextUnconfirmed(): void {
         this.saveEdit({ confirm: false, next: 'unconfirmed' });
+    }
+
+    nextNeedsAction(): void {
+        this.saveEdit({ confirm: false, next: 'needsAction' });
     }
 
     centerRow(row: HTMLTableRowElement): void {
@@ -3124,6 +3148,7 @@ export class TranslationView {
             let currentTranslate: HTMLTableCellElement = this.currentRow.getElementsByClassName('translate')[0] as HTMLTableCellElement;
             let isLocked: boolean = currentTranslate.innerHTML.includes(TranslationView.LOCK_FRAGMENT);
             currentTranslate.innerHTML = isLocked ? TranslationView.SVG_BLANK : TranslationView.LOCK_SPAN;
+            this.currentRow.classList.toggle('locked');
             this.selectRow(this.currentRow);
             return;
         }

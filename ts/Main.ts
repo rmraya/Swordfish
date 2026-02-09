@@ -234,6 +234,9 @@ export class Main {
         ipcRenderer.on('next-unconfirmed', () => {
             this.nextUnconfirmed();
         });
+        ipcRenderer.on('next-needs-action', () => {
+            this.nextNeedsAction();
+        });
         ipcRenderer.on('cancel-edit', () => {
             this.cancelEdit();
         });
@@ -699,6 +702,13 @@ export class Main {
         let selected: string = Main.tabHolder.getSelected();
         if (Main.translationViews.has(selected)) {
             (Main.translationViews.get(selected) as TranslationView).nextUnconfirmed();
+        }
+    }
+
+    nextNeedsAction(): void {
+        let selected: string = Main.tabHolder.getSelected();
+        if (Main.translationViews.has(selected)) {
+            (Main.translationViews.get(selected) as TranslationView).nextNeedsAction();
         }
     }
 

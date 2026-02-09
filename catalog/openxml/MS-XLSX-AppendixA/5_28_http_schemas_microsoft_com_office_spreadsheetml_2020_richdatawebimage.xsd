@@ -1,0 +1,21 @@
+<xsd:schema targetNamespace="http://schemas.microsoft.com/office/spreadsheetml/2020/richdatawebimage" elementFormDefault="qualified" xmlns="http://schemas.microsoft.com/office/spreadsheetml/2020/richdatawebimage" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships" xmlns:x="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+   <xsd:import namespace="http://schemas.openxmlformats.org/officeDocument/2006/relationships" schemaLocation="orel.xsd"/>
+   <xsd:import namespace="http://schemas.openxmlformats.org/spreadsheetml/2006/main" schemaLocation="xlbasictypes.xsd"/>
+   <xsd:element name="webImagesSrd" type="CT_WebImagesSupportingRichData"/>
+   <xsd:complexType name="CT_WebImagesSupportingRichData">
+     <xsd:sequence>
+       <xsd:element name="webImageSrd" minOccurs="0" maxOccurs="unbounded" type="CT_WebImageSupportingRichData"/>
+       <xsd:element name="extLst" type="x:CT_ExtensionList" minOccurs="0" maxOccurs="1"/>
+     </xsd:sequence>
+   </xsd:complexType>
+   <xsd:complexType name="CT_WebImageSupportingRichData">
+     <xsd:sequence>
+       <xsd:element name="address" minOccurs="1" maxOccurs="1" type="CT_WebImageSupportingRichDataRelationship"/>
+       <xsd:element name="moreImagesAddress" minOccurs="0" maxOccurs="1" type="CT_WebImageSupportingRichDataRelationship"/>
+       <xsd:element name="blip" minOccurs="0" maxOccurs="1" type="CT_WebImageSupportingRichDataRelationship"/>
+     </xsd:sequence>
+   </xsd:complexType>
+   <xsd:complexType name="CT_WebImageSupportingRichDataRelationship">
+     <xsd:attribute ref="r:id" use="required"/>
+   </xsd:complexType>
+ </xsd:schema>

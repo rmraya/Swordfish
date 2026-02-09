@@ -23,7 +23,7 @@ dependencies {
     implementation files('jars/mapdb.jar')
     implementation files('jars/openxliff.jar')
     implementation files('jars/xmljava.jar')
-    implementation files('jars/sqlite-jdbc-3.50.3.0.jar')
+    implementation files('jars/sqlite-jdbc-3.51.1.0.jar')
 }
 
 application {

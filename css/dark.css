@@ -7,6 +7,7 @@
 	--odd-unit: #e20606;
 	--orange: #ff9800;
 	--teal: #009688;
+	--bordeaux: #50002b;
 
 	scrollbar-color: var(--ClassicBlue80) var(--gray150);
 	scrollbar-width: thin;
@@ -230,6 +231,9 @@ th {
 	border-bottom: none;
 }
 
+.locked {
+	background-color: var(--bordeaux) !important;
+}
 .nopadding {
 	padding: 0 !important;
 }
@@ -238,6 +242,10 @@ th {
 	border-top: 3px solid var(--ClassicBlue90) !important;
 	border-bottom: 3px solid var(--ClassicBlue90) !important;
 	background-color: var(--gray190) !important;
+}
+
+tr.locked.currentRow {
+  background-color: var(--bordeaux) !important;
 }
 
 .sourceContainer {

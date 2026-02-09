@@ -1,0 +1,17 @@
+<xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships" xmlns="http://schemas.microsoft.com/office/spreadsheetml/2022/pivotVersionInfo" xmlns:x="http://schemas.openxmlformats.org/spreadsheetml/2006/main" targetNamespace="http://schemas.microsoft.com/office/spreadsheetml/2022/pivotVersionInfo" elementFormDefault="qualified">
+   <xsd:import namespace="http://schemas.openxmlformats.org/spreadsheetml/2006/main" schemaLocation="xlbasictypes.xsd"/>
+   <xsd:element name="cacheVersionInfo" type="CT_CacheVersionInfo"/>
+   <xsd:complexType name="CT_CacheVersionInfo">
+     <xsd:sequence>
+       <xsd:element name="requiredFeature" minOccurs="0" maxOccurs="unbounded" type="xsd:string"/>
+       <xsd:element name="lastRefreshFeature" minOccurs="0" maxOccurs="unbounded" type="xsd:string"/>
+     </xsd:sequence>
+   </xsd:complexType>
+   <xsd:element name="pivotVersionInfo" type="CT_PivotVersionInfo"/>
+   <xsd:complexType name="CT_PivotVersionInfo">
+     <xsd:sequence>
+       <xsd:element name="requiredFeature" minOccurs="0" maxOccurs="unbounded" type="xsd:string"/>
+       <xsd:element name="lastUpdateFeature" minOccurs="0" maxOccurs="unbounded" type="xsd:string"/>
+     </xsd:sequence>
+   </xsd:complexType>
+ </xsd:schema>

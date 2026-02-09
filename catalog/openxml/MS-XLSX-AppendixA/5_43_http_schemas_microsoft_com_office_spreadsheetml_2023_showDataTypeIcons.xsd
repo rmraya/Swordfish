@@ -1,0 +1,18 @@
+<xsd:schema targetNamespace="http://schemas.microsoft.com/office/spreadsheetml/2023/showDataTypeIcons" elementFormDefault="qualified" xmlns="http://schemas.microsoft.com/office/spreadsheetml/2023/showDataTypeIcons" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+   <xsd:import namespace="http://schemas.openxmlformats.org/spreadsheetml/2006/main" schemaLocation="xlbasictypes.xsd"/>
+   <xsd:complexType name="CT_ShowDataTypeIconsExt">
+     <xsd:sequence>
+       <xsd:element ref="showDataTypeIcons" minOccurs="0" maxOccurs="1"/>
+     </xsd:sequence>
+   </xsd:complexType>
+   <xsd:element name="showDataTypeIcons" type="CT_ShowDataTypeIcons"/>
+   <xsd:complexType name="CT_ShowDataTypeIcons">
+     <xsd:attribute name="visible" type="xsd:boolean" use="optional" default="true"/>
+   </xsd:complexType>
+   <xsd:complexType name="CT_ShowDataTypeIconsCustomSheetViewExt">
+     <xsd:sequence>
+       <xsd:element ref="showDataTypeIconsCustomSheetView" minOccurs="0" maxOccurs="1"/>
+     </xsd:sequence>
+   </xsd:complexType>
+   <xsd:element name="showDataTypeIconsCustomSheetView" type="CT_ShowDataTypeIcons"/>
+ </xsd:schema>

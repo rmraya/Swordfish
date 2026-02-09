@@ -1,0 +1,10 @@
+<xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships" xmlns="http://schemas.microsoft.com/office/spreadsheetml/2022/pivotRichData" xmlns:x="http://schemas.openxmlformats.org/spreadsheetml/2006/main" targetNamespace="http://schemas.microsoft.com/office/spreadsheetml/2022/pivotRichData" elementFormDefault="qualified">
+   <xsd:import namespace="http://schemas.openxmlformats.org/officeDocument/2006/relationships" schemaLocation="orel.xsd"/>
+   <xsd:import namespace="http://schemas.openxmlformats.org/spreadsheetml/2006/main" schemaLocation="xlbasictypes.xsd"/>
+   <xsd:element name="richInfo" type="CT_PivotCacheRichInfo"/>
+   <xsd:complexType name="CT_PivotCacheRichInfo">
+     <xsd:attribute name="pivotCacheGuid" use="required" type="x:ST_Guid"/>
+     <xsd:attribute name="pivotIgnoreInvalidCache" use="optional" type="xsd:boolean" default="false"/>
+     <xsd:attribute ref="r:id" use="optional"/>
+   </xsd:complexType>
+ </xsd:schema>

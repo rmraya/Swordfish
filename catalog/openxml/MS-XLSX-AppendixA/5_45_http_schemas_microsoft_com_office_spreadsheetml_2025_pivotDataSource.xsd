@@ -1,0 +1,11 @@
+<xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships" xmlns="http://schemas.microsoft.com/office/spreadsheetml/2025/pivotDataSource" xmlns:x="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:xm="http://schemas.microsoft.com/office/excel/2006/main" targetNamespace="http://schemas.microsoft.com/office/spreadsheetml/2025/pivotDataSource" elementFormDefault="qualified">
+   <xsd:import namespace="http://schemas.microsoft.com/office/excel/2006/main" schemaLocation="xlmbasictypes.xsd"/>
+   <xsd:import namespace="http://schemas.openxmlformats.org/spreadsheetml/2006/main" schemaLocation="xlbasictypes.xsd"/>
+   <xsd:element name="pivotCacheDataSource" type="CT_PivotCacheDataSource"/>
+   <xsd:complexType name="CT_PivotCacheDataSource">
+     <xsd:sequence>
+       <xsd:element ref="xm:f" minOccurs="0" maxOccurs="1"/>
+     </xsd:sequence>
+     <xsd:attribute name="ref" type="x:ST_Ref"/>
+   </xsd:complexType>
+ </xsd:schema>

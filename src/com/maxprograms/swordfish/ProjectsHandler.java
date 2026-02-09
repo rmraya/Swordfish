@@ -346,7 +346,7 @@ public class ProjectsHandler implements HttpHandler {
 		if (result == null) {
 			result = new JSONObject();
 			result.put(Constants.PROGRESS, Constants.ERROR);
-			result.put(Constants.REASON, "Null process");
+			result.put(Constants.REASON, Messages.getString("ProjectsHandler.20"));
 		}
 		return result;
 	}

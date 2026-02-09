@@ -1,0 +1,12 @@
+<xsd:schema targetNamespace="http://schemas.microsoft.com/office/spreadsheetml/2024/workbookCompatibilityVersion" elementFormDefault="qualified" xmlns="http://schemas.microsoft.com/office/spreadsheetml/2024/workbookCompatibilityVersion" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+   <xsd:complexType name="CT_WorkbookCompatibilityVersionExt">
+     <xsd:sequence>
+       <xsd:element ref="version" minOccurs="1" maxOccurs="1"/>
+     </xsd:sequence>
+   </xsd:complexType>
+   <xsd:element name="version" type="CT_Version"/>
+   <xsd:complexType name="CT_Version">
+     <xsd:attribute name="warnBelowVersion" type="xsd:unsignedInt" use="optional" default="0"/>
+     <xsd:attribute name="setVersion" type="xsd:unsignedInt"/>
+   </xsd:complexType>
+ </xsd:schema>

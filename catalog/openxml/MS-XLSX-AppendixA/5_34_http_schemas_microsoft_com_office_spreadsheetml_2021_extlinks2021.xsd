@@ -1,0 +1,15 @@
+<xsd:schema targetNamespace="http://schemas.microsoft.com/office/spreadsheetml/2021/extlinks2021" elementFormDefault="qualified" xmlns="http://schemas.microsoft.com/office/spreadsheetml/2021/extlinks2021" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships">
+   <xsd:import namespace="http://schemas.openxmlformats.org/officeDocument/2006/relationships" schemaLocation="orel.xsd"/>
+   <xsd:complexType name="CT_ExternalBookAlternateUrls">
+     <xsd:sequence>
+       <xsd:element name="absoluteUrl" type="CT_AlternateUrl" minOccurs="0" maxOccurs="1"/>
+       <xsd:element name="relativeUrl" type="CT_AlternateUrl" minOccurs="0" maxOccurs="1"/>
+     </xsd:sequence>
+     <xsd:attribute name="driveId" use="optional" type="xsd:string"/>
+     <xsd:attribute name="itemId" use="optional" type="xsd:string"/>
+   </xsd:complexType>
+   <xsd:complexType name="CT_AlternateUrl">
+     <xsd:attribute ref="r:id" use="required"/>
+   </xsd:complexType>
+   <xsd:element name="alternateUrls" type="CT_ExternalBookAlternateUrls"/>
+ </xsd:schema>

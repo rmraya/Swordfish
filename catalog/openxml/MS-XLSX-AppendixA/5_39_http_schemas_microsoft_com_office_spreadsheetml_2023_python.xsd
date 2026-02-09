@@ -1,0 +1,35 @@
+<xsd:schema targetNamespace="http://schemas.microsoft.com/office/spreadsheetml/2023/python" elementFormDefault="qualified" xmlns="http://schemas.microsoft.com/office/spreadsheetml/2023/python" xmlns:x="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+   <xsd:import namespace="http://schemas.openxmlformats.org/spreadsheetml/2006/main" schemaLocation="xlbasictypes.xsd"/>
+   <xsd:element name="python" type="CT_Python"/>
+   <xsd:complexType name="CT_Python">
+     <xsd:sequence>
+       <xsd:element name="environmentDefinition" minOccurs="0" maxOccurs="1" type="CT_PythonEnvironmentDefinition"/>
+       <xsd:element name="pythonScripts" minOccurs="0" maxOccurs="1" type="CT_PythonScripts"/>
+       <xsd:element name="extLst" type="x:CT_ExtensionList" minOccurs="0" maxOccurs="1"/>
+     </xsd:sequence>
+   </xsd:complexType>
+   <xsd:complexType name="CT_PythonScripts">
+     <xsd:sequence minOccurs="1" maxOccurs="unbounded">
+       <xsd:element name="pythonScript" type="CT_PythonScript"/>
+     </xsd:sequence>
+   </xsd:complexType>
+   <xsd:complexType name="CT_PythonScript">
+     <xsd:sequence>
+       <xsd:element name="code" type="x:ST_Xstring" minOccurs="0" maxOccurs="1"/>
+       <xsd:element name="extLst" type="x:CT_ExtensionList" minOccurs="0" maxOccurs="1"/>
+     </xsd:sequence>
+   </xsd:complexType>
+   <xsd:complexType name="CT_PythonEnvironmentDefinition">
+     <xsd:sequence>
+       <xsd:element name="initialization" type="CT_PythonInitialization" minOccurs="0" maxOccurs="1"/>
+       <xsd:element name="extLst" type="x:CT_ExtensionList" minOccurs="0"/>
+     </xsd:sequence>
+     <xsd:attribute name="id" type="x:ST_Guid"/>
+   </xsd:complexType>
+   <xsd:complexType name="CT_PythonInitialization">
+     <xsd:sequence>
+       <xsd:element name="code" type="x:ST_Xstring" minOccurs="0" maxOccurs="1"/>
+     </xsd:sequence>
+     <xsd:attribute name="userModified" type="xsd:boolean" use="optional" default="false"/>
+   </xsd:complexType>
+ </xsd:schema>

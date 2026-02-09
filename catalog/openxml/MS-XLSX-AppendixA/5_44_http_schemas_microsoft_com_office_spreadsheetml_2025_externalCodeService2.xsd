@@ -1,0 +1,12 @@
+<xsd:schema targetNamespace="http://schemas.microsoft.com/office/spreadsheetml/2025/externalCodeService2" elementFormDefault="qualified" xmlns="http://schemas.microsoft.com/office/spreadsheetml/2025/externalCodeService2" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+   <xsd:complexType name="CT_ExternalCodeServiceImageAsInputExt">
+     <xsd:sequence>
+       <xsd:element ref="externalCodeServiceImageAsInput" minOccurs="1" maxOccurs="1"/>
+     </xsd:sequence>
+   </xsd:complexType>
+   <xsd:element name="externalCodeServiceImageAsInput" type="CT_ExternalCodeServiceImageAsInput"/>
+   <xsd:complexType name="CT_ExternalCodeServiceImageAsInput">
+     <xsd:attribute name="maxWidth" type="xsd:unsignedInt" default="0"/>
+     <xsd:attribute name="maxHeight" type="xsd:unsignedInt" default="0"/>
+   </xsd:complexType>
+ </xsd:schema>

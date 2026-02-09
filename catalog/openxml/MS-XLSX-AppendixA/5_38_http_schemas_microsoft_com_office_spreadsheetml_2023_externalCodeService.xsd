@@ -1,0 +1,12 @@
+<xsd:schema targetNamespace="http://schemas.microsoft.com/office/spreadsheetml/2023/externalCodeService" elementFormDefault="qualified" xmlns="http://schemas.microsoft.com/office/spreadsheetml/2023/externalCodeService" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+   <xsd:complexType name="CT_ExternalCodeServiceExt">
+     <xsd:sequence>
+       <xsd:element ref="externalCodeService" minOccurs="1" maxOccurs="1"/>
+     </xsd:sequence>
+   </xsd:complexType>
+   <xsd:element name="externalCodeService" type="CT_ExternalCodeService"/>
+   <xsd:complexType name="CT_ExternalCodeService">
+     <xsd:attribute name="autoShow" type="xsd:unsignedInt" default="1"/>
+     <xsd:attribute name="timeout" type="xsd:unsignedInt"/>
+   </xsd:complexType>
+ </xsd:schema>

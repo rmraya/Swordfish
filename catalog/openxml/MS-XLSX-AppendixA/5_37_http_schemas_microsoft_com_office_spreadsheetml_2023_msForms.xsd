@@ -1,0 +1,29 @@
+<xsd:schema targetNamespace="http://schemas.microsoft.com/office/spreadsheetml/2023/msForms" elementFormDefault="qualified" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:x="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns="http://schemas.microsoft.com/office/spreadsheetml/2023/msForms">
+   <xsd:import namespace="http://schemas.openxmlformats.org/spreadsheetml/2006/main" schemaLocation="xlbasictypes.xsd"/>
+   <xsd:complexType name="CT_MsFormsExt">
+     <xsd:sequence>
+       <xsd:element name="msForm" type="CT_MsForm" minOccurs="1" maxOccurs="1"/>
+     </xsd:sequence>
+   </xsd:complexType>
+   <xsd:complexType name="CT_QuestionExt">
+     <xsd:sequence>
+       <xsd:element name="question" type="CT_Question" minOccurs="0" maxOccurs="1"/>
+     </xsd:sequence>
+   </xsd:complexType>
+   <xsd:complexType name="CT_MsForm">
+     <xsd:sequence>
+       <xsd:element name="syncedQuestionId" type="x:ST_Xstring" minOccurs="0" maxOccurs="unbounded"/>
+       <xsd:element name="extLst" type="x:CT_ExtensionList" minOccurs="0" maxOccurs="1"/>
+     </xsd:sequence>
+     <xsd:attribute name="id" type="x:ST_Xstring" use="required"/>
+     <xsd:attribute name="isFormConnected" type="xsd:boolean" use="optional" default="false"/>
+     <xsd:attribute name="maxResponseId" type="xsd:int" use="optional"/>
+     <xsd:attribute name="latestEventMarker" type="x:ST_Xstring" use="optional"/>
+   </xsd:complexType>
+   <xsd:complexType name="CT_Question">
+     <xsd:sequence>
+       <xsd:element name="extLst" type="x:CT_ExtensionList" minOccurs="0" maxOccurs="1"/>
+     </xsd:sequence>
+     <xsd:attribute name="id" type="x:ST_Xstring" use="required"/>
+   </xsd:complexType>
+ </xsd:schema>

@@ -7,6 +7,7 @@
 	--odd-unit: #e20606;
 	--orange: #ff9800;
 	--teal: #009688;
+	--beige: #F8EAC9;
 
 	scrollbar-color: var(--ClassicBlue80) var(--gray40);
 	scrollbar-width: thin;
@@ -161,6 +162,10 @@ thead tr {
 	border-bottom: none;
 }
 
+.locked {
+	background-color: var(--beige) !important;
+}
+
 .nopadding {
 	padding: 0 !important;
 }
@@ -169,6 +174,10 @@ thead tr {
 	border-top: 3px solid var(--ClassicBlue90) !important;
 	border-bottom: 3px solid var(--ClassicBlue90) !important;
 	background-color: var(--gray10) !important;
+}
+
+tr.locked.currentRow {
+  background-color: var(--beige) !important;
 }
 
 tbody {

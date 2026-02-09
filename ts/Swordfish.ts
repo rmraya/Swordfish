@@ -289,6 +289,7 @@ export class Swordfish {
             if ((oldCss === highcontrast) && (Swordfish.currentCss === dark || Swordfish.currentCss === light)) {
                 Swordfish.deleteAllTags('#009688', '#ffffff');
             }
+            Swordfish.createMenu();
         });
         ipcMain.on('get-rows-page', (event: IpcMainEvent) => {
             event.sender.send('set-rows-page', Swordfish.currentPreferences.pageRows);
@@ -1088,6 +1089,12 @@ export class Swordfish {
             show: false,
             icon: this.iconPath
         });
+        this.createMenu();
+    }
+
+    static createMenu(): void {
+        const iconFolder: string = nativeTheme.shouldUseHighContrastColors ? 'dark' : (nativeTheme.shouldUseDarkColors ? 'dark' : 'light');
+
         this.mainWindow.webContents.on('context-menu', (event: Electron.Event, params: any) => {
             const menu: Menu = new Menu();
             // Add each spelling suggestion
@@ -1110,7 +1117,7 @@ export class Swordfish {
             menu.popup();
         });
         let fileMenu: Menu = Menu.buildFromTemplate([
-            { label: 'Open...', accelerator: 'CmdOrCtrl+O', click: () => { Swordfish.addFile(); } }
+            { label: 'Open...', accelerator: 'CmdOrCtrl+O', click: () => { Swordfish.addFile(); }, icon: join(app.getAppPath(), 'images', iconFolder, 'addFile.png') }
         ]);
         let tagsMenu: Menu = Menu.buildFromTemplate([
             { label: 'Insert Tag "1"', accelerator: 'CmdOrCtrl+1', click: () => { Swordfish.mainWindow.webContents.send('insert-tag', { tag: 1 }); } },
@@ -1121,7 +1128,7 @@ export class Swordfish {
             { label: 'Insert Tag "6"', accelerator: 'CmdOrCtrl+6', click: () => { Swordfish.mainWindow.webContents.send('insert-tag', { tag: 6 }); } },
             { label: 'Insert Tag "7"', accelerator: 'CmdOrCtrl+7', click: () => { Swordfish.mainWindow.webContents.send('insert-tag', { tag: 7 }); } },
             { label: 'Insert Tag "8"', accelerator: 'CmdOrCtrl+8', click: () => { Swordfish.mainWindow.webContents.send('insert-tag', { tag: 8 }); } },
-            { label: 'Insert Tag "8"', accelerator: 'CmdOrCtrl+9', click: () => { Swordfish.mainWindow.webContents.send('insert-tag', { tag: 9 }); } },
+            { label: 'Insert Tag "9"', accelerator: 'CmdOrCtrl+9', click: () => { Swordfish.mainWindow.webContents.send('insert-tag', { tag: 9 }); } },
             { label: 'Insert Tag "10"', accelerator: 'CmdOrCtrl+0', click: () => { Swordfish.mainWindow.webContents.send('insert-tag', { tag: 10 }); } }
         ]);
         let editMenu: Menu = Menu.buildFromTemplate([
@@ -1134,23 +1141,20 @@ export class Swordfish {
             new MenuItem({ type: 'separator' }),
             { label: 'Edit Previous Segment', accelerator: 'PageUp', click: () => { Swordfish.mainWindow.webContents.send('previous-segment'); } },
             { label: 'Edit Next Segment', accelerator: 'PageDown', click: () => { Swordfish.mainWindow.webContents.send('next-segment'); } },
-            { label: 'Go To Segment...', accelerator: 'CmdOrCtrl+G', click: () => { Swordfish.mainWindow.webContents.send('go-to'); } },
-            { label: 'Go To Next Segment With Same Source ', accelerator: 'CmdOrCtrl+Shift+G', click: () => { Swordfish.mainWindow.webContents.send('next-same-source'); } },
+            { label: 'Go To Segment...', accelerator: 'CmdOrCtrl+G', click: () => { Swordfish.mainWindow.webContents.send('go-to'); }, icon: join(app.getAppPath(), 'images', iconFolder, 'goTo.png') },
+            { label: 'Go To Next Segment With Same Source ', accelerator: 'CmdOrCtrl+Shift+G', click: () => { Swordfish.mainWindow.webContents.send('next-same-source'); }, icon: join(app.getAppPath(), 'images', iconFolder, 'goToSource.png') },
             new MenuItem({ type: 'separator' }),
             { label: 'Edit Source Text', accelerator: 'Alt+F2', click: () => { Swordfish.mainWindow.webContents.send('edit-source'); } },
             new MenuItem({ type: 'separator' }),
             { label: 'Edit Next Untranslated Segment', accelerator: 'CmdOrCtrl+U', click: () => { Swordfish.mainWindow.webContents.send('next-untranslated'); } },
             { label: 'Edit Next Unconfirmed Segment', accelerator: 'CmdOrCtrl+Shift+U', click: () => { Swordfish.mainWindow.webContents.send('next-unconfirmed'); } },
+            { label: 'Edit Next Unconfirmed/Untranslated Segment', accelerator: 'CmdOrCtrl+Alt+U', click: () => { Swordfish.mainWindow.webContents.send('next-needs-action'); } },
             new MenuItem({ type: 'separator' }),
-            { label: 'Save Segment Changes', accelerator: 'Alt+Enter', click: () => { Swordfish.mainWindow.webContents.send('save-edit', { confirm: false, next: 'none' }); } },
-            { label: 'Discard Segment Changes', accelerator: 'Esc', click: () => { Swordfish.mainWindow.webContents.send('cancel-edit'); } },
+            { label: 'Save Segment Changes', accelerator: 'Alt+Enter', click: () => { Swordfish.mainWindow.webContents.send('save-edit', { confirm: false, next: 'none' }); }, icon: join(app.getAppPath(), 'images', iconFolder, 'saveChanges.png') },
+            { label: 'Discard Segment Changes', accelerator: 'Esc', click: () => { Swordfish.mainWindow.webContents.send('cancel-edit'); }, icon: join(app.getAppPath(), 'images', iconFolder, 'cancelEdit.png') },
             new MenuItem({ type: 'separator' }),
             { label: 'Change Case', accelerator: 'CmdOrCtrl+Alt+C', click: () => { Swordfish.mainWindow.webContents.send('change-case'); } },
-            new MenuItem({ type: 'separator' }),
-            { label: 'Split Segment', accelerator: 'CmdOrCtrl+H', click: () => { Swordfish.mainWindow.webContents.send('split-segment'); } },
-            { label: 'Merge With Next Segment', accelerator: 'CmdOrCtrl+J', click: () => { Swordfish.mainWindow.webContents.send('merge-next'); } },
-            new MenuItem({ type: 'separator' }),
-            { label: 'Replace Text', accelerator: 'CmdOrCtrl+Alt+F', click: () => { Swordfish.mainWindow.webContents.send('replace-text'); } },
+            { label: 'Replace Text', accelerator: 'CmdOrCtrl+Alt+F', click: () => { Swordfish.mainWindow.webContents.send('replace-text'); }, icon: join(app.getAppPath(), 'images', iconFolder, 'replaceText.png') },
             new MenuItem({ type: 'separator' }),
             { label: 'Insert Tag', accelerator: 'CmdOrCtrl+T', click: () => { Swordfish.mainWindow.webContents.send('insert-tag', {}); } },
             new MenuItem({ label: 'Insert Tags...', submenu: tagsMenu }),
@@ -1169,21 +1173,21 @@ export class Swordfish {
             { label: 'Memories', accelerator: 'F7', click: () => { Swordfish.viewMemories(); } },
             { label: 'Glossaries', accelerator: 'F8', click: () => { Swordfish.viewGlossaries(); } },
             new MenuItem({ type: 'separator' }),
-            { label: 'Sort Segments', accelerator: 'F3', click: () => { Swordfish.mainWindow.webContents.send('sort-segments'); } },
-            { label: 'Filter Segments', accelerator: 'CmdOrCtrl+F', click: () => { Swordfish.mainWindow.webContents.send('filter-segments'); } },
+            { label: 'Sort Segments', accelerator: 'F3', click: () => { Swordfish.mainWindow.webContents.send('sort-segments'); }, icon: join(app.getAppPath(), 'images', iconFolder, 'sort.png') },
+            { label: 'Filter Segments', accelerator: 'CmdOrCtrl+F', click: () => { Swordfish.mainWindow.webContents.send('filter-segments'); }, icon: join(app.getAppPath(), 'images', iconFolder, 'filter.png') },
             new MenuItem({ type: 'separator' }),
-            { label: 'Expand/Collapse Files Panel', accelerator: 'CmdOrCtrl+Shift+F', click: () => { Swordfish.toggleFilesPanel(); } },
-            { label: 'Expand/Collapse Right Panels', accelerator: 'CmdOrCtrl+Shift+J', click: () => { Swordfish.toggleRightPanels(); } },
+            { label: 'Expand/Collapse Files Panel', accelerator: 'CmdOrCtrl+Shift+F', click: () => { Swordfish.toggleFilesPanel(); }, icon: join(app.getAppPath(), 'images', iconFolder, 'expand.png') },
+            { label: 'Expand/Collapse Right Panels', accelerator: 'CmdOrCtrl+Shift+J', click: () => { Swordfish.toggleRightPanels(); }, icon: join(app.getAppPath(), 'images', iconFolder, 'collapse.png') },
             new MenuItem({ type: 'separator' }),
-            { label: 'Show/Hide Notes', accelerator: 'F2', click: () => { Swordfish.toggleNotes(); } },
-            { label: 'Show/Hide Review Comments', accelerator: 'Alt+F6', click: () => { Swordfish.toggleReviewComments(); } },
+            { label: 'Show/Hide Notes', accelerator: 'F2', click: () => { Swordfish.toggleNotes(); }, icon: join(app.getAppPath(), 'images', iconFolder, 'notes.png') },
+            { label: 'Show/Hide Review Comments', accelerator: 'Alt+F6', click: () => { Swordfish.toggleReviewComments(); }, icon: join(app.getAppPath(), 'images', iconFolder, 'SVG_EDIT_COMMENT.png') },
             new MenuItem({ type: 'separator' }),
             { label: 'Close Selected Tab', accelerator: 'CmdOrCtrl+W', click: () => { Swordfish.closeSelectedTab(); } },
             new MenuItem({ type: 'separator' }),
-            { label: 'First Page', accelerator: 'CmdOrCtrl+Shift+PageUp', click: () => { Swordfish.mainWindow.webContents.send('first-page'); } },
-            { label: 'Previous Page', accelerator: 'CmdOrCtrl+PageUp', click: () => { Swordfish.mainWindow.webContents.send('previous-page'); } },
-            { label: 'Next Page', accelerator: 'CmdOrCtrl+PageDown', click: () => { Swordfish.mainWindow.webContents.send('next-page'); } },
-            { label: 'Last Page', accelerator: 'CmdOrCtrl+Shift+PageDown', click: () => { Swordfish.mainWindow.webContents.send('last-page'); } },
+            { label: 'First Page', accelerator: 'CmdOrCtrl+Shift+PageUp', click: () => { Swordfish.mainWindow.webContents.send('first-page'); }, icon: join(app.getAppPath(), 'images', iconFolder, 'firstPage.png') },
+            { label: 'Previous Page', accelerator: 'CmdOrCtrl+PageUp', click: () => { Swordfish.mainWindow.webContents.send('previous-page'); }, icon: join(app.getAppPath(), 'images', iconFolder, 'previousPage.png') },
+            { label: 'Next Page', accelerator: 'CmdOrCtrl+PageDown', click: () => { Swordfish.mainWindow.webContents.send('next-page'); }, icon: join(app.getAppPath(), 'images', iconFolder, 'nextPage.png') },
+            { label: 'Last Page', accelerator: 'CmdOrCtrl+Shift+PageDown', click: () => { Swordfish.mainWindow.webContents.send('last-page'); }, icon: join(app.getAppPath(), 'images', iconFolder, 'lastPage.png') },
             new MenuItem({ type: 'separator' }),
             { label: 'Next Translation Memory Match', accelerator: 'CmdOrCtrl+Alt+Right', click: () => { Swordfish.mainWindow.webContents.send('next-match'); } },
             { label: 'Previous Translation Memory Match', accelerator: 'CmdOrCtrl+Alt+Left', click: () => { Swordfish.mainWindow.webContents.send('previous-match'); } },
@@ -1197,61 +1201,54 @@ export class Swordfish {
             viewMenu.append(new MenuItem({ label: 'Open Development Tools', accelerator: 'F12', click: () => { BrowserWindow.getFocusedWindow()?.webContents.openDevTools() } }));
         }
         let projectsMenu: Menu = Menu.buildFromTemplate([
-            { label: 'New Project', accelerator: 'CmdOrCtrl+N', click: () => { Swordfish.showAddProject(); } },
-            { label: 'Edit Project', click: () => { Swordfish.editProject(); } },
-            { label: 'Translate Projects', click: () => { Swordfish.translateProjects(); } },
-            { label: 'Export Translations/Reviews', accelerator: 'CmdOrCtrl+Alt+S', click: () => { Swordfish.mainWindow.webContents.send('export-translations'); } },
+            { label: 'New Project', accelerator: 'CmdOrCtrl+N', click: () => { Swordfish.showAddProject(); }, icon: join(app.getAppPath(), 'images', iconFolder, 'add.png') },
+            { label: 'Edit Project', click: () => { Swordfish.editProject(); }, icon: join(app.getAppPath(), 'images', iconFolder, 'edit.png') },
+            { label: 'Translate Projects', click: () => { Swordfish.translateProjects(); }, icon: join(app.getAppPath(), 'images', iconFolder, 'translate.png') },
+            { label: 'Export Translations/Reviews', accelerator: 'CmdOrCtrl+Alt+S', click: () => { Swordfish.mainWindow.webContents.send('export-translations'); }, icon: join(app.getAppPath(), 'images', iconFolder, 'exportTranslations.png') },
             { label: 'Export Translations as TMX File', click: () => { Swordfish.mainWindow.webContents.send('export-translations-tmx'); } },
             new MenuItem({ type: 'separator' }),
-            { label: 'Export XLIFF File for Review', click: () => { Swordfish.mainWindow.webContents.send('export-xliff-review'); } },
-            { label: 'Import Reviewed XLIFF File', click: () => { Swordfish.importReviewedXLIFF() } },
+            { label: 'Export XLIFF File for Review', click: () => { Swordfish.mainWindow.webContents.send('export-xliff-review'); }, icon: join(app.getAppPath(), 'images', iconFolder, 'exportXLIFF.png') },
+            { label: 'Import Reviewed XLIFF File', click: () => { Swordfish.importReviewedXLIFF() }, icon: join(app.getAppPath(), 'images', iconFolder, 'importXLIFF.png') },
             new MenuItem({ type: 'separator' }),
             { label: 'Export All Memory Matches as TMX', click: () => { Swordfish.mainWindow.webContents.send('export-matches'); } },
             { label: 'Export All Recognized Terms as TBX', click: () => { Swordfish.mainWindow.webContents.send('export-terminology-all'); } },
             new MenuItem({ type: 'separator' }),
-            { label: 'Remove Projects', click: () => { Swordfish.mainWindow.webContents.send('remove-projects'); } },
+            { label: 'Remove Projects', click: () => { Swordfish.mainWindow.webContents.send('remove-projects'); }, icon: join(app.getAppPath(), 'images', iconFolder, 'remove.png') },
             new MenuItem({ type: 'separator' }),
-            { label: 'Project Statistics', click: () => { Swordfish.mainWindow.webContents.send('request-statistics'); } },
-            { label: 'Export HTML', accelerator: 'F5', click: () => { Swordfish.mainWindow.webContents.send('export-html'); } },
+            { label: 'Project Statistics', click: () => { Swordfish.mainWindow.webContents.send('request-statistics'); }, icon: join(app.getAppPath(), 'images', iconFolder, 'statistics.png') },
+            { label: 'Export HTML', accelerator: 'F5', click: () => { Swordfish.mainWindow.webContents.send('export-html'); }, icon: join(app.getAppPath(), 'images', iconFolder, 'exportHTML.png') },
             new MenuItem({ type: 'separator' }),
-            { label: 'Import Project', click: () => { Swordfish.showImportXliff(); } },
-            { label: 'Export Project', click: () => { Swordfish.mainWindow.webContents.send('export-project'); } }
+            { label: 'Import Project', click: () => { Swordfish.showImportXliff(); }, icon: join(app.getAppPath(), 'images', iconFolder, 'import.png') },
+            { label: 'Export Project', click: () => { Swordfish.mainWindow.webContents.send('export-project'); }, icon: join(app.getAppPath(), 'images', iconFolder, 'export.png') }
         ]);
         let memoriesMenu: Menu = Menu.buildFromTemplate([
-            { label: 'Add Memory', click: () => { Swordfish.showAddMemory(); } },
-            { label: 'Remove Memory', click: () => { Swordfish.mainWindow.webContents.send('remove-memory'); } },
+            { label: 'Add Memory', click: () => { Swordfish.showAddMemory(); }, icon: join(app.getAppPath(), 'images', iconFolder, 'add.png') },
+            { label: 'Remove Memory', click: () => { Swordfish.mainWindow.webContents.send('remove-memory'); }, icon: join(app.getAppPath(), 'images', iconFolder, 'remove.png') },
             new MenuItem({ type: 'separator' }),
-            { label: 'Add RemoteTM Memory', click: () => { Swordfish.showServerSettings('memory'); } },
+            { label: 'Add RemoteTM Memory', click: () => { Swordfish.showServerSettings('memory'); }, icon: join(app.getAppPath(), 'images', iconFolder, 'remoteTM.png') },
             new MenuItem({ type: 'separator' }),
-            { label: 'Concordance Search', accelerator: 'CmdOrCtrl+Y', click: () => { Swordfish.mainWindow.webContents.send('concordance-requested'); } },
+            { label: 'Import TMX File', click: () => { Swordfish.mainWindow.webContents.send('import-tmx'); }, icon: join(app.getAppPath(), 'images', iconFolder, 'import.png') },
+            { label: 'Export Memory as TMX File', click: () => { Swordfish.mainWindow.webContents.send('export-tmx'); }, icon: join(app.getAppPath(), 'images', iconFolder, 'export.png') },
             new MenuItem({ type: 'separator' }),
-            { label: 'Import TMX File', click: () => { Swordfish.mainWindow.webContents.send('import-tmx'); } },
-            { label: 'Export Memory as TMX File', click: () => { Swordfish.mainWindow.webContents.send('export-tmx'); } },
-            new MenuItem({ type: 'separator' }),
-            { label: 'Import SDLTM File', click: () => { Swordfish.mainWindow.webContents.send('import-sdltm'); } }
+            { label: 'Import SDLTM File', click: () => { Swordfish.mainWindow.webContents.send('import-sdltm'); }, icon: join(app.getAppPath(), 'images', iconFolder, 'importSDLTM.png') },
         ]);
         let glossariesMenu: Menu = Menu.buildFromTemplate([
-            { label: 'Add Glossary', click: () => { Swordfish.showAddGlossary(); } },
-            { label: 'Remove Glossary', click: () => { Swordfish.removeGlossary(); } },
+            { label: 'Add Glossary', click: () => { Swordfish.showAddGlossary(); }, icon: join(app.getAppPath(), 'images', iconFolder, 'add.png') },
+            { label: 'Remove Glossary', click: () => { Swordfish.removeGlossary(); }, icon: join(app.getAppPath(), 'images', iconFolder, 'remove.png') },
             new MenuItem({ type: 'separator' }),
-            { label: 'Add RemoteTM Glossary', click: () => { Swordfish.showServerSettings('glossary'); } },
+            { label: 'Add RemoteTM Glossary', click: () => { Swordfish.showServerSettings('glossary'); }, icon: join(app.getAppPath(), 'images', iconFolder, 'remoteTM.png') },
             new MenuItem({ type: 'separator' }),
-            { label: 'Search Term in Glossary', accelerator: 'CmdOrCtrl+D', click: () => { Swordfish.mainWindow.webContents.send('term-search-requested'); } },
-            { label: 'Add Term to Glossary', accelerator: 'CmdOrCtrl+B', click: () => { Swordfish.mainWindow.webContents.send('add-term-requested'); } },
-            new MenuItem({ type: 'separator' }),
-            { label: 'Search on IATE', accelerator: 'CmdOrCtrl+Alt+I', click: () => { Swordfish.showIatePlugin(); } },
-            new MenuItem({ type: 'separator' }),
-            { label: 'Import Glossary', click: () => { Swordfish.mainWindow.webContents.send('import-glossary'); } },
-            { label: 'Export Glossary', click: () => { Swordfish.mainWindow.webContents.send('export-glossary'); } }
+            { label: 'Import Glossary', click: () => { Swordfish.mainWindow.webContents.send('import-glossary'); }, icon: join(app.getAppPath(), 'images', iconFolder, 'import.png') },
+            { label: 'Export Glossary', click: () => { Swordfish.mainWindow.webContents.send('export-glossary'); }, icon: join(app.getAppPath(), 'images', iconFolder, 'export.png') }
         ]);
         let aiMenu: Menu = Menu.buildFromTemplate([
-            { label: 'Fix Tags with AI', accelerator: 'CmdOrCtrl+Shift+Alt+T', click: () => { Swordfish.mainWindow.webContents.send('fix-tags'); } },
-            { label: 'Fix TM Match with AI', accelerator: 'CmdOrCtrl+Shift+M', click: () => { Swordfish.mainWindow.webContents.send('fix-selected-match'); } },
+            { label: 'Fix Tags with AI', accelerator: 'CmdOrCtrl+Shift+Alt+T', click: () => { Swordfish.mainWindow.webContents.send('fix-tags'); }, icon: join(app.getAppPath(), 'images', iconFolder, 'fixTags.png') },
+            { label: 'Fix TM Match with AI', accelerator: 'CmdOrCtrl+Shift+M', click: () => { Swordfish.mainWindow.webContents.send('fix-selected-match'); }, icon: join(app.getAppPath(), 'images', iconFolder, 'fixMatch.png') },
             new MenuItem({ type: 'separator' }),
-            { label: 'Open AI Prompt Dialog', accelerator: 'CmdOrCtrl+Shift+P', click: () => { Swordfish.mainWindow.webContents.send('open-ai-prompt'); } },
+            { label: 'Open AI Prompt Dialog', accelerator: 'CmdOrCtrl+Shift+P', click: () => { Swordfish.mainWindow.webContents.send('open-ai-prompt'); }, icon: join(app.getAppPath(), 'images', iconFolder, 'prompt.png') },
             { label: 'Copy AI Prompt to Clipboard', accelerator: 'CmdOrCtrl+Shift+C', click: () => { Swordfish.mainWindow.webContents.send('copy-ai-prompt'); } },
             new MenuItem({ type: 'separator' }),
-            { label: 'Insert AI Response in Segment', accelerator: 'CmdOrCtrl+Shift+R', click: () => { Swordfish.insertAiResponse(); } }
+            { label: 'Insert AI Response in Segment', accelerator: 'CmdOrCtrl+Shift+R', click: () => { Swordfish.insertAiResponse(); }, icon: join(app.getAppPath(), 'images', iconFolder, 'insertAIResponse.png') }
         ]);
         let helpMenu: Menu = Menu.buildFromTemplate([
             { label: 'Swordfish User Guide', accelerator: 'F1', click: () => { this.showHelp(); } },
@@ -1269,7 +1266,7 @@ export class Swordfish {
             nextUntranslatedKey = 'Ctrl+Alt+Down';
             nextUnconfirmedKey = 'Ctrl+Shift+Down';
         }
-        let termsMenu: Menu = Menu.buildFromTemplate([
+        let insrtTermsMenu: Menu = Menu.buildFromTemplate([
             { label: 'Insert  Term "1"', accelerator: 'CmdOrCtrl+Alt+1', click: () => { Swordfish.mainWindow.webContents.send('insert-tem', { term: 1 }); } },
             { label: 'Insert  Term "2"', accelerator: 'CmdOrCtrl+Alt+2', click: () => { Swordfish.mainWindow.webContents.send('insert-tem', { term: 2 }); } },
             { label: 'Insert  Term "3"', accelerator: 'CmdOrCtrl+Alt+3', click: () => { Swordfish.mainWindow.webContents.send('insert-tem', { term: 3 }); } },
@@ -1278,53 +1275,66 @@ export class Swordfish {
             { label: 'Insert  Term "6"', accelerator: 'CmdOrCtrl+Alt+6', click: () => { Swordfish.mainWindow.webContents.send('insert-tem', { term: 6 }); } },
             { label: 'Insert  Term "7"', accelerator: 'CmdOrCtrl+Alt+7', click: () => { Swordfish.mainWindow.webContents.send('insert-tem', { term: 7 }); } },
             { label: 'Insert  Term "8"', accelerator: 'CmdOrCtrl+Alt+8', click: () => { Swordfish.mainWindow.webContents.send('insert-tem', { term: 8 }); } },
-            { label: 'Insert  Term "8"', accelerator: 'CmdOrCtrl+Alt+9', click: () => { Swordfish.mainWindow.webContents.send('insert-tem', { term: 9 }); } },
+            { label: 'Insert  Term "9"', accelerator: 'CmdOrCtrl+Alt+9', click: () => { Swordfish.mainWindow.webContents.send('insert-tem', { term: 9 }); } },
             { label: 'Insert  Term "10"', accelerator: 'CmdOrCtrl+Alt+0', click: () => { Swordfish.mainWindow.webContents.send('insert-tem', { term: 10 }); } }
         ]);
         let tasksMenu: Menu = Menu.buildFromTemplate([
-            { label: 'Confirm Translation', accelerator: 'CmdOrCtrl+E', click: () => { Swordfish.mainWindow.webContents.send('save-edit', { confirm: true, next: 'none' }); } },
+            { label: 'Confirm Translation', accelerator: 'CmdOrCtrl+E', click: () => { Swordfish.mainWindow.webContents.send('save-edit', { confirm: true, next: 'none' }); }, icon: join(app.getAppPath(), 'images', iconFolder, 'SVG_FINAL.png') },
             { label: 'Unconfirm Translation', accelerator: 'CmdOrCtrl+Shift+E', click: () => { Swordfish.mainWindow.webContents.send('save-edit', { confirm: false, next: 'none', unconfirm: true }); } },
-            { label: 'Confirm and go to Next Untranslated', accelerator: nextUntranslatedKey, click: () => { Swordfish.mainWindow.webContents.send('save-edit', { confirm: true, next: 'untranslated' }); } },
-            { label: 'Confirm and go to Next Unconfirmed', accelerator: nextUnconfirmedKey, click: () => { Swordfish.mainWindow.webContents.send('save-edit', { confirm: true, next: 'unconfirmed' }); } },
+            { label: 'Confirm and go to Next Untranslated', accelerator: nextUntranslatedKey, click: () => { Swordfish.mainWindow.webContents.send('save-edit', { confirm: true, next: 'untranslated' }); }, icon: join(app.getAppPath(), 'images', iconFolder, 'SVG_UNTRANSLATED.png') },
+            { label: 'Confirm and go to Next Unconfirmed', accelerator: nextUnconfirmedKey, click: () => { Swordfish.mainWindow.webContents.send('save-edit', { confirm: true, next: 'unconfirmed' }); }, icon: join(app.getAppPath(), 'images', iconFolder, 'SVG_TRANSLATED.png') },
             new MenuItem({ type: 'separator' }),
             { label: 'Confirm All Translations', click: () => { Swordfish.mainWindow.webContents.send('confirm-all'); } },
             { label: 'Unconfirm All Translations', click: () => { Swordfish.mainWindow.webContents.send('unconfirm-all'); } },
             { label: 'Remove All Translations', click: () => { Swordfish.mainWindow.webContents.send('remove-all'); } },
             new MenuItem({ type: 'separator' }),
+            { label: 'Concordance Search', accelerator: 'CmdOrCtrl+Y', click: () => { Swordfish.mainWindow.webContents.send('concordance-requested'); }, icon: join(app.getAppPath(), 'images', iconFolder, 'concordance.png') },
+            new MenuItem({ type: 'separator' }),
             { label: 'Lock/Unlock Segment', accelerator: 'F4', click: () => { Swordfish.mainWindow.webContents.send('toggle-lock'); } },
             { label: 'Lock Repeated Segments', click: () => { Swordfish.mainWindow.webContents.send('lock-repeated'); } },
             { label: 'Unlock All Segments', click: () => { Swordfish.mainWindow.webContents.send('unlock-segments'); } },
             new MenuItem({ type: 'separator' }),
+            { label: 'Split Segment', accelerator: 'CmdOrCtrl+H', click: () => { Swordfish.mainWindow.webContents.send('split-segment'); }, icon: join(app.getAppPath(), 'images', iconFolder, 'split.png') },
+            { label: 'Merge With Next Segment', accelerator: 'CmdOrCtrl+J', click: () => { Swordfish.mainWindow.webContents.send('merge-next'); }, icon: join(app.getAppPath(), 'images', iconFolder, 'merge.png') },
+            new MenuItem({ type: 'separator' }),
             { label: 'Copy Source to Target', accelerator: 'CmdOrCtrl+P', click: () => { Swordfish.mainWindow.webContents.send('copy-source'); } },
             { label: 'Copy Sources to All Empty Targets', accelerator: 'CmdOrCtrl+Shift+P', click: () => { Swordfish.mainWindow.webContents.send('copy-all-sources'); } },
-            { label: 'Pseudo-translate Untranslated Segments', click: () => { Swordfish.mainWindow.webContents.send('pseudo-translate'); } },
+            { label: 'Pseudo-translate Untranslated Segments', click: () => { Swordfish.mainWindow.webContents.send('pseudo-translate'); } }
+        ]);
+        let termsMenu: Menu = Menu.buildFromTemplate([
+            { label: 'Get Glossary Terms', accelerator: 'CmdOrCtrl+K', click: () => { Swordfish.mainWindow.webContents.send('apply-terminology'); }, icon: join(app.getAppPath(), 'images', iconFolder, 'getTerms.png') },
+            { label: 'Get Terms for All Segments', click: () => { Swordfish.mainWindow.webContents.send('apply-terminology-all'); }, icon: join(app.getAppPath(), 'images', iconFolder, 'requestTerms.png') },
             new MenuItem({ type: 'separator' }),
-            { label: 'Get Translations from Memory', accelerator: 'CmdOrCtrl+M', click: () => { Swordfish.mainWindow.webContents.send('get-tm-matches'); } },
-            { label: 'Accept Translation Memory Match', accelerator: 'CmdOrCtrl+Alt+M', click: () => { Swordfish.mainWindow.webContents.send('accept-tm-match'); } },
-            { label: 'Apply Translation Memory to All Segments', click: () => { Swordfish.mainWindow.webContents.send('apply-tm-all'); } },
+            { label: 'Search Term in Glossary', accelerator: 'CmdOrCtrl+D', click: () => { Swordfish.mainWindow.webContents.send('term-search-requested'); }, icon: join(app.getAppPath(), 'images', iconFolder, 'termSearch.png') },
+            { label: 'Add Term to Glossary', accelerator: 'CmdOrCtrl+B', click: () => { Swordfish.mainWindow.webContents.send('add-term-requested'); }, icon: join(app.getAppPath(), 'images', iconFolder, 'addTerm.png') },
+            new MenuItem({ type: 'separator' }),
+            { label: 'Search on IATE', accelerator: 'CmdOrCtrl+Alt+I', click: () => { Swordfish.showIatePlugin(); }, icon: join(app.getAppPath(), 'images', iconFolder, 'IATE.png') },
+            new MenuItem({ type: 'separator' }),
+            { label: 'Insert Selected Term', accelerator: 'CmdOrCtrl+Alt+K', click: () => { Swordfish.mainWindow.webContents.send('insert-term', { selected: true }); } },
+            { label: 'Select Previous Term', accelerator: 'CmdOrCtrl+Alt+Up', click: () => { Swordfish.mainWindow.webContents.send('select-previous-term'); } },
+            { label: 'Select Next Term', accelerator: 'CmdOrCtrl+Alt+Down', click: () => { Swordfish.mainWindow.webContents.send('select-next-term'); } },
+            new MenuItem({ label: 'Insert Term...', submenu: insrtTermsMenu })
+        ]);
+        let qaMenu: Menu = Menu.buildFromTemplate([
+            { label: 'Check Inline Tags', accelerator: 'F9', click: () => { Swordfish.mainWindow.webContents.send('tags-analysis'); }, icon: join(app.getAppPath(), 'images', iconFolder, 'tagsAnalysis.png') },
+            { label: 'Check Initial/Trailing Spaces', accelerator: 'F10', click: () => { Swordfish.mainWindow.webContents.send('spaces-analysis'); }, icon: join(app.getAppPath(), 'images', iconFolder, 'spaceAnalysis.png') }
+        ]);
+        let tmMtMenu: Menu = Menu.buildFromTemplate([
+            { label: 'Get Translations from Memory', accelerator: 'CmdOrCtrl+M', click: () => { Swordfish.mainWindow.webContents.send('get-tm-matches'); }, icon: join(app.getAppPath(), 'images', iconFolder, 'translate.png') },
+            { label: 'Accept Translation Memory Match', accelerator: 'CmdOrCtrl+Alt+M', click: () => { Swordfish.mainWindow.webContents.send('accept-tm-match'); }, icon: join(app.getAppPath(), 'images', iconFolder, 'accept.png') },
+            { label: 'Apply Translation Memory to All Segments', click: () => { Swordfish.mainWindow.webContents.send('apply-tm-all'); }, icon: join(app.getAppPath(), 'images', iconFolder, 'requestTranslation.png') },
             { label: 'Accept All 100% Matches', click: () => { Swordfish.mainWindow.webContents.send('accept-all-matches'); } },
             { label: 'Remove All Translation Memory Matches', click: () => { Swordfish.mainWindow.webContents.send('remove-matches'); } },
             new MenuItem({ type: 'separator' }),
-            { label: 'Get Machine Translations', accelerator: 'CmdOrCtrl+L', click: () => { Swordfish.mainWindow.webContents.send('get-mt-matches'); } },
-            { label: 'Accept Machine Translation', accelerator: 'CmdOrCtrl+Alt+L', click: () => { Swordfish.mainWindow.webContents.send('accept-mt-match'); } },
+            { label: 'Get Machine Translations', accelerator: 'CmdOrCtrl+L', click: () => { Swordfish.mainWindow.webContents.send('get-mt-matches'); }, icon: join(app.getAppPath(), 'images', iconFolder, 'translate.png') },
+            { label: 'Accept Machine Translation', accelerator: 'CmdOrCtrl+Alt+L', click: () => { Swordfish.mainWindow.webContents.send('accept-mt-match'); }, icon: join(app.getAppPath(), 'images', iconFolder, 'accept.png') },
             { label: 'Apply Machine Translation to All Segments', click: () => { Swordfish.mainWindow.webContents.send('apply-mt-all'); } },
             { label: 'Accept All Machine Translations', click: () => { Swordfish.mainWindow.webContents.send('accept-all-mt'); } },
             { label: 'Remove All Machine Translations', click: () => { Swordfish.mainWindow.webContents.send('remove-mt-all'); } },
             new MenuItem({ type: 'separator' }),
-            { label: 'Get Auto-Translations', accelerator: 'CmdOrCtrl+R', click: () => { Swordfish.mainWindow.webContents.send('get-am-matches'); } },
+            { label: 'Get Auto-Translations', accelerator: 'CmdOrCtrl+R', click: () => { Swordfish.mainWindow.webContents.send('get-am-matches'); }, icon: join(app.getAppPath(), 'images', iconFolder, 'autoTranslate.png') },
             { label: 'Apply Auto-Translation to All Segments', click: () => { Swordfish.mainWindow.webContents.send('apply-am-all'); } },
-            { label: 'Remove All Auto-Translations', click: () => { Swordfish.mainWindow.webContents.send('remove-am-all'); } },
-            new MenuItem({ type: 'separator' }),
-            { label: 'Get Glossary Terms', accelerator: 'CmdOrCtrl+K', click: () => { Swordfish.mainWindow.webContents.send('apply-terminology'); } },
-            { label: 'Insert Selected Term', accelerator: 'CmdOrCtrl+Alt+K', click: () => { Swordfish.mainWindow.webContents.send('insert-tem', { selected: true }); } },
-            { label: 'Select Previous Term', accelerator: 'CmdOrCtrl+Alt+Up', click: () => { Swordfish.mainWindow.webContents.send('select-previous-term'); } },
-            { label: 'Select Next Term', accelerator: 'CmdOrCtrl+Alt+Down', click: () => { Swordfish.mainWindow.webContents.send('select-next-term'); } },
-            new MenuItem({ label: 'Insert Term...', submenu: termsMenu }),
-            { label: 'Get Terms for All Segments', click: () => { Swordfish.mainWindow.webContents.send('apply-terminology-all'); } }
-        ]);
-        let qaMenu: Menu = Menu.buildFromTemplate([
-            { label: 'Check Inline Tags', accelerator: 'F9', click: () => { Swordfish.mainWindow.webContents.send('tags-analysis'); } },
-            { label: 'Check Initial/Trailing Spaces', accelerator: 'F10', click: () => { Swordfish.mainWindow.webContents.send('spaces-analysis'); } }
+            { label: 'Remove All Auto-Translations', click: () => { Swordfish.mainWindow.webContents.send('remove-am-all'); } }
         ]);
         let template: MenuItem[] = [
             new MenuItem({ label: '&File', role: 'fileMenu', submenu: fileMenu }),
@@ -1334,6 +1344,8 @@ export class Swordfish {
             new MenuItem({ label: '&Memories', submenu: memoriesMenu }),
             new MenuItem({ label: '&Glossaries', submenu: glossariesMenu }),
             new MenuItem({ label: '&Tasks', submenu: tasksMenu }),
+            new MenuItem({ label: 'TM&-MT', submenu: tmMtMenu }),
+            new MenuItem({ label: 'Te&rms', submenu: termsMenu }),
             new MenuItem({ label: '&QA', submenu: qaMenu }),
             new MenuItem({ label: '&AI', submenu: aiMenu }),
             new MenuItem({ label: '&Help', role: 'help', submenu: helpMenu })
@@ -2522,8 +2534,9 @@ export class Swordfish {
     }
 
     static showHelp(): void {
-        shell.openExternal('file://' + join(app.getAppPath(), 'swordfish.pdf')).catch(() => {
-            shell.openPath(join(app.getAppPath(), 'swordfish.pdf')).catch((reason: any) => {
+        const path = join(app.getAppPath(), 'swordfish_' + Swordfish.currentPreferences.appLang + '.pdf');
+        shell.openExternal('file://' + path).catch(() => {
+            shell.openPath(path).catch((reason: any) => {
                 if (reason instanceof Error) {
                     console.error(reason.message);
                 }

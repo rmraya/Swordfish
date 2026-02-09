@@ -1,7 +1,7 @@
 {
     "name": "swordfish",
     "productName": "Swordfish",
-    "version": "5.15.1",
+    "version": "5.16.0",
     "description": "Swordfish Translation Editor",
     "main": "js/Swordfish.js",
     "type": "module",
@@ -21,7 +21,7 @@
         "url": "https://github.com/rmraya/Swordfish.git"
     },
     "devDependencies": {
-        "electron": "^40.0.0",
+        "electron": "^40.2.1",
         "typescript": "^5.9.3"
     },
     "dependencies": {

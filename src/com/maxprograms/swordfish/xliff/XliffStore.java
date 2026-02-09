@@ -4437,6 +4437,10 @@ public class XliffStore {
 					Element matchSource = XliffUtils.buildElement(sourceText);
 
 					if (!oldFile.equals(file)) {
+						if (!oldUnit.isEmpty()) {
+							out.write("</unit>\n".getBytes(StandardCharsets.UTF_8));
+							oldUnit = "";
+						}
 						if (!oldFile.isEmpty()) {
 							out.write("</file>\n".getBytes(StandardCharsets.UTF_8));
 						}

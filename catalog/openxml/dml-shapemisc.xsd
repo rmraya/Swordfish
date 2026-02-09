@@ -1,7 +1,0 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-<xsd:schema targetNamespace="http://schemas.openxmlformats.org/drawingml/2006/3/main" elementFormDefault="qualified" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns="http://schemas.openxmlformats.org/drawingml/2006/3/main" xmlns:odoc="http://schemas.microsoft.com/office/internal/2005/internalDocumentation">
-  <xsd:include schemaLocation="dml-basetypes.xsd" />
-  <xsd:simpleType name="ST_ShapeID">
-    <xsd:restriction base="xsd:token" />
-  </xsd:simpleType>
-</xsd:schema>

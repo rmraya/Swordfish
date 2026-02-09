@@ -253,75 +253,7 @@
 
 	<!--    Microsoft OpenXML    -->
 
-	<uri name="http://schemas.openxmlformats.org/presentationml/2006/3/main" uri="openxml/pml-slidesyncinfo.xsd" />
-	<uri name="http://schemas.openxmlformats.org/officeDocument/2006/relationships" uri="openxml/shared-relationships.xsd" />
-	<uri name="http://schemas.openxmlformats.org/drawingml/2006/3/main" uri="openxml/dml-graphicalobject.xsd" />
-	<uri name="http://schemas.openxmlformats.org/drawingml/2006/3/main" uri="openxml/dml-shapemisc.xsd" />
-	<uri name="http://schemas.openxmlformats.org/drawingml/2006/3/main" uri="openxml/dml-graphicalobjectformat.xsd" />
-	<uri name="http://schemas.openxmlformats.org/drawingml/2006/3/main" uri="openxml/dml-text.xsd" />
-	<uri name="http://schemas.openxmlformats.org/drawingml/2006/3/picture" uri="openxml/dml-picture.xsd" />
-	<uri name="http://schemas.openxmlformats.org/drawingml/2006/3/diagram" uri="openxml/dml-diagramcolortransform.xsd" />
-	<uri name="http://schemas.openxmlformats.org/drawingml/2006/3/main" uri="openxml/dml-basestylesheet.xsd" />
-	<uri name="http://schemas.openxmlformats.org/drawingml/2006/3/main" uri="openxml/dml-docproperties.xsd" />
-	<uri name="http://schemas.openxmlformats.org/drawingml/2006/3/main" uri="openxml/dml-basetypes.xsd" />
-	<uri name="http://schemas.openxmlformats.org/presentationml/2006/3/main" uri="openxml/pml-presentation.xsd" />
-	<uri name="http://schemas.openxmlformats.org/drawingml/2006/3/diagram" uri="openxml/dml-diagramlayoutvariables.xsd" />
-	<uri name="http://schemas.openxmlformats.org/drawingml/2006/3/main" uri="openxml/dml-shape3dcamera.xsd" />
-	<uri name="http://schemas.openxmlformats.org/presentationml/2006/3/main" uri="openxml/pml-slide.xsd" />
-	<uri name="http://schemas.openxmlformats.org/presentationml/2006/3/main" uri="openxml/pml-presentationproperties.xsd" />
-	<uri name="http://schemas.openxmlformats.org/drawingml/2006/3/main" uri="openxml/dml-tablestyle.xsd" />
-	<uri name="http://schemas.openxmlformats.org/drawingml/2006/3/main" uri="openxml/dml-shape3dlight.xsd" />
-	<uri name="http://schemas.openxmlformats.org/presentationml/2006/3/main" uri="openxml/pml-ptags.xsd" />
-	<uri name="http://schemas.openxmlformats.org/drawingml/2006/3/main" uri="openxml/dml-shape3dstyles.xsd" />
-	<uri name="http://schemas.openxmlformats.org/presentationml/2006/3/main" uri="openxml/pml-viewproperties.xsd" />
-	<uri name="http://schemas.openxmlformats.org/package/2006/content-types" uri="openxml/opc-contenttypes.xsd" />
-	<uri name="urn:schemas-microsoft-com:office:office" uri="openxml/vml-officedrawing.xsd" />
-	<uri name="http://schemas.openxmlformats.org/schemaLibrary/2006/2/main" uri="openxml/shared-schemalibrary.xsd" />
-	<uri name="http://schemas.openxmlformats.org/drawingml/2006/3/lockedCanvas" uri="openxml/dml-lockedcanvas.xsd" />
-	<uri name="http://schemas.openxmlformats.org/presentationml/2006/3/main" uri="openxml/pml-base.xsd" />
-	<uri name="http://schemas.openxmlformats.org/drawingml/2006/3/main" uri="openxml/dml-table.xsd" />
-	<uri name="http://schemas.microsoft.com/office/omml/2004/12/core" uri="openxml/shared-math.xsd" />
-	<uri name="http://schemas.openxmlformats.org/drawingml/2006/3/main" uri="openxml/dml-shapegeometry.xsd" />
-	<uri name="http://schemas.openxmlformats.org/officedocument/2006/2/customXml" uri="openxml/shared-customxmlprops.xsd" />
-	<uri name="http://schemas.openxmlformats.org/drawingml/2006/3/main" uri="openxml/dml-textbullet.xsd" />
-	<uri name="http://schemas.openxmlformats.org/drawingml/2006/3/diagram" uri="openxml/dml-diagramdefinition.xsd" />
-	<uri name="http://schemas.openxmlformats.org/package/2006/relationships" uri="openxml/opc-relationships.xsd" />
-	<uri name="http://schemas.openxmlformats.org/drawingml/2006/3/main" uri="openxml/dml-graphicalobjectanimation.xsd" />
-	<uri name="http://schemas.openxmlformats.org/drawingml/2006/3/compatibility" uri="openxml/dml-compat.xsd" />
-	<uri name="http://schemas.openxmlformats.org/officeDocument/2006/custom-properties" uri="openxml/shared-docpropertiescustom.xsd" />
-	<uri name="http://schemas.openxmlformats.org/drawingml/2006/3/diagram" uri="openxml/dml-diagramstyledefinition.xsd" />
-	<uri name="http://schemas.openxmlformats.org/drawingml/2006/3/main" uri="openxml/dml-shape3dscene.xsd" />
-	<uri name="http://schemas.openxmlformats.org/package/2006/metadata/core-properties" uri="openxml/opc-coreproperties.xsd" />
-	<uri name="http://schemas.openxmlformats.org/drawingml/2006/3/main" uri="openxml/dml-gvml.xsd" />
-	<uri name="http://schemas.openxmlformats.org/officeDocument/2006/2/activeX" uri="openxml/shared-activex.xsd" />
-	<uri name="http://schemas.openxmlformats.org/drawingml/2006/3/main" uri="openxml/dml-audiovideo.xsd" />
-	<uri name="http://schemas.openxmlformats.org/presentationml/2006/3/main" uri="openxml/pml-animationinfo.xsd" />
-	<uri name="http://schemas.openxmlformats.org/presentationml/2006/3/main" uri="openxml/pml-comments.xsd" />
-	<uri name="http://schemas.openxmlformats.org/drawingml/2006/3/main" uri="openxml/dml-shape3dsceneplane.xsd" />
-	<uri name="urn:schemas-microsoft-com:office:word" uri="openxml/vml-wordprocessingdrawing.xsd" />
-	<uri name="http://schemas.openxmlformats.org/drawingml/2006/3/spreadsheetDrawing" uri="openxml/dml-spreadsheetdrawing.xsd" />
-	<uri name="http://schemas.openxmlformats.org/drawingml/2006/3/main" uri="openxml/dml-textrun.xsd" />
-	<uri name="http://schemas.openxmlformats.org/drawingml/2006/3/main" uri="openxml/dml-shapeproperties.xsd" />
-	<uri name="http://schemas.openxmlformats.org/drawingml/2006/3/main" uri="openxml/dml-textchar.xsd" />
-	<uri name="urn:schemas-microsoft-com:vml" uri="openxml/vml.xsd" />
-	<uri name="http://schemas.openxmlformats.org/drawingml/2006/3/main" uri="openxml/dml-styledefaults.xsd" />
-	<uri name="http://schemas.openxmlformats.org/drawingml/2006/3/chart" uri="openxml/dml-chart.xsd" />
-	<uri name="http://schemas.openxmlformats.org/drawingml/2006/3/main" uri="openxml/dml-textpara.xsd" />
-	<uri name="http://schemas.openxmlformats.org/officeDocument/2006/docPropsVTypes" uri="openxml/shared-docpropertiesvectortypes.xsd" />
-	<uri name="http://schemas.openxmlformats.org/drawingml/2006/3/diagram" uri="openxml/dml-diagramtypes.xsd" />
-	<uri name="http://schemas.openxmlformats.org/spreadsheetml/2006/5/main" uri="openxml/sml-comments.xsd" />
-	<uri name="http://schemas.openxmlformats.org/drawingml/2006/3/main" uri="openxml/dml-stylesheet.xsd" />
-	<uri name="http://schemas.openxmlformats.org/drawingml/2006/3/main" uri="openxml/dml-shapestyle.xsd" />
-	<uri name="http://schemas.openxmlformats.org/wordprocessingml/2006/3/main" uri="openxml/wml.xsd" />
-	<uri name="http://schemas.openxmlformats.org/officeDocument/2006/extended-properties" uri="openxml/shared-docpropertiesextended.xsd" />
-	<uri name="http://schemas.openxmlformats.org/drawingml/2006/3/diagram" uri="openxml/dml-diagramdatamodel.xsd" />
-	<uri name="http://schemas.openxmlformats.org/presentationml/2006/3/main" uri="openxml/pml-ole.xsd" />
-	<uri name="http://schemas.openxmlformats.org/drawingml/2006/3/diagram" uri="openxml/dml-diagramelementpropertyset.xsd" />
-	<uri name="http://schemas.openxmlformats.org/drawingml/2006/3/chartdr" uri="openxml/dml-chartDrawing.xsd" />
-	<uri name="http://schemas.openxmlformats.org/drawingml/2006/3/main" uri="openxml/dml-shapelineproperties.xsd" />
-	<uri name="http://schemas.openxmlformats.org/drawingml/2006/3/wordprocessingDrawing" uri="openxml/dml-wordprocessingdrawing.xsd" />
-	<uri name="http://schemas.openxmlformats.org/drawingml/2006/3/main" uri="openxml/dml-shapeeffects.xsd" />
-	
+	<nextCatalog catalog="openxml/catalog.xml" />
 
 	<!-- Speech Synthesis ML -->
 

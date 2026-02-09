@@ -1,0 +1,14 @@
+<xsd:schema targetNamespace="http://schemas.microsoft.com/office/spreadsheetml/2022/richvaluerel" elementFormDefault="qualified" xmlns="http://schemas.microsoft.com/office/spreadsheetml/2022/richvaluerel" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships" xmlns:x="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+   <xsd:import namespace="http://schemas.openxmlformats.org/officeDocument/2006/relationships" schemaLocation="orel.xsd"/>
+   <xsd:import namespace="http://schemas.openxmlformats.org/spreadsheetml/2006/main" schemaLocation="xlbasictypes.xsd"/>
+   <xsd:element name="richValueRels" type="CT_RichValueRels"/>
+   <xsd:complexType name="CT_RichValueRels">
+     <xsd:sequence>
+       <xsd:element name="rel" minOccurs="0" maxOccurs="unbounded" type="CT_RichValueRelRelationship"/>
+       <xsd:element name="extLst" type="x:CT_ExtensionList" minOccurs="0" maxOccurs="1"/>
+     </xsd:sequence>
+   </xsd:complexType>
+   <xsd:complexType name="CT_RichValueRelRelationship">
+     <xsd:attribute ref="r:id" use="required"/>
+   </xsd:complexType>
+ </xsd:schema>

@@ -1,0 +1,13 @@
+<xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships" xmlns="http://schemas.microsoft.com/office/spreadsheetml/2020/pivotNov2020" xmlns:x="http://schemas.openxmlformats.org/spreadsheetml/2006/main" targetNamespace="http://schemas.microsoft.com/office/spreadsheetml/2020/pivotNov2020" elementFormDefault="qualified">
+   <xsd:import namespace="http://schemas.openxmlformats.org/spreadsheetml/2006/main" schemaLocation="xlbasictypes.xsd"/>
+   <xsd:element name="implicitMeasureSupport" type="xsd:boolean"/>
+   <xsd:element name="ignorableAfterVersion" type="CT_Ignorable"/>
+   <xsd:complexType name="CT_Ignorable">
+     <xsd:attribute name="version" type="xsd:unsignedByte" use="required"/>
+   </xsd:complexType>
+   <xsd:element name="dataFieldFutureData" type="CT_DataFieldFutureData"/>
+   <xsd:complexType name="CT_DataFieldFutureData">
+     <xsd:attribute name="version" type="xsd:unsignedByte" use="required"/>
+     <xsd:attribute name="sourceField" type="xsd:unsignedInt" use="required"/>
+   </xsd:complexType>
+ </xsd:schema>

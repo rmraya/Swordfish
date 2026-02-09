@@ -1,0 +1,46 @@
+<xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships" xmlns="http://schemas.microsoft.com/office/spreadsheetml/2023/pivot2023Calculation" xmlns:x="http://schemas.openxmlformats.org/spreadsheetml/2006/main" targetNamespace="http://schemas.microsoft.com/office/spreadsheetml/2023/pivot2023Calculation" elementFormDefault="qualified">
+   <xsd:import namespace="http://schemas.openxmlformats.org/spreadsheetml/2006/main" schemaLocation="xlbasictypes.xsd"/>
+   <xsd:element name="aggregationInfo" type="CT_AggregationInfo"/>
+   <xsd:complexType name="CT_AggregationInfo">
+     <xsd:attribute name="aggregationType" type="ST_AggregationType" use="required"/>
+     <xsd:attribute name="sourceField" type="xsd:unsignedInt" use="required"/>
+   </xsd:complexType>
+   <xsd:simpleType name="ST_AggregationType">
+     <xsd:restriction base="xsd:string">
+       <xsd:enumeration value="distinctCount"/>
+       <xsd:enumeration value="median"/>
+       <xsd:enumeration value="distinctDuplicates"/>
+       <xsd:enumeration value="countValuesDuplicated"/>
+       <xsd:enumeration value="countRepeatValues"/>
+     </xsd:restriction>
+   </xsd:simpleType>
+   <xsd:element name="featureSupportInfo" type="CT_FeatureSupport"/>
+   <xsd:complexType name="CT_FeatureSupport">
+     <xsd:attribute name="featureName" type="xsd:string" use="required"/>
+   </xsd:complexType>
+   <xsd:element name="pivotFieldSubtotals" type="CT_PivotFieldSubtotals"/>
+   <xsd:complexType name="CT_PivotFieldSubtotals">
+     <xsd:sequence>
+       <xsd:element name="subtotal" type="CT_PivotItemSubtotal" minOccurs="0" maxOccurs="unbounded"/>
+     </xsd:sequence>
+   </xsd:complexType>
+   <xsd:complexType name="CT_PivotItemSubtotal">
+     <xsd:attribute name="subtotalType" type="ST_AggregationType" use="required"/>
+     <xsd:attribute name="itemLocation" type="xsd:unsignedInt" use="required"/>
+   </xsd:complexType>
+   <xsd:element name="pivotAreaReferenceSubtotals" type="CT_PivotAreaReferenceSubtotals"/>
+   <xsd:complexType name="CT_PivotAreaReferenceSubtotals">
+     <xsd:sequence>
+       <xsd:element name="subtotal" type="CT_PivotSubtotalType" minOccurs="1" maxOccurs="unbounded"/>
+     </xsd:sequence>
+   </xsd:complexType>
+   <xsd:complexType name="CT_PivotSubtotalType">
+     <xsd:attribute name="subtotalType" type="ST_AggregationType" use="required"/>
+   </xsd:complexType>
+   <xsd:element name="pivotFieldSubtotalLineItems" type="CT_PivotTableSubtotalLineItems"/>
+   <xsd:complexType name="CT_PivotTableSubtotalLineItems">
+     <xsd:sequence>
+       <xsd:element name="subtotalLineItem" minOccurs="1" maxOccurs="unbounded" type="CT_PivotItemSubtotal"/>
+     </xsd:sequence>
+   </xsd:complexType>
+ </xsd:schema>

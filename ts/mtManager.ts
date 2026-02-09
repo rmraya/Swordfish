@@ -25,6 +25,70 @@ type MTFailure = {
     message: string;
 };
 
+type RetryOptions = {
+    attempts: number;
+    initialDelayMs: number;
+    jitterMs: number;
+};
+
+// Throttle outbound requests so we do not overwhelm MT engines or the local service.
+const DEFAULT_TRANSLATION_CONCURRENCY: number = 4;
+const DEFAULT_MATCH_UPDATE_CONCURRENCY: number = 8;
+const DEFAULT_TRANSLATION_RETRY_OPTIONS: RetryOptions = { attempts: 3, initialDelayMs: 250, jitterMs: 150 };
+const DEFAULT_MATCH_UPDATE_RETRY_OPTIONS: RetryOptions = { attempts: 3, initialDelayMs: 400, jitterMs: 200 };
+const HTTP_STATUS_DESCRIPTIONS: Record<number, string> = {
+    400: 'Bad Request',
+    401: 'Unauthorized',
+    403: 'Forbidden',
+    404: 'Not Found',
+    408: 'Request Timeout',
+    429: 'Too Many Requests',
+    500: 'Internal Server Error',
+    502: 'Bad Gateway',
+    503: 'Service Unavailable',
+    504: 'Gateway Timeout'
+};
+
+class ConcurrencyLimiter {
+    private active: number = 0;
+    private queue: Array<() => void> = [];
+    private limit: number;
+
+    constructor(limit: number) {
+        this.limit = limit > 0 ? limit : Infinity;
+    }
+
+    async run<T>(task: () => Promise<T>): Promise<T> {
+        await this.acquire();
+        try {
+            return await task();
+        } finally {
+            this.release();
+        }
+    }
+
+    private async acquire(): Promise<void> {
+        if (this.active < this.limit) {
+            this.active++;
+            return;
+        }
+        return new Promise<void>((resolve) => {
+            this.queue.push(() => {
+                this.active++;
+                resolve();
+            });
+        });
+    }
+
+    private release(): void {
+        this.active--;
+        let next: (() => void) | undefined = this.queue.shift();
+        if (next) {
+            next();
+        }
+    }
+}
+
 export class MTManager {
 
     mtEngines: MTEngine[];
@@ -33,6 +97,10 @@ export class MTManager {
     tagFixer: MTEngine | undefined = undefined;
     translationFailures: MTFailure[] = [];
     currentProject: string = '';
+    private translationLimiter: ConcurrencyLimiter;
+    private matchUpdateLimiter: ConcurrencyLimiter;
+    private translationRetryOptions: RetryOptions;
+    private matchUpdateRetryOptions: RetryOptions;
 
     readonly mtLanguages: any = {
         google: {
@@ -61,6 +129,10 @@ export class MTManager {
         this.tgtLang = tgtLang;
         this.translationFailures = [];
         this.currentProject = '';
+        this.translationLimiter = new ConcurrencyLimiter(DEFAULT_TRANSLATION_CONCURRENCY);
+        this.matchUpdateLimiter = new ConcurrencyLimiter(DEFAULT_MATCH_UPDATE_CONCURRENCY);
+        this.translationRetryOptions = { ...DEFAULT_TRANSLATION_RETRY_OPTIONS };
+        this.matchUpdateRetryOptions = { ...DEFAULT_MATCH_UPDATE_RETRY_OPTIONS };
         if (preferences.google.enabled) {
             let googleTranslator: GoogleTranslator = new GoogleTranslator(preferences.google.apiKey);
             googleTranslator.setSourceLanguage(preferences.google.srcLang);
@@ -159,16 +231,31 @@ export class MTManager {
 
     private describeError(reason: unknown): string {
         if (reason instanceof Error) {
-            return reason.message;
+            return this.annotateHttpStatus(reason.message);
         }
         if (typeof reason === "string") {
-            return reason;
+            return this.annotateHttpStatus(reason);
         }
         try {
-            return JSON.stringify(reason);
+            return this.annotateHttpStatus(JSON.stringify(reason));
         } catch (error) {
-            return String(reason);
+            return this.annotateHttpStatus(String(reason));
         }
+    }
+
+    private annotateHttpStatus(message: string): string {
+        let statusMatch: RegExpMatchArray | null = message.match(/status(?:\s+code)?\s*[:=]?\s*(\d{3})/i);
+        if (statusMatch) {
+            let code: number = parseInt(statusMatch[1], 10);
+            let description: string | undefined = HTTP_STATUS_DESCRIPTIONS[code];
+            let locale: string = Swordfish.currentPreferences?.appLang ?? 'en';
+            let messageLower: string = message.toLocaleLowerCase(locale);
+            let descriptionLower: string = description ? description.toLocaleLowerCase(locale) : '';
+            if (description && messageLower.indexOf(descriptionLower) === -1) {
+                return message + ' (' + description + ')';
+            }
+        }
+        return message;
     }
 
     private getEngineName(engine: MTEngine): string {
@@ -199,6 +286,28 @@ export class MTManager {
         let projectPart: string = failure.project ? '[' + failure.project + '] ' : '';
         let segmentPart: string = this.describeSegment(failure.segment);
         return projectPart + '[' + failure.engine + '] ' + segmentPart + ': ' + failure.message;
+    }
+
+    private async runWithRetry<T>(task: () => Promise<T>, options: RetryOptions): Promise<T> {
+        for (let attempt: number = 1; attempt <= options.attempts; attempt++) {
+            try {
+                return await task();
+            } catch (error: unknown) {
+                if (attempt === options.attempts) {
+                    throw error;
+                }
+                let baseDelay: number = options.initialDelayMs * attempt;
+                let jitter: number = Math.floor(Math.random() * options.jitterMs);
+                await this.delay(baseDelay + jitter);
+            }
+        }
+        throw new Error('Retry attempts exhausted');
+    }
+
+    private async delay(durationMs: number): Promise<void> {
+        return new Promise<void>((resolve: () => void) => {
+            setTimeout(resolve, durationMs);
+        });
     }
 
     private async getMatchForEngine(mtEngine: MTEngine, source: XMLElement, terms: { source: string, target: string }[]): Promise<MTMatch> {
@@ -260,41 +369,43 @@ export class MTManager {
     }
 
     async translateElement(source: XMLElement, project: string, file: string, unit: string, segment: string, terms: { source: string, target: string }[]): Promise<void> {
-        let segmentId: SegmentId = { file: file, unit: unit, id: segment };
-        try {
-            let matchPromises: Promise<MTMatch>[] = this.mtEngines.map((mtEngine: MTEngine) => this.getMatchForEngine(mtEngine, source, terms));
-            let results = await Promise.allSettled(matchPromises);
-            let translations: MTMatch[] = [];
-            let engineCount: number = 0;
-            for (let i = 0; i < results.length; i++) {
-                let result = results[i];
-                let engine = this.mtEngines[i];
-                let engineName = this.getEngineName(engine);
-                engineCount++;
-                if (result.status === "fulfilled") {
-                    translations.push(result.value);
-                } else {
-                    this.recordFailure(engineName, segmentId, result.reason, project);
+        return this.translationLimiter.run(async () => {
+            let segmentId: SegmentId = { file: file, unit: unit, id: segment };
+            try {
+                let matchPromises: Promise<MTMatch>[] = this.mtEngines.map((mtEngine: MTEngine) => this.runWithRetry(() => this.getMatchForEngine(mtEngine, source, terms), this.translationRetryOptions));
+                let results = await Promise.allSettled(matchPromises);
+                let translations: MTMatch[] = [];
+                let engineCount: number = 0;
+                for (let i = 0; i < results.length; i++) {
+                    let result = results[i];
+                    let engine = this.mtEngines[i];
+                    let engineName = this.getEngineName(engine);
+                    engineCount++;
+                    if (result.status === "fulfilled") {
+                        translations.push(result.value);
+                    } else {
+                        this.recordFailure(engineName, segmentId, result.reason, project);
+                    }
                 }
+                if (translations.length > 0) {
+                    this.setMTMatches({
+                        project: project,
+                        file: file,
+                        unit: unit,
+                        segment: segment,
+                        srcLang: this.srcLang,
+                        tgtLang: this.tgtLang,
+                        translations: translations,
+                        currentSegment: this.currentSegment
+                    });
+                } else if (engineCount > 0) {
+                    // All engines failed for this segment - record as failure
+                    this.recordFailure("All Engines Failed", segmentId, new Error("All translation engines failed for this segment"), project);
+                }
+            } catch (error: unknown) {
+                this.recordFailure("translateElement", segmentId, error, project);
             }
-            if (translations.length > 0) {
-                this.setMTMatches({
-                    project: project,
-                    file: file,
-                    unit: unit,
-                    segment: segment,
-                    srcLang: this.srcLang,
-                    tgtLang: this.tgtLang,
-                    translations: translations,
-                    currentSegment: this.currentSegment
-                });
-            } else if (engineCount > 0) {
-                // All engines failed for this segment - record as failure
-                this.recordFailure("All Engines Failed", segmentId, new Error("All translation engines failed for this segment"), project);
-            }
-        } catch (error: unknown) {
-            this.recordFailure("translateElement", segmentId, error, project);
-        }
+        });
     }
 
     fixTags(params: any): void {
@@ -376,11 +487,11 @@ export class MTManager {
             let engines: MTEngine[] = [];
             for (let mtEngine of this.mtEngines) {
                 if (mtEngine.fixesMatches()) {
-                    promises.push(mtEngine.fixMatch(
+                    promises.push(this.runWithRetry(() => mtEngine.fixMatch(
                         MTUtils.toXMLElement(params.source),
                         MTUtils.toXMLElement(params.matchSource),
                         MTUtils.toXMLElement(params.matchTarget)
-                    ));
+                    ), this.translationRetryOptions));
                     engines.push(mtEngine);
                 }
             }
@@ -443,11 +554,13 @@ export class MTManager {
                 return;
             }
             for (let mtEngine of this.mtEngines) {
+                let matchPromise: Promise<MTMatch>;
                 if (mtEngine.handlesTags()) {
-                    promises.push(mtEngine.getMTMatch(MTUtils.toXMLElement(segment.source), segment.terms));
+                    matchPromise = this.runWithRetry(() => mtEngine.getMTMatch(MTUtils.toXMLElement(segment.source), segment.terms), this.translationRetryOptions);
                 } else {
-                    promises.push(mtEngine.getMTMatch(MTUtils.toXMLElement(segment.plainText), segment.terms));
+                    matchPromise = this.runWithRetry(() => mtEngine.getMTMatch(MTUtils.toXMLElement(segment.plainText), segment.terms), this.translationRetryOptions);
                 }
+                promises.push(matchPromise);
                 engines.push(mtEngine);
             }
             Promise.allSettled(promises).then((results) => {
@@ -520,42 +633,46 @@ export class MTManager {
     }
 
     setMTMatches(params: any): void {
-        fetch('http://127.0.0.1:8070/projects/setMTMatches', {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify(params)
-        }).then(async (response: Response) => {
-            if (response.ok) {
-                let json: any = await response.json();
-                if (json.status !== 'Success') {
-                    console.error("Received " + JSON.stringify(json));
-                    throw new Error(json.reason);
-                }
-                if (params.currentSegment) {
-                    let current: SegmentId = params.currentSegment;
-                    if (current.file === params.file && current.unit === params.unit && current.id === params.segment) {
-                        Swordfish.getMatches({
-                            project: params.project,
-                            file: params.file,
-                            unit: params.unit,
-                            segment: params.segment
-                        });
-                    }
-                    Swordfish.mainWindow.webContents.send('end-waiting');
-                    Swordfish.mainWindow.webContents.send('set-status', '');
-                }
-            } else {
-                throw new Error("Error setting MT matches: " + response.statusText);
-            }
-        }).catch((error: any) => {
+        this.matchUpdateLimiter.run(() => this.performSetMTMatches(params)).catch((error: unknown) => {
             this.recordFailure("setMTMatches", {
                 file: params.file ?? '',
                 unit: params.unit ?? '',
                 id: params.segment ?? ''
             }, error, typeof params.project === 'string' ? params.project : undefined);
         });
+    }
+
+    private async performSetMTMatches(params: any): Promise<void> {
+        await this.runWithRetry(async () => {
+            const response: Response = await fetch('http://127.0.0.1:8070/projects/setMTMatches', {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify(params)
+            });
+            if (!response.ok) {
+                throw new Error("Error setting MT matches: " + response.statusText);
+            }
+            const json: any = await response.json();
+            if (json.status !== 'Success') {
+                console.error("Received " + JSON.stringify(json));
+                throw new Error(json.reason);
+            }
+            if (params.currentSegment) {
+                const current: SegmentId = params.currentSegment;
+                if (current.file === params.file && current.unit === params.unit && current.id === params.segment) {
+                    Swordfish.getMatches({
+                        project: params.project,
+                        file: params.file,
+                        unit: params.unit,
+                        segment: params.segment
+                    });
+                }
+                Swordfish.mainWindow.webContents.send('end-waiting');
+                Swordfish.mainWindow.webContents.send('set-status', '');
+            }
+        }, this.matchUpdateRetryOptions);
     }
 
     getMTLanguages(): any {

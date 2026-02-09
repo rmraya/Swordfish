@@ -1,0 +1,104 @@
+<xsd:schema targetNamespace="http://schemas.microsoft.com/office/spreadsheetml/2022/featurepropertybag" elementFormDefault="qualified" xmlns:x="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns="http://schemas.microsoft.com/office/spreadsheetml/2022/featurepropertybag" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships">
+   <xsd:import namespace="http://schemas.openxmlformats.org/officeDocument/2006/relationships" schemaLocation="orel.xsd"/>
+   <xsd:import namespace="http://schemas.openxmlformats.org/spreadsheetml/2006/main" schemaLocation="xlbasictypes.xsd"/>
+   <xsd:element name="FeaturePropertyBags" type="CT_FeaturePropertyBags"/>
+   <xsd:complexType name="CT_FeaturePropertyBags">
+     <xsd:sequence>
+       <xsd:element name="bagExt" type="CT_BagExtensions" minOccurs="0" maxOccurs="unbounded"/>
+       <xsd:element name="bag" type="CT_FeaturePropertyBag" minOccurs="0" maxOccurs="unbounded"/>
+       <xsd:element name="extLst" type="x:CT_ExtensionList" minOccurs="0" maxOccurs="1"/>
+     </xsd:sequence>
+     <xsd:attribute name="count" type="xsd:unsignedInt" use="optional"/>
+   </xsd:complexType>
+   <xsd:complexType name="CT_BagExtensions">
+     <xsd:sequence>
+       <xsd:element name="extLst" type="x:CT_ExtensionList" minOccurs="0" maxOccurs="1"/>
+     </xsd:sequence>
+   </xsd:complexType>
+   <xsd:complexType name="CT_FeaturePropertyBag">
+     <xsd:choice minOccurs="0" maxOccurs="unbounded">
+       <xsd:element name="a" type="CT_ArrayFeatureProperty"/>
+       <xsd:element name="bagId" type="CT_BagFeatureProperty"/>
+       <xsd:element name="i" type="CT_IntFeatureProperty"/>
+       <xsd:element name="s" type="CT_StringFeatureProperty"/>
+       <xsd:element name="b" type="CT_BoolFeatureProperty"/>
+       <xsd:element name="d" type="CT_DecimalFeatureProperty"/>
+       <xsd:element name="rel" type="CT_RelFeatureProperty"/>
+     </xsd:choice>
+     <xsd:attribute name="type" type="xsd:string" use="required"/>
+     <xsd:attribute name="extRef" type="xsd:string" use="optional"/>
+     <xsd:attribute name="bagExtId" type="xsd:unsignedInt" use="optional"/>
+     <xsd:attribute name="att" type="xsd:string" use="optional"/>
+   </xsd:complexType>
+   <xsd:complexType name="CT_BagFeatureProperty">
+     <xsd:simpleContent>
+       <xsd:extension base="xsd:unsignedInt">
+         <xsd:attribute name="k" type="xsd:string" use="required"/>
+       </xsd:extension>
+     </xsd:simpleContent>
+   </xsd:complexType>
+   <xsd:complexType name="CT_IntFeatureProperty">
+     <xsd:simpleContent>
+       <xsd:extension base="xsd:integer">
+         <xsd:attribute name="k" type="xsd:string" use="required"/>
+       </xsd:extension>
+     </xsd:simpleContent>
+   </xsd:complexType>
+   <xsd:complexType name="CT_StringFeatureProperty">
+     <xsd:simpleContent>
+       <xsd:extension base="xsd:string">
+         <xsd:attribute name="k" type="xsd:string" use="required"/>
+       </xsd:extension>
+     </xsd:simpleContent>
+   </xsd:complexType>
+   <xsd:complexType name="CT_BoolFeatureProperty">
+     <xsd:simpleContent>
+       <xsd:extension base="xsd:boolean">
+         <xsd:attribute name="k" type="xsd:string" use="required"/>
+       </xsd:extension>
+     </xsd:simpleContent>
+   </xsd:complexType>
+   <xsd:complexType name="CT_DecimalFeatureProperty">
+     <xsd:simpleContent>
+       <xsd:extension base="xsd:double">
+         <xsd:attribute name="k" type="xsd:string" use="required"/>
+       </xsd:extension>
+     </xsd:simpleContent>
+   </xsd:complexType>
+   <xsd:complexType name="CT_RelFeatureProperty">
+     <xsd:simpleContent>
+       <xsd:extension base="r:ST_RelationshipId">
+         <xsd:attribute name="k" type="xsd:string" use="required"/>
+       </xsd:extension>
+     </xsd:simpleContent>
+   </xsd:complexType>
+   <xsd:complexType name="CT_ArrayFeatureProperty">
+     <xsd:choice minOccurs="0" maxOccurs="unbounded">
+       <xsd:element name="bagId" type="xsd:unsignedInt"/>
+       <xsd:element name="i" type="xsd:integer"/>
+       <xsd:element name="s" type="xsd:string"/>
+       <xsd:element name="b" type="xsd:boolean"/>
+       <xsd:element name="d" type="xsd:double"/>
+       <xsd:element name="rel" type="r:ST_RelationshipId"/>
+     </xsd:choice>
+     <xsd:attribute name="k" type="xsd:string" use="required"/>
+   </xsd:complexType>
+   <xsd:complexType name="CT_XfComplementExt">
+     <xsd:sequence>
+       <xsd:element ref="xfComplement" minOccurs="1" maxOccurs="1"/>
+     </xsd:sequence>
+   </xsd:complexType>
+   <xsd:element name="xfComplement" type="CT_XfComplement"/>
+   <xsd:complexType name="CT_XfComplement">
+     <xsd:attribute name="i" type="xsd:unsignedInt" use="required"/>
+   </xsd:complexType>
+   <xsd:complexType name="CT_DXFComplementExt">
+     <xsd:sequence>
+       <xsd:element ref="DXFComplement" minOccurs="1" maxOccurs="1"/>
+     </xsd:sequence>
+   </xsd:complexType>
+   <xsd:element name="DXFComplement" type="CT_DXFComplement"/>
+   <xsd:complexType name="CT_DXFComplement">
+     <xsd:attribute name="i" type="xsd:unsignedInt" use="required"/>
+   </xsd:complexType>
+ </xsd:schema>

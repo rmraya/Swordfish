@@ -349,6 +349,15 @@ export class AddProject {
             return;
         }
         let options = '<option value="none" class="error">-- Select Memory --</option>';
+        memories.sort((a, b) => {
+            if (a.name.toLowerCase() < b.name.toLowerCase()) {
+                return -1;
+            }
+            if (a.name.toLowerCase() > b.name.toLowerCase()) {
+                return 1;
+            }
+            return 0;
+        });
         let length = memories.length;
         for (let i = 0; i < length; i++) {
             options = options + '<option value="' + memories[i].id + '">' + memories[i].name + '</option>';
@@ -362,6 +371,15 @@ export class AddProject {
             return;
         }
         let options: string = '<option value="none" class="error">-- Select Glossary --</option>';
+        glossaries.sort((a, b) => {
+            if (a.name.toLowerCase() < b.name.toLowerCase()) {
+                return -1;
+            }
+            if (a.name.toLowerCase() > b.name.toLowerCase()) {
+                return 1;
+            }
+            return 0;
+        });
         let length: number = glossaries.length;
         for (let i = 0; i < length; i++) {
             options = options + '<option value="' + glossaries[i].id + '">' + glossaries[i].name + '</option>';
