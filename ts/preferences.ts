@@ -72,6 +72,13 @@ export interface Preferences {
         model: string;
         fixTags: boolean;
     };
+    qwen: {
+        enabled: boolean;
+        apiKey: string;
+        region: string;
+        model: string;
+        fixTags: boolean;
+    };
     spellchecker: {
         defaultEnglish: string;
         defaultPortuguese: string;

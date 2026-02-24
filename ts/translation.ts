@@ -406,11 +406,11 @@ export class TranslationView {
     }
 
     selectFile(file: string): void {
-        let selectedFile = this.filesContainer.querySelector(`[data-file="${file}"]`);
+        let selectedFile = this.filesContainer.querySelector('[data-file="'+file+'"]');
         if (selectedFile) {
             this.filesContainer.getElementsByClassName('selectedFile')[0]?.classList.remove('selectedFile');
         }
-        this.filesContainer.querySelector(`[data-file="${file}"]`)?.classList.add('selectedFile');
+        this.filesContainer.querySelector('[data-file="'+file+'"]')?.classList.add('selectedFile');
     }
 
     setFiles(files: any[]): void {

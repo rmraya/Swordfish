@@ -107,6 +107,8 @@ public class ServicesHandler implements HttpHandler {
 				result = getSubjects();
 			} else if ("/services/getProjects".equals(url)) {
 				result = getProjectNames();
+			} else if ("/services/XSLTransform".equals(url)) {
+				result = transform(request);
 			} else if ("/services/getSpellingLanguages".equals(url)) {
 				result = getSpellingLanguages(request);
 			} else if ("/services/remoteDatabases".equals(url)) {
@@ -152,6 +154,14 @@ public class ServicesHandler implements HttpHandler {
 		return result;
 	}
 
+	private JSONObject transform(String request) throws Exception {
+		JSONObject json = new JSONObject(request);
+		String xmlFile = json.getString("xmlFile");
+		String xslFile = json.getString("xslFile");
+		String outputFile = json.getString("outputFile");
+		XsltRunner.transform(xmlFile, xslFile, outputFile);
+		return new JSONObject();
+	}
 	private JSONObject getFileFormats() {
 		JSONObject result = new JSONObject();
 		JSONArray array = new JSONArray();
@@ -644,20 +654,5 @@ public class ServicesHandler implements HttpHandler {
 			result.put("content", text);
 		}
 		return result;
-	}
-
-	private JSONObject requestEvaluation(String request) {
-		JSONObject json = new JSONObject(request);
-		return Subscriptions.requestEvaluation(json.getString("firstName"), json.getString("lastName"),
-				json.getString("email"));
-	}
-
-	private JSONObject registerSubscription(String request) {
-		JSONObject json = new JSONObject(request);
-		return Subscriptions.registerSubscription(json.getString("subscription"));
-	}
-
-	private JSONObject subscriptionStatus() {
-		return Subscriptions.subscriptionStatus();
 	}
 }

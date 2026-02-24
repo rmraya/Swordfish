@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <title>XSL Transformation</title>
+    <link id="theme" rel="stylesheet" type="text/css" href="../../css/light.css">
+    <link rel="stylesheet" type="text/css" href="../../css/fonts.css">
+</head>
+
+<body class="dialogBody">
+    <div class="paddedArea">
+        <table class="fill_width">
+            <tr>
+                <td class="middle noWrap">
+                    <label for="xmlFile">Source File</label>
+                </td>
+                <td class="fill_width middle">
+                    <input id="xmlFile" class="table_input fill_width">
+                </td>
+                <td class="middle"><button id="browseXML">Browse...</button></td>
+            </tr>
+            <tr>
+                <td class="middle noWrap">
+                    <label for="xslFile">XSL Stylesheet</label>
+                </td>
+                <td class="fill_width middle">
+                    <input id="xslFile" class="table_input fill_width">
+                </td>
+                <td class="middle"><button id="browseXSL">Browse...</button></td>
+            </tr>
+            <tr>
+                <td class="middle noWrap">
+                    <label for="outputFile">Transformed File</label>
+                </td>
+                <td class="fill_width middle">
+                    <input id="outputFile" class="table_input fill_width">
+                </td>
+                <td class="middle"><button id="browseOutput">Browse...</button></td>
+            </tr>
+        </table>
+        <table>
+            <tr>
+                <td>
+                    <input type="checkbox" id="openTransformed" class="middle">
+                    <label for="openTransformed" class="middle noWrap">Open Transformed File on Completion</label>
+                </td>
+            </tr>
+        </table>
+    </div>
+
+    <div class="buttonArea">
+        <button id="transform">Transform</button>
+    </div>
+
+    <script>
+        const { XSLTransformation } = require('../../js/XSLTransformation.js');
+        new XSLTransformation();
+    </script>
+</body>

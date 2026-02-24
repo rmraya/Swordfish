@@ -10,7 +10,7 @@
  *     Maxprograms - initial API and implementation
  *******************************************************************************/
 
-import { AnthropicTranslator, AzureTranslator, ChatGPTTranslator, DeepLTranslator, GoogleTranslator, MTEngine, MTMatch, MTUtils, MistralTranslator, ModernMTTranslator } from "mtengines";
+import { AnthropicTranslator, AzureTranslator, ChatGPTTranslator, DeepLTranslator, GoogleTranslator, MTEngine, MTMatch, MTUtils, MistralTranslator, ModernMTTranslator, QwenTranslator } from "mtengines";
 import { Language, LanguageUtils } from "typesbcp47";
 import { SAXParser, XMLElement } from "typesxml";
 import { MTContentHandler } from "./mtContentHandler.js";
@@ -187,6 +187,15 @@ export class MTManager {
                 this.tagFixer = mistralTranslator;
             }
         }
+        if (preferences.qwen.enabled) {
+            let qwenTranslator: QwenTranslator = new QwenTranslator(preferences.qwen.apiKey, preferences.qwen.region, preferences.qwen.model);
+            qwenTranslator.setSourceLanguage(srcLang);
+            qwenTranslator.setTargetLanguage(tgtLang);
+            this.mtEngines.push(qwenTranslator);
+            if (preferences.qwen.fixTags) {
+                this.tagFixer = qwenTranslator;
+            }
+        }
     }
 
     private resetFailures(): void {
@@ -355,12 +364,12 @@ export class MTManager {
             let allEnginesFailedCount: number = this.translationFailures.filter(
                 (failure: MTFailure) => failure.engine === "All Engines Failed"
             ).length;
-            
+
             let userMessage: string = '';
             if (allEnginesFailedCount > 0) {
                 userMessage = allEnginesFailedCount + " segment" + (allEnginesFailedCount === 1 ? " was" : "s were") + " not translated due to errors.";
             }
-            
+
             this.notifyFailures(this.translationFailures, userMessage);
         }
         this.resetFailures();

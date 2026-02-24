@@ -10,8 +10,8 @@
  *     Maxprograms - initial API and implementation
  *******************************************************************************/
 import { ipcRenderer, IpcRendererEvent } from "electron";
-import {ReviewComment, CommentField} from "./reviewComments.js";
 import { MetaId } from "./metadata.js";
+import { CommentField, ReviewComment } from "./reviewComments.js";
 
 export class AddComment {
 
@@ -201,7 +201,7 @@ export class AddComment {
                 let input: HTMLInputElement = document.getElementById(field.storeAs) as HTMLInputElement;
                 let value: string = input.value;
                 if (field.required && value.trim() === '') {
-                    ipcRenderer.send('show-message', { type: 'warning', message: `Enter ${field.label}`, parent: 'addCommentDialog' });
+                    ipcRenderer.send('show-message', { type: 'warning', message: 'Enter ' + field.label, parent: 'addCommentDialog' });
                     return;
                 }
                 commentFields.push(new CommentField(field.storeAs, value));
@@ -210,7 +210,7 @@ export class AddComment {
                 let select: HTMLSelectElement = document.getElementById(field.storeAs) as HTMLSelectElement;
                 let value: string = select.selectedOptions[0].text;
                 if (field.required && value.trim() === '') {
-                    ipcRenderer.send('show-message', { type: 'warning', message: `Enter ${field.label}`, parent: 'addCommentDialog' });
+                    ipcRenderer.send('show-message', { type: 'warning', message: 'Enter ' + field.label, parent: 'addCommentDialog' });
                     return;
                 }
                 commentFields.push(new CommentField(field.storeAs, value));
@@ -219,7 +219,7 @@ export class AddComment {
                 let textarea: HTMLTextAreaElement = document.getElementById(field.storeAs) as HTMLTextAreaElement;
                 let value: string = textarea.value;
                 if (field.required && value.trim() === '') {
-                    ipcRenderer.send('show-message', { type: 'warning', message: `Enter ${field.label}`, parent: 'addCommentDialog' });
+                    ipcRenderer.send('show-message', { type: 'warning', message: 'Enter ' + field.label, parent: 'addCommentDialog' });
                     return;
                 }
                 commentFields.push(new CommentField(field.storeAs, value));

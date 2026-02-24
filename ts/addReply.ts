@@ -206,7 +206,7 @@ export class AddReply {
                 let input: HTMLInputElement = document.getElementById(field.storeAs) as HTMLInputElement;
                 let value: string = input.value;
                 if (field.required && value.trim() === '') {
-                    ipcRenderer.send('show-message', { type: 'warning', message: `Enter ${field.label}`, parent: 'addCommentDialog' });
+                    ipcRenderer.send('show-message', { type: 'warning', message: 'Enter ' + field.label, parent: 'addCommentDialog' });
                     return;
                 }
                 replyFields.push(new CommentField(field.storeAs, value));
@@ -215,7 +215,7 @@ export class AddReply {
                 let select: HTMLSelectElement = document.getElementById(field.storeAs) as HTMLSelectElement;
                 let value: string = select.selectedOptions[0].text;
                 if (field.required && value.trim() === '') {
-                    ipcRenderer.send('show-message', { type: 'warning', message: `Enter ${field.label}`, parent: 'addCommentDialog' });
+                    ipcRenderer.send('show-message', { type: 'warning', message: 'Enter ' + field.label, parent: 'addCommentDialog' });
                     return;
                 }
                 replyFields.push(new CommentField(field.storeAs, value));
@@ -224,7 +224,7 @@ export class AddReply {
                 let textarea: HTMLTextAreaElement = document.getElementById(field.storeAs) as HTMLTextAreaElement;
                 let value: string = textarea.value;
                 if (field.required && value.trim() === '') {
-                    ipcRenderer.send('show-message', { type: 'warning', message: `Enter ${field.label}`, parent: 'addCommentDialog' });
+                    ipcRenderer.send('show-message', { type: 'warning', message: 'Enter ' + field.label, parent: 'addCommentDialog' });
                     return;
                 }
                 replyFields.push(new CommentField(field.storeAs, value));

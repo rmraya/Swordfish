@@ -74,6 +74,7 @@ export class Swordfish {
     static spaceAnalysisWindow: BrowserWindow;
     static systemInfoWindow: BrowserWindow;
     static promptWindow: BrowserWindow;
+    static XSLTransformationWindow: BrowserWindow;
 
     javapath: string = join(app.getAppPath(), 'bin', 'java');
 
@@ -138,6 +139,13 @@ export class Swordfish {
             enabled: false,
             apiKey: '',
             model: 'mistral-medium',
+            fixTags: false
+        },
+        qwen: {
+            enabled: false,
+            apiKey: '',
+            region: '',
+            model: '',
             fixTags: false
         },
         modernmt: {
@@ -611,6 +619,15 @@ export class Swordfish {
         ipcMain.on('browse-catalog', (event: IpcMainEvent) => {
             this.browseCatalog(event);
         });
+        ipcMain.on('browse-xsl-source', (event: IpcMainEvent) => {
+            this.browseXslSource(event);
+        });
+        ipcMain.on('browse-xsl', (event: IpcMainEvent) => {
+            this.browseXSL(event);
+        });
+        ipcMain.on('browse-output', (event: IpcMainEvent) => {
+            this.browseOutput(event);
+        });
         ipcMain.on('browse-review-model', (event: IpcMainEvent) => {
             this.browseReviewModel(event);
         });
@@ -801,7 +818,7 @@ export class Swordfish {
             Swordfish.importXliffWindow.close();
         });
         ipcMain.on('browse-xliff-import', (event: IpcMainEvent) => {
-            Swordfish.browseXLIFF(event);
+            Swordfish.browseImportXLIFF(event);
         });
         ipcMain.on('import-xliff-file', (event: IpcMainEvent, arg: any) => {
             Swordfish.importXLIFF(arg);
@@ -979,6 +996,13 @@ export class Swordfish {
         ipcMain.on('download-latest', () => {
             Swordfish.downloadLatest();
         });
+        ipcMain.on('close-XSLTransformation', () => {
+            Swordfish.XSLTransformationWindow.close();
+        });
+        ipcMain.on('XSLTransform', (event: IpcMainEvent, arg: { xmlFile: string, xslFile: string, outputFile: string, openResult: boolean }) => {
+            console.log(JSON.stringify(arg));
+            Swordfish.XSLTransformation(arg);
+        });
         ipcMain.on('close-getting-started', () => {
             Swordfish.gettingStartedWindow.close();
         });
@@ -1080,6 +1104,8 @@ export class Swordfish {
             title: app.name,
             width: this.currentDefaults.width,
             height: this.currentDefaults.height,
+            minHeight: 400,
+            minWidth: 600,
             x: this.currentDefaults.x,
             y: this.currentDefaults.y,
             webPreferences: {
@@ -1299,7 +1325,9 @@ export class Swordfish {
             new MenuItem({ type: 'separator' }),
             { label: 'Copy Source to Target', accelerator: 'CmdOrCtrl+P', click: () => { Swordfish.mainWindow.webContents.send('copy-source'); } },
             { label: 'Copy Sources to All Empty Targets', accelerator: 'CmdOrCtrl+Shift+P', click: () => { Swordfish.mainWindow.webContents.send('copy-all-sources'); } },
-            { label: 'Pseudo-translate Untranslated Segments', click: () => { Swordfish.mainWindow.webContents.send('pseudo-translate'); } }
+            { label: 'Pseudo-translate Untranslated Segments', click: () => { Swordfish.mainWindow.webContents.send('pseudo-translate'); } },
+            new MenuItem({ type: 'separator' }),
+            { label: 'XSL Transformation', click: () => { Swordfish.showXSLTransformation(); } }
         ]);
         let termsMenu: Menu = Menu.buildFromTemplate([
             { label: 'Get Glossary Terms', accelerator: 'CmdOrCtrl+K', click: () => { Swordfish.mainWindow.webContents.send('apply-terminology'); }, icon: join(app.getAppPath(), 'images', iconFolder, 'getTerms.png') },
@@ -1639,6 +1667,10 @@ export class Swordfish {
                 }
                 if (!json.hasOwnProperty('mistral')) {
                     json.mistral = { enabled: false, apiKey: '', model: 'mistral-medium', fixTags: false };
+                    needsSaving = true;
+                }
+                if (!json.hasOwnProperty('qwen')) {
+                    json.qwen = { enabled: false, apiKey: '', region: 'Singapore', model: 'qwen-mt-plus', fixTags: false };
                     needsSaving = true;
                 }
                 if (!json.hasOwnProperty('appLang')) {
@@ -2932,7 +2964,7 @@ export class Swordfish {
             defaultPath: Swordfish.currentPreferences.srx,
             properties: ['openFile'],
             filters: [
-                { name: 'SRX File', extensions: ['srx'] },
+                { name: 'SRX Files', extensions: ['srx'] },
                 { name: 'Any File', extensions: ['*'] }
             ]
         }).then((value: OpenDialogReturnValue) => {
@@ -2950,7 +2982,7 @@ export class Swordfish {
             defaultPath: Swordfish.currentPreferences.reviewModel,
             properties: ['openFile'],
             filters: [
-                { name: 'JSON File', extensions: ['json'] },
+                { name: 'JSON Files', extensions: ['json'] },
                 { name: 'Any File', extensions: ['*'] }
             ]
         }).then((value: OpenDialogReturnValue) => {
@@ -3010,12 +3042,63 @@ export class Swordfish {
             defaultPath: Swordfish.currentPreferences.catalog,
             properties: ['openFile'],
             filters: [
-                { name: 'XML File', extensions: ['xml'] },
+                { name: 'XML Files', extensions: ['xml'] },
                 { name: 'Any File', extensions: ['*'] }
             ]
         }).then((value: OpenDialogReturnValue) => {
             if (!value.canceled) {
-                event.sender.send('set-catalog', value.filePaths[0]);
+                event.sender.send('set-xml', value.filePaths[0]);
+            }
+        }).catch((error: Error) => {
+            console.error(error.message);
+        });
+    }
+
+    browseXslSource(event: IpcMainEvent): void {
+        dialog.showOpenDialog({
+            properties: ['openFile'],
+            filters: [
+                { name: 'XLIFF Files', extensions: ['xlf'] },
+                { name: 'TMX Files', extensions: ['tmx'] },
+                { name: 'TBX Files', extensions: ['tbx'] },
+                { name: 'GlossML Files', extensions: ['gls'] },
+                { name: 'XML Files', extensions: ['xml'] },
+                { name: 'Any File', extensions: ['*'] }
+            ]
+        }).then((value: OpenDialogReturnValue) => {
+            if (!value.canceled) {
+                event.sender.send('set-xsl-source', value.filePaths[0]);
+            }
+        }).catch((error: Error) => {
+            console.error(error.message);
+        });
+    }
+
+    browseXSL(event: IpcMainEvent): void {
+        dialog.showOpenDialog({
+            properties: ['openFile'],
+            filters: [
+                { name: 'XSL Files', extensions: ['xsl'] },
+                { name: 'Any File', extensions: ['*'] }
+            ]
+        }).then((value: OpenDialogReturnValue) => {
+            if (!value.canceled) {
+                event.sender.send('set-xsl', value.filePaths[0]);
+            }
+        }).catch((error: Error) => {
+            console.error(error.message);
+        });
+    }
+
+    browseOutput(event: IpcMainEvent): void {
+        dialog.showSaveDialog({
+            properties: ['createDirectory', 'showOverwriteConfirmation'],
+            filters: [
+                { name: 'Any File', extensions: ['*'] }
+            ]
+        }).then((value: SaveDialogReturnValue) => {
+            if (!value.canceled) {
+                event.sender.send('set-output', value.filePath);
             }
         }).catch((error: Error) => {
             console.error(error.message);
@@ -3357,7 +3440,7 @@ export class Swordfish {
         dialog.showOpenDialog({
             properties: ['openFile'],
             filters: [
-                { name: 'TMX File', extensions: ['tmx'] },
+                { name: 'TMX Files', extensions: ['tmx'] },
                 { name: 'Any File', extensions: ['*'] }
             ]
         }).then((value: OpenDialogReturnValue) => {
@@ -3371,7 +3454,7 @@ export class Swordfish {
         dialog.showOpenDialog({
             properties: ['openFile'],
             filters: [
-                { name: 'SDLTM File', extensions: ['sdltm'] },
+                { name: 'SDLTM Files', extensions: ['sdltm'] },
                 { name: 'Any File', extensions: ['*'] }
             ]
         }).then((value: OpenDialogReturnValue) => {
@@ -3485,7 +3568,9 @@ export class Swordfish {
         if (memories.length === 1) {
             dialog.showSaveDialog(Swordfish.mainWindow, {
                 defaultPath: memories[0].name + '.tmx',
-                filters: [{ name: 'TMX Files', extensions: ['tmx'] }, { name: 'Any File', extensions: ['*'] }],
+                filters: [
+                    { name: 'TMX Files', extensions: ['tmx'] },
+                    { name: 'Any File', extensions: ['*'] }],
                 properties: ['createDirectory', 'showOverwriteConfirmation']
             }).then((value: SaveDialogReturnValue) => {
                 if (!value.canceled) {
@@ -3536,7 +3621,9 @@ export class Swordfish {
         if (glossaries.length === 1) {
             dialog.showSaveDialog(Swordfish.mainWindow, {
                 defaultPath: glossaries[0].name + '.tmx',
-                filters: [{ name: 'TMX Files', extensions: ['tmx'] }, { name: 'Any File', extensions: ['*'] }],
+                filters: [
+                    { name: 'TMX Files', extensions: ['tmx'] },
+                    { name: 'Any File', extensions: ['*'] }],
                 properties: ['createDirectory', 'showOverwriteConfirmation']
             }).then((value: SaveDialogReturnValue) => {
                 if (!value.canceled) {
@@ -4158,7 +4245,7 @@ export class Swordfish {
             title: 'Import XLIFF File',
             properties: ['openFile'],
             filters: [
-                { name: 'XLIFF File', extensions: ['xlf'] },
+                { name: 'XLIFF Files', extensions: ['xlf'] },
                 { name: 'Any File', extensions: ['*'] }
             ]
         }).then((value: OpenDialogReturnValue) => {
@@ -4190,7 +4277,9 @@ export class Swordfish {
         }
         dialog.showSaveDialog(Swordfish.mainWindow, {
             defaultPath: description + '_review.xlf',
-            filters: [{ name: 'XLIFF Files', extensions: ['xlf'] }, { name: 'Any File', extensions: ['*'] }],
+            filters: [
+                { name: 'XLIFF Files', extensions: ['xlf'] },
+                { name: 'Any File', extensions: ['*'] }],
             properties: ['createDirectory', 'showOverwriteConfirmation']
         }).then((value: SaveDialogReturnValue) => {
             if (!value.canceled) {
@@ -4225,7 +4314,9 @@ export class Swordfish {
         }
         dialog.showSaveDialog(Swordfish.mainWindow, {
             defaultPath: description + '.xlf',
-            filters: [{ name: 'XLIFF Files', extensions: ['xlf'] }, { name: 'Any File', extensions: ['*'] }],
+            filters: [
+                { name: 'XLIFF Files', extensions: ['xlf'] },
+                { name: 'Any File', extensions: ['*'] }],
             properties: ['createDirectory', 'showOverwriteConfirmation']
         }).then((value: SaveDialogReturnValue) => {
             if (!value.canceled) {
@@ -4425,7 +4516,7 @@ export class Swordfish {
         Swordfish.setLocation(this.importXliffWindow, 'importXliff.html');
     }
 
-    static browseXLIFF(event: IpcMainEvent): void {
+    static browseImportXLIFF(event: IpcMainEvent): void {
         dialog.showOpenDialog({
             title: 'Import Project File',
             properties: ['openFile'],
@@ -6923,6 +7014,58 @@ export class Swordfish {
             Swordfish.checkUpdates(true);
         }, 2000);
     }
+
+    static showXSLTransformation(): void {
+        Swordfish.XSLTransformationWindow = new BrowserWindow({
+            parent: Swordfish.mainWindow,
+            width: 550,
+            height: 300,
+            minimizable: false,
+            maximizable: false,
+            resizable: false,
+            modal: false,
+            show: false,
+            icon: this.iconPath,
+            webPreferences: {
+                nodeIntegration: true,
+                contextIsolation: false
+            }
+        });
+        Swordfish.XSLTransformationWindow.setMenu(null);
+        let filePath: string = join(app.getAppPath(), 'html', Swordfish.currentPreferences.appLang, 'XSLTransformation.html');
+        let fileUrl: URL = new URL('file://' + filePath);
+        Swordfish.XSLTransformationWindow.loadURL(fileUrl.href);
+        Swordfish.XSLTransformationWindow.once('ready-to-show', () => {
+            Swordfish.XSLTransformationWindow.show();
+        });
+        this.XSLTransformationWindow.on('close', () => {
+            this.mainWindow.focus();
+        });
+        Swordfish.setLocation(this.XSLTransformationWindow, 'XSLTransformation.html');
+    }
+
+    static XSLTransformation(arg: { xmlFile: string, xslFile: string, outputFile: string, openResult: boolean }): void {
+        Swordfish.sendRequest('/services/XSLTransform', arg,
+            (data: any) => {
+                Swordfish.XSLTransformationWindow.close();
+                if (data.status === 'Success') {
+                    if (arg.openResult) {
+                        shell.openPath(arg.outputFile).catch((reason: string) => {
+                            Swordfish.showMessage({ type: 'error', message: reason });
+                        });
+                    } else {
+                        Swordfish.showMessage({ type: 'info', message: 'Transformation completed' });
+                    }
+                } else {
+                    Swordfish.showMessage({ type: 'error', message: data.reason });
+                }
+            },
+            (reason: string) => {
+                Swordfish.showMessage({ type: 'error', message: reason });
+            }
+        );
+    }
+
 }
 
 try {

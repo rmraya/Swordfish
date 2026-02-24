@@ -24,6 +24,10 @@ export class ThreeHorizontalPanels {
     centerHeight: number = 0;
     bottomHeight: number = 0;
 
+    topCollapsed: boolean = false;
+    centerCollapsed: boolean = false;
+    bottomCollapsed: boolean = false;
+
     weights: number[];
 
     expandedTop: number = 0;
@@ -51,6 +55,10 @@ export class ThreeHorizontalPanels {
         this.topDivider.classList.add('vdivider');
         this.topDivider.draggable = true;
         this.topDivider.addEventListener('dragstart', (event: DragEvent) => {
+            if (this.topCollapsed || this.twoPanelsCollapsed()) {
+                event.preventDefault();
+                return;
+            }
             this.dragStart(event);
         });
         this.topDivider.addEventListener('drag', (event: DragEvent) => {
@@ -73,6 +81,10 @@ export class ThreeHorizontalPanels {
         this.bottomDivider.classList.add('vdivider');
         this.bottomDivider.draggable = true;
         this.bottomDivider.addEventListener('dragstart', (event: DragEvent) => {
+            if (this.bottomCollapsed || this.twoPanelsCollapsed()) {
+                event.preventDefault();
+                return;
+            }
             this.dragStart(event);
         });
         this.bottomDivider.addEventListener('drag', (event: DragEvent) => {
@@ -127,6 +139,18 @@ export class ThreeHorizontalPanels {
         this.bottom.style.height = weights[2] + '%';
     }
 
+    isTopCollapsed():boolean {
+        return this.topCollapsed;
+    }
+
+    isCenterCollapsed():boolean {
+        return this.centerCollapsed;
+    }
+
+    isBottomCollapsed():boolean {
+        return this.bottomCollapsed;
+    }
+
     topPanel(): HTMLDivElement {
         return this.top;
     }
@@ -139,8 +163,13 @@ export class ThreeHorizontalPanels {
         return this.bottom;
     }
 
+    twoPanelsCollapsed(): boolean {
+        return (this.topCollapsed && this.centerCollapsed) 
+        || (this.topCollapsed && this.bottomCollapsed) 
+        || (this.centerCollapsed && this.bottomCollapsed);
+    }
+
     dragStart(event: DragEvent): void {
-        // change cursor shape to resizing
         document.body.style.cursor = 'ns-resize';
         this.topDivider.classList.add('dragging');
         this.topHeight = this.top.clientHeight;
@@ -179,13 +208,17 @@ export class ThreeHorizontalPanels {
     }
 
     collapseTop(): void {
-        if (this.expandedTop > 0) {
+        if (this.topCollapsed) {
+            return;
+        }
+        if (this.centerCollapsed && this.bottomCollapsed) {
             return;
         }
         const currentHeight: number = this.top.clientHeight;
         if (currentHeight <= MIN_HORIZONTAL_PANEL_HEIGHT) {
             return;
         }
+        this.topCollapsed = true;
         this.expandedTop = currentHeight;
         const centerHeight: number = this.center.clientHeight;
         const bottomHeight: number = this.bottom.clientHeight;
@@ -212,7 +245,7 @@ export class ThreeHorizontalPanels {
     }
 
     expandTop(): void {
-        if (this.expandedTop === 0) {
+        if (!this.topCollapsed) {
             return;
         }
         const totalHeight: number = this.top.clientHeight + this.center.clientHeight + this.bottom.clientHeight;
@@ -220,17 +253,22 @@ export class ThreeHorizontalPanels {
         const newCenterHeight: number = totalHeight - this.expandedTop - this.bottom.clientHeight;
         this.center.style.height = Math.max(MIN_HORIZONTAL_PANEL_HEIGHT, newCenterHeight) + 'px';
         this.updateWeights();
+        this.topCollapsed = false;
         this.expandedTop = 0;
     }
 
     collapseCenter(): void {
-        if (this.expandedCenter > 0) {
+        if (this.centerCollapsed) {
+            return;
+        }
+        if (this.topCollapsed && this.bottomCollapsed) {
             return;
         }
         const currentHeight: number = this.center.clientHeight;
         if (currentHeight <= MIN_HORIZONTAL_PANEL_HEIGHT) {
             return;
         }
+        this.centerCollapsed = true;
         this.expandedCenter = currentHeight;
         this.centerTopStoredHeight = this.top.clientHeight;
         this.centerBottomStoredHeight = this.bottom.clientHeight;
@@ -259,7 +297,7 @@ export class ThreeHorizontalPanels {
     }
 
     expandCenter(): void {
-        if (this.expandedCenter === 0) {
+        if (!this.centerCollapsed) {
             return;
         }
         if (this.centerTopStoredHeight > 0) {
@@ -270,19 +308,24 @@ export class ThreeHorizontalPanels {
         }
         this.center.style.height = this.expandedCenter + 'px';
         this.updateWeights();
+        this.centerCollapsed = false;
         this.expandedCenter = 0;
         this.centerTopStoredHeight = 0;
         this.centerBottomStoredHeight = 0;
     }
 
     collapseBottom(): void {
-        if (this.expandedBottom > 0) {
+        if (this.bottomCollapsed) {
+            return;
+        }
+        if (this.topCollapsed && this.centerCollapsed) {
             return;
         }
         const currentHeight: number = this.bottom.clientHeight;
         if (currentHeight <= MIN_HORIZONTAL_PANEL_HEIGHT) {
             return;
         }
+        this.bottomCollapsed = true;
         this.expandedBottom = currentHeight;
         const topHeight: number = this.top.clientHeight;
         const centerHeight: number = this.center.clientHeight;
@@ -309,7 +352,7 @@ export class ThreeHorizontalPanels {
     }
 
     expandBottom(): void {
-        if (this.expandedBottom === 0) {
+        if (!this.bottomCollapsed) {
             return;
         }
         const totalHeight: number = this.top.clientHeight + this.center.clientHeight + this.bottom.clientHeight;
@@ -317,6 +360,7 @@ export class ThreeHorizontalPanels {
         const newCenterHeight: number = totalHeight - this.top.clientHeight - this.expandedBottom;
         this.center.style.height = Math.max(MIN_HORIZONTAL_PANEL_HEIGHT, newCenterHeight) + 'px';
         this.updateWeights();
+        this.bottomCollapsed = false;
         this.expandedBottom = 0;
     }
 
