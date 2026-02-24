@@ -645,4 +645,19 @@ public class ServicesHandler implements HttpHandler {
 		}
 		return result;
 	}
+
+	private JSONObject requestEvaluation(String request) {
+		JSONObject json = new JSONObject(request);
+		return Subscriptions.requestEvaluation(json.getString("firstName"), json.getString("lastName"),
+				json.getString("email"));
+	}
+
+	private JSONObject registerSubscription(String request) {
+		JSONObject json = new JSONObject(request);
+		return Subscriptions.registerSubscription(json.getString("subscription"));
+	}
+
+	private JSONObject subscriptionStatus() {
+		return Subscriptions.subscriptionStatus();
+	}
 }
