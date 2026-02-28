@@ -31,6 +31,8 @@ The version of Swordfish included in the official installers from [Maxprograms D
 
 Personal Subscription Keys are available in  [Maxprograms Online Store](https://www.maxprograms.com/store/buy.html). Subscription Keys cannot be shared or transferred to different machines.
 
+Installers may occasionally be updated before the corresponding source code changes appear in this repository. Source code updates are published later, once they are ready for release. This timing difference is expected and does not affect the availability or completeness of the open source code.
+
 Subscription version includes unlimited email support at [tech@maxprograms.com](mailto:tech@maxprograms.com)
 
 ### Differences sumary
