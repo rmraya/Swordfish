@@ -406,11 +406,11 @@ export class TranslationView {
     }
 
     selectFile(file: string): void {
-        let selectedFile = this.filesContainer.querySelector('[data-file="'+file+'"]');
+        let selectedFile = this.filesContainer.querySelector('[data-file="' + file + '"]');
         if (selectedFile) {
             this.filesContainer.getElementsByClassName('selectedFile')[0]?.classList.remove('selectedFile');
         }
-        this.filesContainer.querySelector('[data-file="'+file+'"]')?.classList.add('selectedFile');
+        this.filesContainer.querySelector('[data-file="' + file + '"]')?.classList.add('selectedFile');
     }
 
     setFiles(files: any[]): void {
@@ -441,7 +441,7 @@ export class TranslationView {
                 infoSpan.classList.add('sourceSymbol');
                 infoSpan.innerHTML = TranslationView.FILE_INFO + '<small class="tooltiptext">File Info</small>';
                 infoSpan.addEventListener('click', () => {
-                    this.showFileInfo(detailsArray[0]);
+                    this.showFileInfo(detailsArray[0], sourceFile);
                 });
                 td.appendChild(infoSpan);
                 tr.appendChild(td);
@@ -494,7 +494,7 @@ export class TranslationView {
                     infoSpan.classList.add('sourceSymbol');
                     infoSpan.innerHTML = TranslationView.FILE_INFO + '<small class="tooltiptext">File Info</small>';
                     infoSpan.addEventListener('click', () => {
-                        this.showFileInfo(details);
+                        this.showFileInfo(details, sourceFile);
                     });
                     td.appendChild(infoSpan);
                     tr.appendChild(td);
@@ -542,21 +542,22 @@ export class TranslationView {
         ipcRenderer.send('show-metadata', { project: this.projectId, file: details.file });
     }
 
-    showFileInfo(details: any) {
+    showFileInfo(details: any, sourceFile: string) {
         let metadata: any = details.metadata;
         let data: any[] = metadata.data;
         let array: any[] = [];
         for (let i = 0; i < data.length; i++) {
             let meta: any = data[i];
             let category: string = meta.category || '';
-            if (category === 'format' || category === 'tool' || category === 'PI' || category === 'sourceFile' || category === 'document') {
+            if (category === 'format' || category === 'tool' || category === 'PI' || category === 'document') {
                 array.push(meta);
             }
         }
         let info: any = {
             original: details.original,
             id: details.file,
-            metadata: array
+            metadata: array,
+            sourceFile: sourceFile
         };
         ipcRenderer.send('show-file-info', info);
     }

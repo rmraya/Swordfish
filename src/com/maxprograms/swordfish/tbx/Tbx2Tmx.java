@@ -115,10 +115,14 @@ public class Tbx2Tmx {
                 for (Element note : tuvNotes) {
                     currentTUV.addContent(note);
                 }
+                tuvNotes.clear();
             }
             inTUV = true;
         }
         if ("term".equals(e.getName())) {
+            if (currentTUV == null) {
+                return;
+            }
             currentSeg = new Element("seg");
             currentTUV.addContent(currentSeg);
             List<XMLNode> content = e.getContent();
@@ -138,21 +142,34 @@ public class Tbx2Tmx {
             Element note = new Element("note");
             note.setText(e.getText());
             if (inTUV) {
-                tuvNotes.add(note);
+                if (currentTUV != null) {
+                    List<XMLNode> content = currentTUV.getContent();
+                    content.add(0, note);
+                    currentTUV.setContent(content);
+                }
             } else {
-                currentTU.addContent(note);
+                if (currentTU != null) {
+                    List<XMLNode> content = currentTU.getContent();
+                    content.add(0, note);
+                    currentTU.setContent(content);
+                }
             }
         }
         if ("termNote".equals(e.getName())) {
             String type = e.getAttributeValue("type");
-            if (!type.isBlank()) {
+            if (!type.isBlank() && currentTUV != null) {
                 Element prop = new Element("prop");
                 prop.setAttribute("type", type);
                 prop.setText(e.getText());
-                currentTUV.getContent().add(0, prop);
+                List<XMLNode> content = currentTUV.getContent();
+                content.add(0, prop);
+                currentTUV.setContent(content);
             }
         }
         if ("hi".equals(e.getName())) {
+            if (currentSeg == null) {
+                return;
+            }
             List<XMLNode> content = e.getContent();
             Iterator<XMLNode> it = content.iterator();
             while (it.hasNext()) {
@@ -170,9 +187,17 @@ public class Tbx2Tmx {
             Element note = new Element("note");
             note.setText(e.getText());
             if (inTUV) {
-                currentTUV.getContent().add(0, note);
+                if (currentTUV != null) {
+                    List<XMLNode> content = currentTUV.getContent();
+                    content.add(0, note);
+                    currentTUV.setContent(content);
+                }
             } else {
-                currentTU.getContent().add(0, note);
+                if (currentTU != null) {
+                    List<XMLNode> content = currentTU.getContent();
+                    content.add(0, note);
+                    currentTU.setContent(content);
+                }
             }
         }
         List<Element> list = e.getChildren();

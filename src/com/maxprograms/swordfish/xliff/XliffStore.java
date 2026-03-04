@@ -300,7 +300,6 @@ public class XliffStore {
 			}
 		}
 		if (filesTableEmpty && filesDataExists) {
-			logger.log(Level.INFO, "Files table is empty, populating from filesdata.");
 			sql = "INSERT INTO files (id, name) SELECT file, sourceFile FROM filesdata;";
 			try (Statement st = conn.createStatement()) {
 				st.execute(sql);

@@ -56,6 +56,17 @@ export class FileInfoDialog {
         row.appendChild(cell);
         topTable.appendChild(row);
 
+        row = document.createElement('tr');
+        cell = document.createElement('td');
+        cell.innerText = 'Source File';
+        cell.classList.add('noWrap');
+        row.appendChild(cell);
+        cell = document.createElement('td');
+        cell.innerText = details.sourceFile;
+        cell.classList.add('noWrap');
+        row.appendChild(cell);
+        topTable.appendChild(row);
+
         let metadata: any[] = details.metadata;
         for (const item of metadata) {
             row = document.createElement('tr');
