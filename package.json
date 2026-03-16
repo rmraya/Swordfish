@@ -1,7 +1,7 @@
 {
     "name": "swordfish",
     "productName": "Swordfish",
-    "version": "5.18.0",
+    "version": "5.19.0",
     "description": "Swordfish Translation Editor",
     "main": "js/Swordfish.js",
     "type": "module",
@@ -21,13 +21,13 @@
         "url": "https://github.com/rmraya/Swordfish.git"
     },
     "devDependencies": {
-        "electron": "^40.6.1",
+        "electron": "^41.0.2",
         "typescript": "^5.9.3"
     },
     "dependencies": {
-        "mtengines": "^4.5.0",
-        "sdltm": "^2.0.0",
-        "typesbcp47": "^1.18.0",
-        "typesxml": "^1.17.0"
+        "mtengines": "^4.8.0",
+        "sdltm": "^2.1.0",
+        "typesbcp47": "^1.18.1",
+        "typesxml": "^1.18.0"
     }
 }

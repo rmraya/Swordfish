@@ -11,7 +11,7 @@
  *******************************************************************************/
 
 import { BrowserWindow, ClientRequest, IncomingMessage, IpcMainEvent, Menu, MenuItem, MessageBoxOptions, MessageBoxReturnValue, Notification, OpenDialogReturnValue, Rectangle, SaveDialogReturnValue, Size, app, clipboard, dialog, ipcMain, nativeTheme, net, screen, session, shell } from "electron";
-import { AnthropicTranslator, ChatGPTTranslator, MTUtils, MistralTranslator } from "mtengines";
+import { AnthropicTranslator, ChatGPTTranslator, GeminiTranslator, MTUtils, MistralTranslator } from "mtengines";
 import { ChildProcessWithoutNullStreams, execFileSync, spawn } from "node:child_process";
 import { appendFileSync, existsSync, lstatSync, mkdirSync, readFileSync, readdirSync, rmSync, unlinkSync, writeFileSync } from "node:fs";
 import { userInfo } from "node:os";
@@ -139,6 +139,12 @@ export class Swordfish {
             enabled: false,
             apiKey: '',
             model: 'mistral-medium',
+            fixTags: false
+        },
+        gemini: {
+            enabled: false,
+            apiKey: '',
+            model: 'gemini-2.5-flash',
             fixTags: false
         },
         qwen: {
@@ -1224,7 +1230,7 @@ export class Swordfish {
             new MenuItem({ label: 'Toggle Full Screen', role: 'togglefullscreen' })
         ]);
         if (!app.isPackaged) {
-            viewMenu.append(new MenuItem({ label: 'Open Development Tools', accelerator: 'F12', click: () => { BrowserWindow.getFocusedWindow()?.webContents.openDevTools() } }));
+            viewMenu.append(new MenuItem({ label: 'Open Development Tools', accelerator: 'F12', click: () => { BrowserWindow.getFocusedWindow()?.webContents.openDevTools(); } }));
         }
         let projectsMenu: Menu = Menu.buildFromTemplate([
             { label: 'New Project', accelerator: 'CmdOrCtrl+N', click: () => { Swordfish.showAddProject(); }, icon: join(app.getAppPath(), 'images', iconFolder, 'add.png') },
@@ -1673,6 +1679,10 @@ export class Swordfish {
                     json.qwen = { enabled: false, apiKey: '', region: 'Singapore', model: 'qwen-mt-plus', fixTags: false };
                     needsSaving = true;
                 }
+                if (!json.hasOwnProperty('gemini')) {
+                    json.gemini = { enabled: false, apiKey: '', model: 'gemini-2.5-flash', fixTags: false };
+                    needsSaving = true;
+                }
                 if (!json.hasOwnProperty('appLang')) {
                     json.appLang = 'en';
                     needsSaving = true;
@@ -1750,7 +1760,7 @@ export class Swordfish {
 
     static async savePreferences(preferences: Preferences): Promise<void> {
         let validationError: string | null = null;
-        let aiValidationNeeded: boolean = preferences.chatGpt.enabled || preferences.mistral.enabled || preferences.anthropic.enabled;
+        let aiValidationNeeded: boolean = preferences.chatGpt.enabled || preferences.mistral.enabled || preferences.anthropic.enabled || preferences.gemini.enabled;
         if (aiValidationNeeded) {
             Swordfish.setPreferencesValidationWait(true);
             try {
@@ -1793,7 +1803,7 @@ export class Swordfish {
             }
             let modelsContent: string = readFileSync(modelsPath, 'utf-8');
             models = JSON.parse(modelsContent);
-            if (!(models && Array.isArray(models.ChatGPT) && Array.isArray(models.Mistral) && Array.isArray(models.Claude))) {
+            if (!(models && Array.isArray(models.ChatGPT) && Array.isArray(models.Mistral) && Array.isArray(models.Claude) && Array.isArray(models.Gemini))) {
                 throw new Error('Invalid AI models catalog.');
             }
         } catch (error) {
@@ -1843,6 +1853,21 @@ export class Swordfish {
                     }
                 } catch (error: any) {
                     return 'Unable to validate Anthropic model: ' + (error instanceof Error ? error.message : String(error));
+                }
+            }
+        }
+        if (preferences.gemini.enabled) {
+            preferences.gemini.model = preferences.gemini.model.trim().toLowerCase();
+            if (!models.Gemini.includes(preferences.gemini.model)) {
+                try {
+                    let geminiTranslator: GeminiTranslator = new GeminiTranslator(preferences.gemini.apiKey);
+                    let models: string[][] = await geminiTranslator.getAvailableModels();
+                    let geminiValid: boolean = models.some((model: string[]) => model[0] === preferences.gemini.model);
+                    if (!geminiValid) {
+                        return 'Gemini Model ' + preferences.gemini.model + ' is not valid.';
+                    }
+                } catch (error: any) {
+                    return 'Unable to validate Gemini model: ' + (error instanceof Error ? error.message : String(error));
                 }
             }
         }
@@ -2609,13 +2634,19 @@ export class Swordfish {
         switch (type) {
             case 'Swordfish':
             case "OpenXLIFF":
-            case "BCP47J":
             case "MTEngines":
             case "TypesBCP47":
             case "TypesXML":
-            case "XMLJava":
                 licenseFile = 'EclipsePublicLicense1.0.html';
                 title = 'Eclipse Public License 1.0';
+                break;
+            case "XMLJava":
+                licenseFile = 'xmljava.html';
+                title = 'Custom License';
+                break;
+            case "BCP47J":
+                licenseFile = 'bcp47j.html';
+                title = 'Custom License';
                 break;
             case "electron":
                 licenseFile = 'electron.txt';
@@ -3379,15 +3410,16 @@ export class Swordfish {
                 Swordfish.currentStatus = data;
                 let processId: string = data.process;
                 let intervalObject: NodeJS.Timeout = setInterval(() => {
-                    if (Swordfish.currentStatus.imported) {
-                        Swordfish.mainWindow.webContents.send('set-status', 'Imported ' + Swordfish.currentStatus.imported + ' units');
-                    }
                     if (Swordfish.currentStatus.status === Swordfish.SUCCESS) {
                         if (Swordfish.currentStatus.progress === Swordfish.COMPLETED) {
                             Swordfish.mainWindow.webContents.send('end-waiting');
                             Swordfish.mainWindow.webContents.send('set-status', '');
                             clearInterval(intervalObject);
-                            Swordfish.showMessage({ type: 'info', message: 'Imported ' + Swordfish.currentStatus.imported + ' segments.' });
+                            if (Swordfish.currentStatus.remotetm) {
+                                Swordfish.showMessage({ type: 'info', message: 'File uploaded.\n\nYou will receive an email with process results.' });
+                            } else if (Swordfish.currentStatus.imported !== -1) {
+                                Swordfish.showMessage({ type: 'info', message: 'Imported ' + Swordfish.currentStatus.imported + ' segments.' });
+                            }
                             if (arg.sdltm) {
                                 try {
                                     unlinkSync(arg.tmx);
@@ -4206,7 +4238,7 @@ export class Swordfish {
             if (!existsSync(logsDir)) {
                 mkdirSync(logsDir, { recursive: true });
             }
-            let timestamp: string = new Date().toISOString().replace(/[:.]/g, '-');
+            let timestamp: string = new Date().toISOString().replaceAll(/[:.]/g, '-');
             let filePath: string = join(logsDir, 'mt-errors-' + timestamp + '.txt');
             let header: string = 'Machine translation errors - ' + new Date().toLocaleString();
             let content: string = [header, '', ...logEntries].join('\n');

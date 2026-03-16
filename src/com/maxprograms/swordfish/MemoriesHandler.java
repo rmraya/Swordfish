@@ -260,9 +260,11 @@ public class MemoriesHandler implements HttpHandler {
 		new Thread(() -> {
 			try {
 				open(memory);
+				boolean isLocal = false;
 				ITmEngine engine = getEngine(memory);
 				if (engine.getType().equals(SqliteDatabase.class.getName())) {
 					localEngines.put(process, (SqliteDatabase) engine);
+					isLocal = true;
 				}
 				String project = json.has("project") ? json.getString("project") : "";
 				String client = json.has("client") ? json.getString("client") : "";
@@ -270,7 +272,11 @@ public class MemoriesHandler implements HttpHandler {
 				try {
 					int imported = engine.storeTMX(tmx.getAbsolutePath(), project, client, subject);
 					JSONObject completed = new JSONObject();
-					completed.put("imported", imported);
+					if (isLocal) {
+						completed.put("imported", imported);
+					} else {
+						completed.put("remotetm", true);
+					}
 					completed.put(Constants.PROGRESS, Constants.COMPLETED);
 					openTasks.put(process, completed);
 				} catch (Exception e) {

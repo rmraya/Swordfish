@@ -38,6 +38,7 @@ export class MtMatches {
         toolbar.classList.add('toolbar');
         toolbar.classList.add('middle');
         toolbar.classList.add('roundedBottom');
+        toolbar.style.marginTop = '4px';
         this.container.appendChild(toolbar);
 
         let acceptTranslation = document.createElement('a');

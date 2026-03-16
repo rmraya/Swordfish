@@ -10,7 +10,7 @@
  *     Maxprograms - initial API and implementation
  *******************************************************************************/
 
-import { AnthropicTranslator, AzureTranslator, ChatGPTTranslator, DeepLTranslator, GoogleTranslator, MTEngine, MTMatch, MTUtils, MistralTranslator, ModernMTTranslator, QwenTranslator } from "mtengines";
+import { AnthropicTranslator, AzureTranslator, ChatGPTTranslator, DeepLTranslator, GeminiTranslator, GoogleTranslator, MTEngine, MTMatch, MTUtils, MistralTranslator, ModernMTTranslator, QwenTranslator } from "mtengines";
 import { Language, LanguageUtils } from "typesbcp47";
 import { SAXParser, XMLElement } from "typesxml";
 import { MTContentHandler } from "./mtContentHandler.js";
@@ -187,6 +187,16 @@ export class MTManager {
                 this.tagFixer = mistralTranslator;
             }
         }
+        if (preferences.gemini.enabled) {
+            let geminiTranslator: GeminiTranslator = new GeminiTranslator(preferences.gemini.apiKey, preferences.gemini.model);
+            geminiTranslator.setSourceLanguage(srcLang);
+            geminiTranslator.setTargetLanguage(tgtLang);
+            geminiTranslator.setModel(preferences.gemini.model);
+            this.mtEngines.push(geminiTranslator);
+            if (preferences.gemini.fixTags) {
+                this.tagFixer = geminiTranslator;
+            }
+        }
         if (preferences.qwen.enabled) {
             let qwenTranslator: QwenTranslator = new QwenTranslator(preferences.qwen.apiKey, preferences.qwen.region, preferences.qwen.model);
             qwenTranslator.setSourceLanguage(srcLang);
@@ -255,12 +265,12 @@ export class MTManager {
     private annotateHttpStatus(message: string): string {
         let statusMatch: RegExpMatchArray | null = message.match(/status(?:\s+code)?\s*[:=]?\s*(\d{3})/i);
         if (statusMatch) {
-            let code: number = parseInt(statusMatch[1], 10);
+            let code: number = Number.parseInt(statusMatch[1], 10);
             let description: string | undefined = HTTP_STATUS_DESCRIPTIONS[code];
             let locale: string = Swordfish.currentPreferences?.appLang ?? 'en';
             let messageLower: string = message.toLocaleLowerCase(locale);
             let descriptionLower: string = description ? description.toLocaleLowerCase(locale) : '';
-            if (description && messageLower.indexOf(descriptionLower) === -1) {
+            if (description && !messageLower.includes(descriptionLower)) {
                 return message + ' (' + description + ')';
             }
         }

@@ -21,7 +21,7 @@ Swordfish is available in two modes:
 
 ### Source Code
 
-Source code of Swordfish is free. Anyone can download the source code, compile, modify and use it at no cost in compliance with the accompanying license terms.
+Anyone can download the source code, compile, modify and use it at no cost in compliance with the accompanying license terms. License information for all included components is available in the [licenses](licenses/README.md) directory.
 
 You can subscribe to [Maxprograms Support](https://groups.io/g/maxprograms/) at Groups.io and request peer assistance for the source code version there.
 

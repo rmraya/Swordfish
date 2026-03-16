@@ -2349,6 +2349,8 @@ export class TranslationView {
         this.currentCell.addEventListener('keyup', () => this.changeListener());
 
         let currentTranslate: HTMLTableCellElement = this.currentRow.getElementsByClassName('translate')[0] as HTMLTableCellElement;
+        // Apply highlightSpaces to ensure consistent comparison when leaving the segment
+        this.currentCell.innerHTML = this.highlightSpaces(this.currentCell.innerHTML);
         this.currentContent = this.currentCell.innerHTML;
         if (!currentTranslate.innerHTML.includes(TranslationView.LOCK_FRAGMENT)) {
             this.currentCell.contentEditable = 'true';
@@ -3306,7 +3308,7 @@ export class TranslationView {
 
     title(str: string): string {
         str = str.toLocaleLowerCase(this.tgtLang);
-        return str.replace(/(^|\s)\S/g, (t) => { return t.toLocaleUpperCase(this.tgtLang) });
+        return str.replaceAll(/(^|\s)\S/g, (t) => { return t.toLocaleUpperCase(this.tgtLang) });
     }
 
     toggle(str: string): string {

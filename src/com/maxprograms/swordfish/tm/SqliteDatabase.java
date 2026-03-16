@@ -36,6 +36,8 @@ import java.util.NavigableSet;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.Vector;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.LinkedBlockingQueue;
 import java.util.regex.Pattern;
 
 import javax.xml.parsers.ParserConfigurationException;
@@ -72,9 +74,12 @@ public class SqliteDatabase implements ITmEngine {
     private String currProject;
     private String currSubject;
     private String currCustomer;
-    private FileOutputStream output;
     private String creationId;
     private int matchThreshold;
+
+    // Connection pool for concurrent read operations
+    private BlockingQueue<Connection> readConnectionPool;
+    private static final int DEFAULT_POOL_SIZE = Runtime.getRuntime().availableProcessors();
 
     private TMXReader reader;
 
@@ -104,7 +109,16 @@ public class SqliteDatabase implements ITmEngine {
         boolean sqliteNeedsCreation = !database.exists();
         DriverManager.registerDriver(new org.sqlite.JDBC());
         conn = DriverManager.getConnection("jdbc:sqlite:" + database.getAbsolutePath().replace('\\', '/'));
+
+        // Optimize SQLite performance (must be done before setAutoCommit(false))
+        try (Statement stmt = conn.createStatement()) {
+            stmt.execute("PRAGMA journal_mode = WAL");
+            stmt.execute("PRAGMA synchronous = NORMAL");
+            stmt.execute("PRAGMA cache_size = -10000");
+        }
+
         conn.setAutoCommit(false);
+
         Function.create(conn, "REGEXP", new Function() {
             @Override
             protected void xFunc() throws SQLException {
@@ -120,6 +134,10 @@ public class SqliteDatabase implements ITmEngine {
         if (sqliteNeedsCreation) {
             createTables();
         }
+
+        // Ensure indexes exist (creates them for existing databases without indexes)
+        ensureIndexes();
+
         storeTUV = conn.prepareStatement("INSERT INTO tuv (tuid, lang, seg, puretext, textlength) VALUES (?,?,?,?,?)");
         searchTUV = conn.prepareStatement("SELECT textlength FROM tuv WHERE tuid=? AND lang=?");
         deleteTUV = conn.prepareStatement("DELETE FROM tuv WHERE tuid=? AND lang=?");
@@ -137,6 +155,9 @@ public class SqliteDatabase implements ITmEngine {
             MessageFormat mf = new MessageFormat(Messages.getString("SqliteDatabase.2"));
             throw new IOException(mf.format(new String[] { dbname }));
         }
+
+        // Initialize connection pool for concurrent read operations
+        initializeConnectionPool(DEFAULT_POOL_SIZE);
     }
 
     private void createTables() throws SQLException {
@@ -151,8 +172,105 @@ public class SqliteDatabase implements ITmEngine {
                 );""";
         try (Statement stmt = conn.createStatement()) {
             stmt.execute(sql);
+            stmt.execute("CREATE INDEX idx_tuv_lang ON tuv(lang)");
+            stmt.execute("CREATE INDEX idx_tuv_lang_textlength ON tuv(lang, textlength)");
         }
         conn.commit();
+    }
+
+    private void ensureIndexes() throws SQLException {
+        boolean langIndexExists = false;
+        boolean compositeIndexExists = false;
+
+        // Check if indexes exist
+        try (Statement stmt = conn.createStatement()) {
+            try (ResultSet rs = stmt.executeQuery(
+                    "SELECT name FROM sqlite_master WHERE type='index' AND name='idx_tuv_lang'")) {
+                langIndexExists = rs.next();
+            }
+            try (ResultSet rs = stmt.executeQuery(
+                    "SELECT name FROM sqlite_master WHERE type='index' AND name='idx_tuv_lang_textlength'")) {
+                compositeIndexExists = rs.next();
+            }
+        }
+
+        // Create missing indexes and measure time
+        if (!langIndexExists || !compositeIndexExists) {
+            logger.log(Level.INFO, "Creating missing indexes for database: " + dbname);
+            long startTime = System.currentTimeMillis();
+
+            try (Statement stmt = conn.createStatement()) {
+                if (!langIndexExists) {
+                    logger.log(Level.INFO, "  Creating index on lang column...");
+                    stmt.execute("CREATE INDEX idx_tuv_lang ON tuv(lang)");
+                }
+                if (!compositeIndexExists) {
+                    logger.log(Level.INFO, "  Creating composite index on lang and textlength columns...");
+                    stmt.execute("CREATE INDEX idx_tuv_lang_textlength ON tuv(lang, textlength)");
+                }
+            }
+            conn.commit();
+
+            long elapsedTime = System.currentTimeMillis() - startTime;
+            logger.log(Level.INFO, "Indexes created successfully in " + elapsedTime + " ms (" +
+                    String.format("%.2f", elapsedTime / 1000.0) + " seconds)");
+        }
+    }
+
+    private void initializeConnectionPool(int size) throws IOException, SQLException {
+        readConnectionPool = new LinkedBlockingQueue<>(size);
+
+        for (int i = 0; i < size; i++) {
+            try {
+                Connection readConn = DriverManager.getConnection(
+                        "jdbc:sqlite:file:" + database.getAbsolutePath().replace('\\', '/'));
+
+                // Enable WAL and optimizations for read connection (must be done before
+                // setAutoCommit(false))
+                try (Statement stmt = readConn.createStatement()) {
+                    stmt.execute("PRAGMA journal_mode = WAL");
+                    stmt.execute("PRAGMA synchronous = NORMAL");
+                    stmt.execute("PRAGMA cache_size = -10000");
+                }
+
+                readConn.setAutoCommit(false);
+
+                // Register REGEXP function for each connection
+                org.sqlite.Function.create(readConn, "REGEXP", new org.sqlite.Function() {
+                    @Override
+                    protected void xFunc() throws SQLException {
+                        String expression = value_text(0);
+                        String value = value_text(1);
+                        if (value == null)
+                            value = "";
+                        Pattern pattern = Pattern.compile(expression);
+                        result(pattern.matcher(value).find() ? 1 : 0);
+                    }
+                });
+
+                readConnectionPool.add(readConn);
+            } catch (SQLException e) {
+                logger.log(Level.ERROR, "Failed to create connection pool", e);
+                throw new IOException("Failed to initialize connection pool", e);
+            }
+        }
+    }
+
+    private Connection acquireReadConnection() throws SQLException {
+        try {
+            return readConnectionPool.take();
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            throw new SQLException("Interrupted while acquiring read connection", e);
+        }
+    }
+
+    private void releaseReadConnection(Connection conn) {
+        if (conn != null) {
+            if (!readConnectionPool.offer(conn)) {
+                logger.log(Level.ERROR, "Failed to return connection to pool - possible connection leak");
+            }
+        }
     }
 
     @Override
@@ -184,6 +302,17 @@ public class SqliteDatabase implements ITmEngine {
         searchTUV.close();
         conn.commit();
         conn.close();
+
+        // Close all pooled connections
+        if (readConnectionPool != null) {
+            while (!readConnectionPool.isEmpty()) {
+                Connection readConn = readConnectionPool.poll();
+                if (readConn != null && !readConn.isClosed()) {
+                    readConn.close();
+                }
+            }
+        }
+
         fuzzyIndex.commit();
         fuzzyIndex.close();
         tuDb.commit();
@@ -200,10 +329,22 @@ public class SqliteDatabase implements ITmEngine {
     @Override
     public List<Element> concordanceSearch(String searchStr, String srcLang, int limit, boolean isRegexp,
             boolean caseSensitive) throws SQLException, SAXException, IOException, ParserConfigurationException {
+        Connection readConn = null;
+        try {
+            readConn = acquireReadConnection();
+            return concordanceSearchWithConnection(readConn, searchStr, srcLang, limit, isRegexp, caseSensitive);
+        } finally {
+            releaseReadConnection(readConn);
+        }
+    }
+
+    private List<Element> concordanceSearchWithConnection(Connection readConn, String searchStr, String srcLang,
+            int limit, boolean isRegexp, boolean caseSensitive)
+            throws SQLException, SAXException, IOException, ParserConfigurationException {
         List<Element> result = new Vector<>();
         Vector<String> candidates = new Vector<>();
         if (isRegexp) {
-            try (PreparedStatement stmt = conn
+            try (PreparedStatement stmt = readConn
                     .prepareStatement("SELECT tuid, puretext FROM tuv WHERE lang=? AND puretext REGEXP ? LIMIT ?")) {
                 stmt.setString(1, srcLang);
                 stmt.setString(2, searchStr);
@@ -218,7 +359,7 @@ public class SqliteDatabase implements ITmEngine {
             String sql = caseSensitive ? "SELECT tuid, puretext FROM tuv WHERE lang=? AND puretext GLOB ? LIMIT ?"
                     : "SELECT tuid, puretext FROM tuv WHERE lang=? AND puretext LIKE ? LIMIT ?";
             String escaped = searchStr.replace("%", "\\%").replace("_", "\\_");
-            try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+            try (PreparedStatement stmt = readConn.prepareStatement(sql)) {
                 stmt.setString(1, srcLang);
                 stmt.setString(2, caseSensitive ? "*" + escaped + "*" : "%" + escaped + "%");
                 stmt.setInt(3, limit);
@@ -233,7 +374,7 @@ public class SqliteDatabase implements ITmEngine {
         Iterator<String> it = candidates.iterator();
         while (it.hasNext()) {
             String tuid = it.next();
-            Element tu = getTu(tuid);
+            Element tu = getTu(tuid, readConn);
             result.add(tu);
         }
         return result;
@@ -244,62 +385,63 @@ public class SqliteDatabase implements ITmEngine {
         TmsServer.deleteFolder(databaseFolder);
     }
 
-    private void writeString(String string) throws IOException {
+    private void writeString(FileOutputStream output, String string) throws IOException {
         output.write(string.getBytes(StandardCharsets.UTF_8));
     }
 
-    private void writeHeader(String srcLang) throws IOException {
-        writeString("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
-        writeString(
+    private void writeHeader(FileOutputStream output, String srcLang) throws IOException {
+        writeString(output, "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
+        writeString(output,
                 "<!DOCTYPE tmx PUBLIC \"-//LISA OSCAR:1998//DTD for Translation Memory eXchange//EN\" \"tmx14.dtd\" >\n");
-        writeString("<tmx version=\"1.4\">\n");
-        writeString("<header creationtool=\"" + Constants.APPNAME + "\" creationtoolversion=\"" + Constants.VERSION
-                + "\" srclang=\"" + srcLang + "\" "
-                + " adminlang=\"en\" datatype=\"xml\" o-tmf=\"unknown\" segtype=\"block\" creationdate=\""
-                + TMUtils.creationDate() + "\"/>\n");
+        writeString(output, "<tmx version=\"1.4\">\n");
+        writeString(output,
+                "<header creationtool=\"" + Constants.APPNAME + "\" creationtoolversion=\"" + Constants.VERSION
+                        + "\" srclang=\"" + srcLang + "\" "
+                        + " adminlang=\"en\" datatype=\"xml\" o-tmf=\"unknown\" segtype=\"block\" creationdate=\""
+                        + TMUtils.creationDate() + "\"/>\n");
     }
 
     @Override
     public void exportMemory(String tmxfile, Set<String> langs, String srcLang) throws IOException, SQLException {
-        output = new FileOutputStream(tmxfile);
-        writeHeader(srcLang);
-        writeString("<body>\n");
-        try (PreparedStatement stmt = conn.prepareStatement("SELECT lang, seg FROM tuv WHERE tuid=?")) {
-            try (Statement tus = conn.createStatement()) {
-                try (ResultSet tuKeys = tus.executeQuery("SELECT DISTINCT TUID from TUV")) {
-                    while (tuKeys.next()) {
-                        String tuid = tuKeys.getString(1);
-                        Element tu = tuDb.getTu(tuid);
-                        stmt.setString(1, tuid);
-                        int count = 0;
-                        try (ResultSet rs = stmt.executeQuery()) {
-                            while (rs.next()) {
-                                String lang = rs.getString(1);
-                                String seg = rs.getString(2);
-                                if (seg.equals("<seg></seg>") || !langs.contains(lang)) {
-                                    continue;
-                                }
-                                try {
-                                    Element tuv = TMUtils.buildTuv(lang, seg);
-                                    tu.addContent(tuv);
-                                    count++;
-                                } catch (Exception e) {
-                                    logger.log(Level.ERROR, Messages.getString("SqliteDatabase.3"), e);
-                                    logger.log(Level.INFO, "seg: " + seg);
+        try (FileOutputStream output = new FileOutputStream(tmxfile)) {
+            writeHeader(output, srcLang);
+            writeString(output, "<body>\n");
+            try (PreparedStatement stmt = conn.prepareStatement("SELECT lang, seg FROM tuv WHERE tuid=?")) {
+                try (Statement tus = conn.createStatement()) {
+                    try (ResultSet tuKeys = tus.executeQuery("SELECT DISTINCT tuid FROM tuv")) {
+                        while (tuKeys.next()) {
+                            String tuid = tuKeys.getString(1);
+                            Element tu = tuDb.getTu(tuid);
+                            stmt.setString(1, tuid);
+                            int count = 0;
+                            try (ResultSet rs = stmt.executeQuery()) {
+                                while (rs.next()) {
+                                    String lang = rs.getString(1);
+                                    String seg = rs.getString(2);
+                                    if (seg.equals("<seg></seg>") || !langs.contains(lang)) {
+                                        continue;
+                                    }
+                                    try {
+                                        Element tuv = TMUtils.buildTuv(lang, seg);
+                                        tu.addContent(tuv);
+                                        count++;
+                                    } catch (Exception e) {
+                                        logger.log(Level.ERROR, Messages.getString("SqliteDatabase.3"), e);
+                                        logger.log(Level.INFO, "seg: " + seg);
+                                    }
                                 }
                             }
-                        }
-                        if (count >= 2) {
-                            Indenter.indent(tu, 2);
-                            writeString(tu.toString() + "\n");
+                            if (count >= 2) {
+                                Indenter.indent(tu, 2);
+                                writeString(output, tu.toString() + "\n");
+                            }
                         }
                     }
                 }
+                writeString(output, "</body>\n");
+                writeString(output, "</tmx>\n");
             }
         }
-        writeString("</body>\n");
-        writeString("</tmx>\n");
-        output.close();
     }
 
     @Override
@@ -338,8 +480,13 @@ public class SqliteDatabase implements ITmEngine {
     @Override
     public Element getTu(String tuid)
             throws IOException, SAXException, ParserConfigurationException, SQLException {
+        return getTu(tuid, conn);
+    }
+
+    private Element getTu(String tuid, Connection connection)
+            throws IOException, SAXException, ParserConfigurationException, SQLException {
         Element tu = tuDb.getTu(tuid);
-        try (PreparedStatement stmt = conn.prepareStatement("SELECT lang, seg FROM tuv WHERE tuid=?")) {
+        try (PreparedStatement stmt = connection.prepareStatement("SELECT lang, seg FROM tuv WHERE tuid=?")) {
             stmt.setString(1, tuid);
             try (ResultSet rs = stmt.executeQuery()) {
                 while (rs.next()) {
@@ -385,6 +532,18 @@ public class SqliteDatabase implements ITmEngine {
     @Override
     public List<Element> searchAll(String searchStr, String srcLang, int similarity, boolean caseSensitive)
             throws IOException, SAXException, ParserConfigurationException, SQLException {
+        Connection readConn = null;
+        try {
+            readConn = acquireReadConnection();
+            return searchAllWithConnection(readConn, searchStr, srcLang, similarity, caseSensitive);
+        } finally {
+            releaseReadConnection(readConn);
+        }
+    }
+
+    private List<Element> searchAllWithConnection(Connection readConn, String searchStr, String srcLang,
+            int similarity, boolean caseSensitive)
+            throws IOException, SAXException, ParserConfigurationException, SQLException {
         List<Element> result = new Vector<>();
 
         int[] ngrams = NGrams.getNGrams(searchStr);
@@ -399,7 +558,7 @@ public class SqliteDatabase implements ITmEngine {
         int maxLength = searchStr.length() * (200 - similarity) / 100;
 
         Map<String, Integer> candidates = new Hashtable<>();
-        try (PreparedStatement stmt = conn.prepareStatement(
+        try (PreparedStatement stmt = readConn.prepareStatement(
                 "SELECT puretext FROM tuv WHERE lang=? AND tuid=? AND textlength>=? AND textlength<=?")) {
             stmt.setString(1, srcLang);
             stmt.setInt(3, minLength);
@@ -436,7 +595,7 @@ public class SqliteDatabase implements ITmEngine {
                                 distance = MatchQuality.similarity(searchStr.toLowerCase(), pure.toLowerCase());
                             }
                             if (distance >= similarity) {
-                                Element tu = getTu(tuid);
+                                Element tu = getTu(tuid, readConn);
                                 result.add(tu);
                             }
                         }
@@ -450,6 +609,18 @@ public class SqliteDatabase implements ITmEngine {
     @Override
     public List<Match> searchTranslation(String searchStr, String srcLang, String tgtLang, int similarity,
             boolean caseSensitive) throws SAXException, IOException, ParserConfigurationException, SQLException {
+        Connection readConn = null;
+        try {
+            readConn = acquireReadConnection();
+            return searchTranslationWithConnection(readConn, searchStr, srcLang, tgtLang, similarity, caseSensitive);
+        } finally {
+            releaseReadConnection(readConn);
+        }
+    }
+
+    private List<Match> searchTranslationWithConnection(Connection readConn, String searchStr, String srcLang,
+            String tgtLang, int similarity, boolean caseSensitive)
+            throws SAXException, IOException, ParserConfigurationException, SQLException {
         // search for TUs with a given source and target language
         List<Match> result = new Vector<>();
 
@@ -466,13 +637,14 @@ public class SqliteDatabase implements ITmEngine {
         int maxLength = searchStr.length() * (200 - similarity) / 100;
 
         Hashtable<String, Integer> candidates = new Hashtable<>();
-        try (PreparedStatement stmt = conn.prepareStatement(
+        try (PreparedStatement stmt = readConn.prepareStatement(
                 "SELECT puretext, seg, textlength FROM tuv WHERE lang=? AND tuid=? AND textlength>=? AND textlength<=?")) {
             stmt.setString(1, srcLang);
             stmt.setInt(3, minLength);
             stmt.setInt(4, maxLength);
 
-            try (PreparedStatement stmt2 = conn.prepareStatement("SELECT lang, seg FROM tuv WHERE tuid=? AND lang=?")) {
+            try (PreparedStatement stmt2 = readConn
+                    .prepareStatement("SELECT lang, seg FROM tuv WHERE tuid=? AND lang=?")) {
                 stmt2.setString(2, tgtLang);
 
                 NavigableSet<Fun.Tuple2<Integer, String>> index = fuzzyIndex.getIndex(srcLang);
@@ -520,7 +692,7 @@ public class SqliteDatabase implements ITmEngine {
                                     if (tgtFound) {
                                         Element source = TMUtils.buildTuv(srcLang, srcSeg);
                                         Map<String, String> propsMap = new Hashtable<>();
-                                        Element tu = getTu(tuid);
+                                        Element tu = getTu(tuid, readConn);
                                         List<Element> props = tu.getChildren("prop");
                                         Iterator<Element> pt = props.iterator();
                                         while (pt.hasNext()) {
@@ -544,8 +716,7 @@ public class SqliteDatabase implements ITmEngine {
     @Override
     public int storeTMX(String tmxFile, String project, String customer, String subject)
             throws SAXException, IOException, ParserConfigurationException, SQLException, URISyntaxException {
-        int imported = 0;
-        next = 0l;
+        next = System.currentTimeMillis();
         if (customer == null) {
             customer = "";
         }
@@ -561,8 +732,9 @@ public class SqliteDatabase implements ITmEngine {
 
         reader = new TMXReader(this);
         reader.parse(new File(tmxFile).toURI().toURL());
-        imported = reader.getCount();
+        int imported = reader.getCount();
         commit();
+        reader = null;
         return imported;
     }
 

@@ -72,6 +72,12 @@ export interface Preferences {
         model: string;
         fixTags: boolean;
     };
+    gemini: {
+        enabled: boolean;
+        apiKey: string;
+        model: string;
+        fixTags: boolean;
+    };
     qwen: {
         enabled: boolean;
         apiKey: string;

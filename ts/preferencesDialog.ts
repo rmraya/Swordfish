@@ -72,6 +72,11 @@ export class PreferencesDialog {
     mistralModel: HTMLInputElement = document.createElement('input');
     mistralFixTags: HTMLInputElement = document.createElement('input');
 
+    enableGemini: HTMLInputElement = document.createElement('input');
+    geminiKey: HTMLInputElement = document.createElement('input');
+    geminiModel: HTMLInputElement = document.createElement('input');
+    geminiFixTags: HTMLInputElement = document.createElement('input');
+
     enableModernmt: HTMLInputElement = document.createElement('input');
     modernmtKey: HTMLInputElement = document.createElement('input');
     modernmtSrcLang: HTMLSelectElement = document.createElement('select');
@@ -162,7 +167,7 @@ export class PreferencesDialog {
         ipcRenderer.on('set-preferences', (event: IpcRendererEvent, preferences: any) => {
             this.setPreferences(preferences);
         });
-        ipcRenderer.on('set-ai-models', (event: IpcRendererEvent, models: { ChatGPT?: string[], Claude?: string[], Mistral?: string[] }) => {
+        ipcRenderer.on('set-ai-models', (event: IpcRendererEvent, models: { ChatGPT?: string[], Claude?: string[], Mistral?: string[], Gemini?: string[] }) => {
             this.applyModelSuggestions(models);
         });
         ipcRenderer.on('ai-models-error', () => {
@@ -321,6 +326,19 @@ export class PreferencesDialog {
             this.mistralFixTags.disabled = !this.enableMistral.checked;
         });
 
+        this.enableGemini.checked = preferences.gemini.enabled;
+        this.geminiKey.value = preferences.gemini.apiKey;
+        this.geminiModel.value = preferences.gemini.model;
+        this.geminiKey.disabled = !preferences.gemini.enabled;
+        this.geminiModel.disabled = !preferences.gemini.enabled;
+        this.geminiFixTags.checked = preferences.gemini.fixTags;
+        this.geminiFixTags.disabled = !preferences.gemini.enabled;
+        this.enableGemini.addEventListener('change', () => {
+            this.geminiKey.disabled = !this.enableGemini.checked;
+            this.geminiModel.disabled = !this.enableGemini.checked;
+            this.geminiFixTags.disabled = !this.enableGemini.checked;
+        });
+
         this.enableQwen.checked = preferences.qwen.enabled;
         this.qwenKey.value = preferences.qwen.apiKey;
         this.qwenRegion.value = preferences.qwen.region;
@@ -426,6 +444,15 @@ export class PreferencesDialog {
             return;
         }
 
+        if (this.enableGemini.checked && this.geminiKey.value === '') {
+            ipcRenderer.send('show-message', { type: 'warning', message: 'Enter Gemini API key', parent: 'preferences' });
+            return;
+        }
+        if (this.enableGemini.checked && this.geminiModel.value.trim() === '') {
+            ipcRenderer.send('show-message', { type: 'warning', message: 'Enter Gemini model', parent: 'preferences' });
+            return;
+        }
+
         if (this.enableModernmt.checked && this.modernmtKey.value === '') {
             ipcRenderer.send('show-message', { type: 'warning', message: 'Enter ModernMT API key', parent: 'preferences' });
             return;
@@ -490,6 +517,12 @@ export class PreferencesDialog {
                 apiKey: this.mistralKey.value,
                 model: this.mistralModel.value,
                 fixTags: this.mistralFixTags.checked
+            },
+            gemini: {
+                enabled: this.enableGemini.checked,
+                apiKey: this.geminiKey.value,
+                model: this.geminiModel.value,
+                fixTags: this.geminiFixTags.checked
             },
             qwen: {
                 enabled: this.enableQwen.checked,
@@ -1340,6 +1373,24 @@ export class PreferencesDialog {
         radioRow.classList.add('middle');
         leftSide.appendChild(radioRow);
 
+        let geminiRadio: HTMLInputElement = document.createElement('input');
+        geminiRadio.type = 'radio';
+        geminiRadio.name = 'mtProvider';
+        geminiRadio.id = 'geminiRadio';
+        geminiRadio.style.margin = '4px';
+        radioRow.appendChild(geminiRadio);
+
+        let geminiLabel: HTMLLabelElement = document.createElement('label');
+        geminiLabel.setAttribute('for', 'geminiRadio');
+        geminiLabel.innerText = 'Gemini';
+        geminiLabel.style.marginTop = '4px';
+        radioRow.appendChild(geminiLabel);
+
+        radioRow = document.createElement('div');
+        radioRow.classList.add('row');
+        radioRow.classList.add('middle');
+        leftSide.appendChild(radioRow);
+
         let modernmtRadio: HTMLInputElement = document.createElement('input');
         modernmtRadio.type = 'radio';
         modernmtRadio.name = 'mtProvider';
@@ -1401,6 +1452,12 @@ export class PreferencesDialog {
         rightSide.appendChild(anthropicTab);
         this.populateAnthropicTab(anthropicTab);
 
+        let geminiTab: HTMLDivElement = document.createElement('div');
+        geminiTab.id = 'geminiTab';
+        geminiTab.style.display = 'none';
+        rightSide.appendChild(geminiTab);
+        this.populateGeminiTab(geminiTab);
+
         let modernmtTab: HTMLDivElement = document.createElement('div');
         modernmtTab.id = 'modernmtTab';
         modernmtTab.style.display = 'none';
@@ -1435,6 +1492,10 @@ export class PreferencesDialog {
             console.log('show anthropic tab');
             this.toggleTab('anthropicTab');
         });
+        geminiRadio.addEventListener('change', () => {
+            console.log('show gemini tab');
+            this.toggleTab('geminiTab');
+        });
         modernmtRadio.addEventListener('change', () => {
             console.log('show modernmt tab');
             this.toggleTab('modernmtTab');
@@ -1443,7 +1504,7 @@ export class PreferencesDialog {
 
     toggleTab(tabId: string): void {
         const tabs: string[] = ['googleTab', 'azureTab', 'deeplTab',
-            'chatGptTab', 'mistralTab', 'qwenTab', 'anthropicTab', 'modernmtTab'];
+            'chatGptTab', 'mistralTab', 'qwenTab', 'anthropicTab', 'geminiTab', 'modernmtTab'];
         tabs.forEach((id) => {
             const tab = document.getElementById(id);
             if (tab) {
@@ -1715,6 +1776,7 @@ export class PreferencesDialog {
             if (this.chatGptFixTags.checked) {
                 this.anthropicFixTags.checked = false;
                 this.mistralFixTags.checked = false;
+                this.geminiFixTags.checked = false;
                 this.qwenFixTags.checked = false;
             }
         });
@@ -1795,6 +1857,7 @@ export class PreferencesDialog {
             if (this.mistralFixTags.checked) {
                 this.chatGptFixTags.checked = false;
                 this.anthropicFixTags.checked = false;
+                this.geminiFixTags.checked = false;
                 this.qwenFixTags.checked = false;
             }
         });
@@ -1896,6 +1959,7 @@ export class PreferencesDialog {
                 this.chatGptFixTags.checked = false;
                 this.anthropicFixTags.checked = false;
                 this.mistralFixTags.checked = false;
+                this.geminiFixTags.checked = false;
             }
         });
         tagsRow.appendChild(this.qwenFixTags);
@@ -1969,6 +2033,7 @@ export class PreferencesDialog {
             if (this.anthropicFixTags.checked) {
                 this.chatGptFixTags.checked = false;
                 this.mistralFixTags.checked = false;
+                this.geminiFixTags.checked = false;
                 this.qwenFixTags.checked = false;
             }
         });
@@ -1982,6 +2047,80 @@ export class PreferencesDialog {
         this.enableAnthropic = document.getElementById('enableAnthropic') as HTMLInputElement;
         this.anthropicKey = document.getElementById('anthropicKey') as HTMLInputElement;
         this.anthropicModel = document.getElementById('anthropicModel') as HTMLInputElement;
+    }
+
+    populateGeminiTab(container: HTMLDivElement): void {
+        container.style.paddingTop = '10px';
+        let geminiDiv: HTMLDivElement = document.createElement('div');
+        geminiDiv.classList.add('middle');
+        geminiDiv.classList.add('row');
+        geminiDiv.style.paddingLeft = '4px';
+        geminiDiv.innerHTML = '<input type="checkbox" id="enableGemini"><label for="enableGemini" style="padding-top:4px;">Enable Gemini Translation</label>';
+        container.appendChild(geminiDiv);
+        let langsTable: HTMLTableElement = document.createElement('table');
+        langsTable.classList.add('fill_width');
+        container.appendChild(langsTable);
+        let tr: HTMLTableRowElement = document.createElement('tr');
+        langsTable.appendChild(tr);
+        let td: HTMLTableCellElement = document.createElement('td');
+        td.classList.add('middle');
+        td.classList.add('noWrap');
+        td.innerHTML = '<label for="geminiKey">API Key</label>'
+        tr.appendChild(td);
+        td = document.createElement('td');
+        td.classList.add('middle');
+        td.classList.add('fill_width');
+        td.innerHTML = '<input type="text" id="geminiKey" class="table_input"/>';
+        tr.appendChild(td);
+        tr = document.createElement('tr');
+        langsTable.appendChild(tr);
+        td = document.createElement('td');
+        td.classList.add('middle');
+        td.classList.add('noWrap');
+        td.innerHTML = '<label for="geminiModel">Gemini Model</label>'
+        tr.appendChild(td);
+
+        td = document.createElement('td');
+        td.classList.add('middle');
+        td.classList.add('fill_width');
+        let geminiModelInput: HTMLInputElement = document.createElement('input');
+        geminiModelInput.type = 'text';
+        geminiModelInput.id = 'geminiModel';
+        geminiModelInput.classList.add('table_input');
+        geminiModelInput.setAttribute('list', 'geminiModelsList');
+        td.appendChild(geminiModelInput);
+        tr.appendChild(td);
+
+        let geminiDatalist: HTMLDataListElement = document.createElement('datalist');
+        geminiDatalist.id = 'geminiModelsList';
+        container.appendChild(geminiDatalist);
+
+        let tagsRow: HTMLDivElement = document.createElement('div');
+        tagsRow.classList.add('row');
+        tagsRow.classList.add('middle');
+        container.appendChild(tagsRow);
+
+        this.geminiFixTags.id = 'geminiFixTags';
+        this.geminiFixTags.type = 'checkbox';
+        tagsRow.appendChild(this.geminiFixTags);
+        this.geminiFixTags.addEventListener('change', () => {
+            if (this.geminiFixTags.checked) {
+                this.chatGptFixTags.checked = false;
+                this.mistralFixTags.checked = false;
+                this.anthropicFixTags.checked = false;
+                this.qwenFixTags.checked = false;
+            }
+        });
+
+        let fixLabel: HTMLLabelElement = document.createElement('label');
+        fixLabel.innerText = 'Use to Fix Tags';
+        fixLabel.setAttribute('for', 'geminiFixTags');
+        fixLabel.style.paddingTop = '4px';
+        tagsRow.appendChild(fixLabel);
+
+        this.enableGemini = document.getElementById('enableGemini') as HTMLInputElement;
+        this.geminiKey = document.getElementById('geminiKey') as HTMLInputElement;
+        this.geminiModel = document.getElementById('geminiModel') as HTMLInputElement;
     }
 
     populateModernmtTab(container: HTMLDivElement): void {
@@ -2057,12 +2196,13 @@ export class PreferencesDialog {
         ipcRenderer.send('get-ai-models');
     }
 
-    applyModelSuggestions(models: { ChatGPT?: string[], Claude?: string[], Mistral?: string[], Qwen?: string[] }): void {
+    applyModelSuggestions(models: { ChatGPT?: string[], Claude?: string[], Mistral?: string[], Gemini?: string[], Qwen?: string[] }): void {
         this.modelSuggestionsLoading = false;
         this.modelSuggestionsLoaded = true;
         this.populateModelList('chatGptModelsList', models.ChatGPT);
         this.populateModelList('anthropicModelsList', models.Claude);
         this.populateModelList('mistralModelsList', models.Mistral);
+        this.populateModelList('geminiModelsList', models.Gemini);
         this.populateModelList('qwenModelsList', models.Qwen);
     }
 

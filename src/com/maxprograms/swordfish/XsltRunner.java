@@ -16,16 +16,19 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 
+import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.parsers.SAXParserFactory;
 import javax.xml.transform.Result;
 import javax.xml.transform.Source;
 import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerException;
 import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.sax.SAXSource;
 import javax.xml.transform.stream.StreamResult;
 import javax.xml.transform.stream.StreamSource;
 
 import org.xml.sax.InputSource;
+import org.xml.sax.SAXException;
 import org.xml.sax.XMLReader;
 
 public class XsltRunner {
@@ -36,7 +39,12 @@ public class XsltRunner {
             "jdk.xml.xpathTotalOpLimit"
     };
 
-    public static void transform(String xmlFile, String xslFile, String outputFile) throws Exception {
+    private XsltRunner() {
+        // private for security
+    }
+
+    public static void transform(String xmlFile, String xslFile, String outputFile)
+            throws IOException, SAXException, ParserConfigurationException, TransformerException {
 
         File xmlFileObj = new File(xmlFile);
         File xslFileObj = new File(xslFile);

@@ -481,8 +481,8 @@ export class Main {
                     if (this.hasTags(html)) {
                         this.parseClipboardHtml(html);
                     } else {
-                        let text: string = clipboardData.getData('text/plain').replace(/\r/g, '');
-                        text = text.replace(/\n\n/g, '\n');
+                        let text: string = clipboardData.getData('text/plain').replaceAll(/\r/g, '');
+                        text = text.replaceAll(/\n\n/g, '\n');
                         Main.insertHtmlAtSelection(text);
                     }
                 }
@@ -540,7 +540,7 @@ export class Main {
         if (node.nodeType === Node.TEXT_NODE) {
             let content: string | null = node.textContent;
             if (content) {
-                result = content.replace(/\s\s+/g, ' ');
+                result = content.replaceAll(/\s\s+/g, ' ');
             }
         }
         if (node.nodeName === 'IMG' && this.isTag(node)) {
@@ -564,7 +564,7 @@ export class Main {
         if (node.nodeType === Node.TEXT_NODE) {
             let content: string | null = node.textContent;
             if (content) {
-                return content.replace(/\n/g, '');
+                return content.replaceAll(/\n/g, '');
             }
         }
         node.childNodes.forEach((child) => {

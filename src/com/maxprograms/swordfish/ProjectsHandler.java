@@ -56,9 +56,7 @@ import com.maxprograms.swordfish.models.SourceFile;
 import com.maxprograms.swordfish.xliff.Skeletons;
 import com.maxprograms.swordfish.xliff.XliffStore;
 import com.maxprograms.swordfish.xliff.XliffUtils;
-import com.maxprograms.xliff2.Resegmenter;
 import com.maxprograms.xliff2.ToXliff2;
-import com.maxprograms.xml.CatalogBuilder;
 import com.maxprograms.xml.Document;
 import com.maxprograms.xml.Element;
 import com.maxprograms.xml.Indenter;
@@ -950,12 +948,7 @@ public class ProjectsHandler implements HttpHandler {
 							}
 
 							boolean paragraph = paragraphSegmentation;
-							boolean mustResegment = false;
-							if (!paragraphSegmentation) {
-								mustResegment = true;
-								paragraph = true;
-							}
-
+							
 							File source = new File(fullName);
 							File xliff = new File(projectFolder, shortName + ".xlf");
 							if (!xliff.getParentFile().exists()) {
@@ -980,10 +973,6 @@ public class ProjectsHandler implements HttpHandler {
 
 							if ("0".equals(res.get(0))) {
 								res = ToXliff2.run(xliff, catalogFile, "2.1");
-								if (mustResegment && "0".equals(res.get(0))) {
-									res = Resegmenter.run(xliff.getAbsolutePath(), srxFile, json.getString("srcLang"),
-											CatalogBuilder.getCatalog(catalogFile));
-								}
 							}
 							if ("0".equals(res.get(0))) {
 								setSourceFile(xliff, source.getName());

@@ -36,12 +36,17 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.UUID;
 import java.util.Vector;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
@@ -156,6 +161,9 @@ public class XliffStore {
 	private int tag;
 	private Map<String, String> tagsMap;
 	private Map<String, Element> notesMap;
+
+	// Batch operation counter
+	private int segmentBatchCount;
 
 	private static Pattern pattern;
 	private static String lastFilterText;
@@ -288,7 +296,7 @@ public class XliffStore {
 			}
 			conn.commit();
 		}
-		
+
 		// populate files table if it's empty
 		sql = "SELECT COUNT(*) FROM files;";
 		boolean filesTableEmpty = false;
@@ -306,7 +314,46 @@ public class XliffStore {
 			}
 			conn.commit();
 		}
-		
+
+		// Create indexes if they don't exist (for databases created before indexes were
+		// added)
+		String[] indexes = {
+				"idx_segments_type_state",
+				"idx_segments_sourcetext",
+				"idx_segments_targettext",
+				"idx_segments_idx",
+				"idx_segments_file_child"
+		};
+		for (String indexName : indexes) {
+			sql = "SELECT name FROM sqlite_master WHERE type='index' AND name=?";
+			boolean indexExists = false;
+			try (PreparedStatement prep = conn.prepareStatement(sql)) {
+				prep.setString(1, indexName);
+				try (ResultSet rs = prep.executeQuery()) {
+					if (rs.next()) {
+						indexExists = true;
+					}
+				}
+			}
+			if (!indexExists) {
+				logger.log(Level.INFO, "Creating index: " + indexName);
+				String createIndexSql = switch (indexName) {
+					case "idx_segments_type_state" -> "CREATE INDEX idx_segments_type_state ON segments(type, state)";
+					case "idx_segments_sourcetext" -> "CREATE INDEX idx_segments_sourcetext ON segments(sourceText)";
+					case "idx_segments_targettext" -> "CREATE INDEX idx_segments_targettext ON segments(targetText)";
+					case "idx_segments_idx" -> "CREATE INDEX idx_segments_idx ON segments(idx)";
+					case "idx_segments_file_child" -> "CREATE INDEX idx_segments_file_child ON segments(file, child)";
+					default -> null;
+				};
+				if (createIndexSql != null) {
+					try (Statement st = conn.createStatement()) {
+						st.execute(createIndexSql);
+					}
+					conn.commit();
+				}
+			}
+		}
+
 		getUnitData = conn.prepareStatement("SELECT data, compressed FROM units WHERE file=? AND unitId=?");
 		getSource = conn.prepareStatement(
 				"SELECT source, sourceText, state, translate FROM segments WHERE file=? AND unitId=? AND segId=?");
@@ -443,6 +490,12 @@ public class XliffStore {
 			create.execute(notes);
 			create.execute(metadata);
 			create.execute(filesMetadata);
+			// Create indexes for query performance
+			create.execute("CREATE INDEX idx_segments_type_state ON segments(type, state)");
+			create.execute("CREATE INDEX idx_segments_sourcetext ON segments(sourceText)");
+			create.execute("CREATE INDEX idx_segments_targettext ON segments(targetText)");
+			create.execute("CREATE INDEX idx_segments_idx ON segments(idx)");
+			create.execute("CREATE INDEX idx_segments_file_child ON segments(file, child)");
 		}
 		conn.commit();
 	}
@@ -450,6 +503,15 @@ public class XliffStore {
 	private void prepareInsertSegment() throws SQLException {
 		String sql = "INSERT INTO segments (file, unitId, segId, type, state, child, translate, tags, space, source, sourceText, target, targetText, words, chars) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
 		insertSegmentStmt = conn.prepareStatement(sql);
+		segmentBatchCount = 0;
+	}
+
+	private void executeBatchIfNeeded() throws SQLException {
+		if (segmentBatchCount >= BATCHSIZE) {
+			insertSegmentStmt.executeBatch();
+			conn.commit();
+			segmentBatchCount = 0;
+		}
 	}
 
 	private void parseDocument() throws SQLException, IOException, SAXException, ParserConfigurationException {
@@ -462,6 +524,10 @@ public class XliffStore {
 		insertNoteStmt = conn
 				.prepareStatement("INSERT INTO notes (file, unitId, segId, noteId, note) values (?,?,?,?,?)");
 		recurse(document.getRootElement());
+		// Execute any remaining segment batch
+		if (segmentBatchCount > 0) {
+			insertSegmentStmt.executeBatch();
+		}
 		insertUnit.close();
 		insertNoteStmt.close();
 		insertSegmentStmt.close();
@@ -845,7 +911,9 @@ public class XliffStore {
 		insertSegmentStmt.setString(13, (target != null ? XliffUtils.pureText(target) : ""));
 		insertSegmentStmt.setInt(14, type.equals("S") ? RepetitionAnalysis.wordCount(pureSource, srcLang) : 0);
 		insertSegmentStmt.setInt(15, type.equals("S") ? (pureSource.length() - spaces(pureSource)) : 0);
-		insertSegmentStmt.execute();
+		insertSegmentStmt.addBatch();
+		segmentBatchCount++;
+		executeBatchIfNeeded();
 	}
 
 	private int spaces(String text) {
@@ -2794,7 +2862,8 @@ public class XliffStore {
 		}
 		getPreferences();
 		File adjusted = reviewStates();
-		List<String> result = Merge.merge(adjusted.getAbsolutePath(), output, catalog, acceptUnconfirmed);
+		String maxThreads = "" + Runtime.getRuntime().availableProcessors();
+		List<String> result = Merge.merge(adjusted.getAbsolutePath(), output, catalog, acceptUnconfirmed, maxThreads);
 		if (!"0".equals(result.get(0))) {
 			throw new IOException(result.get(1));
 		}
@@ -3313,7 +3382,8 @@ public class XliffStore {
 			}
 		}
 		MemoriesHandler.close(memory);
-		GlossariesHandler.closeGlossary(glossary);
+		// Commit once after all matches for this segment are inserted
+		conn.commit();
 	}
 
 	public JSONArray tmTranslate(JSONObject json) throws SAXException, IOException, ParserConfigurationException,
@@ -3351,8 +3421,9 @@ public class XliffStore {
 			int similarity = m.getSimilarity() - tagDifferences(original, matchSource);
 			insertMatch(m.getId(), file, unit, segment, memoryName, Constants.TM, similarity, matchSource, matchTarget,
 					tags);
-			conn.commit();
 		}
+		// Commit once after all matches for this segment are inserted
+		conn.commit();
 		MemoriesHandler.close(memory);
 		return getTaggedtMatches(json);
 	}
@@ -4582,6 +4653,7 @@ public class XliffStore {
 				}
 			}
 		}
+		conn.commit();
 		GlossariesHandler.closeGlossary(glossary);
 		return sortTerms(result);
 	}
@@ -4613,47 +4685,96 @@ public class XliffStore {
 		GlossariesHandler.openGlossary(glossary);
 		String glossaryName = GlossariesHandler.getGlossaryName(glossary);
 		ITmEngine engine = GlossariesHandler.getEngine(glossary);
-		int count = 0;
+
+		List<String[]> segmentData = new Vector<>();
+		Map<String, List<String>> segmentWords = new LinkedHashMap<>();
+		Set<String> allUniqueTerms = new LinkedHashSet<>();
+
 		try (PreparedStatement segIterator = conn.prepareStatement(
 				"SELECT file, unitId, segId, sourceText FROM segments WHERE type='S' AND translate='Y' ")) {
 			try (ResultSet set = segIterator.executeQuery()) {
 				while (set.next()) {
-					String file = set.getString(1);
-					String unit = set.getString(2);
-					String segment = set.getString(3);
-					String sourceText = set.getString(4);
-					List<String> words = sourceLanguage.isCJK() ? cjkWordList(sourceText, NGrams.TERM_SEPARATORS)
-							: NGrams.buildWordList(sourceText, NGrams.TERM_SEPARATORS);
-					Map<String, String> visited = new Hashtable<>();
-					boolean added = false;
+					String[] seg = { set.getString(1), set.getString(2),
+							set.getString(3), set.getString(4) };
+					segmentData.add(seg);
+					List<String> words = sourceLanguage.isCJK()
+							? cjkWordList(seg[3], NGrams.TERM_SEPARATORS)
+							: NGrams.buildWordList(seg[3], NGrams.TERM_SEPARATORS);
+					String segKey = seg[0] + "\t" + seg[1] + "\t" + seg[2];
+					segmentWords.put(segKey, words);
 					for (int i = 0; i < words.size(); i++) {
-						StringBuilder termBuilder = new StringBuilder();
-						for (int length = 0; length < MAXTERMLENGTH; length++) {
-							if (i + length < words.size()) {
+						StringBuilder tb = new StringBuilder();
+						for (int len = 0; len < MAXTERMLENGTH; len++) {
+							if (i + len < words.size()) {
 								if (!sourceLanguage.isCJK()) {
-									termBuilder.append(' ');
+									tb.append(' ');
 								}
-								termBuilder.append(words.get(i + length));
-								String term = termBuilder.toString().trim();
-								if (!visited.containsKey(term)) {
-									visited.put(term, "");
-									List<Element> res = engine.searchAll(term, srcLang, similarity,
-											caseSensitiveTermSearches);
-									List<Term> array = parseMatches(res, glossaryName);
-									for (int h = 0; h < array.size(); h++) {
-										Term candidate = array.get(h);
-										saveTerm(file, unit, segment, glossaryName, candidate.getSource(),
-												candidate.getTarget());
-										added = true;
-									}
+								tb.append(words.get(i + len));
+								allUniqueTerms.add(tb.toString().trim());
+							}
+						}
+					}
+				}
+			}
+		}
+		Map<String, List<Term>> termCache = new Hashtable<>();
+		int poolSize = Runtime.getRuntime().availableProcessors();
+		try (ExecutorService executor = Executors.newFixedThreadPool(poolSize)) {
+			Map<String, Future<List<Element>>> futures = new LinkedHashMap<>();
+			for (String term : allUniqueTerms) {
+				futures.put(term, executor.submit(
+						() -> engine.searchAll(term, srcLang, similarity, caseSensitiveTermSearches)));
+			}
+			for (Map.Entry<String, Future<List<Element>>> entry : futures.entrySet()) {
+				try {
+					List<Element> res = entry.getValue().get();
+					List<Term> matches = parseMatches(res, glossaryName);
+					if (!matches.isEmpty()) {
+						termCache.put(entry.getKey(), matches);
+					}
+				} catch (java.util.concurrent.ExecutionException e) {
+					throw new IOException(e.getCause());
+				} catch (InterruptedException e) {
+					Thread.currentThread().interrupt();
+					throw new IOException(e);
+				}
+			}
+		}
+		int count = 0;
+		for (String[] seg : segmentData) {
+			String file = seg[0];
+			String unit = seg[1];
+			String segment = seg[2];
+			String segKey = file + "\t" + unit + "\t" + segment;
+			List<String> words = segmentWords.get(segKey);
+			boolean added = false;
+			Set<String> visited = new LinkedHashSet<>();
+			for (int i = 0; i < words.size(); i++) {
+				StringBuilder tb = new StringBuilder();
+				for (int len = 0; len < MAXTERMLENGTH; len++) {
+					if (i + len < words.size()) {
+						if (!sourceLanguage.isCJK()) {
+							tb.append(' ');
+						}
+						tb.append(words.get(i + len));
+						String term = tb.toString().trim();
+						if (!visited.contains(term)) {
+							visited.add(term);
+							List<Term> matches = termCache.get(term);
+							if (matches != null) {
+								for (Term candidate : matches) {
+									saveTerm(file, unit, segment, glossaryName,
+											candidate.getSource(), candidate.getTarget());
+									added = true;
 								}
 							}
 						}
 					}
-					if (added) {
-						count++;
-					}
 				}
+			}
+			if (added) {
+				conn.commit();
+				count++;
 			}
 		}
 		GlossariesHandler.closeGlossary(glossary);
@@ -4681,7 +4802,6 @@ public class XliffStore {
 			insertTerm.setString(6, source);
 			insertTerm.setString(7, target);
 			insertTerm.execute();
-			conn.commit();
 		}
 	}
 
@@ -4694,7 +4814,10 @@ public class XliffStore {
 			Iterator<Element> it = tuvs.iterator();
 			while (it.hasNext()) {
 				Element tuv = it.next();
-				map.put(tuv.getAttributeValue("xml:lang"), MemoriesHandler.pureText(tuv.getChild("seg")));
+				Element seg = tuv.getChild("seg");
+				if (seg != null) {
+					map.put(tuv.getAttributeValue("xml:lang"), MemoriesHandler.pureText(seg));
+				}
 			}
 			if (map.containsKey(tgtLang)) {
 				Term term = new Term(map.get(srcLang), map.get(tgtLang), srcLang, tgtLang, glossaryName);
@@ -5193,7 +5316,7 @@ public class XliffStore {
 					String file = rs.getString(6);
 					String unit = rs.getString(7);
 					String segment = rs.getString(8);
-					int bestMatch = getBestMatch(file, unit, segment);
+					int best = getBestMatch(file, unit, segment);
 
 					String box = SVG_BLANK;
 					String border = "grey";
@@ -5220,7 +5343,7 @@ public class XliffStore {
 											removeSvg(addHtmlTags(source, "", false, false, tagsData, segPreserve)))
 									+ "</td>\n");
 					writeString(out,
-							"<td class=\"center\"> " + (bestMatch > 0 ? bestMatch + "%" : "&nbsp;") + "</td>\n");
+							"<td class=\"center\"> " + (best > 0 ? best + "%" : "&nbsp;") + "</td>\n");
 					writeString(out, "<td class=\"center " + border + "\"> " + box + "</td>\n");
 					writeString(out,
 							"<td class=\"text " + space + "\"" + targetDir + ">"
@@ -5676,6 +5799,7 @@ public class XliffStore {
 
 	private void indexSegments() throws SQLException {
 		int idx = 0;
+		int batchCount = 0;
 		String update = "UPDATE segments SET idx=? WHERE file=? AND unitID=? AND segId=?";
 		try (PreparedStatement prep = conn.prepareStatement(update)) {
 			try (Statement st = conn.createStatement()) {
@@ -5686,9 +5810,19 @@ public class XliffStore {
 						prep.setString(2, rs.getString(1));
 						prep.setString(3, rs.getString(2));
 						prep.setString(4, rs.getString(3));
-						prep.executeUpdate();
+						prep.addBatch();
+						batchCount++;
+						if (batchCount >= BATCHSIZE) {
+							prep.executeBatch();
+							conn.commit();
+							batchCount = 0;
+						}
 					}
 				}
+			}
+			// Execute remaining batch
+			if (batchCount > 0) {
+				prep.executeBatch();
 			}
 		}
 		conn.commit();

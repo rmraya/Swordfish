@@ -223,6 +223,9 @@ public class TmsServer implements HttpHandler {
 
 	public static JSONObject getPreferences() throws IOException, JSONException {
 		File preferences = new File(getWorkFolder(), "preferences.json");
+		if (!preferences.exists()) {
+			return new JSONObject();
+		}
 		return readJSON(preferences);
 	}
 

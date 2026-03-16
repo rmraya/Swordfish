@@ -43,6 +43,7 @@ export class TermsPanel {
         toolbar.classList.add('toolbar');
         toolbar.classList.add('middle');
         toolbar.classList.add('roundedBottom');
+        toolbar.style.marginTop = '4px';
         this.container.appendChild(toolbar);
 
         let getTerms = document.createElement('a');
