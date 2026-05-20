@@ -75,6 +75,7 @@ public class ProjectsHandler implements HttpHandler {
 	private String srxFile;
 	private String catalogFile;
 	private boolean paragraphSegmentation;
+	private int maxThreads = Runtime.getRuntime().availableProcessors();
 
 	private static Map<String, XliffStore> projectStores = new Hashtable<>();
 
@@ -972,6 +973,7 @@ public class ProjectsHandler implements HttpHandler {
 							params.put("srcLang", json.getString("srcLang"));
 							params.put("tgtLang", json.getString("tgtLang"));
 							params.put("xmlfilter", json.getString("xmlfilter"));
+							params.put("maxThreads", String.valueOf(maxThreads));
 
 							List<String> res = Convert.run(params);
 
@@ -979,7 +981,7 @@ public class ProjectsHandler implements HttpHandler {
 								res = ToXliff2.run(xliff, catalogFile, "2.1");
 								if (!paragraph) {
 									res = Resegmenter.run(xliff.getAbsolutePath(), srxFile, json.getString("srcLang"),
-											CatalogBuilder.getCatalog(catalogFile));
+											CatalogBuilder.getCatalog(catalogFile), maxThreads);
 								}
 							}
 							if ("0".equals(res.get(0))) {
@@ -1092,6 +1094,9 @@ public class ProjectsHandler implements HttpHandler {
 		srxFile = json.getString("srx");
 		catalogFile = json.getString("catalog");
 		paragraphSegmentation = json.getBoolean("paragraphSegmentation");
+		if (json.has("maxThreads")) {
+			maxThreads = json.getInt("maxThreads");
+		}
 	}
 
 	public static File getWorkFolder() throws IOException {
@@ -1961,7 +1966,8 @@ public class ProjectsHandler implements HttpHandler {
 		try {
 			String project = json.getString("project");
 			if (projectStores.containsKey(project)) {
-				JSONObject context = projectStores.get(project).getContext(json.getString("file"), json.getString("unit"));
+				JSONObject context = projectStores.get(project).getContext(json.getString("file"),
+						json.getString("unit"));
 				if (context != null) {
 					result.put("context", context);
 				}

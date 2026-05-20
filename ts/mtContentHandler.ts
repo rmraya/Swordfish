@@ -10,7 +10,7 @@
  *     Maxprograms - initial API and implementation
  *******************************************************************************/
 
-import { Catalog, ContentHandler, Grammar, XMLAttribute, XMLElement } from "typesxml";
+import { Catalog, ContentHandler, Grammar, TextNode, XMLAttribute, XMLElement, XMLNode } from "typesxml";
 import { MTManager } from "./mtManager.js";
 
 export class MTContentHandler implements ContentHandler {
@@ -150,5 +150,19 @@ export class MTContentHandler implements ContentHandler {
 
     setGrammar(grammar: Grammar | undefined): void {
         // do nothing
+    }
+
+    getCurrentText(): string {
+        if (this.stack.length > 0) {
+            let text: string = '';
+            let content: XMLNode[] = this.stack[this.stack.length - 1].getContent();
+            content.forEach(node => {
+                if (node instanceof TextNode) {
+                    text += node.toString();
+                }
+            });
+            return text;
+        }
+        return '';
     }
 }

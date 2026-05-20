@@ -148,6 +148,7 @@ public class XliffStore {
 	private static boolean caseSensitiveMatches;
 	private static boolean autoConfirm;
 	private static int matchThreshold;
+	private static int maxThreads = Runtime.getRuntime().availableProcessors();
 
 	private int index;
 	private int nextId;
@@ -411,8 +412,15 @@ public class XliffStore {
 			parseDocument();
 			conn.commit();
 			indexSegments();
-		} else if (!filesDataExists) {
-			harvestFilesData();
+		} else {
+			if (!filesDataExists) {
+				harvestFilesData();
+			}
+			try (ResultSet versionRs = stmt.executeQuery("PRAGMA user_version")) {
+				if (versionRs.next() && versionRs.getInt(1) == 0) {
+					indexSegments();
+				}
+			}
 		}
 	}
 
@@ -1091,7 +1099,7 @@ public class XliffStore {
 			}
 		}
 		if (sortOption.equals("none")) {
-			queryBuilder.append(" ORDER BY file, child ");
+			queryBuilder.append(" ORDER BY CAST(file AS INTEGER), child ");
 		}
 		if (sortOption.equals("source")) {
 			queryBuilder.append(" ORDER BY sourceText");
@@ -1343,7 +1351,7 @@ public class XliffStore {
 		int result = -1;
 		try (PreparedStatement prepStmt = conn.prepareStatement("""
 				SELECT row_num FROM (
-				        SELECT file, unitId, ROW_NUMBER() OVER (ORDER BY file, unitId) AS row_num FROM segments
+				        SELECT file, unitId, ROW_NUMBER() OVER (ORDER BY CAST(file AS INTEGER), child) AS row_num FROM segments WHERE type='S'
 				    ) sub WHERE file = ? ORDER BY row_num LIMIT 1;
 				    """)) {
 			prepStmt.setString(1, file);
@@ -1633,6 +1641,9 @@ public class XliffStore {
 			matchThreshold = json.getInt("matchThreshold");
 		} else {
 			matchThreshold = 60;
+		}
+		if (json.has("maxThreads")) {
+			maxThreads = json.getInt("maxThreads");
 		}
 	}
 
@@ -2955,8 +2966,7 @@ public class XliffStore {
 		}
 		getPreferences();
 		File adjusted = reviewStates();
-		String maxThreads = "" + Runtime.getRuntime().availableProcessors();
-		List<String> result = Merge.merge(adjusted.getAbsolutePath(), output, catalog, acceptUnconfirmed, maxThreads);
+		List<String> result = Merge.merge(adjusted.getAbsolutePath(), output, catalog, acceptUnconfirmed, "" + maxThreads);
 		if (!"0".equals(result.get(0))) {
 			throw new IOException(result.get(1));
 		}
@@ -4981,7 +4991,7 @@ public class XliffStore {
 		JSONObject result = new JSONObject();
 		JSONArray errors = new JSONArray();
 		int idx = 0;
-		String sql = "SELECT file, unitId, segId, child, source, target, targetText, translate FROM segments WHERE type='S' ORDER BY file, child ";
+		String sql = "SELECT file, unitId, segId, child, source, target, targetText, translate FROM segments WHERE type='S' ORDER BY CAST(file AS INTEGER), child ";
 		try (ResultSet rs = stmt.executeQuery(sql)) {
 			while (rs.next()) {
 				idx++;
@@ -5026,7 +5036,7 @@ public class XliffStore {
 
 	public void fixSpaces() throws SQLException, IOException, SAXException, ParserConfigurationException {
 		getPreferences();
-		String sql = "SELECT file, unitId, segId, child, source, target, targetText, translate FROM segments WHERE type='S' ORDER BY file, child ";
+		String sql = "SELECT file, unitId, segId, child, source, target, targetText, translate FROM segments WHERE type='S' ORDER BY CAST(file AS INTEGER), child ";
 		try (ResultSet rs = stmt.executeQuery(sql)) {
 			sql = "UPDATE segments SET target=?, targetText=?, state=? WHERE file=? AND unitId=? AND segId=?";
 			try (PreparedStatement fixStmt = conn.prepareStatement(sql)) {
@@ -5229,7 +5239,7 @@ public class XliffStore {
 		JSONObject result = new JSONObject();
 		JSONArray errors = new JSONArray();
 		int idx = 0;
-		String sql = "SELECT file, unitId, segId, child, source, target, state, translate FROM segments WHERE type='S' ORDER BY file, child ";
+		String sql = "SELECT file, unitId, segId, child, source, target, state, translate FROM segments WHERE type='S' ORDER BY CAST(file AS INTEGER), child ";
 		try (ResultSet rs = stmt.executeQuery(sql)) {
 			while (rs.next()) {
 				idx++;
@@ -5399,7 +5409,7 @@ public class XliffStore {
 			String targetDir = LanguageUtils.isBiDi(tgtLang) ? " dir=\"rtl\"" : "";
 
 			try (ResultSet rs = stmt.executeQuery(
-					"SELECT source, target, state, space, translate, file, unitid, segid, child FROM segments WHERE type='S' ORDER BY file, child")) {
+					"SELECT source, target, state, space, translate, file, unitid, segid, child FROM segments WHERE type='S' ORDER BY CAST(file AS INTEGER), child")) {
 				int count = 1;
 				JSONObject tagsData = new JSONObject();
 				while (rs.next()) {
@@ -5908,7 +5918,7 @@ public class XliffStore {
 		String update = "UPDATE segments SET idx=? WHERE file=? AND unitID=? AND segId=?";
 		try (PreparedStatement prep = conn.prepareStatement(update)) {
 			try (Statement st = conn.createStatement()) {
-				String sql = "SELECT file, unitId, segId, child FROM segments WHERE type='S' ORDER BY file, child";
+				String sql = "SELECT file, unitId, segId, child FROM segments WHERE type='S' ORDER BY CAST(file AS INTEGER), child";
 				try (ResultSet rs = st.executeQuery(sql)) {
 					while (rs.next()) {
 						prep.setInt(1, idx++);
@@ -5930,6 +5940,7 @@ public class XliffStore {
 				prep.executeBatch();
 			}
 		}
+		stmt.execute("PRAGMA user_version = 1");
 		conn.commit();
 	}
 
@@ -6042,7 +6053,7 @@ public class XliffStore {
 	public JSONArray getFiles() throws JSONException, SQLException {
 		JSONArray result = new JSONArray();
 		try (PreparedStatement getFiles = conn.prepareStatement(
-				"SELECT file, original, metadata, customdata FROM filesdata WHERE sourceFile = ?")) {
+				"SELECT file, original, metadata, customdata FROM filesdata WHERE sourceFile = ? ORDER BY CAST(file AS INTEGER)")) {
 			try (Statement sourceGroup = conn.createStatement()) {
 				try (ResultSet rs1 = sourceGroup
 						.executeQuery("SELECT DISTINCT sourceFile FROM filesdata")) {

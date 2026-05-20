@@ -13,9 +13,10 @@
 import { BrowserWindow, ClientRequest, IncomingMessage, IpcMainEvent, Menu, MenuItem, MessageBoxOptions, MessageBoxReturnValue, Notification, OpenDialogReturnValue, Rectangle, SaveDialogReturnValue, Size, app, clipboard, dialog, ipcMain, nativeTheme, net, screen, session, shell } from "electron";
 import { AnthropicTranslator, ChatGPTTranslator, GeminiTranslator, MTUtils, MistralTranslator } from "mtengines";
 import { ChildProcessWithoutNullStreams, execFileSync, spawn } from "node:child_process";
-import { appendFileSync, existsSync, lstatSync, mkdirSync, readFileSync, readdirSync, rmSync, unlinkSync, writeFileSync } from "node:fs";
+import { appendFileSync, copyFileSync, existsSync, lstatSync, mkdirSync, readFileSync, readdirSync, rmSync, unlinkSync, writeFileSync } from "node:fs";
 import { userInfo } from "node:os";
-import { join } from "node:path";
+import { basename, join } from "node:path";
+import { pathToFileURL } from "node:url";
 import { TMReader, TMReaderResult } from "sdltm";
 import { LanguageUtils } from "typesbcp47";
 import { XMLElement } from "typesxml";
@@ -2095,14 +2096,7 @@ export class Swordfish {
                             buttons: ['Yes', 'No']
                         }).then((selection: MessageBoxReturnValue) => {
                             if (selection.response === 0) {
-                                shell.openExternal('file://' + output).catch(() => {
-                                    shell.openPath(output).catch((reason: any) => {
-                                        if (reason instanceof Error) {
-                                            console.error(reason.message);
-                                        }
-                                        this.showMessage({ type: 'error', message: 'Unable to open translated file.' });
-                                    });
-                                });
+                                Swordfish.openFile(output, 'Unable to open translated file.');
                             }
                         });
                     } else {
@@ -2608,7 +2602,7 @@ export class Swordfish {
                 if (reason instanceof Error) {
                     console.error(reason.message);
                 }
-                this.showMessage({ type: 'error', message: 'Unable to open Swordfish User Guide.' });
+                Swordfish.showMessage({ type: 'error', message: 'Unable to open Swordfish User Guide.' });
             });
         });
     }
@@ -2819,7 +2813,7 @@ export class Swordfish {
             if (reason instanceof Error) {
                 console.error(reason.message);
             }
-            this.showMessage({ type: 'error', message: 'Unable to open release history.' });
+            Swordfish.showMessage({ type: 'error', message: 'Unable to open release history.' });
         });
     }
 
@@ -2828,7 +2822,41 @@ export class Swordfish {
             if (reason instanceof Error) {
                 console.error(reason.message);
             }
-            this.showMessage({ type: 'error', message: 'Unable to open support group page.' });
+            Swordfish.showMessage({ type: 'error', message: 'Unable to open support group page.' });
+        });
+    }
+
+    static openFile(path: string, message: string): void {
+        if (process.platform === 'linux') {
+            let segments: string[] = path.split('/').filter((segment: string) => {
+                return segment.length > 0;
+            });
+            let isHidden: boolean = segments.some((segment: string) => {
+                return segment.startsWith('.');
+            });
+            if (isHidden) {
+                let tempFolder: string = join(app.getPath('home'), 'tmp', 'swordfish');
+                if (!existsSync(tempFolder)) {
+                    mkdirSync(tempFolder, { recursive: true });
+                }
+                let tempFile: string = join(tempFolder, basename(path));
+                try {
+                    copyFileSync(path, tempFile);
+                    path = tempFile;
+                } catch (error) {
+                    console.error('Error copying file:', error);
+                    Swordfish.showMessage({ type: 'error', message: message });
+                    return;
+                }
+            }
+        }
+        shell.openExternal(pathToFileURL(path).href).catch(() => {
+            shell.openPath(path).catch((reason: any) => {
+                if (reason instanceof Error) {
+                    console.error(reason.message);
+                }
+                Swordfish.showMessage({ type: 'error', message: message });
+            });
         });
     }
 
@@ -4256,16 +4284,7 @@ export class Swordfish {
             let header: string = 'Machine translation errors - ' + new Date().toLocaleString();
             let content: string = [header, '', ...logEntries].join('\n');
             writeFileSync(filePath, content, { encoding: 'utf8' });
-            shell.openExternal('file://' + filePath).catch(() => {
-                shell.openPath(filePath).catch((reason: any) => {
-                    if (reason instanceof Error) {
-                        console.error(reason.message);
-                    } else {
-                        console.error(reason);
-                    }
-                    Swordfish.showMessage({ type: 'error', message: 'Unable to open MT error log.' });
-                });
-            });
+            Swordfish.openFile(filePath, 'Unable to open MT error log.');
         } catch (error: any) {
             if (error instanceof Error) {
                 console.error(error.message);
@@ -5004,14 +5023,7 @@ export class Swordfish {
                     Swordfish.showMessage({ type: 'error', message: data.reason });
                     return;
                 }
-                shell.openExternal('file://' + data.analysis).catch(() => {
-                    shell.openPath(data.analysis).catch((reason: any) => {
-                        if (reason instanceof Error) {
-                            console.error(reason.message);
-                        }
-                        this.showMessage({ type: 'error', message: 'Unable to open statistics.' });
-                    });
-                });
+                Swordfish.openFile(data.analysis, 'Unable to open statistics.');
             },
             (reason: string) => {
                 Swordfish.mainWindow.webContents.send('end-waiting');
@@ -6064,14 +6076,7 @@ export class Swordfish {
                     Swordfish.showMessage({ type: 'error', message: data.reason });
                     return;
                 }
-                shell.openExternal('file://' + data.export).catch(() => {
-                    shell.openPath(data.export).catch((reason: any) => {
-                        if (reason instanceof Error) {
-                            console.error(reason.message);
-                        }
-                        this.showMessage({ type: 'error', message: 'Unable to open HTML.' });
-                    });
-                });
+                Swordfish.openFile(data.export, 'Unable to open HTML.');
             },
             (reason: string) => {
                 Swordfish.mainWindow.webContents.send('end-waiting');
@@ -6952,7 +6957,7 @@ export class Swordfish {
                     (data: any) => {
                         if (data.status === 'Success') {
                             Swordfish.getXMLFilters(event);
-                            this.showMessage({ type: 'info', message: 'Configuration file imported', parent: 'preferences' });
+                            Swordfish.showMessage({ type: 'info', message: 'Configuration file imported', parent: 'preferences' });
                         } else {
                             Swordfish.showMessage({ type: 'error', message: data.reason, parent: 'preferences' });
                         }
@@ -7001,7 +7006,7 @@ export class Swordfish {
                 Swordfish.sendRequest('/services/exportFilters', { path: app.getAppPath(), files: arg.files, folder: value.filePaths[0] },
                     (data: any) => {
                         if (data.status === 'Success') {
-                            this.showMessage({ type: 'info', message: 'Configuration files exported', parent: 'preferences' });
+                            Swordfish.showMessage({ type: 'info', message: 'Configuration files exported', parent: 'preferences' });
                         } else {
                             Swordfish.showMessage({ type: 'error', message: data.reason, parent: 'preferences' });
                         }
