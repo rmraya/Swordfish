@@ -5982,6 +5982,9 @@ export class Swordfish {
     static insertResponse(aiResponse: any): void {
         Swordfish.sendRequest('/projects/setTarget', aiResponse,
             (data: any) => {
+                data.file = aiResponse.file;
+                data.unit = aiResponse.unit;
+                data.segment = aiResponse.segment;
                 if (data.status === Swordfish.SUCCESS) {
                     Swordfish.mainWindow.webContents.send('set-target', data);
                 } else {
