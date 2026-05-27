@@ -98,8 +98,8 @@ Subscription version includes unlimited email support at [tech@maxprograms.com](
 
 ## Related projects
 
-- <https://github.com/rmraya/RemoteTM>
-- <https://github.com/rmraya/OpenXLIFF>
+- <https://github.com/maxprograms-com/RemoteTM>
+- <https://github.com/maxprograms-com/OpenXLIFF>
 
 ---
 
