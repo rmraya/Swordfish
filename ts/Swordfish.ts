@@ -162,6 +162,11 @@ export class Swordfish {
             srcLang: 'none',
             tgtLang: 'none'
         },
+        ollama: {
+            enabled: false,
+            url: 'http://localhost:11434',
+            model: ''
+        },
         spellchecker: {
             defaultEnglish: 'en-US',
             defaultPortuguese: 'pt-BR',
@@ -1693,6 +1698,10 @@ export class Swordfish {
                 }
                 if (!json.hasOwnProperty('gemini')) {
                     json.gemini = { enabled: false, apiKey: '', model: 'gemini-2.5-flash', fixTags: false };
+                    needsSaving = true;
+                }
+                if (!json.hasOwnProperty('ollama')) {
+                    json.ollama = { enabled: false, url: 'http://localhost:11434', model: '' };
                     needsSaving = true;
                 }
                 if (!json.hasOwnProperty('appLang')) {
