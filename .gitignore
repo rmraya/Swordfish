@@ -1,9 +1,11 @@
 .DS_Store
 .gradle/
 .settings/
-.vscode
+.vscode/
+.github/
 out/
 bin/
+build/
 conf/
 dist/
 include/
