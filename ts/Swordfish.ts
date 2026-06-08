@@ -156,6 +156,13 @@ export class Swordfish {
             model: '',
             fixTags: false
         },
+        ollama: {
+            enabled: false,
+            url: 'http://localhost:11434',
+            model: '',
+            fixTags: false,
+            think: false
+        },
         modernmt: {
             enabled: false,
             apiKey: '',
@@ -1693,6 +1700,10 @@ export class Swordfish {
                 }
                 if (!json.hasOwnProperty('gemini')) {
                     json.gemini = { enabled: false, apiKey: '', model: 'gemini-2.5-flash', fixTags: false };
+                    needsSaving = true;
+                }
+                if (!json.hasOwnProperty('ollama')) {
+                    json.ollama = { enabled: false, url: 'http://localhost:11434', model: '', fixTags: false, think: false };
                     needsSaving = true;
                 }
                 if (!json.hasOwnProperty('appLang')) {
@@ -5998,11 +6009,17 @@ export class Swordfish {
     }
 
     static fixTags(args: any): void {
-        if (!(Swordfish.currentPreferences.chatGpt.enabled || Swordfish.currentPreferences.anthropic.enabled || Swordfish.currentPreferences.mistral.enabled)) {
+        const aiEnabled: boolean = Swordfish.currentPreferences.chatGpt.enabled || Swordfish.currentPreferences.anthropic.enabled
+            || Swordfish.currentPreferences.mistral.enabled || Swordfish.currentPreferences.qwen.enabled
+            || Swordfish.currentPreferences.gemini.enabled || Swordfish.currentPreferences.ollama.enabled;
+        if (!aiEnabled) {
             Swordfish.showMessage({ type: 'error', message: 'No AI engine is currently enabled' });
             return;
         }
-        if (!(Swordfish.currentPreferences.chatGpt.fixTags || Swordfish.currentPreferences.anthropic.fixTags || Swordfish.currentPreferences.mistral.fixTags)) {
+        const aiFixTagsEnabled: boolean = Swordfish.currentPreferences.chatGpt.fixTags || Swordfish.currentPreferences.anthropic.fixTags
+            || Swordfish.currentPreferences.mistral.fixTags || Swordfish.currentPreferences.qwen.fixTags
+            || Swordfish.currentPreferences.gemini.fixTags || Swordfish.currentPreferences.ollama.fixTags;
+        if (!aiFixTagsEnabled) {
             Swordfish.showMessage({ type: 'error', message: 'No AI engine is currently configured to fix tags' });
             return;
         }
@@ -6044,7 +6061,10 @@ export class Swordfish {
     }
 
     static fixMatch(match: Match): void {
-        if (!(Swordfish.currentPreferences.chatGpt.enabled || Swordfish.currentPreferences.anthropic.enabled || Swordfish.currentPreferences.mistral.enabled)) {
+        const aiEnabled: boolean = Swordfish.currentPreferences.chatGpt.enabled || Swordfish.currentPreferences.anthropic.enabled
+            || Swordfish.currentPreferences.mistral.enabled || Swordfish.currentPreferences.qwen.enabled
+            || Swordfish.currentPreferences.gemini.enabled || Swordfish.currentPreferences.ollama.enabled;
+        if (!aiEnabled) {
             Swordfish.showMessage({ type: 'error', message: 'No AI engine is currently enabled' });
             return;
         }

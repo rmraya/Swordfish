@@ -59,93 +59,118 @@
 
 	<!-- MS-XLSX Appendix A schemas -->
 	<!-- section 5.1 -->
-	<uri name="http://schemas.microsoft.com/office/excel/2006/main" uri="MS-XLSX-AppendixA/5_1_http_schemas_microsoft_com_office_excel_2006_main.xsd" />
+	<uri name="http://schemas.microsoft.com/office/excel/2006/main" uri="MS-XLSX-AppendixA/5_1_excel_2006_main.xsd" />
 	<!-- section 5.2 -->
-	<uri name="http://schemas.microsoft.com/office/drawing/2010/slicer" uri="MS-XLSX-AppendixA/5_2_http_schemas_microsoft_com_office_drawing_2010_slicer.xsd" />
+	<uri name="http://schemas.microsoft.com/office/drawing/2010/slicer" uri="MS-XLSX-AppendixA/5_2_drawing_2010_slicer.xsd" />
 	<!-- section 5.3 -->
-	<uri name="http://schemas.microsoft.com/office/spreadsheetml/2010/11/main" uri="MS-XLSX-AppendixA/5_3_http_schemas_microsoft_com_office_spreadsheetml_2010_11_main.xsd" />
+	<uri name="http://schemas.microsoft.com/office/spreadsheetml/2010/11/main" uri="MS-XLSX-AppendixA/5_3_spreadsheetml_2010_11_main.xsd" />
 	<!-- section 5.4 -->
-	<uri name="http://schemas.microsoft.com/office/spreadsheetml/2009/9/main" uri="MS-XLSX-AppendixA/5_4_http_schemas_microsoft_com_office_spreadsheetml_2009_9_main.xsd" />
+	<uri name="http://schemas.microsoft.com/office/spreadsheetml/2009/9/main" uri="MS-XLSX-AppendixA/5_4_spreadsheetml_2009_9_main.xsd" />
 	<!-- section 5.5 -->
-	<uri name="http://schemas.microsoft.com/office/spreadsheetml/2009/9/ac" uri="MS-XLSX-AppendixA/5_5_http_schemas_microsoft_com_office_spreadsheetml_2009_9_ac.xsd" />
+	<uri name="http://schemas.microsoft.com/office/spreadsheetml/2009/9/ac" uri="MS-XLSX-AppendixA/5_5_spreadsheetml_2009_9_ac.xsd" />
 	<!-- section 5.6 -->
-	<uri name="http://schemas.microsoft.com/office/spreadsheetml/2011/1/ac" uri="MS-XLSX-AppendixA/5_6_http_schemas_microsoft_com_office_spreadsheetml_2011_1_ac.xsd" />
+	<uri name="http://schemas.microsoft.com/office/spreadsheetml/2011/1/ac" uri="MS-XLSX-AppendixA/5_6_spreadsheetml_2011_1_ac.xsd" />
 	<!-- section 5.7 -->
-	<uri name="http://schemas.microsoft.com/office/drawing/2012/timeslicer" uri="MS-XLSX-AppendixA/5_7_http_schemas_microsoft_com_office_drawing_2012_timeslicer.xsd" />
+	<uri name="http://schemas.microsoft.com/office/drawing/2012/timeslicer" uri="MS-XLSX-AppendixA/5_7_drawing_2012_timeslicer.xsd" />
 	<!-- section 5.8 -->
-	<uri name="http://schemas.microsoft.com/office/excel/2010/spreadsheetDrawing" uri="MS-XLSX-AppendixA/5_8_http_schemas_microsoft_com_office_excel_2010_spreadsheetDrawing.xsd" />
+	<uri name="http://schemas.microsoft.com/office/excel/2010/spreadsheetDrawing" uri="MS-XLSX-AppendixA/5_8_excel_2010_spreadsheetDrawing.xsd" />
 	<!-- section 5.9 -->
-	<uri name="http://schemas.microsoft.com/office/spreadsheetml/2010/11/ac" uri="MS-XLSX-AppendixA/5_9_http_schemas_microsoft_com_office_spreadsheetml_2010_11_ac.xsd" />
+	<uri name="http://schemas.microsoft.com/office/spreadsheetml/2010/11/ac" uri="MS-XLSX-AppendixA/5_9_spreadsheetml_2010_11_ac.xsd" />
 	<!-- section 5.10 -->
-	<uri name="http://schemas.microsoft.com/office/spreadsheetml/2014/11/main" uri="MS-XLSX-AppendixA/5_10_http_schemas_microsoft_com_office_spreadsheetml_2014_11_main.xsd" />
+	<uri name="http://schemas.microsoft.com/office/spreadsheetml/2014/11/main" uri="MS-XLSX-AppendixA/5_10_spreadsheetml_2014_11_main.xsd" />
 	<!-- section 5.11 -->
-	<uri name="http://schemas.microsoft.com/office/spreadsheetml/2015/02/main" uri="MS-XLSX-AppendixA/5_11_http_schemas_microsoft_com_office_spreadsheetml_2015_02_main.xsd" />
+	<uri name="http://schemas.microsoft.com/office/spreadsheetml/2015/02/main" uri="MS-XLSX-AppendixA/5_11_spreadsheetml_2015_02_main.xsd" />
 	<!-- section 5.12 -->
-	<uri name="http://schemas.microsoft.com/office/spreadsheetml/2016/revision10" uri="MS-XLSX-AppendixA/5_12_http_schemas_microsoft_com_office_spreadsheetml_2016_revision10.xsd" />
+	<uri name="http://schemas.microsoft.com/office/spreadsheetml/2016/revision10" uri="MS-XLSX-AppendixA/5_12_spreadsheetml_2016_revision10.xsd" />
 	<!-- section 5.13 -->
-	<uri name="http://schemas.microsoft.com/office/spreadsheetml/2016/revision9" uri="MS-XLSX-AppendixA/5_13_http_schemas_microsoft_com_office_spreadsheetml_2016_revision9.xsd" />
+	<uri name="http://schemas.microsoft.com/office/spreadsheetml/2016/revision9" uri="MS-XLSX-AppendixA/5_13_spreadsheetml_2016_revision9.xsd" />
 	<!-- section 5.14 -->
-	<uri name="http://schemas.microsoft.com/office/spreadsheetml/2016/revision6" uri="MS-XLSX-AppendixA/5_14_http_schemas_microsoft_com_office_spreadsheetml_2016_revision6.xsd" />
+	<uri name="http://schemas.microsoft.com/office/spreadsheetml/2016/revision6" uri="MS-XLSX-AppendixA/5_14_spreadsheetml_2016_revision6.xsd" />
 	<!-- section 5.15 -->
-	<uri name="http://schemas.microsoft.com/office/spreadsheetml/2014/revision" uri="MS-XLSX-AppendixA/5_15_http_schemas_microsoft_com_office_spreadsheetml_2014_revision.xsd" />
+	<uri name="http://schemas.microsoft.com/office/spreadsheetml/2014/revision" uri="MS-XLSX-AppendixA/5_15_spreadsheetml_2014_revision.xsd" />
 	<!-- section 5.16 -->
-	<uri name="http://schemas.microsoft.com/office/spreadsheetml/2015/revision2" uri="MS-XLSX-AppendixA/5_16_http_schemas_microsoft_com_office_spreadsheetml_2015_revision2.xsd" />
+	<uri name="http://schemas.microsoft.com/office/spreadsheetml/2015/revision2" uri="MS-XLSX-AppendixA/5_16_spreadsheetml_2015_revision2.xsd" />
 	<!-- section 5.17 -->
-	<uri name="http://schemas.microsoft.com/office/spreadsheetml/2016/revision3" uri="MS-XLSX-AppendixA/5_17_http_schemas_microsoft_com_office_spreadsheetml_2016_revision3.xsd" />
+	<uri name="http://schemas.microsoft.com/office/spreadsheetml/2016/revision3" uri="MS-XLSX-AppendixA/5_17_spreadsheetml_2016_revision3.xsd" />
 	<!-- section 5.18 -->
-	<uri name="http://schemas.microsoft.com/office/spreadsheetml/2016/revision5" uri="MS-XLSX-AppendixA/5_18_http_schemas_microsoft_com_office_spreadsheetml_2016_revision5.xsd" />
+	<uri name="http://schemas.microsoft.com/office/spreadsheetml/2016/revision5" uri="MS-XLSX-AppendixA/5_18_spreadsheetml_2016_revision5.xsd" />
 	<!-- section 5.19 -->
-	<uri name="http://schemas.microsoft.com/office/spreadsheetml/2016/pivotdefaultlayout" uri="MS-XLSX-AppendixA/5_19_http_schemas_microsoft_com_office_spreadsheetml_2016_pivotdefaultlayout.xsd" />
+	<uri name="http://schemas.microsoft.com/office/spreadsheetml/2016/pivotdefaultlayout" uri="MS-XLSX-AppendixA/5_19_spreadsheetml_2016_pivotdefaultlayout.xsd" />
 	<!-- section 5.20 -->
-	<uri name="http://schemas.microsoft.com/office/spreadsheetml/2017/richdata2" uri="MS-XLSX-AppendixA/5_20_http_schemas_microsoft_com_office_spreadsheetml_2017_richdata2.xsd" />
+	<uri name="http://schemas.microsoft.com/office/spreadsheetml/2017/richdata2" uri="MS-XLSX-AppendixA/5_20_spreadsheetml_2017_richdata2.xsd" />
 	<!-- section 5.21 -->
-	<uri name="http://schemas.microsoft.com/office/spreadsheetml/2017/richdata" uri="MS-XLSX-AppendixA/5_21_http_schemas_microsoft_com_office_spreadsheetml_2017_richdata.xsd" />
+	<uri name="http://schemas.microsoft.com/office/spreadsheetml/2017/richdata" uri="MS-XLSX-AppendixA/5_21_spreadsheetml_2017_richdata.xsd" />
 	<!-- section 5.22 -->
-	<uri name="http://schemas.microsoft.com/office/spreadsheetml/2018/calcfeatures" uri="MS-XLSX-AppendixA/5_22_http_schemas_microsoft_com_office_spreadsheetml_2018_calcfeatures.xsd" />
+	<uri name="http://schemas.microsoft.com/office/spreadsheetml/2018/calcfeatures" uri="MS-XLSX-AppendixA/5_22_spreadsheetml_2018_calcfeatures.xsd" />
 	<!-- section 5.23 -->
-	<uri name="http://schemas.microsoft.com/office/spreadsheetml/2018/threadedcomments" uri="MS-XLSX-AppendixA/5_23_http_schemas_microsoft_com_office_spreadsheetml_2018_threadedcomments.xsd" />
+	<uri name="http://schemas.microsoft.com/office/spreadsheetml/2018/threadedcomments" uri="MS-XLSX-AppendixA/5_23_spreadsheetml_2018_threadedcomments.xsd" />
 	<!-- section 5.24 -->
-	<uri name="http://schemas.microsoft.com/office/spreadsheetml/2018/08/main" uri="MS-XLSX-AppendixA/5_24_http_schemas_microsoft_com_office_spreadsheetml_2018_08_main.xsd" />
+	<uri name="http://schemas.microsoft.com/office/spreadsheetml/2018/08/main" uri="MS-XLSX-AppendixA/5_24_spreadsheetml_2018_08_main.xsd" />
 	<!-- section 5.25 -->
-	<uri name="http://schemas.microsoft.com/office/spreadsheetml/2017/dynamicarray" uri="MS-XLSX-AppendixA/5_25_http_schemas_microsoft_com_office_spreadsheetml_2017_dynamicarray.xsd" />
+	<uri name="http://schemas.microsoft.com/office/spreadsheetml/2017/dynamicarray" uri="MS-XLSX-AppendixA/5_25_spreadsheetml_2017_dynamicarray.xsd" />
 	<!-- section 5.26 -->
-	<uri name="http://schemas.microsoft.com/office/spreadsheetml/2019/namedsheetviews" uri="MS-XLSX-AppendixA/5_26_http_schemas_microsoft_com_office_spreadsheetml_2019_namedsheetviews.xsd" />
+	<uri name="http://schemas.microsoft.com/office/spreadsheetml/2019/namedsheetviews" uri="MS-XLSX-AppendixA/5_26_spreadsheetml_2019_namedsheetviews.xsd" />
 	<!-- section 5.27 -->
-	<uri name="http://schemas.microsoft.com/office/spreadsheetml/2019/extlinksprops" uri="MS-XLSX-AppendixA/5_27_http_schemas_microsoft_com_office_spreadsheetml_2019_extlinksprops.xsd" />
+	<uri name="http://schemas.microsoft.com/office/spreadsheetml/2019/extlinksprops" uri="MS-XLSX-AppendixA/5_27_spreadsheetml_2019_extlinksprops.xsd" />
 	<!-- section 5.28 -->
-	<uri name="http://schemas.microsoft.com/office/spreadsheetml/2020/richdatawebimage" uri="MS-XLSX-AppendixA/5_28_http_schemas_microsoft_com_office_spreadsheetml_2020_richdatawebimage.xsd" />
+	<uri name="http://schemas.microsoft.com/office/spreadsheetml/2020/richdatawebimage" uri="MS-XLSX-AppendixA/5_28_spreadsheetml_2020_richdatawebimage.xsd" />
 	<!-- section 5.29 -->
-	<uri name="http://schemas.microsoft.com/office/spreadsheetml/2020/pivotNov2020" uri="MS-XLSX-AppendixA/5_29_http_schemas_microsoft_com_office_spreadsheetml_2020_pivotNov2020.xsd" />
+	<uri name="http://schemas.microsoft.com/office/spreadsheetml/2020/pivotNov2020" uri="MS-XLSX-AppendixA/5_29_spreadsheetml_2020_pivotNov2020.xsd" />
 	<!-- section 5.30 -->
-	<uri name="http://schemas.microsoft.com/office/spreadsheetml/2020/threadedcomments2" uri="MS-XLSX-AppendixA/5_30_http_schemas_microsoft_com_office_spreadsheetml_2020_threadedcomments2.xsd" />
+	<uri name="http://schemas.microsoft.com/office/spreadsheetml/2020/threadedcomments2" uri="MS-XLSX-AppendixA/5_30_spreadsheetml_2020_threadedcomments2.xsd" />
 	<!-- section 5.31 -->
-	<uri name="http://schemas.microsoft.com/office/spreadsheetml/2020/richvaluerefresh" uri="MS-XLSX-AppendixA/5_31_http_schemas_microsoft_com_office_spreadsheetml_2020_richvaluerefresh.xsd" />
+	<uri name="http://schemas.microsoft.com/office/spreadsheetml/2020/richvaluerefresh" uri="MS-XLSX-AppendixA/5_31_spreadsheetml_2020_richvaluerefresh.xsd" />
 	<!-- section 5.32 -->
-	<uri name="http://schemas.microsoft.com/office/spreadsheetml/2022/pivotVersionInfo" uri="MS-XLSX-AppendixA/5_32_http_schemas_microsoft_com_office_spreadsheetml_2022_pivotVersionInfo.xsd" />
+	<uri name="http://schemas.microsoft.com/office/spreadsheetml/2022/pivotVersionInfo" uri="MS-XLSX-AppendixA/5_32_spreadsheetml_2022_pivotVersionInfo.xsd" />
 	<!-- section 5.33 -->
-	<uri name="http://schemas.microsoft.com/office/spreadsheetml/2022/pivotRichData" uri="MS-XLSX-AppendixA/5_33_http_schemas_microsoft_com_office_spreadsheetml_2022_pivotRichData.xsd" />
+	<uri name="http://schemas.microsoft.com/office/spreadsheetml/2022/pivotRichData" uri="MS-XLSX-AppendixA/5_33_spreadsheetml_2022_pivotRichData.xsd" />
 	<!-- section 5.34 -->
-	<uri name="http://schemas.microsoft.com/office/spreadsheetml/2021/extlinks2021" uri="MS-XLSX-AppendixA/5_34_http_schemas_microsoft_com_office_spreadsheetml_2021_extlinks2021.xsd" />
+	<uri name="http://schemas.microsoft.com/office/spreadsheetml/2021/extlinks2021" uri="MS-XLSX-AppendixA/5_34_spreadsheetml_2021_extlinks2021.xsd" />
 	<!-- section 5.35 -->
-	<uri name="http://schemas.microsoft.com/office/spreadsheetml/2022/richvaluerel" uri="MS-XLSX-AppendixA/5_35_http_schemas_microsoft_com_office_spreadsheetml_2022_richvaluerel.xsd" />
+	<uri name="http://schemas.microsoft.com/office/spreadsheetml/2022/richvaluerel" uri="MS-XLSX-AppendixA/5_35_spreadsheetml_2022_richvaluerel.xsd" />
 	<!-- section 5.36 -->
-	<uri name="http://schemas.microsoft.com/office/spreadsheetml/2022/featurepropertybag" uri="MS-XLSX-AppendixA/5_36_http_schemas_microsoft_com_office_spreadsheetml_2022_featurepropertybag.xsd" />
+	<uri name="http://schemas.microsoft.com/office/spreadsheetml/2022/featurepropertybag" uri="MS-XLSX-AppendixA/5_36_spreadsheetml_2022_featurepropertybag.xsd" />
 	<!-- section 5.37 -->
-	<uri name="http://schemas.microsoft.com/office/spreadsheetml/2023/msForms" uri="MS-XLSX-AppendixA/5_37_http_schemas_microsoft_com_office_spreadsheetml_2023_msForms.xsd" />
+	<uri name="http://schemas.microsoft.com/office/spreadsheetml/2023/msForms" uri="MS-XLSX-AppendixA/5_37_spreadsheetml_2023_msForms.xsd" />
 	<!-- section 5.38 -->
-	<uri name="http://schemas.microsoft.com/office/spreadsheetml/2023/externalCodeService" uri="MS-XLSX-AppendixA/5_38_http_schemas_microsoft_com_office_spreadsheetml_2023_externalCodeService.xsd" />
+	<uri name="http://schemas.microsoft.com/office/spreadsheetml/2023/externalCodeService" uri="MS-XLSX-AppendixA/5_38_spreadsheetml_2023_externalCodeService.xsd" />
 	<!-- section 5.39 -->
-	<uri name="http://schemas.microsoft.com/office/spreadsheetml/2023/python" uri="MS-XLSX-AppendixA/5_39_http_schemas_microsoft_com_office_spreadsheetml_2023_python.xsd" />
+	<uri name="http://schemas.microsoft.com/office/spreadsheetml/2023/python" uri="MS-XLSX-AppendixA/5_39_spreadsheetml_2023_python.xsd" />
 	<!-- section 5.40 -->
-	<uri name="http://schemas.microsoft.com/office/spreadsheetml/2023/pivot2023Calculation" uri="MS-XLSX-AppendixA/5_40_http_schemas_microsoft_com_office_spreadsheetml_2023_pivot2023Calculation.xsd" />
+	<uri name="http://schemas.microsoft.com/office/spreadsheetml/2023/pivot2023Calculation" uri="MS-XLSX-AppendixA/5_40_spreadsheetml_2023_pivot2023Calculation.xsd" />
 	<!-- section 5.41 -->
-	<uri name="http://schemas.microsoft.com/office/spreadsheetml/2024/pivotAutoRefresh" uri="MS-XLSX-AppendixA/5_41_http_schemas_microsoft_com_office_spreadsheetml_2024_pivotAutoRefresh.xsd" />
+	<uri name="http://schemas.microsoft.com/office/spreadsheetml/2024/pivotAutoRefresh" uri="MS-XLSX-AppendixA/5_41_spreadsheetml_2024_pivotAutoRefresh.xsd" />
 	<!-- section 5.42 -->
-	<uri name="http://schemas.microsoft.com/office/spreadsheetml/2024/workbookCompatibilityVersion" uri="MS-XLSX-AppendixA/5_42_http_schemas_microsoft_com_office_spreadsheetml_2024_workbookCompatibilityVersion.xsd" />
+	<uri name="http://schemas.microsoft.com/office/spreadsheetml/2024/workbookCompatibilityVersion" uri="MS-XLSX-AppendixA/5_42_spreadsheetml_2024_workbookCompatibilityVersion.xsd" />
 	<!-- section 5.43 -->
-	<uri name="http://schemas.microsoft.com/office/spreadsheetml/2023/showDataTypeIcons" uri="MS-XLSX-AppendixA/5_43_http_schemas_microsoft_com_office_spreadsheetml_2023_showDataTypeIcons.xsd" />
+	<uri name="http://schemas.microsoft.com/office/spreadsheetml/2023/showDataTypeIcons" uri="MS-XLSX-AppendixA/5_43_spreadsheetml_2023_showDataTypeIcons.xsd" />
 	<!-- section 5.44 -->
-	<uri name="http://schemas.microsoft.com/office/spreadsheetml/2025/externalCodeService2" uri="MS-XLSX-AppendixA/5_44_http_schemas_microsoft_com_office_spreadsheetml_2025_externalCodeService2.xsd" />
+	<uri name="http://schemas.microsoft.com/office/spreadsheetml/2025/externalCodeService2" uri="MS-XLSX-AppendixA/5_44_spreadsheetml_2025_externalCodeService2.xsd" />
 	<!-- section 5.45 -->
-	<uri name="http://schemas.microsoft.com/office/spreadsheetml/2025/pivotDataSource" uri="MS-XLSX-AppendixA/5_45_http_schemas_microsoft_com_office_spreadsheetml_2025_pivotDataSource.xsd" />
+	<uri name="http://schemas.microsoft.com/office/spreadsheetml/2025/pivotDataSource" uri="MS-XLSX-AppendixA/5_45_spreadsheetml_2025_pivotDataSource.xsd" />
+
+	<!-- MS-XLSX Appendix A imported dependency schemas -->
+	<system systemId="oartdocprop.xsd" uri="xlsx/oartdocprop.xsd" />
+	<system systemId="orel.xsd" uri="xlsx/orel.xsd" />
+	<system systemId="xl14.xsd" uri="xlsx/xl14.xsd" />
+	<system systemId="xl15.xsd" uri="xlsx/xl15.xsd" />
+	<system systemId="xlautofilter.xsd" uri="xlsx/xlautofilter.xsd" />
+	<system systemId="xlbasictypes.xsd" uri="xlsx/xlbasictypes.xsd" />
+	<system systemId="xlextconns.xsd" uri="xlsx/xlextconns.xsd" />
+	<system systemId="xlmbasictypes.xsd" uri="xlsx/xlmbasictypes.xsd" />
+	<system systemId="xlpivot.xsd" uri="xlsx/xlpivot.xsd" />
+	<system systemId="xlpivot16.xsd" uri="xlsx/xlpivot16.xsd" />
+	<system systemId="xlrevexignore.xsd" uri="xlsx/xlrevexignore.xsd" />
+	<system systemId="xlrevexignore10.xsd" uri="xlsx/xlrevexignore10.xsd" />
+	<system systemId="xlrevexignore2.xsd" uri="xlsx/xlrevexignore2.xsd" />
+	<system systemId="xlrevexignore6.xsd" uri="xlsx/xlrevexignore6.xsd" />
+	<system systemId="xlrichvaluerefresh.xsd" uri="xlsx/xlrichvaluerefresh.xsd" />
+	<system systemId="xlsheet.xsd" uri="xlsx/xlsheet.xsd" />
+	<system systemId="xlslicercache.xsd" uri="xlsx/xlslicercache.xsd" />
+	<system systemId="xlslicercache15.xsd" uri="xlsx/xlslicercache15.xsd" />
+	<system systemId="xlsst.xsd" uri="xlsx/xlsst.xsd" />
+	<system systemId="xlstyles.xsd" uri="xlsx/xlstyles.xsd" />
+	<system systemId="xlsupbook.xsd" uri="xlsx/xlsupbook.xsd" />
+	<system systemId="xlThreadedComments2.xsd" uri="xlsx/xlThreadedComments2.xsd" />
+	<system systemId="xlworkbook.xsd" uri="xlsx/xlworkbook.xsd" />
 </catalog>

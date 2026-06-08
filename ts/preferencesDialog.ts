@@ -88,6 +88,12 @@ export class PreferencesDialog {
     qwenModel: HTMLInputElement = document.createElement('input');
     qwenFixTags: HTMLInputElement = document.createElement('input');
 
+    enableOllama: HTMLInputElement = document.createElement('input');
+    ollamaUrl: HTMLInputElement = document.createElement('input');
+    ollamaModel: HTMLInputElement = document.createElement('input');
+    ollamaFixTags: HTMLInputElement = document.createElement('input');
+    ollamaThink: HTMLInputElement = document.createElement('input');
+
     defaultEnglish: HTMLSelectElement = document.createElement('select');
     defaultPortuguese: HTMLSelectElement = document.createElement('select');
     defaultSpanish: HTMLSelectElement = document.createElement('select');
@@ -355,6 +361,22 @@ export class PreferencesDialog {
             this.qwenFixTags.disabled = !this.enableQwen.checked;
         });
 
+        this.enableOllama.checked = preferences.ollama.enabled;
+        this.ollamaUrl.value = preferences.ollama.url;
+        this.ollamaModel.value = preferences.ollama.model;
+        this.ollamaFixTags.checked = preferences.ollama.fixTags;
+        this.ollamaThink.checked = preferences.ollama.think;
+        this.ollamaUrl.disabled = !preferences.ollama.enabled;
+        this.ollamaModel.disabled = !preferences.ollama.enabled;
+        this.ollamaFixTags.disabled = !preferences.ollama.enabled;
+        this.ollamaThink.disabled = !preferences.ollama.enabled;
+        this.enableOllama.addEventListener('change', () => {
+            this.ollamaUrl.disabled = !this.enableOllama.checked;
+            this.ollamaModel.disabled = !this.enableOllama.checked;
+            this.ollamaFixTags.disabled = !this.enableOllama.checked;
+            this.ollamaThink.disabled = !this.enableOllama.checked;
+        });
+
         this.enableModernmt.checked = preferences.modernmt.enabled;
         this.modernmtKey.value = preferences.modernmt.apiKey;
         this.modernmtSrcLang.value = preferences.modernmt.srcLang;
@@ -453,6 +475,15 @@ export class PreferencesDialog {
             return;
         }
 
+        if (this.enableOllama.checked && this.ollamaModel.value.trim() === '') {
+            ipcRenderer.send('show-message', { type: 'warning', message: 'Enter Ollama model', parent: 'preferences' });
+            return;
+        }
+        if (this.enableOllama.checked && this.ollamaUrl.value.trim() === '') {
+            ipcRenderer.send('show-message', { type: 'warning', message: 'Enter Ollama URL', parent: 'preferences' });
+            return;
+        }
+
         if (this.enableModernmt.checked && this.modernmtKey.value === '') {
             ipcRenderer.send('show-message', { type: 'warning', message: 'Enter ModernMT API key', parent: 'preferences' });
             return;
@@ -530,6 +561,13 @@ export class PreferencesDialog {
                 region: this.qwenRegion.value,
                 model: this.qwenModel.value,
                 fixTags: this.qwenFixTags.checked
+            },
+            ollama: {
+                enabled: this.enableOllama.checked,
+                url: this.ollamaUrl.value,
+                model: this.ollamaModel.value,
+                fixTags: this.ollamaFixTags.checked,
+                think: this.ollamaThink.checked
             },
             modernmt: {
                 enabled: this.enableModernmt.checked,
@@ -1391,6 +1429,24 @@ export class PreferencesDialog {
         radioRow.classList.add('middle');
         leftSide.appendChild(radioRow);
 
+        let ollamaRadio: HTMLInputElement = document.createElement('input');
+        ollamaRadio.type = 'radio';
+        ollamaRadio.name = 'mtProvider';
+        ollamaRadio.id = 'ollamaRadio';
+        ollamaRadio.style.margin = '4px';
+        radioRow.appendChild(ollamaRadio);
+
+        let ollamaLabel: HTMLLabelElement = document.createElement('label');
+        ollamaLabel.setAttribute('for', 'ollamaRadio');
+        ollamaLabel.innerText = 'Ollama';
+        ollamaLabel.style.marginTop = '4px';
+        radioRow.appendChild(ollamaLabel);
+
+        radioRow = document.createElement('div');
+        radioRow.classList.add('row');
+        radioRow.classList.add('middle');
+        leftSide.appendChild(radioRow);
+
         let modernmtRadio: HTMLInputElement = document.createElement('input');
         modernmtRadio.type = 'radio';
         modernmtRadio.name = 'mtProvider';
@@ -1440,6 +1496,12 @@ export class PreferencesDialog {
         rightSide.appendChild(mistralTab);
         this.populateMistralTab(mistralTab);
 
+        let ollamaTab: HTMLDivElement = document.createElement('div');
+        ollamaTab.id = 'ollamaTab';
+        ollamaTab.style.display = 'none';
+        rightSide.appendChild(ollamaTab);
+        this.populateOllamaTab(ollamaTab);
+
         let qwenTab: HTMLDivElement = document.createElement('div');
         qwenTab.id = 'qwenTab';
         qwenTab.style.display = 'none';
@@ -1465,46 +1527,40 @@ export class PreferencesDialog {
         this.populateModernmtTab(modernmtTab);
 
         googleRadio.addEventListener('change', () => {
-            console.log('show google tab');
             this.toggleTab('googleTab');
         });
         azureRadio.addEventListener('change', () => {
-            console.log('show azure tab');
             this.toggleTab('azureTab');
         });
         deeplRadio.addEventListener('change', () => {
-            console.log('show deepl tab');
             this.toggleTab('deeplTab');
         });
         chatGptRadio.addEventListener('change', () => {
-            console.log('show chatgpt tab');
             this.toggleTab('chatGptTab');
         });
         mistralRadio.addEventListener('change', () => {
-            console.log('show mistral tab');
             this.toggleTab('mistralTab');
         });
         qwenRadio.addEventListener('change', () => {
-            console.log('show Qwen tab');
             this.toggleTab('qwenTab');
         });
+        ollamaRadio.addEventListener('change', () => {
+            this.toggleTab('ollamaTab');
+        });
         anthropicRadio.addEventListener('change', () => {
-            console.log('show anthropic tab');
             this.toggleTab('anthropicTab');
         });
         geminiRadio.addEventListener('change', () => {
-            console.log('show gemini tab');
             this.toggleTab('geminiTab');
         });
         modernmtRadio.addEventListener('change', () => {
-            console.log('show modernmt tab');
             this.toggleTab('modernmtTab');
         });
     }
 
     toggleTab(tabId: string): void {
         const tabs: string[] = ['googleTab', 'azureTab', 'deeplTab',
-            'chatGptTab', 'mistralTab', 'qwenTab', 'anthropicTab', 'geminiTab', 'modernmtTab'];
+            'chatGptTab', 'mistralTab', 'qwenTab', 'ollamaTab', 'anthropicTab', 'geminiTab', 'modernmtTab'];
         tabs.forEach((id) => {
             const tab = document.getElementById(id);
             if (tab) {
@@ -1975,6 +2031,100 @@ export class PreferencesDialog {
         this.qwenModel = document.getElementById('qwenModel') as HTMLInputElement;
     }
 
+    populateOllamaTab(container: HTMLDivElement): void {
+        container.style.paddingTop = '10px';
+        let ollamaDiv: HTMLDivElement = document.createElement('div');
+        ollamaDiv.classList.add('middle');
+        ollamaDiv.classList.add('row');
+        ollamaDiv.style.paddingLeft = '4px';
+        ollamaDiv.innerHTML = '<input type="checkbox" id="enableOllama"><label for="enableOllama" style="padding-top:4px;">Enable Ollama Translation</label>';
+        container.appendChild(ollamaDiv);
+
+        let inputsTable: HTMLTableElement = document.createElement('table');
+        inputsTable.classList.add('fill_width');
+        container.appendChild(inputsTable);
+
+        let tr: HTMLTableRowElement = document.createElement('tr');
+        inputsTable.appendChild(tr);
+        let td: HTMLTableCellElement = document.createElement('td');
+        td.classList.add('middle');
+        td.classList.add('noWrap');
+        td.innerHTML = '<label for="ollamaUrl">Ollama URL</label>'
+        tr.appendChild(td);
+        td = document.createElement('td');
+        td.classList.add('middle');
+        td.classList.add('fill_width');
+        let ollamaUrlInput: HTMLInputElement = document.createElement('input');
+        ollamaUrlInput.type = 'text';
+        ollamaUrlInput.id = 'ollamaUrl';
+        ollamaUrlInput.classList.add('table_input');
+        td.appendChild(ollamaUrlInput);
+        tr.appendChild(td);
+
+        tr = document.createElement('tr');
+        inputsTable.appendChild(tr);
+
+        td = document.createElement('td');
+        td.classList.add('middle');
+        td.classList.add('noWrap');
+        td.innerHTML = '<label for="ollamaModel">Ollama Model</label>'
+        tr.appendChild(td);
+
+        td = document.createElement('td');
+        td.classList.add('middle');
+        td.classList.add('fill_width');
+        let ollamaModelInput: HTMLInputElement = document.createElement('input');
+        ollamaModelInput.type = 'text';
+        ollamaModelInput.id = 'ollamaModel';
+        ollamaModelInput.classList.add('table_input');
+        td.appendChild(ollamaModelInput);
+        tr.appendChild(td);
+
+
+        let thinkRow: HTMLDivElement = document.createElement('div');
+        thinkRow.classList.add('row');
+        thinkRow.classList.add('middle');
+        container.appendChild(thinkRow);
+
+        this.ollamaThink.id = 'ollamaThink';
+        this.ollamaThink.type = 'checkbox';
+        thinkRow.appendChild(this.ollamaThink);
+
+        let thinkLabel: HTMLLabelElement = document.createElement('label');
+        thinkLabel.innerText = 'Enable Thinking';
+        thinkLabel.setAttribute('for', 'ollamaThink');
+        thinkLabel.style.paddingTop = '4px';
+        thinkRow.appendChild(thinkLabel);
+
+        let tagsRow: HTMLDivElement = document.createElement('div');
+        tagsRow.classList.add('row');
+        tagsRow.classList.add('middle');
+        container.appendChild(tagsRow);
+
+        this.ollamaFixTags.id = 'ollamaFixTags';
+        this.ollamaFixTags.type = 'checkbox';
+        this.ollamaFixTags.addEventListener('change', () => {
+            if (this.ollamaFixTags.checked) {
+                this.chatGptFixTags.checked = false;
+                this.anthropicFixTags.checked = false;
+                this.mistralFixTags.checked = false;
+                this.geminiFixTags.checked = false;
+                this.qwenFixTags.checked = false;
+            }
+        });
+        tagsRow.appendChild(this.ollamaFixTags);
+
+        let fixLabel: HTMLLabelElement = document.createElement('label');
+        fixLabel.innerText = 'Use to Fix Tags';
+        fixLabel.setAttribute('for', 'ollamaFixTags');
+        fixLabel.style.paddingTop = '4px';
+        tagsRow.appendChild(fixLabel);
+
+        this.enableOllama = document.getElementById('enableOllama') as HTMLInputElement;
+        this.ollamaUrl = document.getElementById('ollamaUrl') as HTMLInputElement;
+        this.ollamaModel = document.getElementById('ollamaModel') as HTMLInputElement;
+    }
+
     populateAnthropicTab(container: HTMLDivElement): void {
         container.style.paddingTop = '10px';
         let anthropicDiv: HTMLDivElement = document.createElement('div');
@@ -1983,11 +2133,11 @@ export class PreferencesDialog {
         anthropicDiv.style.paddingLeft = '4px';
         anthropicDiv.innerHTML = '<input type="checkbox" id="enableAnthropic"><label for="enableAnthropic" style="padding-top:4px;">Enable Claude Translation</label>';
         container.appendChild(anthropicDiv);
-        let langsTable: HTMLTableElement = document.createElement('table');
-        langsTable.classList.add('fill_width');
-        container.appendChild(langsTable);
+        let inputsTable: HTMLTableElement = document.createElement('table');
+        inputsTable.classList.add('fill_width');
+        container.appendChild(inputsTable);
         let tr: HTMLTableRowElement = document.createElement('tr');
-        langsTable.appendChild(tr);
+        inputsTable.appendChild(tr);
         let td: HTMLTableCellElement = document.createElement('td');
         td.classList.add('middle');
         td.classList.add('noWrap');
@@ -1999,7 +2149,7 @@ export class PreferencesDialog {
         td.innerHTML = '<input type="text" id="anthropicKey" class="table_input"/>';
         tr.appendChild(td);
         tr = document.createElement('tr');
-        langsTable.appendChild(tr);
+        inputsTable.appendChild(tr);
         td = document.createElement('td');
         td.classList.add('middle');
         td.classList.add('noWrap');
