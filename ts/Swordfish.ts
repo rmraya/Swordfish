@@ -239,14 +239,14 @@ export class Swordfish {
             mkdirSync(Swordfish.appHome, { recursive: true });
         }
 
-        this.ls = spawn(this.javapath, ['--module-path', 'lib', '-m', 'swordfish/com.maxprograms.swordfish.TmsServer', '-port', '8070'], { cwd: app.getAppPath(), windowsHide: true });
+        this.ls = spawn(this.javapath, ['-XX:+UseCompactObjectHeaders', '--enable-native-access=mapdb,org.xerial.sqlitejdbc', '--module-path', 'lib', '-m', 'swordfish/com.maxprograms.swordfish.TmsServer', '-port', '8070'], { cwd: app.getAppPath(), windowsHide: true });
         this.ls.stdout.on('data', (data) => {
             console.log(`stdout: ${data}`);
         });
         this.ls.stderr.on('data', (data) => {
             console.error(`stderr: ${data}`);
         });
-        execFileSync(this.javapath, ['--module-path', 'lib', '-m', 'swordfish/com.maxprograms.swordfish.CheckURL', 'http://localhost:8070/TMSServer'], { cwd: app.getAppPath(), windowsHide: true });
+        execFileSync(this.javapath, ['-XX:+UseCompactObjectHeaders', '--module-path', 'lib', '-m', 'swordfish/com.maxprograms.swordfish.CheckURL', 'http://localhost:8070/TMSServer'], { cwd: app.getAppPath(), windowsHide: true });
 
         this.loadDefaults();
         Swordfish.locations = new Locations(join(app.getPath('appData'), app.name, 'locations.json'));
@@ -277,10 +277,6 @@ export class Swordfish {
                 event.preventDefault();
                 this.stopServer();
             }
-        });
-
-        app.on('quit', () => {
-            app.quit();
         });
 
         app.on('window-all-closed', () => {
@@ -1349,7 +1345,7 @@ export class Swordfish {
             { label: 'Merge With Next Segment', accelerator: 'CmdOrCtrl+J', click: () => { Swordfish.mainWindow.webContents.send('merge-next'); }, icon: join(app.getAppPath(), 'images', iconFolder, 'merge.png') },
             new MenuItem({ type: 'separator' }),
             { label: 'Copy Source to Target', accelerator: 'CmdOrCtrl+P', click: () => { Swordfish.mainWindow.webContents.send('copy-source'); } },
-            { label: 'Copy Sources to All Empty Targets', accelerator: 'CmdOrCtrl+Shift+P', click: () => { Swordfish.mainWindow.webContents.send('copy-all-sources'); } },
+            { label: 'Copy Sources to All Empty Targets', accelerator: 'CmdOrCtrl+Alt+P', click: () => { Swordfish.mainWindow.webContents.send('copy-all-sources'); } },
             { label: 'Pseudo-translate Untranslated Segments', click: () => { Swordfish.mainWindow.webContents.send('pseudo-translate'); } },
             new MenuItem({ type: 'separator' }),
             { label: 'XSL Transformation', click: () => { Swordfish.showXSLTransformation(); } }
@@ -1483,16 +1479,14 @@ export class Swordfish {
     stopServer(): void {
         let instance: Swordfish = this;
         Swordfish.sendRequest('/', { command: 'stop' },
-            (data: any) => {
-                if (data.status === 'OK') {
-                    instance.ls.kill();
-                    app.quit();
-                } else {
-                    Swordfish.showMessage({ type: 'error', message: data.reason });
-                }
+            () => {
+                instance.ls.kill();
+                app.quit();
             },
-            (reason: string) => {
-                Swordfish.showMessage({ type: 'error', message: reason });
+            () => {
+                // Java is already gone — kill the process and quit anyway
+                instance.ls.kill();
+                app.quit();
             }
         );
     }
@@ -2574,7 +2568,7 @@ export class Swordfish {
         Swordfish.mainWindow.webContents.send('view-glossaries');
     }
 
-    static sendRequest(url: string, params: any, success: Function, error: Function): void {
+    static sendRequest(url: string, params: any, success: (data: any) => void, error: (reason: string) => void): void {
         let options: any = {
             url: 'http://127.0.0.1:8070' + url,
             method: 'POST'
@@ -2583,6 +2577,9 @@ export class Swordfish {
         let responseData: string = '';
         request.setHeader('Content-Type', 'application/json');
         request.setHeader('Accept', 'application/json');
+        request.on('error', (e: Error) => {
+            error(e.message);
+        });
         request.on('response', (response: IncomingMessage) => {
             response.on('error', (e: Error) => {
                 error(e.message);
@@ -2594,8 +2591,8 @@ export class Swordfish {
                 try {
                     let json: any = JSON.parse(responseData);
                     success(json);
-                } catch (reason: any) {
-                    error(JSON.stringify(reason));
+                } catch (reason: unknown) {
+                    error((reason as Error).message ?? JSON.stringify(reason));
                 }
             });
             response.on('data', (chunk: Buffer) => {

@@ -115,7 +115,6 @@ public class SqliteDatabase implements ITmEngine {
         }
         database = new File(databaseFolder, "database.db");
         boolean sqliteNeedsCreation = !database.exists();
-        DriverManager.registerDriver(new org.sqlite.JDBC());
         conn = DriverManager.getConnection("jdbc:sqlite:" + database.getAbsolutePath().replace('\\', '/'));
 
         // Optimize SQLite performance (must be done before setAutoCommit(false))
@@ -329,7 +328,8 @@ public class SqliteDatabase implements ITmEngine {
     @Override
     public void close() throws IOException, SQLException, URISyntaxException {
         if (translatePool != null) {
-            translatePool.shutdown();
+            translatePool.close();
+            translatePool = null;
         }
         storeTUV.close();
         deleteTUV.close();

@@ -31,7 +31,7 @@ public class TuDatabase {
 	private Set<String> customers;
 
 	public TuDatabase(File folder) {
-		mapdb = DBMaker.newFileDB(new File(folder, "tudata")).closeOnJvmShutdown().make();
+		mapdb = DBMaker.newFileDB(new File(folder, "tudata")).make();
 		tumap = mapdb.getHashMap("tuvmap");
 		projects = mapdb.getHashSet("projects");
 		subjects = mapdb.getHashSet("subjects");

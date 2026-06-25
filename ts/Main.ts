@@ -455,7 +455,7 @@ export class Main {
             this.openAiPrompt();
         });
         ipcRenderer.on('copy-ai-prompt', () => {
-            this.copyAiPropmpt();
+            this.copyAiPrompt();
         });
         ipcRenderer.on('insert-ai-response', (event: IpcRendererEvent, response: string) => {
             this.insertAiReponse(response);
@@ -663,7 +663,7 @@ export class Main {
         }
     }
 
-    copyAiPropmpt(): void {
+    copyAiPrompt(): void {
         let selected: string = Main.tabHolder.getSelected();
         if (Main.translationViews.has(selected)) {
             (Main.translationViews.get(selected) as TranslationView).generatePrompt();

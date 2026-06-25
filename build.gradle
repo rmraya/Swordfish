@@ -7,7 +7,7 @@ defaultTasks 'dist'
 
 java {
     toolchain {
-        languageVersion = JavaLanguageVersion.of(21)
+        languageVersion = JavaLanguageVersion.of(25)
     }
 }
 
@@ -23,7 +23,7 @@ dependencies {
     implementation files('jars/mapdb.jar')
     implementation files('jars/openxliff.jar')
     implementation files('jars/xmljava.jar')
-    implementation files('jars/sqlite-jdbc-3.53.1.0.jar')
+    implementation files('jars/sqlite-jdbc-3.53.2.0.jar')
 }
 
 application {

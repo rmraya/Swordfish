@@ -389,7 +389,7 @@ public class XliffUtils {
 				throw new IOException(NOTSHARED);
 			}
 			return projectId;
-		} catch (SAXException | ParserConfigurationException e) {
+		} catch (SAXException | ParserConfigurationException _) {
 			throw new IOException(NOTXLIFF);
 		}
 	}
@@ -481,7 +481,7 @@ public class XliffUtils {
 			result.put("targetLang", xliff.getAttributeValue("trgLang"));
 			result.put("files", filesArray);
 			return result;
-		} catch (SAXException | ParserConfigurationException e) {
+		} catch (SAXException | ParserConfigurationException _) {
 			throw new IOException(NOTXLIFF);
 		}
 	}
@@ -616,7 +616,7 @@ public class XliffUtils {
 					}
 				}
 			}
-		} catch (Exception e) {
+		} catch (Exception _) {
 			// do nothing
 		}
 		return false;

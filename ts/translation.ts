@@ -472,7 +472,7 @@ export class TranslationView {
                 td.addEventListener('click', () => {
                     ipcRenderer.send('goto-file', { project: this.projectId, file: detailsArray[0].file });
                 });
-                td.innerText = sourceFile;
+                td.innerText = this.getDocumentName(detailsArray[0]) || sourceFile;
                 tr.appendChild(td);
             } else {
                 let tr: HTMLTableRowElement = document.createElement('tr');
@@ -523,7 +523,7 @@ export class TranslationView {
                     td.classList.add('middle');
                     td.classList.add('noWrap');
                     td.classList.add('fileName');
-                    td.innerText = details.original;
+                    td.innerText = this.getDocumentName(details) || details.original;
                     td.addEventListener('click', () => {
                         ipcRenderer.send('goto-file', { project: this.projectId, file: details.file });
                     });
@@ -540,6 +540,20 @@ export class TranslationView {
                 this.collapseFilesButton.click();
             }
         }, 150);
+    }
+
+    getDocumentName(details: any): string {
+        let data: any[] = details.metadata?.data || [];
+        for (const item of data) {
+            if (item.category === 'document') {
+                for (const entry of item.meta || []) {
+                    if (entry.type === 'original' && entry.value) {
+                        return entry.value;
+                    }
+                }
+            }
+        }
+        return '';
     }
 
     showFileMetadata(details: any) {

@@ -38,7 +38,7 @@ public class CheckURL {
 			try {
 				connect(string);
 				waiting = false;
-			} catch (IOException | URISyntaxException e) {
+			} catch (IOException | URISyntaxException _) {
 				try {
 					Thread.sleep(500);
 					count++;

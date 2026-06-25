@@ -38,9 +38,9 @@ Download ready-to-use installers (recommended for most users):
 
 ### Requirements
 
-- JDK 21 LTS (<https://adoptium.net/>)
+- JDK 25 LTS (<https://adoptium.net/>)
 - Gradle 9.5.1 or newer (<https://gradle.org>)
-- Node.js 24.15.0 LTS (<https://nodejs.org/>)
+- Node.js 24.18.0 LTS (<https://nodejs.org/>)
 
 ### Build steps
 

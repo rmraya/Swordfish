@@ -193,7 +193,6 @@ public class XliffStore {
 		builder = new SAXBuilder();
 		builder.setEntityResolver(CatalogBuilder.getCatalog(catalog));
 
-		DriverManager.registerDriver(new org.sqlite.JDBC());
 		conn = DriverManager
 				.getConnection("jdbc:sqlite:" + database.getAbsolutePath().replace('\\', '/') + "/database.db");
 		conn.setAutoCommit(false);
@@ -629,7 +628,6 @@ public class XliffStore {
 	}
 
 	private Element toMetadata(String string) throws SAXException, IOException, ParserConfigurationException {
-		try {
 			Element metadata = new Element("mda:metadata");
 			Element nameSpaced = Utils.toElement(string.replace("mda:", ""));
 			metadata.setAttributes(nameSpaced.getAttributes());
@@ -647,9 +645,6 @@ public class XliffStore {
 				}
 			}
 			return metadata;
-		} catch (SAXException | IOException | ParserConfigurationException e) {
-			throw new RuntimeException();
-		}
 	}
 
 	private void recurse(Element e) throws SQLException, IOException, SAXException, ParserConfigurationException {
@@ -669,12 +664,12 @@ public class XliffStore {
 					Element metadata = toMetadata(pis.get(0).getData());
 					JSONObject json = getJsonMetadata(metadata);
 					customMetadata = json.toString(2);
-				} catch (RuntimeException ex) {
+				} catch (RuntimeException _) {
 					try {
 						JSONObject json = new JSONObject(pis.get(0).getData());
 						customMetadata = json.toString(2);
 					} catch (JSONException jse) {
-						logger.log(Level.WARNING, "Error parsing custom metadata for file " + currentFile, e);
+						logger.log(Level.WARNING, "Error parsing custom metadata for file " + currentFile, jse);
 					}
 				}
 			}
@@ -792,12 +787,12 @@ public class XliffStore {
 					}
 					json.put("data", groupsArray);
 					customMetadataString = json.toString(2);
-				} catch (RuntimeException ex) {
+				} catch (SAXException | IOException | ParserConfigurationException _) {
 					try {
 						JSONObject json = new JSONObject(pis.get(0).getData());
 						customMetadataString = json.toString(2);
 					} catch (JSONException jse) {
-						logger.log(Level.WARNING, "Error parsing custom metadata for unit " + currentUnit, e);
+						logger.log(Level.WARNING, "Error parsing custom metadata for unit " + currentUnit, jse);
 					}
 				}
 			}
@@ -1059,7 +1054,7 @@ public class XliffStore {
 			if (regExp) {
 				try {
 					Pattern.compile(filterText);
-				} catch (PatternSyntaxException e) {
+				} catch (PatternSyntaxException _) {
 					throw new IOException(Messages.getString("XliffStore.47"));
 				}
 				if ("source".equals(filterLanguage)) {
@@ -1472,7 +1467,7 @@ public class XliffStore {
 						if (number > maxId) {
 							maxId = number;
 						}
-					} catch (NumberFormatException e) {
+					} catch (NumberFormatException _) {
 						// ignore
 					}
 				}
@@ -1593,7 +1588,7 @@ public class XliffStore {
 		return new JSONObject(data);
 	}
 
-	public void close() throws SQLException {
+	public synchronized void close() throws SQLException {
 		getUnitData.close();
 		getSource.close();
 		getTargetStmt.close();
@@ -2965,12 +2960,123 @@ public class XliffStore {
 			return;
 		}
 		getPreferences();
+		patchLegacySkeletons();
 		File adjusted = reviewStates();
 		List<String> result = Merge.merge(adjusted.getAbsolutePath(), output, catalog, acceptUnconfirmed, "" + maxThreads);
 		if (!"0".equals(result.get(0))) {
 			throw new IOException(result.get(1));
 		}
 		Files.delete(adjusted.toPath());
+	}
+
+	private void patchLegacySkeletons() throws SAXException, IOException, ParserConfigurationException {
+		Document xliff2 = builder.build(xliffFile);
+		List<Element> fileElements = xliff2.getRootElement().getChildren("file");
+		if (fileElements.isEmpty()) {
+			return;
+		}
+		Element firstFile = fileElements.get(0);
+		if (!isLegacyVersion(getMetaValue(firstFile, "tool", "tool-version"))) {
+			return;
+		}
+		File xliffDir = new File(xliffFile).getParentFile();
+		Set<String> patched = new HashSet<>();
+		for (Element fileEl : fileElements) {
+			if (!"x-xliff".equals(getMetaValue(fileEl, "format", "datatype"))) {
+				continue;
+			}
+			Element skeletonEl = fileEl.getChild("skeleton");
+			if (skeletonEl == null) {
+				continue;
+			}
+			String href = skeletonEl.getAttributeValue("href");
+			if (href.isEmpty()) {
+				continue;
+			}
+			File hrefFile = new File(href);
+			File skeletonFile = hrefFile.isAbsolute() ? hrefFile : new File(xliffDir, href);
+			if (!skeletonFile.exists()) {
+				continue;
+			}
+			String canonicalPath = skeletonFile.getCanonicalPath();
+			if (patched.contains(canonicalPath)) {
+				continue;
+			}
+			patchSkeletonFile(skeletonFile, fileEl.getAttributeValue("id"));
+			patched.add(canonicalPath);
+		}
+	}
+
+	private String getMetaValue(Element fileEl, String category, String type) {
+		Element metadata = fileEl.getChild("mda:metadata");
+		if (metadata == null) {
+			return "";
+		}
+		for (Element group : metadata.getChildren("mda:metaGroup")) {
+			if (category.equals(group.getAttributeValue("category"))) {
+				for (Element meta : group.getChildren("mda:meta")) {
+					if (type.equals(meta.getAttributeValue("type"))) {
+						return meta.getText();
+					}
+				}
+			}
+		}
+		return "";
+	}
+
+	private static boolean isLegacyVersion(String version) {
+		if (version.isEmpty()) {
+			return false;
+		}
+		try {
+			return Integer.parseInt(version.split("\\.")[0]) < 6;
+		} catch (NumberFormatException e) {
+			return false;
+		}
+	}
+
+	private void patchSkeletonFile(File skeletonFile, String xliffFileId) throws SAXException, IOException, ParserConfigurationException {
+		Document skeletonDoc = builder.build(skeletonFile.getAbsolutePath());
+		List<Element> fileElements = skeletonDoc.getRootElement().getChildren("file");
+		boolean modified = false;
+		for (Element fileEl : fileElements) {
+			String original = fileEl.getAttributeValue("original");
+			if (patchFilePIs(fileEl, original, xliffFileId)) {
+				modified = true;
+			}
+		}
+		if (modified) {
+			XMLOutputter outputter = new XMLOutputter();
+			outputter.preserveSpace(true);
+			try (FileOutputStream out = new FileOutputStream(skeletonFile)) {
+				outputter.output(skeletonDoc, out);
+			}
+		}
+	}
+
+	private boolean patchFilePIs(Element e, String original, String xliffFileId) {
+		String prefix = original + "_";
+		boolean modified = false;
+		for (XMLNode node : e.getContent()) {
+			if (node.getNodeType() == XMLNode.PROCESSING_INSTRUCTION_NODE) {
+				PI pi = (PI) node;
+				if ("OpenXLIFF".equals(pi.getTarget())) {
+					String data = pi.getData();
+					if (data.startsWith(prefix)) {
+						pi.setData(xliffFileId + "_" + data.substring(prefix.length()));
+						modified = true;
+					} else if (data.matches("\\d+")) {
+						pi.setData(xliffFileId + "_" + data);
+						modified = true;
+					}
+				}
+			} else if (node.getNodeType() == XMLNode.ELEMENT_NODE) {
+				if (patchFilePIs((Element) node, original, xliffFileId)) {
+					modified = true;
+				}
+			}
+		}
+		return modified;
 	}
 
 	private File reviewStates() throws SAXException, IOException, ParserConfigurationException {
@@ -4534,7 +4640,7 @@ public class XliffStore {
 		if (isRegExp) {
 			try {
 				Pattern.compile(searchText);
-			} catch (PatternSyntaxException e) {
+			} catch (PatternSyntaxException _) {
 				throw new IOException(Messages.getString("XliffStore.47"));
 			}
 			queryBuilder.append(" targetText REGEXP '");
@@ -5061,7 +5167,7 @@ public class XliffStore {
 						if (initial) {
 							try {
 								tgt = fixInitialSpaces(src, tgt);
-							} catch (Exception e) {
+							} catch (Exception _) {
 								// ignore
 							}
 						}

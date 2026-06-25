@@ -208,7 +208,7 @@ public class MemoriesHandler implements HttpHandler {
 				if (isRegexp) {
 					try {
 						Pattern.compile(searchStr);
-					} catch (PatternSyntaxException e) {
+					} catch (PatternSyntaxException _) {
 						throw new IOException(Messages.getString("MemoriesHandler.6"));
 					}
 				}
@@ -394,7 +394,7 @@ public class MemoriesHandler implements HttpHandler {
 		try {
 			File wfolder = new File(getWorkFolder(), id);
 			TmsServer.deleteFolder(wfolder);
-		} catch (IOException ioe) {
+		} catch (IOException _) {
 			MessageFormat mf = new MessageFormat(Messages.getString("MemoriesHandler.14"));
 			logger.log(Level.WARNING, mf.format(new String[] { id }));
 		}

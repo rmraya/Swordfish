@@ -79,7 +79,7 @@ public class XsltRunner {
             factory.setFeature("http://xml.org/sax/features/external-general-entities", false);
             factory.setFeature("http://xml.org/sax/features/external-parameter-entities", false);
             factory.setFeature("http://apache.org/xml/features/nonvalidating/load-external-dtd", false);
-        } catch (Exception e) {
+        } catch (Exception _) {
             // Ignore if features are not supported
         }
 
@@ -91,7 +91,7 @@ public class XsltRunner {
             saxFactory.setFeature("http://xml.org/sax/features/external-general-entities", false);
             saxFactory.setFeature("http://xml.org/sax/features/external-parameter-entities", false);
             saxFactory.setFeature("http://apache.org/xml/features/nonvalidating/load-external-dtd", false);
-        } catch (Exception e) {
+        } catch (Exception _) {
             // Ignore if features are not supported
         }
 
@@ -123,7 +123,7 @@ public class XsltRunner {
             if (value != null && !value.trim().isEmpty()) {
                 try {
                     factory.setAttribute(propertyName, value.trim());
-                } catch (IllegalArgumentException ex) {
+                } catch (IllegalArgumentException _) {
                     // Ignore factories that do not understand the attribute.
                 }
             }

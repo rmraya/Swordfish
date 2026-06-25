@@ -73,7 +73,7 @@ public class TMUtils {
 			int year = Integer.parseInt(tmxDate.substring(0, 4));
 			calendar.set(year, month, date, hour, minute, second);
 			return calendar.getTimeInMillis();
-		} catch (NumberFormatException e) {
+		} catch (NumberFormatException _) {
 			MessageFormat mf = new MessageFormat(Messages.getString("TMUtils.0"));
 			logger.log(Level.WARNING, mf.format(new String[] { tmxDate }));
 			return 0l;
@@ -121,7 +121,7 @@ public class TMUtils {
 		try {
 			Double.parseDouble(s);
 			return true;
-		} catch (NumberFormatException e) {
+		} catch (NumberFormatException _) {
 			return false;
 		}
 	}

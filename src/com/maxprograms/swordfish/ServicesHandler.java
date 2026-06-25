@@ -449,7 +449,7 @@ public class ServicesHandler implements HttpHandler {
 					if (bom != null) {
 						encoding = bom.name();
 					}
-				} catch (IOException e) {
+				} catch (IOException _) {
 					// ignore
 				}
 			}

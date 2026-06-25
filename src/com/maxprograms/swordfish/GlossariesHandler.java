@@ -261,7 +261,7 @@ public class GlossariesHandler implements HttpHandler {
 		try {
 			File wfolder = new File(getWorkFolder(), id);
 			TmsServer.deleteFolder(wfolder);
-		} catch (IOException ioe) {
+		} catch (IOException _) {
 			MessageFormat mf = new MessageFormat(Messages.getString("GlossariesHandler.5"));
 			logger.log(Level.WARNING, mf.format(new String[] { id }));
 		}
