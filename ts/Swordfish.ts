@@ -2149,9 +2149,9 @@ export class Swordfish {
     }
 
     static addFile(): void {
-        let extensions: string[] = ['inx', 'icml', 'idml', 'ditamap', 'dita', 'xml', 'html', 'htm', 'js', 'properties', 'json', 'mif', 'docx', 'xlsx', 'pptx',
-            'sxw', 'sxc', 'sxi', 'sxd', 'odt', 'ods', 'odp', 'odg', 'txt', 'po', 'pot', 'rc', 'resx', 'sdlxliff', 'srt', 'svg', 'sdlppx', 'ts', 'txml', 'vsdx',
-            'xlf', 'xliff', 'mqxliff', 'txlf'];
+        let extensions: string[] = ['inx', 'icml', 'idml', 'ditamap', 'dita', 'xml', 'html', 'htm', 'js', 'properties',
+            'json', 'md', 'mif', 'docx', 'xlsx', 'pptx', 'sxw', 'sxc', 'sxi', 'sxd', 'odt', 'ods', 'odp', 'odg', 'txt',
+            'po', 'pot', 'rc', 'resx', 'sdlxliff', 'srt', 'svg', 'sdlppx', 'ts', 'txml', 'vtt', 'vsdx', 'xlf', 'xliff', 'mqxliff', 'txlf'];
         let filters: any[] = [
             { name: 'Supported Files', extensions: extensions },
             { name: 'Any File', extensions: ['*'] }
@@ -2347,7 +2347,7 @@ export class Swordfish {
     }
 
     selectSourceFiles(event: IpcMainEvent): void {
-        let extensions: string[] = ['inx', 'icml', 'idml', 'ditamap', 'dita', 'xml', 'html', 'htm', 'js', 'properties', 'json', 'mif', 'docx', 'xlsx', 'pptx',
+        let extensions: string[] = ['inx', 'icml', 'idml', 'ditamap', 'dita', 'xml', 'html', 'htm', 'js', 'properties', 'json', 'md', 'mif', 'docx', 'xlsx', 'pptx',
             'sxw', 'sxc', 'sxi', 'sxd', 'odt', 'ods', 'odp', 'odg', 'txt', 'po', 'pot', 'rc', 'resx', 'sdlxliff', 'srt', 'svg', 'sdlppx', 'ts', 'txml', 'vsdx',
             'xlf', 'xliff', 'mqxliff', 'txlf'];
         let filters: any[] = [
@@ -2604,7 +2604,22 @@ export class Swordfish {
     }
 
     static showHelp(): void {
-        const path = join(app.getAppPath(), 'swordfish_' + Swordfish.currentPreferences.appLang + '.pdf');
+        let path = join(app.getAppPath(), 'swordfish_' + Swordfish.currentPreferences.appLang + '.pdf');
+        if (process.platform === 'linux' && path.startsWith('/opt')) {
+            let tempFolder: string = join(app.getPath('home'), 'tmp', 'swordfish');
+            if (!existsSync(tempFolder)) {
+                mkdirSync(tempFolder, { recursive: true });
+            }
+            let tempFile: string = join(tempFolder, basename(path));
+            try {
+                copyFileSync(path, tempFile);
+                path = tempFile;
+            } catch (error) {
+                console.error('Error copying file:', error);
+                Swordfish.showMessage({ type: 'error', message: 'Unable to open Swordfish User Guide.' });
+                return;
+            }
+        }
         shell.openExternal('file://' + path).catch(() => {
             shell.openPath(path).catch((reason: any) => {
                 if (reason instanceof Error) {
@@ -2646,6 +2661,9 @@ export class Swordfish {
         let title: string = '';
         switch (type) {
             case 'Swordfish':
+                licenseFile = 'Swordfish.txt';
+                title = 'Swordfish License';
+                break;
             case "OpenXLIFF":
             case "MTEngines":
             case "TypesBCP47":
@@ -3547,7 +3565,7 @@ export class Swordfish {
         dialog.showOpenDialog({
             properties: ['openFile'],
             filters: [
-                { name: 'TMX/TBX File', extensions: ['tmx', 'tbx'] },
+                { name: 'TMX/TBX/GlossML File', extensions: ['tmx', 'tbx', 'gls'] },
                 { name: 'Any File', extensions: ['*'] }
             ]
         }).then((value: OpenDialogReturnValue) => {

@@ -621,4 +621,63 @@ public class XliffUtils {
 		}
 		return false;
 	}
+
+	public static boolean isCurrentOpenXliff(String fileName) {
+		try {
+			SAXBuilder builder = new SAXBuilder();
+			Document doc = builder.build(new File(fileName));
+			Element root = doc.getRootElement();
+			if (!"xliff".equals(root.getName()) || root.getAttributeValue("version") == null
+					|| !root.getAttributeValue("version").startsWith("2.")) {
+				return false;
+			}
+			Element file = root.getChild("file");
+			if (file == null) {
+				return false;
+			}
+			Element metadata = file.getChild("mda:metadata");
+			if (metadata == null) {
+				return false;
+			}
+			String toolId = "";
+			String toolVersion = "";
+			for (Element group : metadata.getChildren("mda:metaGroup")) {
+				if ("tool".equals(group.getAttributeValue("category"))) {
+					for (Element meta : group.getChildren("mda:meta")) {
+						if ("tool-id".equals(meta.getAttributeValue("type"))) {
+							toolId = meta.getText();
+						}
+						if ("tool-version".equals(meta.getAttributeValue("type"))) {
+							toolVersion = meta.getText();
+						}
+					}
+				}
+			}
+			return com.maxprograms.converters.Constants.TOOLID.equals(toolId)
+					&& compareVersions(toolVersion, com.maxprograms.converters.Constants.VERSION) >= 0;
+		} catch (Exception _) {
+			return false;
+		}
+	}
+
+	private static int compareVersions(String a, String b) {
+		String[] partsA = a.trim().split("\\s+")[0].split("\\.");
+		String[] partsB = b.trim().split("\\s+")[0].split("\\.");
+		for (int i = 0; i < Math.max(partsA.length, partsB.length); i++) {
+			int numA = i < partsA.length ? parseIntSafe(partsA[i]) : 0;
+			int numB = i < partsB.length ? parseIntSafe(partsB[i]) : 0;
+			if (numA != numB) {
+				return Integer.compare(numA, numB);
+			}
+		}
+		return 0;
+	}
+
+	private static int parseIntSafe(String value) {
+		try {
+			return Integer.parseInt(value);
+		} catch (NumberFormatException e) {
+			return 0;
+		}
+	}
 }

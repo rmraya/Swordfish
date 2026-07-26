@@ -45,6 +45,7 @@ import org.xml.sax.SAXException;
 
 import com.maxprograms.converters.EncodingResolver;
 import com.maxprograms.languages.Language;
+import com.maxprograms.swordfish.gls.GlossML2Tmx;
 import com.maxprograms.swordfish.models.Memory;
 import com.maxprograms.swordfish.tbx.Tbx2Tmx;
 import com.maxprograms.swordfish.tm.ITmEngine;
@@ -392,7 +393,12 @@ public class GlossariesHandler implements HttpHandler {
 				openGlossary(glossaries.get(id));
 				File tempFile = null;
 				String tmxFile = glossFile.getAbsolutePath();
-				if (isTBX(glossFile)) {
+				String head = readHead(glossFile);
+				if (isGlossML(head)) {
+					tempFile = File.createTempFile("gloss", ".tmx");
+					GlossML2Tmx.convert(tmxFile, tempFile.getAbsolutePath());
+					tmxFile = tempFile.getAbsolutePath();
+				} else if (!isTMX(head)) {
 					tempFile = File.createTempFile("gloss", ".tmx");
 					Tbx2Tmx.convert(tmxFile, tempFile.getAbsolutePath());
 					tmxFile = tempFile.getAbsolutePath();
@@ -403,8 +409,6 @@ public class GlossariesHandler implements HttpHandler {
 				String subject = json.has("subject") ? json.getString("subject") : "";
 				try {
 					int imported = engine.storeTMX(tmxFile, project, client, subject);
-					MessageFormat mf = new MessageFormat(Messages.getString("GlossariesHandler.12"));
-					logger.log(Level.INFO, mf.format(new String[] { "" + imported }));
 					JSONObject completed = new JSONObject();
 					completed.put("imported", imported);
 					completed.put(Constants.PROGRESS, Constants.COMPLETED);
@@ -457,7 +461,7 @@ public class GlossariesHandler implements HttpHandler {
 		return home.getAbsolutePath();
 	}
 
-	private boolean isTBX(File file) throws IOException {
+	private String readHead(File file) throws IOException {
 		byte[] array = new byte[40960];
 		try (FileInputStream input = new FileInputStream(file)) {
 			if (input.read(array) == -1) {
@@ -480,7 +484,15 @@ public class GlossariesHandler implements HttpHandler {
 		} else {
 			string = new String(array);
 		}
-		return string.indexOf("<tmx ") == -1;
+		return string;
+	}
+
+	private boolean isTMX(String head) {
+		return head.indexOf("<tmx ") != -1;
+	}
+
+	private boolean isGlossML(String head) {
+		return head.indexOf("<glossary ") != -1 && head.indexOf("maxprograms.com/gml") != -1;
 	}
 
 	private JSONObject addTerm(String request) {

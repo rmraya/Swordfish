@@ -934,7 +934,8 @@ public class ProjectsHandler implements HttpHandler {
 								file.getString("encoding"));
 						sourceFiles.add(sf);
 						if (FileFormats.getFullName(file.getString("type")).equals(FileFormats.XLIFF)
-								&& XliffUtils.isSwordfishReview(file.getString("file"))) {
+								&& (XliffUtils.isSwordfishReview(file.getString("file"))
+										|| XliffUtils.isCurrentOpenXliff(file.getString("file")))) {
 							if (files.length() != 1) {
 								try {
 									TmsServer.deleteFolder(projectFolder);

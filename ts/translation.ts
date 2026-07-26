@@ -2184,6 +2184,7 @@ export class TranslationView {
                     currentState.classList.remove('translated');
                     currentState.classList.add('initial');
                     if (hasNotes) {
+                        currentState.innerHTML = '';
                         let span: HTMLSpanElement = document.createElement('span');
                         span.innerHTML = TranslationView.NOTES_SPAN;
                         span.addEventListener('click', () => {
@@ -2519,6 +2520,7 @@ export class TranslationView {
             if (source.innerHTML === '') {
                 currentState.classList.add('initial');
                 if (hasNotes) {
+                    currentState.innerHTML = '';
                     let span: HTMLSpanElement = document.createElement('span');
                     span.innerHTML = TranslationView.NOTES_SPAN;
                     span.addEventListener('click', () => {

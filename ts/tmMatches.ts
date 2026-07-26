@@ -23,6 +23,7 @@ export class TmMatches {
     tabHolder: TabHolder;
     matches: Map<string, Match>;
     origin: HTMLSpanElement;
+    fuzzy: HTMLSpanElement;
 
     constructor(div: HTMLDivElement, projectId: string) {
         this.container = div;
@@ -73,7 +74,19 @@ export class TmMatches {
         this.origin.innerText = '';
         this.origin.style.marginTop = '4px';
         this.origin.style.marginLeft = '10px';
+        this.origin.classList.add('noWrap');
         toolbar.appendChild(this.origin);
+
+        let filler: HTMLSpanElement = document.createElement('span');
+        filler.innerHTML = '&nbsp;';
+        filler.className = 'fill_width';
+        toolbar.appendChild(filler);
+
+        this.fuzzy = document.createElement('span');
+        this.fuzzy.innerText = '';
+        this.fuzzy.style.marginTop = '4px';
+        this.fuzzy.style.marginLeft = '10px';
+        toolbar.appendChild(this.fuzzy);
 
         ipcRenderer.on('accept-tm-match', () => {
             this.acceptTranslation();
@@ -96,6 +109,7 @@ export class TmMatches {
     clear(): void {
         this.tabHolder.clear();
         this.origin.innerText = '';
+        this.fuzzy.innerText = '';
         this.matches.clear();
     }
 
@@ -141,10 +155,12 @@ export class TmMatches {
 
         if (this.tabHolder.size() === 1) {
             this.origin.innerText = match.origin;
+            this.fuzzy.innerText = match.fuzzy ? match.fuzzy + '%' : '';
         }
 
         tab.getLabelDiv().addEventListener('click', () => {
             this.origin.innerText = match.origin;
+            this.fuzzy.innerText = match.fuzzy ? match.fuzzy + '%' : '';
         });
 
         let config: MutationObserverInit = { attributes: true, childList: false, subtree: false };
@@ -185,6 +201,7 @@ export class TmMatches {
         let selected: string = this.tabHolder.getSelected();
         let match: Match = this.matches.get(selected) as Match;
         this.origin.innerText = match.origin;
+        this.fuzzy.innerText = match.fuzzy ? match.fuzzy + '%' : '';
     }
 
     previousMatch(): void {
@@ -192,5 +209,6 @@ export class TmMatches {
         let selected: string = this.tabHolder.getSelected();
         let match: Match = this.matches.get(selected) as Match;
         this.origin.innerText = match.origin;
+        this.fuzzy.innerText = match.fuzzy ? match.fuzzy + '%' : '';
     }
 }

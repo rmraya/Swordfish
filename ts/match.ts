@@ -18,6 +18,7 @@ export interface Match {
     type: string;
     matchId: string;
     similarity: number;
+    fuzzy: number;
     srcLang: string;
     tgtLang: string;
     source: string;

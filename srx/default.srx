@@ -7965,7 +7965,7 @@
         </rule>
         <rule>
           <beforebreak>[\.\?!]+</beforebreak>
-          <afterbreak>\s</afterbreak>
+          <afterbreak>\s+\S</afterbreak>
         </rule>
         <rule>
           <beforebreak>\S:+["'”\)]?</beforebreak>
@@ -7975,8 +7975,8 @@
           <beforebreak>\u2029</beforebreak>
         </rule>
         <rule>
-          <beforebreak>\S[\.\?!]+["'”\)]?</beforebreak>
-          <afterbreak>\s</afterbreak>
+          <beforebreak>\S[\.\?!]+[“'”\)]?</beforebreak>
+          <afterbreak>\s+\S</afterbreak>
         </rule>
         <rule>
           <beforebreak>\S\t+</beforebreak>

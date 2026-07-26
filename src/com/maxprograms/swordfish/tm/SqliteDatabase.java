@@ -26,6 +26,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.text.MessageFormat;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Enumeration;
 import java.util.Hashtable;
@@ -36,7 +37,6 @@ import java.util.NavigableSet;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.Vector;
-import java.util.ArrayList;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
@@ -71,8 +71,10 @@ public class SqliteDatabase implements ITmEngine {
     private File database;
     private Connection conn;
     private PreparedStatement storeTUV;
-    private PreparedStatement searchTUV;
+    private PreparedStatement getPureText;
     private PreparedStatement deleteTUV;
+    private PreparedStatement storeTuvProp;
+    private PreparedStatement deleteTuvProps;
     private TuDatabase tuDb;
     private FuzzyIndex fuzzyIndex;
     private long next;
@@ -145,9 +147,15 @@ public class SqliteDatabase implements ITmEngine {
         // Ensure indexes exist (creates them for existing databases without indexes)
         ensureIndexes();
 
+        // Ensure tuvprops table exists (creates it for existing databases that predate
+        // it)
+        ensureTuvPropsTable();
+
         storeTUV = conn.prepareStatement("INSERT INTO tuv (tuid, lang, seg, puretext, textlength) VALUES (?,?,?,?,?)");
-        searchTUV = conn.prepareStatement("SELECT textlength FROM tuv WHERE tuid=? AND lang=?");
+        getPureText = conn.prepareStatement("SELECT puretext FROM tuv WHERE tuid=? AND lang=?");
         deleteTUV = conn.prepareStatement("DELETE FROM tuv WHERE tuid=? AND lang=?");
+        storeTuvProp = conn.prepareStatement("INSERT INTO tuvprops (tuid, lang, type, value) VALUES (?,?,?,?)");
+        deleteTuvProps = conn.prepareStatement("DELETE FROM tuvprops WHERE tuid=? AND lang=?");
         try {
             tuDb = new TuDatabase(databaseFolder);
         } catch (Exception e) {
@@ -180,12 +188,44 @@ public class SqliteDatabase implements ITmEngine {
                 textlength INTEGER NOT NULL,
                 PRIMARY KEY(tuid, lang)
                 );""";
+        String tuvPropsSql = """
+                CREATE TABLE tuvprops (
+                tuid VARCHAR(256) NOT NULL,
+                lang VARCHAR(15) NOT NULL,
+                type VARCHAR(64) NOT NULL,
+                value TEXT NOT NULL
+                );""";
         try (Statement stmt = conn.createStatement()) {
             stmt.execute(sql);
             stmt.execute("CREATE INDEX idx_tuv_lang ON tuv(lang)");
             stmt.execute("CREATE INDEX idx_tuv_lang_textlength ON tuv(lang, textlength)");
+            stmt.execute(tuvPropsSql);
+            stmt.execute("CREATE INDEX idx_tuvprops_tuid_lang ON tuvprops(tuid, lang)");
         }
         conn.commit();
+    }
+
+    private void ensureTuvPropsTable() throws SQLException {
+        boolean tableExists;
+        try (Statement stmt = conn.createStatement()) {
+            try (ResultSet rs = stmt.executeQuery(
+                    "SELECT name FROM sqlite_master WHERE type='table' AND name='tuvprops'")) {
+                tableExists = rs.next();
+            }
+        }
+        if (!tableExists) {
+            try (Statement stmt = conn.createStatement()) {
+                stmt.execute("""
+                        CREATE TABLE tuvprops (
+                        tuid VARCHAR(256) NOT NULL,
+                        lang VARCHAR(15) NOT NULL,
+                        type VARCHAR(64) NOT NULL,
+                        value TEXT NOT NULL
+                        );""");
+                stmt.execute("CREATE INDEX idx_tuvprops_tuid_lang ON tuvprops(tuid, lang)");
+            }
+            conn.commit();
+        }
     }
 
     private void ensureIndexes() throws SQLException {
@@ -206,24 +246,15 @@ public class SqliteDatabase implements ITmEngine {
 
         // Create missing indexes and measure time
         if (!langIndexExists || !compositeIndexExists) {
-            logger.log(Level.INFO, "Creating missing indexes for database: " + dbname);
-            long startTime = System.currentTimeMillis();
-
             try (Statement stmt = conn.createStatement()) {
                 if (!langIndexExists) {
-                    logger.log(Level.INFO, "  Creating index on lang column...");
                     stmt.execute("CREATE INDEX idx_tuv_lang ON tuv(lang)");
                 }
                 if (!compositeIndexExists) {
-                    logger.log(Level.INFO, "  Creating composite index on lang and textlength columns...");
                     stmt.execute("CREATE INDEX idx_tuv_lang_textlength ON tuv(lang, textlength)");
                 }
             }
             conn.commit();
-
-            long elapsedTime = System.currentTimeMillis() - startTime;
-            logger.log(Level.INFO, "Indexes created successfully in " + elapsedTime + " ms (" +
-                    String.format("%.2f", elapsedTime / 1000.0) + " seconds)");
         }
     }
 
@@ -314,11 +345,16 @@ public class SqliteDatabase implements ITmEngine {
                 throw new IOException("Interrupted during batch translate", e);
             } catch (ExecutionException e) {
                 Throwable cause = e.getCause();
-                if (cause instanceof IOException io) throw io;
-                if (cause instanceof SAXException sax) throw sax;
-                if (cause instanceof ParserConfigurationException pce) throw pce;
-                if (cause instanceof SQLException sql) throw sql;
-                if (cause instanceof URISyntaxException uri) throw uri;
+                if (cause instanceof IOException io)
+                    throw io;
+                if (cause instanceof SAXException sax)
+                    throw sax;
+                if (cause instanceof ParserConfigurationException pce)
+                    throw pce;
+                if (cause instanceof SQLException sql)
+                    throw sql;
+                if (cause instanceof URISyntaxException uri)
+                    throw uri;
                 throw new IOException("Unexpected error during batch translate", cause);
             }
         }
@@ -333,7 +369,7 @@ public class SqliteDatabase implements ITmEngine {
         }
         storeTUV.close();
         deleteTUV.close();
-        searchTUV.close();
+        getPureText.close();
         conn.commit();
         conn.close();
 
@@ -457,11 +493,11 @@ public class SqliteDatabase implements ITmEngine {
                                     }
                                     try {
                                         Element tuv = TMUtils.buildTuv(lang, seg);
+                                        addTuvProps(tuv, tuid, lang, conn);
                                         tu.addContent(tuv);
                                         count++;
                                     } catch (Exception e) {
                                         logger.log(Level.ERROR, Messages.getString("SqliteDatabase.3"), e);
-                                        logger.log(Level.INFO, "seg: " + seg);
                                     }
                                 }
                             }
@@ -530,11 +566,34 @@ public class SqliteDatabase implements ITmEngine {
                         continue;
                     }
                     Element tuv = TMUtils.buildTuv(lang, seg);
+                    addTuvProps(tuv, tuid, lang, connection);
                     tu.addContent(tuv);
                 }
             }
         }
         return tu;
+    }
+
+    private void addTuvProps(Element tuv, String tuid, String lang, Connection connection) throws SQLException {
+        try (PreparedStatement stmt = connection
+                .prepareStatement("SELECT type, value FROM tuvprops WHERE tuid=? AND lang=?")) {
+            stmt.setString(1, tuid);
+            stmt.setString(2, lang);
+            List<Element> props = new ArrayList<>();
+            try (ResultSet rs = stmt.executeQuery()) {
+                while (rs.next()) {
+                    Element prop = new Element("prop");
+                    prop.setAttribute("type", rs.getString(1));
+                    prop.setText(rs.getString(2));
+                    props.add(prop);
+                }
+            }
+            if (!props.isEmpty()) {
+                List<Element> content = new ArrayList<>(props);
+                content.addAll(tuv.getChildren());
+                tuv.setChildren(content);
+            }
+        }
     }
 
     @Override
@@ -557,10 +616,34 @@ public class SqliteDatabase implements ITmEngine {
         commit();
     }
 
-    private void delete(String tuid, String lang) throws SQLException {
+    private boolean delete(String tuid, String lang) throws SQLException, IOException {
+        String oldPuretext = null;
+        getPureText.setString(1, tuid);
+        getPureText.setString(2, lang);
+        try (ResultSet rs = getPureText.executeQuery()) {
+            if (rs.next()) {
+                oldPuretext = rs.getString(1);
+            }
+        }
+        if (oldPuretext == null) {
+            return false;
+        }
+        removeFromIndex(tuid, lang, oldPuretext);
         deleteTUV.setString(1, tuid);
         deleteTUV.setString(2, lang);
         deleteTUV.execute();
+        deleteTuvProps.setString(1, tuid);
+        deleteTuvProps.setString(2, lang);
+        deleteTuvProps.execute();
+        return true;
+    }
+
+    private void removeFromIndex(String tuid, String lang, String puretext) throws IOException {
+        int[] ngrams = NGrams.getNGrams(puretext);
+        NavigableSet<Fun.Tuple2<Integer, String>> index = fuzzyIndex.getIndex(lang);
+        for (int i = 0; i < ngrams.length; i++) {
+            index.remove(Fun.t2(ngrams[i], tuid));
+        }
     }
 
     @Override
@@ -845,8 +928,7 @@ public class SqliteDatabase implements ITmEngine {
             Element tuv = it.next();
             String lang = LanguageUtils.normalizeCode(tuv.getAttributeValue("xml:lang"));
             if (lang != null && !tuLangs.contains(lang)) {
-                if (exists(tuid, lang)) {
-                    delete(tuid, lang);
+                if (delete(tuid, lang)) {
                     tu.setAttribute("changedate", TMUtils.creationDate());
                     tu.setAttribute("changeid", creationId);
                 }
@@ -860,10 +942,21 @@ public class SqliteDatabase implements ITmEngine {
                 storeTUV.setString(4, puretext);
                 storeTUV.setInt(5, puretext.length());
                 storeTUV.execute();
+
+                List<Element> tuvProps = tuv.getChildren("prop");
+                Iterator<Element> pt = tuvProps.iterator();
+                while (pt.hasNext()) {
+                    Element prop = pt.next();
+                    if (!prop.hasAttribute("type")) {
+                        continue;
+                    }
+                    storeTuvProp.setString(1, tuid);
+                    storeTuvProp.setString(2, lang);
+                    storeTuvProp.setString(3, prop.getAttributeValue("type"));
+                    storeTuvProp.setString(4, prop.getText());
+                    storeTuvProp.execute();
+                }
                 tuLangs.add(lang);
-
-                tuDb.store(tuid, tu);
-
                 int[] ngrams = NGrams.getNGrams(puretext);
                 NavigableSet<Fun.Tuple2<Integer, String>> index = fuzzyIndex.getIndex(lang);
                 for (int i = 0; i < ngrams.length; i++) {
@@ -874,6 +967,9 @@ public class SqliteDatabase implements ITmEngine {
                 }
             }
         }
+        if (!tuLangs.isEmpty()) {
+            tuDb.store(tuid, tu);
+        }
     }
 
     private String nextId() {
@@ -881,18 +977,6 @@ public class SqliteDatabase implements ITmEngine {
             next = System.currentTimeMillis();
         }
         return "" + next++;
-    }
-
-    private boolean exists(String tuid, String lang) throws SQLException {
-        searchTUV.setString(1, tuid);
-        searchTUV.setString(2, lang);
-        boolean found = false;
-        try (ResultSet rs = searchTUV.executeQuery()) {
-            while (rs.next()) {
-                found = true;
-            }
-        }
-        return found;
     }
 
     public int getCount() {
