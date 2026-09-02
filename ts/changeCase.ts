@@ -37,19 +37,19 @@ export class ChangeCase {
 
     changeCase(): void {
         if ((document.getElementById('sentence') as HTMLInputElement).checked) {
-            ipcRenderer.send('change-case-to', { case: 'sentence' });
+            ipcRenderer.send('change-case-to', 'sentence');
         }
         if ((document.getElementById('lowercase') as HTMLInputElement).checked) {
-            ipcRenderer.send('change-case-to', { case: 'lowercase' });
+            ipcRenderer.send('change-case-to', 'lowercase');
         }
         if ((document.getElementById('uppercase') as HTMLInputElement).checked) {
-            ipcRenderer.send('change-case-to', { case: 'uppercase' });
+            ipcRenderer.send('change-case-to', 'uppercase');
         }
         if ((document.getElementById('title') as HTMLInputElement).checked) {
-            ipcRenderer.send('change-case-to', { case: 'title' });
+            ipcRenderer.send('change-case-to', 'title');
         }
         if ((document.getElementById('toggle') as HTMLInputElement).checked) {
-            ipcRenderer.send('change-case-to', { case: 'toggle' });
+            ipcRenderer.send('change-case-to', 'toggle');
         }
     }
 }

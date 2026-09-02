@@ -34,6 +34,7 @@ export class TranslationView {
         "<path d='M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V5h14v14zM17.99 9l-1.41-1.42-6.59 6.59-2.58-2.57-1.42 1.41 4 3.99z'/></svg>";
     static SVG_LOCK: string = "<svg xmlns='http://www.w3.org/2000/svg' height='24' viewBox='0 0 24 24' width='24'>" +
         "<path d='M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zM9 6c0-1.66 1.34-3 3-3s3 1.34 3 3v2H9V6zm9 14H6V10h12v10zm-6-3c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2z'/></svg>";
+    static SVG_REPEATED: string = "<svg xmlns='http://www.w3.org/2000/svg' height='24px' viewBox='0 -960 960 960' width='24px'><path d='M480-400 40-640l440-240 440 240-440 240Zm0 160L63-467l84-46 333 182 333-182 84 46-417 227Zm0 160L63-307l84-46 333 182 333-182 84 46L480-80Zm0-411 273-149-273-149-273 149 273 149Zm0-149Z'/></svg>";
     static SVG_WARNING: string = "<svg xmlns='http://www.w3.org/2000/svg' height='24' viewBox='0 0 24 24' width='24'>" +
         "<path d='M11 15h2v2h-2v-2zm0-8h2v6h-2V7zm.99-5C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8z'/></svg>";
     static SVG_NOTE: string = "<svg xmlns='http://www.w3.org/2000/svg' height='24' viewBox='0 0 24 24' width='24'>" +
@@ -60,6 +61,7 @@ export class TranslationView {
     static CONTEXT_SPAN: string = "<span class='iconTooltip'>" + this.SVG_HAS_CONTEXT + " <small class='tooltiptext'>Segment has context</small></span>";
 
     static LOCK_SPAN: string = "<span class='iconTooltip'>" + this.SVG_LOCK + " <small class='tooltiptext'>Locked segment</small></span>";
+    static REPEATED_SPAN: string = "<span class='iconTooltip'>" + this.SVG_REPEATED + " <small class='tooltiptext'>Repeated segment</small></span>";
     static FINAL_SPAN: string = "<span class='iconTooltip'>" + this.SVG_FINAL + " <small class='tooltiptext'>Confirmed</small></span>";
     static TRANSLATED_SPAN: string = "<span class='iconTooltip'>" + this.SVG_TRANSLATED + " <small class='tooltiptext'>Draft</small></span>";
     static NOTES_SPAN: string = "<span class='iconTooltip'>" + this.SVG_NOTE + " <small class='tooltiptext'>Segment has notes</small></span>";
@@ -673,18 +675,31 @@ export class TranslationView {
         });
         this.topBar.appendChild(goToLink);
 
-        let goToSource: HTMLAnchorElement = document.createElement('a');
-        goToSource.classList.add('tooltip');
-        goToSource.classList.add('bottomTooltip');
-        goToSource.innerHTML = '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">' +
+        let previousSameSourceButton: HTMLAnchorElement = document.createElement('a');
+        previousSameSourceButton.classList.add('tooltip');
+        previousSameSourceButton.classList.add('bottomTooltip');
+        previousSameSourceButton.innerHTML = '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">' +
+            '<path d="M22 9V6.9H11V9H22ZM22 4.1V2H11V4.1H22Z" />' +
+            '<path d="M8.3 22L10.5167 16.5167L16 14.3V13.2111L2 8L7.2111 22H8.3ZM7.7944 19.1222L4.6444 10.6444L13.1222 13.7944L9.3111 15.3111L7.7944 19.1222Z" fill="black"/>' +
+            '</svg>' +
+            '<span class="tooltiptext bottomTooltip">Go To Previous Segment With Same Source</span>';
+        previousSameSourceButton.addEventListener('click', () => {
+            this.previousSameSource();
+        });
+        this.topBar.appendChild(previousSameSourceButton);
+
+        let nextSameSourceButton: HTMLAnchorElement = document.createElement('a');
+        nextSameSourceButton.classList.add('tooltip');
+        nextSameSourceButton.classList.add('bottomTooltip');
+        nextSameSourceButton.innerHTML = '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">' +
             '<path d="M2 9V6.9H13V9H2ZM2 4.1V2H13V4.1H2Z"/>' +
             '<path d="M15.7 22L13.4833 16.5167L8 14.3V13.2111L22 8L16.7889 22H15.7ZM16.2056 19.1222L19.3556 10.6444L10.8778 13.7944L14.6889 15.3111L16.2056 19.1222Z"/>' +
             '</svg>' +
             '<span class="tooltiptext bottomTooltip">Go To Next Segment With Same Source</span>';
-        goToSource.addEventListener('click', () => {
-            this.goToSameSource();
+        nextSameSourceButton.addEventListener('click', () => {
+            this.nextSameSource();
         });
-        this.topBar.appendChild(goToSource);
+        this.topBar.appendChild(nextSameSourceButton);
 
         let splitButton: HTMLAnchorElement = document.createElement('a');
         splitButton.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 0 24 24" width="24">'
@@ -1839,10 +1854,10 @@ export class TranslationView {
         ipcRenderer.send('generate-statistics', { project: this.projectId });
     }
 
-    setSegments(arg: Segment[]): void {
+    setSegments(segments: Segment[]): void {
         this.tbody.innerHTML = '';
         this.tbody.parentElement?.scrollTo({ top: 0, left: 0, behavior: 'smooth' });
-        let length: number = arg.length;
+        let length: number = segments.length;
         if (length === 0 && this.filterButton.classList.contains('active')) {
             ipcRenderer.send('show-message', { type: 'warning', message: 'Nothing to display, consider clearing current filter' });
             this.container.classList.remove('wait');
@@ -1850,7 +1865,7 @@ export class TranslationView {
         }
         let returnRow: HTMLTableRowElement | undefined;
         for (let i = 0; i < length; i++) {
-            let row: Segment = arg[i];
+            let row: Segment = segments[i];
             let tr: HTMLTableRowElement = document.createElement('tr');
             tr.setAttribute('data-file', row.file);
             tr.setAttribute('data-unit', row.unit);
@@ -1874,7 +1889,7 @@ export class TranslationView {
                 ipcRenderer.send('close-go-to');
             }
 
-            if (length > 1 && ((i > 0 && arg[i - 1].unit === row.unit) || (i < length - 1 && arg[i + 1].unit === row.unit))) {
+            if (length > 1 && ((i > 0 && segments[i - 1].unit === row.unit) || (i < length - 1 && segments[i + 1].unit === row.unit))) {
                 let unit: number = Number.parseInt(row.unit);
                 if (unit % 2 === 0) {
                     td.classList.add('evenUnit');
@@ -1896,6 +1911,8 @@ export class TranslationView {
             td.innerHTML = row.source;
             tr.appendChild(td);
 
+            // stat=rt translate
+
             td = document.createElement('td');
             td.classList.add('middle');
             td.classList.add('center');
@@ -1913,6 +1930,11 @@ export class TranslationView {
                 if (row.tagErrors && row.spaceErrors) {
                     td.innerHTML = TranslationView.SPACE_TAG_WARNING;
                 }
+            }
+            if (row.repeated) {
+                let repeatedSpan: HTMLSpanElement = document.createElement('span');
+                repeatedSpan.innerHTML = TranslationView.REPEATED_SPAN;
+                td.appendChild(repeatedSpan);
             }
             if (row.hasMetadata) {
                 let span: HTMLSpanElement = document.createElement('span');
@@ -1947,6 +1969,8 @@ export class TranslationView {
                 td.innerHTML = TranslationView.SVG_BLANK;
             }
             tr.appendChild(td);
+
+            // end translate
 
             td = document.createElement('td');
             td.classList.add('middle');
@@ -3217,7 +3241,7 @@ export class TranslationView {
             } else {
                 // Locking: remove blank SVG if present and add lock span at the beginning
                 if (currentTranslate.innerHTML.includes(TranslationView.SVG_BLANK)) {
-                    currentTranslate.innerHTML = '';
+                    currentTranslate.innerHTML = currentTranslate.innerHTML.replace(TranslationView.SVG_BLANK, '');
                 }
                 let lockSpan: HTMLSpanElement = document.createElement('span');
                 lockSpan.classList.add('iconTooltip');
@@ -3286,9 +3310,14 @@ export class TranslationView {
         this.saveEdit({ next: 'previous', confirm: false });
     }
 
-    goToSameSource(): void {
+    previousSameSource(): void {
         let segment: FullId = { project: this.projectId, file: this.currentId.file, unit: this.currentId.unit, segment: this.currentId.id };
-        ipcRenderer.send('go-to-same-source', segment);
+        ipcRenderer.send('previous-same-source', segment);
+    }
+
+    nextSameSource(): void {
+        let segment: FullId = { project: this.projectId, file: this.currentId.file, unit: this.currentId.unit, segment: this.currentId.id };
+        ipcRenderer.send('next-same-source', segment);
     }
 
     openSegment(seg: number): void {
@@ -3339,22 +3368,23 @@ export class TranslationView {
         ipcRenderer.send('show-change-case');
     }
 
-    caseChanged(arg: any): void {
-        this.currentCell = this.currentRow?.getElementsByClassName('target')[0] as HTMLTableCellElement;
-        if (arg.case === 'sentence') {
-            this.currentCell.innerText = this.sentence(this.currentCell.innerText);
+    caseChanged(arg: string): void {
+        let cell: HTMLTableCellElement = this.currentRow?.getElementsByClassName('target')[0] as HTMLTableCellElement;
+        this.currentCell = cell;
+        if (arg === 'sentence') {
+            cell.innerHTML = this.sentenceCase(cell);
         }
-        if (arg.case === 'lowercase') {
-            this.currentCell.innerText = this.currentCell.innerText.toLocaleLowerCase(this.tgtLang);
+        if (arg === 'lowercase') {
+            cell.innerHTML = this.lowercaseCase(cell);
         }
-        if (arg.case === 'uppercase') {
-            this.currentCell.innerText = this.currentCell.innerText.toLocaleUpperCase(this.tgtLang);
+        if (arg === 'uppercase') {
+            cell.innerHTML = this.uppercaseCase(cell);
         }
-        if (arg.case === 'title') {
-            this.currentCell.innerText = this.title(this.currentCell.innerText);
+        if (arg === 'title') {
+            cell.innerHTML = this.titleCase(cell);
         }
-        if (arg.case === 'toggle') {
-            this.currentCell.innerText = this.toggle(this.currentCell.innerText);
+        if (arg === 'toggle') {
+            cell.innerHTML = this.toggleCase(cell);
         }
     }
 
@@ -3362,34 +3392,81 @@ export class TranslationView {
         return str === str.toLocaleLowerCase(this.tgtLang);
     }
 
-    sentence(str: string): string {
+    sentenceCase(cell: HTMLElement): string {
+        let nodes: ChildNode[] = Array.from(cell.childNodes);
         let result: string = '';
-        str = str.toLocaleLowerCase(this.tgtLang);
         let changed: boolean = false;
-        for (let i: number = 0; i < str.length; i++) {
-            let c: string = str.charAt(i);
-            if (!changed) {
-                let d: string = c.toLocaleUpperCase(this.tgtLang);
-                if (c !== d) {
-                    c = d;
+        for (let node of nodes) {
+            if (node.nodeType !== Node.TEXT_NODE) {
+                result += (node as HTMLElement).outerHTML;
+                continue;
+            }
+            let str: string = (node as Text).data.toLocaleLowerCase(this.tgtLang);
+            for (let i: number = 0; i < str.length; i++) {
+                let c: string = str.charAt(i);
+                if (!changed && /\p{L}/u.test(c)) {
+                    c = c.toLocaleUpperCase(this.tgtLang);
                     changed = true;
                 }
+                result = result.concat(c);
             }
-            result = result.concat(c);
         }
         return result;
     }
 
-    title(str: string): string {
-        str = str.toLocaleLowerCase(this.tgtLang);
-        return str.replaceAll(/(^|\s)\S/g, (t) => { return t.toLocaleUpperCase(this.tgtLang) });
+    lowercaseCase(cell: HTMLElement): string {
+        let nodes: ChildNode[] = Array.from(cell.childNodes);
+        let result: string = '';
+        for (let node of nodes) {
+            if (node.nodeType !== Node.TEXT_NODE) {
+                result += (node as HTMLElement).outerHTML;
+                continue;
+            }
+            result += (node as Text).data.toLocaleLowerCase(this.tgtLang);
+        }
+        return result;
     }
 
-    toggle(str: string): string {
+    uppercaseCase(cell: HTMLElement): string {
+        let nodes: ChildNode[] = Array.from(cell.childNodes);
         let result: string = '';
-        for (let i: number = 0; i < str.length; i++) {
-            let c: string = str.charAt(i);
-            result = this.isLower(c) ? result.concat(c.toLocaleUpperCase(this.tgtLang)) : result.concat(c.toLocaleLowerCase(this.tgtLang));
+        for (let node of nodes) {
+            if (node.nodeType !== Node.TEXT_NODE) {
+                result += (node as HTMLElement).outerHTML;
+                continue;
+            }
+            result += (node as Text).data.toLocaleUpperCase(this.tgtLang);
+        }
+        return result;
+    }
+
+    titleCase(cell: HTMLElement): string {
+        let nodes: ChildNode[] = Array.from(cell.childNodes);
+        let result: string = '';
+        for (let node of nodes) {
+            if (node.nodeType !== Node.TEXT_NODE) {
+                result += (node as HTMLElement).outerHTML;
+                continue;
+            }
+            let str: string = (node as Text).data.toLocaleLowerCase(this.tgtLang);
+            result += str.replace(/\p{L}+/gu, (word: string) => word.charAt(0).toLocaleUpperCase(this.tgtLang) + word.slice(1));
+        }
+        return result;
+    }
+
+    toggleCase(cell: HTMLElement): string {
+        let nodes: ChildNode[] = Array.from(cell.childNodes);
+        let result: string = '';
+        for (let node of nodes) {
+            if (node.nodeType !== Node.TEXT_NODE) {
+                result += (node as HTMLElement).outerHTML;
+                continue;
+            }
+            let str: string = (node as Text).data;
+            for (let i: number = 0; i < str.length; i++) {
+                let c: string = str.charAt(i);
+                result = result.concat(this.isLower(c) ? c.toLocaleUpperCase(this.tgtLang) : c.toLocaleLowerCase(this.tgtLang));
+            }
         }
         return result;
     }
@@ -3536,6 +3613,11 @@ export class TranslationView {
                     });
                     td.appendChild(span);
                 }
+                if (arg.repeated) {
+                    let span: HTMLSpanElement = document.createElement('span');
+                    span.innerHTML = TranslationView.REPEATED_SPAN;
+                    td.appendChild(span);
+                }
                 if (arg.hasContext !== undefined && arg.hasContext) {
                     let span: HTMLSpanElement = document.createElement('span');
                     span.innerHTML = TranslationView.SVG_HAS_CONTEXT;
@@ -3585,6 +3667,11 @@ export class TranslationView {
                         };
                         ipcRenderer.send('show-metadata', metaId);
                     });
+                    td.appendChild(span);
+                }
+                if (arg.repeated) {
+                    let span: HTMLSpanElement = document.createElement('span');
+                    span.innerHTML = TranslationView.REPEATED_SPAN;
                     td.appendChild(span);
                 }
                 if (arg.hasContext !== undefined && arg.hasContext) {

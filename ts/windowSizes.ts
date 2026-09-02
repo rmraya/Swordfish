@@ -43,7 +43,6 @@ export class Sizes {
                     console.error(err.message);
                     return;
                 }
-                console.log(err);
             }
         }
     }

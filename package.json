@@ -1,7 +1,7 @@
 {
     "name": "swordfish",
     "productName": "Swordfish",
-    "version": "5.26.0",
+    "version": "5.27.0",
     "description": "Swordfish Translation Editor",
     "main": "js/Swordfish.js",
     "type": "module",
@@ -21,13 +21,13 @@
         "url": "https://github.com/maxprograms-com/Swordfish.git"
     },
     "devDependencies": {
-        "electron": "^43.2.0",
+        "electron": "^44.1.1",
         "typescript": "^6.0.3"
     },
     "dependencies": {
-        "mtengines": "^4.14.1",
-        "sdltm": "^2.5.0",
-        "typesbcp47": "^1.24.1",
-        "typesxml": "^2.2.1"
+        "mtengines": "^4.15.0",
+        "sdltm": "^2.5.3",
+        "typesbcp47": "^1.24.5",
+        "typesxml": "^2.5.0"
     }
 }

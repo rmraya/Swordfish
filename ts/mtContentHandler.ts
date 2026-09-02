@@ -135,7 +135,7 @@ export class MTContentHandler implements ContentHandler {
     }
 
     skippedEntity(name: string): void {
-        console.log('skippedEntity: ' + name);
+        // do nothing
     }
 
     translate(segment: XMLElement): void {

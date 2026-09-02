@@ -26,4 +26,5 @@ export interface Segment {
     hasMetadata: boolean;
     tagErrors: boolean;
     spaceErrors: boolean;
+    repeated: boolean;
 }

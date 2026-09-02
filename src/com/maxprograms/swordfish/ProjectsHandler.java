@@ -238,8 +238,10 @@ public class ProjectsHandler implements HttpHandler {
 				response = getFiles(request);
 			} else if ("/projects/getFileStart".equals(url)) {
 				response = getFileStart(request);
-			} else if ("/projects/getSameSource".equals(url)) {
-				response = getSameSource(request);
+			} else if ("/projects/previousSameSource".equals(url)) {
+				response = previousSameSource(request);
+			} else if ("/projects/nextSameSource".equals(url)) {
+				response = nextSameSource(request);
 			} else if ("/projects/addNote".equals(url)) {
 				response = addNote(request);
 			} else if ("/projects/removeNote".equals(url)) {
@@ -294,7 +296,8 @@ public class ProjectsHandler implements HttpHandler {
 	}
 
 	private JSONObject setMTMatches(String request)
-			throws JSONException, SQLException, IOException, SAXException, ParserConfigurationException, URISyntaxException {
+			throws JSONException, SQLException, IOException, SAXException, ParserConfigurationException,
+			URISyntaxException {
 		JSONObject result = new JSONObject();
 		JSONObject json = new JSONObject(request);
 		String project = json.getString("project");
@@ -980,7 +983,7 @@ public class ProjectsHandler implements HttpHandler {
 							params.put("tgtLang", json.getString("tgtLang"));
 							params.put("xmlfilter", json.getString("xmlfilter"));
 							params.put("maxThreads", String.valueOf(maxThreads));
-							params.put("xliff21","yes");
+							params.put("xliff21", "yes");
 
 							List<String> res = Convert.run(params);
 
@@ -1123,7 +1126,7 @@ public class ProjectsHandler implements HttpHandler {
 		String project = json.getString("project");
 		if (projectStores.containsKey(project)) {
 			try {
-				XliffStore prj = projectStores.get(project);				
+				XliffStore prj = projectStores.get(project);
 				prj.close();
 				projectStores.remove(project);
 			} catch (Exception e) {
@@ -1393,7 +1396,7 @@ public class ProjectsHandler implements HttpHandler {
 			String project = json.getString("project");
 			String glossary = json.getString("glossary");
 			Map<String, Project> projects = getProjects();
-			projects.get(project).setMemory(glossary);
+			projects.get(project).setGlossary(glossary);
 			saveProjectsList(projects);
 		} catch (IOException e) {
 			logger.log(Level.ERROR, e);
@@ -2017,14 +2020,31 @@ public class ProjectsHandler implements HttpHandler {
 		return result;
 	}
 
-	private JSONObject getSameSource(String request) {
+	private JSONObject previousSameSource(String request) {
+		JSONObject result = new JSONObject();
+		JSONObject json = new JSONObject(request);
+		try {
+			String project = json.getString("project");
+			if (projectStores.containsKey(project)) {
+				result.put("previous",
+						projectStores.get(project).previousSameSource(json.getString("file"), json.getString("unit"),
+								json.getString("segment")));
+			}
+		} catch (SQLException | JSONException e) {
+			logger.log(Level.ERROR, e);
+			result.put(Constants.REASON, e.getMessage());
+		}
+		return result;
+	}
+
+	private JSONObject nextSameSource(String request) {
 		JSONObject result = new JSONObject();
 		JSONObject json = new JSONObject(request);
 		try {
 			String project = json.getString("project");
 			if (projectStores.containsKey(project)) {
 				result.put("next",
-						projectStores.get(project).getSameSource(json.getString("file"), json.getString("unit"),
+						projectStores.get(project).nextSameSource(json.getString("file"), json.getString("unit"),
 								json.getString("segment")));
 			}
 		} catch (SQLException | JSONException e) {

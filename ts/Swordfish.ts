@@ -385,8 +385,11 @@ export class Swordfish {
             Swordfish.mainWindow.focus();
             Swordfish.mainWindow.webContents.send('open-segment', seg);
         });
-        ipcMain.on('go-to-same-source', (event: IpcMainEvent, currentSegment: FullId) => {
-            Swordfish.goToSameSource(currentSegment);
+        ipcMain.on('previous-same-source', (event: IpcMainEvent, currentSegment: FullId) => {
+            Swordfish.previousSameSource(currentSegment);
+        });
+        ipcMain.on('next-same-source', (event: IpcMainEvent, currentSegment: FullId) => {
+            Swordfish.nextSameSource(currentSegment);
         });
         ipcMain.on('get-project-param', (event: IpcMainEvent) => {
             Swordfish.projectParam ? event.sender.send('set-project', Swordfish.projectParam) : event.preventDefault();
@@ -910,7 +913,7 @@ export class Swordfish {
         ipcMain.on('close-change-case', () => {
             Swordfish.changeCaseWindow.close();
         });
-        ipcMain.on('change-case-to', (event: IpcMainEvent, arg: any) => {
+        ipcMain.on('change-case-to', (event: IpcMainEvent, arg: string) => {
             Swordfish.changeCaseTo(arg);
         });
         ipcMain.on('split-at', (event: IpcMainEvent, arg: any) => {
@@ -1020,7 +1023,6 @@ export class Swordfish {
             Swordfish.XSLTransformationWindow.close();
         });
         ipcMain.on('XSLTransform', (event: IpcMainEvent, arg: { xmlFile: string, xslFile: string, outputFile: string, openResult: boolean }) => {
-            console.log(JSON.stringify(arg));
             Swordfish.XSLTransformation(arg);
         });
         ipcMain.on('close-getting-started', () => {
@@ -1188,6 +1190,7 @@ export class Swordfish {
             { label: 'Edit Previous Segment', accelerator: 'PageUp', click: () => { Swordfish.mainWindow.webContents.send('previous-segment'); } },
             { label: 'Edit Next Segment', accelerator: 'PageDown', click: () => { Swordfish.mainWindow.webContents.send('next-segment'); } },
             { label: 'Go To Segment...', accelerator: 'CmdOrCtrl+G', click: () => { Swordfish.mainWindow.webContents.send('go-to'); }, icon: join(app.getAppPath(), 'images', iconFolder, 'goTo.png') },
+            { label: 'Go To Previous Segment With Same Source ', accelerator: 'CmdOrCtrl+Alt+G', click: () => { Swordfish.mainWindow.webContents.send('previous-same-source'); }, icon: join(app.getAppPath(), 'images', iconFolder, 'previousSource.png') },
             { label: 'Go To Next Segment With Same Source ', accelerator: 'CmdOrCtrl+Shift+G', click: () => { Swordfish.mainWindow.webContents.send('next-same-source'); }, icon: join(app.getAppPath(), 'images', iconFolder, 'goToSource.png') },
             new MenuItem({ type: 'separator' }),
             { label: 'Edit Source Text', accelerator: 'Alt+F2', click: () => { Swordfish.mainWindow.webContents.send('edit-source'); } },
@@ -3800,7 +3803,8 @@ export class Swordfish {
                         spaceErrors: data.spaceErrors,
                         hasNotes: data.hasNotes,
                         hasContext: data.hasContext,
-                        hasMetadata: data.hasMetadata
+                        hasMetadata: data.hasMetadata,
+                        repeated: data.repeated
                     });
                 } else {
                     Swordfish.mainWindow.webContents.send('clear-errors', {
@@ -3812,7 +3816,8 @@ export class Swordfish {
                         spaceErrors: data.spaceErrors,
                         hasNotes: data.hasNotes,
                         hasContext: data.hasContext,
-                        hasMetadata: data.hasMetadata
+                        hasMetadata: data.hasMetadata,
+                        repeated: data.repeated
                     });
                 }
                 Swordfish.mainWindow.webContents.send('set-statistics', { project: arg.project, statistics: data.statistics });
@@ -5091,8 +5096,24 @@ export class Swordfish {
         Swordfish.setLocation(this.tagsWindow, 'tags.html');
     }
 
-    static goToSameSource(currentSegment: FullId): void {
-        Swordfish.sendRequest('/projects/getSameSource', { project: currentSegment.project, file: currentSegment.file, unit: currentSegment.unit, segment: currentSegment.segment }, (data: any) => {
+    static previousSameSource(currentSegment: FullId): void {
+        Swordfish.sendRequest('/projects/previousSameSource', { project: currentSegment.project, file: currentSegment.file, unit: currentSegment.unit, segment: currentSegment.segment }, (data: any) => {
+            if (data.status === Swordfish.SUCCESS) {
+                if (data.previous !== -1) {
+                    Swordfish.mainWindow.webContents.send('open-segment', data.previous);
+                } else {
+                    Swordfish.showMessage({ type: 'info', message: 'No more segments with the same source' });
+                }
+            } else {
+                Swordfish.showMessage({ type: 'error', message: data.reason });
+            }
+        }, (reason: string) => {
+            Swordfish.showMessage({ type: 'error', message: reason });
+        });
+    }
+
+    static nextSameSource(currentSegment: FullId): void {
+        Swordfish.sendRequest('/projects/nextSameSource', { project: currentSegment.project, file: currentSegment.file, unit: currentSegment.unit, segment: currentSegment.segment }, (data: any) => {
             if (data.status === Swordfish.SUCCESS) {
                 if (data.next !== -1) {
                     Swordfish.mainWindow.webContents.send('open-segment', data.next);
@@ -5988,21 +6009,24 @@ export class Swordfish {
     }
 
     static insertAiResponse(): void {
-        let clipboardText: string = clipboard.readText();
-        try {
-            let target: XMLElement = MTUtils.toXMLElement(clipboardText);
-            if (target.getName() === 'target') {
-                this.mainWindow.webContents.send('insert-ai-response', target.toString());
-            } else {
-                Swordfish.showMessage({ type: 'error', message: 'Invalid AI response: ' + clipboardText });
-                return;
+        clipboard.readText().then((clipboardText: string) => {
+            try {
+                let target: XMLElement = MTUtils.toXMLElement(clipboardText);
+                if (target.getName() === 'target') {
+                    this.mainWindow.webContents.send('insert-ai-response', target.toString());
+                } else {
+                    Swordfish.showMessage({ type: 'error', message: 'Invalid AI response: ' + clipboardText });
+                    return;
+                }
+            } catch (e: unknown) {
+                if (e instanceof Error) {
+                    Swordfish.showMessage({ type: 'error', message: 'Invalid AI response: ' + clipboardText });
+                    return;
+                }
             }
-        } catch (e) {
-            if (e instanceof Error) {
-                Swordfish.showMessage({ type: 'error', message: 'Invalid AI response: ' + clipboardText });
-                return;
-            }
-        }
+        }).catch((error: any) => {
+            Swordfish.showMessage({ type: 'error', message: 'Failed to read clipboard: ' + error });
+        });
     }
 
     static insertResponse(aiResponse: any): void {
@@ -6156,7 +6180,7 @@ export class Swordfish {
         Swordfish.setLocation(this.changeCaseWindow, 'changeCase.html');
     }
 
-    static changeCaseTo(arg: any): void {
+    static changeCaseTo(arg: string): void {
         Swordfish.mainWindow.webContents.send('case-changed', arg);
         this.changeCaseWindow.close();
     }

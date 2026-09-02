@@ -43,7 +43,6 @@ export class Locations {
                     console.error(err.message);
                     return;
                 }
-                console.log(err);
             }
         }
     }

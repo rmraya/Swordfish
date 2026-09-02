@@ -12,11 +12,11 @@
 
 import { ipcRenderer, IpcRendererEvent } from "electron";
 import { GlossariesView } from "./glossaries.js";
+import { Match } from "./match.js";
 import { MemoriesView } from "./memories.js";
 import { MetaId } from "./metadata.js";
 import { Project } from "./project.js";
 import { ProjectsView } from "./projects.js";
-import { Match } from "./match.js";
 import { FullId } from "./segmentId.js";
 import { Tab, TabHolder } from "./tabs.js";
 import { TranslationView } from "./translation.js";
@@ -214,8 +214,11 @@ export class Main {
         ipcRenderer.on('go-to', () => {
             this.goToSegment();
         });
+        ipcRenderer.on('previous-same-source', () => {
+            this.previousSameSource();
+        });
         ipcRenderer.on('next-same-source', () => {
-            this.goToSameSource();
+            this.nextSameSource();
         });
         ipcRenderer.on('open-segment', (event: IpcRendererEvent, seg: number) => {
             this.openSegment(seg);
@@ -400,7 +403,7 @@ export class Main {
         ipcRenderer.on('change-case', () => {
             this.changeCase();
         });
-        ipcRenderer.on('case-changed', (event: IpcRendererEvent, arg: any) => {
+        ipcRenderer.on('case-changed', (event: IpcRendererEvent, arg: string) => {
             this.caseChanged(arg);
         });
         ipcRenderer.on('set-errors', (event: IpcRendererEvent, arg: any) => {
@@ -1151,10 +1154,17 @@ export class Main {
         }
     }
 
-    goToSameSource(): void {
+    previousSameSource(): void {
         let selected: string = Main.tabHolder.getSelected();
         if (Main.translationViews.has(selected)) {
-            (Main.translationViews.get(selected) as TranslationView).goToSameSource();
+            (Main.translationViews.get(selected) as TranslationView).previousSameSource();
+        }
+    }
+    
+    nextSameSource(): void {
+        let selected: string = Main.tabHolder.getSelected();
+        if (Main.translationViews.has(selected)) {
+            (Main.translationViews.get(selected) as TranslationView).nextSameSource();
         }
     }
 
@@ -1239,7 +1249,7 @@ export class Main {
         }
     }
 
-    caseChanged(arg: any): void {
+    caseChanged(arg: string): void {
         let selected: string = Main.tabHolder.getSelected();
         if (Main.translationViews.has(selected)) {
             (Main.translationViews.get(selected) as TranslationView).caseChanged(arg);
